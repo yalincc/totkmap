@@ -51,20 +51,30 @@ html, body {
 /* ---------- 区域名标签（贴合游戏：米黄地图字色 + 深色描边，参考游戏内地图） ---------- */
 .area-label {
   background: none;
-  color: #f4f2ea;
+  color: #bfae68;
   border: none;
   border-radius: 0;
   padding: 0;
   font-weight: 600;
   font-family: "PingFang SC", "Microsoft YaHei", "SimSun", sans-serif;
   text-shadow:
-    -1.5px -1.5px 0 rgba(0,0,0,.95), 1.5px -1.5px 0 rgba(0,0,0,.95),
-    -1.5px 1.5px 0 rgba(0,0,0,.95), 1.5px 1.5px 0 rgba(0,0,0,.95),
-    0 2px 4px rgba(0,0,0,.45),
-    0 0 3px rgba(0,0,0,.6), 0 0 6px rgba(0,0,0,.4);
+    -1.5px -1.5px 0 #3f3010, 1.5px -1.5px 0 #3f3010,
+    -1.5px 1.5px 0 #3f3010, 1.5px 1.5px 0 #3f3010,
+    0 2px 4px rgba(0,0,0,.5),
+    0 0 3px rgba(30,20,0,.75), 0 0 6px rgba(30,20,0,.55);
   white-space: nowrap;
   pointer-events: none;
   letter-spacing: .5px;
+}
+
+.area-label-wrap {
+  display: inline-block;
+  transform: translate(-50%, -50%);
+}
+.area-label-inner {
+  display: inline-block;
+  white-space: nowrap;
+  line-height: 1.15;
 }
 
 /* ---------- 左侧面板 ---------- */

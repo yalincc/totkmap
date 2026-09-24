@@ -24,9 +24,59 @@
 - **显示标点名称**：开关控制地图上的标点名称标签
 - **新增标点**：在地图上点击空白处，添加自定义标记（保存在本地）
 - **详情弹窗**：点位名称、分类、攻略说明、一键复制坐标
-- **地名风格**：区域名直接印在地图上（暖白地图字色带深色描边，贴合游戏内地图），
-  随缩放层级显示不同详略的地名
+- **地名风格**：官方中文地名直接印在地图上（romfs 提取的金褐 #bfae68 字色带暖褐描边，
+  与游戏内地图一致），**地名 = objmap 官方 Location 分组坐标点 1312 处**（含同名多坐标）（区域/地点/城堡内部名，
+  来自 853 条官方中文 CSV 匹配 + static.json 补缺，剔除商店/魔人像等非地名词）；
+  城市/驿站/洞穴/神庙/鸟望塔等分类已有地图图标，不显示地名文字，
+  随缩放层级照搬游戏/objmap 的 ShowLevel 显隐（区域→城市→地点→细节），
+  标签自动防重叠（重叠的低优先级地名偏移/让位，如「避难壕/监视堡垒」不再挤作一团）
 - **移动端适配**：窄屏默认收起面板，触控缩放平移
+
+
+
+> **地名完整规范（数据 + 文字式样 + 渲染）见 [`地名规范.md`](地名规范.md)**——改地图前先读它。
+
+## 坐标映射（技术备忘，勿重新推导）
+
+- **游戏坐标**：X∈[-6000,6000]（东向正）、Z∈[-5000,5000]（北为负）；地图坐标 latlng = (Z, X)。
+- **官方地名数据**：`E:\WorkSpace\BOTWroms\totk_locations_cn.csv`（853 条官方中文+游戏坐标，
+  读时用 utf-8-sig）；坐标基准 = objmap `game_files/map_summary/MainField/static.json`。
+- **地名坐标以 objmap static.json 的 Translate(X/Z/Y) 为准**（2026-09-24 已把 135 条 CSV 坐标
+  统一替换为 objmap 坐标，天空/地底偏移最大达 300-740 单位、地表 20-110 单位）；
+  完整对照见 `objmap地名坐标对照表.csv`（690 条：objmap 坐标/我们坐标/偏差/ShowLevel）。
+- **地名文字渲染锚点 = 坐标点居中**（对齐 objmap `bindTooltip(direction:'center')` 行为）：
+  divIcon 用 `iconSize:[0,0]`（锚点即坐标点）+ `.area-label-wrap{display:inline-block;transform:translate(-50%,-50%)}`
+  居中，`.area-label-inner` 为 inline-block（防重叠偏移设在 inner 上、居中在 wrap 上，二者互不覆盖）；
+  避让检测必须取 inner 的 rect（.area-label 自身是 0×0）。勿改回默认 [12,12] 锚点（文字会整体偏右下）。
+- **同 MessageID 多坐标点**（河流/护城河/湖泊/山脉/废矿等分段点）：已保留同名多坐标（2026-09-25），
+  areas 共 1311 条（objmap Location 890 个坐标点全量展开：希麦加米河 8 点、海拉鲁城堡护城河 8 点、
+  沃尔纳山 5 点、各地底废矿 4 点等），去重键 = (layer,name,坐标)，同坐标同名才去重；
+  objmap 总计 118 个地名带多个坐标点（共 197 个额外点）。
+- **地名范围 = objmap Location 分组纯地名（2026-09-25 修正）**：地名只保留 objmap Location 分组
+  （890 坐标点）+ 少数区域补充（城市/竞技场/天空诸岛/泉水等）；**洞穴、神庙、深穴、驿站、井、鸟望台等
+  有图标的类型不做地名显示**（可在左侧栏单独控制图标层）。过滤依据：CSV 补充分支按 category 剔除
+  CaveEntranceNormal/CaveEntranceWell/CaveEntranceSpecial/Shrine/Tower/Stable（共剔除 397 条）+ 名字特征兜底。
+  objmap Location 分组里"坑道/驿站村遗迹/神庙岛"等属官方地名，保留。areas 现为 913 条。
+- **三层（天空/地表/地底）判层规则（2026-09-25 修正，勿再犯）**：层的判定**必须看 objmap Translate.Y**——
+  **Y>=950 → 天空(layer20)**、**Y<0 → 地底(layer19)**、否则地表(layer18)。此前 CSV 匹配分支用
+  `field==MinusField?19:18` 判层，导致 19 个"天空诸岛"（objmap Y=1000~2054）全部错放地表；
+  已统一改为按 objmap Y 判层（含 MapRegion_*_Sky、SkyIslands_*、初始空岛、时之神殿等全部天空点），
+  CSV 无 objmap 坐标点的条目按 category 判（SkyArchipelago→天空、MinusField→地底）。
+  注意 MapRegion_Firone 与 MapRegion_Firone_Sky 等成对 id 坐标完全相同，按名字/层区分，勿混。
+  areas 现为 913 条（layer 18:706 / 19:154 / 20:53），与 objmap Y 核对 0 不一致。
+- **⚠ 同名多坐标的分层陷阱（2026-09-25 已修正，勿再犯）**：objmap 同 id 的多个坐标点各自带独立 ShowLevel
+  （如中央广场遗迹 HyruleCentralPlace：1 点 Near→z5、1 点 Nearest→z6-7；劳鲁村落遗迹 ShinyarkiVillage 同理）。
+  生成时必须**每点用自己 sl 单独算 visible**，**禁止合并同名多点的 sl**；且 ShowLevel 判断用**逗号 token 精确匹配**
+  （"Near"/"Nearest"/"Far"/"Farthest" 按 token 等值判断），**禁止 `"Near" in sl` 子串判断**（"Nearest" 含 "Near" 子串会误判，
+  导致 z5 与 z6-7 同时显示 2 个点）。卡拉卡拉集市（objmap 排除的 Oasis）只保留 1 个标注点。
+- **CSV→地图**：`lat = CSV.z`、`lng = CSV.x`（同体系直接映射，无需换算）。
+- **gamersky 旧坐标→游戏坐标**（V1.4.2 15 塔拟合，勿再用旧 240/288 假设）：
+  `lat(Z) = -42.6811380353599*x_gamersky - 7050.60856084442`；
+  `lng(X) = 42.6842804369353*y_gamersky - 6258.74590297329`。
+- **瓦片缩放**：`TOTK_GRID_W={3:6,4:12,5:24,6:47,7:94}`，`scale(z)=GRID*256/288`；
+  objmap 瓦片 z3=6×5、z4=12×10、z5=24×20、z6=47×40、z7=94×79（每瓦 256px）。
+- **地名分层（ShowLevel，照搬游戏/objmap）**：Farthest→z3-4、Far/Near→z5、Nearest/无→z6-7；
+  标签防重叠：同缩放内按优先级（区域>地点>细节）偏移/让位，放不下才隐藏。
 
 ## 打开方式
 
@@ -36,4 +86,4 @@
 
 ## 版本
 
-V1.4.2
+V1.5.1

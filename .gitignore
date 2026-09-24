@@ -9,3 +9,4 @@ tiles/
 Thumbs.db
 .DS_Store
 desktop.ini
+*.bak-v*

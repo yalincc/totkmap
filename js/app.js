@@ -11,7 +11,7 @@
   var AREAS = window.TOTK_AREAS || [];
   var MARKERS = window.TOTK_MARKERS || [];
 
-  var VERSION = 'TOTKMAP V1.4.2';
+  var VERSION = 'TOTKMAP V1.5.1';
   var LS_DONE = 'totkmap_done_v1';
   var LS_CUSTOM = 'totkmap_custom_v1';
   var LS_LAYER = 'totkmap_layer_v1';
@@ -190,7 +190,7 @@
 
   function selectDefault() {
     state.selected = {};
-    var def = { 18: [62, 63, 65, 66, 67, 68, 73, 75, 76, 77, 78, 79], 19: [97, 190, 99, 100, 101, 104], 20: [109, 111, 118, 120, 205, 173] };
+    var def = { 18: [62, 63, 74], 19: [86, 87, 97], 20: [108, 109, 110] };
     var list = def[state.layer] || [];
     catsOfLayer(state.layer).forEach(function (c) {
       if (list.indexOf(c.id) >= 0) state.selected[c.id] = true;
@@ -331,8 +331,8 @@
         interactive: false,
         icon: L.divIcon({
           className: 'area-label',
-          html: esc(a.name),
-          iconSize: null
+          html: '<div class="area-label-wrap"><div class="area-label-inner" data-prio="' + (a.prio || 5) + '">' + esc(a.name) + '</div></div>',
+          iconSize: [0, 0]
         })
       });
       mk._vis = vis;
@@ -352,6 +352,43 @@
       if (show) {
         var el = a.mk.getElement();
         if (el) el.style.fontSize = Math.max(11, a.size * (0.5 + z * 0.13)) + 'px';
+      }
+    }
+  }
+
+  /* 标签防重叠：同缩放级别内重叠的低优先级标签做偏移，偏移失败则隐藏 */
+  function avoidOverlap() {
+    var els = [], vw = window.innerWidth, vh = window.innerHeight;
+    document.querySelectorAll('.area-label').forEach(function (el) {
+      var inner = el.querySelector('.area-label-inner');
+      if (!inner) return;
+      inner.style.transform = '';
+      inner.style.display = '';
+      var r = inner.getBoundingClientRect();
+      if (r.right <= 0 || r.left >= vw || r.bottom <= 0 || r.top >= vh) return;
+      var prio = parseInt(inner.getAttribute('data-prio') || '5', 10);
+      els.push({ r: r, inner: inner, prio: prio });
+    });
+    els.sort(function (a, b) { return a.prio - b.prio; });
+    var tries = [[0,0],[0,-16],[0,16],[-32,0],[32,0],[0,-32],[0,32],[-16,16],[16,16],[-16,-16],[16,-16],[-48,0],[48,0],[0,-48],[0,48],[-48,-16],[48,-16],[-48,16],[48,16],[-64,0],[64,0],[0,-64],[0,64],[-80,0],[80,0]];
+    var placed = [];
+    for (var i = 0; i < els.length; i++) {
+      var cur = els[i], ok = null;
+      for (var t = 0; t < tries.length && !ok; t++) {
+        var dx = tries[t][0], dy = tries[t][1];
+        var nb = { x: cur.r.left + dx, y: cur.r.top + dy, w: cur.r.width, h: cur.r.height };
+        var hit = false;
+        for (var p = 0; p < placed.length; p++) {
+          var pb = placed[p];
+          if (nb.x < pb.x + pb.w && nb.x + nb.w > pb.x && nb.y < pb.y + pb.h && nb.y + nb.h > pb.y) { hit = true; break; }
+        }
+        if (!hit) ok = { dx: dx, dy: dy };
+      }
+      if (ok) {
+        if (ok.dx || ok.dy) cur.inner.style.transform = 'translate(' + ok.dx + 'px,' + ok.dy + 'px)';
+        placed.push({ x: cur.r.left + ok.dx, y: cur.r.top + ok.dy, w: cur.r.width, h: cur.r.height });
+      } else {
+        cur.inner.style.display = 'none';
       }
     }
   }
@@ -771,7 +808,16 @@
   });
 
   /* ---------------- 事件绑定 ---------------- */
-  map.on('moveend zoomend', function () { refreshLabels(); updateAreas(); });
+  var aoTimer = null;
+  map.on('moveend zoomend', function () {
+    refreshLabels(); updateAreas();
+    if (aoTimer) clearTimeout(aoTimer);
+    aoTimer = setTimeout(function () {
+      avoidOverlap();
+      setTimeout(avoidOverlap, 450);   // 动画中再跑
+      setTimeout(avoidOverlap, 1200);  // 完全稳定后最终兜底
+    }, 80);
+  });
 
   /* ---------------- 初始化 ---------------- */
   loadDone();
