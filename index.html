@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>塞尔达传说：王国之泪 · 互动地图</title>
+<link rel="stylesheet" href="vendor/leaflet.css">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- 地图容器 -->
+<div id="map"></div>
+
+<!-- ============ 左侧筛选面板 ============ -->
+<aside id="panel" class="panel">
+
+  <!-- 面板头部：图层切换 + 名称开关 -->
+  <div class="panel-top">
+    <div class="panel-head-row">
+      <h2 class="panel-title">王国之泪·全能地图</h2>
+      <div class="name-switch cur" id="toggleNames">
+        <span>显示标点名称</span>
+        <input type="checkbox" id="nameSwitch" checked>
+        <label class="switch" for="nameSwitch"><i></i></label>
+      </div>
+    </div>
+    <div class="layer-switch" id="layerSwitch">
+      <button data-layer="20">天空</button>
+      <button data-layer="18" class="active">地上</button>
+      <button data-layer="19">地下</button>
+    </div>
+  </div>
+
+  <!-- 搜索 -->
+  <div class="search-box">
+    <input id="searchInput" type="search" placeholder="搜索神庙/地名/任务/物品..." autocomplete="off">
+    <div id="searchResult" class="search-result hidden"></div>
+  </div>
+
+  <!-- 图层工具栏（gamersky 全选/清空 + 图层计数） -->
+  <div class="layer-toolbar">
+    <button id="ltAll" type="button" class="lt-btn">全选图层</button>
+    <button id="ltClear" type="button" class="lt-btn">清空图层</button>
+    <span id="layerCount" class="lt-count">0/0 图层</span>
+  </div>
+
+  <!-- 分类分组列表 -->
+  <div class="catalog-body" id="catalogList"></div>
+
+  <!-- 探索度（加载存档后显示） -->
+  <div class="progress-section" id="progressSection">
+    <div class="progress-head" id="progressHead" title="点击展开/收起">
+      <span class="progress-toggle" id="progressToggle">▾</span>
+      <span class="progress-title">探索度</span>
+    </div>
+    <div id="progressList" class="progress-list"></div>
+  </div>
+
+  <!-- 加载存档 -->
+  <div class="save-upload">
+    <div class="su-row">
+      <button id="saveSyncBtn" type="button" class="su-load-btn" title="读取本机 Ryujinx/Yuzu 的 progress.sav，同步收集进度（文件仅在本机内存处理）">📂 从存档加载进度…</button>
+      <span class="su-help" id="suHelp" tabindex="0" role="button" aria-label="存档在哪里">?</span>
+      <div class="su-tip hidden" id="suTip">
+        <b>存档文件：progress.sav</b>
+        <div>Ryujinx（Switch 模拟器）：<br><code>%APPDATA%\Ryujinx\bis\user\save\&lt;用户&gt;\0\slot_XX\progress.sav</code></div>
+        <div>Yuzu：<br><code>…\load\0100F2C0115B6000\&lt;用户&gt;\&lt;存档槽&gt;\progress.sav</code></div>
+        <div class="su-tip-sub">找不到时：Win+R 输入 <code>%APPDATA%\Ryujinx\bis\user\save</code>，进游戏对应 ID 目录找 <code>progress.sav</code>。把文件拖进面板或点按钮选择即可，解析全程在本机，不会上传。</div>
+      </div>
+      <input type="file" id="saveFileInput" accept=".sav" hidden>
+    </div>
+  </div>
+
+  <footer class="side-foot">
+    <p class="foot-version">TOTKMAP V1.4.2</p>
+    <p>© 2026 yalin · github.com/yalincc</p>
+  </footer>
+</aside>
+
+<!-- 面板收起把手 -->
+<button id="panelToggle" class="panel-toggle" title="收起/展开面板">«</button>
+
+<!-- ============ 详情弹窗 ============ -->
+<section id="detail" class="detail hidden">
+  <div class="detail-card">
+    <button class="detail-close" id="detailClose">×</button>
+    <div class="detail-head">
+      <img id="detailIcon" src="" alt="">
+      <div class="detail-head-text">
+        <h3 id="detailName"></h3>
+        <p id="detailCat"></p>
+      </div>
+    </div>
+    <div class="detail-body" id="detailDesc"></div>
+    <div class="detail-foot">
+      <button id="detailDone" class="btn primary">标记为已完成</button>
+      <button id="detailCopy" class="btn ghost">复制坐标</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 底部工具条 ============ -->
+<div class="bottom-bar">
+  <button id="addMarkerBtn" class="bar-btn">+ 新增标点</button>
+  <button id="feedbackBtn" class="bar-btn">? 问题</button>
+  <span class="version">TOTKMAP V1.4.2</span>
+</div>
+
+<!-- 自定义标点表单 -->
+<div id="addMarkerModal" class="modal hidden">
+  <div class="modal-card">
+    <h3>新增标点</h3>
+    <input id="amName" type="text" placeholder="标点名称" maxlength="40">
+    <input id="amDesc" type="text" placeholder="备注（可选）" maxlength="100">
+    <div class="modal-actions">
+      <button id="amSave" class="btn primary">保存</button>
+      <button id="amCancel" class="btn ghost">取消</button>
+    </div>
+    <p class="modal-tip">在地图上点击空白处即可放置标点</p>
+  </div>
+</div>
+
+<!-- ============ 帮助弹窗（同步存档 Q&A） ============ -->
+<div id="helpBox" class="help-box hidden">
+  <h3>同步存档 · 帮助
+    <button id="hbClose" class="help-close" title="关闭">×</button>
+  </h3>
+  <div class="hq">
+    <h4>存档文件在哪？</h4>
+    <p>需要选择游戏存档目录下的 <code>progress.sav</code> 文件：</p>
+    <ul>
+      <li><b class="hl">Ryujinx</b>（Switch 模拟器）：<br>
+        <span class="path-line"><code>%APPDATA%\Ryujinx\bis\user\save\&lt;用户ID&gt;\0\slot_XX\progress.sav</code>
+        <button type="button" class="copy-btn" data-copy="%APPDATA%\Ryujinx\bis\user\save\&lt;用户ID&gt;\0\slot_XX\progress.sav">复制</button></span></li>
+      <li><b class="hl">Yuzu</b>：<br>
+        <span class="path-line"><code>…\load\0100F2C0115B6000\&lt;用户ID&gt;\&lt;存档槽&gt;\progress.sav</code>
+        <button type="button" class="copy-btn" data-copy="…\load\0100F2C0115B6000\&lt;用户ID&gt;\&lt;存档槽&gt;\progress.sav">复制</button></span></li>
+    </ul>
+    <p>找不到时：按 <code>Win+R</code> 输入 <code>%APPDATA%\Ryujinx\bis\user\save</code> 回车，
+      进入 <code>0100F2C0115B6000</code>（王国之泪）对应的用户目录，在 <code>slot_XX</code> 下找 <code>progress.sav</code>。</p>
+  </div>
+  <div class="hq">
+    <h4>怎么加载？</h4>
+    <ul>
+      <li>点「同步存档」按钮选择 <code>progress.sav</code>；</li>
+      <li>或直接把 <code>progress.sav</code> 文件拖进左侧面板；</li>
+      <li>解析全部在本机浏览器内存中完成，<b class="hl">不会上传任何数据</b>。</li>
+    </ul>
+  </div>
+  <div class="hq">
+    <h4>同步后能看到什么？</h4>
+    <p>鸟望台、神庙、树根、克洛格、双倍克洛格、魔犹伊遗失物、卡邦达立牌、
+      设计图石板、贤者的遗志、洞穴/井/地洞入口等类别的真实收集进度
+      （显示为「已完成/总数」，如 神庙 8/152）。</p>
+    <p>背包类（武器/弓/盾/防具数量）、任务类（情节/迷你挑战）等无法从存档
+      直接读取的类别，保持显示游戏全收集总数。</p>
+  </div>
+  <div class="hq">
+    <h4>多存档槽怎么选？</h4>
+    <p>模拟器里哪个存档槽对应你常用的进度就选哪个槽的 <code>progress.sav</code>；
+      手动标记的「已完成」进度与存档进度各自独立保存，不会互相覆盖。</p>
+  </div>
+</div>
+
+<div id="toast" class="toast hidden"></div>
+
+<script src="vendor/leaflet.js"></script>
+<script src="vendor/murmurhash3js.min.js"></script>
+<script src="data/totk_save_hashes.js"></script>
+<script src="data/layers.js"></script>
+<script src="data/catalogs.js"></script>
+<script src="data/areas.js"></script>
+<script src="data/markers.js"></script>
+<script src="js/save-parser.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

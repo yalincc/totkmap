@@ -1,0 +1,1 @@
+window.TOTK_LAYERS=[{"id":18,"key":"ground","name":"地上","zoomMin":1,"zoomMax":7,"width":576,"height":576,"cx":0,"cy":0,"zoom":3},{"id":19,"key":"underground","name":"地下","zoomMin":1,"zoomMax":7,"width":646,"height":646,"cx":0,"cy":0,"zoom":3},{"id":20,"key":"sky","name":"天空","zoomMin":1,"zoomMax":7,"width":646,"height":646,"cx":0,"cy":0,"zoom":0}];

@@ -1,0 +1,11 @@
+# 旧 gamersky 瓦片（V1.4.0 后弃用，约 200MB，本地保留不入库）
+tiles/
+
+# 坐标换算前备份（git 历史已保留全部版本，本地备份不入库）
+*.bak
+*.bak-v141
+
+# 系统/编辑器
+Thumbs.db
+.DS_Store
+desktop.ini
