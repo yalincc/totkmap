@@ -14,7 +14,7 @@
   var AREA_SKY = window.TOTK_AREA_SKY || [];
   var AREA_DEPTHS = window.TOTK_AREA_DEPTHS || [];
 
-  var VERSION = 'TOTKMAP V1.6.0';
+  var VERSION = 'TOTKMAP V1.7.0';
   var LS_DONE = 'totkmap_done_v1';
   var LS_CUSTOM = 'totkmap_custom_v1';
   var LS_LAYER = 'totkmap_layer_v1';
@@ -638,6 +638,8 @@
     renderMarkers();
     updateCount();
     updateLayerCount();
+    buildMatPanel();
+    renderMaterials();
     map.setView(CENTER, 3);
   }
 
@@ -931,6 +933,338 @@
     catById: catById
   };
 
+  /* ============================================================
+     材料追踪（V1.7.0）—— 参考 BOTWmap 架构：
+     - 每材料独立 supercluster 索引（懒加载）
+     - 每材料独立 Leaflet LayerGroup，勾选时 addTo(map)，取消时 removeLayer
+     - 切层时清空缓存重建
+     ============================================================ */
+  var MATS = window.TOTK_MATERIALS || { materials: [], points: [] };
+  var LS_MAT = 'totkmap_mats_v1';
+  var LS_MAT_FAV = 'totkmap_matfav_v1';
+  var MAT_CAT_ORDER = ['植物', '蘑菇', '水果', '昆虫', '鱼', '矿岩'];
+
+  var FX = 180 / 6000, FZ = 85 / 5000;
+
+  var matPointsByLayer = {};
+  var matCountByLayer = {};
+  (function buildMatPoints() {
+    var p = MATS.points || [];
+    for (var i = 0; i < p.length; i += 4) {
+      var mid = p[i], L = p[i + 1], x = p[i + 2], z = p[i + 3];
+      if (!matPointsByLayer[L]) { matPointsByLayer[L] = {}; matCountByLayer[L] = {}; }
+      if (!matPointsByLayer[L][mid]) { matPointsByLayer[L][mid] = []; matCountByLayer[L][mid] = 0; }
+      matPointsByLayer[L][mid].push([x, z]);
+      matCountByLayer[L][mid]++;
+    }
+  })();
+
+  var matById = {};
+  (MATS.materials || []).forEach(function (m) { matById[m.id] = m; });
+
+  state.matTab = 'explore';
+  state.matSelected = loadJson(LS_MAT, {});
+  state.matFav = loadJson(LS_MAT_FAV, {});
+  state.matFavOnly = false;
+  state.matCollapsed = {};
+  state.matIdx = {};
+  state.matGroups = {};
+
+  function matCountOnLayer(mid, layerId) {
+    return (matCountByLayer[layerId] && matCountByLayer[layerId][mid]) || 0;
+  }
+
+  function getMatClusterer(mid, layerId) {
+    if (!state.matIdx[layerId]) state.matIdx[layerId] = {};
+    if (state.matIdx[layerId][mid]) return state.matIdx[layerId][mid];
+    var pts = (matPointsByLayer[layerId] || {})[mid] || [];
+    if (!pts.length) return null;
+    var feats = pts.map(function (p) {
+      return {
+        type: 'Feature',
+        properties: { matId: mid, gx: p[0], gz: p[1] },
+        geometry: { type: 'Point', coordinates: [p[0] * FX, p[1] * FZ] }
+      };
+    });
+    var c = new Supercluster({ radius: 36, maxZoom: 6, minZoom: 2 });
+    c.load(feats);
+    state.matIdx[layerId][mid] = c;
+    return c;
+  }
+
+  function renderMatLayer(mid) {
+    if (state.matGroups[mid]) {
+      map.removeLayer(state.matGroups[mid]);
+      delete state.matGroups[mid];
+    }
+    if (!state.matSelected[mid] || state.matTab !== 'material') return;
+    var idx = getMatClusterer(mid, state.layer);
+    if (!idx) return;
+    var bounds = map.getBounds();
+    var z = Math.round(map.getZoom());
+    // supercluster coords are [X*FX, Z*FZ], map bounds are game coords
+    var padX = 800 * FX, padZ = 800 * FZ;
+    var fakeBbox = [
+      bounds.getWest() * FX - padX, bounds.getSouth() * FZ - padZ,
+      bounds.getEast() * FX + padX, bounds.getNorth() * FZ + padZ
+    ];
+    var clusters = idx.getClusters(fakeBbox, z);
+    var grp = L.layerGroup();
+    var m = matById[mid];
+    clusters.forEach(function (c) {
+      var coords = c.geometry.coordinates;
+      var gx = coords[0] / FX, gz = coords[1] / FZ;
+      var latlng = [gz, gx];
+      var props = c.properties;
+      if (props.cluster) {
+        var size = props.point_count >= 100 ? 34 : props.point_count >= 20 ? 30 : 26;
+        var icon = L.divIcon({
+          className: '',
+          html: '<div class="mat-cluster" style="width:' + size + 'px;height:' + size + 'px;" data-char="' + esc(m.cn[0]) + '"><img src="assets/materials/' + m.entry + '.png" onerror="this.remove()"><span>' + props.point_count + '</span></div>',
+          iconSize: [size, size], iconAnchor: [size / 2, size / 2]
+        });
+        (function (ll, sz) {
+          var mk = L.marker(ll, { icon: icon, riseOnHover: true });
+          mk.bindTooltip(m.cn + ' · ' + props.point_count + '点', { direction: 'top', offset: [0, -sz / 2 - 4] });
+          mk.on('click', function () { map.flyTo(ll, Math.min(map.getZoom() + 1, 6), { duration: 0.3 }); });
+          grp.addLayer(mk);
+        })(latlng, size);
+      } else {
+        var icon2 = L.divIcon({
+          className: '',
+          html: '<div class="mat-leaf" style="width:26px;height:26px;" title="' + esc(m.cn) + '" data-char="' + esc(m.cn[0]) + '"><img src="assets/materials/' + m.entry + '.png" onerror="this.remove()"></div>',
+          iconSize: [26, 26], iconAnchor: [13, 13]
+        });
+        (function (ll, mid) {
+          var mk = L.marker(ll, { icon: icon2, riseOnHover: true });
+          mk.bindTooltip(m.cn, { direction: 'top', offset: [0, -12], className: 'mk-label' });
+          mk.on('click', function () {
+            showDetail(m.cn, m.cat + ' · ' + LAYER_NAME[state.layer], null,
+              '坐标(' + Number(ll[1]).toFixed(1) + ', ' + Number(ll[0]).toFixed(1) + ')', false, null);
+            // Sidebar linkage: expand cat, scroll to item, flash
+            var listEl = $('matList');
+            if (listEl) {
+              var catBody = listEl.querySelector('.mat-cat[data-cat="' + m.cat + '"] .mat-cat-body');
+              if (catBody) {
+                catBody.parentElement.classList.remove('collapsed');
+                var item = listEl.querySelector('.mat-item[data-mat="' + mid + '"]');
+                if (item) {
+                  item.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+                  item.classList.remove('flash');
+                  void item.offsetWidth;
+                  item.classList.add('flash');
+                }
+              }
+            }
+          });
+          grp.addLayer(mk);
+        })(latlng, mid);
+      }
+    });
+    grp.addTo(map);
+    state.matGroups[mid] = grp;
+  }
+
+  function renderMaterials() {
+    if (state.matTab !== 'material') return;
+    for (var mid in state.matSelected) renderMatLayer(Number(mid));
+  }
+
+  function buildMatPanel() {
+    var list = $('matList');
+    if (!list) return;
+    var layerId = state.layer;
+    var byCat = {};
+    MAT_CAT_ORDER.forEach(function (c) { byCat[c] = []; });
+    (MATS.materials || []).forEach(function (m) {
+      var n = matCountOnLayer(m.id, layerId);
+      if (n <= 0) return;
+      if (state.matFavOnly && !state.matFav[m.id]) return;
+      if (!byCat[m.cat]) byCat[m.cat] = [];
+      byCat[m.cat].push({ m: m, n: n });
+    });
+
+    var html = '';
+    var favCount = 0;
+    (MATS.materials || []).forEach(function (m) {
+      if (state.matFav[m.id] && matCountOnLayer(m.id, layerId) > 0) favCount++;
+    });
+    html += '<div class="mat-fav-filter' + (state.matFavOnly ? ' on' : '') + '" id="matFavFilter">';
+    html += '<span class="mat-fav-star">' + (state.matFavOnly ? '\u2605' : '\u2606') + '</span>';
+    html += '<span>只看收藏 (' + favCount + ')</span>';
+    html += '</div>';
+
+    MAT_CAT_ORDER.forEach(function (cat) {
+      var items = byCat[cat];
+      if (!items || !items.length) return;
+      var collapsed = state.matCollapsed[cat] ? ' collapsed' : '';
+      var layerTotal = items.reduce(function (s, it) { return s + it.n; }, 0);
+      html += '<div class="mat-cat' + collapsed + '" data-cat="' + esc(cat) + '">';
+      html += '<div class="mat-cat-head">';
+      html += '<span class="mat-cat-arrow">▼</span>';
+      html += '<span class="mat-cat-name">' + esc(cat) + '</span>';
+      html += '<span class="mat-cat-count">' + items.length + '种 · ' + layerTotal + '点</span>';
+      html += '</div><div class="mat-cat-body mat-grid">';
+      items.forEach(function (it) {
+        var m = it.m;
+        var on = state.matSelected[m.id] ? ' checked' : '';
+        var fav = state.matFav[m.id] ? ' fav' : '';
+        html += '<div class="mat-item' + on + fav + '" data-mat="' + m.id + '">';
+        html += '<span class="mat-star" data-fav="' + m.id + '">' + (state.matFav[m.id] ? '\u2605' : '\u2606') + '</span>';
+        html += '<span class="mat-item-name">' + esc(m.cn) + '</span>';
+        html += '<span class="mat-item-count">' + it.n + '</span>';
+        html += '</div>';
+      });
+      html += '</div></div>';
+    });
+    list.innerHTML = html || '<div class="sr-empty">当前图层暂无材料</div>';
+
+    var ff = $('matFavFilter');
+    if (ff) ff.addEventListener('click', function () {
+      state.matFavOnly = !state.matFavOnly;
+      buildMatPanel();
+    });
+
+    Array.prototype.forEach.call(list.querySelectorAll('.mat-cat-head'), function (hd) {
+      hd.addEventListener('click', function (e) {
+        if (e.target.tagName === 'INPUT' || e.target.classList.contains('mat-star')) return;
+        var cat = hd.parentElement;
+        var name = cat.getAttribute('data-cat');
+        state.matCollapsed[name] = !state.matCollapsed[name];
+        cat.classList.toggle('collapsed');
+      });
+    });
+    Array.prototype.forEach.call(list.querySelectorAll('.mat-item'), function (el) {
+      el.addEventListener('click', function (e) {
+        if (e.target.classList.contains('mat-star')) {
+          var mid = Number(e.target.getAttribute('data-fav'));
+          if (state.matFav[mid]) delete state.matFav[mid];
+          else state.matFav[mid] = true;
+          saveJson(LS_MAT_FAV, state.matFav);
+          buildMatPanel();
+          return;
+        }
+        var mid = Number(el.getAttribute('data-mat'));
+        var nowOn = !state.matSelected[mid];
+        if (nowOn) state.matSelected[mid] = true;
+        else delete state.matSelected[mid];
+        saveJson(LS_MAT, state.matSelected);
+        el.classList.toggle('checked', nowOn);
+        renderMatLayer(mid);
+        updateMatCount();
+      });
+    });
+    updateMatCount();
+  }
+
+  function updateMatCount() {
+    var el = $('matCount');
+    if (!el) return;
+    var n = 0, total = 0;
+    (MATS.materials || []).forEach(function (m) {
+      if (matCountOnLayer(m.id, state.layer) <= 0) return;
+      total++;
+      if (state.matSelected[m.id]) n++;
+    });
+    el.textContent = n + '/' + total + ' 材料';
+  }
+
+  function setTab(tab) {
+    state.matTab = tab;
+    Array.prototype.forEach.call($('sideTabs').querySelectorAll('button'), function (b) {
+      b.classList.toggle('active', b.getAttribute('data-tab') === tab);
+    });
+    var explorePane = $('explorePane'), matPane = $('materialPane');
+    if (tab === 'material') {
+      explorePane.classList.add('hidden');
+      matPane.classList.remove('hidden');
+      Object.keys(state.groups).forEach(function (k) {
+        if (map.hasLayer(state.groups[k])) map.removeLayer(state.groups[k]);
+      });
+      buildMatPanel();
+      renderMaterials();
+    } else {
+      matPane.classList.add('hidden');
+      explorePane.classList.remove('hidden');
+      for (var mid in state.matGroups) map.removeLayer(state.matGroups[mid]);
+      state.matGroups = {};
+      renderMarkers();
+    }
+  }
+  $('sideTabs').addEventListener('click', function (e) {
+    var btn = e.target.closest('button');
+    if (!btn) return;
+    setTab(btn.getAttribute('data-tab'));
+  });
+
+  $('matAll').addEventListener('click', function () {
+    (MATS.materials || []).forEach(function (m) {
+      if (matCountOnLayer(m.id, state.layer) > 0) state.matSelected[m.id] = true;
+    });
+    saveJson(LS_MAT, state.matSelected);
+    buildMatPanel();
+    renderMaterials();
+  });
+  $('matClear').addEventListener('click', function () {
+    state.matSelected = {};
+    saveJson(LS_MAT, state.matSelected);
+    buildMatPanel();
+    for (var mid in state.matGroups) map.removeLayer(state.matGroups[mid]);
+    state.matGroups = {};
+    updateMatCount();
+  });
+
+  var matSearchTimer = null;
+  $('matSearchInput').addEventListener('input', function () {
+    var q = this.value.trim();
+    var box = $('matSearchResult');
+    if (matSearchTimer) clearTimeout(matSearchTimer);
+    if (!q) { box.classList.add('hidden'); return; }
+    matSearchTimer = setTimeout(function () {
+      var ql = q.toLowerCase();
+      var hits = [];
+      (MATS.materials || []).forEach(function (m) {
+        if (hits.length >= 30) return;
+        if (matCountOnLayer(m.id, state.layer) <= 0) return;
+        if (m.cn.toLowerCase().indexOf(ql) >= 0) hits.push(m);
+      });
+      if (!hits.length) {
+        box.innerHTML = '<div class="sr-empty">未找到相关材料</div>';
+      } else {
+        var html = '';
+        hits.forEach(function (m) {
+          html += '<div class="sr-item" data-mat="' + m.id + '">' +
+            '<span class="sr-name">' + esc(m.cn) + '</span>' +
+            '<span class="sr-cat">' + esc(m.cat) + ' · ' + matCountOnLayer(m.id, state.layer) + '点</span></div>';
+        });
+        box.innerHTML = html;
+      }
+      box.classList.remove('hidden');
+      Array.prototype.forEach.call(box.querySelectorAll('.sr-item'), function (el) {
+        el.addEventListener('click', function () {
+          var mid = Number(el.getAttribute('data-mat'));
+          state.matSelected[mid] = true;
+          saveJson(LS_MAT, state.matSelected);
+          box.classList.add('hidden');
+          $('matSearchInput').value = '';
+          buildMatPanel();
+          renderMatLayer(mid);
+          toast('已勾选「' + matById[mid].cn + '」，放大地图查看具体位置');
+        });
+      });
+    }, 200);
+  });
+  document.addEventListener('click', function (e) {
+    var box = $('matSearchResult');
+    if (box && !box.classList.contains('hidden') && !e.target.closest('.mat-search-box')) {
+      box.classList.add('hidden');
+    }
+  });
+
+  map.on('moveend zoomend', function () {
+    if (state.matTab === 'material') renderMaterials();
+  });
+
 
   /* ---------------- 图层工具栏（全选/清空 + 计数） ---------------- */
   function updateLayerCount() {
@@ -984,57 +1318,6 @@
   updateLayerCount();
 
 
-
-  /* ---------------- 图层工具栏（全选/清空 + 计数） ---------------- */
-  function updateLayerCount() {
-    var el = $('layerCount');
-    if (!el) return;
-    var cats = catsOfLayer(state.layer);
-    var n = 0;
-    cats.forEach(function (c) { if (state.selected[c.id]) n++; });
-    el.textContent = n + '/' + cats.length + ' 图层';
-  }
-  var ltAll = $('ltAll');
-  var ltClear = $('ltClear');
-  if (ltAll) ltAll.addEventListener('click', function () {
-    catsOfLayer(state.layer).forEach(function (c) { state.selected[c.id] = true; });
-    buildCatalogPanel(); renderMarkers(); updateCount(); updateLayerCount();
-  });
-  if (ltClear) ltClear.addEventListener('click', function () {
-    catsOfLayer(state.layer).forEach(function (c) { delete state.selected[c.id]; });
-    buildCatalogPanel(); renderMarkers(); updateCount(); updateLayerCount();
-  });
-
-  /* ---------------- 帮助弹窗路径复制按钮 ---------------- */
-  Array.prototype.forEach.call(document.querySelectorAll('.copy-btn'), function (b) {
-    b.addEventListener('click', function () {
-      var txt = b.getAttribute('data-copy') || '';
-      function flashCopy(btn) {
-        btn.textContent = '已复制';
-        btn.classList.add('copied');
-        setTimeout(function () { btn.textContent = '复制'; btn.classList.remove('copied'); }, 1500);
-      }
-      function fallbackCopy(btn) {
-        var ta = document.createElement('textarea');
-        ta.value = txt;
-        ta.style.position = 'fixed';
-        ta.style.opacity = '0';
-        document.body.appendChild(ta);
-        ta.select();
-        try { document.execCommand('copy'); } catch (e) {}
-        document.body.removeChild(ta);
-        flashCopy(btn);
-      }
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(txt).then(function () { flashCopy(b); }).catch(function () { fallbackCopy(b); });
-      } else {
-        fallbackCopy(b);
-      }
-    });
-  });
-
-  /* 初始图层计数 */
-  updateLayerCount();
 
   /* ---------------- 探索度展开/收起 ---------------- */
   var progressHead = $('progressHead');

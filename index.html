@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>塞尔达传说：王国之泪 · 互动地图</title>
 <link rel="stylesheet" href="vendor/leaflet.css">
-<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/style.css?v=180">
 </head>
 <body>
 
@@ -39,22 +39,42 @@
     </div>
   </div>
 
+  <!-- 探索 / 材料 Tab 切换 -->
+  <div class="side-tabs" id="sideTabs">
+    <button type="button" data-tab="explore" class="active">探索</button>
+    <button type="button" data-tab="material">材料</button>
+  </div>
+
   <!-- 搜索 -->
   <div class="search-box">
     <input id="searchInput" type="search" placeholder="搜索神庙/地名/任务/物品..." autocomplete="off">
     <div id="searchResult" class="search-result hidden"></div>
   </div>
 
-  <!-- 图层工具栏（gamersky 全选/清空 + 图层计数） -->
-  <div class="layer-toolbar">
-    <button id="ltAll" type="button" class="lt-btn">全选图层</button>
-    <button id="ltClear" type="button" class="lt-btn">清空图层</button>
-    <span id="layerCount" class="lt-count">0/0 图层</span>
+  <!-- ===== 探索面板 ===== -->
+  <div id="explorePane">
+    <!-- 图层工具栏（全选/清空 + 图层计数） -->
+    <div class="layer-toolbar">
+      <button id="ltAll" type="button" class="lt-btn">全选图层</button>
+      <button id="ltClear" type="button" class="lt-btn">清空图层</button>
+      <span id="layerCount" class="lt-count">0/0 图层</span>
+    </div>
+
+    <!-- 分类分组列表 -->
+    <div class="catalog-body" id="catalogList"></div>
   </div>
 
-  <!-- 分类分组列表 -->
-  <div class="catalog-body" id="catalogList"></div>
-<!-- 探索度（加载存档后显示） -->
+  <!-- ===== 材料面板 ===== -->
+  <div id="materialPane" class="hidden">
+    <div class="layer-toolbar">
+      <button id="matAll" type="button" class="lt-btn">全选材料</button>
+      <button id="matClear" type="button" class="lt-btn">清空材料</button>
+      <span id="matCount" class="lt-count">0/0 材料</span>
+    </div>
+    <div class="catalog-body mat-list" id="matList"></div>
+  </div>
+
+  <!-- 探索度（加载存档后显示） -->
   <div class="progress-section" id="progressSection">
     <div class="progress-head" id="progressHead" title="点击展开/收起">
       <span class="progress-toggle" id="progressToggle">▾</span>
@@ -79,7 +99,7 @@
   </div>
 
   <footer class="side-foot">
-    <p class="foot-version">TOTKMAP V1.6.0</p>
+    <p class="foot-version">TOTKMAP V1.7.0</p>
     <p>© 2026 yalin · github.com/yalincc</p>
   </footer>
 </aside>
@@ -110,7 +130,7 @@
 <div class="bottom-bar">
   <button id="addMarkerBtn" class="bar-btn">+ 新增标点</button>
   <button id="feedbackBtn" class="bar-btn">? 问题</button>
-  <span class="version">TOTKMAP V1.6.0</span>
+  <span class="version">TOTKMAP V1.7.0</span>
 </div>
 
 <!-- 自定义标点表单 -->
@@ -137,11 +157,9 @@
     <p>需要选择游戏存档目录下的 <code>progress.sav</code> 文件：</p>
     <ul>
       <li><b class="hl">Ryujinx</b>（Switch 模拟器）：<br>
-        <span class="path-line"><code>%APPDATA%\Ryujinx\bis\user\save\&lt;用户ID&gt;\0\slot_XX\progress.sav</code>
-        <button type="button" class="copy-btn" data-copy="%APPDATA%\Ryujinx\bis\user\save\&lt;用户ID&gt;\0\slot_XX\progress.sav">复制</button></span></li>
+        <span class="path-line"><code>%APPDATA%\Ryujinx\bis\user\save\&lt;用户ID&gt;\0\slot_XX\progress.sav</code></span></li>
       <li><b class="hl">Yuzu</b>：<br>
-        <span class="path-line"><code>…\load\0100F2C0115B6000\&lt;用户ID&gt;\&lt;存档槽&gt;\progress.sav</code>
-        <button type="button" class="copy-btn" data-copy="…\load\0100F2C0115B6000\&lt;用户ID&gt;\&lt;存档槽&gt;\progress.sav">复制</button></span></li>
+        <span class="path-line"><code>…\load\0100F2C0115B6000\&lt;用户ID&gt;\&lt;存档槽&gt;\progress.sav</code></span></li>
     </ul>
     <p>找不到时：按 <code>Win+R</code> 输入 <code>%APPDATA%\Ryujinx\bis\user\save</code> 回车，
       进入 <code>0100F2C0115B6000</code>（王国之泪）对应的用户目录，在 <code>slot_XX</code> 下找 <code>progress.sav</code>。</p>
@@ -173,6 +191,7 @@
 
 <script src="vendor/leaflet.js"></script>
 <script src="vendor/murmurhash3js.min.js"></script>
+<script src="vendor/supercluster.min.js?v=180"></script>
 <script src="data/totk_save_hashes.js"></script>
 <script src="data/layers.js"></script>
 <script src="data/catalogs.js"></script>
@@ -181,7 +200,8 @@
 <script src="data/area_sky.js"></script>
 <script src="data/area_depths.js"></script>
 <script src="data/markers.js"></script>
+<script src="data/materials.js?v=180"></script>
 <script src="js/save-parser.js"></script>
-<script src="js/app.js"></script>
+<script src="js/app.js?v=180"></script>
 </body>
 </html>
