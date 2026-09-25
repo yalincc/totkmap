@@ -10,13 +10,17 @@
   var CATALOGS = window.TOTK_CATALOGS || [];
   var AREAS = window.TOTK_AREAS || [];
   var MARKERS = window.TOTK_MARKERS || [];
+  var AREA_CAVE = window.TOTK_AREA_CAVE || [];
+  var AREA_SKY = window.TOTK_AREA_SKY || [];
+  var AREA_DEPTHS = window.TOTK_AREA_DEPTHS || [];
 
-  var VERSION = 'TOTKMAP V1.5.1';
+  var VERSION = 'TOTKMAP V1.6.0';
   var LS_DONE = 'totkmap_done_v1';
   var LS_CUSTOM = 'totkmap_custom_v1';
   var LS_LAYER = 'totkmap_layer_v1';
   var LS_NAMES = 'totkmap_names_v1';
-  var LS_SAVE = 'totkmap_save_v1';      // 存档同步结果（仅保存收集计数）
+  var LS_SAVE = 'totkmap_save_v1';
+  var LS_AREA = 'totkmap_area_v1';
 
   var LAYER_KEY = { 18: 'ground', 19: 'depths', 20: 'sky' };
   var LAYER_NAME = { 18: '地上', 19: '地下', 20: '天空' };
@@ -42,7 +46,9 @@
     current: null,
     lastSearch: [],
     save: null,            // 存档同步结果 {分类名: {done, total}} 或 null
-    saveVersion: null      // 存档版本（如 v1.1.x/v1.2.x）
+    saveVersion: null,     // 存档版本（如 v1.1.x/v1.2.x）
+    areaOn: false,         // 区域轮廓总开关
+    areaLayers: {}         // {current: L.LayerGroup}
   };
 
   /* ---------------- 工具 ---------------- */
@@ -551,6 +557,61 @@
     }
   });
 
+  /* ---------------- 区域轮廓图层（单总开关，按当前层自动选对应轮廓） ---------------- */
+  var AREA_STYLE = {
+    cave:   { color: '#f3e79b', weight: 1, fillColor: '#f3e79b', fillOpacity: 0.06, dashArray: '4,3' },
+    sky:    { color: '#66ccff', weight: 1, fillColor: '#66ccff', fillOpacity: 0.12 },
+    depths: { color: '#ff4444', weight: 1.5, fill: false, dashArray: '4,3' }
+  };
+  // 当前层 → 对应轮廓 key
+  var AREA_KEY_OF_LAYER = { 18: 'cave', 20: 'sky', 19: 'depths' };
+
+  function clearAreaOverlays() {
+    if (state.areaLayers.current) {
+      map.removeLayer(state.areaLayers.current);
+      state.areaLayers.current = null;
+    }
+  }
+
+  function buildAreaOverlays() {
+    clearAreaOverlays();
+    if (!state.areaOn) return;
+    var key = AREA_KEY_OF_LAYER[state.layer];
+    if (!key) return;
+    var data = key === 'cave' ? AREA_CAVE : key === 'sky' ? AREA_SKY : AREA_DEPTHS;
+    if (!data || !data.length) return;
+    var grp = L.layerGroup();
+    var style = AREA_STYLE[key];
+    data.forEach(function (item) {
+      if (key === 'depths') {
+        item.polys.forEach(function (poly) { grp.addLayer(L.polygon(poly, style)); });
+      } else {
+        var p = L.polygon(item.rings, style);
+        if (key === 'cave' && item.name) p.bindTooltip(item.name, { sticky: true, direction: 'top' });
+        grp.addLayer(p);
+      }
+    });
+    grp.addTo(map);
+    state.areaLayers.current = grp;
+  }
+
+  function initAreaOverlays() {
+    state.areaOn = loadJson(LS_AREA, false);
+    var sw = $('areaSwitch');
+    var box = $('toggleArea');
+    if (sw) sw.checked = !!state.areaOn;
+    if (box) box.classList.toggle('cur', !!state.areaOn);
+    function apply(on) {
+      state.areaOn = !!on;
+      saveJson(LS_AREA, state.areaOn);
+      if (sw) sw.checked = !!state.areaOn;
+      if (box) box.classList.toggle('cur', !!state.areaOn);
+      buildAreaOverlays();
+    }
+    // label 的 for 属性自动切换 input，change 统一处理
+    if (sw) sw.addEventListener('change', function () { apply(this.checked); });
+    buildAreaOverlays();
+  }
   /* ---------------- 图层切换 ---------------- */
   $('layerSwitch').addEventListener('click', function (e) {
     var btn = e.target.closest('button');
@@ -573,6 +634,7 @@
     selectDefault();
     buildCatalogPanel();
     renderAreas();
+    buildAreaOverlays();
     renderMarkers();
     updateCount();
     updateLayerCount();
@@ -847,6 +909,7 @@
   selectDefault();
   buildCatalogPanel();
   renderAreas();
+  initAreaOverlays();
   renderMarkers();
   updateCount();
   map.setView(CENTER, 3);

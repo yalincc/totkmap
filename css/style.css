@@ -759,3 +759,41 @@ html, body {
 /* 帮助气泡内路径也可选中 */
 .su-tip { user-select: text; -webkit-user-select: text; }
 /* 探索度进度条已内联于 .progress-item 中 */
+
+/* ============ 区域轮廓覆盖层 ============ */
+.area-overlay-section {
+  padding: 8px 12px 4px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  margin-top: 4px;
+}
+.area-overlay-section .group-title {
+  font-size: 12px;
+  color: #bfae68;
+  margin-bottom: 6px;
+  letter-spacing: 1px;
+}
+.area-overlay-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+}
+.area-overlay-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: #ccc;
+  cursor: pointer;
+  user-select: none;
+}
+.area-overlay-item input {
+  margin: 0;
+  cursor: pointer;
+}
+
+/* 顶部双开关并排 */
+.top-switches {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+}

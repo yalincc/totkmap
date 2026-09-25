@@ -19,10 +19,17 @@
   <div class="panel-top">
     <div class="panel-head-row">
       <h2 class="panel-title">王国之泪·全能地图</h2>
-      <div class="name-switch cur" id="toggleNames">
-        <span>显示标点名称</span>
-        <input type="checkbox" id="nameSwitch" checked>
-        <label class="switch" for="nameSwitch"><i></i></label>
+      <div class="top-switches">
+        <div class="name-switch cur" id="toggleNames">
+          <span>显示名称</span>
+          <input type="checkbox" id="nameSwitch" checked>
+          <label class="switch" for="nameSwitch"><i></i></label>
+        </div>
+        <label class="name-switch" id="toggleArea">
+          <span>地区轮廓</span>
+          <input type="checkbox" id="areaSwitch">
+          <span class="switch"><i></i></span>
+        </label>
       </div>
     </div>
     <div class="layer-switch" id="layerSwitch">
@@ -47,8 +54,7 @@
 
   <!-- 分类分组列表 -->
   <div class="catalog-body" id="catalogList"></div>
-
-  <!-- 探索度（加载存档后显示） -->
+<!-- 探索度（加载存档后显示） -->
   <div class="progress-section" id="progressSection">
     <div class="progress-head" id="progressHead" title="点击展开/收起">
       <span class="progress-toggle" id="progressToggle">▾</span>
@@ -73,7 +79,7 @@
   </div>
 
   <footer class="side-foot">
-    <p class="foot-version">TOTKMAP V1.5.1</p>
+    <p class="foot-version">TOTKMAP V1.6.0</p>
     <p>© 2026 yalin · github.com/yalincc</p>
   </footer>
 </aside>
@@ -104,7 +110,7 @@
 <div class="bottom-bar">
   <button id="addMarkerBtn" class="bar-btn">+ 新增标点</button>
   <button id="feedbackBtn" class="bar-btn">? 问题</button>
-  <span class="version">TOTKMAP V1.5.1</span>
+  <span class="version">TOTKMAP V1.6.0</span>
 </div>
 
 <!-- 自定义标点表单 -->
@@ -171,6 +177,9 @@
 <script src="data/layers.js"></script>
 <script src="data/catalogs.js"></script>
 <script src="data/areas.js"></script>
+<script src="data/area_cave.js"></script>
+<script src="data/area_sky.js"></script>
+<script src="data/area_depths.js"></script>
 <script src="data/markers.js"></script>
 <script src="js/save-parser.js"></script>
 <script src="js/app.js"></script>
