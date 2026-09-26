@@ -553,7 +553,7 @@ html, body {
 .detail {
   position: absolute;
   z-index: 600;
-  width: 300px;
+  width: 320px;
 }
 .detail-card {
   background: rgba(20,22,26,.97);
@@ -603,28 +603,34 @@ html, body {
   color: #f2f5f9;
   word-break: break-all;
 }
-.card-title-row {
+/* 材料卡片 256px 高清大图（居中） */
+.card-img {
+  display: block;
+  width: 256px;
+  height: 256px;
+  margin: 10px auto 6px;
+  object-fit: contain;
+  background: rgba(255,255,255,.06);
+  border-radius: 10px;
+  padding: 6px;
+}
+/* 区域 / 坐标 / 位置 meta 区（克洛格卡同款） */
+.card-meta { margin: 8px 0 2px; }
+.meta-row {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 2px;
+  margin: 3px 0;
+  font-size: 12.5px;
 }
-.card-title-row .card-img {
-  width: 96px;
-  height: 96px;
-  object-fit: contain;
-  flex: 0 0 auto;
-  background: rgba(255,255,255,.06);
-  border-radius: 8px;
-  padding: 4px;
+.meta-label { color: #8a93a0; flex: 0 0 44px; }
+.meta-val { color: #e8ecf1; word-break: break-all; }
+/* 用途区 */
+.card-usage {
+  margin: 8px 0 2px;
+  font-size: 12.5px;
 }
-.card-title-text { min-width: 0; flex: 1; }
-.card-en {
-  font-size: 12px;
-  color: #8a93a0;
-  margin-bottom: 10px;
-  word-break: break-all;
-}
+.usage-label { color: #8a93a0; margin-right: 6px; }
+#detailUsage { color: #eac27e; }
 .card-body .row { margin: 3px 0; color: #8a93a0; }
 .card-body .row b { color: #e8ecf1; font-weight: 500; margin-left: 4px; }
 #detailDesc {

@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>塞尔达传说：王国之泪 · 互动地图</title>
 <link rel="stylesheet" href="vendor/leaflet.css">
-<link rel="stylesheet" href="css/style.css?v=185">
+<link rel="stylesheet" href="css/style.css?v=186">
 </head>
 <body>
 
@@ -113,7 +113,7 @@
   </div>
 
   <footer class="side-foot">
-    <p class="foot-version">TOTKMAP V1.7.5</p>
+    <p class="foot-version">TOTKMAP V1.7.6</p>
     <p>© 2026 yalin · github.com/yalincc</p>
   </footer>
 </aside>
@@ -128,19 +128,21 @@
       <span class="chip" id="detailChip"></span>
       <button class="detail-close" id="detailClose">×</button>
     </div>
-    <div class="card-title-row">
-      <img id="detailImg" class="card-img" src="" alt="">
-      <div class="card-title-text">
-        <h3 class="card-name" id="detailName"></h3>
-        <div class="card-en" id="detailCat"></div>
-      </div>
+    <h3 class="card-name" id="detailName"></h3>
+    <div class="card-meta" id="detailMeta">
+      <div class="meta-row"><span class="meta-label">区域</span><span class="meta-val" id="detailRegion"></span></div>
+      <div class="meta-row"><span class="meta-label">坐标</span><span class="meta-val" id="detailCoord"></span></div>
+      <div class="meta-row"><span class="meta-label">位置</span><span class="meta-val" id="detailPos"></span></div>
     </div>
+    <img id="detailImg" class="card-img" src="" alt="">
+    <div class="card-usage" id="detailUsageRow"><span class="usage-label">用途</span><span id="detailUsage"></span></div>
     <div class="card-body">
       <div class="row" id="detailDesc"></div>
     </div>
     <div class="card-actions">
-      <button id="detailDone" class="btn primary">标记为已完成</button>
-      <button id="detailCopy" class="btn ghost">复制坐标</button>
+      <button id="detailNav" class="btn act">导航</button>
+      <button id="detailCollect" class="btn act">收集</button>
+      <button id="detailDone" class="btn primary">标记完成</button>
     </div>
   </div>
 </section>
@@ -209,7 +211,7 @@
 
 <script src="vendor/leaflet.js"></script>
 <script src="vendor/murmurhash3js.min.js"></script>
-<script src="vendor/supercluster.min.js?v=185"></script>
+<script src="vendor/supercluster.min.js?v=186"></script>
 <script src="data/totk_save_hashes.js"></script>
 <script src="data/layers.js"></script>
 <script src="data/catalogs.js"></script>
@@ -218,8 +220,8 @@
 <script src="data/area_sky.js"></script>
 <script src="data/area_depths.js"></script>
 <script src="data/markers.js"></script>
-<script src="data/materials.js?v=185"></script>
+<script src="data/materials.js?v=186"></script>
 <script src="js/save-parser.js"></script>
-<script src="js/app.js?v=185"></script>
+<script src="js/app.js?v=186"></script>
 </body>
 </html>

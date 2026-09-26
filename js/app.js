@@ -14,7 +14,7 @@
   var AREA_SKY = window.TOTK_AREA_SKY || [];
   var AREA_DEPTHS = window.TOTK_AREA_DEPTHS || [];
 
-  var VERSION = 'TOTKMAP V1.7.5';
+  var VERSION = 'TOTKMAP V1.7.6';
   var LS_DONE = 'totkmap_done_v1';
   var LS_CUSTOM = 'totkmap_custom_v1';
   var LS_LAYER = 'totkmap_layer_v1';
@@ -486,40 +486,58 @@
     document.addEventListener('touchend', up);
   }
 
-  function showDetail(name, catName, iconUrl, desc, isDone, onDone, evt) {
-    $('detailName').textContent = name;
-    $('detailCat').textContent = catName;
-    $('detailChip').textContent = catName;
-    var img = $('detailImg');
-    if (iconUrl && img) { img.src = iconUrl; img.style.display = ''; }
-    else if (img) img.style.display = 'none';
-    $('detailDesc').textContent = stripHtml(desc) || '暂无说明。';
+  /* 详情卡片（克洛格卡式纵向结构）
+     opts: {name, cat, desc, isDone, onDone, img, region, coord, posText, usage, collected, onNav, onCollect, evt}
+     材料卡片带 img/region/coord/posText/usage/导航/收集；探索标点只有 name/cat/desc/标记完成 */
+  function showDetail(opts) {
+    $('detailName').textContent = opts.name;
+    $('detailChip').textContent = opts.cat || '';
+    $('detailDesc').textContent = stripHtml(opts.desc || '') || '暂无说明。';
+    var isMat = !!(opts.img || opts.onNav);
+    var meta = $('detailMeta'), img = $('detailImg'), uRow = $('detailUsageRow');
+    var nav = $('detailNav'), col = $('detailCollect'), body = $('detailDesc');
+    if (isMat) {
+      img.src = opts.img; img.style.display = '';
+      $('detailRegion').textContent = opts.region || '';
+      $('detailCoord').textContent = opts.coord || '';
+      $('detailPos').textContent = opts.posText || '';
+      $('detailUsage').textContent = opts.usage || '';
+      meta.style.display = ''; uRow.style.display = '';
+      nav.style.display = ''; col.style.display = '';
+      nav.onclick = opts.onNav || null;
+      col.onclick = opts.onCollect || null;
+      col.textContent = opts.collected ? '已收集' : '收集';
+      body.parentElement.style.display = 'none';
+    } else {
+      meta.style.display = 'none'; img.style.display = 'none'; uRow.style.display = 'none';
+      nav.style.display = 'none'; col.style.display = 'none';
+      body.parentElement.style.display = '';
+    }
     var btn = $('detailDone');
-    if (onDone) {
+    if (opts.onDone) {
       btn.style.display = '';
-      btn.textContent = isDone ? '取消完成标记' : '标记为已完成';
-      btn.className = 'btn primary' + (isDone ? ' done' : '');
-      btn.onclick = onDone;
+      btn.textContent = opts.isDone ? '取消完成' : '标记完成';
+      btn.className = 'btn primary' + (opts.isDone ? ' done' : '');
+      btn.onclick = opts.onDone;
     } else {
       btn.style.display = 'none';
     }
     var card = $('detail');
     var wasHidden = card.classList.contains('hidden');
     card.classList.remove('hidden');
-    if (wasHidden || evt) positionDetail(evt && evt.originalEvent || null);
+    if (wasHidden || opts.evt) positionDetail(opts.evt && opts.evt.originalEvent || null);
   }
 
   function openDetail(m, evt) {
     state.current = m;
     var cat = catById(state.layer, m.cat);
     var isDone = !!state.done[m.id];
-    showDetail(
-      m.name || m.full,
-      (cat ? cat.name : '未知分类') + ' · ' + LAYER_NAME[state.layer],
-      null,   // 探索标点不显示大图标（BOTWmap 风格，仅材料卡片显示高清图）
-      m.desc || '',
-      isDone,
-      function () {
+    showDetail({
+      name: m.name || m.full,
+      cat: (cat ? cat.name : '未知分类') + ' · ' + LAYER_NAME[state.layer],
+      desc: m.desc || '',
+      isDone: isDone,
+      onDone: function () {
         if (state.done[m.id]) delete state.done[m.id];
         else state.done[m.id] = true;
         saveDone();
@@ -537,13 +555,13 @@
         if (state.filter !== 'all') renderMarkers();
         openDetail(m, evt);
       },
-      evt
-    );
+      evt: evt
+    });
   }
 
   function openCustomDetail(c) {
     state.current = c;
-    showDetail(c.name, '自定义标点 · ' + LAYER_NAME[state.layer], null, c.desc || '暂无说明。', false, null);
+    showDetail({ name: c.name, cat: '自定义标点 · ' + LAYER_NAME[state.layer], desc: c.desc || '暂无说明。' });
   }
 
   $('detailClose').addEventListener('click', function () {
@@ -551,24 +569,6 @@
     state.current = null;
   });
   initCardDrag();
-  $('detailCopy').addEventListener('click', function () {
-    var m = state.current;
-    if (!m) return;
-    var text = (m.name || '') + ' 坐标(' + Number(m.x).toFixed(2) + ', ' + Number(m.y).toFixed(2) + ')';
-    try {
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(text).then(function () { toast('坐标已复制'); });
-      } else {
-        var ta = document.createElement('textarea');
-        ta.value = text;
-        document.body.appendChild(ta);
-        ta.select();
-        document.execCommand('copy');
-        document.body.removeChild(ta);
-        toast('坐标已复制');
-      }
-    } catch (e) { toast('复制失败'); }
-  });
 
   /* ---------------- 搜索 ---------------- */
   var searchTimer = null;
@@ -1032,6 +1032,8 @@
   var MATS = window.TOTK_MATERIALS || { materials: [], points: [] };
   var LS_MAT = 'totkmap_mats_v1';
   var LS_MAT_FAV = 'totkmap_matfav_v1';
+  var LS_MAT_COL = 'totkmap_matcol_v1';
+  var LS_MAT_DONE = 'totkmap_matdone_v1';
   var MAT_CAT_ORDER = ['植物', '蘑菇', '水果', '昆虫', '鱼', '矿岩'];
 
   var FX = 180 / 6000, FZ = 85 / 5000;
@@ -1055,6 +1057,8 @@
   state.matTab = 'explore';
   state.matSelected = loadJson(LS_MAT, {});
   state.matFav = loadJson(LS_MAT_FAV, {});
+  state.matCollected = loadJson(LS_MAT_COL, {});   // mid -> [点索引]，点级收集记录
+  state.matDone = loadJson(LS_MAT_DONE, {});       // mid -> true，材料级完成标记
   state.matFavOnly = false;
   state.matCollapsed = {};
   state.matIdx = {};
@@ -1069,8 +1073,9 @@
     if (state.matIdx[layerId][mid]) return state.matIdx[layerId][mid];
     var pts = (matPointsByLayer[layerId] || {})[mid] || [];
     if (!pts.length) return null;
-    var feats = pts.map(function (p) {
+    var feats = pts.map(function (p, i) {
       return {
+        id: i,   // 点索引（点级收集用）
         type: 'Feature',
         properties: { matId: mid, gx: p[0], gz: p[1] },
         geometry: { type: 'Point', coordinates: [p[0] * FX, p[1] * FZ] }
@@ -1086,6 +1091,89 @@
   function matIconSize(z) {
     var s = { 3: 20, 4: 22, 5: 26, 6: 30, 7: 34 };
     return s[z] || (z > 7 ? 34 : 20);
+  }
+
+  /* ---- 材料卡片（克洛格卡式：区域/坐标/256大图/用途/导航/收集/标记完成） ---- */
+  var UPGRADE_NAMES = ['大剑草','潜行鳟鱼','大剑独角仙','铠甲独角仙','毅力胡萝卜','生命松露',
+    '精力独角仙','潜行田螺','静静萤火虫','金苹果','苹果','精力鲈鱼','大剑鲤鱼','铠甲鲤鱼',
+    '大剑香蕉','宁静公主','远昔骨舌鱼'];
+  function usageFor(m) {
+    var tags = [];
+    if (UPGRADE_NAMES.indexOf(m.cn) >= 0) tags.push('升级素材');
+    if (m.cat === '矿岩') tags.push('强化材料');
+    else tags.push('料理材料');
+    return tags.join(' · ');
+  }
+  /* 区域：最近地区标注点（无官方边界，近似归属，够用） */
+  function nearestRegion(ll) {
+    var best = '', bd = Infinity;
+    AREAS.forEach(function (a) {
+      if (a.layer !== state.layer || !a.name) return;
+      var d = (ll[0]-a.x)*(ll[0]-a.x) + (ll[1]-a.y)*(ll[1]-a.y);
+      if (d < bd) { bd = d; best = a.name; }
+    });
+    return best;
+  }
+  function isCollected(mid, idx) {
+    var arr = state.matCollected[mid];
+    return arr && arr.indexOf(idx) >= 0;
+  }
+  function toggleMatDone(mid) {
+    if (state.matDone[mid]) delete state.matDone[mid];
+    else state.matDone[mid] = true;
+    saveJson(LS_MAT_DONE, state.matDone);
+    renderMatLayer(mid);
+  }
+  function showMatDetail(m, ll, idx, evt) {
+    var pts = (matPointsByLayer[state.layer] || {})[m.id] || [];
+    var total = pts.length || 0;
+    var gx = Number(ll[1]).toFixed(0), gz = Number(ll[0]).toFixed(0);
+    showDetail({
+      name: m.cn,
+      cat: m.cat + ' · ' + LAYER_NAME[state.layer],
+      desc: '',
+      img: 'assets/materials/' + m.entry + '.png',
+      region: nearestRegion(ll),
+      coord: 'X ' + gx + ' · Z ' + gz,
+      posText: '第 ' + (idx + 1) + ' / ' + total + ' 个位置',
+      usage: usageFor(m),
+      isDone: !!state.matDone[m.id],
+      collected: isCollected(m.id, idx),
+      onDone: function () { toggleMatDone(m.id); showMatDetail(m, ll, idx, evt); },
+      onNav: function () {
+        map.flyTo(ll, 7, { animate: true, duration: 0.8 });
+        toast('第 ' + (idx + 1) + '/' + total + ' 个位置 · 导航程序接入后将自动切换下一位置');
+      },
+      onCollect: function () { collectAndNext(m, ll, idx); },
+      evt: evt
+    });
+  }
+  /* 收集当前点 -> 自动定位到该材料下一未收集位置（导航程序雏形） */
+  function collectAndNext(m, ll, idx) {
+    var pts = (matPointsByLayer[state.layer] || {})[m.id] || [];
+    if (!pts.length) return;
+    var arr = state.matCollected[m.id] || [];
+    if (arr.indexOf(idx) < 0) {
+      arr.push(idx);
+      state.matCollected[m.id] = arr;
+      saveJson(LS_MAT_COL, state.matCollected);
+    }
+    var next = -1;
+    for (var i = 1; i <= pts.length; i++) {
+      var j = (idx + i) % pts.length;
+      if (arr.indexOf(j) < 0) { next = j; break; }
+    }
+    if (next < 0) {
+      renderMatLayer(m.id);
+      showMatDetail(m, ll, idx, null);
+      toast('该材料 ' + pts.length + ' 个位置已全部收集完成');
+      return;
+    }
+    var nll = [pts[next][1], pts[next][0]];
+    renderMatLayer(m.id);
+    map.flyTo(nll, 7, { animate: true, duration: 0.8 });
+    showMatDetail(m, nll, next, null);
+    toast('已收集，自动定位到下一位置（第 ' + (next + 1) + '/' + pts.length + ' 个）');
   }
 
   function renderMatLayer(mid) {
@@ -1132,12 +1220,12 @@
           html: '<div class="mat-leaf" style="width:' + lsize + 'px;height:' + lsize + 'px;" title="' + esc(m.cn) + '" data-char="' + esc(m.cn[0]) + '"><img src="assets/materials/' + m.entry + '.png" onerror="this.remove()"></div>',
           iconSize: [lsize, lsize], iconAnchor: [lsize / 2, lsize / 2]
         });
-        (function (ll, mid) {
+        (function (ll, mid, idx) {
           var mk = L.marker(ll, { icon: icon2, riseOnHover: true });
+          if (isCollected(mid, idx) || state.matDone[mid]) mk.setOpacity(0.38);
           mk.bindTooltip(m.cn, { direction: 'top', offset: [0, -lsize / 2 - 4], className: 'mk-label' });
           mk.on('click', function (e) {
-            showDetail(m.cn, m.cat + ' · ' + LAYER_NAME[state.layer], 'assets/materials/' + m.entry + '.png',
-              '坐标(' + Number(ll[1]).toFixed(1) + ', ' + Number(ll[0]).toFixed(1) + ')', false, null, e);
+            showMatDetail(m, ll, idx, e);
             // Sidebar linkage: expand cat, scroll to item, flash
             var listEl = $('matList');
             if (listEl) {
@@ -1155,7 +1243,7 @@
             }
           });
           grp.addLayer(mk);
-        })(latlng, mid);
+        })(latlng, mid, c.id);
       }
     });
     grp.addTo(map);
