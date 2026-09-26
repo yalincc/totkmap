@@ -129,10 +129,9 @@
     toast('已回到全图');
   });
   $('zoomLocate').addEventListener('click', function () {
-    // V1.8.0: 实时服务在线时定位到玩家，否则回监视堡垒
+    // V1.8.3: 实时服务在线时「定位 + 开关视图跟随」；离线回监视堡垒
     if (window.LIVENAV && LIVENAV.online()) {
-      LIVENAV.centerOnPlayer();
-      toast('已定位到玩家当前位置');
+      LIVENAV.toggleFollow();
       return;
     }
     map.flyTo(CENTER, 5, { duration: 0.6 });
@@ -520,7 +519,7 @@
       nav.style.display = ''; col.style.display = '';
       nav.onclick = opts.onNav || null;
       col.onclick = opts.onCollect || null;
-      col.textContent = opts.collected ? '已收集' : '收集';
+      col.textContent = opts.colBtn || (opts.collected ? '已收集' : '收集');
       body.parentElement.style.display = 'none';
     } else {
       meta.style.display = 'none'; img.style.display = 'none'; uRow.style.display = 'none';
@@ -1309,7 +1308,22 @@
     applyDoneToMarker: applyDoneToMarker,
     buildCatalogPanel: buildCatalogPanel,
     updateCount: updateCount,
-    syncProgressFromServer: syncProgressFromServer
+    syncProgressFromServer: syncProgressFromServer,
+    matById: function (mid) { return matById[mid]; },
+    matName: function (mid) { var m = matById[mid]; return m ? m.cn : ('材料' + mid); },
+    matPoints: function (layerId) { return matPointsByLayer[layerId] || {}; },
+    matCollect: function (mid, idx) {
+      var arr = state.matCollected[mid] || [];
+      var added = arr.indexOf(idx) < 0;
+      if (added) {
+        arr.push(idx);
+        state.matCollected[mid] = arr;
+        saveJson(LS_MAT_COL, state.matCollected);
+        renderMatLayer(mid);
+      }
+      return added;
+    },
+    showMatCard: function (mid, ll, idx, evt) { var m = matById[mid]; if (m) showMatDetail(m, ll, idx, evt); }
   };
 
   // 版本号
@@ -1441,6 +1455,9 @@
     var pts = (matPointsByLayer[state.layer] || {})[m.id] || [];
     var total = pts.length || 0;
     var gx = Number(ll[1]).toFixed(0), gz = Number(ll[0]).toFixed(0);
+    var colBtn = '';
+    var MA = window.MAT_AUTO;
+    if (MA && MA.isRunning() && MA.isCurrent(m.id, idx)) colBtn = MA.isArrived() ? '已收集，继续' : '停止收集';
     showDetail({
       name: m.cn,
       cat: m.cat + ' · ' + LAYER_NAME[state.layer],
@@ -1458,37 +1475,30 @@
         toast('第 ' + (idx + 1) + '/' + total + ' 个位置');
       },
       navTarget: { x: ll[0], y: ll[1] },
-      onCollect: function () { collectAndNext(m, ll, idx); },
+      colBtn: colBtn,
+      onCollect: function () { matCollectClick(m, ll, idx); },
       compendium: (window.TOTK_COMPENDIUM_URL ? window.TOTK_COMPENDIUM_URL + '/items/' + m.entry : ''),
       evt: evt
     });
   }
-  /* 收集当前点 -> 自动定位到该材料下一未收集位置（导航程序雏形） */
-  function collectAndNext(m, ll, idx) {
-    var pts = (matPointsByLayer[state.layer] || {})[m.id] || [];
-    if (!pts.length) return;
-    var arr = state.matCollected[m.id] || [];
-    if (arr.indexOf(idx) < 0) {
-      arr.push(idx);
-      state.matCollected[m.id] = arr;
-      saveJson(LS_MAT_COL, state.matCollected);
-    }
-    var next = -1;
-    for (var i = 1; i <= pts.length; i++) {
-      var j = (idx + i) % pts.length;
-      if (arr.indexOf(j) < 0) { next = j; break; }
-    }
-    if (next < 0) {
-      renderMatLayer(m.id);
-      showMatDetail(m, ll, idx, null);
-      toast('该材料 ' + pts.length + ' 个位置已全部收集完成');
+  /* M4：材料卡「收集」按钮 —— 接入材料收集队列 B（js/mat-auto.js）
+     队列未运行：标记当前点已收集 + 启动队列（已收集的点点【已收集】= 直接启动）
+     队列运行中：当前目标=该点 → 未到达=停止 / 已到达=确认收集续导；其他点 → 提示不打断 */
+  function matCollectClick(m, ll, idx) {
+    var MA = window.MAT_AUTO;
+    if (!MA) { toast('材料队列未加载'); return; }
+    if (MA.isRunning()) {
+      if (MA.isCurrent(m.id, idx)) {
+        if (MA.isArrived()) MA.confirm();
+        else MA.stop();
+      } else {
+        var c = MA.current();
+        var cm = c ? matById[c.mid] : null;
+        toast('收集队列正在导航 ' + (cm ? cm.cn : '其他材料') + '，请先停止或完成当前目标');
+      }
       return;
     }
-    var nll = [pts[next][1], pts[next][0]];
-    renderMatLayer(m.id);
-    map.flyTo(nll, 7, { animate: true, duration: 0.8 });
-    showMatDetail(m, nll, next, null);
-    toast('已收集，自动定位到下一位置（第 ' + (next + 1) + '/' + pts.length + ' 个）');
+    MA.start(m.id, idx, ll);
   }
 
   function renderMatLayer(mid) {

@@ -129,6 +129,7 @@
 
   function start(m) {
     if (running) { A.toast('自动导航已在运行（卡片【停止自动导航】可停）'); return; }
+    if (window.MAT_AUTO && window.MAT_AUTO.isRunning()) { A.toast('材料收集队列运行中，请先停止再开始探索'); return; }
     if (!m || !m.id) { A.toast('该标点暂不支持自动导航'); return; }
     if (!online()) { A.toast('实时定位服务未连接（live-python 未启动？）'); return; }
     var p = pos();
@@ -168,9 +169,18 @@
     setInterval(tick, 600);
   }
 
+  /* 外部结束导航（面板「结束」/清除目标）→ 自动导航同步停止（防残留） */
+  function onNavEnd() {
+    if (!running) return;
+    running = false; waiting = false; arrived = false; current = null;
+    if (pollT) { clearInterval(pollT); pollT = null; }
+    A.toast('导航已结束，自动导航已停止');
+  }
+
   window.EXPLORE_AUTO = {
     start: start,
     stop: stop,
+    onNavEnd: onNavEnd,
     isRunning: function () { return running; },
     isWaiting: function () { return waiting; },
     current: function () { return current; },

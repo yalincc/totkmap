@@ -20,14 +20,16 @@
   var LS_FOLLOW = 'totkmap.live.follow.v1';
   var LS_AUTOLAYER = 'totkmap.live.autolayer.v1';
   var LS_ARRIVE = 'totkmap.live.arrive.v1';
+  var LS_HOLD = 'totkmap.live.hold.v1';
   var ARRIVE_DEF = 30;                 // 到达阈值：游戏单位 ≈ m（可调）
+  var HOLD_DEF = 2;                    // 到达停留自动标记：秒（0-10，0=到达即标，面板可调）
   var LAYER_NAME = { 18: '地上', 19: '地下', 20: '天空' };
 
   var map = null, T = null;
   var pos = { online: false, mx: null, my: null, gx: 0, gy: 0, gz: 0,
               layer: 18, verified: false, source: '-' };
   var target = null;                  // {x,y,name,type,layer} 服务端目标
-  var follow = false, autoLayer = true, arriveM = ARRIVE_DEF, paused = false;
+  var follow = false, autoLayer = true, arriveM = ARRIVE_DEF, holdSec = HOLD_DEF, paused = false;
   var lastProgGen = null, lastProgFetch = 0;   // 存档进度代次（服务端 /pos.progressGen）
   var arrivedShown = false;
   var layerLock = null;                        // 手动层级锁定：null=自动，18/19/20=锁定该层（传送后恢复自动）
@@ -183,7 +185,7 @@
         lastPosKey = key;
         trail.push([p.mx, p.my]);
         if (trail.length > 600) trail.shift();
-        if (follow && !paused) centerOnPlayer();
+        if (follow && !paused) followCenter();
       }
       autoSwitchLayer();
     } else {
@@ -286,10 +288,51 @@
     drawGuide();
   }
 
-  /* ---------------- 视图跟随 ---------------- */
+  /* ---------------- 视图跟随（V1.8.3：范围跟随，防持续动画晕眩/卡顿） ---------------- */
+  /* 单次定位：居中玩家，保持缩放 */
   function centerOnPlayer() {
     if (pos.mx == null) return;
     map.flyTo([pos.mx, pos.my], Math.max(map.getZoom(), 5), { duration: 0.6 });
+  }
+  /* 跟随：红点偏离视口中心超 30% 才平移一次（游戏跟随视角式，范围内不动） */
+  function followCenter() {
+    if (pos.mx == null) return;
+    var cp = map.latLngToContainerPoint([pos.mx, pos.my]);
+    var cc = map.latLngToContainerPoint(map.getCenter());
+    var lim = Math.min(map.getSize().x, map.getSize().y) * 0.3;
+    if (Math.abs(cp.x - cc.x) > lim || Math.abs(cp.y - cc.y) > lim) {
+      map.panTo([pos.mx, pos.my], { animate: true, duration: 0.3 });
+    }
+  }
+  function setLocateBtns() {
+    if ($('npLocate')) $('npLocate').classList.toggle('active', follow);
+    if ($('zoomLocate')) $('zoomLocate').classList.toggle('active', follow);
+  }
+  function toggleFollow() {
+    if (pos.mx == null) { toast('尚未获取玩家位置'); return false; }
+    follow = !follow;
+    lsSet(LS_FOLLOW, follow ? '1' : '0');
+    if ($('npFollow')) $('npFollow').checked = follow;
+    if (follow) centerOnPlayer();
+    setLocateBtns();
+    toast(follow ? '已开启：视图跟随玩家（超范围时跟随）' : '已关闭视图跟随');
+    return follow;
+  }
+  /* 拖动地图 = 手动看别处 → 自动关闭跟随 */
+  function bindFollowDrag() {
+    if (!map) return;
+    map.on('dragstart', function () {
+      if (!follow) return;
+      follow = false;
+      lsSet(LS_FOLLOW, '0');
+      if ($('npFollow')) $('npFollow').checked = false;
+      setLocateBtns();
+    });
+  }
+  /* 导航结束广播：材料/探索队列同步停止（防队列状态残留，防重入：队列 stop 先置 running=false） */
+  function notifyQueueEnd() {
+    if (window.MAT_AUTO && window.MAT_AUTO.onNavEnd) window.MAT_AUTO.onNavEnd();
+    if (window.EXPLORE_AUTO && window.EXPLORE_AUTO.onNavEnd) window.EXPLORE_AUTO.onNavEnd();
   }
 
   /* ---------------- 导航目标 ---------------- */
@@ -321,6 +364,7 @@
     }).catch(function () {});
     target = null; arrivedShown = false; lastDrawKey = '';
     drawGuide(); setStatus();
+    notifyQueueEnd();
   }
 
   /* 导航按钮切换：同一目标再次点击 = 停止导航 */
@@ -385,6 +429,18 @@
         toast('到达阈值已设为 ' + v + ' 游戏单位');
       });
     }
+    var iHold = $('npHold');
+    if (iHold) {
+      iHold.value = holdSec;
+      iHold.addEventListener('change', function () {
+        var v = parseInt(this.value, 10);
+        if (isNaN(v) || v < 0) v = HOLD_DEF;
+        if (v > 10) v = 10;
+        this.value = v; holdSec = v;
+        lsSet(LS_HOLD, String(v));
+        toast('停留自动标记已设为 ' + v + ' 秒（0=到达即标记）');
+      });
+    }
     var cAuto = $('npAutoLayer');
     if (cAuto) {
       cAuto.checked = autoLayer;
@@ -401,6 +457,7 @@
         follow = this.checked;
         lsSet(LS_FOLLOW, follow ? '1' : '0');
         if (follow && pos.mx != null) centerOnPlayer();
+        setLocateBtns();
         toast(follow ? '已开启：视图跟随玩家' : '已关闭视图跟随');
       });
     }
@@ -411,10 +468,7 @@
     var bClear = $('npClear');
     if (bClear) bClear.addEventListener('click', function () { clearNav(); toast('已清除目标'); });
     var bLoc = $('npLocate');
-    if (bLoc) bLoc.addEventListener('click', function () {
-      if (pos.mx == null) { toast('尚未获取玩家位置'); return; }
-      centerOnPlayer();
-    });
+    if (bLoc) bLoc.addEventListener('click', toggleFollow);
     /* 面板可拖动（按住头部；收起按钮除外），拖动后转为 left/top 定位 */
     var head = panel.querySelector('.np-head');
     if (head) {
@@ -459,8 +513,12 @@
     try { autoLayer = lsGet(LS_AUTOLAYER, '1') !== '0'; } catch (e) {}
     var a = parseInt(lsGet(LS_ARRIVE, String(ARRIVE_DEF)), 10);
     arriveM = (isNaN(a) || a < 1) ? ARRIVE_DEF : Math.min(a, 500);
+    var h = parseInt(lsGet(LS_HOLD, String(HOLD_DEF)), 10);
+    holdSec = (isNaN(h) || h < 0) ? HOLD_DEF : Math.min(h, 10);
 
     buildPanel();
+    setLocateBtns();
+    bindFollowDrag();
     setInterval(poll, 600);
     document.addEventListener('visibilitychange', function () {
       if (!document.hidden) poll();
@@ -478,7 +536,10 @@
       pos: function () { return { online: pos.online, located: pos.located, mx: pos.mx, my: pos.my, layer: pos.layer, verified: pos.verified }; },
       arrived: function () { return arrivedShown; },
       arriveM: function () { return arriveM; },
+      holdSec: function () { return holdSec; },
       paused: function () { return paused; },
+      toggleFollow: toggleFollow,
+      setLocateBtns: setLocateBtns,
       /* V1.8.1: 手动层级锁定 */
       setLayerLock: setLayerLock,
       lockLayer: function () { return layerLock; }

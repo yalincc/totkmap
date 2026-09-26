@@ -1107,3 +1107,6 @@ html, body {
     width: auto;
   }
 }
+
+/* V1.8.3 视图跟随激活态（定位我 / 🎯 高亮） */
+#zoomLocate.active, #npLocate.active { background: #ffb703 !important; color: #222 !important; }
