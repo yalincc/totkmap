@@ -14,7 +14,7 @@
   var AREA_SKY = window.TOTK_AREA_SKY || [];
   var AREA_DEPTHS = window.TOTK_AREA_DEPTHS || [];
 
-  var VERSION = 'TOTKMAP V1.7.6';
+  var VERSION = 'TOTKMAP V1.7.7';
   var LS_DONE = 'totkmap_done_v1';
   var LS_CUSTOM = 'totkmap_custom_v1';
   var LS_LAYER = 'totkmap_layer_v1';
@@ -1058,7 +1058,8 @@
   state.matSelected = loadJson(LS_MAT, {});
   state.matFav = loadJson(LS_MAT_FAV, {});
   state.matCollected = loadJson(LS_MAT_COL, {});   // mid -> [点索引]，点级收集记录
-  state.matDone = loadJson(LS_MAT_DONE, {});       // mid -> true，材料级完成标记
+  state.matDone = loadJson(LS_MAT_DONE, {});       // mid -> [点索引]，点级完成标记（材料会刷新，重新勾选即重显）
+  (function () { for (var k in state.matDone) if (state.matDone[k] === true) delete state.matDone[k]; })();
   state.matFavOnly = false;
   state.matCollapsed = {};
   state.matIdx = {};
@@ -1118,9 +1119,18 @@
     var arr = state.matCollected[mid];
     return arr && arr.indexOf(idx) >= 0;
   }
-  function toggleMatDone(mid) {
-    if (state.matDone[mid]) delete state.matDone[mid];
-    else state.matDone[mid] = true;
+  function isMatDone(mid, idx) {
+    var arr = state.matDone[mid];
+    return arr && arr.indexOf(idx) >= 0;
+  }
+  /* 标记完成 = 单个材料位置（点级），不影响其他位置 */
+  function toggleMatDone(mid, idx) {
+    var arr = state.matDone[mid] || [];
+    var at = arr.indexOf(idx);
+    if (at >= 0) arr.splice(at, 1);
+    else arr.push(idx);
+    if (arr.length) state.matDone[mid] = arr;
+    else delete state.matDone[mid];
     saveJson(LS_MAT_DONE, state.matDone);
     renderMatLayer(mid);
   }
@@ -1137,9 +1147,9 @@
       coord: 'X ' + gx + ' · Z ' + gz,
       posText: '第 ' + (idx + 1) + ' / ' + total + ' 个位置',
       usage: usageFor(m),
-      isDone: !!state.matDone[m.id],
+      isDone: isMatDone(m.id, idx),
       collected: isCollected(m.id, idx),
-      onDone: function () { toggleMatDone(m.id); showMatDetail(m, ll, idx, evt); },
+      onDone: function () { toggleMatDone(m.id, idx); showMatDetail(m, ll, idx, evt); },
       onNav: function () {
         map.flyTo(ll, 7, { animate: true, duration: 0.8 });
         toast('第 ' + (idx + 1) + '/' + total + ' 个位置 · 导航程序接入后将自动切换下一位置');
@@ -1222,7 +1232,7 @@
         });
         (function (ll, mid, idx) {
           var mk = L.marker(ll, { icon: icon2, riseOnHover: true });
-          if (isCollected(mid, idx) || state.matDone[mid]) mk.setOpacity(0.38);
+          if (isCollected(mid, idx) || isMatDone(mid, idx)) mk.setOpacity(0.38);
           mk.bindTooltip(m.cn, { direction: 'top', offset: [0, -lsize / 2 - 4], className: 'mk-label' });
           mk.on('click', function (e) {
             showMatDetail(m, ll, idx, e);
@@ -1335,6 +1345,11 @@
         else delete state.matSelected[mid];
         saveJson(LS_MAT, state.matSelected);
         el.classList.toggle('checked', nowOn);
+        if (nowOn && state.matDone[mid]) {
+          // 材料会刷新：重新勾选时清除该材料点级“标记完成”，全部位置重新显示（可重新采集）
+          delete state.matDone[mid];
+          saveJson(LS_MAT_DONE, state.matDone);
+        }
         renderMatLayer(mid);
         updateMatCount();
       });
