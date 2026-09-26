@@ -28,7 +28,7 @@
   var GROUP_ORDER = [1, 2, 3, 4, 5];
 
   var LABEL_MIN_ZOOM = 4;   // 名称标签显示的最低缩放级别
-  var MAX_ZOOM = 7;
+  var MAX_ZOOM = 6;   // V1.8.6: EdgeOne 20000 文件限制，瓦片 z7 不入库，最高缩放 6（材料聚合本就 maxZoom 6）
   var MIN_ZOOM = 3;
 
   var state = {
@@ -154,7 +154,7 @@
     tileLayer = new TotkTileLayer('tiles_obj/' + LAYER_KEY[layerId] + '/{z}/{x}_{y}.{ext}', {
       minZoom: MIN_ZOOM,
       maxZoom: MAX_ZOOM,
-      maxNativeZoom: 7,
+      maxNativeZoom: 6,   // V1.8.6
       tileSize: 256,
       noWrap: true,
       bounds: TILE_BOX,

@@ -13,3 +13,4 @@ desktop.ini
 # 定位服务运行时数据（机器相关偏移，不入库）
 live-python/known_addrs.json
 live-go/known_addrs.json
+tiles_obj/*/7/
