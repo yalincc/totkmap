@@ -136,9 +136,17 @@
   updateZoomPct();
 
   var tileLayer = null;
+  /* V1.8.0 瓦片优化: z3/z4 已转 WebP q80(23.9MB->1.9MB), z5+ 仍是 PNG —— 按缩放级选扩展名 */
+  var TotkTileLayer = L.TileLayer.extend({
+    getTileUrl: function (coords) {
+      var ext = (coords.z <= 4) ? 'webp' : 'png';
+      return this._url.replace('{z}', coords.z).replace('{x}', coords.x)
+        .replace('{y}', coords.y).replace('{ext}', ext);
+    }
+  });
   function setTileLayer(layerId) {
     if (tileLayer) map.removeLayer(tileLayer);
-    tileLayer = L.tileLayer('tiles_obj/' + LAYER_KEY[layerId] + '/{z}/{x}_{y}.png', {
+    tileLayer = new TotkTileLayer('tiles_obj/' + LAYER_KEY[layerId] + '/{z}/{x}_{y}.{ext}', {
       minZoom: MIN_ZOOM,
       maxZoom: MAX_ZOOM,
       maxNativeZoom: 7,
