@@ -544,6 +544,17 @@
     } else {
       btn.style.display = 'none';
     }
+    /* 查看图鉴（联动 totk-site 图鉴站）：opts.compendium 为跳转 URL，无则隐藏 */
+    var comp = $('detailComp');
+    if (comp) {
+      if (opts.compendium) {
+        comp.style.display = '';
+        comp.onclick = function () { window.open(opts.compendium, '_blank'); };
+      } else {
+        comp.style.display = 'none';
+        comp.onclick = null;
+      }
+    }
     var card = $('detail');
     var wasHidden = card.classList.contains('hidden');
     card.classList.remove('hidden');
@@ -910,6 +921,7 @@
 
   function applySaveSync(silent) {
     var btn = $('saveSyncBtn');
+    serverSaveSlot = '';
     btn.textContent = state.save ? '已同步 ✓ 重新加载' : '📂 从存档加载进度…';
     btn.classList.toggle('busy', false);
     buildCatalogPanel();
@@ -1092,6 +1104,31 @@
     applyProgressDone(Object.keys(pd || {}).map(Number));
   }
 
+  /* V1.8.0 M3：服务端存档自动同步（BOTWmap 同机制——服务自动定位存档、网页拉取、
+   * 游戏内保存后 mtime 变化 → progressGen 变化 → live.js 触发本函数自动刷新） */
+  var serverSaveSlot = '';
+  function syncProgressFromServer() {
+    if (!window.LIVENAV || !window.LIVENAV.online()) return;
+    fetch('http://127.0.0.1:8766/progress?t=' + Date.now(), { cache: 'no-store' })
+      .then(function (r) { return r.json(); })
+      .then(function (res) {
+        if (!res || !res.ok) return;
+        if (res.doneIds) applyProgressDone(res.doneIds);
+        if (res.counts) {
+          state.save = res.counts;
+          state.saveVersion = (res.version || '') + ' · 服务端自动同步';
+          var m = String(res.save || '').match(/slot_(\d+)/);
+          serverSaveSlot = m ? m[1] : '';
+          renderProgress();
+          buildCatalogPanel();
+          updateCount();
+          var btn = $('saveSyncBtn');
+          if (btn) btn.textContent = serverSaveSlot ? ('存档自动同步 ✓（slot_' + serverSaveSlot + '）') : '存档自动同步 ✓';
+        }
+      })
+      .catch(function () {});
+  }
+
   /* 标点完成状态刷新（卡片回调/队列共用） */
   function applyDoneToMarker(mid) {
     var mk = state.markers[mid];
@@ -1267,7 +1304,8 @@
     applyProgressDone: applyProgressDone,
     applyDoneToMarker: applyDoneToMarker,
     buildCatalogPanel: buildCatalogPanel,
-    updateCount: updateCount
+    updateCount: updateCount,
+    syncProgressFromServer: syncProgressFromServer
   };
 
   // 版本号
@@ -1417,6 +1455,7 @@
       },
       navTarget: { x: ll[0], y: ll[1] },
       onCollect: function () { collectAndNext(m, ll, idx); },
+      compendium: (window.TOTK_COMPENDIUM_URL ? window.TOTK_COMPENDIUM_URL + '/items/' + m.entry : ''),
       evt: evt
     });
   }
@@ -1789,5 +1828,51 @@
   if (progressHead) progressHead.addEventListener('click', function () {
     $('progressSection').classList.toggle('collapsed');
   });
+
+  /* ---------------- URL 深链（联动超级全能互动地图图鉴站） ----------------
+     ?actor=Item_PlantGet_O  材料深链：自动切材料 Tab、勾选该材料、切到有点的层、定位第一个刷点并开详情卡
+     ?q=海拉鲁城堡           探索深链：自动填充探索搜索框并搜索定位
+     来源：totk-site 图鉴「在地图上查看」按钮 / 站外分享链接 */
+  (function () {
+    var sp;
+    try { sp = new URLSearchParams(location.search); } catch (e) { return; }
+    var actor = sp.get('actor');
+    var q = sp.get('q');
+    if (!actor && !q) return;
+    try { history.replaceState(null, '', location.pathname); } catch (e) {}  // 清参数，防刷新重复定位
+
+    if (q) {
+      var inp = $('searchInput');
+      if (inp) { inp.value = q; doSearch(q); }
+    }
+
+    if (actor) {
+      var hit = null;
+      (MATS.materials || []).forEach(function (m) {
+        if (hit) return;
+        if (m.entry === actor || (m.actors || []).indexOf(actor) >= 0) hit = m;
+      });
+      if (!hit) { toast('未找到材料：' + actor); return; }
+      // 切到该材料有点的层：地上 18 > 天空 20 > 地下 19
+      var order = [18, 20, 19], pick = null;
+      for (var i = 0; i < order.length; i++) {
+        if (matCountOnLayer(hit.id, order[i]) > 0) { pick = order[i]; break; }
+      }
+      state.matSelected[hit.id] = true;
+      saveJson(LS_MAT, state.matSelected);
+      setTab('material');
+      if (pick && pick !== state.layer) switchLayer(pick, true);
+      buildMatPanel();
+      renderMatLayer(hit.id);
+      renderMaterials();
+      var pts = (matPointsByLayer[state.layer] || {})[hit.id] || [];
+      if (pts.length) {
+        var ll = [pts[0][1], pts[0][0]];
+        map.flyTo(ll, 7, { animate: true, duration: 1.2 });
+        setTimeout(function () { showMatDetail(hit, ll, 0, null); }, 1300);
+      }
+      toast('已定位材料「' + hit.cn + '」' + (pick ? '（' + LAYER_NAME[pick] + '）' : ''));
+    }
+  })();
 
 })();
