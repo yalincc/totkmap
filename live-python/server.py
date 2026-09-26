@@ -17,8 +17,11 @@ HTTP 契约（与后续 Go 化版本一致，网页端只认这套）：
 端口 8766（与 BotwNavi 一致）。用法：python live-python/server.py
 """
 import ctypes
+import glob
+import io
 import json
 import os
+import re
 import struct
 import sys
 import threading
@@ -402,6 +405,127 @@ def watchdog():
             relocalize("watchdog: no remembered offset works")
 
 
+# ================= /progress：服务端存档逐点完成判定（V1.8.0 M3 自动导航） =================
+# 复刻 js/save-parser.js 解析口径：版本表 / HASH_TABLE_END / 0xa3db7114 哨兵 / GUID 格式
+SAVE_GAME_VERSIONS = [
+    (0x0046c3c8, 0x0003c050, 2307552, "v1.0"),
+    (0x0047e0f4, 0x0003c088, 2307656, "v1.1.x/v1.2.x"),
+    (0x0049e946, 0x0003c138, 2307856, "v1.4.x"),
+]
+HASH_TABLE_END = 0x03c800
+PROGRESS_CACHE_SEC = 5.0        # /progress 缓存，避免高频 IO
+_progress_cache = {"t": 0.0, "payload": None, "mtime": 0.0}
+
+
+def _find_save():
+    """Ryujinx 各槽 progress.sav 中 mtime 最新者（游戏当前正在写的槽）。"""
+    base = os.path.join(os.environ.get("APPDATA", ""), "Ryujinx", "bis", "user", "save")
+    best = None
+    for p in glob.glob(os.path.join(base, "*", "0", "slot_*", "progress.sav")):
+        try:
+            mt = os.path.getmtime(p)
+        except OSError:
+            continue
+        if best is None or mt > best[0]:
+            best = (mt, p)
+    return best
+
+
+def _parse_save(path):
+    """解析 progress.sav → {ok, version, valueByHash, guids}（与 js parse() 同口径）。"""
+    try:
+        with open(path, "rb") as f:
+            data = f.read()
+    except OSError as e:
+        return {"ok": False, "error": "read: %s" % e}
+    if len(data) < 8 or struct.unpack("<I", data[0:4])[0] != 0x01020304:
+        return {"ok": False, "error": "bad header"}
+    header = struct.unpack("<I", data[4:8])[0]
+    meta = struct.unpack("<I", data[8:12])[0]
+    version = None
+    for h, m, sz, v in SAVE_GAME_VERSIONS:
+        if len(data) == sz and header == h and meta == m:
+            version = v
+            break
+    if not version:
+        return {"ok": False, "error": "unsupported version"}
+    value_by_hash = {}
+    guids_offset = None
+    end = min(HASH_TABLE_END, len(data))
+    for j in range(0x28, end - 7, 8):
+        h = struct.unpack("<I", data[j:j + 4])[0]
+        if h == 0xA3DB7114:
+            guids_offset = struct.unpack("<I", data[j + 4:j + 8])[0]
+        value_by_hash[h] = j + 4
+    if guids_offset is None or guids_offset <= 0 or guids_offset >= len(data):
+        return {"ok": False, "error": "no guid table"}
+    guids = []
+    k = guids_offset
+    while k < len(data) - 8:
+        lo = struct.unpack("<I", data[k:k + 4])[0]
+        up = struct.unpack("<I", data[k + 4:k + 8])[0]
+        if lo == 0 and up == 0:
+            break
+        guids.append("0x%08x%08x" % (up, lo))
+        k += 8
+    return {"ok": True, "version": version, "valueByHash": value_by_hash, "guids": guids}
+
+
+def _load_explore_map():
+    """读 data/explore_save_map.js 中的 JSON 映射表。"""
+    p = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data", "explore_save_map.js")
+    try:
+        with io.open(p, "r", encoding="utf-8") as f:
+            text = f.read()
+        m = re.search(r"window\.TOTK_EXPLORE_MAP\s*=\s*(\{.*?\});", text, re.S)
+        if not m:
+            return None
+        return json.loads(m.group(1))
+    except Exception:
+        return None
+
+
+def progress_payload(force=False):
+    """重新解析当前槽存档 → doneIds（可逐点映射的已完成标点 id 列表）。"""
+    now = time.time()
+    if not force and _progress_cache["payload"] and now - _progress_cache["t"] < PROGRESS_CACHE_SEC:
+        return _progress_cache["payload"]
+    found = _find_save()
+    if not found:
+        out = {"ok": False, "error": "未找到 progress.sav（Ryujinx 存档目录）"}
+        _progress_cache.update({"t": now, "payload": out})
+        return out
+    mt, path = found
+    if not force and _progress_cache["payload"] and _progress_cache["mtime"] == mt:
+        return _progress_cache["payload"]
+    parsed = _parse_save(path)
+    if not parsed.get("ok"):
+        out = {"ok": False, "error": parsed.get("error")}
+        _progress_cache.update({"t": now, "payload": out, "mtime": mt})
+        return out
+    emap = _load_explore_map() or {}
+    vb = parsed["valueByHash"]
+    done_ids = []
+    # towers/tears：hash 表 value == 1
+    with open(path, "rb") as f:
+        for tbl in ("towers", "tears"):
+            for mid, hv in (emap.get(tbl) or {}).items():
+                off = vb.get(int(hv, 16))
+                if off is None:
+                    continue
+                f.seek(off)
+                if struct.unpack("<I", f.read(4))[0] == 1:
+                    done_ids.append(int(mid))
+        # bubbuls：GUID 存在于存档 GUID 表
+        for mid, guid in (emap.get("bubbuls") or {}).items():
+            if guid in parsed["guids"]:
+                done_ids.append(int(mid))
+    out = {"ok": True, "version": parsed["version"], "save": path, "doneIds": done_ids,
+           "mapped": sum(len(emap.get(k) or {}) for k in ("towers", "tears", "bubbuls"))}
+    _progress_cache.update({"t": now, "payload": out, "mtime": mt})
+    return out
+
+
 class Handler(BaseHTTPRequestHandler):
     def _json(self, obj, code=200):
         body = json.dumps(obj, ensure_ascii=False).encode("utf-8")
@@ -440,6 +564,9 @@ class Handler(BaseHTTPRequestHandler):
             threading.Thread(target=relocalize, args=("/rescan requested",),
                              daemon=True).start()
             self._json({"started": True})
+            return
+        if path == "/progress":
+            self._json(progress_payload())
             return
         self._json({"ok": False, "error": "unknown endpoint"}, code=404)
 
@@ -493,7 +620,7 @@ def main():
     threading.Thread(target=watchdog, daemon=True).start()
 
     srv = ThreadingHTTPServer(("127.0.0.1", PORT), Handler)
-    print("HTTP 服务: http://127.0.0.1:%d  （/pos /target /rescan，Ctrl+C 退出）" % PORT, flush=True)
+    print("HTTP 服务: http://127.0.0.1:%d  （/pos /target /progress /rescan，Ctrl+C 退出）" % PORT, flush=True)
     try:
         srv.serve_forever()
     except KeyboardInterrupt:

@@ -418,7 +418,12 @@
       currentTarget: currentTarget,
       clearNav: clearNav,
       centerOnPlayer: centerOnPlayer,
-      endNav: endNav
+      endNav: endNav,
+      /* V1.8.0 M3: 探索队列需要的位置/到达状态 */
+      pos: function () { return { online: pos.online, located: pos.located, mx: pos.mx, my: pos.my, layer: pos.layer, verified: pos.verified }; },
+      arrived: function () { return arrivedShown; },
+      arriveM: function () { return arriveM; },
+      paused: function () { return paused; }
     };
   }
 

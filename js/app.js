@@ -550,48 +550,30 @@
     if (wasHidden || opts.evt) positionDetail(opts.evt && opts.evt.originalEvent || null);
   }
 
+  /* V1.8.0 M3: 探索标点 → 独立探索卡片（与材料卡片完全分离，不共用模板/无图） */
   function openDetail(m, evt) {
     state.current = m;
     var cat = catById(state.layer, m.cat);
-    var isDone = !!state.done[m.id];
-    showDetail({
+    showExploreCard({
       name: m.name || m.full,
-      cat: (cat ? cat.name : '未知分类') + ' · ' + LAYER_NAME[state.layer],
+      cat: cat ? cat.name : '未知分类',
       desc: m.desc || '',
-      isDone: isDone,
-      // V1.8.0: 探索标点也可直接导航（实时服务在线时设置服务端目标）
-      onNav: function () {
-        liveToggleNav({ name: m.name || m.full, x: m.x, y: m.y, layer: m.layer, type: cat ? cat.name : '标点' });
-      },
-      navTarget: { x: m.x, y: m.y },
-      onDone: function () {
-        if (state.done[m.id]) delete state.done[m.id];
-        else state.done[m.id] = true;
-        saveDone();
-        var mk = state.markers[m.id];
-        if (mk) {
-          mk.setOpacity(state.done[m.id] ? 0.38 : 1);
-          mk.unbindTooltip();
-          mk.bindTooltip(m.name || m.full, {
-            direction: 'top', offset: [0, -12],
-            className: 'mk-label' + (state.done[m.id] ? ' done-label' : '')
-          });
-        }
-        buildCatalogPanel();
-        updateCount();
-        if (state.filter !== 'all') renderMarkers();
-        openDetail(m, evt);
-      },
+      m: m,
+      isDone: !!state.done[m.id],
       evt: evt
     });
   }
 
   function openCustomDetail(c) {
     state.current = c;
-    showDetail({
-      name: c.name, cat: '自定义标点 · ' + LAYER_NAME[state.layer], desc: c.desc || '暂无说明。',
-      onNav: function () { liveToggleNav({ name: c.name, x: c.x, y: c.y, layer: c.layer, type: '自定义' }); },
-      navTarget: { x: c.x, y: c.y }
+    showExploreCard({
+      name: c.name,
+      cat: '自定义标点 · ' + LAYER_NAME[state.layer],
+      desc: c.desc || '暂无说明。',
+      m: { id: c.id, x: c.x, y: c.y, layer: c.layer, name: c.name },
+      isDone: false,
+      custom: true,
+      evt: null
     });
   }
 
@@ -883,6 +865,8 @@
     var r = LIVENAV.toggleNav(o);
     var nav = $('detailNav');
     if (nav) nav.textContent = (r === 'navigating') ? '停止导航' : '导航';
+    var ecNav = $('ecNav');
+    if (ecNav) ecNav.textContent = (r === 'navigating') ? '停止导航' : '导航';
   }
 
   /* ---------------- 问题反馈 ---------------- */
@@ -1003,6 +987,8 @@
         state.save = progress;
         state.saveVersion = parsed.version;
         saveJson(LS_SAVE, { version: parsed.version, progress: progress });
+        /* V1.8.0 M3: 可逐点映射类别（鸟望台/龙之泪/魔犹伊）以存档为准写入 state.done */
+        applySavePointDone(parsed);
         applySaveSync();
       } catch (err) {
         toast('同步失败：' + err.message);
@@ -1072,6 +1058,217 @@
 
   // 存档同步按钮初始状态
   applySaveSync(true);
+
+  /* ============================================================
+     V1.8.0 M3：独立探索卡片 + 探索队列桥接（材料卡片体系保持原样）
+     ============================================================ */
+  /* 权威合并完成点（可逐点判定类别：鸟望台/龙之泪/魔犹伊）——存档为准 */
+  function applyProgressDone(doneIds) {
+    var map = window.TOTK_EXPLORE_MAP || {};
+    var set = {};
+    (doneIds || []).forEach(function (id) { set[id] = true; });
+    var changed = false;
+    [['towers', map.towers], ['tears', map.tears], ['bubbuls', map.bubbuls]].forEach(function (pair) {
+      var tbl = pair[1];
+      if (!tbl) return;
+      for (var id in tbl) {
+        var on = !!set[id];
+        if (on && !state.done[id]) { state.done[id] = true; changed = true; }
+        else if (!on && state.done[id]) { delete state.done[id]; changed = true; }
+      }
+    });
+    if (changed) {
+      saveDone();
+      renderMarkers();
+      buildCatalogPanel();
+      updateCount();
+    }
+  }
+
+  /* 上传存档 → 逐点完成注入（走同一权威合并） */
+  function applySavePointDone(parsed) {
+    var map = window.TOTK_EXPLORE_MAP || {};
+    var pd = TOTKSaveParser.pointDone(parsed, map);
+    applyProgressDone(Object.keys(pd || {}).map(Number));
+  }
+
+  /* 标点完成状态刷新（卡片回调/队列共用） */
+  function applyDoneToMarker(mid) {
+    var mk = state.markers[mid];
+    if (!mk) return;
+    var m = null;
+    for (var i = 0; i < MARKERS.length; i++) { if (MARKERS[i].id === mid) { m = MARKERS[i]; break; } }
+    mk.setOpacity(state.done[mid] ? 0.38 : 1);
+    mk.unbindTooltip();
+    mk.bindTooltip(m ? (m.name || m.full) : '', {
+      direction: 'top', offset: [0, -12],
+      className: 'mk-label' + (state.done[mid] ? ' done-label' : '')
+    });
+  }
+
+  /* 塔域：最近鸟望台（15 座塔=地面层 cat=62；TOTK 无现成塔域分区，最近塔为准） */
+  var TOWER_MARKERS = null;
+  function nearestTower(ll) {
+    if (!TOWER_MARKERS) {
+      TOWER_MARKERS = MARKERS.filter(function (m) { return m.cat === 62 && m.layer === 18; });
+    }
+    var best = null, bd = Infinity;
+    TOWER_MARKERS.forEach(function (tt) {
+      var d = (tt.x - ll[0]) * (tt.x - ll[0]) + (tt.y - ll[1]) * (tt.y - ll[1]);
+      if (d < bd) { bd = d; best = tt; }
+    });
+    return best ? best.name : '';
+  }
+
+  /* 试炼名称：神庙 desc 首行「名称：XXX」；非神庙无此行则省略 */
+  function parseTrial(desc) {
+    if (!desc) return '';
+    var m = String(desc).match(/名称[:：]\s*([^\n]+)/);
+    return m ? m[1].trim() : '';
+  }
+
+  /* 探索卡片定位（同 detail 规则：不挡侧栏、锚点侧、可视区钳制） */
+  function positionExploreCard(ev) {
+    var card = $('exploreCard');
+    if (!card) return;
+    var vw = window.innerWidth, vh = window.innerHeight;
+    if (vw <= 720) {
+      card.style.left = ''; card.style.top = '';
+      return;
+    }
+    var guard = 366;
+    var ax = guard + 200, ay = vh * 0.45;
+    if (ev && typeof ev.clientX === 'number') { ax = ev.clientX; ay = ev.clientY; }
+    var cw = card.offsetWidth || 280;
+    var ch = card.offsetHeight || 220;
+    var left = ax + 20, top = ay - ch / 2;
+    if (left + cw > vw - 10) left = ax - cw - 20;
+    left = Math.max(guard, Math.min(left, vw - cw - 10));
+    top = Math.max(10, Math.min(top, vh - 90));
+    card.style.left = left + 'px';
+    card.style.top = top + 'px';
+  }
+
+  /* 探索卡片拖拽（独立实现，不与材料卡共用） */
+  function initExploreCardDrag() {
+    var card = $('exploreCard');
+    var head = $('ecHead');
+    if (!head) return;
+    var dragging = false, sx = 0, sy = 0, ox = 0, oy = 0;
+    function down(e) {
+      if (e.target.closest && e.target.closest('.detail-close')) return;
+      dragging = true;
+      sx = e.clientX; sy = e.clientY;
+      ox = card.offsetLeft; oy = card.offsetTop;
+    }
+    function move(e) {
+      if (!dragging) return;
+      card.style.left = Math.max(0, Math.min(ox + e.clientX - sx, window.innerWidth - card.offsetWidth)) + 'px';
+      card.style.top = Math.max(0, Math.min(oy + e.clientY - sy, window.innerHeight - 60)) + 'px';
+    }
+    function up() { dragging = false; }
+    head.addEventListener('mousedown', down);
+    head.addEventListener('touchstart', function (e) {
+      if (e.touches && e.touches[0]) down(e.touches[0]);
+    }, { passive: true });
+    document.addEventListener('mousemove', move);
+    document.addEventListener('touchmove', function (e) {
+      if (e.touches && e.touches[0]) move(e.touches[0]);
+    }, { passive: true });
+    document.addEventListener('mouseup', up);
+    document.addEventListener('touchend', up);
+  }
+
+  /* 独立探索卡片（紧凑信息卡：名称/分类/描述/标记完成/导航/跳过） */
+  function showExploreCard(opts) {
+    var m = opts.m || {};
+    var ea = window.EXPLORE_AUTO;
+    var autoOn = !!(ea && ea.isRunning() && ea.current() && ea.current().id === m.id);
+    $('ecChip').textContent = opts.cat || '';
+    $('ecName').textContent = opts.name;
+    var ll = [m.x, m.y];
+    $('ecRegion').textContent = nearestRegion(ll) || '未知';
+    $('ecTower').textContent = nearestTower(ll) || '未知';
+    $('ecCoord').textContent = 'X ' + Math.round(m.y) + ' · Z ' + Math.round(m.x);
+    var trial = parseTrial(m.desc || '');
+    $('ecTrialRow').style.display = trial ? '' : 'none';
+    $('ecTrial').textContent = trial;
+    var btnNav = $('ecNav'), btnAuto = $('ecAuto'), btnDone = $('ecDone');
+    btnNav.textContent = '导航';
+    if (window.LIVENAV && window.LIVENAV.currentTarget) {
+      var _cur = window.LIVENAV.currentTarget();
+      if (_cur && _cur.x === m.x && _cur.y === m.y) btnNav.textContent = '停止导航';
+    }
+    btnNav.onclick = function () {
+      liveToggleNav({ name: m.name || '目标', x: m.x, y: m.y, layer: m.layer, type: opts.cat });
+    };
+    btnAuto.textContent = autoOn ? '停止自动导航' : '自动导航';
+    btnAuto.onclick = function () {
+      if (autoOn) { if (ea) ea.stop(); }
+      else if (ea) { ea.start(m); }
+      showExploreCard({
+        name: opts.name, cat: opts.cat, desc: opts.desc, m: m,
+        isDone: !!state.done[m.id], custom: opts.custom, evt: null
+      });
+    };
+    if (opts.custom) {
+      btnDone.style.display = 'none';
+    } else {
+      btnDone.style.display = '';
+      btnDone.textContent = opts.isDone ? '取消完成' : '标记完成';
+      btnDone.className = 'btn primary' + (opts.isDone ? ' done' : '');
+      btnDone.onclick = function () {
+        if (ea && ea.isRunning() && ea.current() && ea.current().id === m.id) { ea.completeCurrent(); return; }
+        if (state.done[m.id]) delete state.done[m.id]; else state.done[m.id] = true;
+        saveDone();
+        applyDoneToMarker(m.id);
+        buildCatalogPanel();
+        updateCount();
+        if (state.filter !== 'all') renderMarkers();
+        showExploreCard({
+          name: opts.name, cat: opts.cat, desc: opts.desc, m: m,
+          isDone: !!state.done[m.id], custom: opts.custom, evt: null
+        });
+      };
+    }
+    var card = $('exploreCard');
+    var wasHidden = card.classList.contains('hidden');
+    card.classList.remove('hidden');
+    if (wasHidden || opts.evt) positionExploreCard(opts.evt && opts.evt.originalEvent || null);
+  }
+  $('ecClose').addEventListener('click', function () {
+    $('exploreCard').classList.add('hidden');
+    state.current = null;
+  });
+  initExploreCardDrag();
+
+  // V1.8.0 M3 返工：探索自动导航桥接（explore-auto.js 依赖）
+  window.TOTK_APP = {
+    state: function () { return state; },
+    markers: function () { return MARKERS; },
+    catsOfLayer: catsOfLayer,
+    catById: catById,
+    catName: function (id) { var c = catById(state.layer, id); return c ? c.name : ''; },
+    layerName: function (l) { return LAYER_NAME[l] || ''; },
+    saveDone: saveDone,
+    renderMarkers: renderMarkers,
+    liveNav: function (o) { if (window.LIVENAV) return window.LIVENAV.navigate(o); return false; },
+    toast: toast,
+    esc: esc,
+    showCard: function (m) {
+      showExploreCard({
+        name: m.name || m.full,
+        cat: (catById(state.layer, m.cat) || {}).name || '未知分类',
+        desc: m.desc || '',
+        m: m,
+        isDone: !!state.done[m.id]
+      });
+    },
+    applyProgressDone: applyProgressDone,
+    applyDoneToMarker: applyDoneToMarker,
+    buildCatalogPanel: buildCatalogPanel,
+    updateCount: updateCount
+  };
 
   // 版本号
   var vEl = document.querySelector('.version');

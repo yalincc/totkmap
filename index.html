@@ -147,6 +147,26 @@
   </div>
 </section>
 
+<!-- ============ 独立探索卡片（V1.8.0 M3 返工：BOTW 风格，与材料卡片完全分离、无图） ============ -->
+<section id="exploreCard" class="explore-card hidden">
+  <div class="ec-card">
+    <div class="ec-head" id="ecHead">
+      <span class="chip" id="ecChip"></span>
+      <button type="button" class="detail-close" id="ecClose">×</button>
+    </div>
+    <h3 class="card-name" id="ecName"></h3>
+    <div class="ec-row" id="ecRegionRow"><span class="ec-label">区域</span><span class="ec-value" id="ecRegion"></span></div>
+    <div class="ec-row" id="ecTowerRow"><span class="ec-label">塔域</span><span class="ec-value" id="ecTower"></span></div>
+    <div class="ec-row" id="ecCoordRow"><span class="ec-label">坐标</span><span class="ec-value" id="ecCoord"></span></div>
+    <div class="ec-row" id="ecTrialRow"><span class="ec-label">试炼</span><span class="ec-value" id="ecTrial"></span></div>
+    <div class="card-actions">
+      <button id="ecNav" type="button" class="btn act">导航</button>
+      <button id="ecAuto" type="button" class="btn act">自动导航</button>
+      <button id="ecDone" type="button" class="btn primary">标记完成</button>
+    </div>
+  </div>
+</section>
+
 <!-- ============ 材料原图预览（点击卡片图标查看 256px 原图） ============ -->
 <div id="imgPreview" class="img-preview hidden">
   <img id="imgPreviewImg" src="" alt="">
@@ -245,6 +265,7 @@
 <script src="vendor/murmurhash3js.min.js"></script>
 <script src="vendor/supercluster.min.js?v=188"></script>
 <script src="data/totk_save_hashes.js"></script>
+<script src="data/explore_save_map.js?v=190"></script>
 <script src="data/layers.js"></script>
 <script src="data/catalogs.js"></script>
 <script src="data/areas.js"></script>
@@ -254,7 +275,8 @@
 <script src="data/markers.js"></script>
 <script src="data/materials.js?v=188"></script>
 <script src="js/save-parser.js"></script>
-<script src="js/app.js?v=189"></script>
-<script src="js/live.js?v=189"></script>
+<script src="js/app.js?v=190"></script>
+<script src="js/live.js?v=190"></script>
+<script src="js/explore-auto.js?v=191"></script>
 </body>
 </html>

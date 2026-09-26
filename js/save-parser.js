@@ -123,9 +123,34 @@ var TOTKSaveParser = (function () {
     return out;
   }
 
+  /* V1.8.0 M3: 逐点完成判定（配合 data/explore_save_map.js）
+   * map = { towers: {markerId: hash}, tears: {markerId: hash}, bubbuls: {markerId: guid} }
+   * 返回 { markerId: true, ... }（仅存档判定为“已完成”的点）
+   */
+  function pointDone(parsed, map) {
+    var out = {};
+    if (!parsed || !parsed.ok) return out;
+    function hval(hashInt) {
+      var off = parsed.valueByHash[hashInt];
+      return off === undefined ? null : parsed.dv.getUint32(off, true);
+    }
+    map = map || {};
+    if (map.towers) for (var id in map.towers) {
+      if (hval(parseInt(map.towers[id], 16)) === 1) out[id] = true;
+    }
+    if (map.tears) for (var id2 in map.tears) {
+      if (hval(parseInt(map.tears[id2], 16)) === 1) out[id2] = true;
+    }
+    if (map.bubbuls) for (var id3 in map.bubbuls) {
+      if (parsed.guids.indexOf(map.bubbuls[id3]) >= 0) out[id3] = true;
+    }
+    return out;
+  }
+
   return {
     parse: parse,
     collect: collect,
+    pointDone: pointDone,
     count: count,
     countGuids: countGuids
   };
