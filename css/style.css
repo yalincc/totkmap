@@ -34,6 +34,46 @@ html, body {
 }
 #map .leaflet-control-zoom a:hover { background: rgba(48,52,58,.95); color: #fff; }
 
+/* ---------- 右下角缩放控件（百分比 / ＋－ / 全图 / 定位） ---------- */
+#zoomControls {
+  position: absolute;
+  right: 14px; bottom: 62px;   /* 位于底部工具条(48px)上方 */
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  z-index: 1000;
+}
+#zoomPct {
+  text-align: center;
+  font-size: 10.5px;
+  color: #aeb6c0;
+  background: rgba(30,32,36,.88);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 6px;
+  padding: 3px 2px;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+  user-select: none;
+}
+#zoomControls button {
+  width: 36px; height: 36px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,.08);
+  background: rgba(30,32,36,.92);
+  color: #cfd4da;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#zoomControls button:hover { background: rgba(48,52,58,.95); color: #fff; border-color: #eac27e; }
+#zoomControls button:active { transform: scale(.94); }
+@media (max-width: 720px) {
+  #zoomControls { right: 10px; bottom: 56px; gap: 5px; }
+  #zoomControls button { width: 34px; height: 34px; }
+}
+
 /* ---------- 标记点标签（标点名称） ---------- */
 .mk-label {
   background: rgba(10,12,14,.62);
@@ -629,13 +669,6 @@ html, body {
   transition: all .15s;
 }
 .bar-btn:hover { background: rgba(48,52,58,.95); color: #fff; }
-.version {
-  margin-left: auto;
-  font-size: 12px;
-  color: rgba(255,255,255,.55);
-  letter-spacing: .5px;
-  pointer-events: auto;
-}
 
 /* ---------- 新增标点弹窗 ---------- */
 .modal {
@@ -698,7 +731,6 @@ html, body {
   .panel-toggle { left: min(88vw, 352px); }
   .panel.collapsed + .panel-toggle { left: 0; }
   .bottom-bar { left: 0; padding: 0 10px; }
-  .bottom-bar .version { font-size: 11px; }
   .detail { right: 8px; bottom: 62px; width: calc(100vw - 16px); }
   .detail-body { max-height: 200px; }
   .cat-item .cat-name { max-width: 104px; }

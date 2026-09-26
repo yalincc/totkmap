@@ -5,12 +5,21 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>塞尔达传说：王国之泪 · 互动地图</title>
 <link rel="stylesheet" href="vendor/leaflet.css">
-<link rel="stylesheet" href="css/style.css?v=181">
+<link rel="stylesheet" href="css/style.css?v=182">
 </head>
 <body>
 
 <!-- 地图容器 -->
 <div id="map"></div>
+
+<!-- 右下角缩放控件（百分比 / 放大 / 缩小 / 全图 / 定位） -->
+<div id="zoomControls">
+  <span id="zoomPct">100%</span>
+  <button id="zoomIn" type="button" title="放大">＋</button>
+  <button id="zoomOut" type="button" title="缩小">－</button>
+  <button id="zoomFit" type="button" title="回到全图">⌂</button>
+  <button id="zoomLocate" type="button" title="定位到监视堡垒（导航后续接入）">🎯</button>
+</div>
 
 <!-- ============ 左侧筛选面板 ============ -->
 <aside id="panel" class="panel">
@@ -103,7 +112,7 @@
   </div>
 
   <footer class="side-foot">
-    <p class="foot-version">TOTKMAP V1.7.1</p>
+    <p class="foot-version">TOTKMAP V1.7.2</p>
     <p>© 2026 yalin · github.com/yalincc</p>
   </footer>
 </aside>
@@ -134,7 +143,6 @@
 <div class="bottom-bar">
   <button id="addMarkerBtn" class="bar-btn">+ 新增标点</button>
   <button id="feedbackBtn" class="bar-btn">? 问题</button>
-  <span class="version">TOTKMAP V1.7.1</span>
 </div>
 
 <!-- 自定义标点表单 -->
@@ -195,7 +203,7 @@
 
 <script src="vendor/leaflet.js"></script>
 <script src="vendor/murmurhash3js.min.js"></script>
-<script src="vendor/supercluster.min.js?v=181"></script>
+<script src="vendor/supercluster.min.js?v=182"></script>
 <script src="data/totk_save_hashes.js"></script>
 <script src="data/layers.js"></script>
 <script src="data/catalogs.js"></script>
@@ -204,8 +212,8 @@
 <script src="data/area_sky.js"></script>
 <script src="data/area_depths.js"></script>
 <script src="data/markers.js"></script>
-<script src="data/materials.js?v=181"></script>
+<script src="data/materials.js?v=182"></script>
 <script src="js/save-parser.js"></script>
-<script src="js/app.js?v=181"></script>
+<script src="js/app.js?v=182"></script>
 </body>
 </html>

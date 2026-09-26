@@ -14,7 +14,7 @@
   var AREA_SKY = window.TOTK_AREA_SKY || [];
   var AREA_DEPTHS = window.TOTK_AREA_DEPTHS || [];
 
-  var VERSION = 'TOTKMAP V1.7.1';
+  var VERSION = 'TOTKMAP V1.7.2';
   var LS_DONE = 'totkmap_done_v1';
   var LS_CUSTOM = 'totkmap_custom_v1';
   var LS_LAYER = 'totkmap_layer_v1';
@@ -110,9 +110,30 @@
     attributionControl: false,
     zoomSnap: 0.5,
     wheelPxPerZoomLevel: 140,
-    doubleClickZoom: false
+    doubleClickZoom: false,
+    maxBounds: TILE_BOX,          // 限制地图不可平移出界（V1.7.2）
+    maxBoundsViscosity: 1.0       // 拖动到边缘平滑停在边界
   });
-  L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+  /* 右下角缩放控件（百分比 / ＋－ / 全图 / 定位，参考 BOTWmap #zoomControls） */
+  function updateZoomPct() {
+    var el = $('zoomPct');
+    if (!el) return;
+    var z = map.getZoom();
+    el.textContent = Math.round(Math.pow(2, z - MIN_ZOOM) * 100) + '%';
+  }
+  $('zoomIn').addEventListener('click', function () { map.zoomIn(); });
+  $('zoomOut').addEventListener('click', function () { map.zoomOut(); });
+  $('zoomFit').addEventListener('click', function () {
+    map.fitBounds(TILE_BOX, { animate: true });
+    toast('已回到全图');
+  });
+  $('zoomLocate').addEventListener('click', function () {
+    map.flyTo(CENTER, 5, { duration: 0.6 });
+    toast('已定位到监视堡垒（导航后续接入）');
+  });
+  map.on('zoomend moveend', updateZoomPct);
+  updateZoomPct();
 
   var tileLayer = null;
   function setTileLayer(layerId) {
@@ -1181,6 +1202,11 @@
     Array.prototype.forEach.call($('sideTabs').querySelectorAll('button'), function (b) {
       b.classList.toggle('active', b.getAttribute('data-tab') === tab);
     });
+    // 探索搜索框只在探索 Tab 显示，材料 Tab 隐藏（V1.7.2）
+    var globalSearch = document.querySelector('.search-box');
+    if (globalSearch) globalSearch.classList.toggle('hidden', tab === 'material');
+    var srBox = $('searchResult');
+    if (srBox) srBox.classList.add('hidden');
     var explorePane = $('explorePane'), matPane = $('materialPane');
     if (tab === 'material') {
       explorePane.classList.add('hidden');
