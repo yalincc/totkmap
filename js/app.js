@@ -14,7 +14,7 @@
   var AREA_SKY = window.TOTK_AREA_SKY || [];
   var AREA_DEPTHS = window.TOTK_AREA_DEPTHS || [];
 
-  var VERSION = 'TOTKMAP V1.7.3';
+  var VERSION = 'TOTKMAP V1.7.4';
   var LS_DONE = 'totkmap_done_v1';
   var LS_CUSTOM = 'totkmap_custom_v1';
   var LS_LAYER = 'totkmap_layer_v1';
@@ -490,6 +490,9 @@
     $('detailName').textContent = name;
     $('detailCat').textContent = catName;
     $('detailChip').textContent = catName;
+    var img = $('detailImg');
+    if (iconUrl && img) { img.src = iconUrl; img.style.display = ''; }
+    else if (img) img.style.display = 'none';
     $('detailDesc').textContent = stripHtml(desc) || '暂无说明。';
     var btn = $('detailDone');
     if (onDone) {
@@ -513,7 +516,7 @@
     showDetail(
       m.name || m.full,
       (cat ? cat.name : '未知分类') + ' · ' + LAYER_NAME[state.layer],
-      cat && cat.icon ? 'assets/icons/' + cat.icon : null,
+      null,   // 探索标点不显示大图标（BOTWmap 风格，仅材料卡片显示高清图）
       m.desc || '',
       isDone,
       function () {
@@ -1133,7 +1136,7 @@
           var mk = L.marker(ll, { icon: icon2, riseOnHover: true });
           mk.bindTooltip(m.cn, { direction: 'top', offset: [0, -lsize / 2 - 4], className: 'mk-label' });
           mk.on('click', function (e) {
-            showDetail(m.cn, m.cat + ' · ' + LAYER_NAME[state.layer], null,
+            showDetail(m.cn, m.cat + ' · ' + LAYER_NAME[state.layer], 'assets/materials/' + m.entry + '.png',
               '坐标(' + Number(ll[1]).toFixed(1) + ', ' + Number(ll[0]).toFixed(1) + ')', false, null, e);
             // Sidebar linkage: expand cat, scroll to item, flash
             var listEl = $('matList');
