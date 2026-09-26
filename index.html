@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>塞尔达传说：王国之泪 · 互动地图</title>
 <link rel="stylesheet" href="vendor/leaflet.css">
-<link rel="stylesheet" href="css/style.css?v=182">
+<link rel="stylesheet" href="css/style.css?v=183">
 </head>
 <body>
 
@@ -75,14 +75,15 @@
 
   <!-- ===== 材料面板 ===== -->
   <div id="materialPane" class="hidden">
+    <!-- 搜索框与探索页共用同一套 .search-box 式样（搜索栏在上） -->
+    <div class="search-box">
+      <input id="matSearchInput" type="search" placeholder="搜索材料…" autocomplete="off">
+      <div id="matSearchResult" class="search-result hidden"></div>
+    </div>
     <div class="layer-toolbar">
       <button id="matAll" type="button" class="lt-btn">全选材料</button>
       <button id="matClear" type="button" class="lt-btn">清空材料</button>
       <span id="matCount" class="lt-count">0/0 材料</span>
-    </div>
-    <div class="mat-search-box">
-      <input id="matSearchInput" type="search" placeholder="搜索材料…" autocomplete="off">
-      <div id="matSearchResult" class="search-result hidden"></div>
     </div>
     <div class="catalog-body mat-list" id="matList"></div>
   </div>
@@ -112,7 +113,7 @@
   </div>
 
   <footer class="side-foot">
-    <p class="foot-version">TOTKMAP V1.7.2</p>
+    <p class="foot-version">TOTKMAP V1.7.3</p>
     <p>© 2026 yalin · github.com/yalincc</p>
   </footer>
 </aside>
@@ -120,19 +121,19 @@
 <!-- 面板收起把手 -->
 <button id="panelToggle" class="panel-toggle" title="收起/展开面板">«</button>
 
-<!-- ============ 详情弹窗 ============ -->
+<!-- ============ 详情卡片（点击标点/材料弹出，参考 BOTWmap 信息卡） ============ -->
 <section id="detail" class="detail hidden">
   <div class="detail-card">
-    <button class="detail-close" id="detailClose">×</button>
-    <div class="detail-head">
-      <img id="detailIcon" src="" alt="">
-      <div class="detail-head-text">
-        <h3 id="detailName"></h3>
-        <p id="detailCat"></p>
-      </div>
+    <div class="card-head" id="detailHead">
+      <span class="chip" id="detailChip"></span>
+      <button class="detail-close" id="detailClose">×</button>
     </div>
-    <div class="detail-body" id="detailDesc"></div>
-    <div class="detail-foot">
+    <h3 class="card-name" id="detailName"></h3>
+    <div class="card-en" id="detailCat"></div>
+    <div class="card-body">
+      <div class="row" id="detailDesc"></div>
+    </div>
+    <div class="card-actions">
       <button id="detailDone" class="btn primary">标记为已完成</button>
       <button id="detailCopy" class="btn ghost">复制坐标</button>
     </div>
@@ -203,7 +204,7 @@
 
 <script src="vendor/leaflet.js"></script>
 <script src="vendor/murmurhash3js.min.js"></script>
-<script src="vendor/supercluster.min.js?v=182"></script>
+<script src="vendor/supercluster.min.js?v=183"></script>
 <script src="data/totk_save_hashes.js"></script>
 <script src="data/layers.js"></script>
 <script src="data/catalogs.js"></script>
@@ -212,8 +213,8 @@
 <script src="data/area_sky.js"></script>
 <script src="data/area_depths.js"></script>
 <script src="data/markers.js"></script>
-<script src="data/materials.js?v=182"></script>
+<script src="data/materials.js?v=183"></script>
 <script src="js/save-parser.js"></script>
-<script src="js/app.js?v=182"></script>
+<script src="js/app.js?v=183"></script>
 </body>
 </html>

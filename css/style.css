@@ -550,77 +550,86 @@ html, body {
 .panel.collapsed + .panel-toggle { left: 0; }
 .panel-toggle:hover { background: rgba(48,52,58,.95); color: #fff; }
 
-/* ---------- 详情弹窗 ---------- */
+/* ---------- 详情卡片（点击标点/材料弹出，BOTWmap 信息卡风格） ---------- */
 .detail {
   position: absolute;
-  right: 16px; bottom: 74px;
-  width: 360px;
-  max-width: calc(100vw - 32px);
   z-index: 600;
+  width: 300px;
 }
 .detail-card {
-  background: rgba(20,22,26,.95);
+  background: rgba(20,22,26,.97);
   border: 1px solid rgba(255,255,255,.13);
   border-radius: 12px;
   box-shadow: 0 10px 34px rgba(0,0,0,.55);
+  padding: 14px 16px;
+  font-size: 13px;
+}
+.card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  cursor: move;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.chip {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  background: rgba(234,194,126,.10);
+  color: #eac27e;
+  border: 1px solid rgba(234,194,126,.35);
+  max-width: 240px;
   overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .detail-close {
-  position: absolute;
-  top: 8px; right: 10px;
-  width: 28px; height: 28px;
+  background: none;
   border: none;
-  border-radius: 50%;
-  background: rgba(255,255,255,.12);
-  color: #cfd4da;
-  font-size: 18px;
-  line-height: 1;
+  color: #8a93a0;
+  font-size: 20px;
   cursor: pointer;
-  z-index: 2;
-}
-.detail-close:hover { background: rgba(255,255,255,.22); color: #fff; }
-.detail-head {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 14px 16px 10px;
-  border-bottom: 1px solid rgba(255,255,255,.07);
-}
-.detail-head img {
-  width: 40px; height: 40px;
-  object-fit: contain;
+  line-height: 1;
   flex: 0 0 auto;
-  background: rgba(255,255,255,.07);
-  border-radius: 8px;
-  padding: 5px;
 }
-.detail-head-text { min-width: 0; }
-.detail-head-text h3 {
-  font-size: 16px;
+.detail-close:hover { color: #fff; }
+.card-name {
+  font-size: 17px;
+  font-weight: 700;
+  margin-bottom: 2px;
   color: #f2f5f9;
   word-break: break-all;
 }
-.detail-head-text p {
-  font-size: 12.5px;
+.card-en {
+  font-size: 12px;
   color: #8a93a0;
-  margin-top: 3px;
+  margin-bottom: 10px;
+  word-break: break-all;
 }
-.detail-body {
-  padding: 12px 16px;
-  font-size: 13.5px;
-  line-height: 1.7;
-  color: #cfd6df;
-  max-height: 240px;
-  overflow-y: auto;
+.card-body .row { margin: 3px 0; color: #8a93a0; }
+.card-body .row b { color: #e8ecf1; font-weight: 500; margin-left: 4px; }
+#detailDesc {
   white-space: pre-wrap;
-  user-select: text;
+  line-height: 1.65;
+  font-size: 13px;
+  color: #cfd6df;
 }
-.detail-body:empty::after { content: '暂无说明。'; color: #7c8591; }
-.detail-foot {
+.card-actions {
+  margin-top: 12px;
   display: flex;
   gap: 8px;
-  padding: 10px 16px 14px;
-  border-top: 1px solid rgba(255,255,255,.07);
+  flex-wrap: wrap;
+}
+.card-actions .btn {
+  flex: 1;
+  min-width: 0;
+  border-radius: 8px;
+  padding: 10px 4px;
+  font-size: 13px;
 }
 .btn {
   flex: 1;
@@ -731,8 +740,7 @@ html, body {
   .panel-toggle { left: min(88vw, 352px); }
   .panel.collapsed + .panel-toggle { left: 0; }
   .bottom-bar { left: 0; padding: 0 10px; }
-  .detail { right: 8px; bottom: 62px; width: calc(100vw - 16px); }
-  .detail-body { max-height: 200px; }
+  .detail { left: 8px; right: 8px; bottom: 62px; top: auto; width: auto; max-width: none; max-height: 55vh; overflow-y: auto; }
   .cat-item .cat-name { max-width: 104px; }
 }
 
@@ -853,28 +861,6 @@ html, body {
   background: linear-gradient(180deg,#eac27e,#c89a4a);
   color: #222;
   font-weight: 700;
-}
-.mat-search-box {
-  position: relative;
-  margin-top: 8px;
-  padding: 0 16px 6px;
-}
-.mat-search-box input {
-  width: 100%;
-  height: 32px;
-  padding: 0 12px;
-  border-radius: 4px;
-  border: 1px solid rgba(255,255,255,.12);
-  background: rgba(0,0,0,.3);
-  color: #e8ecf1;
-  font-size: 13px;
-  outline: none;
-  user-select: text;
-}
-.mat-search-box input:focus { border-color: #eac27e; }
-.mat-search-box input::placeholder { color: #7c8591; }
-.mat-search-box .search-result {
-  top: 38px; left: 16px; right: 16px;
 }
 
 /* 材料手风琴分类 —— 与探索页 cat-grid/cat-item 风格一致 */

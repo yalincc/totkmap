@@ -14,7 +14,7 @@
   var AREA_SKY = window.TOTK_AREA_SKY || [];
   var AREA_DEPTHS = window.TOTK_AREA_DEPTHS || [];
 
-  var VERSION = 'TOTKMAP V1.7.2';
+  var VERSION = 'TOTKMAP V1.7.3';
   var LS_DONE = 'totkmap_done_v1';
   var LS_CUSTOM = 'totkmap_custom_v1';
   var LS_LAYER = 'totkmap_layer_v1';
@@ -284,7 +284,7 @@
         className: 'mk-label' + (isDone ? ' done-label' : '')
       });
       (function (mm) {
-        mk.on('click', function () { openDetail(mm); });
+        mk.on('click', function (e) { openDetail(mm, e); });
       })(m);
 
       if (!state.groups[m.cat]) state.groups[m.cat] = L.layerGroup();
@@ -428,12 +428,68 @@
     return d.textContent || d.innerText || '';
   }
 
-  function showDetail(name, catName, iconUrl, desc, isDone, onDone) {
+  /* 详情卡片定位：锚定点击位置附近（参考 BOTWmap positionCard：锚点右侧优先，
+     放不下转左侧，避让左侧面板；手机用底部抽屉，位置交给 CSS） */
+  function positionDetail(ev) {
+    var card = $('detail');
+    if (!card) return;
+    var vw = window.innerWidth, vh = window.innerHeight;
+    if (vw <= 720) {
+      card.style.left = ''; card.style.top = '';
+      card.style.right = ''; card.style.bottom = '';
+      card.style.maxHeight = ''; card.style.overflowY = '';
+      return;
+    }
+    var guard = 366;   // 左侧面板 352 + 间距
+    var ax = guard + 200, ay = vh * 0.45;
+    if (ev && typeof ev.clientX === 'number') { ax = ev.clientX; ay = ev.clientY; }
+    var cw = card.offsetWidth || 300;
+    var ch = Math.min(card.offsetHeight || 320, vh * 0.7);
+    var left = ax + 20;                                   // 锚点右侧
+    var top = ay - ch / 2;                                // 纵向居中于锚点
+    if (left + cw > vw - 10) left = ax - cw - 20;         // 放不下 → 锚点左侧
+    left = Math.max(guard, Math.min(left, vw - cw - 10));
+    top = Math.max(10, Math.min(top, vh - 90));
+    card.style.left = left + 'px';
+    card.style.top = top + 'px';
+  }
+
+  /* 详情卡片拖拽（按住头部移动，参考 BOTWmap initCardDrag） */
+  function initCardDrag() {
+    var card = $('detail');
+    var head = $('detailHead');
+    if (!head) return;
+    var dragging = false, sx = 0, sy = 0, ox = 0, oy = 0;
+    function down(e) {
+      if (e.target.closest && e.target.closest('.detail-close')) return;
+      dragging = true;
+      sx = e.clientX; sy = e.clientY;
+      ox = card.offsetLeft; oy = card.offsetTop;
+    }
+    function move(e) {
+      if (!dragging) return;
+      var left = Math.max(0, Math.min(ox + e.clientX - sx, window.innerWidth - card.offsetWidth));
+      var top = Math.max(0, Math.min(oy + e.clientY - sy, window.innerHeight - 60));
+      card.style.left = left + 'px';
+      card.style.top = top + 'px';
+    }
+    function up() { dragging = false; }
+    head.addEventListener('mousedown', down);
+    head.addEventListener('touchstart', function (e) {
+      if (e.touches && e.touches[0]) down(e.touches[0]);
+    }, { passive: true });
+    document.addEventListener('mousemove', move);
+    document.addEventListener('touchmove', function (e) {
+      if (e.touches && e.touches[0]) move(e.touches[0]);
+    }, { passive: true });
+    document.addEventListener('mouseup', up);
+    document.addEventListener('touchend', up);
+  }
+
+  function showDetail(name, catName, iconUrl, desc, isDone, onDone, evt) {
     $('detailName').textContent = name;
     $('detailCat').textContent = catName;
-    var img = $('detailIcon');
-    if (iconUrl) { img.src = iconUrl; img.style.display = ''; }
-    else img.style.display = 'none';
+    $('detailChip').textContent = catName;
     $('detailDesc').textContent = stripHtml(desc) || '暂无说明。';
     var btn = $('detailDone');
     if (onDone) {
@@ -444,10 +500,13 @@
     } else {
       btn.style.display = 'none';
     }
-    $('detail').classList.remove('hidden');
+    var card = $('detail');
+    var wasHidden = card.classList.contains('hidden');
+    card.classList.remove('hidden');
+    if (wasHidden || evt) positionDetail(evt && evt.originalEvent || null);
   }
 
-  function openDetail(m) {
+  function openDetail(m, evt) {
     state.current = m;
     var cat = catById(state.layer, m.cat);
     var isDone = !!state.done[m.id];
@@ -473,8 +532,9 @@
         buildCatalogPanel();
         updateCount();
         if (state.filter !== 'all') renderMarkers();
-        openDetail(m);
-      }
+        openDetail(m, evt);
+      },
+      evt
     );
   }
 
@@ -487,6 +547,7 @@
     $('detail').classList.add('hidden');
     state.current = null;
   });
+  initCardDrag();
   $('detailCopy').addEventListener('click', function () {
     var m = state.current;
     if (!m) return;
@@ -705,7 +766,12 @@
 
   var pendingPos = null;
   map.on('click', function (e) {
-    if (!state.adding) return;
+    if (!state.adding) {
+      // 点击地图空白处自动关闭详情卡片（V1.7.3）
+      $('detail').classList.add('hidden');
+      state.current = null;
+      return;
+    }
     if ($('addMarkerModal').classList.contains('hidden') === false) return;
     var c = e.latlng;
     if (c.lat < -5000 || c.lat > 5000 || c.lng < -6000 || c.lng > 6000) {
@@ -1066,9 +1132,9 @@
         (function (ll, mid) {
           var mk = L.marker(ll, { icon: icon2, riseOnHover: true });
           mk.bindTooltip(m.cn, { direction: 'top', offset: [0, -lsize / 2 - 4], className: 'mk-label' });
-          mk.on('click', function () {
+          mk.on('click', function (e) {
             showDetail(m.cn, m.cat + ' · ' + LAYER_NAME[state.layer], null,
-              '坐标(' + Number(ll[1]).toFixed(1) + ', ' + Number(ll[0]).toFixed(1) + ')', false, null);
+              '坐标(' + Number(ll[1]).toFixed(1) + ', ' + Number(ll[0]).toFixed(1) + ')', false, null, e);
             // Sidebar linkage: expand cat, scroll to item, flash
             var listEl = $('matList');
             if (listEl) {
@@ -1289,7 +1355,7 @@
   });
   document.addEventListener('click', function (e) {
     var box = $('matSearchResult');
-    if (box && !box.classList.contains('hidden') && !e.target.closest('.mat-search-box')) {
+    if (box && !box.classList.contains('hidden') && !e.target.closest('.search-box')) {
       box.classList.add('hidden');
     }
   });
