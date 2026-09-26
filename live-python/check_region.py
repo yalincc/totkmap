@@ -47,9 +47,9 @@ def main():
             print("  (%7.1f, %7.1f) layer%d -> %s (距离 %.1f)" % (lat, lng, layer, n, d))
         return
     anchors = locate.read_save_triples()
-    print("存档锚点 %d 个（(gx,gy,gz)=(X东,Y北,高)，地图坐标 lat=gy lng=gx）" % len(anchors))
+    print("存档锚点 %d 个（(gx,gy,gz)=(X东,Y北,高)，地图坐标 lat=-gy(北负) lng=gx）" % len(anchors))
     for p, off, (gx, gy, gz) in anchors:
-        lat, lng = gy, gx
+        lat, lng = -gy, gx
         layer = 20 if gz >= 950 else (19 if gz < 0 else 18)
         n, d = nearest(lat, lng, layer, areas)
         print("  %s@0x%X  hud=(%7.1f, %7.1f, %6.1f) -> layer%d %s (%.1f)"

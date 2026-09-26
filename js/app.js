@@ -129,6 +129,12 @@
     toast('已回到全图');
   });
   $('zoomLocate').addEventListener('click', function () {
+    // V1.8.0: 实时服务在线时定位到玩家，否则回监视堡垒
+    if (window.LIVENAV && LIVENAV.online()) {
+      LIVENAV.centerOnPlayer();
+      toast('已定位到玩家当前位置');
+      return;
+    }
     map.flyTo(CENTER, 5, { duration: 0.6 });
     toast('已定位到监视堡垒（导航后续接入）');
   });
@@ -518,8 +524,16 @@
       body.parentElement.style.display = 'none';
     } else {
       meta.style.display = 'none'; img.style.display = 'none'; uRow.style.display = 'none';
-      nav.style.display = 'none'; col.style.display = 'none';
+      // V1.8.0: 探索标点/自定义标点也显示「导航」按钮
+      nav.style.display = ''; col.style.display = 'none';
+      nav.onclick = opts.onNav || null;
       body.parentElement.style.display = '';
+    }
+    /* V1.8.0: 导航按钮初始文案（该目标导航中 → 停止导航） */
+    nav.textContent = '导航';
+    if (opts.navTarget && window.LIVENAV && LIVENAV.currentTarget) {
+      var _cur = LIVENAV.currentTarget();
+      if (_cur && _cur.x === opts.navTarget.x && _cur.y === opts.navTarget.y) nav.textContent = '停止导航';
     }
     var btn = $('detailDone');
     if (opts.onDone) {
@@ -545,6 +559,11 @@
       cat: (cat ? cat.name : '未知分类') + ' · ' + LAYER_NAME[state.layer],
       desc: m.desc || '',
       isDone: isDone,
+      // V1.8.0: 探索标点也可直接导航（实时服务在线时设置服务端目标）
+      onNav: function () {
+        liveToggleNav({ name: m.name || m.full, x: m.x, y: m.y, layer: m.layer, type: cat ? cat.name : '标点' });
+      },
+      navTarget: { x: m.x, y: m.y },
       onDone: function () {
         if (state.done[m.id]) delete state.done[m.id];
         else state.done[m.id] = true;
@@ -569,7 +588,11 @@
 
   function openCustomDetail(c) {
     state.current = c;
-    showDetail({ name: c.name, cat: '自定义标点 · ' + LAYER_NAME[state.layer], desc: c.desc || '暂无说明。' });
+    showDetail({
+      name: c.name, cat: '自定义标点 · ' + LAYER_NAME[state.layer], desc: c.desc || '暂无说明。',
+      onNav: function () { liveToggleNav({ name: c.name, x: c.x, y: c.y, layer: c.layer, type: '自定义' }); },
+      navTarget: { x: c.x, y: c.y }
+    });
   }
 
   $('detailClose').addEventListener('click', function () {
@@ -724,7 +747,8 @@
     switchLayer(id);
   });
 
-  function switchLayer(id) {
+  /* V1.8.0: keepView=true 时保留当前视野（实时层自动切层用，不重置视角） */
+  function switchLayer(id, keepView) {
     state.layer = id;
     saveJson(LS_LAYER, id);
     Array.prototype.forEach.call($('layerSwitch').querySelectorAll('button'), function (b) {
@@ -743,7 +767,7 @@
     updateLayerCount();
     buildMatPanel();
     renderMaterials();
-    map.setView(CENTER, 3);
+    if (!keepView) map.setView(CENTER, 3);
   }
 
   /* ---------------- 面板收起 / 名称开关 ---------------- */
@@ -837,6 +861,28 @@
     t.classList.remove('hidden');
     if (toastTimer) clearTimeout(toastTimer);
     toastTimer = setTimeout(function () { t.classList.add('hidden'); }, 2200);
+  }
+
+  /* ---------------- 实时导航入口（V1.8.0，对接 js/live.js 的 LIVENAV） ---------------- */
+  function liveNavTo(name, x, y, layer, type) {
+    if (window.LIVENAV) {
+      LIVENAV.navigate({ name: name, x: x, y: y, layer: layer, type: type || '' });
+      return;
+    }
+    map.flyTo([x, y], 7, { animate: true, duration: 0.8 });
+    toast('已定位（实时导航服务未启动，仅移动视角）');
+  }
+
+  /* 导航按钮切换：同一目标再次点击 = 停止导航（按钮文案随状态变化） */
+  function liveToggleNav(o) {
+    if (!window.LIVENAV) {
+      map.flyTo([o.x, o.y], 7, { animate: true, duration: 0.8 });
+      toast('已定位（实时导航服务未启动，仅移动视角）');
+      return;
+    }
+    var r = LIVENAV.toggleNav(o);
+    var nav = $('detailNav');
+    if (nav) nav.textContent = (r === 'navigating') ? '停止导航' : '导航';
   }
 
   /* ---------------- 问题反馈 ---------------- */
@@ -1169,9 +1215,10 @@
       collected: isCollected(m.id, idx),
       onDone: function () { toggleMatDone(m.id, idx); showMatDetail(m, ll, idx, evt); },
       onNav: function () {
-        map.flyTo(ll, 7, { animate: true, duration: 0.8 });
-        toast('第 ' + (idx + 1) + '/' + total + ' 个位置 · 导航程序接入后将自动切换下一位置');
+        liveToggleNav({ name: m.cn, x: ll[0], y: ll[1], layer: state.layer, type: m.cat });
+        toast('第 ' + (idx + 1) + '/' + total + ' 个位置');
       },
+      navTarget: { x: ll[0], y: ll[1] },
       onCollect: function () { collectAndNext(m, ll, idx); },
       evt: evt
     });

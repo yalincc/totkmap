@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>塞尔达传说：王国之泪 · 互动地图</title>
 <link rel="stylesheet" href="vendor/leaflet.css">
-<link rel="stylesheet" href="css/style.css?v=188">
+<link rel="stylesheet" href="css/style.css?v=189">
 </head>
 <body>
 
@@ -18,7 +18,7 @@
   <button id="zoomIn" type="button" title="放大">＋</button>
   <button id="zoomOut" type="button" title="缩小">－</button>
   <button id="zoomFit" type="button" title="回到全图">⌂</button>
-  <button id="zoomLocate" type="button" title="定位到监视堡垒（导航后续接入）">🎯</button>
+  <button id="zoomLocate" type="button" title="定位（实时服务在线→玩家，否则监视堡垒）">🎯</button>
 </div>
 
 <!-- ============ 左侧筛选面板 ============ -->
@@ -156,6 +156,7 @@
 <!-- ============ 底部工具条 ============ -->
 <div class="bottom-bar">
   <button id="addMarkerBtn" class="bar-btn">+ 新增标点</button>
+  <button id="navBtn" class="bar-btn" title="实时定位导航（需本地 live-python 服务）">🧭 导航</button>
   <button id="feedbackBtn" class="bar-btn">? 问题</button>
 </div>
 
@@ -213,6 +214,31 @@
   </div>
 </div>
 
+<!-- ============ 实时导航面板（V1.8.0） ============ -->
+<div id="navPanel" class="nav-panel hidden">
+  <div class="np-head">
+    <span class="np-title">🧭 实时导航</span>
+    <span class="np-status off" id="npStatus">● 离线</span>
+    <button type="button" class="np-min" id="npToggle" title="收起/展开">－</button>
+  </div>
+  <div class="np-body" id="npBody">
+    <div class="np-row" id="npPos">位置 --（未连接定位服务）</div>
+    <div class="np-row" id="npTargetRow">目标：未设置</div>
+    <div class="np-row np-arrive hidden" id="npArrive">✓ 已到达目标（阈值内）</div>
+    <div class="np-opts">
+      <label class="np-opt">到达阈值 <input type="number" id="npArriveInput" value="30" min="1" max="500"> 游戏单位</label>
+      <label class="np-chk"><input type="checkbox" id="npAutoLayer" checked> 跟随自动切层</label>
+      <label class="np-chk"><input type="checkbox" id="npFollow"> 视图跟随</label>
+    </div>
+    <div class="np-actions">
+      <button type="button" class="np-btn" id="npPause">暂停</button>
+      <button type="button" class="np-btn" id="npEnd">结束</button>
+      <button type="button" class="np-btn" id="npClear">清除目标</button>
+      <button type="button" class="np-btn" id="npLocate">定位我</button>
+    </div>
+  </div>
+</div>
+
 <div id="toast" class="toast hidden"></div>
 
 <script src="vendor/leaflet.js"></script>
@@ -228,6 +254,7 @@
 <script src="data/markers.js"></script>
 <script src="data/materials.js?v=188"></script>
 <script src="js/save-parser.js"></script>
-<script src="js/app.js?v=188"></script>
+<script src="js/app.js?v=189"></script>
+<script src="js/live.js?v=189"></script>
 </body>
 </html>

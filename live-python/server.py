@@ -8,10 +8,11 @@
 
 HTTP 契约（与后续 Go 化版本一致，网页端只认这套）：
   GET  /pos      -> {ok, mx, my, gz, layer, verified, source, age, target}
-                     mx/my = Leaflet latlng = (Z 北向, X 东向)，objmap 游戏坐标原值
+                     mx/my = Leaflet latlng = (Z, X)；Z 北负南正（与游戏地图一致），X 东正
                      layer = 20 天空 / 19 地底 / 18 地上（按玩家实际高度）
   GET  /target   -> 当前目标或 {ok:false}
-  POST /target   -> {"x":..,"y":..,"name":..,"type":..} 或 {"clear":true}
+  POST /target   -> {"x":..,"y":..,"name":..,"type":..,"layer":18|19|20} 或 {"clear":true}
+                     layer 可省（缺省 null）；网页端按 layer 判断是否跨层
   GET  /rescan   -> 触发重新定位
 端口 8766（与 BotwNavi 一致）。用法：python live-python/server.py
 """
@@ -262,7 +263,7 @@ def poll():
         if v:
             gx, gy, gz = v
             STATE.update(ok=True, gx=gx, gy=gy, gz=gz,
-                         mx=gy, my=gx,
+                         mx=-gy, my=gx,
                          layer=layer_of(gz),
                          age=time.time(),
                          verified=LOCK["verified"], copies=LOCK["copies"],
@@ -455,9 +456,10 @@ class Handler(BaseHTTPRequestHandler):
                 print("  [target] cleared", flush=True)
             else:
                 TARGET[0] = {"x": float(data.get("x", 0)), "y": float(data.get("y", 0)),
-                             "name": data.get("name", ""), "type": data.get("type", "")}
-                print("  [target] set %s at (%.1f, %.1f)" % (TARGET[0]["name"],
-                      TARGET[0]["x"], TARGET[0]["y"]), flush=True)
+                             "name": data.get("name", ""), "type": data.get("type", ""),
+                             "layer": data.get("layer")}
+                print("  [target] set %s at (%.1f, %.1f) layer=%s" % (TARGET[0]["name"],
+                      TARGET[0]["x"], TARGET[0]["y"], TARGET[0]["layer"]), flush=True)
             self._json({"ok": True, "target": TARGET[0]})
             return
         self._json({"ok": False, "error": "unknown endpoint"}, code=404)
