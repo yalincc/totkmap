@@ -14,7 +14,7 @@
   var AREA_SKY = window.TOTK_AREA_SKY || [];
   var AREA_DEPTHS = window.TOTK_AREA_DEPTHS || [];
 
-  var VERSION = 'TOTKMAP V1.7.4';
+  var VERSION = 'TOTKMAP V1.7.5';
   var LS_DONE = 'totkmap_done_v1';
   var LS_CUSTOM = 'totkmap_custom_v1';
   var LS_LAYER = 'totkmap_layer_v1';
@@ -1280,9 +1280,7 @@
     if (tab === 'material') {
       explorePane.classList.add('hidden');
       matPane.classList.remove('hidden');
-      Object.keys(state.groups).forEach(function (k) {
-        if (map.hasLayer(state.groups[k])) map.removeLayer(state.groups[k]);
-      });
+      // V1.7.5: 切到材料 Tab 时保留已勾选的探索标点（神庙/鸟望塔等），与材料位置叠加显示，便于同时定位
       buildMatPanel();
       renderMaterials();
     } else {
