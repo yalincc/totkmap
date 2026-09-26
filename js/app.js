@@ -14,7 +14,7 @@
   var AREA_SKY = window.TOTK_AREA_SKY || [];
   var AREA_DEPTHS = window.TOTK_AREA_DEPTHS || [];
 
-  var VERSION = 'TOTKMAP V1.7.7';
+  var VERSION = 'TOTKMAP V1.7.8';
   var LS_DONE = 'totkmap_done_v1';
   var LS_CUSTOM = 'totkmap_custom_v1';
   var LS_LAYER = 'totkmap_layer_v1';
@@ -569,6 +569,16 @@
     state.current = null;
   });
   initCardDrag();
+  /* 材料卡片图标点击 -> 查看 256px 原图（克洛格卡「查看原图」同款） */
+  $('detailImg').addEventListener('click', function () {
+    var src = this.src;
+    if (!src) return;
+    $('imgPreviewImg').src = src;
+    $('imgPreview').classList.remove('hidden');
+  });
+  $('imgPreview').addEventListener('click', function () {
+    this.classList.add('hidden');
+  });
 
   /* ---------------- 搜索 ---------------- */
   var searchTimer = null;
