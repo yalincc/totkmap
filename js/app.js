@@ -14,7 +14,7 @@
   var AREA_SKY = window.TOTK_AREA_SKY || [];
   var AREA_DEPTHS = window.TOTK_AREA_DEPTHS || [];
 
-  var VERSION = 'TOTKMAP V1.7.0';
+  var VERSION = 'TOTKMAP V1.7.1';
   var LS_DONE = 'totkmap_done_v1';
   var LS_CUSTOM = 'totkmap_custom_v1';
   var LS_LAYER = 'totkmap_layer_v1';
@@ -992,6 +992,12 @@
     return c;
   }
 
+  /* 材料图标分级：随缩放级别 + 聚合数量调整尺寸（参考地名字号随 zoom 调整逻辑） */
+  function matIconSize(z) {
+    var s = { 3: 20, 4: 22, 5: 26, 6: 30, 7: 34 };
+    return s[z] || (z > 7 ? 34 : 20);
+  }
+
   function renderMatLayer(mid) {
     if (state.matGroups[mid]) {
       map.removeLayer(state.matGroups[mid]);
@@ -1017,7 +1023,7 @@
       var latlng = [gz, gx];
       var props = c.properties;
       if (props.cluster) {
-        var size = props.point_count >= 100 ? 34 : props.point_count >= 20 ? 30 : 26;
+        var size = matIconSize(z) + (props.point_count >= 100 ? 12 : props.point_count >= 20 ? 6 : 0);
         var icon = L.divIcon({
           className: '',
           html: '<div class="mat-cluster" style="width:' + size + 'px;height:' + size + 'px;" data-char="' + esc(m.cn[0]) + '"><img src="assets/materials/' + m.entry + '.png" onerror="this.remove()"><span>' + props.point_count + '</span></div>',
@@ -1030,14 +1036,15 @@
           grp.addLayer(mk);
         })(latlng, size);
       } else {
+        var lsize = matIconSize(z);
         var icon2 = L.divIcon({
           className: '',
-          html: '<div class="mat-leaf" style="width:26px;height:26px;" title="' + esc(m.cn) + '" data-char="' + esc(m.cn[0]) + '"><img src="assets/materials/' + m.entry + '.png" onerror="this.remove()"></div>',
-          iconSize: [26, 26], iconAnchor: [13, 13]
+          html: '<div class="mat-leaf" style="width:' + lsize + 'px;height:' + lsize + 'px;" title="' + esc(m.cn) + '" data-char="' + esc(m.cn[0]) + '"><img src="assets/materials/' + m.entry + '.png" onerror="this.remove()"></div>',
+          iconSize: [lsize, lsize], iconAnchor: [lsize / 2, lsize / 2]
         });
         (function (ll, mid) {
           var mk = L.marker(ll, { icon: icon2, riseOnHover: true });
-          mk.bindTooltip(m.cn, { direction: 'top', offset: [0, -12], className: 'mk-label' });
+          mk.bindTooltip(m.cn, { direction: 'top', offset: [0, -lsize / 2 - 4], className: 'mk-label' });
           mk.on('click', function () {
             showDetail(m.cn, m.cat + ' · ' + LAYER_NAME[state.layer], null,
               '坐标(' + Number(ll[1]).toFixed(1) + ', ' + Number(ll[0]).toFixed(1) + ')', false, null);

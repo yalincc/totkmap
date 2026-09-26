@@ -90,7 +90,7 @@
 鱼,酥麻鳟鱼,Item_FishGet_D,Animal_Fish_D,5
 鱼,潜行鳟鱼,Item_FishGet_X,Animal_Fish_X,5
 矿岩,左纳尼乌姆矿床,Obj_Mineral_D_01,Obj_Mineral_D_01,5437
-矿岩,散落的琥珀,Obj_MineralGrain_A_03,Obj_MineralGrain_A_03,4644
+矿岩,散落的左纳尼乌姆,Obj_MineralGrain_A_03,Obj_MineralGrain_A_03,4644
 矿岩,矿床,Obj_Mineral_A_01,Obj_Mineral_A_01,229
 矿岩,埋藏的矿床,Obj_MineralBury_A_01,Obj_MineralBury_A_01,164
 矿岩,散落的蛋白石,Obj_MineralGrain_A_04,Obj_MineralGrain_A_04,131

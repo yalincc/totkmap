@@ -126,7 +126,7 @@ MANUAL_ZH = {
     'Animal_Insect_Z': '昆虫群（随机）',
     'Obj_MineralGrain_A_01': '散落的岩盐',
     'Obj_MineralGrain_A_02': '散落的打火石',
-    'Obj_MineralGrain_A_03': '散落的琥珀',
+    'Obj_MineralGrain_A_03': '散落的左纳尼乌姆',
     'Obj_MineralGrain_A_04': '散落的蛋白石',
     'Obj_MineralGrain_A_05': '散落的黄玉',
     'Obj_MineralBury_A_01': '埋藏的矿床',
