@@ -736,6 +736,10 @@
     var btn = e.target.closest('button');
     if (!btn) return;
     var id = Number(btn.getAttribute('data-layer'));
+    /* V1.8.1: 手动点击 = 切层并锁定；再点同层 = 解除锁定；传送后由 live.js 恢复自动 */
+    if (window.LIVENAV && window.LIVENAV.setLayerLock) {
+      window.LIVENAV.setLayerLock(id);
+    }
     if (id === state.layer) return;
     switchLayer(id);
   });

@@ -198,6 +198,8 @@ html, body {
   transition: all .15s;
 }
 .layer-switch button.active { background: #eac27e; color: #222; font-weight: 600; }
+.layer-switch button.locked { box-shadow: inset 0 0 0 2px #ffb703; color: #ffd166; }
+.layer-switch button.locked.active { background: #eac27e; color: #222; box-shadow: inset 0 0 0 2px #b45309; }
 
 /* 地图标点区 */
 .marker-section {

@@ -30,6 +30,9 @@
   var follow = false, autoLayer = true, arriveM = ARRIVE_DEF, paused = false;
   var lastProgGen = null, lastProgFetch = 0;   // 存档进度代次（服务端 /pos.progressGen）
   var arrivedShown = false;
+  var layerLock = null;                        // 手动层级锁定：null=自动，18/19/20=锁定该层（传送后恢复自动）
+  var lastMX = null, lastMY = null;            // 上一采样位置（传送检测）
+  var teleportTS = 0;                           // 最近一次传送解锁时间戳（抑制紧随的切层 toast）
 
   var trail = [];
   var lastPosKey = null;
@@ -67,7 +70,7 @@
     if (distLabel) { map.removeLayer(distLabel); distLabel = null; }
     if (!target || !pos.online || pos.mx == null) return;
     // 不跨层：目标在其他层时只提示，不画误导线
-    if (target.layer && target.layer !== pos.layer) return;
+    if (target.layer && target.layer !== renderLayer()) return;
     guideLine = L.polyline([[pos.mx, pos.my], [target.x, target.y]], {
       pane: 'overlayPane', color: 'rgba(255,183,3,.92)', weight: 1.6, dashArray: '7,5', interactive: false
     });
@@ -94,6 +97,7 @@
   /* ---------------- 状态 / 面板 ---------------- */
   function setStatus() {
     if (!panel) return;
+    var rl = renderLayer();
     var el = $('npStatus');
     if (!el) return;
     var txt, cls;
@@ -110,7 +114,7 @@
     if (posEl) {
       var s = pos.located
         ? '位置 (' + Math.round(pos.mx) + ', ' + Math.round(pos.my) + ') · ' +
-          LAYER_NAME[pos.layer] + ' · 高 ' + Math.round(pos.gz)
+          LAYER_NAME[rl] + (layerLock != null ? ' 🔒' : '') + ' · 高 ' + Math.round(pos.gz)
         : (pos.online ? '位置 --（等待玩家位置）' : '位置 --（未连接定位服务）');
       if (posEl.textContent !== s) posEl.textContent = s;
     }
@@ -119,9 +123,9 @@
       var ts = '目标：未设置';
       if (target && target.name) {
         var d = distToTarget();
-        var cross = (target.layer && target.layer !== pos.layer);
+        var cross = (target.layer && target.layer !== rl);
         ts = '目标：' + target.name + (target.type ? '（' + target.type + '）' : '');
-        if (cross) ts += ' · 在' + LAYER_NAME[target.layer] + '层，不跨层';
+        if (cross) ts += ' · 在' + LAYER_NAME[target.layer] + '层，点击左侧层按钮切换';
         else if (d != null) ts += ' · 距离 ' + Math.round(d) + 'm';
       }
       if (tEl.textContent !== ts) tEl.textContent = ts;
@@ -162,6 +166,18 @@
       target = (p.target && typeof p.target.x === 'number') ? p.target : null;
       arrivedShown = arrivedShown && (target != null);
 
+      /* 传送检测：相邻采样位移 > 1000 游戏单位 = 传送（地图传送/深穴/神庙瞬移），解除层级锁定 */
+      if (layerLock != null && lastMX != null) {
+        var dd = Math.sqrt((pos.mx - lastMX) * (pos.mx - lastMX) + (pos.my - lastMY) * (pos.my - lastMY));
+        if (dd > 1000) {
+          layerLock = null;
+          teleportTS = Date.now();
+          toast('检测到传送，已恢复自动层级切换');
+          updateLockUI();
+        }
+      }
+      lastMX = pos.mx; lastMY = pos.my;
+
       var key = Math.round(p.mx) + ',' + Math.round(p.my);
       if (key !== lastPosKey) {
         lastPosKey = key;
@@ -189,19 +205,47 @@
     setStatus();
   }
 
+  /* ---------------- 手动层级锁定（V1.8.1）：自动切层 + 手动接管，传送后恢复 ---------------- */
+  function renderLayer() {
+    return (layerLock != null) ? layerLock : pos.layer;
+  }
+  function updateLockUI() {
+    var sw = document.getElementById('layerSwitch');
+    if (!sw) return;
+    Array.prototype.forEach.call(sw.querySelectorAll('button'), function (b) {
+      b.classList.toggle('locked', Number(b.getAttribute('data-layer')) === layerLock);
+    });
+  }
+  function setLayerLock(id) {
+    if (layerLock === id) {
+      layerLock = null;
+      toast('已解除层级锁定，恢复自动切换');
+    } else {
+      layerLock = id;
+      toast('已锁定' + (LAYER_NAME[id] || id) + '层（传送后恢复自动）');
+    }
+    lastDrawKey = '';
+    redraw();
+    setStatus();
+    updateLockUI();
+  }
+
   /* 跟随玩家 Z 自动切层（天空/地上/地底），不跨层 */
   function autoSwitchLayer() {
     if (paused || !autoLayer || !pos.online || !pos.located) return;
+    if (layerLock != null) return;   // 手动锁定期间不自动切层
     if (pos.layer && pos.layer !== T.state.layer) {
       T.switchLayer(pos.layer, true);
-      toast('已自动切换到' + (LAYER_NAME[pos.layer] || pos.layer) + '层');
+      if (Date.now() - teleportTS > 2000) {
+        toast('已自动切换到' + (LAYER_NAME[pos.layer] || pos.layer) + '层');
+      }
     }
   }
 
   /* 到达提示：距离 ≤ 阈值 判定「已到达」（仅为提示值，不参与算法） */
   function tickArrival() {
     if (paused || !pos.online || !pos.located || !target) { arrivedShown = false; return; }
-    if (target.layer && target.layer !== pos.layer) { arrivedShown = false; return; }
+    if (target.layer && target.layer !== renderLayer()) { arrivedShown = false; return; }
     var d = distToTarget();
     if (d == null) return;
     if (arrivedShown && d > arriveM * 1.5) arrivedShown = false;
@@ -434,7 +478,10 @@
       pos: function () { return { online: pos.online, located: pos.located, mx: pos.mx, my: pos.my, layer: pos.layer, verified: pos.verified }; },
       arrived: function () { return arrivedShown; },
       arriveM: function () { return arriveM; },
-      paused: function () { return paused; }
+      paused: function () { return paused; },
+      /* V1.8.1: 手动层级锁定 */
+      setLayerLock: setLayerLock,
+      lockLayer: function () { return layerLock; }
     };
   }
 
