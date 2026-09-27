@@ -222,7 +222,7 @@ func sessionBlocks(h uintptr) []struct{ Base, Size uintptr } {
 
 const (
 	smTick       = 200 * time.Millisecond // 5Hz 循环
-	invalidMax   = 3                      // 连续读数无效次数 → 回 UNLOCKED
+	invalidMax   = 10                     // 连续读数无效次数 → 回 UNLOCKED（~2s，扛过读图 Loading）
 	teleportDist = 300.0                  // 相邻采样位移超过 → 判传送，回 UNLOCKED
 	moveDist     = 0.5                    // 移动确认最小位移（游戏单位/采样）
 	moveConfirmN = 3                      // 连续移动采样次数 → verified
@@ -271,6 +271,7 @@ func goUnlocked(reason string) {
 	if useSaveScan {
 		skipKnownOnce = true
 	}
+	lastScanAt = time.Time{} // 清掉扫描冷却：解锁后下一 tick 立即扫，不再等 15s
 	fmt.Printf("  [sm] -> UNLOCKED (%s)\n", reason)
 }
 
@@ -464,12 +465,37 @@ func stateMachine() {
 		cur := [3]float32{v[0], v[1], v[2]}
 		delta := dist3(cur, prev)
 
-		// 传送检测：相邻采样位移 >300m → 立即回 UNLOCKED 重扫
+		// 传送处理（BotwNavi 思路：大位移 ≠ 锁坏）。verified 锁出现 >300m 跳变时
+		// 槽位大概率还活着、新值就是传送后的真实位置——用 known 偏移共识仲裁，
+		// 三种结果都不需要全量扫描（避免 6GB 读取拖卡游戏）：
+		//   共识 ≈ 跳变值         → 就地接受，零扫描零卡顿
+		//   共识存在但与跳变值不符 → 锁到共识活副本（槽地址未变，只是本槽冻结了）
+		//   无共识 / 锁未 verified → 跳变不可信，回 UNLOCKED（冷却已清零，立即扫）
 		if hasPrev && delta > teleportDist {
 			incCounter("jumps")
-			inLocked = false
-			goUnlocked(fmt.Sprintf("teleport jump %.0fm", delta))
-			continue
+			lock.mu.RLock()
+			ver := lock.verified
+			lock.mu.RUnlock()
+			accepted := false
+			if ver {
+				if a2, v2, ok := tryOffsets(); ok {
+					if dist3(v2, cur) < 5.0 {
+						fmt.Printf("  [sm] teleport %.0fm accepted in place (known consensus agrees, no scan)\n", delta)
+						setLock(a, false, 0, "scan") // 降回未验证：移动 0.6s 重验；冻结则 10s 核对兜底
+					} else {
+						setLock(a2, false, 0, "known")
+						cur = v2
+						fmt.Printf("  [sm] teleport %.0fm -> relock to live consensus copy 0x%X (no scan)\n", delta, a2)
+					}
+					accepted = true
+					lastReco = time.Now() // 传送刚落定，推迟站桩核对
+				}
+			}
+			if !accepted {
+				inLocked = false
+				goUnlocked(fmt.Sprintf("teleport %.0fm with no consensus -> rescan", delta))
+				continue
+			}
 		}
 
 		// 移动确认：连续 3 次采样位移 >0.5m → verified（写 known 记忆）
