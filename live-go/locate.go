@@ -96,8 +96,10 @@ func rotOKBytes(buf []byte) bool {
 		return false
 	}
 	a := floats(buf) // 128 字节 → 32 个 float
-	// 与 live-python rot_ok 完全同口径：st=4..16（检查 offset 4-24 共 13 个窗口）。
-	for st := 4; st < 17 && st+9 <= len(a); st++ {
+	// TOTK ActorBase：mPosition 后紧跟 mRotation（矩阵在 offset 12，float st=3）。
+	// live-python rot_ok 只查 st=4..16 会漏掉玩家槽 → struct=0 → 排序退化。
+	// 这里从 st=3 起检查（offset 12-56），保留 4..16 兼容其他布局。
+	for st := 3; st < 17 && st+9 <= len(a); st++ {
 		m := a[st : st+9]
 		cols := [3][3]float32{
 			{m[0], m[3], m[6]},

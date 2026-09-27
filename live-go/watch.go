@@ -500,7 +500,9 @@ func relocalize(reason string) bool {
 		lock.verified = true
 		lock.mu.Unlock()
 	}
-	saveKnown(append([]uintptr{res.Addr}, loadKnownAddrs()...), guestBase.Load())
+	// 注意：候选未确认前不写入 known_addrs——TOTK 同值副本槽里 Addrs[0]
+	// 可能是静态死镜像（值=玩家位置但不更新），保存后 remembered 快路径
+	// 会锁死槽。只有 watchShortlist 移动确认锁定活槽时才 saveKnown。
 	fmt.Printf("  [relocate] candidate 0x%X mem=(%.1f, %.1f, %.1f) - being watched\n",
 		res.Addr, res.Hud[0], res.Hud[1], res.Hud[2])
 	return true
