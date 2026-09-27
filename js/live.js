@@ -34,6 +34,8 @@
   var arrivedShown = false;
   var layerLock = null;                        // 手动层级锁定：null=自动，18/19/20=锁定该层（传送后恢复自动）
   var lastMX = null, lastMY = null;            // 上一采样位置（传送检测）
+  var lastLayer = null;                        // 上一采样层（传送检测：层变化 = 传送/深穴，解除手动锁定）
+  var autoLayerWarned = false;                 // 自动切层关闭提示（只提示一次）
   var teleportTS = 0;                           // 最近一次传送解锁时间戳（抑制紧随的切层 toast）
 
   var trail = [];
@@ -168,17 +170,20 @@
       target = (p.target && typeof p.target.x === 'number') ? p.target : null;
       arrivedShown = arrivedShown && (target != null);
 
-      /* 传送检测：相邻采样位移 > 1000 游戏单位 = 传送（地图传送/深穴/神庙瞬移），解除层级锁定 */
+      /* 传送检测：相邻采样位移 > 1000 游戏单位，或层变化（天空↔地上↔地底）= 传送/深穴/重启，
+         解除层级锁定（重启后 layerLock 残留而位移<1000 时，层变化是更可靠的信号） */
       if (layerLock != null && lastMX != null) {
         var dd = Math.sqrt((pos.mx - lastMX) * (pos.mx - lastMX) + (pos.my - lastMY) * (pos.my - lastMY));
-        if (dd > 1000) {
+        var lc = (lastLayer != null && pos.layer !== lastLayer);
+        if (dd > 1000 || (lc && layerLock !== pos.layer)) {
           layerLock = null;
           teleportTS = Date.now();
-          toast('检测到传送，已恢复自动层级切换');
+          toast('检测到传送/层变化，已恢复自动层级切换');
           updateLockUI();
         }
       }
       lastMX = pos.mx; lastMY = pos.my;
+      lastLayer = pos.layer;
 
       var key = Math.round(p.mx) + ',' + Math.round(p.my);
       if (key !== lastPosKey) {
@@ -186,6 +191,10 @@
         trail.push([p.mx, p.my]);
         if (trail.length > 600) trail.shift();
         if (follow && !paused) followCenter();
+      }
+      if (!autoLayer && !autoLayerWarned) {
+        autoLayerWarned = true;
+        toast('提示：自动切层已关闭，不会跟随玩家切换层级');
       }
       autoSwitchLayer();
     } else {
@@ -241,6 +250,9 @@
       if (Date.now() - teleportTS > 2000) {
         toast('已自动切换到' + (LAYER_NAME[pos.layer] || pos.layer) + '层');
       }
+      /* 切层会重置地图视野：传送+切层时 followCenter 在切层前已执行（旧层视野），
+         这里切层成功后立即再跟随一次，画面才落到新层红点位置 */
+      if (follow && !paused) followCenter();
     }
   }
 

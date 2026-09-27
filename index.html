@@ -113,7 +113,7 @@
   </div>
 
   <footer class="side-foot">
-    <p class="foot-version">TOTKMAP V1.8.6</p>
+    <p class="foot-version">TOTKMAP V1.8.7</p>
     <p>© 2026 yalin · github.com/yalincc</p>
   </footer>
 </aside>
@@ -141,6 +141,7 @@
     </div>
     <div class="card-actions">
       <button id="detailNav" class="btn act">导航</button>
+      <button id="detailComp" class="btn act" style="display:none">查看图鉴</button>
       <button id="detailCollect" class="btn act">收集</button>
       <button id="detailDone" class="btn primary">标记完成</button>
     </div>
@@ -176,7 +177,7 @@
 <!-- ============ 底部工具条 ============ -->
 <div class="bottom-bar">
   <button id="addMarkerBtn" class="bar-btn">+ 新增标点</button>
-  <button id="navBtn" class="bar-btn" title="实时定位导航（需本地 live-python 服务）">🧭 导航</button>
+  <button id="navBtn" class="bar-btn" title="实时定位导航（需本地 live-go 服务）">🧭 导航</button>
   <button id="feedbackBtn" class="bar-btn">? 问题</button>
 </div>
 
@@ -278,6 +279,8 @@
 <script src="data/area_depths.js"></script>
 <script src="data/markers.js"></script>
 <script src="data/materials.js?v=188"></script>
+<!-- 图鉴站地址（联动「查看图鉴」按钮 / 对站跳转）：正式图鉴站地址配置后填写，留空则按钮不显示 -->
+<script>window.TOTK_COMPENDIUM_URL = '';</script>
 <script src="js/save-parser.js"></script>
 <script src="js/app.js?v=196"></script>
 <script src="js/live.js?v=193"></script>

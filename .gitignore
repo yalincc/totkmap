@@ -22,3 +22,7 @@ live-go/run-events.log*
 live-go/*.exe~
 live-go/run_*.log
 live-go/run_*.err
+
+# 定位服务 exe 备份（重构迭代留档，不入库）
+live-go/*-bak
+live-go/*-broken
