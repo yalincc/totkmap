@@ -206,17 +206,23 @@ func watchShortlist(sl []ShortlistEntry) {
 	if h == 0 {
 		return
 	}
-	base := map[uintptr][3]float32{}
-	for _, g := range sl {
+	type addrState struct {
+		base  [3]float32
+		moved int
+	}
+	states := map[uintptr]*addrState{}
+	groupMoved := make([]int, len(sl))
+	for gi, g := range sl {
 		for _, a := range g.Addrs {
 			if d := readMem(h, a, 12); d != nil && len(d) >= 12 {
 				f := floats(d[:12])
-				base[a] = [3]float32{f[0], f[1], f[2]}
+				states[a] = &addrState{base: [3]float32{f[0], f[1], f[2]}}
+				_ = gi
 			}
 		}
 	}
-	moved := make([]int, len(sl))
 	confirmed := -1
+	started := time.Now()
 	for {
 		time.Sleep(600 * time.Millisecond)
 		procMu.Lock()
@@ -233,45 +239,95 @@ func watchShortlist(sl []ShortlistEntry) {
 				}
 				f := floats(d[:12])
 				v := [3]float32{f[0], f[1], f[2]}
-				b, ok := base[a]
-				base[a] = v
+				st, ok := states[a]
 				if !ok {
+					states[a] = &addrState{base: v}
 					continue
 				}
-				if abs32(v[0]-b[0]) > 0.5 || abs32(v[1]-b[1]) > 0.5 || abs32(v[2]-b[2]) > 0.5 {
-					moved[gi]++
+				if abs32(v[0]-st.base[0]) > 0.5 || abs32(v[1]-st.base[1]) > 0.5 || abs32(v[2]-st.base[2]) > 0.5 {
+					st.moved++
+					groupMoved[gi]++
+				}
+				st.base = v
+			}
+		}
+		// 选组：moved>=3 的组按 struct 高 → dist 小；站桩 30s 后兜底锁
+		pick := -1
+		for gi := range sl {
+			if groupMoved[gi] >= 3 {
+				if pick < 0 || betterShortlist(sl, gi, pick) {
+					pick = gi
 				}
 			}
 		}
-// confirmed 后锁定组不再重算，防止副本组横跳
-// confirmed 后锁定组不再重算
-top := confirmed
-if top < 0 {
-	// sl 已按 d 小的在前排序（locate.go），选 d 最小的组
-	top = 0
-	// d 接近（<15m）的组里选 moved 最大的（活槽优先）
-	for i := 1; i < len(sl); i++ {
-		if sl[i].Dist < 15.0 && sl[i].Dist <= sl[top].Dist+15.0 && moved[i] > moved[top] {
-			top = i
+		if pick < 0 && time.Since(started) > 30*time.Second {
+			pick = 0
+			for gi := 1; gi < len(sl); gi++ {
+				if betterShortlist(sl, gi, pick) {
+					pick = gi
+				}
+			}
 		}
-	}
-}
-			if moved[top] >= 3 && top != confirmed {
-			confirmed = top
-			a := sl[top].Addrs[0]
+		// 防抖：当前锁槽读数在本轮监听中仍在更新（moved>0）→ 不切换。
+		// 真玩家槽的多个副本组会同时移动，频繁横跳会让 poll 反复跳变确认；
+		// 只有锁槽变死（玩家移动它不再同步）才允许切到其他移动组。
+		curMoving := false
+		if confirmed >= 0 {
+			lock.mu.RLock()
+			la := lock.addr
+			lock.mu.RUnlock()
+			if st, ok := states[la]; ok && st.moved > 0 {
+				curMoving = true
+			}
+		}
+		if pick >= 0 && pick != confirmed && !curMoving {
+			// 锁组内 moved 最高的地址（副本组里"会动"的那个才是真槽）
+			a := uintptr(0)
+			bestM := -1
+			for _, cand := range sl[pick].Addrs {
+				if st, ok := states[cand]; ok && st.moved > bestM {
+					bestM, a = st.moved, cand
+				}
+			}
+			if a == 0 {
+				a = sl[pick].Addrs[0]
+			}
+			confirmed = pick
 			lock.mu.Lock()
 			lock.addr = a
 			lock.verified = true
-			lock.copies = sl[top].Copies
+			lock.copies = sl[pick].Copies
 			lock.source = "scan"
 			lock.mu.Unlock()
 			addrs := loadKnownAddrs()
 			addrs = append(addrs, a)
 			saveKnown(addrs, guestBase.Load())
-			fmt.Printf("  [watch] locked onto group %d: copies=%d struct=%d mem=%v\n",
-				top, sl[top].Copies, sl[top].Struct, sl[top].Hud)
+			fmt.Printf("  [watch] locked onto group %d: copies=%d struct=%d mem=%v (addr 0x%X, moved=%d)\n",
+				pick, sl[pick].Copies, sl[pick].Struct, sl[pick].Hud, a, bestM)
+			// 锁到新槽后重置计数：只累计"本次锁定后"的移动（切换依据）
+			groupMoved = make([]int, len(sl))
+			for _, st := range states {
+				st.moved = 0
+			}
 		}
 	}
+}
+
+// betterShortlist 与 locate.go 排序同口径：struct>0 硬优先 → struct 降序 →
+// dist 升序 → copies 降序。
+func betterShortlist(sl []ShortlistEntry, i, j int) bool {
+	a, b := sl[i], sl[j]
+	aLive, bLive := a.Struct > 0, b.Struct > 0
+	if aLive != bLive {
+		return aLive
+	}
+	if a.Struct != b.Struct {
+		return a.Struct > b.Struct
+	}
+	if a.Dist != b.Dist {
+		return a.Dist < b.Dist
+	}
+	return a.Copies > b.Copies
 }
 
 func loadKnownAddrs() []uintptr {
@@ -377,9 +433,9 @@ func verifyKnown(addr uintptr) {
 		// 死槽（静止不动），要么是跳到无关数据的坏槽（跳变），都不是玩家坐标槽。
 		// 超时后按存档锚点重新扫描定位（20s 首试，失败后 2min 重试）。
 		lock.mu.RLock()
-		staleSrc, verifiedNow := lock.source, lock.verified
+		staleSrc := lock.source
 		lock.mu.RUnlock()
-		if staleSrc == "known" && !verifiedNow && time.Since(staleSince) >= staleGap {
+		if staleSrc == "known" && time.Since(staleSince) >= staleGap {
 			// Fix 1：超时无移动 ≠ 死槽——玩家站桩时锁一样「不动」。
 			// 先按存档锚点扫描一次：候选位置与当前锁接近（<verifyKeepDist）
 			// 说明锁的值就是玩家当前位置 → 站桩，锁有效，直接 verified；
@@ -393,10 +449,7 @@ func verifyKnown(addr uintptr) {
 					scanDist := float32(math.Sqrt(float64(dx*dx + dy*dy + dz*dz)))
 					if scanDist < verifyKeepDist {
 						fmt.Printf("  [verify] player idle (scan dist=%.1fm) - lock valid, keeping\n", scanDist)
-						lock.mu.Lock()
-						lock.verified = true
-						lock.mu.Unlock()
-						staleSince, staleGap = time.Now(), 2*time.Minute
+						staleSince, staleGap = time.Now(), 60*time.Second
 						continue
 					}
 					fmt.Printf("  [verify] scan dist=%.1fm disagrees -> re-locating\n", scanDist)
@@ -404,12 +457,12 @@ func verifyKnown(addr uintptr) {
 					fmt.Println("  [verify] idle check scan found nothing -> re-locating")
 				}
 			}
-			fmt.Printf("  [verify] address 0x%X never moves smoothly (%v); stale/bad slot -> re-locating\n", addr, staleGap)
+			fmt.Printf("  [verify] address 0x%X stale/bad (no movement sync) -> re-locating\n", addr)
 			relocalize("remembered address is stale or erratic (no smooth movement)")
 			if lock.addr != addr {
 				return
 			}
-			staleSince, staleGap = time.Now(), 2*time.Minute
+			staleSince, staleGap = time.Now(), 60*time.Second
 		}
 	}
 }

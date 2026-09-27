@@ -2,7 +2,8 @@
 //
 // 与 Python live-python/locate.py 的 read_save_triples 完全同口径：
 //   - progress.sav 在固定偏移保存玩家坐标（两份副本），caption.sav 镜像一份；
-//   - 存档存 (X_east, Z_stored, -Y_north)，其中 Z_stored = 真实高度 + ELEV_BIAS(105)；
+//   - 存档存 (X_east, Z_stored, Y_north)，其中 Z_stored = 真实高度 + ELEV_BIAS(105)；
+//     （注意：TOTK 第三轴是 +Y 北，与 BOTW 的 -Y 相反——不要取反！）
 //   - 六个槽共用同一 mtime，按“位置去重”而不是信任 mtime 顺序。
 
 package main
@@ -32,7 +33,7 @@ func abs32(v float32) float32 {
 
 type SaveAnchor struct {
 	Path string
-	Pos  [3]float32 // 内存序 (X, Z_stored, -Y)
+	Pos  [3]float32 // 内存序 (X, Z_stored, Y_north)
 }
 
 func totkSaveRoot() string {
@@ -103,15 +104,15 @@ func readTotkAnchors() []*SaveAnchor {
 			mx := math.Float32frombits(binary.LittleEndian.Uint32(data[off:]))
 			mz := math.Float32frombits(binary.LittleEndian.Uint32(data[off+4:]))
 			my := math.Float32frombits(binary.LittleEndian.Uint32(data[off+8:]))
-			gx, gz, gy := mx, mz-elevBias, -my
+			gx, gz, gy := mx, mz-elevBias, my
 			if !totkSane(gx, gy, gz) {
 				continue
 			}
-			mem := [3]float32{gx, mz, -my} // 内存序 (X, Z_stored, -Y)
+			mem := [3]float32{gx, mz, my} // 内存序 (X, Z_stored, Y_north)
 			key := [3]int32{
 				int32(math.Round(float64(gx) * 10)),
 				int32(math.Round(float64(mz) * 10)),
-				int32(math.Round(float64(-my) * 10)),
+				int32(math.Round(float64(my) * 10)),
 			}
 			if seen[key] {
 				continue

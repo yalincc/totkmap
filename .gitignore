@@ -20,3 +20,5 @@ live-go/status.json
 live-go/run-*.log
 live-go/run-events.log*
 live-go/*.exe~
+live-go/run_*.log
+live-go/run_*.err

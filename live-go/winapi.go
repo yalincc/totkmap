@@ -123,14 +123,17 @@ func readMem(h uintptr, addr uintptr, size int) []byte {
 	return buf[:got]
 }
 
-// guestBlocks 枚举所有足够大的 RW MEM_MAPPED 提交区域（去掉 32GB 高的镜像块）。
+// guestBlocks 与 live-python regions() 同口径：优先返回最大的 RW MEM_MAPPED
+// 提交块（Ryujinx 的 guest DRAM），仅当它 >=512MB 时只扫它——避免把其他区域的
+// 无矩阵坐标副本混进玩家组（struct 签名采样失真）。否则退回所有 >=minMB 的去镜像块。
 func guestBlocks(h uintptr, minMB float64) []struct{ Base, Size uintptr } {
 	minSize := uintptr(minMB * 1048576.0)
+	const limit = uintptr(0x7FFFFFFFFFFF)
+	const mirrorStep = uintptr(0x800000000)
+	var dram struct{ Base, Size uintptr }
 	var raw []struct{ Base, Size uintptr }
 	baseSet := map[uintptr]bool{}
 	addr := uintptr(0)
-	const limit = uintptr(0x7FFFFFFFFFFF)
-	const mirrorStep = uintptr(0x800000000)
 	for addr < limit {
 		var mbi MemoryBasicInformation
 		if virtualQueryEx(h, addr, &mbi) == 0 {
@@ -144,6 +147,9 @@ func guestBlocks(h uintptr, minMB float64) []struct{ Base, Size uintptr } {
 				raw = append(raw, struct{ Base, Size uintptr }{base, size})
 				baseSet[base] = true
 			}
+			if size > dram.Size {
+				dram = struct{ Base, Size uintptr }{base, size}
+			}
 		}
 		nxt := base + size
 		if nxt > addr {
@@ -151,6 +157,9 @@ func guestBlocks(h uintptr, minMB float64) []struct{ Base, Size uintptr } {
 		} else {
 			addr += 0x1000
 		}
+	}
+	if dram.Size >= 512*1048576 {
+		return []struct{ Base, Size uintptr }{dram}
 	}
 	var out []struct{ Base, Size uintptr }
 	for _, b := range raw {

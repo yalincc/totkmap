@@ -61,18 +61,20 @@ func floats(b []byte) []float32 {
 	return unsafe.Slice((*float32)(unsafe.Pointer(&b[0])), len(b)/4)
 }
 
-// decodePos 12 字节内存 → hud 序 (gx=X东, gy=Y北, gz=Z高)；无效返回 nil。
-// TOTK 内存序 = (X, Z_stored, -Y)，Z_stored = 真实高度 + elevBias(105)。
+// decodePos 12 字节内存 → hud 序 (gx=X东, gy=-Y北, gz=Z高)；无效返回 nil。
+// TOTK 内存序 = (X, Z_stored, Y_north)，Z_stored = 真实高度 + elevBias(105)。
+// 注意：hud gy = -Y北（负北向，与 live-python 的 hud=(X,-my,alt) 一致；前端
+// mx=-gy 得到地图北向坐标）。BOTW 是 -Y 北、TOTK 是 +Y 北，这里统一取反。
 func decodePos(d []byte) []float32 {
 	if len(d) < 12 {
 		return nil
 	}
 	a := floats(d[:12])
-	gx, zs, ny := a[0], a[1], a[2]
+	gx, zs, yn := a[0], a[1], a[2]
 	if a[0] == 0 && a[1] == 0 && a[2] == 0 {
 		return nil // 标题/加载画面，槽位未初始化
 	}
-	gy, gz := -ny, zs-elevBias
+	gy, gz := -yn, zs-elevBias
 	// Fix 5：近零残留（原点附近残留）判无效——known 快路径会锁零残留槽。
 	// 阈值 5.0 与运动扫描玩家候选门槛一致（真实坐标 |x|,|y| 都 >5）。
 	if abs32(gx) < 5 && abs32(gy) < 5 {
@@ -93,8 +95,9 @@ func rotOKBytes(buf []byte) bool {
 	if len(buf) < 64 {
 		return false
 	}
-	a := floats(buf[:64])
-	for st := 0; st+9 <= len(a); st++ {
+	a := floats(buf) // 128 字节 → 32 个 float
+	// 与 live-python rot_ok 完全同口径：st=4..16（检查 offset 4-24 共 13 个窗口）。
+	for st := 4; st < 17 && st+9 <= len(a); st++ {
 		m := a[st : st+9]
 		cols := [3][3]float32{
 			{m[0], m[3], m[6]},
@@ -286,11 +289,9 @@ func groupAndRank(h uintptr, hits []Hit) ([]*Group, []ShortlistEntry) {
 		top = top[:30]
 	}
 	for _, g := range top {
-		n := g.Addrs
-		if len(n) > 64 {
-			n = n[:64]
-		}
-		for _, a := range n {
+		// 检查组内全部地址（不限 64）：并发扫描使 hits 顺序不确定，
+		// 截断采样会把矩阵槽（ActorBase 特征）漏出窗口，导致玩家组 struct=0。
+		for _, a := range g.Addrs {
 			if rotOK(h, a) {
 				g.Struct++
 			}
@@ -298,13 +299,16 @@ func groupAndRank(h uintptr, hits []Hit) ([]*Group, []ShortlistEntry) {
 	}
 	sort.Slice(top, func(i, j int) bool {
 		a, b := top[i], top[j]
-		// d 小的优先（离存档锚点近，真槽在锚点附近）
-		if math.Abs(float64(a.Dist-b.Dist)) > 15.0 {
-			return a.Dist < b.Dist
+		// 与 live-python 排序完全一致：struct>0 硬优先 → struct 降序 → dist 升序 → copies 降序。
+		aLive, bLive := a.Struct > 0, b.Struct > 0
+		if aLive != bLive {
+			return aLive
 		}
-		// d 接近（<15m）：struct 高的优先（真槽 struct>=6，副本 struct=0~4）
 		if a.Struct != b.Struct {
 			return a.Struct > b.Struct
+		}
+		if a.Dist != b.Dist {
+			return a.Dist < b.Dist
 		}
 		return a.Copies > b.Copies
 	})
@@ -389,7 +393,7 @@ func locate(pid uint32, window float64, logf func(string)) *LocateResult {
 	log(fmt.Sprintf("shortlist: %d groups, %d addresses", len(shortlist), shortlistAddrs(shortlist)))
 	log(fmt.Sprintf("total %.1fs", time.Since(t0).Seconds()))
 
-	// best hud（展示顺序 X, Z, alt）
+	// best hud（展示顺序 X, -Y北, alt，与 Python candidate hud 同口径）
 	var hud [3]float32
 	if d := decodePos(readMem(h, addr, 12)); d != nil {
 		hud = [3]float32{d[0], d[1], d[2]}
