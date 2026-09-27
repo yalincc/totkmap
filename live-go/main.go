@@ -63,12 +63,12 @@ func main() {
 		fmt.Println("  Ryujinx not running yet - the state machine attaches as soon as it appears.")
 	}
 
-	// 块世代检测（启动前置）：参照块不在 → 游戏重启过 → 跳过 remembered 偏移
-	// 直接扫描，避免锁到旧块残留槽（值可读但位置错误、永不更新）。
+	// 块世代检测（启动前置）：参照块不在 → 游戏重启过 → 只扫当前会话块，
+	// 避免锁到旧块残留槽（值可读但位置错误、永不更新）。
 	if h := procHandleNow(); h != 0 {
 		blks := guestBlocks(h, minBlockMB)
 		if newOnes := detectNewBlocks(blks); newOnes != nil {
-			fmt.Printf("  [gen] game-restart detected at startup - skipping remembered offsets\n")
+			fmt.Printf("  [gen] game-restart detected at startup\n")
 			bestBase, bestSize := uintptr(0), uintptr(0)
 			for _, b := range blks {
 				for _, nb := range newOnes {
@@ -78,7 +78,6 @@ func main() {
 				}
 			}
 			currentSessionBase = bestBase
-			skipKnownOnce = true
 			fmt.Printf("  [gen] current session block 0x%X\n", currentSessionBase)
 		}
 	}

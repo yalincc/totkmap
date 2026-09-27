@@ -1,11 +1,17 @@
-// 定位核心（重构版）：单一状态机。
-// 设计见《TOTKmap go定位核心重构方案.md》：一个 goroutine 5Hz 循环独占 lock.addr，
-// 两态循环——UNLOCKED（known 快路径 / 存档锚点扫描 → 锁定）与 LOCKED（读数跟随、
-// 移动确认 verified、传送检测、30s 站桩核对）。判据只有三条硬规则：
-//   读数失效 ×3 / 相邻采样位移 >300m（传送）/ 站桩核对位置差 >15m → 回 UNLOCKED 重扫。
-// 已删除旧版的多事件源机制：teleportCh、jitterCheck 黑名单、组内 swap、
-// watchShortlist 多 goroutine、betterStruct/betterMoved/betterIdle 多级策略、
-// verifyKnown、watchdog、motion scan。块世代检测与 known_addrs 记忆保留。
+// 定位核心（方案 A：锁住就信，零自动扫描）。
+// 对齐 live-python server.py / BotwNavi 被验证稳定的三个要素：
+//   1. 全量扫描只在三种时机：程序启动、读数失效（读图/换场景）、手动 /rescan。
+//      没有"站桩核对"、没有周期性重扫——扫描要读 6GB 内存，会拖卡游戏。
+//   2. 锁定后 5Hz 纯读跟随；传送 = 值大跳变 = 直接接受新位置（BotwNavi poll 同款）。
+//   3. 防冻结槽从源头解决：扫描候选不立即信任，进入"监听确认"（python
+//      watch_shortlist 同款）——同时观察 top 组，谁在动锁谁；玩家在动必中活槽。
+// 兜底（全部零扫描）：
+//   - known 快路径：解锁后扫描先行，known 只作为扫描失败期间的 1s 一试备胎；
+//   - 冻结共识：锁读数停滞 ≥30s 时读 known 偏移（十几次 12B 读，微秒级），
+//     ≥3 个互相一致且与本锁差 >15m → 记为候选；候选在下一次检查时"动了"
+//     才换锁（活副本证明），玩家站桩时绝不误换。
+// 已删除（迭代中证明弊大于利）：站桩核对、自证回扫、无佐证回扫、
+// teleport 共识仲裁、skipKnownOnce 强制扫描。
 
 package main
 
@@ -90,7 +96,7 @@ func guestRamBase() uintptr {
 	return base
 }
 
-// tryOffsets known fast path：把记住的偏移 rebase 到当前块并读取（多副本一致才算数）。
+// tryOffsets known 快路径：把记住的偏移 rebase 到当前块并读取（多副本一致才算数）。
 func tryOffsets() (uintptr, [3]float32, bool) {
 	if !reopenProcess() {
 		return 0, [3]float32{}, false
@@ -221,34 +227,28 @@ func sessionBlocks(h uintptr) []struct{ Base, Size uintptr } {
 // ---- 单一状态机 ----
 
 const (
-	smTick       = 200 * time.Millisecond // 5Hz 循环
-	invalidMax   = 10                     // 连续读数无效次数 → 回 UNLOCKED（~2s，扛过读图 Loading）
-	teleportDist = 300.0                  // 相邻采样位移超过 → 判传送，回 UNLOCKED
-	moveDist     = 0.5                    // 移动确认最小位移（游戏单位/采样）
-	moveConfirmN = 3                      // 连续移动采样次数 → verified
-	reconEvery   = 30 * time.Second       // 站桩核对周期（verified 锁）
-	reconFast    = 10 * time.Second       // 站桩核对周期（未 verified 锁，冻结槽快速识别）
-	reconDist    = 15.0                   // 站桩核对允许位置差
-	scanCooldown = 15 * time.Second       // UNLOCKED 全量扫描重试间隔
-	knownRetry   = 1 * time.Second        // UNLOCKED known 快路径重试间隔
+	smTick        = 200 * time.Millisecond // 5Hz 循环
+	invalidMax    = 10                     // 连续读数无效次数 → 回 UNLOCKED（~2s，扛过读图 Loading）
+	teleportDist  = 300.0                  // 相邻采样位移超过 → 判传送
+	moveDist      = 0.5                    // 移动确认最小位移（游戏单位/采样）
+	moveConfirmN  = 3                      // 连续移动采样次数 → verified
+	scanCooldown  = 15 * time.Second       // 扫描失败重试间隔（成功后由解锁事件清零触发立即扫）
+	knownRetry    = 1 * time.Second        // known 快路径重试间隔（扫描失败期间）
+	probeEvery    = 600 * time.Millisecond // 监听确认采样周期
+	probeMoveN    = 3                      // 组内移动采样次数 ≥ 此值 → 判活组
+	probeLife     = 60 * time.Second       // 监听确认最长持续时间
+	probeAddrCap  = 24                     // 每组最多观察的地址数
+	frozenTicks   = 150                    // 锁读数停滞 tick 数（30s）→ 启动共识兜底检查
+	consensusMin  = 3                      // 共识簇最少成员数
+	consensusDist = 15.0                   // 共识位置与本锁读数的最小差
+	consensusEvery = 1 * time.Second       // 共识检查间隔
 )
 
 var (
 	rescanCh   chan struct{} // /rescan 请求（server.go → requestRescan）
-	reconCh    chan reconRes // 站桩核对结果（缓冲 1，仅状态机消费）
-	reconBusy  atomic.Bool
 	lastScanAt time.Time
 	useSaveScan = true // --no-save 时关闭存档锚点扫描（known 快路径不受影响）
-	// skipKnownOnce：启动/游戏重启后首轮跳过 known 快路径——旧块残留偏移
-	// rebase 到新块后可能"值可读但位置错误"，先靠扫描建立本次会话的锁。
-	skipKnownOnce bool
 )
-
-type reconRes struct {
-	found bool
-	hud   [3]float32
-	addr  uintptr // 扫描最佳候选地址（与锁地址比对识别"自证"）
-}
 
 func setLock(addr uintptr, verified bool, copies int, source string) {
 	lock.mu.Lock()
@@ -265,13 +265,7 @@ func goUnlocked(reason string) {
 	state.ok = false
 	state.source = "locating..."
 	state.mu.Unlock()
-	// 任何异常解锁后都强制先全量扫描一次：传送/场景切换后 remembered 偏移
-	// 极可能是冻结的旧值——多副本会"一致地冻结"，能骗过 known 共识检查。
-	// --no-save 模式没有扫描可用，不能跳过 known（否则永久无锁）。
-	if useSaveScan {
-		skipKnownOnce = true
-	}
-	lastScanAt = time.Time{} // 清掉扫描冷却：解锁后下一 tick 立即扫，不再等 15s
+	lastScanAt = time.Time{} // 解锁后下一拍立即扫描；15s 冷却只约束"扫不到"的重试
 	fmt.Printf("  [sm] -> UNLOCKED (%s)\n", reason)
 }
 
@@ -289,21 +283,78 @@ func dist3(a, b [3]float32) float32 {
 	return float32(math.Sqrt(float64(dx*dx + dy*dy + dz*dz)))
 }
 
+// consensusCopy 在 known 偏移里找最大一致簇（互相 <2m，排除本锁地址）。
+// 返回簇的一个代表地址与位置；成员 < consensusMin 视为无共识。
+func consensusCopy(h uintptr, exclude uintptr) (uintptr, [3]float32, bool) {
+	base := currentSessionBase
+	if base == 0 {
+		base = loadKnownBlock()
+	}
+	if base == 0 {
+		return 0, [3]float32{}, false
+	}
+	type val struct {
+		addr uintptr
+		pos  [3]float32
+	}
+	var vals []val
+	for _, o := range loadOffsets() {
+		adr := base + o
+		if adr == exclude {
+			continue
+		}
+		if d := decodePos(readMem(h, adr, 12)); d != nil {
+			vals = append(vals, val{adr, [3]float32{d[0], d[1], d[2]}})
+		}
+	}
+	best, bestN := val{}, 0
+	for _, x := range vals {
+		n := 0
+		for _, y := range vals {
+			if dist3(x.pos, y.pos) < 2 {
+				n++
+			}
+		}
+		if n > bestN {
+			best, bestN = x, n
+		}
+	}
+	if bestN < consensusMin {
+		return 0, [3]float32{}, false
+	}
+	return best.addr, best.pos, true
+}
+
 // stateMachine 定位主循环：全程序只有这里写 lock.addr。
 func stateMachine() {
 	rescanCh = make(chan struct{}, 1)
-	reconCh = make(chan reconRes, 1)
 
 	inLocked := false
 	var prev [3]float32 // 上一次有效读数（hud 序）
 	hasPrev := false
-	moveN := 0        // 连续移动采样计数（≥moveConfirmN → verified）
-	movedWin := false // 本核对周期内出现过移动（锁活性证明）
+	moveN := 0    // 连续移动采样计数（≥moveConfirmN → verified）
+	invalidN := 0 // 连续读数无效计数
+	frozenN := 0  // 锁读数停滞 tick 计数（共识兜底触发用）
 	savedKnown := false
-	invalidN := 0
-	selfN := 0 // 核对"自证"计数（扫描最佳候选==锁地址且未 verified）
-	lastReco := time.Now()
 	lastKnownAt := time.Now().Add(-knownRetry)
+	lastConsensusAt := time.Time{}
+	consensusCand := uintptr(0) // 冻结共识候选（需"动了"才换锁）
+	var consensusCandPos [3]float32
+
+	// 监听确认（probe）状态：观察 shortlist 各组，谁在动锁谁
+	probing := false
+	var probeGroups []ShortlistEntry
+	probeBase := map[uintptr][3]float32{}
+	var probeMoved []int
+	var probeStart, probeLast time.Time
+	probeLockGi := -1 // 当前锁来自哪个探针组（该组由 moveN 正常确认）
+
+	resetFollow := func() {
+		prev, hasPrev = [3]float32{}, false
+		moveN, invalidN, frozenN = 0, 0, 0
+		savedKnown = false
+		consensusCand = 0
+	}
 
 	tick := time.NewTicker(smTick)
 	defer tick.Stop()
@@ -341,7 +392,6 @@ func stateMachine() {
 						}
 					}
 					currentSessionBase = bestBase
-					skipKnownOnce = true
 					lastScanAt = time.Time{}
 					if inLocked {
 						inLocked = false
@@ -362,87 +412,107 @@ func stateMachine() {
 		default:
 		}
 
-		// 3) 消费站桩核对结果（未锁定时结果作废直接丢弃）
-		select {
-		case r := <-reconCh:
-			if !inLocked {
-				break // 只跳出 select
-			}
-			lock.mu.RLock()
-			a, ver := lock.addr, lock.verified
-			lock.mu.RUnlock()
-			if a == 0 {
-				break
-			}
-			if r.found && r.addr == a {
-				// 扫描最佳候选就是当前锁地址：无法区分"锁活着"与"冻结值自证"。
-				// 已 verified → 信任移动记录；未 verified 连续 2 次自证 → 重扫。
-				if !ver {
-					selfN++
-					if selfN >= 2 {
-						inLocked = false
-						goUnlocked("idle check: unverified lock self-confirmed x2")
-					}
-				}
-				break
-			}
-			if !r.found {
-				// 扫描无结果：verified 锁信任（玩家离存档锚点远属正常）；
-				// 未 verified 的锁没有任何佐证 → 大概率冻结槽，立即重扫。
-				if !ver {
-					inLocked = false
-					goUnlocked("idle check: no scan corroboration on unverified lock")
-				}
-				break
-			}
-			if v := decodePos(readMem(h, a, 12)); v != nil {
-				cur := [3]float32{v[0], v[1], v[2]}
-				d := dist3(r.hud, cur)
-				if d > reconDist {
-					inLocked = false
-					goUnlocked(fmt.Sprintf("idle check mismatch: scan %.0fm away from lock", d))
-					continue
-				}
-				fmt.Printf("  [sm] idle check ok (scan dist %.0fm) - lock stands\n", d)
-			}
-		default:
-		}
-
-		// ---- UNLOCKED：known 快路径 → 存档锚点全量扫描 → 锁定候选 ----
+		// ---- UNLOCKED：扫描先行（解锁时冷却已清零），known 作为扫描失败期间的备胎 ----
 		if !inLocked {
-			if !skipKnownOnce && time.Since(lastKnownAt) >= knownRetry {
-				lastKnownAt = time.Now()
-				if a, v, ok := tryOffsets(); ok {
-					setLock(a, false, 0, "known")
-					inLocked = true
-					hasPrev, moveN, movedWin, savedKnown, invalidN, selfN = false, 0, false, false, 0, 0
-					lastReco = time.Now()
-					fmt.Printf("  [sm] known offset -> lock 0x%X mem=(%.1f, %.1f, %.1f) [pending move confirm]\n",
-						a, v[0], v[1], v[2])
-					continue
-				}
-			}
 			if useSaveScan && time.Since(lastScanAt) >= scanCooldown {
 				lastScanAt = time.Now()
-				skipKnownOnce = false // 扫过一次后 known 快路径恢复可用
 				res := locate(procPID, 120.0, sessionBlocks(h), func(s string) { fmt.Println("    " + s) })
 				if res != nil {
 					setLock(res.Addr, false, res.Copies, "scan")
 					inLocked = true
-					hasPrev, moveN, movedWin, savedKnown, invalidN, selfN = false, 0, false, false, 0, 0
-					lastReco = time.Now()
-					fmt.Printf("  [sm] scan -> lock 0x%X copies=%d struct=%d mem=(%.1f, %.1f, %.1f) [pending move confirm]\n",
-						res.Addr, res.Copies, res.Struct, res.Hud[0], res.Hud[1], res.Hud[2])
+					resetFollow()
+					// 建立监听确认：观察 shortlist 各组，谁在动锁谁
+					if len(res.Shortlist) > 0 {
+						probing = true
+						probeGroups = res.Shortlist
+						probeMoved = make([]int, len(probeGroups))
+						probeBase = map[uintptr][3]float32{}
+						probeStart, probeLast = time.Now(), time.Time{}
+						probeLockGi = 0 // best=ranked[0]
+					}
+					fmt.Printf("  [sm] scan -> lock 0x%X copies=%d struct=%d mem=(%.1f, %.1f, %.1f) [probing %d groups]\n",
+						res.Addr, res.Copies, res.Struct, res.Hud[0], res.Hud[1], res.Hud[2], len(probeGroups))
 				} else {
 					fmt.Println("  [sm] scan found nothing - retrying")
+				}
+				continue
+			}
+			if time.Since(lastKnownAt) >= knownRetry {
+				lastKnownAt = time.Now()
+				if a, v, ok := tryOffsets(); ok {
+					setLock(a, false, 0, "known")
+					inLocked = true
+					resetFollow()
+					probing = false
+					probeGroups = nil
+					fmt.Printf("  [sm] known offset -> lock 0x%X mem=(%.1f, %.1f, %.1f) [pending move confirm]\n",
+						a, v[0], v[1], v[2])
 				}
 			}
 			continue
 		}
 
-		// ---- LOCKED：读锁地址 → 跟随 / 校验 ----
+		// ---- LOCKED ----
 		lock.mu.RLock()
 		a := lock.addr
+		lock.mu.RUnlock()
+		if a == 0 {
+			inLocked = false
+			continue
+		}
+
+		// 监听确认（600ms 一拍）：观察各组是否在动；本锁未 verified 时"谁在动锁谁"
+		if probing && time.Since(probeLast) >= probeEvery {
+			probeLast = time.Now()
+			for gi, g := range probeGroups {
+				n := len(g.Addrs)
+				if n > probeAddrCap {
+					n = probeAddrCap
+				}
+				for i := 0; i < n; i++ {
+					adr := g.Addrs[i]
+					d := decodePos(readMem(h, adr, 12))
+					if d == nil {
+						continue
+					}
+					v := [3]float32{d[0], d[1], d[2]}
+					b, ok := probeBase[adr]
+					probeBase[adr] = v
+					if ok && dist3(v, b) > moveDist {
+						probeMoved[gi]++
+					}
+				}
+			}
+			lock.mu.RLock()
+			ver := lock.verified
+			lock.mu.RUnlock()
+			if ver {
+				probing = false // 本锁已由移动确认，不再换
+			} else {
+				bestGi, bestMv := -1, 0
+				for gi, mv := range probeMoved {
+					if mv >= probeMoveN && gi != probeLockGi && mv > bestMv {
+						bestGi, bestMv = gi, mv
+					}
+				}
+				if bestGi >= 0 {
+					adr := probeGroups[bestGi].Addrs[0]
+					setLock(adr, true, probeGroups[bestGi].Copies, "probe")
+					saveKnown([]uintptr{adr}, currentSessionBase)
+					probing = false
+					resetFollow()
+					a = adr
+					fmt.Printf("  [sm] probe -> switched to moving group #%d copies=%d addr=0x%X\n",
+						bestGi, probeGroups[bestGi].Copies, adr)
+				}
+			}
+			if probing && time.Since(probeStart) > probeLife {
+				probing = false
+			}
+		}
+
+		lock.mu.RLock()
+		a = lock.addr // probe 可能已换锁
 		lock.mu.RUnlock()
 		if a == 0 {
 			inLocked = false
@@ -465,35 +535,19 @@ func stateMachine() {
 		cur := [3]float32{v[0], v[1], v[2]}
 		delta := dist3(cur, prev)
 
-		// 传送处理（BotwNavi 思路：大位移 ≠ 锁坏）。verified 锁出现 >300m 跳变时
-		// 槽位大概率还活着、新值就是传送后的真实位置——用 known 偏移共识仲裁，
-		// 三种结果都不需要全量扫描（避免 6GB 读取拖卡游戏）：
-		//   共识 ≈ 跳变值         → 就地接受，零扫描零卡顿
-		//   共识存在但与跳变值不符 → 锁到共识活副本（槽地址未变，只是本槽冻结了）
-		//   无共识 / 锁未 verified → 跳变不可信，回 UNLOCKED（冷却已清零，立即扫）
+		// 传送：verified 锁的大位移就是真传送，直接接受新位置（零扫描）。
+		// 未 verified 的锁出现大位移 = 坏槽跳变，回扫。
 		if hasPrev && delta > teleportDist {
-			incCounter("jumps")
 			lock.mu.RLock()
 			ver := lock.verified
 			lock.mu.RUnlock()
-			accepted := false
 			if ver {
-				if a2, v2, ok := tryOffsets(); ok {
-					if dist3(v2, cur) < 5.0 {
-						fmt.Printf("  [sm] teleport %.0fm accepted in place (known consensus agrees, no scan)\n", delta)
-						setLock(a, false, 0, "scan") // 降回未验证：移动 0.6s 重验；冻结则 10s 核对兜底
-					} else {
-						setLock(a2, false, 0, "known")
-						cur = v2
-						fmt.Printf("  [sm] teleport %.0fm -> relock to live consensus copy 0x%X (no scan)\n", delta, a2)
-					}
-					accepted = true
-					lastReco = time.Now() // 传送刚落定，推迟站桩核对
-				}
-			}
-			if !accepted {
+				incCounter("jumps")
+				frozenN = 0
+				fmt.Printf("  [sm] teleport jump %.0fm accepted in place (no scan)\n", delta)
+			} else {
 				inLocked = false
-				goUnlocked(fmt.Sprintf("teleport %.0fm with no consensus -> rescan", delta))
+				goUnlocked(fmt.Sprintf("teleport jump %.0fm on unverified lock -> rescan", delta))
 				continue
 			}
 		}
@@ -501,7 +555,7 @@ func stateMachine() {
 		// 移动确认：连续 3 次采样位移 >0.5m → verified（写 known 记忆）
 		if hasPrev && delta > moveDist {
 			moveN++
-			movedWin = true
+			frozenN = 0
 			if moveN >= moveConfirmN {
 				lock.mu.Lock()
 				if !lock.verified {
@@ -509,6 +563,7 @@ func stateMachine() {
 					lock.verified = true
 				}
 				lock.mu.Unlock()
+				probing = false
 				if !savedKnown {
 					savedKnown = true
 					saveKnown([]uintptr{a}, currentSessionBase)
@@ -516,6 +571,9 @@ func stateMachine() {
 			}
 		} else {
 			moveN = 0
+			if hasPrev {
+				frozenN++
+			}
 		}
 
 		// 更新 STATE（/pos 输出口径与旧版一致）
@@ -535,41 +593,27 @@ func stateMachine() {
 		prev = cur
 		hasPrev = true
 
-		// 站桩核对：verified 锁每 30s 一次；未 verified 每 10s 一次（冻结槽快速识别）。
-		// 只在"本周期无移动"时执行——移动本身就是锁活性证明，冻结的锁不会动；
-		// 移动期间扫描会拖出轨迹簇，核对结果不可靠（旧版误杀的根源）。
-		reconWait := reconEvery
-		if !verified {
-			reconWait = reconFast
-		}
-		if time.Since(lastReco) >= reconWait {
-			lastReco = time.Now()
-			if movedWin {
-				movedWin = false
-			} else if !reconBusy.Swap(true) {
-				go runReconcile(h, prev)
+		// 冻结共识兜底（零扫描）：锁读数停滞 ≥30s 时，找 known 偏移里与本锁
+		// 差 >15m 的 ≥3 成员一致簇作候选；候选在下一次检查"动了"（活副本证明）
+		// 才换锁——玩家站桩时绝不误换，玩家一动 1~2s 内自愈。
+		if frozenN >= frozenTicks && time.Since(lastConsensusAt) >= consensusEvery {
+			lastConsensusAt = time.Now()
+			a2, v2, ok := consensusCopy(h, a)
+			if !ok {
+				consensusCand = 0
+			} else if a2 != consensusCand {
+				consensusCand, consensusCandPos = a2, v2
+				fmt.Printf("  [sm] lock frozen %.0fs, consensus candidate 0x%X (%.0fm away) - watching\n",
+					frozenTicks*smTick.Seconds(), a2, dist3(v2, cur))
+			} else if dist3(v2, consensusCandPos) > moveDist {
+				// 候选位置变了 = 活副本在跟随玩家 → 换锁
+				fmt.Printf("  [sm] frozen lock 0x%X -> relock to live consensus copy 0x%X\n", a, a2)
+				setLock(a2, false, 0, "consensus")
+				resetFollow()
+				probing = false
+				continue
 			}
 		}
-	}
-}
-
-// runReconcile 后台执行站桩核对扫描（只算结果，不写锁——状态机是唯一写者）。
-func runReconcile(h uintptr, cur [3]float32) {
-	defer reconBusy.Store(false)
-	res := locate(procPID, 120.0, sessionBlocks(h), nil)
-	r := reconRes{}
-	if res != nil {
-		r.found = true
-		r.hud = res.Hud
-		r.addr = res.Addr
-	}
-	select { // 先清掉可能滞留的旧结果，保证消费到的是本次扫描
-	case <-reconCh:
-	default:
-	}
-	select {
-	case reconCh <- r:
-	default:
 	}
 }
 
