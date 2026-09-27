@@ -226,7 +226,8 @@ const (
 	teleportDist = 300.0                  // 相邻采样位移超过 → 判传送，回 UNLOCKED
 	moveDist     = 0.5                    // 移动确认最小位移（游戏单位/采样）
 	moveConfirmN = 3                      // 连续移动采样次数 → verified
-	reconEvery   = 30 * time.Second       // 站桩核对周期
+	reconEvery   = 30 * time.Second       // 站桩核对周期（verified 锁）
+	reconFast    = 10 * time.Second       // 站桩核对周期（未 verified 锁，冻结槽快速识别）
 	reconDist    = 15.0                   // 站桩核对允许位置差
 	scanCooldown = 15 * time.Second       // UNLOCKED 全量扫描重试间隔
 	knownRetry   = 1 * time.Second        // UNLOCKED known 快路径重试间隔
@@ -246,6 +247,7 @@ var (
 type reconRes struct {
 	found bool
 	hud   [3]float32
+	addr  uintptr // 扫描最佳候选地址（与锁地址比对识别"自证"）
 }
 
 func setLock(addr uintptr, verified bool, copies int, source string) {
@@ -263,6 +265,12 @@ func goUnlocked(reason string) {
 	state.ok = false
 	state.source = "locating..."
 	state.mu.Unlock()
+	// 任何异常解锁后都强制先全量扫描一次：传送/场景切换后 remembered 偏移
+	// 极可能是冻结的旧值——多副本会"一致地冻结"，能骗过 known 共识检查。
+	// --no-save 模式没有扫描可用，不能跳过 known（否则永久无锁）。
+	if useSaveScan {
+		skipKnownOnce = true
+	}
 	fmt.Printf("  [sm] -> UNLOCKED (%s)\n", reason)
 }
 
@@ -292,6 +300,7 @@ func stateMachine() {
 	movedWin := false // 本核对周期内出现过移动（锁活性证明）
 	savedKnown := false
 	invalidN := 0
+	selfN := 0 // 核对"自证"计数（扫描最佳候选==锁地址且未 verified）
 	lastReco := time.Now()
 	lastKnownAt := time.Now().Add(-knownRetry)
 
@@ -355,22 +364,45 @@ func stateMachine() {
 		// 3) 消费站桩核对结果（未锁定时结果作废直接丢弃）
 		select {
 		case r := <-reconCh:
-			if inLocked && r.found {
-				lock.mu.RLock()
-				a := lock.addr
-				lock.mu.RUnlock()
-				if a != 0 {
-					if v := decodePos(readMem(h, a, 12)); v != nil {
-						cur := [3]float32{v[0], v[1], v[2]}
-						d := dist3(r.hud, cur)
-						if d > reconDist {
-							inLocked = false
-							goUnlocked(fmt.Sprintf("idle check mismatch: scan %.0fm away from lock", d))
-							continue
-						}
-						fmt.Printf("  [sm] idle check ok (scan dist %.0fm) - lock stands\n", d)
+			if !inLocked {
+				break // 只跳出 select
+			}
+			lock.mu.RLock()
+			a, ver := lock.addr, lock.verified
+			lock.mu.RUnlock()
+			if a == 0 {
+				break
+			}
+			if r.found && r.addr == a {
+				// 扫描最佳候选就是当前锁地址：无法区分"锁活着"与"冻结值自证"。
+				// 已 verified → 信任移动记录；未 verified 连续 2 次自证 → 重扫。
+				if !ver {
+					selfN++
+					if selfN >= 2 {
+						inLocked = false
+						goUnlocked("idle check: unverified lock self-confirmed x2")
 					}
 				}
+				break
+			}
+			if !r.found {
+				// 扫描无结果：verified 锁信任（玩家离存档锚点远属正常）；
+				// 未 verified 的锁没有任何佐证 → 大概率冻结槽，立即重扫。
+				if !ver {
+					inLocked = false
+					goUnlocked("idle check: no scan corroboration on unverified lock")
+				}
+				break
+			}
+			if v := decodePos(readMem(h, a, 12)); v != nil {
+				cur := [3]float32{v[0], v[1], v[2]}
+				d := dist3(r.hud, cur)
+				if d > reconDist {
+					inLocked = false
+					goUnlocked(fmt.Sprintf("idle check mismatch: scan %.0fm away from lock", d))
+					continue
+				}
+				fmt.Printf("  [sm] idle check ok (scan dist %.0fm) - lock stands\n", d)
 			}
 		default:
 		}
@@ -382,7 +414,7 @@ func stateMachine() {
 				if a, v, ok := tryOffsets(); ok {
 					setLock(a, false, 0, "known")
 					inLocked = true
-					hasPrev, moveN, movedWin, savedKnown, invalidN = false, 0, false, false, 0
+					hasPrev, moveN, movedWin, savedKnown, invalidN, selfN = false, 0, false, false, 0, 0
 					lastReco = time.Now()
 					fmt.Printf("  [sm] known offset -> lock 0x%X mem=(%.1f, %.1f, %.1f) [pending move confirm]\n",
 						a, v[0], v[1], v[2])
@@ -396,7 +428,7 @@ func stateMachine() {
 				if res != nil {
 					setLock(res.Addr, false, res.Copies, "scan")
 					inLocked = true
-					hasPrev, moveN, movedWin, savedKnown, invalidN = false, 0, false, false, 0
+					hasPrev, moveN, movedWin, savedKnown, invalidN, selfN = false, 0, false, false, 0, 0
 					lastReco = time.Now()
 					fmt.Printf("  [sm] scan -> lock 0x%X copies=%d struct=%d mem=(%.1f, %.1f, %.1f) [pending move confirm]\n",
 						res.Addr, res.Copies, res.Struct, res.Hud[0], res.Hud[1], res.Hud[2])
@@ -477,10 +509,14 @@ func stateMachine() {
 		prev = cur
 		hasPrev = true
 
-		// 站桩核对：每 30s 一次全量扫描，扫描候选与锁位置差 >15m → 重扫。
+		// 站桩核对：verified 锁每 30s 一次；未 verified 每 10s 一次（冻结槽快速识别）。
 		// 只在"本周期无移动"时执行——移动本身就是锁活性证明，冻结的锁不会动；
 		// 移动期间扫描会拖出轨迹簇，核对结果不可靠（旧版误杀的根源）。
-		if time.Since(lastReco) >= reconEvery {
+		reconWait := reconEvery
+		if !verified {
+			reconWait = reconFast
+		}
+		if time.Since(lastReco) >= reconWait {
 			lastReco = time.Now()
 			if movedWin {
 				movedWin = false
@@ -499,6 +535,7 @@ func runReconcile(h uintptr, cur [3]float32) {
 	if res != nil {
 		r.found = true
 		r.hud = res.Hud
+		r.addr = res.Addr
 	}
 	select { // 先清掉可能滞留的旧结果，保证消费到的是本次扫描
 	case <-reconCh:
