@@ -14,3 +14,9 @@ desktop.ini
 live-python/known_addrs.json
 live-go/known_addrs.json
 tiles_obj/*/7/
+live-go/TOTKNavi.exe
+live-go/*.exe
+live-go/status.json
+live-go/run-*.log
+live-go/run-events.log*
+live-go/*.exe~
