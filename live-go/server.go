@@ -72,7 +72,7 @@ func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 	case "/rescan":
 		if r.Method == http.MethodGet {
-			go relocalize("/rescan requested")
+			requestRescan()
 			writeJSON(w, map[string]any{"started": true})
 		} else {
 			writeJSON(w, map[string]any{"ok": false})

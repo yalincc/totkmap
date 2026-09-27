@@ -1,10 +1,14 @@
-﻿// BotwNavi（BOTW live 追踪服务，Go 版）
+﻿// TOTKNavi（TOTK live 追踪服务，Go 版）
 //
-// 用途：在本地为在线互动地图 https://botw.yalin.site/ 提供实时角色追踪。
+// 用途：在本地为互动地图 https://totk.yalin.site/ 提供实时角色追踪。
 // 原理：读 Ryujinx 模拟器进程内存定位玩家坐标 → HTTP API（127.0.0.1:8766）
 // → 在线地图页跨域连接显示红点/轨迹/导航。
 //
-// 用法：botwlive.exe [port] [--no-open] [--no-save]
+// 定位核心（watch.go）是单一状态机：UNLOCKED（known 快路径/存档锚点扫描）→
+// LOCKED（跟随 + 移动确认 + 传送检测 + 30s 站桩核对），自动处理传送、场景
+// 切换、游戏重启，无需手动"调整"。
+//
+// 用法：TOTKNavi.exe [port] [--no-open] [--no-save]
 
 package main
 
@@ -27,13 +31,12 @@ func main() {
 
 	port := 8766
 	autoOpen := true
-	useSave := true
 	for _, a := range os.Args[1:] {
 		switch {
 		case a == "--no-open":
 			autoOpen = false
 		case a == "--no-save":
-			useSave = false
+			useSaveScan = false
 		case strings.HasPrefix(a, "--"):
 			// ignore
 		default:
@@ -57,50 +60,34 @@ func main() {
 		procHandle, procPID = h, pid
 		fmt.Printf("  pid = %d\n", pid)
 	} else {
-		fmt.Println("  Ryujinx not running yet - the watchdog attaches as soon as it appears.")
+		fmt.Println("  Ryujinx not running yet - the state machine attaches as soon as it appears.")
+	}
+
+	// 块世代检测（启动前置）：参照块不在 → 游戏重启过 → 跳过 remembered 偏移
+	// 直接扫描，避免锁到旧块残留槽（值可读但位置错误、永不更新）。
+	if h := procHandleNow(); h != 0 {
+		blks := guestBlocks(h, minBlockMB)
+		if newOnes := detectNewBlocks(blks); newOnes != nil {
+			fmt.Printf("  [gen] game-restart detected at startup - skipping remembered offsets\n")
+			bestBase, bestSize := uintptr(0), uintptr(0)
+			for _, b := range blks {
+				for _, nb := range newOnes {
+					if b.Base == nb && b.Size > bestSize {
+						bestBase, bestSize = b.Base, b.Size
+					}
+				}
+			}
+			currentSessionBase = bestBase
+			skipKnownOnce = true
+			fmt.Printf("  [gen] current session block 0x%X\n", currentSessionBase)
+		}
 	}
 
 	progress = newProgressWatcher()
 	go progress.loop()
 
-	fmt.Println("  stage 0: remembered offsets (no scan needed) ...")
-	if a, v, ok := tryOffsets(); ok {
-		lock.mu.Lock()
-		lock.addr = a
-		lock.verified = false
-		lock.copies = 0
-		lock.source = "known"
-		lock.mu.Unlock()
-		fmt.Printf("  address 0x%X -> mem=(%.1f, %.1f, %.1f)   [fast path, no scan]\n", a, v[0], v[1], v[2])
-		fmt.Println("  it is marked verified as soon as the value moves.")
-	} else if reopenProcess() {
-		fmt.Println("  stage 1: save anchor + anchored scan ...")
-		if !(useSave && relocalize("remembered addresses unusable")) {
-			fmt.Println("  stage 2: motion scan (walk a few steps when prompted)")
-			if a2 := locateByMotion(); a2 != 0 {
-				lock.mu.Lock()
-				lock.addr = a2
-				lock.verified = true
-				lock.copies = 0
-				lock.source = "motion"
-				lock.mu.Unlock()
-				saveKnown(append([]uintptr{a2}, loadKnownAddrs()...), guestBase.Load())
-			} else {
-				fmt.Println("  no luck yet - serving anyway, the watchdog keeps trying.")
-			}
-		}
-	} else {
-		fmt.Println("  Ryujinx is not running yet - serving anyway.")
-		fmt.Println("  Map + collection progress work now; the live dot starts as")
-		fmt.Println("  soon as the emulator appears (watchdog, no restart needed).")
-	}
-
-	go poll()
-	go watchdog()
+	go stateMachine()
 	go statusLoop()
-	if a0 := lockAddr(); a0 != 0 {
-		go verifyKnown(a0)
-	}
 
 	time.Sleep(500 * time.Millisecond)
 
@@ -138,12 +125,6 @@ func main() {
 	}
 	fmt.Printf("  API -> http://%s/pos\n", addr)
 	http.Serve(ln, &server{})
-}
-
-func lockAddr() uintptr {
-	lock.mu.RLock()
-	defer lock.mu.RUnlock()
-	return lock.addr
 }
 
 func openBrowser(url string) {

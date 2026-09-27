@@ -1,13 +1,17 @@
-// 运行状态机：坐标轮询、看门狗、校验、短名单监听、运动扫描兜底。
-// 完全对应 Python start.py 的 poll / watchdog / verify_known /
-// watch_shortlist / relocalize / locate_by_motion。
+// 定位核心（重构版）：单一状态机。
+// 设计见《TOTKmap go定位核心重构方案.md》：一个 goroutine 5Hz 循环独占 lock.addr，
+// 两态循环——UNLOCKED（known 快路径 / 存档锚点扫描 → 锁定）与 LOCKED（读数跟随、
+// 移动确认 verified、传送检测、30s 站桩核对）。判据只有三条硬规则：
+//   读数失效 ×3 / 相邻采样位移 >300m（传送）/ 站桩核对位置差 >15m → 回 UNLOCKED 重扫。
+// 已删除旧版的多事件源机制：teleportCh、jitterCheck 黑名单、组内 swap、
+// watchShortlist 多 goroutine、betterStruct/betterMoved/betterIdle 多级策略、
+// verifyKnown、watchdog、motion scan。块世代检测与 known_addrs 记忆保留。
 
 package main
 
 import (
 	"fmt"
 	"math"
-	"sort"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -31,15 +35,15 @@ type lockT struct {
 var lock = lockT{}
 
 type stateT struct {
-	mu       sync.RWMutex
-	ok       bool
+	mu         sync.RWMutex
+	ok         bool
 	gx, gy, gz float32 // gx=X东, gy=Y北, gz=Z高
-	mx, my   float32   // 地图像素
-	layer    int
-	age      float64
-	verified bool
-	copies   int
-	source   string
+	mx, my     float32 // 地图像素（Leaflet latlng = (Z北, X东)）
+	layer      int
+	age        float64
+	verified   bool
+	copies     int
+	source     string
 }
 
 var state = stateT{}
@@ -66,11 +70,19 @@ func reopenProcess() bool {
 	return true
 }
 
-// guestRamBase 返回最大 guest DRAM 块（known fast path 用）。
-func guestRamBase() uintptr {
+func procHandleNow() uintptr {
 	procMu.Lock()
 	h := procHandle
 	procMu.Unlock()
+	return h
+}
+
+// guestRamBase 返回当前会话 guest DRAM 块（known fast path 用）。
+func guestRamBase() uintptr {
+	if currentSessionBase != 0 {
+		return currentSessionBase
+	}
+	h := procHandleNow()
 	if h == 0 {
 		return 0
 	}
@@ -78,15 +90,19 @@ func guestRamBase() uintptr {
 	return base
 }
 
-// tryOffsets known fast path：把记住的偏移 rebase 到当前块并读取。
+// tryOffsets known fast path：把记住的偏移 rebase 到当前块并读取（多副本一致才算数）。
 func tryOffsets() (uintptr, [3]float32, bool) {
 	if !reopenProcess() {
 		return 0, [3]float32{}, false
 	}
-	procMu.Lock()
-	h := procHandle
-	procMu.Unlock()
-	base := guestRamBase()
+	h := procHandleNow()
+	base := currentSessionBase
+	if base == 0 {
+		base = loadKnownBlock()
+	}
+	if base == 0 {
+		base = guestRamBase()
+	}
 	if base == 0 {
 		return 0, [3]float32{}, false
 	}
@@ -123,599 +139,378 @@ func tryOffsets() (uintptr, [3]float32, bool) {
 	return best.addr, best.pos, true
 }
 
-// poll 10Hz 把锁定的地址镜像到 STATE。
-// 跳变过滤：打开暂停菜单/过场动画时相机 actor 会跳变（如果误锁到相机），
-// 单次位移 >10 米视为可疑；连续 3 次才确认新坐标（快速旅行后位置稳定）。
+// ---- 块世代：Ryujinx 重开游戏后新旧 guest DRAM 块并存（旧块残留上次会话玩家槽）----
+// 扫描时发现"从未见过的新块"判定为游戏重启/块重建 → 只扫新块、回 UNLOCKED。
 var (
-	lastPollGx, lastPollGy, lastPollGz float32
-	bigJumpN                           int
+	knownBlocks        []uintptr
+	currentSessionBase uintptr
 )
 
-func poll() {
-	for {
+// detectNewBlocks：对比本次扫描块与已知块，返回从未见过的新块 base 列表。
+// 返回非空 = 游戏重启/块重建（knownBlocks 只保留新块）。
+// 首次（knownBlocks 空）：以 known_addrs 记录的 block 为"上次会话块"参照，
+// 当前块 ≠ 参照块 → 判定新会话（TOTKNavi 与游戏同时重启也能识别）。
+func detectNewBlocks(blocks []struct{ Base, Size uintptr }) []uintptr {
+	var newOnes []uintptr
+	if len(knownBlocks) == 0 {
+		if ref := loadKnownBlock(); ref != 0 {
+			still := false
+			for _, b := range blocks {
+				if b.Base == ref {
+					still = true
+					break
+				}
+			}
+			if still {
+				// 参照块还在 → 游戏未重启（同一会话）→ 全部记 known，不触发
+				for _, b := range blocks {
+					knownBlocks = append(knownBlocks, b.Base)
+				}
+				return nil
+			}
+			// 参照块不在 → 游戏重启 → 当前全部块都是新会话
+			for _, b := range blocks {
+				knownBlocks = append(knownBlocks, b.Base)
+				newOnes = append(newOnes, b.Base)
+			}
+			return newOnes
+		}
+		for _, b := range blocks {
+			knownBlocks = append(knownBlocks, b.Base)
+		}
+		return nil
+	}
+	for _, b := range blocks {
+		found := false
+		for _, k := range knownBlocks {
+			if k == b.Base {
+				found = true
+				break
+			}
+		}
+		if !found {
+			newOnes = append(newOnes, b.Base)
+		}
+	}
+	if len(newOnes) > 0 {
+		knownBlocks = newOnes
+		return newOnes
+	}
+	return nil
+}
+
+// sessionBlocks 返回当前会话的 guest 块（currentSessionBase 所在块）。
+// currentSessionBase 未定时返回全部块（块世代检测尚未建立）。
+func sessionBlocks(h uintptr) []struct{ Base, Size uintptr } {
+	blks := guestBlocks(h, minBlockMB)
+	if currentSessionBase == 0 {
+		return blks
+	}
+	var out []struct{ Base, Size uintptr }
+	for _, b := range blks {
+		if b.Base == currentSessionBase {
+			out = append(out, b)
+		}
+	}
+	if len(out) > 0 {
+		return out
+	}
+	return blks
+}
+
+// ---- 单一状态机 ----
+
+const (
+	smTick       = 200 * time.Millisecond // 5Hz 循环
+	invalidMax   = 3                      // 连续读数无效次数 → 回 UNLOCKED
+	teleportDist = 300.0                  // 相邻采样位移超过 → 判传送，回 UNLOCKED
+	moveDist     = 0.5                    // 移动确认最小位移（游戏单位/采样）
+	moveConfirmN = 3                      // 连续移动采样次数 → verified
+	reconEvery   = 30 * time.Second       // 站桩核对周期
+	reconDist    = 15.0                   // 站桩核对允许位置差
+	scanCooldown = 15 * time.Second       // UNLOCKED 全量扫描重试间隔
+	knownRetry   = 1 * time.Second        // UNLOCKED known 快路径重试间隔
+)
+
+var (
+	rescanCh   chan struct{} // /rescan 请求（server.go → requestRescan）
+	reconCh    chan reconRes // 站桩核对结果（缓冲 1，仅状态机消费）
+	reconBusy  atomic.Bool
+	lastScanAt time.Time
+	useSaveScan = true // --no-save 时关闭存档锚点扫描（known 快路径不受影响）
+	// skipKnownOnce：启动/游戏重启后首轮跳过 known 快路径——旧块残留偏移
+	// rebase 到新块后可能"值可读但位置错误"，先靠扫描建立本次会话的锁。
+	skipKnownOnce bool
+)
+
+type reconRes struct {
+	found bool
+	hud   [3]float32
+}
+
+func setLock(addr uintptr, verified bool, copies int, source string) {
+	lock.mu.Lock()
+	lock.addr = addr
+	lock.verified = verified
+	lock.copies = copies
+	lock.source = source
+	lock.mu.Unlock()
+}
+
+func goUnlocked(reason string) {
+	setLock(0, false, 0, "locating...")
+	state.mu.Lock()
+	state.ok = false
+	state.source = "locating..."
+	state.mu.Unlock()
+	fmt.Printf("  [sm] -> UNLOCKED (%s)\n", reason)
+}
+
+// requestRescan 供 /rescan HTTP 端点调用（非阻塞）。
+func requestRescan() {
+	select {
+	case rescanCh <- struct{}{}:
+	default:
+	}
+}
+
+// dist3 两点距离（hud 序 = decodePos 序：东、北取反、高）。
+func dist3(a, b [3]float32) float32 {
+	dx, dy, dz := a[0]-b[0], a[1]-b[1], a[2]-b[2]
+	return float32(math.Sqrt(float64(dx*dx + dy*dy + dz*dz)))
+}
+
+// stateMachine 定位主循环：全程序只有这里写 lock.addr。
+func stateMachine() {
+	rescanCh = make(chan struct{}, 1)
+	reconCh = make(chan reconRes, 1)
+
+	inLocked := false
+	var prev [3]float32 // 上一次有效读数（hud 序）
+	hasPrev := false
+	moveN := 0        // 连续移动采样计数（≥moveConfirmN → verified）
+	movedWin := false // 本核对周期内出现过移动（锁活性证明）
+	savedKnown := false
+	invalidN := 0
+	lastReco := time.Now()
+	lastKnownAt := time.Now().Add(-knownRetry)
+
+	tick := time.NewTicker(smTick)
+	defer tick.Stop()
+	genN := 0 // 块世代检测计数（15 tick ≈ 3s）
+
+	for range tick.C {
+		// 0) Ryujinx 附着（同 pid 时开销可忽略；未运行则等待）
+		if !reopenProcess() {
+			if inLocked {
+				inLocked = false
+				goUnlocked("Ryujinx lost")
+			} else {
+				state.mu.Lock()
+				state.ok = false
+				state.source = "waiting for Ryujinx"
+				state.mu.Unlock()
+			}
+			continue
+		}
+		h := procHandleNow()
+
+		// 1) 游戏重启检测（每 ~3s）：出现从未见过的新块 → 只扫新块 + 回 UNLOCKED
+		genN++
+		if genN >= 15 {
+			genN = 0
+			if blks := guestBlocks(h, minBlockMB); len(blks) > 0 {
+				if newOnes := detectNewBlocks(blks); newOnes != nil {
+					fmt.Printf("  [sm] %d NEW guest block(s) (game restart) -> rescan on new blocks\n", len(newOnes))
+					bestBase, bestSize := uintptr(0), uintptr(0)
+					for _, b := range blks {
+						for _, nb := range newOnes {
+							if b.Base == nb && b.Size > bestSize {
+								bestBase, bestSize = b.Base, b.Size
+							}
+						}
+					}
+					currentSessionBase = bestBase
+					skipKnownOnce = true
+					lastScanAt = time.Time{}
+					if inLocked {
+						inLocked = false
+						goUnlocked("game restart (new blocks)")
+					}
+				}
+			}
+		}
+
+		// 2) /rescan 请求：回 UNLOCKED 立即重扫
+		select {
+		case <-rescanCh:
+			lastScanAt = time.Time{}
+			if inLocked {
+				inLocked = false
+				goUnlocked("/rescan requested")
+			}
+		default:
+		}
+
+		// 3) 消费站桩核对结果（未锁定时结果作废直接丢弃）
+		select {
+		case r := <-reconCh:
+			if inLocked && r.found {
+				lock.mu.RLock()
+				a := lock.addr
+				lock.mu.RUnlock()
+				if a != 0 {
+					if v := decodePos(readMem(h, a, 12)); v != nil {
+						cur := [3]float32{v[0], v[1], v[2]}
+						d := dist3(r.hud, cur)
+						if d > reconDist {
+							inLocked = false
+							goUnlocked(fmt.Sprintf("idle check mismatch: scan %.0fm away from lock", d))
+							continue
+						}
+						fmt.Printf("  [sm] idle check ok (scan dist %.0fm) - lock stands\n", d)
+					}
+				}
+			}
+		default:
+		}
+
+		// ---- UNLOCKED：known 快路径 → 存档锚点全量扫描 → 锁定候选 ----
+		if !inLocked {
+			if !skipKnownOnce && time.Since(lastKnownAt) >= knownRetry {
+				lastKnownAt = time.Now()
+				if a, v, ok := tryOffsets(); ok {
+					setLock(a, false, 0, "known")
+					inLocked = true
+					hasPrev, moveN, movedWin, savedKnown, invalidN = false, 0, false, false, 0
+					lastReco = time.Now()
+					fmt.Printf("  [sm] known offset -> lock 0x%X mem=(%.1f, %.1f, %.1f) [pending move confirm]\n",
+						a, v[0], v[1], v[2])
+					continue
+				}
+			}
+			if useSaveScan && time.Since(lastScanAt) >= scanCooldown {
+				lastScanAt = time.Now()
+				skipKnownOnce = false // 扫过一次后 known 快路径恢复可用
+				res := locate(procPID, 120.0, sessionBlocks(h), func(s string) { fmt.Println("    " + s) })
+				if res != nil {
+					setLock(res.Addr, false, res.Copies, "scan")
+					inLocked = true
+					hasPrev, moveN, movedWin, savedKnown, invalidN = false, 0, false, false, 0
+					lastReco = time.Now()
+					fmt.Printf("  [sm] scan -> lock 0x%X copies=%d struct=%d mem=(%.1f, %.1f, %.1f) [pending move confirm]\n",
+						res.Addr, res.Copies, res.Struct, res.Hud[0], res.Hud[1], res.Hud[2])
+				} else {
+					fmt.Println("  [sm] scan found nothing - retrying")
+				}
+			}
+			continue
+		}
+
+		// ---- LOCKED：读锁地址 → 跟随 / 校验 ----
 		lock.mu.RLock()
 		a := lock.addr
-		verified := lock.verified
-		copies := lock.copies
-		src := lock.source
 		lock.mu.RUnlock()
-
-		var v []float32
-		if a != 0 {
-			procMu.Lock()
-			h := procHandle
-			procMu.Unlock()
-			if h != 0 {
-				v = decodePos(readMem(h, a, 12))
-			}
+		if a == 0 {
+			inLocked = false
+			continue
 		}
-		state.mu.Lock()
-		if v != nil {
-			gx, gy, gz := v[0], v[1], v[2]
-			// 跳变过滤：与上一个有效坐标比
-			accept := true
-			if state.ok && lastPollGx != 0 {
-				dx, dy, dz := gx-lastPollGx, gy-lastPollGy, gz-lastPollGz
-				delta := float32(math.Sqrt(float64(dx*dx + dy*dy + dz*dz)))
-				if delta > pollJumpMax {
-					bigJumpN++
-					if bigJumpN < pollJumpConfirmN {
-						accept = false
-					} else {
-						fmt.Printf("  [poll] big jump %.1fm x%d -> accept new position\n", delta, pollJumpConfirmN)
-					}
-				} else {
-					bigJumpN = 0
-				}
-			}
-			if accept {
-				lastPollGx, lastPollGy, lastPollGz = gx, gy, gz
-				state.ok = true
-				state.gx, state.gy, state.gz = gx, gy, gz
-				state.mx, state.my = -gy, gx
-				state.layer = layerOf(gx, gy, gz)
-				state.verified = verified
-				state.copies = copies
-				state.source = src
-			}
-			state.age = float64(time.Now().UnixNano()) / 1e9
-		} else {
+		v := decodePos(readMem(h, a, 12))
+		if v == nil {
+			invalidN++
+			state.mu.Lock()
 			state.ok = false
-			if a != 0 {
-				state.source = "address lost"
-			} else {
-				state.source = "locating..."
+			state.source = "address lost"
+			state.mu.Unlock()
+			if invalidN >= invalidMax {
+				inLocked = false
+				goUnlocked(fmt.Sprintf("readings invalid x%d (scene change?)", invalidMax))
 			}
-		}
-		state.mu.Unlock()
-		time.Sleep(100 * time.Millisecond)
-	}
-}
-
-// poll 跳变过滤参数（见 poll 注释）。
-const (
-	pollJumpMax      = 10.0 // 单次采样位移上限（游戏单位）：正常走/跑/骑远小于此；菜单/过场/坏槽会超
-	pollJumpConfirmN = 3   // 连续 N 次大跳变才确认新坐标（快速旅行后位置稳定；菜单跳变只有 1-2 次）
-)
-
-// watchShortlist 锁定真正在动的候选组。
-func watchShortlist(sl []ShortlistEntry) {
-	procMu.Lock()
-	h := procHandle
-	procMu.Unlock()
-	if h == 0 {
-		return
-	}
-	type addrState struct {
-		base  [3]float32
-		moved int
-	}
-	states := map[uintptr]*addrState{}
-	groupMoved := make([]int, len(sl))
-	for gi, g := range sl {
-		for _, a := range g.Addrs {
-			if d := readMem(h, a, 12); d != nil && len(d) >= 12 {
-				f := floats(d[:12])
-				states[a] = &addrState{base: [3]float32{f[0], f[1], f[2]}}
-				_ = gi
-			}
-		}
-	}
-	confirmed := -1
-	started := time.Now()
-	for {
-		time.Sleep(600 * time.Millisecond)
-		procMu.Lock()
-		h = procHandle
-		procMu.Unlock()
-		if h == 0 {
 			continue
 		}
-		for gi, g := range sl {
-			for _, a := range g.Addrs {
-				d := readMem(h, a, 12)
-				if d == nil || len(d) < 12 {
-					continue
-				}
-				f := floats(d[:12])
-				v := [3]float32{f[0], f[1], f[2]}
-				st, ok := states[a]
-				if !ok {
-					states[a] = &addrState{base: v}
-					continue
-				}
-				if abs32(v[0]-st.base[0]) > 0.5 || abs32(v[1]-st.base[1]) > 0.5 || abs32(v[2]-st.base[2]) > 0.5 {
-					st.moved++
-					groupMoved[gi]++
-				}
-				st.base = v
-			}
-		}
-		// 选组：moved>=3 的组按 struct 高 → dist 小；站桩 30s 后兜底锁
-		pick := -1
-		for gi := range sl {
-			if groupMoved[gi] >= 3 {
-				if pick < 0 || betterShortlist(sl, gi, pick) {
-					pick = gi
-				}
-			}
-		}
-		if pick < 0 && time.Since(started) > 30*time.Second {
-			pick = 0
-			for gi := 1; gi < len(sl); gi++ {
-				if betterShortlist(sl, gi, pick) {
-					pick = gi
-				}
-			}
-		}
-		// 防抖：当前锁槽读数在本轮监听中仍在更新（moved>0）→ 不切换。
-		// 真玩家槽的多个副本组会同时移动，频繁横跳会让 poll 反复跳变确认；
-		// 只有锁槽变死（玩家移动它不再同步）才允许切到其他移动组。
-		curMoving := false
-		if confirmed >= 0 {
-			lock.mu.RLock()
-			la := lock.addr
-			lock.mu.RUnlock()
-			if st, ok := states[la]; ok && st.moved > 0 {
-				curMoving = true
-			}
-		}
-		if pick >= 0 && pick != confirmed && !curMoving {
-			// 锁组内 moved 最高的地址（副本组里"会动"的那个才是真槽）
-			a := uintptr(0)
-			bestM := -1
-			for _, cand := range sl[pick].Addrs {
-				if st, ok := states[cand]; ok && st.moved > bestM {
-					bestM, a = st.moved, cand
-				}
-			}
-			if a == 0 {
-				a = sl[pick].Addrs[0]
-			}
-			confirmed = pick
-			lock.mu.Lock()
-			lock.addr = a
-			lock.verified = true
-			lock.copies = sl[pick].Copies
-			lock.source = "scan"
-			lock.mu.Unlock()
-			addrs := loadKnownAddrs()
-			addrs = append(addrs, a)
-			saveKnown(addrs, guestBase.Load())
-			fmt.Printf("  [watch] locked onto group %d: copies=%d struct=%d mem=%v (addr 0x%X, moved=%d)\n",
-				pick, sl[pick].Copies, sl[pick].Struct, sl[pick].Hud, a, bestM)
-			// 锁到新槽后重置计数：只累计"本次锁定后"的移动（切换依据）
-			groupMoved = make([]int, len(sl))
-			for _, st := range states {
-				st.moved = 0
-			}
-		}
-	}
-}
+		invalidN = 0
+		cur := [3]float32{v[0], v[1], v[2]}
+		delta := dist3(cur, prev)
 
-// betterShortlist 与 locate.go 排序同口径：struct>0 硬优先 → struct 降序 →
-// dist 升序 → copies 降序。
-func betterShortlist(sl []ShortlistEntry, i, j int) bool {
-	a, b := sl[i], sl[j]
-	aLive, bLive := a.Struct > 0, b.Struct > 0
-	if aLive != bLive {
-		return aLive
-	}
-	if a.Struct != b.Struct {
-		return a.Struct > b.Struct
-	}
-	if a.Dist != b.Dist {
-		return a.Dist < b.Dist
-	}
-	return a.Copies > b.Copies
-}
-
-func loadKnownAddrs() []uintptr {
-	// 已知偏移转绝对地址（当前块）
-	base := guestBase.Load()
-	if base == 0 {
-		return nil
-	}
-	var out []uintptr
-	for _, o := range loadOffsets() {
-		out = append(out, base+o)
-	}
-	return out
-}
-
-// verifyKnown 后台校验锁定的地址，读不到时重新定位。
-// 死槽保护：remembered-offset 快速路径（source="known"）可能锁到 Ryujinx 重启后
-// 残留的旧坐标槽——地址可读、数值合理但永不更新。此时 verifyKnown 永远等不到
-// "移动"信号（verified 一直 false），位置追踪/导航/收集全部按错误坐标工作。
-// 处理：known 地址长时间无移动 → 按存档锚点重新扫描定位（20s 首试，失败后 2min 重试）。
-func verifyKnown(addr uintptr) {
-	procMu.Lock()
-	h := procHandle
-	procMu.Unlock()
-	if h == 0 {
-		return
-	}
-	prev := decodePos(readMem(h, addr, 12))
-	bad := 0
-	smoothN := 0
-	staleSince := time.Now()
-	staleGap := 20 * time.Second
-	for {
-		time.Sleep(300 * time.Millisecond)
-		lock.mu.RLock()
-		curAddr := lock.addr
-		lock.mu.RUnlock()
-		if curAddr != addr {
-			return
+		// 传送检测：相邻采样位移 >300m → 立即回 UNLOCKED 重扫
+		if hasPrev && delta > teleportDist {
+			incCounter("jumps")
+			inLocked = false
+			goUnlocked(fmt.Sprintf("teleport jump %.0fm", delta))
+			continue
 		}
-		procMu.Lock()
-		h = procHandle
-		procMu.Unlock()
-		if h == 0 {
-			return
-		}
-		cur := decodePos(readMem(h, addr, 12))
-		if cur == nil {
-			bad++
-			if bad == 2 {
-				reopenProcess()
-			}
-			if bad >= 4 {
-				if a, v, ok := tryOffsets(); ok {
-					fmt.Printf("  [verify] re-based offset onto new block -> 0x%X mem=(%.1f, %.1f, %.1f)\n", a, v[0], v[1], v[2])
-					lock.mu.Lock()
-					lock.addr = a
-					lock.verified = false
-					lock.copies = 0
-					lock.source = "known"
-					lock.mu.Unlock()
-					go verifyKnown(a) // 新地址需要新 goroutine 校验；本实例退出
-					return
-				}
-			}
-			if bad >= 10 {
-				fmt.Println("  [verify] address went bad - re-locating")
+
+		// 移动确认：连续 3 次采样位移 >0.5m → verified（写 known 记忆）
+		if hasPrev && delta > moveDist {
+			moveN++
+			movedWin = true
+			if moveN >= moveConfirmN {
 				lock.mu.Lock()
-				lock.addr = 0
-				lock.verified = false
+				if !lock.verified {
+					fmt.Printf("  [sm] lock 0x%X confirmed live (moving)\n", a)
+					lock.verified = true
+				}
 				lock.mu.Unlock()
-				relocalize("remembered address became unreadable")
-				return
+				if !savedKnown {
+					savedKnown = true
+					saveKnown([]uintptr{a}, currentSessionBase)
+				}
 			}
-			continue
-		}
-		bad = 0
-		// 位移量（游戏单位/次采样 ≈ 0.3s）。正常走/跑/骑/滑翔单次采样位移远小于
-		// verifyJumpMax；快传、读错槽、或跳到无关数据才会出现大跳变。
-		delta := float32(math.Inf(1))
-		if prev != nil {
-			dx, dy, dz := cur[0]-prev[0], cur[1]-prev[1], cur[2]-prev[2]
-			delta = float32(math.Sqrt(float64(dx*dx + dy*dy + dz*dz)))
-		}
-		// 平滑移动：位移在 (verifyMoveMin, verifyJumpMax) 区间，且连续多次才确认。
-		// 避免把"静止时抖动"或"坏槽跳变"误判为玩家在移动。
-		if prev != nil && delta > verifyMoveMin && delta < verifyJumpMax {
-			smoothN++
 		} else {
-			smoothN = 0
+			moveN = 0
 		}
-		if smoothN >= verifySmoothN {
-			lock.mu.Lock()
-			if !lock.verified {
-				fmt.Printf("  [verify] address 0x%X is live (moving smoothly) -> verified\n", addr)
-				lock.verified = true
-			}
-			lock.mu.Unlock()
-		}
+
+		// 更新 STATE（/pos 输出口径与旧版一致）
+		lock.mu.RLock()
+		verified, copies, src := lock.verified, lock.copies, lock.source
+		lock.mu.RUnlock()
+		state.mu.Lock()
+		state.ok = true
+		state.gx, state.gy, state.gz = cur[0], cur[1], cur[2]
+		state.mx, state.my = -cur[1], cur[0]
+		state.layer = layerOf(cur[0], cur[1], cur[2])
+		state.age = float64(time.Now().UnixNano()) / 1e9
+		state.verified = verified
+		state.copies = copies
+		state.source = src
+		state.mu.Unlock()
 		prev = cur
-		// 死槽/坏槽保护（仅针对 remembered-offset 快速路径 source="known"）：
-		// 未确认期间，地址可读但始终等不到平滑移动——要么是 Ryujinx 重启后残留的
-		// 死槽（静止不动），要么是跳到无关数据的坏槽（跳变），都不是玩家坐标槽。
-		// 超时后按存档锚点重新扫描定位（20s 首试，失败后 2min 重试）。
-		lock.mu.RLock()
-		staleSrc := lock.source
-		lock.mu.RUnlock()
-		if staleSrc == "known" && time.Since(staleSince) >= staleGap {
-			// Fix 1：超时无移动 ≠ 死槽——玩家站桩时锁一样「不动」。
-			// 先按存档锚点扫描一次：候选位置与当前锁接近（<verifyKeepDist）
-			// 说明锁的值就是玩家当前位置 → 站桩，锁有效，直接 verified；
-			// 候选与锁差异大才判定死槽/坏槽 → 重新定位。
-			// 旧逻辑 20s 无条件 relocalize，站桩玩家会被反复误杀 → 位置漂移。
-			cur := decodePos(readMem(h, addr, 12))
-			if cur != nil {
-				silent := func(string) {}
-				if res := locate(procPID, 60.0, silent); res != nil {
-					dx, dy, dz := cur[0]-res.Hud[0], cur[1]-res.Hud[1], cur[2]-res.Hud[2]
-					scanDist := float32(math.Sqrt(float64(dx*dx + dy*dy + dz*dz)))
-					if scanDist < verifyKeepDist {
-						fmt.Printf("  [verify] player idle (scan dist=%.1fm) - lock valid, keeping\n", scanDist)
-						staleSince, staleGap = time.Now(), 60*time.Second
-						continue
-					}
-					fmt.Printf("  [verify] scan dist=%.1fm disagrees -> re-locating\n", scanDist)
-				} else {
-					fmt.Println("  [verify] idle check scan found nothing -> re-locating")
-				}
+		hasPrev = true
+
+		// 站桩核对：每 30s 一次全量扫描，扫描候选与锁位置差 >15m → 重扫。
+		// 只在"本周期无移动"时执行——移动本身就是锁活性证明，冻结的锁不会动；
+		// 移动期间扫描会拖出轨迹簇，核对结果不可靠（旧版误杀的根源）。
+		if time.Since(lastReco) >= reconEvery {
+			lastReco = time.Now()
+			if movedWin {
+				movedWin = false
+			} else if !reconBusy.Swap(true) {
+				go runReconcile(h, prev)
 			}
-			fmt.Printf("  [verify] address 0x%X stale/bad (no movement sync) -> re-locating\n", addr)
-			relocalize("remembered address is stale or erratic (no smooth movement)")
-			if lock.addr != addr {
-				return
-			}
-			staleSince, staleGap = time.Now(), 60*time.Second
 		}
 	}
 }
 
-// verifyKnown 的移动判定参数（见上方注释）。
-const (
-	verifyMoveMin  = 0.2  // 判定"在移动"的最小位移（游戏单位/采样）
-	verifyJumpMax  = 50.0 // 单次采样位移上限：正常移动不可能超过（快传/坏槽会超）
-	verifySmoothN  = 3    // 连续 N 次平滑移动才确认 verified
-	verifyKeepDist = 15.0 // Fix 1：站桩判定——扫描候选与当前锁的允许距离（m）
-)
-
-// relocalize 方案 B：save anchor 扫描 + shortlist 监听。
-func relocalize(reason string) bool {
-	if !reopenProcess() {
-		fmt.Printf("  [relocate] %s -> Ryujinx not running\n", reason)
-		return false
+// runReconcile 后台执行站桩核对扫描（只算结果，不写锁——状态机是唯一写者）。
+func runReconcile(h uintptr, cur [3]float32) {
+	defer reconBusy.Store(false)
+	res := locate(procPID, 120.0, sessionBlocks(h), nil)
+	r := reconRes{}
+	if res != nil {
+		r.found = true
+		r.hud = res.Hud
 	}
-	fmt.Printf("  [relocate] %s -> running save-anchor scan\n", reason)
-	res := locate(procPID, 60.0, func(s string) { fmt.Println("    " + s) })
-	if res == nil {
-		fmt.Println("  [relocate] scan found nothing")
-		return false
+	select { // 先清掉可能滞留的旧结果，保证消费到的是本次扫描
+	case <-reconCh:
+	default:
 	}
-	lock.mu.Lock()
-	lock.addr = res.Addr
-	lock.verified = false
-	lock.copies = res.Copies
-	lock.source = "scan"
-	lock.mu.Unlock()
-	if len(res.Shortlist) > 0 {
-		go watchShortlist(res.Shortlist)
-	} else {
-		lock.mu.Lock()
-		lock.verified = true
-		lock.mu.Unlock()
-	}
-	// 注意：候选未确认前不写入 known_addrs——TOTK 同值副本槽里 Addrs[0]
-	// 可能是静态死镜像（值=玩家位置但不更新），保存后 remembered 快路径
-	// 会锁死槽。只有 watchShortlist 移动确认锁定活槽时才 saveKnown。
-	fmt.Printf("  [relocate] candidate 0x%X mem=(%.1f, %.1f, %.1f) - being watched\n",
-		res.Addr, res.Hud[0], res.Hud[1], res.Hud[2])
-	return true
-}
-
-var lastScanAt = time.Now().Add(-time.Hour)
-
-// watchdog 无需用户操作持续保持锁定。
-func watchdog() {
-	for {
-		time.Sleep(3 * time.Second)
-		lock.mu.RLock()
-		hasAddr := lock.addr != 0
-		src := lock.source
-		lock.mu.RUnlock()
-		state.mu.RLock()
-		ok := state.ok
-		state.mu.RUnlock()
-		// scan 来源的地址不被 watchdog 覆盖（watchShortlist 刚锁时 poll 可能还没同步）
-		if hasAddr && (ok || src == "scan") {
-			continue
-		}
-		if a, v, ok := tryOffsets(); ok {
-			first := !hasAddr
-			lock.mu.Lock()
-			lock.addr = a
-			lock.verified = false
-			lock.copies = 0
-			lock.source = "known"
-			lock.mu.Unlock()
-			fmt.Printf("  [watchdog] recovered 0x%X mem=(%.1f, %.1f, %.1f)\n", a, v[0], v[1], v[2])
-			if first {
-				go verifyKnown(a)
-			}
-			continue
-		}
-		if time.Since(lastScanAt) > 180*time.Second {
-			lastScanAt = time.Now()
-			relocalize("watchdog: no remembered offset works")
-		}
+	select {
+	case reconCh <- r:
+	default:
 	}
 }
 
-// ---- motion scan（结构性 fallback）----
-
-const (
-	motionChunk = 32 << 20
-	motionWorkers = 8
-	rotTol = 0.2
-	motionCountdown = 5
-)
-
-type motionJob struct{ base, size uintptr }
-
-func scanChunkMotion(h uintptr, base, size uintptr) []Hit {
-	buf := readMem(h, base, int(size)+64)
-	if len(buf) < 256 {
-		return nil
-	}
-	a := floats(buf)
-	N := len(a) - 12
-	var out []Hit
-	for s := 0; s < N; s++ {
-		x, y, z := a[s], a[s+1], a[s+2]
-		if !(abs32(x) > 5 && abs32(x) < 7000 && y > -600 && y < 5000 && abs32(z) > 5 && abs32(z) < 7000) {
-			continue
-		}
-		r0x, r0y, r0z := a[s+3], a[s+4], a[s+5]
-		r1x, r1y, r1z := a[s+6], a[s+7], a[s+8]
-		r2x, r2y, r2z := a[s+9], a[s+10], a[s+11]
-		n0 := r0x*r0x + r0y*r0y + r0z*r0z
-		n1 := r1x*r1x + r1y*r1y + r1z*r1z
-		n2 := r2x*r2x + r2y*r2y + r2z*r2z
-		if abs32(n0-1) >= rotTol || abs32(n1-1) >= rotTol || abs32(n2-1) >= rotTol {
-			continue
-		}
-		d01 := r0x*r1x + r0y*r1y + r0z*r1z
-		d02 := r0x*r2x + r0y*r2y + r0z*r2z
-		d12 := r1x*r2x + r1y*r2y + r1z*r2z
-		if abs32(d01) >= rotTol || abs32(d02) >= rotTol || abs32(d12) >= rotTol {
-			continue
-		}
-		out = append(out, Hit{base + uintptr(s)*4, x, y, z, 0, 0})
-	}
-	return out
-}
-
-func beep(times int) {
-	for i := 0; i < times; i++ {
-		fmt.Print("\a")
-		time.Sleep(120 * time.Millisecond)
-	}
-}
-
-// locateByMotion 结构性候选 + 走几步差分（save anchor 失效时的兜底）。
-func locateByMotion() uintptr {
-	procMu.Lock()
-	h := procHandle
-	procMu.Unlock()
-	if h == 0 {
-		return 0
-	}
-	blocks := guestBlocks(h, minBlockMB)
-	if len(blocks) == 0 {
-		fmt.Println("  guest RAM blocks not found")
-		return 0
-	}
-	var jobs []motionJob
-	for _, b := range blocks {
-		off := uintptr(0)
-		for off < b.Size {
-			n := uintptr(motionChunk)
-			if b.Size-off < n {
-				n = b.Size - off
-			}
-			jobs = append(jobs, motionJob{b.Base + off, n})
-			off += n
-		}
-	}
-	t0 := time.Now()
-	var mu sync.Mutex
-	var hits []Hit
-	wg := sync.WaitGroup{}
-	ch := make(chan motionJob)
-	for w := 0; w < motionWorkers; w++ {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			for j := range ch {
-				local := scanChunkMotion(h, j.base, j.size)
-				if len(local) > 0 {
-					mu.Lock()
-					hits = append(hits, local...)
-					mu.Unlock()
-				}
-			}
-		}()
-	}
-	for _, j := range jobs {
-		ch <- j
-	}
-	close(ch)
-	wg.Wait()
-	fmt.Printf("  scan: %d structural candidates in %.0fs\n", len(hits), time.Since(t0).Seconds())
-	if len(hits) == 0 {
-		return 0
-	}
-	baseline := map[uintptr][3]float32{}
-	for _, hit := range hits {
-		baseline[hit.Addr] = [3]float32{hit.X, hit.Y, hit.Z}
-	}
-
-	fmt.Println("")
-	fmt.Println("  >>> WALK A FEW STEPS IN THE GAME NOW <<<")
-	fmt.Println("      (do NOT open the in-game map - it pauses the world)")
-	beep(3)
-	for i := motionCountdown; i > 0; i-- {
-		fmt.Printf("      sampling in %d ...\n", i)
-		time.Sleep(1 * time.Second)
-	}
-
-	type changedT struct {
-		addr uintptr
-		pos  [3]float32
-	}
-	var changed []changedT
-	for a, b := range baseline {
-		d := readMem(h, a, 12)
-		if d == nil || len(d) < 12 {
-			continue
-		}
-		f := floats(d[:12])
-		x, y, z := f[0], f[1], f[2]
-		if abs32(x-b[0]) < 0.5 && abs32(y-b[1]) < 0.5 && abs32(z-b[2]) < 0.5 {
-			continue
-		}
-		if !(abs32(x) < 7000 && abs32(z) < 7000 && y > -600 && y < 5000 && (abs32(x) > 5 || abs32(z) > 5)) {
-			continue
-		}
-		changed = append(changed, changedT{a, [3]float32{x, y, z}})
-	}
-	fmt.Printf("  %d of %d addresses moved\n", len(changed), len(baseline))
-	if len(changed) == 0 {
-		fmt.Println("  nothing moved. Re-run and walk during the countdown.")
-		return 0
-	}
-	counts := map[[3]int32]int{}
-	sample := map[[3]int32]uintptr{}
-	for _, c := range changed {
-		k := [3]int32{int32(math.Round(float64(c.pos[0]) * 10)), int32(math.Round(float64(c.pos[1]) * 10)), int32(math.Round(float64(c.pos[2]) * 10))}
-		counts[k]++
-		if _, ok := sample[k]; !ok {
-			sample[k] = c.addr
-		}
-	}
-	type kv struct {
-		k [3]int32
-		n int
-	}
-	var sorted []kv
-	for k, n := range counts {
-		sorted = append(sorted, kv{k, n})
-	}
-	sort.Slice(sorted, func(i, j int) bool { return sorted[i].n > sorted[j].n })
-	fmt.Println("  top moved-value clusters:")
-	for i := 0; i < len(sorted) && i < 8; i++ {
-		fmt.Printf("     %5d copies   mem=(%9.1f, %9.1f, %9.1f)\n",
-			sorted[i].n, float32(sorted[i].k[0])/10, float32(sorted[i].k[1])/10, float32(sorted[i].k[2])/10)
-	}
-	addr := sample[sorted[0].k]
-	fmt.Printf("  player locked: copies=%d  address = 0x%X\n", sorted[0].n, addr)
-	return addr
-}
+// ---- 导航目标（server.go 使用，原样保留）----
 
 func setTarget(t *targetT) {
 	targetMu.Lock()

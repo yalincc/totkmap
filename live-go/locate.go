@@ -261,7 +261,10 @@ func scanRegion(h uintptr, base, size uintptr, refs [][3]float32, window float32
 	}
 }
 
-// groupAndRank 命中分组打分：struct>0 优先 → struct 降序 → dist 升序 → copies 降序。
+// groupAndRank 命中分组打分（方案唯一规则，见重构方案文档第四节）：
+// struct>0 只作活槽门槛（不比较 struct 大小——相机槽 struct 可达 107 而玩家可能只有 15），
+// 然后 copies 降序（玩家槽被相机/UI/存档引用最多，实测 357 vs 相机 171），
+// 最后距存档锚点升序（玩家重启/传送后位置=最近存档位置）。
 func groupAndRank(h uintptr, hits []Hit) ([]*Group, []ShortlistEntry) {
 	groups := map[[3]int32]*Group{}
 	for _, hit := range hits {
@@ -301,18 +304,15 @@ func groupAndRank(h uintptr, hits []Hit) ([]*Group, []ShortlistEntry) {
 	}
 	sort.Slice(top, func(i, j int) bool {
 		a, b := top[i], top[j]
-		// 与 live-python 排序完全一致：struct>0 硬优先 → struct 降序 → dist 升序 → copies 降序。
+		// 唯一排序规则：struct>0 门槛 → copies 降序 → dist 升序（不比较 struct 大小）。
 		aLive, bLive := a.Struct > 0, b.Struct > 0
 		if aLive != bLive {
 			return aLive
 		}
-		if a.Struct != b.Struct {
-			return a.Struct > b.Struct
+		if a.Copies != b.Copies {
+			return a.Copies > b.Copies
 		}
-		if a.Dist != b.Dist {
-			return a.Dist < b.Dist
-		}
-		return a.Copies > b.Copies
+		return a.Dist < b.Dist
 	})
 	shortlist := make([]ShortlistEntry, 0, len(top))
 	for _, g := range top {
@@ -329,7 +329,8 @@ func groupAndRank(h uintptr, hits []Hit) ([]*Group, []ShortlistEntry) {
 }
 
 // locate 主流程：save anchor → 窗口扫描（120 / 400）→ 分组打分。
-func locate(pid uint32, window float64, logf func(string)) *LocateResult {
+// onlyBlocks 非空时只扫描指定块（块世代检测：游戏重启后只扫新块，排除旧块残留槽）。
+func locate(pid uint32, window float64, onlyBlocks []struct{ Base, Size uintptr }, logf func(string)) *LocateResult {
 	t0 := time.Now()
 	log := func(s string) {
 		if logf != nil {
@@ -356,6 +357,9 @@ func locate(pid uint32, window float64, logf func(string)) *LocateResult {
 	defer closeHandle(h)
 
 	blocks := guestBlocks(h, minBlockMB)
+	if onlyBlocks != nil {
+		blocks = onlyBlocks
+	}
 	var total uintptr
 	for _, b := range blocks {
 		total += b.Size

@@ -39,6 +39,15 @@ func parseHex(v string) uintptr {
 	return uintptr(n)
 }
 
+// loadKnownBlock 返回 known_addrs.json 记录的块基址（上次会话块，重启参照用）。
+func loadKnownBlock() uintptr {
+	var d knownData
+	if data, err := os.ReadFile(knownPath()); err == nil {
+		json.Unmarshal(data, &d)
+	}
+	return parseHex(d.Block)
+}
+
 func loadOffsets() []uintptr {
 	var d knownData
 	if data, err := os.ReadFile(knownPath()); err == nil {
