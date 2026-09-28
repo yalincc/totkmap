@@ -100,21 +100,20 @@
   <!-- 加载存档 -->
   <div class="save-upload">
     <div class="su-row">
-      <button id="saveSyncBtn" type="button" class="su-load-btn" title="读取本机 Ryujinx/Yuzu 的 progress.sav，同步收集进度（文件仅在本机内存处理）">📂 从存档加载进度…</button>
+      <button id="saveSyncBtn" type="button" class="su-load-btn" title="读取本机 Ryujinx 的 progress.sav，同步收集进度（文件仅在本机内存处理）">📂 从存档加载进度…</button>
       <span class="su-help" id="suHelp" tabindex="0" role="button" aria-label="存档在哪里">?</span>
       <div class="su-tip hidden" id="suTip">
-        <b>存档文件：progress.sav</b>
-        <div>Ryujinx（Switch 模拟器）：<br><code>%APPDATA%\Ryujinx\bis\user\save\&lt;用户&gt;\0\slot_XX\progress.sav</code></div>
-        <div>Yuzu：<br><code>…\load\0100F2C0115B6000\&lt;用户&gt;\&lt;存档槽&gt;\progress.sav</code></div>
-        <div class="su-tip-sub">找不到时：Win+R 输入 <code>%APPDATA%\Ryujinx\bis\user\save</code>，进游戏对应 ID 目录找 <code>progress.sav</code>。把文件拖进面板或点按钮选择即可，解析全程在本机，不会上传。</div>
+        <b>存档文件 = progress.sav（游戏存档）</b>
+        <div>存档位置：<code>AppData\Roaming\Ryujinx\bis\user\save\0000000000000007\0\slot_00\progress.sav</code></div>
+        <div class="su-tip-sub">点击问号打开「同步存档 · 帮助」，查看模拟器版本、存档位置与同步说明。</div>
       </div>
       <input type="file" id="saveFileInput" accept=".sav" hidden>
     </div>
   </div>
 
   <footer class="side-foot">
-    <p class="foot-version">TOTKMAP V1.9.0</p>
-    <p>© 2026 yalin · github.com/yalincc</p>
+    <p class="foot-version">TOTKMAP V1.9.1 © 2026 yalincc</p>
+    <p>GitHub <a href="https://github.com/yalincc/totkmap" target="_blank" rel="noopener">https://github.com/yalincc/totkmap</a></p>
   </footer>
 </aside>
 
@@ -195,46 +194,65 @@
   </div>
 </div>
 
-<!-- ============ 帮助弹窗（同步存档 Q&A） ============ -->
+<!-- ============ 帮助弹窗（同步存档 · 帮助） ============ -->
 <div id="helpBox" class="help-box hidden">
   <h3>同步存档 · 帮助
     <button id="hbClose" class="help-close" title="关闭">×</button>
   </h3>
   <div class="hq">
-    <h4>存档在哪？怎么同步？（V1.8.0 起自动检测）</h4>
-    <p>启动本地服务后，地图会<b class="hl">自动读取 Ryujinx 当前游戏的存档</b>（默认取
-      <code>slot_00</code>，无需手动上传）。加载存档后，鸟望台/神庙/克洛格等
-      收集进度会自动同步到面板（按钮显示「存档自动同步 ✓」）。</p>
+    <h4>① 模拟器和游戏版本</h4>
     <ul>
-      <li><b class="hl">快速查看存档位置</b>：在 Ryujinx 游戏列表中，<b class="hl">鼠标右键点击
-        「塞尔达传说：王国之泪」→ 查看存档位置</b>，即可打开存档文件夹
-        （<code>…\bis\user\save\&lt;用户ID&gt;\0\slot_XX\progress.sav</code>）。</li>
-      <li>换槽位/换游戏进度：把对应的 <code>progress.sav</code> 放到 <code>slot_00</code>，
-        或重启本地服务让自动检测重新生效。</li>
-      <li>仍然支持手动方式：点「同步存档」按钮选择 <code>progress.sav</code>，
-        或直接把文件拖进左侧面板；解析全部在本机完成，<b class="hl">不会上传任何数据</b>。</li>
+      <li><b class="hl">模拟器</b>：Ryujinx（Canary 分支）v1.3.351 —— <a href="https://github.com/Ryujinx/release-channel-canary" target="_blank" rel="noopener">Ryujinx Canary 发布页</a></li>
+      <li><b class="hl">游戏</b>：塞尔达传说：王国之泪（The Legend of Zelda: Tears of the Kingdom）</li>
+      <li><b class="hl">TitleID</b>：0100F2C0115B6000</li>
+      <li><b class="hl">游戏版本</b>：1.2.1（更新号 v720896）</li>
+      <li><b class="hl">存档文件</b>：progress.sav（头部 magic 0x01020304）</li>
     </ul>
   </div>
   <div class="hq">
-    <h4>怎么加载？</h4>
+    <h4>② 怎么找存档</h4>
+    <p>Ryujinx 存档标准路径：</p>
+    <code>%APPDATA%\Ryujinx\bis\user\save\&lt;SaveId&gt;\&lt;玩家序号&gt;\slot_XX\progress.sav</code>
+    <p>本机实际路径：</p>
+    <code>AppData\Roaming\Ryujinx\bis\user\save\0000000000000007\0\slot_00\progress.sav</code>
     <ul>
-      <li>点「同步存档」按钮选择 <code>progress.sav</code>；</li>
-      <li>或直接把 <code>progress.sav</code> 文件拖进左侧面板；</li>
-      <li>解析全部在本机浏览器内存中完成，<b class="hl">不会上传任何数据</b>。</li>
+      <li><b class="hl">快速查看</b>：Ryujinx 游戏列表里右键「塞尔达传说：王国之泪」→「打开存档位置」，直达存档文件夹。</li>
+      <li>路径段含义：<code>0000000000000007</code> = TOTK 固定存档目录；<code>0</code> = 玩家序号；<code>slot_00</code>~<code>slot_05</code> = 游戏内存档槽，每槽独立进度。</li>
+      <li>Win+R 输入 <code>%APPDATA%\Ryujinx\bis\user\save</code> 回车，可直接打开存档根目录。</li>
     </ul>
   </div>
   <div class="hq">
-    <h4>同步后能看到什么？</h4>
-    <p>鸟望台、神庙、树根、克洛格、双倍克洛格、魔犹伊遗失物、卡邦达立牌、
-      设计图石板、贤者的遗志、洞穴/井/地洞入口等类别的真实收集进度
-      （显示为「已完成/总数」，如 神庙 8/152）。</p>
-    <p>背包类（武器/弓/盾/防具数量）、任务类（情节/迷你挑战）等无法从存档
-      直接读取的类别，保持显示游戏全收集总数。</p>
+    <h4>③ 搭配导航程序自动同步最新存档</h4>
+    <ul>
+      <li>启动本地定位服务（live-go TOTKNavi）后，地图<b class="hl">自动读取 Ryujinx 当前游戏的 slot_00</b>，游戏保存后自动刷新同步，无需手动上传（V1.8.0 起）。</li>
+      <li>加载后按钮显示「存档自动同步 ✓」，探索度面板实时更新。</li>
+      <li>换槽位 / 换进度：把对应 <code>progress.sav</code> 放到 <code>slot_00</code>，或重启本地服务让自动检测重新生效。</li>
+    </ul>
   </div>
   <div class="hq">
-    <h4>多存档槽怎么选？</h4>
-    <p>模拟器里哪个存档槽对应你常用的进度就选哪个槽的 <code>progress.sav</code>；
-      手动标记的「已完成」进度与存档进度各自独立保存，不会互相覆盖。</p>
+    <h4>④ 同步后的探索度统计介绍</h4>
+    <p>能显示真实收集进度（「已完成/总数」，如 神庙 8/152）：</p>
+    <p>鸟望台、神庙、树根、克洛格、双倍克洛格、魔犹伊遗失物、卡邦达立牌、设计图石板、贤者的遗志、洞穴/井/地洞入口等。</p>
+    <p>无法直接读取（保持全收集总数）：背包类（武器/弓/盾/防具数量）、任务类（情节/迷你挑战）等。</p>
+  </div>
+  <div class="hq">
+    <h4>⑤ 参考资料和链接</h4>
+    <ul>
+      <li>模拟器：<a href="https://github.com/Ryujinx/release-channel-canary" target="_blank" rel="noopener">Ryujinx Canary 发布页</a>（本机 v1.3.351）</li>
+      <li>游戏文件：本机 <code>G:\YUZU\Switch Games\TOTKroms</code></li>
+      <li>GitHub 仓库：<a href="https://github.com/yalincc/totkmap" target="_blank" rel="noopener">github.com/yalincc/totkmap</a></li>
+      <li>gitee 仓库：<a href="https://gitee.com/yalincc/totkmap" target="_blank" rel="noopener">gitee.com/yalincc/totkmap</a></li>
+      <li>地图线上版：<a href="https://totk.yalin.site" target="_blank" rel="noopener">totk.yalin.site</a></li>
+    </ul>
+  </div>
+  <div class="hq">
+    <h4>⑥ 存档的加载技术介绍</h4>
+    <ul>
+      <li>存档文件 <code>progress.sav</code> 头部 magic <code>0x01020304</code>；哈希表自偏移 <code>0x28</code> 起，每条 8 字节 <code>[uint32 hash][uint32 value]</code>，哨兵 <code>0xa3db7114</code>。</li>
+      <li>按文件大小识别游戏版本：v1.0 = 2,307,552 / v1.1.x·v1.2.x = 2,307,656 / v1.4.x = 2,307,856 字节。</li>
+      <li>解析<b class="hl">全程在本机浏览器内存完成，不会上传任何数据</b>。</li>
+      <li>能同步的类别按存档哈希表逐项匹配；背包/任务类不在存档哈希表内，无法读取。</li>
+    </ul>
   </div>
 </div>
 

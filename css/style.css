@@ -529,6 +529,8 @@ html, body {
 }
 .side-foot p { font-size: 11.5px; color: #8a93a0; line-height: 1.7; }
 .side-foot .foot-version { color: #a7a7ad; font-weight: 500; }
+.side-foot a { color: #8a93a0; text-decoration: underline; text-underline-offset: 2px; }
+.side-foot a:hover { color: #eac27e; }
 
 /* 面板收起把手 */
 .panel-toggle {
