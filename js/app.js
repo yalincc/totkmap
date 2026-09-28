@@ -14,7 +14,7 @@
   var AREA_SKY = window.TOTK_AREA_SKY || [];
   var AREA_DEPTHS = window.TOTK_AREA_DEPTHS || [];
 
-  var VERSION = 'TOTKMAP V1.8.7';
+  var VERSION = 'TOTKMAP V1.9.0';
   var LS_DONE = 'totkmap_done_v1';
   var LS_CUSTOM = 'totkmap_custom_v1';
   var LS_LAYER = 'totkmap_layer_v1';
@@ -28,7 +28,7 @@
   var GROUP_ORDER = [1, 2, 3, 4, 5];
 
   var LABEL_MIN_ZOOM = 4;   // 名称标签显示的最低缩放级别
-  var MAX_ZOOM = 6;   // V1.8.6: EdgeOne 20000 文件限制，瓦片 z7 不入库，最高缩放 6（材料聚合本就 maxZoom 6）
+  var MAX_ZOOM = 7;   // V1.9.0: z7 尺寸由 z6 瓦片 2× 自动缩放实现（maxNativeZoom=6 保持不变），材料聚合 maxZoom 同步 7
   var MIN_ZOOM = 3;
 
   var state = {
@@ -42,6 +42,7 @@
     groups: {},            // catalogId -> L.LayerGroup
     markers: {},           // markerId -> L.Marker
     customMarks: [],       // 自定义标点 L.Marker
+    matExpanded: {},       // V1.9.0: z7 已展开的聚合（mid -> {clusterId:true}），展开后渲染为单点
     areaMarks: [],         // 区域名 L.Marker
     current: null,
     lastSearch: [],
@@ -154,7 +155,7 @@
     tileLayer = new TotkTileLayer('tiles_obj/' + LAYER_KEY[layerId] + '/{z}/{x}_{y}.{ext}', {
       minZoom: MIN_ZOOM,
       maxZoom: MAX_ZOOM,
-      maxNativeZoom: 6,   // V1.8.6
+      maxNativeZoom: 6,   // V1.9.0: 保持 6 —— 地图放大到 z7 时自动请求 z6 瓦片并 2× 缩放（z7 尺寸，无需 z7 瓦片）
       tileSize: 256,
       noWrap: true,
       bounds: TILE_BOX,
@@ -1386,9 +1387,10 @@
     return (matCountByLayer[layerId] && matCountByLayer[layerId][mid]) || 0;
   }
 
-  function getMatClusterer(mid, layerId) {
-    if (!state.matIdx[layerId]) state.matIdx[layerId] = {};
-    if (state.matIdx[layerId][mid]) return state.matIdx[layerId][mid];
+  function getMatClusterer(mid, layerId, radius) {
+    var r = radius || 36;
+    var key = layerId + ':' + mid + ':' + r;
+    if (state.matIdx[key]) return state.matIdx[key];
     var pts = (matPointsByLayer[layerId] || {})[mid] || [];
     if (!pts.length) return null;
     var feats = pts.map(function (p, i) {
@@ -1399,10 +1401,11 @@
         geometry: { type: 'Point', coordinates: [p[0] * FX, p[1] * FZ] }
       };
     });
-    var c = new Supercluster({ radius: 36, maxZoom: 6, minZoom: 2 });
-    c.load(feats);
-    state.matIdx[layerId][mid] = c;
-    return c;
+    /* V1.9.0: 聚合半径按缩放级别懒构建缓存（低 zoom 大半径减 DOM 数），key=层:材料:半径 */
+    var idx = new Supercluster({ radius: r, maxZoom: 7, minZoom: 2 });
+    idx.load(feats);
+    state.matIdx[key] = idx;
+    return idx;
   }
 
   /* 材料图标分级：随缩放级别 + 聚合数量调整尺寸（参考地名字号随 zoom 调整逻辑） */
@@ -1507,25 +1510,90 @@
       delete state.matGroups[mid];
     }
     if (!state.matSelected[mid] || state.matTab !== 'material') return;
-    var idx = getMatClusterer(mid, state.layer);
-    if (!idx) return;
     var bounds = map.getBounds();
     var z = Math.round(map.getZoom());
+    var grp = L.layerGroup();
+    var m = matById[mid];
+    var pts = (matPointsByLayer[state.layer] || {})[mid] || [];
+    if (!pts.length) return;
+
+    /* V1.9.0 方向1: z≥7 强制单点显示（绕过 supercluster 聚合，按视口 bbox 直接过滤点位） */
+    if (z >= 7) {
+      var padV = 60;   // 游戏单位缓冲（图标半宽）
+      var west = bounds.getWest() - padV, east = bounds.getEast() + padV;
+      var south = bounds.getSouth() - padV, north = bounds.getNorth() + padV;
+      var inView = [];
+      for (var pi2 = 0; pi2 < pts.length; pi2++) {
+        var px = pts[pi2][0], pz = pts[pi2][1];
+        if (px >= west && px <= east && pz >= south && pz <= north) inView.push(pi2);
+      }
+      /* 视口内点数超上限 → 回退聚合（防海量单点卡死） */
+      if (inView.length <= 400) {
+        var lsize = matIconSize(z);
+        for (var vi = 0; vi < inView.length; vi++) {
+          var pi3 = inView[vi];
+          var ll2 = [pts[pi3][1], pts[pi3][0]];
+          var icon2 = L.divIcon({
+            className: '',
+            html: '<div class="mat-leaf" style="width:' + lsize + 'px;height:' + lsize + 'px;" title="' + esc(m.cn) + '" data-char="' + esc(m.cn[0]) + '"><img src="assets/materials/' + m.entry + '.png" onerror="this.remove()"></div>',
+            iconSize: [lsize, lsize], iconAnchor: [lsize / 2, lsize / 2]
+          });
+          (function (ll3, mid2, id2) {
+            var mk = L.marker(ll3, { icon: icon2, riseOnHover: true, bubblingMouseEvents: false });
+            if (isCollected(mid2, id2) || isMatDone(mid2, id2)) mk.setOpacity(0.38);
+            mk.bindTooltip(m.cn, { direction: 'top', offset: [0, -lsize / 2 - 4], className: 'mk-label' });
+            mk.on('click', function (e) { showMatDetail(m, ll3, id2, e); });
+            grp.addLayer(mk);
+          })(ll2, mid, pi3);
+        }
+        grp.addTo(map);
+        state.matGroups[mid] = grp;
+        return;
+      }
+    }
+
+    /* V1.9.0: 聚合半径按缩放级别动态调整。100%（z3）=96、200-283%（z4~z4.9）=192（同级聚合不拆碎，滚轮连续缩放平滑）；400%（z5）=256；800%（z6）=128 过渡平滑；z7 超限回退用 8px */
+    var r = z >= 7 ? 8 : (z <= 3 ? 96 : z < 5 ? 192 : z === 5 ? 256 : 128);
+    var idx = getMatClusterer(mid, state.layer, r);
+    if (!idx) return;
+    var idxr = idx;
     // supercluster coords are [X*FX, Z*FZ], map bounds are game coords
     var padX = 800 * FX, padZ = 800 * FZ;
     var fakeBbox = [
       bounds.getWest() * FX - padX, bounds.getSouth() * FZ - padZ,
       bounds.getEast() * FX + padX, bounds.getNorth() * FZ + padZ
     ];
-    var clusters = idx.getClusters(fakeBbox, z);
-    var grp = L.layerGroup();
-    var m = matById[mid];
+    var clusters = idxr.getClusters(fakeBbox, z);
     clusters.forEach(function (c) {
       var coords = c.geometry.coordinates;
       var gx = coords[0] / FX, gz = coords[1] / FZ;
       var latlng = [gz, gx];
       var props = c.properties;
       if (props.cluster) {
+        /* V1.9.0: 已展开的聚合（z7 点击徽标后）→ 渲染其内部所有点位为单点 */
+        var expSet = state.matExpanded[mid];
+        if (expSet && expSet[c.id] && z >= 7) {
+          var leaves = idxr.getLeaves(c.id, Infinity) || [];
+          for (var li = 0; li < leaves.length; li++) {
+            var lf = leaves[li];
+            var lc = lf.geometry.coordinates;
+            var llf = [lc[1] / FZ, lc[0] / FX];
+            var lsize = matIconSize(z);
+            var licon = L.divIcon({
+              className: '',
+              html: '<div class="mat-leaf" style="width:' + lsize + 'px;height:' + lsize + 'px;" title="' + esc(m.cn) + '" data-char="' + esc(m.cn[0]) + '"><img src="assets/materials/' + m.entry + '.png" onerror="this.remove()"></div>',
+              iconSize: [lsize, lsize], iconAnchor: [lsize / 2, lsize / 2]
+            });
+            (function (ll3, mid2, id2) {
+              var mk2 = L.marker(ll3, { icon: licon, riseOnHover: true, bubblingMouseEvents: false });
+              if (isCollected(mid2, id2) || isMatDone(mid2, id2)) mk2.setOpacity(0.38);
+              mk2.bindTooltip(m.cn, { direction: 'top', offset: [0, -lsize / 2 - 4], className: 'mk-label' });
+              mk2.on('click', function (e) { showMatDetail(m, ll3, id2, e); });
+              grp.addLayer(mk2);
+            })(llf, mid, lf.id);
+          }
+          return;
+        }
         var size = matIconSize(z) + (props.point_count >= 100 ? 12 : props.point_count >= 20 ? 6 : 0);
         var icon = L.divIcon({
           className: '',
@@ -1533,9 +1601,13 @@
           iconSize: [size, size], iconAnchor: [size / 2, size / 2]
         });
         (function (ll, sz) {
-          var mk = L.marker(ll, { icon: icon, riseOnHover: true });
+          var mk = L.marker(ll, { icon: icon, riseOnHover: true, bubblingMouseEvents: false });
           mk.bindTooltip(m.cn + ' · ' + props.point_count + '点', { direction: 'top', offset: [0, -sz / 2 - 4] });
-          mk.on('click', function () { map.flyTo(ll, Math.min(map.getZoom() + 1, 6), { duration: 0.3 }); });
+          mk.on('click', function () {
+            /* V1.9.0: z7 已无法再放大 → 展开聚合为单点；z<7 仍逐级放大 */
+            if (map.getZoom() >= 7) expandMatCluster(mid, c.id);
+            else map.flyTo(ll, Math.min(map.getZoom() + 1, 7), { duration: 0.3 });
+          });
           grp.addLayer(mk);
         })(latlng, size);
       } else {
@@ -1546,7 +1618,7 @@
           iconSize: [lsize, lsize], iconAnchor: [lsize / 2, lsize / 2]
         });
         (function (ll, mid, idx) {
-          var mk = L.marker(ll, { icon: icon2, riseOnHover: true });
+          var mk = L.marker(ll, { icon: icon2, riseOnHover: true, bubblingMouseEvents: false });
           if (isCollected(mid, idx) || isMatDone(mid, idx)) mk.setOpacity(0.38);
           mk.bindTooltip(m.cn, { direction: 'top', offset: [0, -lsize / 2 - 4], className: 'mk-label' });
           mk.on('click', function (e) {
@@ -1573,6 +1645,14 @@
     });
     grp.addTo(map);
     state.matGroups[mid] = grp;
+  }
+
+  /* V1.9.0: 聚合徽标点击 —— z7 超限回退场景下展开为单点（getLeaves 取聚合内全部位置）；z<7 由点击处 flyTo 逐级放大 */
+  function expandMatCluster(mid, cid) {
+    if (!state.matExpanded[mid]) state.matExpanded[mid] = {};
+    state.matExpanded[mid][cid] = true;
+    renderMatLayer(mid);
+    toast('已展开聚合点位（' + LAYER_NAME[state.layer] + '），点击单个材料查看');
   }
 
   function renderMaterials() {
@@ -1779,8 +1859,11 @@
     }
   });
 
+  var matRenderTimer = null;
   map.on('moveend zoomend', function () {
-    if (state.matTab === 'material') renderMaterials();
+    if (state.matTab !== 'material') return;
+    if (matRenderTimer) clearTimeout(matRenderTimer);
+    matRenderTimer = setTimeout(renderMaterials, 120);
   });
 
 
