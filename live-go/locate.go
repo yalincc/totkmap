@@ -75,12 +75,28 @@ func decodePos(d []byte) []float32 {
 		return nil // 标题/加载画面，槽位未初始化
 	}
 	gy, gz := -yn, zs-elevBias
+	// NaN / Inf 必须单独判：NaN 与任何数比较都是 false，下面的绝对值与范围
+	// 检查全都抓不住它（实际症状是会算出 "NaN 米" 这种脏距离）。
+	if math.IsNaN(float64(gx)) || math.IsNaN(float64(gy)) || math.IsNaN(float64(gz)) ||
+		math.IsInf(float64(gx), 0) || math.IsInf(float64(gy), 0) || math.IsInf(float64(gz), 0) {
+		return nil
+	}
 	// Fix 5：近零残留（原点附近残留）判无效——known 快路径会锁零残留槽。
 	// 阈值 5.0 与运动扫描玩家候选门槛一致（真实坐标 |x|,|y| 都 >5）。
 	if abs32(gx) < 5 && abs32(gy) < 5 {
 		return nil
 	}
-	if abs32(gx) < 1e-20 || abs32(gy) < 1e-20 {
+	// denormal 必须按 1e-6 判，且三轴都要查。旧实现用 1e-20 形同虚设
+	// （只有精确 0 才拦得住），且漏掉了 gz 轴 —— 放过"半个槽被覆写"的垃圾值。
+	if abs32(gx) < 1e-6 || abs32(gy) < 1e-6 || abs32(gz) < 1e-6 {
+		return nil
+	}
+	// 默认坐标陷阱：未初始化 / 占位 Actor 的坐标常常三轴皆为整齐整数，
+	// 而它的副本数量极大，在"副本最多"的排序里稳居第一。
+	// 实测 2026-10-02 TOTK：probe 换锁把玩家锁定到这样一个静止的整数坐标槽，
+	// 之后 6.5 分钟位置纹丝不动且被标为 verified，再也无法纠偏。
+	// 判据取原始内存三元组（未经 elevBias 换算），不受 bias 影响。
+	if isWhole32(a[0]) && isWhole32(a[1]) && isWhole32(a[2]) {
 		return nil
 	}
 	if gx <= -6000 || gx >= 6000 || gy <= -6000 || gy >= 6000 ||
@@ -88,6 +104,15 @@ func decodePos(d []byte) []float32 {
 		return nil
 	}
 	return []float32{gx, gy, gz}
+}
+
+// isWhole32 判断浮点数是否恰等于自己的整数截断值。
+// 浮点世界坐标不会三轴同时这么整齐，据此剔除占位 / 未初始化的值。
+func isWhole32(v float32) bool {
+	if v > 4e9 || v < -4e9 { // 超出 float32 精确表示的整数不用此法判
+		return false
+	}
+	return v == float32(int64(v))
 }
 
 // rotOKBytes 检查缓冲区内是否存在正交 3x3 旋转矩阵（ActorBase 特征）。
@@ -356,7 +381,8 @@ func locate(pid uint32, window float64, onlyBlocks []struct{ Base, Size uintptr 
 	}
 	defer closeHandle(h)
 
-	blocks := guestBlocks(h, minBlockMB)
+	// 块枚举实测 6 秒（Ryujinx），走短期缓存；块布局秒级内不会变。
+	blocks := guestBlocksCached(h, minBlockMB)
 	if onlyBlocks != nil {
 		blocks = onlyBlocks
 	}

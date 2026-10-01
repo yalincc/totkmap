@@ -5,7 +5,9 @@ package main
 
 import (
 	"strings"
+	"sync"
 	"syscall"
+	"time"
 	"unicode/utf16"
 	"unsafe"
 )
@@ -121,6 +123,36 @@ func readMem(h uintptr, addr uintptr, size int) []byte {
 		return nil
 	}
 	return buf[:got]
+}
+
+// ---- 块枚举缓存 ----
+// guestBlocks 要 VirtualQueryEx 一路遍历到 0x7FFFFFFFFFFF；Ryujinx 进程里
+// region 极多，实测一次 **6 秒**（Cemu 同样逻辑只要 42ms）。传送 / 场景切换后
+// 每次重扫都要再付一次这个代价 —— 实测占"失效到重新锁定"总耗时的近一半。
+// 块布局在秒级内不会变，这里做短期缓存；pid 变化立即失效（进程重启）。
+// 注意：块世代检测（detectNewBlocks）需要新鲜数据，不要走这个缓存。
+
+const blkCacheTTL = 5 * time.Second
+
+var blkCache struct {
+	mu    sync.Mutex
+	pid   uint32
+	minMB float64
+	at    time.Time
+	val   []struct{ Base, Size uintptr }
+}
+
+// guestBlocksCached 带 TTL 的 guestBlocks。pid 取自全局 procPID（进程重启自动失效）。
+func guestBlocksCached(h uintptr, minMB float64) []struct{ Base, Size uintptr } {
+	blkCache.mu.Lock()
+	defer blkCache.mu.Unlock()
+	if blkCache.val != nil && blkCache.pid == procPID && blkCache.minMB == minMB &&
+		time.Since(blkCache.at) < blkCacheTTL {
+		return blkCache.val
+	}
+	v := guestBlocks(h, minMB)
+	blkCache.pid, blkCache.minMB, blkCache.at, blkCache.val = procPID, minMB, time.Now(), v
+	return v
 }
 
 // guestBlocks 与 live-python regions() 同口径：优先返回最大的 RW MEM_MAPPED

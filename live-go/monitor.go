@@ -98,7 +98,10 @@ func statusPath() string {
 // statusLoop 每 2s 写一次会话健康快照（原子替换，避免读到半截）。
 func statusLoop() {
 	for {
-		time.Sleep(2 * time.Second)
+		// 原为 2s：GUI 面板位置最多每 2 秒才变一次（实测观感"1~3 秒一跳"）。
+		// status.json 只有几百字节，写入成本可忽略；配合前端 eventBridge 800ms
+		// 采样，面板刷新观感落到 1 秒以内。定位逻辑完全不受影响。
+		time.Sleep(400 * time.Millisecond)
 		lock.mu.RLock()
 		addr := lock.addr
 		src := lock.source
@@ -134,6 +137,45 @@ func statusLoop() {
 				"scans":     cntScans.Load(),
 			},
 		}
+
+		// ---- GUI 套壳兼容字段 ----
+		// 让 xnavi-gui（Wails 前端 App.vue）能直接显示 TOTK 的状态与进度。
+		// 前端读：game（切换 TOTK 中文标签）/ map_url（地图链接）/ progress.counts
+		// （英文 key + [done,total] 数组）。live-go 原生 counts 是中文 key +
+		// {done,total} 对象，这里做一次映射；五个 key 必须齐全，前端用
+		// counts.shrine[0] 直接取下标，缺 key 会得到 undefined 而渲染报错。
+		obj["game"] = "totk"
+		obj["emulator"] = "Ryujinx"
+		obj["map_url"] = mapURL
+		obj["mode"] = src
+		if ok2, body, _ := progress.snapshot(); ok2 && len(body) > 0 {
+			var raw struct {
+				Save   string `json:"save"`
+				Counts map[string]struct {
+					Done  int `json:"done"`
+					Total int `json:"total"`
+				} `json:"counts"`
+			}
+			if json.Unmarshal(body, &raw) == nil {
+				pick := func(zh string) []int {
+					if c, ok := raw.Counts[zh]; ok {
+						return []int{c.Done, c.Total}
+					}
+					return []int{0, 0}
+				}
+				obj["progress"] = map[string]any{
+					"counts": map[string]any{
+						"shrine": pick("神庙"),
+						"tower":  pick("鸟望台"),
+						"korok":  pick("克洛格"),
+						"memory": pick("龙之泪"),
+						"beast":  pick("树根"),
+					},
+					"save": raw.Save,
+				}
+			}
+		}
+
 		buf, err := json.MarshalIndent(obj, "", " ")
 		if err != nil {
 			continue

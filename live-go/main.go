@@ -1,4 +1,4 @@
-﻿// TOTKNavi（TOTK live 追踪服务，Go 版）
+// TOTKNavi（TOTK live 追踪服务，Go 版）
 //
 // 用途：在本地为互动地图 https://totk.yalin.site/ 提供实时角色追踪。
 // 原理：读 Ryujinx 模拟器进程内存定位玩家坐标 → HTTP API（127.0.0.1:8766）
@@ -27,16 +27,22 @@ import (
 const mapURL = "https://totk.yalin.site/"
 
 func main() {
+	// GUI 壳（xnavi-gui）按 "YYYY-MM-DD HH:mm:ss.SSS" 前缀解析日志时间列，
+	// 这里统一给 stdout 每行加时间戳（移植自 xnavi/log_ts.go，打印点零改动）。
+	enableLogTimestamps()
 	setConsoleTitle("TOTKNavi · TOTK Live")
 
 	port := 8766
 	autoOpen := true
+	asProbe := false
 	for _, a := range os.Args[1:] {
 		switch {
 		case a == "--no-open":
 			autoOpen = false
 		case a == "--no-save":
 			useSaveScan = false
+		case a == "-asprobe":
+			asProbe = true // 地址空间探路（一次性试验，见 spike_as.go）
 		case strings.HasPrefix(a, "--"):
 			// ignore
 		default:
@@ -44,6 +50,9 @@ func main() {
 				port = n
 			}
 		}
+	}
+	if asProbe {
+		runASProbe() // 内部 os.Exit，不进入正常定位路径
 	}
 
 	fmt.Println("=" + strings.Repeat("=", 61))
@@ -120,6 +129,7 @@ func main() {
 		}
 		fmt.Println("  5 秒后自动退出……")
 		time.Sleep(5 * time.Second)
+		flushLog() // stdout 已被换成管道，不刷会吞掉上面这些提示
 		os.Exit(1)
 	}
 	fmt.Printf("  API -> http://%s/pos\n", addr)

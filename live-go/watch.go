@@ -234,10 +234,12 @@ const (
 	moveConfirmN  = 3                      // 连续移动采样次数 → verified
 	scanCooldown  = 15 * time.Second       // 扫描失败重试间隔（成功后由解锁事件清零触发立即扫）
 	knownRetry    = 1 * time.Second        // known 快路径重试间隔（扫描失败期间）
-	probeEvery    = 600 * time.Millisecond // 监听确认采样周期
-	probeMoveN    = 3                      // 组内移动采样次数 ≥ 此值 → 判活组
+	probeEvery    = 400 * time.Millisecond // 监听确认采样周期（原 600ms：实测换锁要 14 秒才完成）
+	probeMoveN    = 2                      // 组内移动采样次数 ≥ 此值 → 判活组（原 3：配合 400ms 拍从 1.8s 降到 0.8s）
 	probeLife     = 60 * time.Second       // 监听确认最长持续时间
 	probeAddrCap  = 24                     // 每组最多观察的地址数
+	probeNearDist = 50.0                   // 换锁候选与本锁位置的最大差（防远处微动槽误换）
+	probeCopyKeep = 0.7                    // 换锁候选 copies 不得低于本锁的这个比例（copies 是主导维度）
 	frozenTicks   = 150                    // 锁读数停滞 tick 数（30s）→ 启动共识兜底检查
 	consensusMin  = 3                      // 共识簇最少成员数
 	consensusDist = 15.0                   // 共识位置与本锁读数的最小差
@@ -348,6 +350,9 @@ func stateMachine() {
 	var probeMoved []int
 	var probeStart, probeLast time.Time
 	probeLockGi := -1 // 当前锁来自哪个探针组（该组由 moveN 正常确认）
+	var probeRefPos [3]float32 // 换锁位置基准（展示序 X, Z, alt，与 decodeTripleAt 输出同序）
+	lastProbeIgnoreGi := -1    // ignore 限频：同组 30s 内只打一行
+	var lastProbeIgnoreAt time.Time
 
 	resetFollow := func() {
 		prev, hasPrev = [3]float32{}, false
@@ -429,6 +434,7 @@ func stateMachine() {
 						probeBase = map[uintptr][3]float32{}
 						probeStart, probeLast = time.Now(), time.Time{}
 						probeLockGi = 0 // best=ranked[0]
+						probeRefPos = [3]float32{res.Hud[0], res.Hud[1], res.Hud[2]}
 					}
 					fmt.Printf("  [sm] scan -> lock 0x%X copies=%d struct=%d mem=(%.1f, %.1f, %.1f) [probing %d groups]\n",
 						res.Addr, res.Copies, res.Struct, res.Hud[0], res.Hud[1], res.Hud[2], len(probeGroups))
@@ -497,13 +503,38 @@ func stateMachine() {
 				}
 				if bestGi >= 0 {
 					adr := probeGroups[bestGi].Addrs[0]
-					setLock(adr, true, probeGroups[bestGi].Copies, "probe")
-					saveKnown([]uintptr{adr}, currentSessionBase)
-					probing = false
-					resetFollow()
-					a = adr
-					fmt.Printf("  [sm] probe -> switched to moving group #%d copies=%d addr=0x%X\n",
-						bestGi, probeGroups[bestGi].Copies, adr)
+					// 换锁两道闸门。缺了它们实测会把锁切到远处的整数坐标死槽，
+					// 再叠加"直接标 verified"就再也纠不回来（2026-10-02 TOTK 实测：
+					// 从 copies=149 的组切到 copies=35 的第 22 组，位置 (30,-1500,1405)
+					// 三轴皆整数，之后 6.5 分钟纹丝不动）。
+					//   1) 位置校验：候选必须在本锁附近（玩家槽副本簇）——
+					//      防止远处"微动槽"（相机 / UI / NPC / 物理波动）被当成玩家
+					//   2) 丰裕度校验：copies 是主导维度，不允许明显少于本锁
+					// 另外 setLock 传 false：换过去的槽要重新走移动确认才晋升 verified。
+					lock.mu.RLock()
+					curCopies := lock.copies
+					lock.mu.RUnlock()
+					if d := decodePos(readMem(h, adr, 12)); d != nil &&
+						dist3([3]float32{d[0], d[1], d[2]}, probeRefPos) < probeNearDist &&
+						float32(probeGroups[bestGi].Copies) >= float32(curCopies)*probeCopyKeep {
+						setLock(adr, false, probeGroups[bestGi].Copies, "probe")
+						saveKnown([]uintptr{adr}, sessionBaseForKnown())
+						probing = false
+						resetFollow()
+						a = adr
+						probeRefPos = [3]float32{d[0], d[1], d[2]}
+						fmt.Printf("  [sm] probe -> switched to moving group #%d copies=%d addr=0x%X\n",
+							bestGi, probeGroups[bestGi].Copies, adr)
+					} else if bestGi != lastProbeIgnoreGi || time.Since(lastProbeIgnoreAt) > 30*time.Second {
+						lastProbeIgnoreGi = bestGi
+						lastProbeIgnoreAt = time.Now()
+						dist := float32(-1)
+						if d := decodePos(readMem(h, adr, 12)); d != nil {
+							dist = dist3([3]float32{d[0], d[1], d[2]}, probeRefPos)
+						}
+						fmt.Printf("  [sm] probe: group #%d moving but rejected (%.0fm away, copies %d vs current %d) - ignore\n",
+							bestGi, dist, probeGroups[bestGi].Copies, curCopies)
+					}
 				}
 			}
 			if probing && time.Since(probeStart) > probeLife {
