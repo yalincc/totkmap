@@ -1111,13 +1111,29 @@
   /* V1.8.0 M3：服务端存档自动同步（BOTWmap 同机制——服务自动定位存档、网页拉取、
    * 游戏内保存后 mtime 变化 → progressGen 变化 → live.js 触发本函数自动刷新） */
   var serverSaveSlot = '';
+  /* V1.9.2 URL 上下文（xnavi 打开地图带 ?game=，见《BOTWmap导航配合接口协议 v1》）：
+   * 仅用于异口径进度提示；?follow=1 由 live.js 消费 */
+  var urlGame = null, progWarned = false;
+  try { urlGame = new URLSearchParams(location.search).get('game'); } catch (e) {}
   function syncProgressFromServer() {
     if (!window.LIVENAV || !window.LIVENAV.online()) return;
     fetch('http://127.0.0.1:8766/progress?t=' + Date.now(), { cache: 'no-store' })
       .then(function (r) { return r.json(); })
       .then(function (res) {
         if (!res || !res.ok) return;
-        if (res.doneIds) applyProgressDone(res.doneIds);
+        /* V1.9.2 口径防御（协议 §2.3，线上 Bug3 教训）：xnavi /progress 按当前游戏分两种口径——
+         * TOTK = doneIds；BOTW = points（无 doneIds）。无 doneIds 即异口径/格式不符，
+         * 整段跳过、保留现状，绝不把 BOTW 口径的 counts 当 TOTK 进度应用 */
+        if (!Array.isArray(res.doneIds)) {
+          if (!progWarned) {
+            progWarned = true;
+            toast(urlGame === 'botw'
+              ? '当前导航识别为 BOTW，进度请查看 botw 地图'
+              : '进度数据格式不符（非 TOTK 口径），已保留当前进度');
+          }
+          return;
+        }
+        applyProgressDone(res.doneIds);
         if (res.counts) {
           state.save = res.counts;
           state.saveVersion = (res.version || '') + ' · 服务端自动同步';

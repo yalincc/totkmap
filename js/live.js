@@ -522,6 +522,16 @@
     map = window.TOTK.map;
     T = window.TOTK;
     try { follow = lsGet(LS_FOLLOW, '0') !== '0'; } catch (e) {}
+    /* V1.9.2 URL 上下文（xnavi 导航程序打开地图时带参，见《BOTWmap导航配合接口协议 v1》）：
+     *   ?follow=1 → 导航启动，强制开启视图跟随并持久化（用户手动设置让位于导航启动意图）
+     *   无 follow 参数 → 完全尊重本地持久化设置（手动打开行为不变） */
+    try {
+      var _sp = new URLSearchParams(location.search);
+      if (_sp.get('follow') === '1') {
+        follow = true;
+        lsSet(LS_FOLLOW, '1');
+      }
+    } catch (e) {}
     try { autoLayer = lsGet(LS_AUTOLAYER, '1') !== '0'; } catch (e) {}
     var a = parseInt(lsGet(LS_ARRIVE, String(ARRIVE_DEF)), 10);
     arriveM = (isNaN(a) || a < 1) ? ARRIVE_DEF : Math.min(a, 500);
