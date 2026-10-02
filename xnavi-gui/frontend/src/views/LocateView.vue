@@ -1,107 +1,219 @@
 <template>
-  <div class="flex-1 flex flex-col gap-3 min-h-0 p-3">
-    <!-- 顶部：开始/停止 + 环境 -->
-    <div class="grid grid-cols-12 gap-3 shrink-0">
-      <section class="col-span-12 md:col-span-3 bg-[#161b22] border border-slate-800 rounded-md p-3">
-        <div class="text-[11px] font-semibold text-slate-400 mb-2 uppercase tracking-wider">运行环境</div>
-        <div class="text-xs text-slate-300 leading-relaxed">
-          <div>模拟器：<span class="text-white font-semibold">Ryujinx</span></div>
-          <div>游戏：<span class="text-white font-semibold">王国之泪 (TOTK)</span></div>
-          <div class="mt-1" :class="ryuHintClass">{{ ryuHintText }}</div>
-        </div>
-      </section>
-      <section class="col-span-12 md:col-span-2 flex">
-        <button @click="toggleLocating"
-          :class="isLocating ? 'bg-amber-600 hover:bg-amber-500' : 'bg-blue-600 hover:bg-blue-500'"
-          class="w-full rounded flex items-center justify-center font-bold text-sm text-white shadow-lg transition active:scale-95">
-          {{ isLocating ? '■ 停止' : '▶ 开始定位' }}
-        </button>
-      </section>
-      <section class="col-span-12 md:col-span-7 bg-gradient-to-r from-emerald-950/30 to-[#161b22] border border-emerald-500/30 rounded-md p-3">
-        <div class="flex items-center gap-1.5">
-          <div class="text-[11px] text-emerald-400 font-medium">存档信息</div>
-          <div v-if="progressData.save" class="text-[10px] text-slate-500 font-mono truncate ml-1" :title="progressData.save">{{ saveBasename }}</div>
-        </div>
-        <div class="text-xs text-slate-300 mt-1">Ryujinx · 王国之泪 (TOTK)</div>
-        <div v-if="progressData.counts" class="grid grid-cols-2 gap-x-4 gap-y-1 mt-2 font-mono">
-          <div class="text-[12px] text-slate-400">神庙 <span class="text-white font-bold">{{ n('神庙') }}</span></div>
-          <div class="text-[12px] text-slate-400">鸟望台 <span class="text-white font-bold">{{ n('鸟望台') }}</span></div>
-          <div class="text-[12px] text-slate-400">克洛格 <span class="text-white font-bold">{{ n('克洛格') }}</span></div>
-          <div class="text-[12px] text-slate-400">龙之泪 <span class="text-white font-bold">{{ n('龙之泪') }}</span></div>
-          <div class="text-[12px] text-slate-400">树根 <span class="text-white font-bold">{{ n('树根') }}</span></div>
-          <div class="text-[12px] text-slate-400">魔犹伊 <span class="text-white font-bold">{{ n('魔犹伊遗失物') }}</span></div>
-        </div>
-        <div v-else class="mt-2 text-[11px] text-slate-500">等待读取存档...</div>
-      </section>
-    </div>
+  <div class="flex-1 flex flex-col gap-3 min-h-0 p-3 overflow-y-auto">
 
-    <!-- 状态卡（M2） -->
-    <section class="bg-[#161b22] border border-slate-800 rounded-md p-3 shrink-0">
-      <div class="flex items-center justify-between mb-2">
-        <div class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">实时定位</div>
-        <div class="text-[11px] font-mono" :class="stateTextClass">{{ stateText }}</div>
+    <!-- ① 自绘标题栏：整栏拖拽 + 设置/窗口控制 -->
+    <section class="bg-[#161b22] border-b border-slate-800 px-3 py-2.5 shrink-0 flex items-center gap-5" style="--wails-draggable:drag;">
+      <div class="flex items-center gap-2.5 shrink-0">
+        <span class="w-2.5 h-2.5 rounded-full" :class="syncDot"></span>
+        <span class="text-white text-sm font-bold tracking-wide">TOTKNavi 定位导航</span>
+        <span class="text-[10px] font-mono text-sky-300 bg-blue-500/10 border border-blue-500/40 rounded px-1.5 py-0.5">v{{ ver.replace('v','') }}</span>
+        <span class="text-[11px] text-slate-500 ml-1.5 pl-2.5 border-l border-slate-800">Ryujinx ➔ totk.yalin.site</span>
       </div>
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-2 font-mono text-xs">
-        <div class="bg-[#0d1117] border border-slate-800 rounded p-2">
-          <div class="text-[10px] text-slate-500">游戏坐标</div>
-          <div class="text-white mt-0.5">X {{ fmt(pos.gx) }} · Y {{ fmt(pos.gy) }}<div class="text-slate-400">高度 Z {{ fmt(pos.gz) }}</div></div>
+      <div class="flex items-center gap-1 ml-auto shrink-0" style="--wails-draggable:no-drag;">
+        <span class="text-[11px] font-mono mr-2" :class="syncClass">{{ syncText }}</span>
+        <!-- 设置卡片（点击齿轮弹出，与关于互斥） -->
+        <div class="relative" @click.stop>
+          <button class="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-white rounded hover:bg-slate-700/60" title="设置" @click="toggleSettings">⚙</button>
+          <SettingsPop v-if="showSettingsPop" class="absolute right-0 top-full mt-1.5 z-50" />
         </div>
-        <div class="bg-[#0d1117] border border-slate-800 rounded p-2">
-          <div class="text-[10px] text-slate-500">地图坐标</div>
-          <div class="text-white mt-0.5">{{ fmt(pos.mx) }}, {{ fmt(pos.my) }}</div>
+        <!-- 关于卡片（点击问号弹出，与设置互斥） -->
+        <div class="relative" @click.stop>
+          <button class="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-white rounded hover:bg-slate-700/60 text-[15px] font-semibold" title="关于" @click="toggleAbout">?</button>
+          <AboutPop v-if="showAboutPop" class="absolute right-0 top-full mt-1.5 z-50" />
         </div>
-        <div class="bg-[#0d1117] border border-slate-800 rounded p-2">
-          <div class="text-[10px] text-slate-500">所在层 / 来源</div>
-          <div class="text-white mt-0.5">{{ layerName }} <span class="text-slate-500">({{ pos.layer }})</span></div>
-          <div class="text-blue-300">{{ sourceLabel }}</div>
-        </div>
-        <div class="bg-[#0d1117] border border-slate-800 rounded p-2">
-          <div class="text-[10px] text-slate-500">锁定状态</div>
-          <div class="flex items-center gap-1.5 mt-0.5">
-            <span class="w-2 h-2 rounded-full" :class="locked ? 'bg-emerald-400' : (locating ? 'bg-amber-400 animate-pulse' : 'bg-slate-600')"></span>
-            <span class="text-white">{{ locked ? '已锁定' : (locating ? '定位中' : '未锁定') }}</span>
-          </div>
-          <div class="text-slate-500 text-[10px] mt-0.5" v-if="pos.copies > 0">copies {{ pos.copies }}<span v-if="pos.lockAddr"> · 0x{{ pos.lockAddr.slice(-8) }}</span></div>
-        </div>
-      </div>
-      <!-- 步骤条 -->
-      <div class="flex items-center justify-center gap-4 mt-3">
-        <template v-for="(s, i) in steps" :key="s.name">
-          <div class="flex items-center space-x-1.5" :class="stepClass(s.state)">
-            <span class="w-2 h-2 rounded-full" :class="stepDot(s.state)"></span>
-            <span class="text-xs font-mono">{{ s.name }}</span>
-          </div>
-          <div v-if="i < steps.length - 1" class="w-6 h-px bg-slate-700"></div>
-        </template>
+        <button class="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-white rounded hover:bg-slate-700/60 text-sm leading-none" title="最小化" @click="minWin">—</button>
+        <button class="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-rose-400 rounded hover:bg-slate-700/60 text-sm leading-none" title="关闭" @click="closeWin">✕</button>
       </div>
     </section>
 
-    <!-- 日志 -->
+    <!-- ② 主操作横幅：步骤状态机 | 打开地图 + 定位 -->
+    <section class="bg-[#161b22] border border-slate-800 rounded-lg px-3.5 py-2.5 shrink-0 flex items-center justify-between gap-4">
+      <div class="flex items-center gap-2 text-xs font-mono shrink-0 whitespace-nowrap">
+        <template v-for="(s, i) in steps" :key="s.name">
+          <div v-if="i > 0" class="text-slate-600 mx-0.5">/</div>
+          <div class="flex items-center gap-1.5" :class="stepClass(s.state)">
+            <span class="w-2 h-2 rounded-full" :class="stepDot(s.state)"></span>
+            <span>{{ s.name }}</span>
+          </div>
+        </template>
+      </div>
+      <div class="flex items-center gap-2.5 shrink-0">
+        <button @click="openMap" class="w-[136px] py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-sky-400 text-xs font-medium border border-slate-700 flex items-center justify-center gap-1.5 transition">
+          🧭 打开网页地图
+        </button>
+        <button @click="toggleLocating"
+          :class="isLocating
+            ? 'bg-emerald-600 hover:bg-emerald-500 shadow-emerald-950/50'
+            : 'bg-blue-600 hover:bg-blue-500 shadow-blue-950/50'"
+          class="w-[136px] py-2 rounded-lg text-white text-xs font-bold flex items-center justify-center gap-1.5 transition shadow-lg active:scale-95">
+          <span>{{ isLocating ? '◉' : '▶' }}</span>
+          <span>{{ isLocating ? '正在定位中' : '开始定位' }}</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ③ 两列：左4 实时数据 ｜ 右6 本地解析进度 -->
+    <div class="grid grid-cols-10 gap-3 items-stretch shrink-0">
+
+      <!-- 左 4 列 -->
+      <div class="col-span-4 flex flex-col gap-3">
+
+        <!-- 实时同步坐标卡 -->
+        <section class="bg-[#161b22] border border-slate-800 rounded-xl p-3.5 flex-1">
+          <div class="flex items-center justify-between text-xs pb-2 border-b border-slate-800/80 mb-3">
+            <span class="font-bold text-sky-400 flex items-center gap-1.5">实时同步坐标</span>
+            <span class="text-[10px] font-mono text-slate-500">偏移量: {{ lockAddrText }}</span>
+          </div>
+          <div class="grid grid-cols-3 gap-2 text-center font-mono">
+            <div class="bg-[#0d1117] p-2 rounded-lg border border-slate-800">
+              <div class="text-[10px] text-slate-500">X</div>
+              <div class="text-sm font-bold text-white mt-0.5">{{ fmt(pos.gx) }}</div>
+            </div>
+            <div class="bg-[#0d1117] p-2 rounded-lg border border-slate-800">
+              <div class="text-[10px] text-slate-500">Y</div>
+              <div class="text-sm font-bold text-white mt-0.5">{{ fmt(pos.gy) }}</div>
+            </div>
+            <div class="bg-[#0d1117] p-2 rounded-lg border border-slate-800">
+              <div class="text-[10px] text-slate-500">Z 高度</div>
+              <div class="text-sm font-bold text-white mt-0.5">{{ fmt(pos.gz) }}</div>
+            </div>
+          </div>
+          <div class="mt-2.5 flex items-center justify-between text-xs bg-[#0d1117] px-3 py-2 rounded-lg border border-slate-800">
+            <span class="text-slate-400">所在图层:</span>
+            <span class="font-bold text-emerald-400">{{ regionText }}<span class="text-blue-300 text-[10px] ml-2">{{ sourceLabel }}</span></span>
+          </div>
+        </section>
+
+        <!-- 网页地图选定目标卡 -->
+        <section class="bg-[#161b22] border border-slate-800 rounded-xl p-3.5 flex-1">
+          <div class="flex items-center justify-between text-xs pb-2 border-b border-slate-800/80 mb-2">
+            <span class="font-bold text-amber-400 flex items-center gap-1.5">网页地图选定目标</span>
+            <span class="text-[10px] text-slate-500">来自 totk.yalin.site</span>
+          </div>
+          <div class="flex items-center justify-between mt-1 gap-3">
+            <div class="min-w-0">
+              <div class="text-xs font-semibold text-white truncate">{{ targetName }}</div>
+              <div class="text-[10px] text-slate-400 font-mono mt-0.5">Layer: {{ targetLayerText }}</div>
+            </div>
+            <div class="text-right shrink-0">
+              <div class="text-base font-mono font-bold text-amber-400">{{ distText }}</div>
+              <div class="text-[10px] text-slate-500 font-mono">直线测距</div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- 右 6 列：本地解析进度（全量 20 类 + 滚动） -->
+      <div class="col-span-6 flex flex-col min-h-0">        <section class="bg-[#161b22] border border-slate-800 rounded-xl p-3.5 flex-1 flex flex-col min-h-0">
+          <div class="flex items-center justify-between text-xs pb-2 border-b border-slate-800/80 shrink-0">
+            <span class="font-bold text-emerald-400">本地解析进度</span>
+            <span class="text-[10px] text-slate-500">{{ progressCount }} / 20 类</span>
+          </div>
+          <div v-if="progressData.counts" class="overflow-y-auto min-h-0 flex-1 pr-0.5">
+            <div class="grid grid-cols-3 gap-1.5 py-2.5">
+              <div v-for="c in allCategories" :key="c.key"
+                class="bg-[#0d1117] p-1.5 px-2 rounded border border-slate-800 flex justify-between text-[11px]">
+                <span class="text-slate-400 truncate">{{ c.label }}</span>
+                <span class="font-mono text-white font-semibold shrink-0 ml-1">{{ n(c.key) }}</span>
+              </div>
+            </div>
+          </div>
+          <div v-else class="flex-1 flex items-center justify-center text-[11px] text-slate-500 my-2">等待读取存档...（需先开始定位）</div>
+        </section>
+      </div>
+    </div>
+
+    <!-- ④ 实时日志 -->
     <LogPanel />
   </div>
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, ref, onMounted, onUnmounted } from 'vue'
 import LogPanel from '../components/LogPanel.vue'
+import SettingsPop from '../components/SettingsPop.vue'
+import AboutPop from '../components/AboutPop.vue'
+import { findRegion } from '../data/regions'
 import {
   pos, steps, stepClass, stepDot, isLocating, toggleLocating, progressData,
-  stateText, stateTextClass, locked, locating, layerName, sourceLabel,
-  clearTarget, pickRyujinx, pickSave, saveSettings
+  target, targetDist, layerName, sourceLabel, LAYER_NAME, openMap,
+  ver, syncText, syncClass, syncDot, rt
 } from '../composables/useCore'
 
-const ryuHintText = '路径自动探测（按进程名）'
-const ryuHintClass = 'text-slate-500'
+function minWin() { rt.WindowMinimise() }
+// Wails 无边框(Frameless)下 WindowClose() 不触发关闭，改用 Quit() 强制退出
+function closeWin() { rt.Quit() }
 
-function fmt(v) { return (v == null) ? '-' : Number(v).toFixed(1) }
+// 全量 20 类（与 core progressCounts 对齐）
+const allCategories = [
+  { key: '鸟望台', label: '鸟望台' },
+  { key: '龙之泪', label: '龙之泪' },
+  { key: '神庙', label: '神庙' },
+  { key: '树根', label: '树根' },
+  { key: '克洛格', label: '克洛格' },
+  { key: '双倍克洛格', label: '双倍克洛格' },
+  { key: '魔犹伊遗失物', label: '魔犹伊遗失物' },
+  { key: '残旧的地图', label: '残旧的地图' },
+  { key: '贤者的遗志', label: '贤者的遗志' },
+  { key: '设计图石板', label: '设计图石板' },
+  { key: '卡邦达立牌', label: '卡邦达立牌' },
+  { key: '独眼巨人', label: '独眼巨人' },
+  { key: '岩石巨人', label: '岩石巨人' },
+  { key: '莫尔德拉吉克', label: '莫尔德拉吉克' },
+  { key: '方块魔像', label: '方块魔像' },
+  { key: '巨霸伽马', label: '巨霸伽马' },
+  { key: '古栗欧克', label: '古栗欧克' },
+  { key: '地洞入口', label: '地洞入口' },
+  { key: '洞穴入口', label: '洞穴入口' },
+  { key: '井', label: '井' }
+]
+
+function fmt(v) { return (!pos.ok || v == null) ? '-' : Number(v).toFixed(1) }
 function n(key) {
   const c = progressData.value?.counts?.[key]
   if (!c) return '-'
   return `${c.done}/${c.total}`
 }
-const saveBasename = computed(() => {
-  const s = progressData.value?.save
-  if (!s) return ''
-  return s.split(/[\\/]/).slice(-2).join('\\')
+const progressCount = computed(() => {
+  const counts = progressData.value?.counts
+  return counts ? Object.keys(counts).filter(k => counts[k] && counts[k].total).length : 0
+})
+
+const lockAddrText = computed(() => (pos.lockAddr && pos.lockAddr !== '0x0' ? pos.lockAddr : '—'))
+
+// 设置/关于卡片：互斥显示（同时只弹一个），点击外部全部关闭
+const showSettingsPop = ref(false)
+const showAboutPop = ref(false)
+function toggleSettings() {
+  showAboutPop.value = false
+  showSettingsPop.value = !showSettingsPop.value
+}
+function toggleAbout() {
+  showSettingsPop.value = false
+  showAboutPop.value = !showAboutPop.value
+}
+function closePops() {
+  showSettingsPop.value = false
+  showAboutPop.value = false
+}
+onMounted(() => document.addEventListener('click', closePops))
+onUnmounted(() => document.removeEventListener('click', closePops))
+
+// 所在图层行：地面层显示地区名（TOTKmap areas.js 最近区域匹配），地下/天空仅层名
+const regionText = computed(() => {
+  if (!pos.ok) return '—'
+  const r = findRegion(pos.mx, pos.my, pos.layer)
+  return r ? `${r.name} · ${layerName.value} (${pos.layer})` : `${layerName.value} (${pos.layer})`
+})
+
+const targetName = computed(() => (target.value?.name || '未设置目标'))
+const distText = computed(() => {
+  const d = targetDist.value
+  return d == null ? '-' : Math.round(d) + ' m'
+})
+const targetLayerText = computed(() => {
+  const t = target.value
+  if (!t || t.layer == null) return '未指定'
+  return (LAYER_NAME[Number(t.layer)] || String(t.layer)) + ` (${t.layer})`
 })
 </script>

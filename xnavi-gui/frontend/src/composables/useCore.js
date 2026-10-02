@@ -1,7 +1,7 @@
 // useCore.js — TOTKNavi GUI 共享状态 + 全部 Wails 调用（V1.1.0 重构）
 // 单一数据源：status.json（core 400ms 写，eventBridge 300ms 推）+
 // xnavi-gui-core.log（增量读）。前端所有视图组件只从这里取状态/调方法。
-import { ref, reactive, computed } from 'vue'
+import { ref, reactive, computed, watch } from 'vue'
 
 const api = window.go.main.App
 const rt = window.runtime
@@ -9,7 +9,7 @@ const rt = window.runtime
 export { api, rt }
 
 // ---- 版本 / 运行 ----
-export const ver = ref('v1.1.0')
+export const ver = ref('v1.2.0')
 export const coreRunning = ref(false)
 export const isLocating = ref(false)
 export const updateInfo = ref(null)
@@ -17,7 +17,8 @@ export const updateInfo = ref(null)
 // ---- 头部状态灯 ----
 export const syncText = ref('等待坐标流')
 export const syncDot = ref('bg-slate-600')
-export const syncClass = computed(() => coreRunning.value ? 'text-emerald-400' : 'text-slate-500')
+// 状态文字颜色：未激活灰，激活（core 运行）琥珀黄
+export const syncClass = computed(() => coreRunning.value ? 'text-amber-400' : 'text-slate-500')
 
 // ---- 定位状态（结构化，来自 status.json）----
 export const pos = reactive({
@@ -101,6 +102,8 @@ export function buildMapUrl() {
   return `${mapUrl.value}${sep}follow=1&game=totk`
 }
 export function openMap() { rt.BrowserOpenURL(buildMapUrl()) }
+// 在系统默认浏览器打开外部链接（wails runtime，避免 webview 内导航）
+export function openExternal(url) { rt.BrowserOpenURL(url) }
 
 // ---- 日志 ----
 export const filteredLogs = computed(() => {
@@ -143,17 +146,23 @@ export async function saveSettings() {
 export async function openLogDir() { await api.OpenLogDir() }
 export async function exportDiag() { await api.ExportDiagnostics() }
 export function checkUpdate() { rt.EventsEmit('update:check') }
+// 手动检查更新：调用 Go 绑定拿明确结果（前端据此提示）
+export async function checkForUpdates() {
+  const r = await api.CheckForUpdates()
+  if (r.status === 'available') updateInfo.value = { latest: r.latest, url: r.url }
+  return r
+}
 
 // ---- 事件订阅 / 初始化 ----
 let mapAutoOpened = false
 function applyStatus(st) {
   coreRunning.value = !!st.running
   if (st.pos) {
-    pos.ok = !!st.ok
     pos.gx = st.pos.gx || 0; pos.gy = st.pos.gy || 0; pos.gz = st.pos.gz || 0
     pos.mx = st.pos.mx || 0; pos.my = st.pos.my || 0
   }
   if (st.layer != null) pos.layer = st.layer
+  pos.ok = !!st.ok
   pos.verified = !!st.verified
   if (st.source) pos.source = st.source
   pos.copies = st.copies || 0
@@ -163,14 +172,23 @@ function applyStatus(st) {
   if (st.target !== undefined) target.value = st.target
   if (st.progress && st.progress.counts) progressData.value = st.progress
   if (st.map_url) statusMapUrl.value = st.map_url
+  // core 未运行：不展示残留坐标/锁定态（status.json 残留上次会话数据）
+  if (!st.running) {
+    pos.ok = false
+    pos.verified = false
+    pos.pid = 0
+  }
   setStepState()
   updateSync()
-  // 首次 verified 自动打开地图（导航配合地图：BOTW 时代协议，保留）
-  if (pos.ok && pos.verified && !mapAutoOpened) {
-    mapAutoOpened = true
-    rt.BrowserOpenURL(buildMapUrl())
-  }
 }
+// 锁定后才自动打开地图网页：仅本次会话用户点击「开始定位」(isLocating) 后、
+// 且 verified 从 false→true 真实锁定才打开（延迟 1.5s）。避免启动时读到残留 status.json 误开。
+watch(locked, (val, old) => {
+  if (val && !old && isLocating.value && !mapAutoOpened) {
+    mapAutoOpened = true
+    setTimeout(() => rt.BrowserOpenURL(buildMapUrl()), 1500)
+  }
+})
 function updateSync() {
   if (coreRunning.value && pos.ok) {
     syncText.value = '坐标流同步中'
@@ -185,6 +203,7 @@ function updateSync() {
 }
 
 export async function initCore() {
+  mapAutoOpened = false // 每次启动重置，仅本次会话真实锁定后才自动开地图
   logs.value = []
   steps.value.forEach(s => { s.state = s.name === '就绪' ? 'done' : 'idle' })
   ver.value = await api.Version()

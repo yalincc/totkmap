@@ -11,13 +11,13 @@
         <div class="flex-1 h-2 bg-[#0d1117] border border-slate-800 rounded overflow-hidden">
           <div class="h-full bg-gradient-to-r from-emerald-600 to-emerald-400 transition-all" :style="{ width: overallPct + '%' }"></div>
         </div>
-        <div class="text-sm font-mono text-white">{{ overallPct }}%</div>
+        <div class="text-sm font-mono text-white">{{ overallPct.toFixed(1) }}%</div>
       </div>
       <div v-else class="text-[11px] text-slate-500 mt-2">等待读取存档...（需先开始定位）</div>
     </section>
 
     <!-- 分类列表 -->
-    <section v-if="progressData.counts" class="grid grid-cols-1 md:grid-cols-2 gap-2 shrink-0">
+    <section v-if="progressData.counts" class="grid grid-cols-1 md:grid-cols-3 gap-2 shrink-0">
       <div v-for="c in categories" :key="c.key" class="bg-[#161b22] border border-slate-800 rounded-md p-2.5">
         <div class="flex items-center justify-between text-xs">
           <span class="text-slate-300">{{ c.label }}</span>
@@ -77,7 +77,8 @@ const overallPct = computed(() => {
     const c = counts[k]
     if (c && c.total) { d += c.done; t += c.total }
   }
-  return t ? Math.round(d / t * 100) : 0
+  // 保留 1 位小数（0.5% 级别可显示），进度条宽度同步用该值
+  return t ? Math.round(d / t * 1000) / 10 : 0
 })
 const saveBasename = computed(() => {
   const s = progressData.value?.save

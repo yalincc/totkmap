@@ -24,7 +24,6 @@ defineProps({
 defineEmits(['change'])
 const items = [
   { id: 'locate', label: '实时定位', icon: '📡' },
-  { id: 'nav', label: '导航目标', icon: '🧭' },
   { id: 'progress', label: '存档进度', icon: '📊' },
   { id: 'settings', label: '设置', icon: '⚙' }
 ]

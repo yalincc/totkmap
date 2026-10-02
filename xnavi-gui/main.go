@@ -16,11 +16,11 @@ func main() {
 
 	err := wails.Run(&options.App{
 		Title:     "TOTKNavi 定位导航 · 王国之泪",
-		Width:     1080,
+		Width:     960,
 		Height:    720,
 		MinWidth:  900,
 		MinHeight: 600,
-		Frameless: false, // 无边框：前端自绘标题栏（去壳化，拖拽区 --wails-draggable）
+		Frameless: true, // 无边框：前端自绘标题栏（品牌区 --wails-draggable 拖拽，右侧窗口控制按钮）
 		AssetServer: &assetserver.Options{
 			Assets: assets,
 		},

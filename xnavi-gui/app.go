@@ -22,7 +22,7 @@ import (
 )
 
 // guiVersion 导航程序版本（与地图网页版本解耦，见 BOTWmap 项目规则第 3 条）。
-const guiVersion = "v1.1.0"
+const guiVersion = "v1.2.0"
 
 // App Wails 后端：管理核心子进程 + 读 status.json / xnavi-gui-core.log + 网页端端口探测。
 // 与核心的通信完全走文件（status.json、xnavi-gui-core.log），不依赖 8766 HTTP——
@@ -153,19 +153,17 @@ func (a *App) ensureWindowVisible() {
 	fmt.Println("  [gui] window repositioned to center:", x, y)
 }
 
-// checkUpdate 启动时查 GitHub tags 列表，找最新 totknavi- 开头的 tag，有新版弹窗。
-func (a *App) checkUpdate() {
-	defer func() { recover() }()
+// fetchLatestTag 查 GitHub tags，返回最新 totknavi- 前缀版本号；网络/解析失败返回空串。
+func fetchLatestTag() string {
 	client := &http.Client{Timeout: 5 * time.Second}
 	resp, err := client.Get("https://api.github.com/repos/yalincc/totkmap/tags?per_page=30")
-	if err != nil { return }
+	if err != nil { return "" }
 	defer resp.Body.Close()
 	body, _ := io.ReadAll(resp.Body)
 	var tags []struct {
 		Name string `json:"name"`
 	}
-	if json.Unmarshal(body, &tags) != nil { return }
-	// 遍历全部 totknavi- tag，取版本号最大的（tags 列表本身按创建时间排序，版本号需自行比较）
+	if json.Unmarshal(body, &tags) != nil { return "" }
 	best := ""
 	for _, t := range tags {
 		if !strings.HasPrefix(t.Name, "totknavi-") { continue }
@@ -174,8 +172,14 @@ func (a *App) checkUpdate() {
 			best = v
 		}
 	}
+	return best
+}
+
+// checkUpdate 启动时 + 事件触发时查 GitHub tags 列表，有新版弹窗，无新版/失败静默（自动检查场景）。
+func (a *App) checkUpdate() {
+	defer func() { recover() }()
+	best := fetchLatestTag()
 	if best == "" {
-		runtime.EventsEmit(a.ctx, "update:latest", nil)
 		return
 	}
 	if verGreater(best, guiVersion) {
@@ -186,6 +190,22 @@ func (a *App) checkUpdate() {
 	} else {
 		runtime.EventsEmit(a.ctx, "update:latest", nil)
 	}
+}
+
+// CheckForUpdates 手动检查更新（GUI 按钮）：返回明确结果供前端提示最新/可用/失败。
+func (a *App) CheckForUpdates() map[string]string {
+	best := fetchLatestTag()
+	if best == "" {
+		return map[string]string{"status": "error", "msg": "无法连接 GitHub，请检查网络"}
+	}
+	if verGreater(best, guiVersion) {
+		return map[string]string{
+			"status": "available",
+			"latest": best,
+			"url":    "https://github.com/yalincc/totkmap/releases/tag/totknavi-" + best,
+		}
+	}
+	return map[string]string{"status": "latest"}
 }
 
 // verGreater 比较 "vX.Y.Z" 版本号，x > y 返回 true。
