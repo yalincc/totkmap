@@ -125,6 +125,29 @@ func tryOffsets() (uintptr, [3]float32, bool) {
 	return 0, [3]float32{}, false
 }
 
+// knownOffsetsForWatch 返回 known 列表里除当前锁外、rebase 到当前块的全部偏移地址
+// （known 锁确认窗口的交替观察用，逐条 12B 读微秒级）。
+func knownOffsetsForWatch(cur uintptr) []uintptr {
+	base := currentSessionBase
+	if base == 0 {
+		base = loadKnownBlock()
+	}
+	if base == 0 {
+		base = guestRamBase()
+	}
+	if base == 0 {
+		return nil
+	}
+	var out []uintptr
+	for _, o := range loadOffsets() {
+		adr := base + o
+		if adr != cur {
+			out = append(out, adr)
+		}
+	}
+	return out
+}
+
 // ---- 块世代：Ryujinx 重开游戏后新旧 guest DRAM 块并存（旧块残留上次会话玩家槽）----
 // 扫描时发现"从未见过的新块"判定为游戏重启/块重建 → 只扫新块、回 UNLOCKED。
 var (
@@ -224,6 +247,13 @@ const (
 	consensusMin  = 3                      // 共识簇最少成员数
 	consensusDist = 15.0                   // 共识位置与本锁读数的最小差
 	consensusEvery = 1 * time.Second       // 共识检查间隔
+	// known 锁确认窗口（2026-10-02 实测补丁）：known 锁上后 30s 内从未出现
+	// 移动采样（锁错垃圾槽时玩家走动读数也不变），进入交替观察——轮读 known
+	// 列表其他偏移（微秒级），谁在动就是真玩家槽。秒锁正常 0.5s 就确认，
+	// 窗口只惩罚锁错的场景，站桩玩家零开销。
+	knownConfirmWin = 30 * time.Second
+	knownWatchEvery = 400 * time.Millisecond // 交替观察采样周期
+	knownWatchMoveN = 2                      // 观察偏移移动采样次数 ≥ 此值 → 判活槽
 )
 
 var (
@@ -323,6 +353,15 @@ func stateMachine() {
 	consensusCand := uintptr(0) // 冻结共识候选（需"动了"才换锁）
 	var consensusCandPos [3]float32
 
+	// known 锁确认窗口状态（交替观察）
+	knownLockAt := time.Time{} // known 锁锁上时刻
+	knownSeenMove := false     // 本锁是否出现过移动采样（出现过=锁对，玩家在动）
+	knownWatchOn := false      // 交替观察模式开启
+	knownWatchAt := time.Time{}
+	var knownWatchAddrs []uintptr
+	knownWatchBase := map[uintptr][3]float32{}
+	knownWatchMoved := []int{}
+
 	// 监听确认（probe）状态：观察 shortlist 各组，谁在动锁谁
 	probing := false
 	var probeGroups []ShortlistEntry
@@ -339,6 +378,11 @@ func stateMachine() {
 		moveN, invalidN, frozenN = 0, 0, 0
 		savedKnown = false
 		consensusCand = 0
+		knownSeenMove = false
+		knownWatchOn = false
+		knownWatchAddrs = nil
+		knownWatchBase = map[uintptr][3]float32{}
+		knownWatchMoved = []int{}
 	}
 
 	tick := time.NewTicker(smTick)
@@ -408,6 +452,7 @@ func stateMachine() {
 					setLock(a, false, 0, "known")
 					inLocked = true
 					resetFollow()
+					knownLockAt = time.Now()
 					probing = false
 					probeGroups = nil
 					fmt.Printf("  [sm] known offset -> lock 0x%X mem=(%.1f, %.1f, %.1f) [pending move confirm]\n",
@@ -445,6 +490,8 @@ func stateMachine() {
 					setLock(a, false, 0, "known")
 					inLocked = true
 					resetFollow()
+					knownLockAt = time.Now()
+					knownLockAt = time.Now()
 					probing = false
 					probeGroups = nil
 					fmt.Printf("  [sm] known offset -> lock 0x%X mem=(%.1f, %.1f, %.1f) [pending move confirm]\n",
@@ -579,10 +626,18 @@ func stateMachine() {
 			}
 		}
 
+		// known 锁确认窗口状态：本锁槽出现移动采样 → 锁对（玩家在动且槽跟随）
+		lock.mu.RLock()
+		lockSrc, lockVer := lock.source, lock.verified
+		lock.mu.RUnlock()
+
 		// 移动确认：连续 3 次采样位移 >0.5m → verified（写 known 记忆）
 		if hasPrev && delta > moveDist {
 			moveN++
 			frozenN = 0
+			if lockSrc == "known" {
+				knownSeenMove = true
+			}
 			if moveN >= moveConfirmN {
 				lock.mu.Lock()
 				if !lock.verified {
@@ -602,6 +657,57 @@ func stateMachine() {
 			moveN = 0
 			if hasPrev {
 				frozenN++
+			}
+		}
+
+		// ---- known 锁确认窗口（2026-10-02 实测补丁，见常量 knownConfirmWin）----
+		// 锁上 30s 从未出现移动采样 → 交替观察 known 列表其他偏移（微秒级），
+		// 谁在动就是真玩家槽：换锁并给旧锁记 fail（连续 knownEvictFail 次移出）。
+		// 单偏移（无候选）不动作：站桩与锁错在单偏移下不可分，误回扫会卡游戏；
+		// 该场景靠传送跳变 / 读失效 / 游戏重启兜底。
+		if lockSrc == "known" && !lockVer && !knownSeenMove && !knownWatchOn && time.Since(knownLockAt) >= knownConfirmWin {
+			knownWatchOn = true
+			knownWatchAt = time.Now()
+			knownWatchAddrs = knownOffsetsForWatch(a)
+			knownWatchBase = map[uintptr][3]float32{}
+			knownWatchMoved = make([]int, len(knownWatchAddrs))
+			fmt.Printf("  [sm] known lock not confirmed %.0fs - watching %d other offset(s)\n",
+				knownConfirmWin.Seconds(), len(knownWatchAddrs))
+		}
+		if knownWatchOn && time.Since(knownWatchAt) >= knownWatchEvery {
+			knownWatchAt = time.Now()
+			for i, adr := range knownWatchAddrs {
+				d := decodePos(readMem(h, adr, 12))
+				if d == nil {
+					continue
+				}
+				v := [3]float32{d[0], d[1], d[2]}
+				b, ok := knownWatchBase[adr]
+				knownWatchBase[adr] = v
+				if ok && dist3(v, b) > moveDist {
+					knownWatchMoved[i]++
+				}
+			}
+			best := -1
+			for i, mv := range knownWatchMoved {
+				if mv >= knownWatchMoveN && (best < 0 || mv > knownWatchMoved[best]) {
+					best = i
+				}
+			}
+			if best >= 0 {
+				stale := a
+				adr := knownWatchAddrs[best]
+				if d := decodePos(readMem(h, adr, 12)); d != nil {
+					knownFailInc(stale)
+					setLock(adr, false, 0, "known-fallback")
+					fmt.Printf("  [sm] known lock stale (no move %.0fs) -> fallback to live offset 0x%X (%.1f, %.1f, %.1f)\n",
+						knownConfirmWin.Seconds(), adr, d[0], d[1], d[2])
+					resetFollow()
+					knownSeenMove = true // 阻止新锁立即再进观察
+					knownWatchOn = false
+					a = adr
+					continue
+				}
 			}
 		}
 

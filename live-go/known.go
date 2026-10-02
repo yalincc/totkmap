@@ -5,6 +5,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -17,6 +18,11 @@ const knownFile = "known_addrs.json"
 // Fix 4：偏移记忆条数上限——旧版无限追加，实测积累 40+ 条垃圾偏移，
 // 快路径投票被污染、启动锁错槽。只保留最近 knownCap 条。
 const knownCap = 10
+
+// knownEvictFail 偏移连续失败次数达到该值 → 移出 known_addrs.json。
+// 背景（2026-10-02 实测）：known 锁确认超窗被踢时记一次 fail，防垃圾偏移
+// 一直霸位、每次 tryOffsets 都白试一轮。
+const knownEvictFail = 3
 
 // maxKnownOff 允许的块内偏移上限。旧值是 0x100000000（4GB），但 Ryujinx 实测
 // guest DRAM 有 6088MB，玩家槽相对块基址的偏移可达 5.5GB，被这条上限直接拒掉
@@ -40,9 +46,61 @@ func sessionBaseForKnown() uintptr {
 }
 
 type knownData struct {
-	Block   string   `json:"block"`
-	Offsets []string `json:"offsets"`
-	Updated string   `json:"updated"`
+	Block   string         `json:"block"`
+	Offsets []string       `json:"offsets"`
+	Fails   map[string]int `json:"fails,omitempty"` // 偏移 -> 失败次数（连续 knownEvictFail 次移出）
+	Updated string         `json:"updated"`
+}
+
+// knownFails 偏移失败计数（hex8 -> count）。只由状态机 goroutine 读写。
+var knownFails map[string]int
+
+func init() {
+	var d knownData
+	if data, err := os.ReadFile(knownPath()); err == nil {
+		json.Unmarshal(data, &d)
+	}
+	knownFails = d.Fails
+	if knownFails == nil {
+		knownFails = map[string]int{}
+	}
+}
+
+func failReached(a uintptr) bool {
+	return knownFails[hex8(a)] >= knownEvictFail
+}
+
+// knownFailInc 给偏移记一次失败；达到 knownEvictFail 次则把该偏移移出
+// known_addrs.json（重写文件，其余偏移与 fails 状态保留）。
+// 注意：key 必须是"相对块基址的偏移"（与 offsets 列表同口径），绝对地址
+// 跨会话/块变化后与列表对不上，踢出逻辑会失效（2026-10-02 实测修正）。
+func knownFailInc(a uintptr) {
+	blk := currentSessionBase
+	if blk == 0 {
+		blk = loadKnownBlock()
+	}
+	o := a
+	if blk != 0 && a > blk {
+		o = a - blk
+	}
+	key := hex8(o)
+	knownFails[key]++
+	var d knownData
+	if data, err := os.ReadFile(knownPath()); err == nil {
+		json.Unmarshal(data, &d)
+	}
+	var offs []string
+	for _, v := range d.Offsets {
+		if !failReached(parseHex(v)) {
+			offs = append(offs, v)
+		}
+	}
+	d.Offsets = offs
+	d.Fails = knownFails
+	d.Updated = time.Now().Format("2006-01-02 15:04:05")
+	buf, _ := json.MarshalIndent(d, "", "  ")
+	os.WriteFile(knownPath(), buf, 0644)
+	fmt.Printf("  [known] offset %s fail=%d (evict>=%d)\n", key, knownFails[key], knownEvictFail)
 }
 
 func knownPath() string {
@@ -118,7 +176,7 @@ func saveKnown(addrs []uintptr, block uintptr) {
 		}
 	}
 	for _, o := range loadOffsets() {
-		if !seen[o] {
+		if !seen[o] && !failReached(o) {
 			seen[o] = true
 			offs = append(offs, hex8(o))
 		}
@@ -129,6 +187,7 @@ func saveKnown(addrs []uintptr, block uintptr) {
 	d := knownData{
 		Block:   hex12(block),
 		Offsets: offs,
+		Fails:   knownFails,
 		Updated: time.Now().Format("2006-01-02 15:04:05"),
 	}
 	buf, _ := json.MarshalIndent(d, "", "  ")
