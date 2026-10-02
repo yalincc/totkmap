@@ -1,0 +1,10 @@
+{
+  "$schema": "https://wails.io/schemas/config.v2.json",
+  "name": "totknavi-gui",
+  "outputfilename": "TOTKNavi-GUI",
+  "frontend:dist": "frontend/dist",
+  "author": {
+    "name": "yalincc",
+    "email": "22169292@qq.com"
+  }
+}

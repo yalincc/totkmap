@@ -97,6 +97,10 @@ func guestRamBase() uintptr {
 }
 
 // tryOffsets known 快路径：把记住的偏移 rebase 到当前块并读取（多副本一致才算数）。
+// Fix 7：改为"顺序优先试读"——known_addrs.json 里最新写入的偏移最可信
+// （verified 后才写 known），读到合法坐标即锁；旧偏移只作后续备胎。
+// 旧逻辑对全部历史偏移平等投票选"最一致的簇"，实测锁到死镜像槽
+// （5 条历史偏移里只有最新 0xECB52A48 是活槽，投票却选了 0x35D528 死槽）。
 func tryOffsets() (uintptr, [3]float32, bool) {
 	if !reopenProcess() {
 		return 0, [3]float32{}, false
@@ -113,36 +117,12 @@ func tryOffsets() (uintptr, [3]float32, bool) {
 		return 0, [3]float32{}, false
 	}
 	guestBase.Store(base)
-	offs := loadOffsets()
-	type val struct {
-		addr uintptr
-		pos  [3]float32
-	}
-	var vals []val
-	for _, o := range offs {
+	for _, o := range loadOffsets() {
 		if v := decodePos(readMem(h, base+o, 12)); v != nil {
-			vals = append(vals, val{base + o, [3]float32{v[0], v[1], v[2]}})
+			return base + o, [3]float32{v[0], v[1], v[2]}, true
 		}
 	}
-	if len(vals) == 0 {
-		return 0, [3]float32{}, false
-	}
-	best, bestN := val{}, -1
-	for _, a := range vals {
-		n := 0
-		for _, b := range vals {
-			if abs32(a.pos[0]-b.pos[0]) < 2 && abs32(a.pos[1]-b.pos[1]) < 2 && abs32(a.pos[2]-b.pos[2]) < 2 {
-				n++
-			}
-		}
-		if n > bestN {
-			best, bestN = a, n
-		}
-	}
-	if bestN < 2 && len(offs) > 1 {
-		return 0, [3]float32{}, false
-	}
-	return best.addr, best.pos, true
+	return 0, [3]float32{}, false
 }
 
 // ---- 块世代：Ryujinx 重开游戏后新旧 guest DRAM 块并存（旧块残留上次会话玩家槽）----
@@ -417,8 +397,24 @@ func stateMachine() {
 		default:
 		}
 
-		// ---- UNLOCKED：扫描先行（解锁时冷却已清零），known 作为扫描失败期间的备胎 ----
+		// ---- UNLOCKED：known 快路径优先（秒锁、零扫描），失败再全量扫描 ----
+		// Fix 6：原顺序是"扫描先行、known 只当扫描失败备胎"，且 lastScanAt 初始为
+		// 零值导致启动第一拍必扫描 6GB。调成 known 优先：偏移记忆有效时毫秒级锁定，
+		// 无效（游戏重启/换场景后读不到）才走扫描，扫描仍是永久兜底。
 		if !inLocked {
+			if time.Since(lastKnownAt) >= knownRetry {
+				lastKnownAt = time.Now()
+				if a, v, ok := tryOffsets(); ok {
+					setLock(a, false, 0, "known")
+					inLocked = true
+					resetFollow()
+					probing = false
+					probeGroups = nil
+					fmt.Printf("  [sm] known offset -> lock 0x%X mem=(%.1f, %.1f, %.1f) [pending move confirm]\n",
+						a, v[0], v[1], v[2])
+					continue
+				}
+			}
 			if useSaveScan && time.Since(lastScanAt) >= scanCooldown {
 				lastScanAt = time.Now()
 				res := locate(procPID, 120.0, sessionBlocks(h), func(s string) { fmt.Println("    " + s) })
@@ -597,7 +593,9 @@ func stateMachine() {
 				probing = false
 				if !savedKnown {
 					savedKnown = true
-					saveKnown([]uintptr{a}, currentSessionBase)
+					// Fix 6：block 用兜底函数，不能用 currentSessionBase
+					// （启动常态恒为 0，会把 known_addrs.json 的 block 写成 0x0）
+					saveKnown([]uintptr{a}, sessionBaseForKnown())
 				}
 			}
 		} else {

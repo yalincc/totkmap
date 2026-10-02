@@ -26,3 +26,6 @@ live-go/run_*.err
 # 定位服务 exe 备份（重构迭代留档，不入库）
 live-go/*-bak
 live-go/*-broken
+
+# GUI 部署目录（编译产物 + 运行时数据，不入库；源码在 xnavi-gui/）
+live-gui/

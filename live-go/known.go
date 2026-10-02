@@ -99,6 +99,12 @@ func loadOffsets() []uintptr {
 }
 
 func saveKnown(addrs []uintptr, block uintptr) {
+	// Fix 6：block==0 时兜底——调用方（如移动确认路径）曾直接传
+	// currentSessionBase（启动常态为 0），把 known_addrs.json 的 block
+	// 覆盖成 0x0，导致 loadKnownBlock() 失效、快路径 rebase 失败、每次重扫。
+	if block == 0 {
+		block = sessionBaseForKnown()
+	}
 	seen := map[uintptr]bool{}
 	var offs []string
 	for _, a := range addrs {

@@ -1,0 +1,77 @@
+<svg viewBox="0 0 680 505" width="100%" role="img" xmlns="http://www.w3.org/2000/svg">
+  <title>xnavi 架构现状与建议</title>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M2 1L8 5L2 9" fill="none" stroke="#5F5E5A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+  </defs>
+
+  <g>
+    <rect x="60" y="50" width="210" height="56" rx="10" fill="#E6F1FB" stroke="#378ADD" stroke-width="0.5"/>
+    <text x="165" y="72" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="14" font-weight="500" fill="#0C447C">网页互动地图</text>
+    <text x="165" y="92" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="12" fill="#185FA5">botw / totk.yalin.site</text>
+  </g>
+  <g>
+    <rect x="420" y="50" width="210" height="56" rx="10" fill="#FFFFFF" stroke="#B4B2A9" stroke-width="0.5"/>
+    <text x="525" y="72" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="14" font-weight="500" fill="#2C2C2A">GUI xnavi.exe</text>
+    <text x="525" y="92" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="12" fill="#5F5E5A">wails + Vue</text>
+  </g>
+
+  <path d="M165,106 L147,188" fill="none" stroke="#5F5E5A" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="95" y="145" font-family="sans-serif" font-size="12" fill="#5F5E5A">600ms 轮询</text>
+  <path d="M525,106 L525,138" fill="none" stroke="#5F5E5A" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="540" y="126" font-family="sans-serif" font-size="12" fill="#5F5E5A">拉起·读状态</text>
+
+  <rect x="40" y="140" width="600" height="185" rx="20" fill="#F1EFE8" stroke="#B4B2A9" stroke-width="0.5"/>
+  <text x="60" y="163" font-family="sans-serif" font-size="14" font-weight="500" fill="#444441">xnavi-core.exe（Go · 只读内存）</text>
+
+  <g>
+    <rect x="70" y="190" width="150" height="48" rx="8" fill="#FFFFFF" stroke="#B4B2A9" stroke-width="0.5"/>
+    <text x="145" y="208" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="13" font-weight="500" fill="#2C2C2A">HTTP server</text>
+    <text x="145" y="226" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="12" fill="#5F5E5A">/pos · :8766</text>
+  </g>
+  <g>
+    <rect x="255" y="190" width="160" height="48" rx="8" fill="#FFFFFF" stroke="#B4B2A9" stroke-width="0.5"/>
+    <text x="335" y="208" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="13" font-weight="500" fill="#2C2C2A">watch 状态机</text>
+    <text x="335" y="226" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="12" fill="#5F5E5A">扫描 · 仲裁 · 跟随</text>
+  </g>
+  <g>
+    <rect x="450" y="190" width="160" height="48" rx="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.5"/>
+    <text x="530" y="208" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="13" font-weight="500" fill="#085041">Game 接口（接缝）</text>
+    <text x="530" y="226" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="11" fill="#0F6E56">DecodeAt·PickOffset·LayerOf</text>
+  </g>
+  <path d="M510,238 L488,256" fill="none" stroke="#5F5E5A" stroke-width="1" marker-end="url(#arrow)"/>
+  <path d="M550,238 L572,256" fill="none" stroke="#5F5E5A" stroke-width="1" marker-end="url(#arrow)"/>
+  <g>
+    <rect x="445" y="258" width="78" height="40" rx="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.5"/>
+    <text x="484" y="278" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="11" fill="#085041">game_botw</text>
+  </g>
+  <g>
+    <rect x="533" y="258" width="78" height="40" rx="8" fill="#E1F5EE" stroke="#0F6E56" stroke-width="0.5"/>
+    <text x="572" y="278" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="11" fill="#085041">game_totk</text>
+  </g>
+  <g>
+    <rect x="70" y="258" width="150" height="40" rx="8" fill="#FFFFFF" stroke="#B4B2A9" stroke-width="0.5"/>
+    <text x="145" y="278" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="12" fill="#2C2C2A">monitor → status.json</text>
+  </g>
+
+  <path d="M180,325 L180,363" fill="none" stroke="#5F5E5A" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="192" y="350" font-family="sans-serif" font-size="12" fill="#5F5E5A">读内存（只读）</text>
+  <path d="M420,325 L420,363" fill="none" stroke="#5F5E5A" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <g>
+    <rect x="90" y="365" width="180" height="50" rx="10" fill="#E6F1FB" stroke="#378ADD" stroke-width="0.5"/>
+    <text x="180" y="385" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="14" font-weight="500" fill="#0C447C">Ryujinx</text>
+    <text x="180" y="403" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="12" fill="#185FA5">TOTK / BOTW 进程内存</text>
+  </g>
+  <g>
+    <rect x="330" y="365" width="180" height="50" rx="10" fill="#E6F1FB" stroke="#378ADD" stroke-width="0.5"/>
+    <text x="420" y="385" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="14" font-weight="500" fill="#0C447C">Cemu</text>
+    <text x="420" y="403" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="12" fill="#185FA5">BOTW 进程内存</text>
+  </g>
+
+  <g>
+    <rect x="140" y="440" width="400" height="48" rx="10" fill="#FAEEDA" stroke="#BA7517" stroke-width="0.5" stroke-dasharray="6,4"/>
+    <text x="340" y="458" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="13" font-weight="500" fill="#633806">建议新增：/pos 契约回归测试</text>
+    <text x="340" y="475" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-size="11" fill="#854F0B">起服 → 请求 /pos → 断言字段与 live.js 期望一致</text>
+  </g>
+</svg>
