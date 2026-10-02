@@ -15,11 +15,11 @@ func main() {
 	app := NewApp()
 
 	err := wails.Run(&options.App{
-		Title:     "Xnavi 游戏定位导航",
-		Width:     920,
-		Height:    680,
-		MinWidth:  720,
-		MinHeight: 560,
+		Title:     "TOTKNavi 定位导航 · 王国之泪",
+		Width:     1080,
+		Height:    720,
+		MinWidth:  900,
+		MinHeight: 600,
 		Frameless: false, // 无边框：前端自绘标题栏（去壳化，拖拽区 --wails-draggable）
 		AssetServer: &assetserver.Options{
 			Assets: assets,

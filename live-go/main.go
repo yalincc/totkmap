@@ -94,6 +94,7 @@ func main() {
 	progress = newProgressWatcher()
 	go progress.loop()
 
+	go navClearLoop() // V1.1.0：GUI 清除目标文件通信
 	go stateMachine()
 	go statusLoop()
 

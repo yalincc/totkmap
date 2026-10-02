@@ -6,6 +6,10 @@ export function Calibrate(arg1, arg2, arg3) {
   return window['go']['main']['App']['Calibrate'](arg1, arg2, arg3);
 }
 
+export function ClearTarget() {
+  return window['go']['main']['App']['ClearTarget']();
+}
+
 export function CoreRunning() {
   return window['go']['main']['App']['CoreRunning']();
 }
@@ -42,8 +46,8 @@ export function SaveConfig(arg1) {
   return window['go']['main']['App']['SaveConfig'](arg1);
 }
 
-export function StartCore(arg1) {
-  return window['go']['main']['App']['StartCore'](arg1);
+export function StartCore() {
+  return window['go']['main']['App']['StartCore']();
 }
 
 export function StopCore() {

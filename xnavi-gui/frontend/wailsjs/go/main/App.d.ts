@@ -4,6 +4,8 @@ import {main} from '../models';
 
 export function Calibrate(arg1:number,arg2:number,arg3:number):Promise<string>;
 
+export function ClearTarget():Promise<string>;
+
 export function CoreRunning():Promise<boolean>;
 
 export function CoreStatus():Promise<Record<string, any>>;
@@ -22,7 +24,7 @@ export function PollLogs():Promise<Array<string>>;
 
 export function SaveConfig(arg1:main.Config):Promise<string>;
 
-export function StartCore(arg1:string):Promise<string>;
+export function StartCore():Promise<string>;
 
 export function StopCore():Promise<string>;
 

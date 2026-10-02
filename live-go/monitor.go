@@ -88,6 +88,29 @@ func incCounter(name string) {
 	}
 }
 
+// ---- 导航清除（V1.1.0）----
+// GUI 点"清除目标"→ 写 nav-clear.json（GUI 同目录，文件通信，双入口原则）
+// → 本循环消费 → clearTarget() → 删除文件。
+// 与 server.go POST /target {clear:true} 走同一 clearTarget()，无竞争。
+
+func navClearPath() string {
+	exe, _ := os.Executable()
+	return filepath.Join(filepath.Dir(exe), "nav-clear.json")
+}
+
+// navClearLoop 每 200ms 检查 nav-clear.json，存在即清目标并删除。
+func navClearLoop() {
+	for {
+		time.Sleep(200 * time.Millisecond)
+		if _, err := os.Stat(navClearPath()); err != nil {
+			continue
+		}
+		clearTarget()
+		os.Remove(navClearPath())
+		fmt.Println("  [nav] clear target requested by GUI (nav-clear.json)")
+	}
+}
+
 // ---- status.json ----
 
 func statusPath() string {
@@ -113,6 +136,7 @@ func statusLoop() {
 		ok := state.ok
 		gx, gy, gz := state.gx, state.gy, state.gz
 		mx, my := state.mx, state.my
+		layer := state.layer
 		age := state.age
 		state.mu.RUnlock()
 
@@ -125,6 +149,7 @@ func statusLoop() {
 			"pid":      procPID,
 			"ok":       ok,
 			"pos":      map[string]any{"gx": gx, "gy": gy, "gz": gz, "mx": mx, "my": my},
+			"layer":    layer,
 			"source":   src,
 			"verified": verified,
 			"copies":   copies,
@@ -136,14 +161,16 @@ func statusLoop() {
 				"jumps":     cntJumps.Load(),
 				"scans":     cntScans.Load(),
 			},
+			// V1.1.0：导航目标同步（GUI 显示目标状态；地图 /pos 同源）。
+			// nil 时 JSON 输出 null，GUI st.target === null 判断"无目标"。
+			"target": getTarget(),
 		}
 
 		// ---- GUI 套壳兼容字段 ----
-		// 让 xnavi-gui（Wails 前端 App.vue）能直接显示 TOTK 的状态与进度。
-		// 前端读：game（切换 TOTK 中文标签）/ map_url（地图链接）/ progress.counts
-		// （英文 key + [done,total] 数组）。live-go 原生 counts 是中文 key +
-		// {done,total} 对象，这里做一次映射；五个 key 必须齐全，前端用
-		// counts.shrine[0] 直接取下标，缺 key 会得到 undefined 而渲染报错。
+		// 让 xnavi-gui（Wails 前端）能直接显示 TOTK 的状态与进度。
+		// V1.1.0：progress 直接透传 /progress 的 counts（中文 key + {done,total} 对象，
+		// 全量 20 类），前端 ProgressView 按表渲染；旧版 GUI 只认英文 key，发布时
+		// GUI+core 同包更新，不兼容旧壳。
 		obj["game"] = "totk"
 		obj["emulator"] = "Ryujinx"
 		obj["map_url"] = mapURL
@@ -156,23 +183,8 @@ func statusLoop() {
 					Total int `json:"total"`
 				} `json:"counts"`
 			}
-			if json.Unmarshal(body, &raw) == nil {
-				pick := func(zh string) []int {
-					if c, ok := raw.Counts[zh]; ok {
-						return []int{c.Done, c.Total}
-					}
-					return []int{0, 0}
-				}
-				obj["progress"] = map[string]any{
-					"counts": map[string]any{
-						"shrine": pick("神庙"),
-						"tower":  pick("鸟望台"),
-						"korok":  pick("克洛格"),
-						"memory": pick("龙之泪"),
-						"beast":  pick("树根"),
-					},
-					"save": raw.Save,
-				}
+			if json.Unmarshal(body, &raw) == nil && raw.Counts != nil {
+				obj["progress"] = map[string]any{"save": raw.Save, "counts": raw.Counts}
 			}
 		}
 

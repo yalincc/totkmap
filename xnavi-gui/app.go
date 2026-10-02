@@ -16,12 +16,13 @@ import (
 	"sync"
 	"syscall"
 	"time"
+	"unsafe"
 
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
 // guiVersion 导航程序版本（与地图网页版本解耦，见 BOTWmap 项目规则第 3 条）。
-const guiVersion = "v1.0.0"
+const guiVersion = "v1.1.0"
 
 // App Wails 后端：管理核心子进程 + 读 status.json / xnavi-gui-core.log + 网页端端口探测。
 // 与核心的通信完全走文件（status.json、xnavi-gui-core.log），不依赖 8766 HTTP——
@@ -37,18 +38,17 @@ type App struct {
 }
 
 // Config GUI 持久化配置（xnavi-gui-config.json）。
+// V1.1.0 精简：只保留 Ryujinx + TOTK（去掉 Cemu/Emulator/Game 选项）。
+// 旧 config json 的多余字段由 json.Unmarshal 自动忽略，向前兼容。
 type Config struct {
-	CemuDir    string `json:"cemuDir"`
 	RyujinxDir string `json:"ryujinxDir"`
 	SaveDir    string `json:"saveDir"`
-	Emulator   string `json:"emulator"` // auto | cemu | ryujinx
-	Game       string `json:"game"`     // auto | botw | totk（V2.2.0 双游戏）
 }
 
 func (a *App) configPath() string { return filepath.Join(a.workDir, "xnavi-gui-config.json") }
 
 func (a *App) loadConfig() *Config {
-	cfg := &Config{Emulator: "auto", Game: "auto"}
+	cfg := &Config{}
 	buf, err := os.ReadFile(a.configPath())
 	if err == nil {
 		json.Unmarshal(buf, cfg)
@@ -81,10 +81,76 @@ func (a *App) startup(ctx context.Context) {
 	a.tailInit()
 	go a.eventBridge(ctx)
 	go a.checkUpdate()
+	go a.ensureWindowVisible()
 	// 手动检查更新
 	runtime.EventsOn(ctx, "update:check", func(data ...interface{}) {
 		go a.checkUpdate()
 	})
+}
+
+// ensureWindowVisible 启动后把主窗口移回主屏可见区域。
+// 防御性兜底：若窗口因 DPI 缩放/多屏/分辨率切换落在屏幕外（部分超屏），
+// 用 EnumWindows 按进程 PID 找主窗口（比 FindWindow 标题匹配可靠），
+// 超界则 SetWindowPos 移到主屏居中；窗口本来就在屏内则不动。
+func (a *App) ensureWindowVisible() {
+	time.Sleep(1 * time.Second)
+	user32 := syscall.NewLazyDLL("user32.dll")
+	enumWindows := user32.NewProc("EnumWindows")
+	getWindowThreadProcessId := user32.NewProc("GetWindowThreadProcessId")
+	getWindowRect := user32.NewProc("GetWindowRect")
+	getSystemMetrics := user32.NewProc("GetSystemMetrics")
+	setWindowPos := user32.NewProc("SetWindowPos")
+
+	const (
+		smCxScreen = 0
+		smCyScreen = 1
+		swpNoZ     = 0x0004
+		swpNoAct   = 0x0010
+	)
+
+	myPid := uint32(os.Getpid())
+	var hwnd uintptr
+	cb := syscall.NewCallback(func(h uintptr, lparam uintptr) uintptr {
+		var pid uint32
+		getWindowThreadProcessId.Call(h, uintptr(unsafe.Pointer(&pid)))
+		if pid == myPid {
+			hwnd = h
+			return 0 // 停止枚举
+		}
+		return 1
+	})
+	enumWindows.Call(cb, 0)
+	if hwnd == 0 {
+		return
+	}
+
+	var rect struct {
+		Left, Top, Right, Bottom int32
+	}
+	if r, _, _ := getWindowRect.Call(hwnd, uintptr(unsafe.Pointer(&rect))); r == 0 {
+		return
+	}
+	sw, _, _ := getSystemMetrics.Call(smCxScreen)
+	sh, _, _ := getSystemMetrics.Call(smCyScreen)
+	if int32(sw) == 0 || int32(sh) == 0 {
+		return
+	}
+	w := rect.Right - rect.Left
+	h := rect.Bottom - rect.Top
+	// 窗口完全在屏幕内 → 不动
+	if rect.Left >= 0 && rect.Top >= 0 && rect.Right <= int32(sw) && rect.Bottom <= int32(sh) {
+		return
+	}
+	x := (int32(sw) - w) / 2
+	y := (int32(sh) - h) / 2
+	if x < 0 {
+		x = 0
+	}
+	if y < 0 {
+		y = 0
+	}
+	setWindowPos.Call(hwnd, 0, uintptr(x), uintptr(y), uintptr(w), uintptr(h), swpNoZ|swpNoAct)
+	fmt.Println("  [gui] window repositioned to center:", x, y)
 }
 
 // checkUpdate 启动时查 GitHub tags 列表，找最新 totknavi- 开头的 tag，有新版弹窗。
@@ -99,24 +165,54 @@ func (a *App) checkUpdate() {
 		Name string `json:"name"`
 	}
 	if json.Unmarshal(body, &tags) != nil { return }
-	found := false
+	// 遍历全部 totknavi- tag，取版本号最大的（tags 列表本身按创建时间排序，版本号需自行比较）
+	best := ""
 	for _, t := range tags {
 		if !strings.HasPrefix(t.Name, "totknavi-") { continue }
-		latest := strings.TrimPrefix(t.Name, "totknavi-")
-		if latest != guiVersion {
-			runtime.EventsEmit(a.ctx, "update:available", map[string]string{
-				"latest": latest,
-				"url":    "https://github.com/yalincc/totkmap/releases/tag/" + t.Name,
-			})
-		} else {
-			runtime.EventsEmit(a.ctx, "update:latest", nil)
+		v := strings.TrimPrefix(t.Name, "totknavi-")
+		if best == "" || verGreater(v, best) {
+			best = v
 		}
-		found = true
-		break
 	}
-	if !found {
+	if best == "" {
+		runtime.EventsEmit(a.ctx, "update:latest", nil)
+		return
+	}
+	if verGreater(best, guiVersion) {
+		runtime.EventsEmit(a.ctx, "update:available", map[string]string{
+			"latest": best,
+			"url":    "https://github.com/yalincc/totkmap/releases/tag/totknavi-" + best,
+		})
+	} else {
 		runtime.EventsEmit(a.ctx, "update:latest", nil)
 	}
+}
+
+// verGreater 比较 "vX.Y.Z" 版本号，x > y 返回 true。
+// 非标准格式（缺段/非数字）按 0 补全，保证解析不 panic。
+func verGreater(x, y string) bool {
+	px := parseVer(x)
+	py := parseVer(y)
+	for i := 0; i < 3; i++ {
+		if px[i] > py[i] { return true }
+		if px[i] < py[i] { return false }
+	}
+	return false
+}
+
+func parseVer(s string) [3]int {
+	s = strings.TrimPrefix(strings.TrimPrefix(s, "v"), "V")
+	var r [3]int
+	parts := strings.Split(s, ".")
+	for i := 0; i < len(parts) && i < 3; i++ {
+		n := 0
+		for _, c := range parts[i] {
+			if c < '0' || c > '9' { break }
+			n = n*10 + int(c-'0')
+		}
+		r[i] = n
+	}
+	return r
 }
 
 func (a *App) PickDir(title string) string {
@@ -129,9 +225,10 @@ func (a *App) onShutdown(ctx context.Context) {
 	a.stopCoreLocked()
 }
 
-// eventBridge 每 800ms 推一次状态与日志增量（Wails Runtime 事件流）。
+// eventBridge 每 300ms 推一次状态与日志增量（Wails Runtime 事件流）。
+// V1.1.0：800ms → 300ms（status.json 由 core 400ms 写，300ms 采样观感更跟手）。
 func (a *App) eventBridge(ctx context.Context) {
-	ticker := time.NewTicker(800 * time.Millisecond)
+	ticker := time.NewTicker(300 * time.Millisecond)
 	defer ticker.Stop()
 	for {
 		select {
@@ -161,15 +258,25 @@ func (a *App) Calibrate(x, y, z float64) string {
 	return "校准请求已提交（约 5-10 秒出结果，看日志面板 [calib] 行）"
 }
 
+// ClearTarget 请求 core 清除导航目标（V1.1.0）。
+// 文件通信：写 nav-clear.json，core 的 navClearLoop 消费后 clearTarget() 并删除；
+// 地图端 /pos 下一轮读到 target=null，引导线同步消失（双向同步，core 是唯一状态持有者）。
+func (a *App) ClearTarget() string {
+	if err := os.WriteFile(filepath.Join(a.workDir, "nav-clear.json"), []byte("{}"), 0644); err != nil {
+		return "写入清除请求失败: " + err.Error()
+	}
+	return "已请求清除目标（地图同步取消）"
+}
+
 // corePath 核心子进程 exe 路径：与 GUI 同目录的 xnavi-core.exe。
 func (a *App) corePath() string {
 	return filepath.Join(a.workDir, "xnavi-core.exe")
 }
 
-// StartCore 启动核心子进程（xnavi-core.exe --emu=<emu> [--game=<game>] --no-open）。
-// emu: auto | ryujinx | cemu；game 从已保存配置读取（auto | botw | totk，auto 时不传让 core 自动识别）。
+// StartCore 启动核心子进程（xnavi-core.exe --emu=ryujinx --game=totk --no-open [--ryujinx-dir=] [--save-dir=]）。
+// V1.1.0：固定 Ryujinx + TOTK，不再有模拟器/游戏选项。
 // 重复调用会先停掉旧进程。
-func (a *App) StartCore(emu string) string {
+func (a *App) StartCore() string {
 	a.mu.Lock()
 	defer a.mu.Unlock()
 	a.stopCoreLocked()
@@ -177,22 +284,14 @@ func (a *App) StartCore(emu string) string {
 	if _, err := os.Stat(exe); err != nil {
 		return "找不到核心程序 xnavi-core.exe（应放在本程序同目录）"
 	}
-	args := []string{"--emu=" + emu, "--no-open"}
-	game := ""
+	args := []string{"--emu=ryujinx", "--game=totk", "--no-open"}
 	if a.cfg != nil {
-		game = a.cfg.Game
-	}
-	if game != "" && game != "auto" {
-		args = append(args, "--game="+game)
-	}
-	if a.cfg.CemuDir != "" {
-		args = append(args, "--cemu-dir="+a.cfg.CemuDir)
-	}
-	if a.cfg.RyujinxDir != "" {
-		args = append(args, "--ryujinx-dir="+a.cfg.RyujinxDir)
-	}
-	if a.cfg.SaveDir != "" {
-		args = append(args, "--save-dir="+a.cfg.SaveDir)
+		if a.cfg.RyujinxDir != "" {
+			args = append(args, "--ryujinx-dir="+a.cfg.RyujinxDir)
+		}
+		if a.cfg.SaveDir != "" {
+			args = append(args, "--save-dir="+a.cfg.SaveDir)
+		}
 	}
 	cmd := exec.Command(exe, args...)
 	cmd.Dir = a.workDir
@@ -209,11 +308,7 @@ func (a *App) StartCore(emu string) string {
 	}
 	a.cmd = cmd
 	go func() { cmd.Wait(); a.mu.Lock(); if a.cmd == cmd { a.cmd = nil }; a.mu.Unlock() }()
-	msg := "核心已启动（" + emu + "）"
-	if game != "" && game != "auto" {
-		msg += " · 游戏 " + game
-	}
-	return msg
+	return "核心已启动（Ryujinx · TOTK）"
 }
 
 // StopCore 停止核心子进程。
@@ -390,17 +485,10 @@ func (a *App) ExportDiagnostics() string {
 
 	// 1) 系统信息
 	info := fmt.Sprintf(
-		"xnavi diagnostics\n===================\nGUI version: %s\nOS: %s/%s\nArch: %s\nCPU cores: %d\nHostname: %s\nTime: %s\nEmulator setting: %s\nCemuDir configured: %q\nRyujinxDir configured: %q\nSaveDir override: %q\n\n",
+		"xnavi diagnostics\n===================\nGUI version: %s\nOS: %s/%s\nArch: %s\nCPU cores: %d\nHostname: %s\nTime: %s\nRyujinxDir configured: %q\nSaveDir override: %q\n\n",
 		guiVersion, stdruntime.GOOS, stdruntime.GOARCH, stdruntime.GOARCH,
 		stdruntime.NumCPU(), hostname(),
 		time.Now().Format("2006-01-02 15:04:05"),
-		func() string {
-			if a.cfg != nil {
-				return a.cfg.Emulator
-			}
-			return "auto"
-		}(),
-		func() string { if a.cfg != nil { return a.cfg.CemuDir }; return "" }(),
 		func() string { if a.cfg != nil { return a.cfg.RyujinxDir }; return "" }(),
 		func() string { if a.cfg != nil { return a.cfg.SaveDir }; return "" }(),
 	)
@@ -431,21 +519,15 @@ func portInUse(port int) bool {
 	return true
 }
 
-// EnvDetect 探测"已配置的"模拟器路径是否存在（仅给前端做提示，不挡开始按钮）。
-// 真实"是否附加到运行中的模拟器进程"由 core 经 status.json 的 pid 上报，
-// 这里不再硬编码开发机盘符——任何用户机器上都不该因为路径猜不到而点不了开始。
+// EnvDetect 探测"已配置的"Ryujinx 路径是否存在（仅给前端做提示，不挡开始按钮）。
+// V1.1.0：只查 Ryujinx（TOTK 专用）。
 func (a *App) EnvDetect() map[string]any {
 	a.mu.Lock()
 	cfg := a.cfg
 	a.mu.Unlock()
-	res := map[string]any{"ryujinx": false, "cemu": false}
-	if cfg != nil {
-		if cfg.CemuDir != "" && pathExists(cfg.CemuDir) {
-			res["cemu"] = true
-		}
-		if cfg.RyujinxDir != "" && pathExists(cfg.RyujinxDir) {
-			res["ryujinx"] = true
-		}
+	res := map[string]any{"ryujinx": false}
+	if cfg != nil && cfg.RyujinxDir != "" && pathExists(cfg.RyujinxDir) {
+		res["ryujinx"] = true
 	}
 	return res
 }
