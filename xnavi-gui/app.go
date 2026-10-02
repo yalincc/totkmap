@@ -247,17 +247,6 @@ func (a *App) eventBridge(ctx context.Context) {
 // Version 返回 GUI 版本号（前端显示用）。
 func (a *App) Version() string { return guiVersion }
 
-// Calibrate 基准校准（S3）：把用户从游戏地图读到的坐标写入 calibrate.json，
-// core 轮询消费（文件通信，遵守双入口原则）。返回提示文案。
-func (a *App) Calibrate(x, y, z float64) string {
-	req := map[string]any{"x": x, "y": y, "z": z, "ts": time.Now().UnixNano()}
-	buf, _ := json.Marshal(req)
-	if err := os.WriteFile(filepath.Join(a.workDir, "calibrate.json"), buf, 0644); err != nil {
-		return "写入校准请求失败: " + err.Error()
-	}
-	return "校准请求已提交（约 5-10 秒出结果，看日志面板 [calib] 行）"
-}
-
 // ClearTarget 请求 core 清除导航目标（V1.1.0）。
 // 文件通信：写 nav-clear.json，core 的 navClearLoop 消费后 clearTarget() 并删除；
 // 地图端 /pos 下一轮读到 target=null，引导线同步消失（双向同步，core 是唯一状态持有者）。

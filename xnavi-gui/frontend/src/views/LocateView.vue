@@ -76,30 +76,19 @@
       </div>
     </section>
 
-    <!-- 基准校准（S3） -->
-    <section class="bg-[#161b22] border border-slate-800 rounded-md p-2.5 shrink-0 flex items-center gap-2 flex-wrap">
-      <span class="text-[11px] font-semibold text-slate-400">基准校准</span>
-      <input v-model="calib.x" placeholder="X" class="w-20 bg-[#0d1117] border border-slate-700 rounded px-2 py-1 text-xs text-white font-mono focus:border-blue-500 focus:outline-none" />
-      <input v-model="calib.y" placeholder="高度" class="w-20 bg-[#0d1117] border border-slate-700 rounded px-2 py-1 text-xs text-white font-mono focus:border-blue-500 focus:outline-none" />
-      <input v-model="calib.z" placeholder="Z" class="w-20 bg-[#0d1117] border border-slate-700 rounded px-2 py-1 text-xs text-white font-mono focus:border-blue-500 focus:outline-none" />
-      <button @click="doCalibrate" class="bg-slate-700 hover:bg-slate-600 px-3 py-1 rounded text-xs">校准</button>
-      <span v-if="calibMsg" class="text-[11px] text-slate-400">{{ calibMsg }}</span>
-    </section>
-
     <!-- 日志 -->
     <LogPanel />
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue'
+import { computed } from 'vue'
 import LogPanel from '../components/LogPanel.vue'
 import {
   pos, steps, stepClass, stepDot, isLocating, toggleLocating, progressData,
   stateText, stateTextClass, locked, locating, layerName, sourceLabel,
   clearTarget, pickRyujinx, pickSave, saveSettings
 } from '../composables/useCore'
-import { api } from '../composables/useCore'
 
 const ryuHintText = '路径自动探测（按进程名）'
 const ryuHintClass = 'text-slate-500'
@@ -115,13 +104,4 @@ const saveBasename = computed(() => {
   if (!s) return ''
   return s.split(/[\\/]/).slice(-2).join('\\')
 })
-
-const calib = reactive({ x: '', y: '', z: '' })
-const calibMsg = ref('')
-async function doCalibrate() {
-  const x = parseFloat(calib.x), y = parseFloat(calib.y), z = parseFloat(calib.z)
-  if (isNaN(x) || isNaN(y) || isNaN(z)) { calibMsg.value = '请输入三个数字（游戏地图上的坐标）'; return }
-  calibMsg.value = await api.Calibrate(x, y, z)
-  setTimeout(() => { calibMsg.value = '' }, 15000)
-}
 </script>
