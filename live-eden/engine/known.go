@@ -139,6 +139,19 @@ func loadAddrs() []uintptr {
 	return out
 }
 
+// knownSlotOK 判定地址能否写入 known 记忆（Eden 修正）：
+// 排除内部场景（神庙/洞穴）本地坐标槽——玩家在神庙里移动确认时，若把神庙槽
+// 写进 known，下次启动 known 快路径秒锁神庙槽 → 输出神庙本地坐标被当大地图
+// 坐标（红点画地下）。读失败（地址失效）时不过滤（保持原行为，由 fail 机制踢出）。
+func knownSlotOK(a uintptr) bool {
+	if d := decodePos(readMem(procHandleNow(), a, 12)); d != nil {
+		if isShrinePos([3]float32{d[0], d[1], d[2]}) {
+			return false
+		}
+	}
+	return true
+}
+
 func saveKnown(addrs []uintptr, block uintptr) {
 	if block == 0 {
 		block = sessionBaseForKnown()
@@ -146,13 +159,13 @@ func saveKnown(addrs []uintptr, block uintptr) {
 	seen := map[uintptr]bool{}
 	var list []string
 	for _, a := range addrs {
-		if a > 0x10000 && a < maxKnownAddr && !seen[a] {
+		if a > 0x10000 && a < maxKnownAddr && !seen[a] && knownSlotOK(a) {
 			seen[a] = true
 			list = append(list, hex8(a))
 		}
 	}
 	for _, a := range loadAddrs() {
-		if !seen[a] && !failReached(a) {
+		if !seen[a] && !failReached(a) && knownSlotOK(a) {
 			seen[a] = true
 			list = append(list, hex8(a))
 		}

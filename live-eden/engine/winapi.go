@@ -4,6 +4,7 @@
 package main
 
 import (
+	"os"
 	"strings"
 	"sync"
 	"syscall"
@@ -83,6 +84,8 @@ func openProcess(pid uint32) (uintptr, error) {
 }
 
 // findPid 按进程名前缀查找（不区分大小写），返回第一个匹配的 pid。
+// 排除自身与 core 进程（进程名含 "core"）：避免 "eden-core.exe" 以 "eden"
+// 开头被误认成游戏进程（eden.exe），导致 core attach 到自己的句柄。
 func findPid(prefix string) uint32 {
 	snap, _, _ := procCreateToolhelp32Snapshot.Call(th32csSnapprocess, 0)
 	if snap == 0 || snap == uintptr(^uintptr(0)) {
@@ -95,8 +98,10 @@ func findPid(prefix string) uint32 {
 	r, _, _ := procProcess32FirstW.Call(snap, uintptr(unsafe.Pointer(&e)))
 	for r != 0 {
 		name := utf16ToString(e.ExeFile[:])
-		if strings.HasPrefix(strings.ToLower(name), strings.ToLower(prefix)) {
-			return e.ProcessID
+		if pid := e.ProcessID; pid != uint32(os.Getpid()) &&
+			!strings.Contains(strings.ToLower(name), "core") &&
+			strings.HasPrefix(strings.ToLower(name), strings.ToLower(prefix)) {
+			return pid
 		}
 		r, _, _ = procProcess32NextW.Call(snap, uintptr(unsafe.Pointer(&e)))
 	}

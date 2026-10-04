@@ -7,6 +7,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"sync"
 	"time"
@@ -79,9 +80,38 @@ func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 	case "/progress":
 		s.handleProgress(w, r)
+	case "/set-coords":
+		if r.Method == http.MethodPost {
+			s.handleSetCoords(w, r)
+		} else {
+			writeJSON(w, map[string]any{"ok": false})
+		}
 	default:
 		writeJSON(w, map[string]any{"ok": false, "error": "unknown endpoint"})
 	}
+}
+
+// handleSetCoords 坐标校准 HTTP 入口（网页端可选；GUI 走文件通道）。
+// 同步执行全 RAM 精确扫描（约 10s），命中后经 coordsCh 通知状态机接管。
+func (s *server) handleSetCoords(w http.ResponseWriter, r *http.Request) {
+	var obj map[string]any
+	if err := json.NewDecoder(r.Body).Decode(&obj); err != nil {
+		writeJSON(w, map[string]any{"ok": false, "error": "bad json"})
+		return
+	}
+	gx, gy, gz := flt(obj["x"]), flt(obj["y"]), flt(obj["z"])
+	if gx == 0 && gy == 0 && gz == 0 {
+		writeJSON(w, map[string]any{"ok": false, "error": "empty coords"})
+		return
+	}
+	fmt.Printf("  [coords] HTTP calibration: game hud (%.1f, %.1f, %.1f)\n", gx, gy, gz)
+	resp := runCoordsLocate(float32(gx), float32(gy), float32(gz))
+	respJSON := map[string]any{
+		"ok": resp.Ok, "addr": resp.Addr,
+		"gx": resp.Gx, "gy": resp.Gy, "gz": resp.Gz,
+		"copies": resp.Copies, "error": resp.Error, "durMs": resp.DurMs,
+	}
+	writeJSON(w, respJSON)
 }
 
 func (s *server) handlePos(w http.ResponseWriter, r *http.Request) {

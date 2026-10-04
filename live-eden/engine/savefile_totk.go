@@ -58,6 +58,23 @@ func totkSaveRoot() string {
 			}
 		}
 	}
+	// 便携 Eden 常见根探测：枚举常见盘符下的 YUZU\eden（Eden 便携版布局，
+	// 进程未启动时也能找到存档根；GUI 先开、游戏后开场景依赖此路径）。
+	// 注意：盘符必须带尾分隔符（filepath.Join("G:", "YUZU") 会产生
+	// "G:YUZU" 这种盘符相对路径，os.Stat 必然失败）。
+	for _, drive := range []string{"C:\\", "D:\\", "E:\\", "F:\\", "G:\\", "H:\\", "I:\\", "J:\\", "K:\\", "L:\\"} {
+		for _, sub := range []string{
+			filepath.Join(drive, "YUZU", "eden", "user", "nand", "user", "save"),
+			filepath.Join(drive, "yuzu", "eden", "user", "nand", "user", "save"),
+			filepath.Join(drive, "YUZU", "user", "nand", "user", "save"),
+		} {
+			if fi, err := os.Stat(sub); err == nil && fi.IsDir() {
+				return sub
+			}
+		}
+	}
+	// APPDATA 安装布局（Eden/yuzu 优先；Ryujinx 是历史残留目录，最后兜底，
+	// 避免旧的 %APPDATA%\Ryujinx\bis\user\save 抢先命中却无 Eden 存档）。
 	for _, c := range []string{
 		filepath.Join(os.Getenv("APPDATA"), "Eden", "user", "nand", "user", "save"),
 		filepath.Join(os.Getenv("APPDATA"), "yuzu", "user", "nand", "user", "save"),

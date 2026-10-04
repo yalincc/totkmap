@@ -38,7 +38,14 @@ func dataDir() string {
 	}
 	exe, err := os.Executable()
 	if err == nil {
-		return filepath.Join(filepath.Dir(exe), "..", "data")
+		// 发布包布局：data 与 exe 同级（release\TOTKNavi-x\data\）
+		if fi, e := os.Stat(filepath.Join(filepath.Dir(exe), "data")); e == nil && fi.IsDir() {
+			return filepath.Join(filepath.Dir(exe), "data")
+		}
+		// 开发布局：data 在 exe 上级（engine\..\data）
+		if fi, e := os.Stat(filepath.Join(filepath.Dir(exe), "..", "data")); e == nil && fi.IsDir() {
+			return filepath.Join(filepath.Dir(exe), "..", "data")
+		}
 	}
 	return "data"
 }

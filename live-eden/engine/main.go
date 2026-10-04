@@ -73,6 +73,7 @@ func main() {
 	go progress.loop()
 
 	go navClearLoop() // V1.1.0：GUI 清除目标文件通信
+	go coordsLoop()   // V1.4.0：GUI 坐标校准定位（coords-req.json 文件通道）
 	go stateMachine()
 	go statusLoop()
 
