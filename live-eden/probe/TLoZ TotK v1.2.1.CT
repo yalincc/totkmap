@@ -1,0 +1,4153 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CheatTable CheatEngineTableVersion="35">
+  <CheatEntries>
+    <CheatEntry>
+      <ID>590</ID>
+      <Description>"HOW TO SETUP (DO THIS FIRST)"</Description>
+      <Options moHideChildren="1" moManualExpandCollapse="1" moAllowManualCollapseAndExpand="1"/>
+      <LastState Value="" RealAddress="1F19200000"/>
+      <Color>00FF00</Color>
+      <GroupHeader>1</GroupHeader>
+      <CheatEntries>
+        <CheatEntry>
+          <ID>595</ID>
+          <Description>"STEP 1"</Description>
+          <Options moHideChildren="1" moManualExpandCollapse="1" moAllowManualCollapseAndExpand="1"/>
+          <LastState Value="" Activated="1" RealAddress="1F19200000"/>
+          <Color>00FF00</Color>
+          <GroupHeader>1</GroupHeader>
+          <CheatEntries>
+            <CheatEntry>
+              <ID>601</ID>
+              <Description>"ENABLE THIS AND FILL OUT THESE 4 QUESTIONS:"</Description>
+              <LastState Activated="1"/>
+              <Color>8000FF</Color>
+              <VariableType>Auto Assembler Script</VariableType>
+              <AssemblerScript>{$lua}
+
+[ENABLE]
+if not getAddressSafe("initcurhp") then
+  local initcurhp = allocateMemory(8)
+  registerSymbol("initcurhp", initcurhp)
+  writeInteger("initcurhp", 0)
+end
+if not getAddressSafe("initmaxhp") then
+  local initmaxhp = allocateMemory(8)
+  registerSymbol("initmaxhp", initmaxhp)
+  writeInteger("initmaxhp", 0)
+end
+if not getAddressSafe("initstam") then
+  local initstam = allocateMemory(8)
+  registerSymbol("initstam", initstam)
+  writeFloat("initstam", 0)
+end
+if not getAddressSafe("initzonrgy") then
+  local initzonrgy = allocateMemory(8)
+  registerSymbol("initzonrgy", initzonrgy)
+  writeFloat("initzonrgy", 0)
+end
+
+[DISABLE]
+deAlloc('initcurhp')
+unregisterSymbol('initcurhp')
+deAlloc('initmaxhp')
+unregisterSymbol('initmaxhp')
+deAlloc('initstam')
+unregisterSymbol('initstam')
+deAlloc('initzonrgy')
+unregisterSymbol('initzonrgy')
+</AssemblerScript>
+              <CheatEntries>
+                <CheatEntry>
+                  <ID>602</ID>
+                  <Description>"NOTE: MAKE SURE YOUR STAMINA AND ZONAI ENERGY ARE CHARGED AND THEN GO INTO "Materials" INVENTORY"</Description>
+                  <LastState Value="" RealAddress="1F19200000"/>
+                  <Color>00FF00</Color>
+                  <GroupHeader>1</GroupHeader>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>596</ID>
+                  <Description>"What is your current hp? (1 red heart = 4hp)"</Description>
+                  <ShowAsSigned>0</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>34227FE0000</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>597</ID>
+                  <Description>"What is your max hp? (all hearts x4)"</Description>
+                  <ShowAsSigned>0</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>34227FF0000</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>598</ID>
+                  <Description>"What is your current max stamina (1 circle = 1000)"</Description>
+                  <ShowAsSigned>0</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>Float</VariableType>
+                  <Address>34228000000</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>599</ID>
+                  <Description>"What is your current max zonai energy (1 cell = 1000, 1 battery = 3000)"</Description>
+                  <ShowAsSigned>0</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>Float</VariableType>
+                  <Address>3422C7B0000</Address>
+                </CheatEntry>
+              </CheatEntries>
+            </CheatEntry>
+          </CheatEntries>
+        </CheatEntry>
+        <CheatEntry>
+          <ID>588</ID>
+          <Description>"STEP 2"</Description>
+          <Options moHideChildren="1" moManualExpandCollapse="1" moAllowManualCollapseAndExpand="1"/>
+          <LastState Value="" Activated="1" RealAddress="1F19200000"/>
+          <Color>00FF00</Color>
+          <GroupHeader>1</GroupHeader>
+          <CheatEntries>
+            <CheatEntry>
+              <ID>603</ID>
+              <Description>"IMPORTANT PART THAT I SKIPPED: SELECT/HOVER OVER "Wood" IN "Materials" INVENTORY BEFORE ENABLING THIS SCRIPT:"</Description>
+              <Options moHideChildren="1"/>
+              <LastState Value="" Activated="1" RealAddress="1F19200000"/>
+              <Color>00FF00</Color>
+              <GroupHeader>1</GroupHeader>
+              <CheatEntries>
+                <CheatEntry>
+                  <ID>600</ID>
+                  <Description>"Auto Find Selected Slot Count Display (enable this to get to step 2.a)"</Description>
+                  <Options moHideChildren="1"/>
+                  <LastState Activated="1"/>
+                  <Color>8000FF</Color>
+                  <VariableType>Auto Assembler Script</VariableType>
+                  <AssemblerScript>{$lua}
+
+[ENABLE]
+--AUTO FIND SELECTED SLOT COUNT DISPLAY ADDRESS
+if not getAddressSafe("sscd") then
+  local sscd = allocateMemory(8)
+  registerSymbol("sscd", sscd)
+  writeInteger("sscd", 0xDEADBEEF)
+end
+if not getAddressSafe("performcalculations") then
+  local performcalculations = allocateMemory(8)
+  registerSymbol("performcalculations", performcalculations)
+  writeInteger("performcalculations", 0xDEADBEEF)
+end
+
+ms=createMemScan()
+fl=createFoundList(ms)
+protectionflags = "*W*X-C"
+ms.FirstScan(soExactValue, vtGrouped, rtRounded, "4:1600807503 w:44 4:16 w:60 4:33","", 0x10000000000, 0x2ffffffffff,"", fsmAligned,"4", false, false, false, false)
+ms.waitTillDone()
+fl.initialize()
+
+local al = getAddressList()
+sscd = al.getMemoryRecordByDescription('Selected Slot Count Display')
+rnawtv = al.getMemoryRecordByDescription('Recalculate new addresses with this value')
+rnawtv.Address = fl.Address[0]--1st result out of 2
+writeQword("performcalculations", rnawtv.CurrentAddress+0xA8)
+rnawtv.Address = "performcalculations"
+
+fl.destroy()
+ms.destroy()
+
+[DISABLE]
+deAlloc('sscd')
+unregisterSymbol('sscd')
+deAlloc('performcalculations')
+unregisterSymbol('performcalculations')
+</AssemblerScript>
+                  <CheatEntries>
+                    <CheatEntry>
+                      <ID>591</ID>
+                      <Description>"COPY THIS VALUE AND RIGHT CLICK &gt; "Recalculate new addresses" ON "Selected Slot Count Display""</Description>
+                      <LastState Value="" RealAddress="1F19200000"/>
+                      <Color>00FF00</Color>
+                      <GroupHeader>1</GroupHeader>
+                      <CheatEntries>
+                        <CheatEntry>
+                          <ID>587</ID>
+                          <Description>"Recalculate new addresses with this value"</Description>
+                          <ShowAsHex>1</ShowAsHex>
+                          <ShowAsSigned>0</ShowAsSigned>
+                          <Color>4080FF</Color>
+                          <VariableType>8 Bytes</VariableType>
+                          <Address>3422C7D0000</Address>
+                        </CheatEntry>
+                      </CheatEntries>
+                    </CheatEntry>
+                  </CheatEntries>
+                </CheatEntry>
+              </CheatEntries>
+            </CheatEntry>
+          </CheatEntries>
+        </CheatEntry>
+        <CheatEntry>
+          <ID>589</ID>
+          <Description>"STEP 3"</Description>
+          <Options moHideChildren="1" moManualExpandCollapse="1" moAllowManualCollapseAndExpand="1"/>
+          <LastState Value="" Activated="1" RealAddress="1F19200000"/>
+          <Color>00FF00</Color>
+          <GroupHeader>1</GroupHeader>
+          <CheatEntries>
+            <CheatEntry>
+              <ID>592</ID>
+              <Description>"TELEPORT TO "Lookout Landing Skyview Tower" AND DON'T MOVE YOUR CHARACTER WHEN YOU'RE THERE"</Description>
+              <LastState Value="" RealAddress="1F19200000"/>
+              <Color>00FF00</Color>
+              <GroupHeader>1</GroupHeader>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>593</ID>
+              <Description>"ENABLE THIS SCRIPT; IT SHOULD TAKE ABOUT 30 SECONDS TO FIND THE ADDRESSES"</Description>
+              <LastState Value="" RealAddress="1F19200000"/>
+              <Color>00FF00</Color>
+              <GroupHeader>1</GroupHeader>
+              <CheatEntries>
+                <CheatEntry>
+                  <ID>585</ID>
+                  <Description>"Auto Find Stamina, Health, Zonai Energy, &amp; World Coords"</Description>
+                  <Options moHideChildren="1"/>
+                  <LastState Activated="1"/>
+                  <Color>8000FF</Color>
+                  <VariableType>Auto Assembler Script</VariableType>
+                  <AssemblerScript>{$lua}
+
+[ENABLE]
+--AUTO FIND STAMINA ADDRESS
+local al = getAddressList()
+stamina = al.getMemoryRecordByDescription('Stamina')
+initstam = readFloat('initstam')
+--initstam = al.getMemoryRecordByDescription('What is your current max stamina (1 circle = 1000)')
+--"f:300 w:8 f:1000 w:20 f:1000"
+stamgs = "f:300 w:8 f:"..initstam.." w:20 f:"..initstam
+
+ms=createMemScan()
+fl=createFoundList(ms)
+protectionflags = "*W*X-C"
+ms.FirstScan(soExactValue, vtGrouped, rtRounded, stamgs,"", 0x10000000000, 0x2ffffffffff,"", fsmAligned,"4", false, false, false, false)
+ms.waitTillDone()
+fl.initialize()
+
+stamina.Address = fl.Address[0]--1st result
+stamina.Address = stamina.CurrentAddress+0x24
+
+fl.destroy()
+ms.destroy()
+
+--AUTO FIND HEALTH/MAX HEALTH ADDRESS
+local al = getAddressList()
+hp = al.getMemoryRecordByDescription('Health')
+maxhp = al.getMemoryRecordByDescription('Max Health')
+initcurhp = readInteger('initcurhp')
+initmaxhp = readInteger('initmaxhp')
+--initcurhp = al.getMemoryRecordByDescription('What is your current hp? (1 red heart = 4hp)')
+--initmaxhp = al.getMemoryRecordByDescription('What is your max hp? (all hearts x4)')
+--"4:150 4:833312128 w:8 4:160 w:204 4:160"
+hpgs = "4:"..initcurhp.." 4:833312128 w:8 4:"..initmaxhp.." w:204 4:"..initmaxhp
+
+ms=createMemScan()
+fl=createFoundList(ms)
+protectionflags = "*W*X-C"
+ms.FirstScan(soExactValue, vtGrouped, rtRounded, hpgs,"", 0x10000000000, 0x2ffffffffff,"", fsmAligned,"4", false, false, false, false)
+ms.waitTillDone()
+fl.initialize()
+
+hp.Address = fl.Address[0]--1st result
+maxhp.Address = hp.CurrentAddress+0x10
+
+fl.destroy()
+ms.destroy()
+
+--AUTO FIND ZONAI ENERGY ADDRESS
+local al = getAddressList()
+ze = al.getMemoryRecordByDescription('Zonai Energy')
+initzonrgy = readFloat('initzonrgy')
+--initzonrgy = al.getMemoryRecordByDescription('What is your current max zonai energy (1 cell = 1000, 1 battery = 3000)')
+--"f:150.00 w:8 f:3000.00 f:0 f:3000.00 f:0"
+zegs = "f:150.00 w:8 f:"..initzonrgy.." f:0 f:"..initzonrgy.." f:0"
+
+ms=createMemScan()
+fl=createFoundList(ms)
+protectionflags = "*W*X-C"
+ms.FirstScan(soExactValue, vtGrouped, rtRounded, zegs,"", 0x10000000000, 0x2ffffffffff,"", fsmAligned,"4", false, false, false, false)
+ms.waitTillDone()
+fl.initialize()
+
+ze.Address = fl.Address[1]--2nd result
+ze.Address = ze.CurrentAddress+0x14
+
+fl.destroy()
+ms.destroy()
+
+--AUTO FIND WORLD COORDS ADDRESS
+ms=createMemScan()
+fl=createFoundList(ms)
+protectionflags = "*W*X-C"
+ms.FirstScan(soExactValue, vtGrouped, rtRounded, "d:-293.19 d:131.84  d:-137.19","", 0x10000000000, 0x2ffffffffff,"", fsmAligned,"4", false, false, false, false)
+ms.waitTillDone()
+fl.initialize()
+
+local al = getAddressList()
+wcx = al.getMemoryRecordByDescription('World Coord X')
+wcy = al.getMemoryRecordByDescription('World Coord Y')
+wcz = al.getMemoryRecordByDescription('World Coord Z')
+yvel = al.getMemoryRecordByDescription('Y Velocity')
+wcx.Address = fl.Address[0]--1st result
+wcy.Address = wcx.CurrentAddress+0x8
+wcz.Address = wcy.CurrentAddress+0x8
+yvel.Address = wcx.CurrentAddress+0x54
+
+fl.destroy()
+ms.destroy()
+
+[DISABLE]
+
+</AssemblerScript>
+                  <CheatEntries>
+                    <CheatEntry>
+                      <ID>594</ID>
+                      <Description>"YOU'RE ALL SET! ENJOY! ✅    🎮🕹🛡🏹🗡⚔"</Description>
+                      <LastState Value="" RealAddress="1F19200000"/>
+                      <Color>00FF00</Color>
+                      <GroupHeader>1</GroupHeader>
+                    </CheatEntry>
+                  </CheatEntries>
+                </CheatEntry>
+              </CheatEntries>
+            </CheatEntry>
+          </CheatEntries>
+        </CheatEntry>
+      </CheatEntries>
+    </CheatEntry>
+    <CheatEntry>
+      <ID>604</ID>
+      <Description>"Selected Slot Count Display"</Description>
+      <Options moHideChildren="1" moManualExpandCollapse="1" moAllowManualCollapseAndExpand="1"/>
+      <LastState Value="4294967295" RealAddress="29C8B893904"/>
+      <ShowAsSigned>0</ShowAsSigned>
+      <Color>00FF00</Color>
+      <VariableType>4 Bytes</VariableType>
+      <Address>29C8B893904</Address>
+      <CheatEntries>
+        <CheatEntry>
+          <ID>98</ID>
+          <Description>"Link Stats"</Description>
+          <Options moHideChildren="1" moManualExpandCollapse="1" moAllowManualCollapseAndExpand="1"/>
+          <LastState Value="" RealAddress="1F19200000"/>
+          <Color>FFFF00</Color>
+          <GroupHeader>1</GroupHeader>
+          <CheatEntries>
+            <CheatEntry>
+              <ID>153</ID>
+              <Description>"Rupees"</Description>
+              <LastState Value="92369" RealAddress="29C937D090C"/>
+              <ShowAsSigned>0</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937D090C</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>143</ID>
+              <Description>"Stamina"</Description>
+              <LastState Value="1000" RealAddress="29D29BACF0C"/>
+              <ShowAsSigned>0</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>Float</VariableType>
+              <Address>29D29BACF0C</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>92</ID>
+              <Description>"Health"</Description>
+              <LastState Value="160" RealAddress="29D29D97918"/>
+              <ShowAsSigned>0</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29D29D97918</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>97</ID>
+              <Description>"Max Health"</Description>
+              <LastState Value="160" RealAddress="29D29D97928"/>
+              <ShowAsSigned>0</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29D29D97928</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>494</ID>
+              <Description>"Zonai Energy"</Description>
+              <LastState Value="3000" RealAddress="2BE8967BFB4"/>
+              <ShowAsSigned>0</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>Float</VariableType>
+              <Address>2BE8967BFB4</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>508</ID>
+              <Description>"World Coordinates"</Description>
+              <Options moHideChildren="1" moManualExpandCollapse="1" moAllowManualCollapseAndExpand="1"/>
+              <LastState Value="" Activated="1" RealAddress="1F19200000"/>
+              <Color>FFFF00</Color>
+              <GroupHeader>1</GroupHeader>
+              <CheatEntries>
+                <CheatEntry>
+                  <ID>658</ID>
+                  <Description>"Auto Find World Coords (TP to Lookout Landing and enable again if coords break)"</Description>
+                  <LastState/>
+                  <Color>8000FF</Color>
+                  <VariableType>Auto Assembler Script</VariableType>
+                  <AssemblerScript>{$lua}
+
+[ENABLE]
+ms=createMemScan()
+fl=createFoundList(ms)
+protectionflags = "*W*X-C"
+ms.FirstScan(soExactValue, vtGrouped, rtRounded, "d:-293.19 d:131.84  d:-137.19","", 0x10000000000, 0x2ffffffffff,"", fsmAligned,"4", false, false, false, false)
+ms.waitTillDone()
+fl.initialize()
+
+local al = getAddressList()
+wcx = al.getMemoryRecordByDescription('World Coord X')
+wcy = al.getMemoryRecordByDescription('World Coord Y')
+wcz = al.getMemoryRecordByDescription('World Coord Z')
+yvel = al.getMemoryRecordByDescription('Y Velocity')
+wcx.Address = fl.Address[0]--1st result
+wcy.Address = wcx.CurrentAddress+0x8
+wcz.Address = wcy.CurrentAddress+0x8
+yvel.Address = wcx.CurrentAddress+0x54
+
+fl.destroy()
+ms.destroy()
+
+[DISABLE]
+</AssemblerScript>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>505</ID>
+                  <Description>"World Coord X"</Description>
+                  <LastState Value="-3.09865224590311E-8" RealAddress="29C8418D090"/>
+                  <ShowAsSigned>0</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>Double</VariableType>
+                  <Address>29C8418D090</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>506</ID>
+                  <Description>"World Coord Y"</Description>
+                  <LastState Value="0.749610424305414" RealAddress="29C8418D098"/>
+                  <ShowAsSigned>0</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>Double</VariableType>
+                  <Address>29C8418D098</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>507</ID>
+                  <Description>"World Coord Z"</Description>
+                  <LastState Value="-3.09525125530286E-8" RealAddress="29C8418D0A0"/>
+                  <ShowAsSigned>0</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>Double</VariableType>
+                  <Address>29C8418D0A0</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>568</ID>
+                  <Description>"Y Velocity"</Description>
+                  <LastState Value="0" RealAddress="29C8418D0E4"/>
+                  <ShowAsSigned>0</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>Float</VariableType>
+                  <Address>29C8418D0E4</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>569</ID>
+                  <Description>"Fly"</Description>
+                  <Options moHideChildren="1" moAllowManualCollapseAndExpand="1"/>
+                  <LastState/>
+                  <Color>8000FF</Color>
+                  <VariableType>Auto Assembler Script</VariableType>
+                  <AssemblerScript>{$lua}
+
+[ENABLE]
+if not getAddressSafe("flymode") then
+  local flymode = allocateMemory(4)
+  registerSymbol("flymode", flymode)
+  writeInteger("flymode", 0)
+end
+local al = getAddressList()
+wcy = al.getMemoryRecordByDescription('World Coord Y')
+yvel = al.getMemoryRecordByDescription('Y Velocity')
+fm = al.getMemoryRecordByDescription('Fly Mode')
+sd = al.getMemoryRecordByDescription('Sky Diving')
+
+t_fly = createTimer()
+t_fly.setInterval(10)
+t_fly.onTimer = function()
+  ctrlr = getXBox360ControllerState()
+  if tonumber(fm.Value) == 0 then --velocity fly mode(hold Y[X if using an xbox controller] to start flying upwards while gliding)
+    if tonumber(sd.Value) == 300 and ctrlr.GAMEPAD_X then
+      yvel.Value = 331.40
+    end
+  end
+  if tonumber(fm.Value) == 1 then --coordinate increase fly mode(hold Y[X if using an xbox controller] to start flying upwards while gliding)
+    if tonumber(sd.Value) == 300 and ctrlr.GAMEPAD_X then
+      wcy.Value = wcy.Value+1.00
+    end
+  end
+  if tonumber(fm.Value) == 2 then --coordinate teleport fly mode(hold Y[X if using an xbox controller] to start flying upwards while gliding)
+    if tonumber(sd.Value) == 300 and ctrlr.GAMEPAD_X then
+      wcy.Value = 3200
+    end
+  end
+end
+
+[DISABLE]
+t_fly.destroy()
+
+deAlloc('flymode')
+unregisterSymbol('flymode')
+</AssemblerScript>
+                  <CheatEntries>
+                    <CheatEntry>
+                      <ID>570</ID>
+                      <Description>"Sky Diving"</Description>
+                      <DropDownList>*:False
+300:True
+</DropDownList>
+                      <LastState Value="5.946896562E-17" RealAddress="29CE9BBF6A8"/>
+                      <ShowAsSigned>0</ShowAsSigned>
+                      <Color>4080FF</Color>
+                      <VariableType>Float</VariableType>
+                      <Address>29CE9BBF6A8</Address>
+                    </CheatEntry>
+                    <CheatEntry>
+                      <ID>567</ID>
+                      <Description>"Fly Mode"</Description>
+                      <DropDownList ReadOnly="1" DescriptionOnly="1" DisplayValueAsItem="1">0:Velocity
+1:Coordinate Increase
+2:Coordinate Teleport
+</DropDownList>
+                      <ShowAsSigned>0</ShowAsSigned>
+                      <Color>4080FF</Color>
+                      <VariableType>4 Bytes</VariableType>
+                      <Address>8D4DA70000</Address>
+                    </CheatEntry>
+                  </CheatEntries>
+                </CheatEntry>
+              </CheatEntries>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>532</ID>
+              <Description>"Map"</Description>
+              <Options moHideChildren="1" moManualExpandCollapse="1" moAllowManualCollapseAndExpand="1"/>
+              <LastState Value="" Activated="1" RealAddress="1F19200000"/>
+              <Color>FFFF00</Color>
+              <GroupHeader>1</GroupHeader>
+              <CheatEntries>
+                <CheatEntry>
+                  <ID>561</ID>
+                  <Description>"Map Teleport"</Description>
+                  <LastState Activated="1"/>
+                  <Color>8000FF</Color>
+                  <VariableType>Auto Assembler Script</VariableType>
+                  <AssemblerScript>{$lua}
+
+[ENABLE]
+local al = getAddressList()
+wcx = al.getMemoryRecordByDescription('World Coord X')
+wcy = al.getMemoryRecordByDescription('World Coord Y')
+wcz = al.getMemoryRecordByDescription('World Coord Z')
+bmppo = al.getMemoryRecordByDescription('Back Menu Purah Pad Open')
+mlay = al.getMemoryRecordByDescription('Map Layer')
+mwcx = al.getMemoryRecordByDescription('Map World Coord X')
+mwcz = al.getMemoryRecordByDescription('Map World Coord Z')
+mhiid = al.getMemoryRecordByDescription('Map Hover Icon ID')
+wcysafecap = 0
+
+t_maptp = createTimer()
+t_maptp.setInterval(50)
+t_maptp.onTimer = function()
+  if tonumber(mlay.Value) == 0 or tonumber(mlay.Value) == 1 then
+    wcysafecap = 3200.00
+    --wcy.Value = wcysafecap
+    --print(ml.Value)
+  end
+  if tonumber(mlay.Value) == 2 then
+    wcysafecap = 0
+  end
+  ctrlr = getXBox360ControllerState()
+  if tonumber(bmppo.Value) ~= 0 and ctrlr.GAMEPAD_LEFT_THUMB then
+    wcx.Value = mwcx.Value
+    wcy.Value = wcysafecap
+    wcz.Value = -(mwcz.Value)
+  end
+  --val = readInteger('address')
+  --writeInteger('newaddress',val)
+end
+
+[DISABLE]
+t_maptp.Enabled = false
+t_maptp.destroy()
+</AssemblerScript>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>562</ID>
+                  <Description>"Back Menu Purah Pad Open"</Description>
+                  <DropDownList ReadOnly="1" DescriptionOnly="1" DisplayValueAsItem="1">0:False
+*:True
+</DropDownList>
+                  <LastState Value="0" RealAddress="29C8ADE48AC"/>
+                  <ShowAsSigned>0</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C8ADE48AC</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>531</ID>
+                  <Description>"Map Layer"</Description>
+                  <DropDownList ReadOnly="1" DescriptionOnly="1" DisplayValueAsItem="1">0:Sky
+1:Surface
+2:Depths
+</DropDownList>
+                  <LastState Value="1" RealAddress="29C8ADE4780"/>
+                  <ShowAsSigned>0</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C8ADE4780</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>524</ID>
+                  <Description>"Map World Coord X"</Description>
+                  <LastState Value="-407.8014832" RealAddress="29C8ADE4790"/>
+                  <ShowAsSigned>0</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>Float</VariableType>
+                  <Address>29C8ADE4790</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>526</ID>
+                  <Description>"Map World Coord Z"</Description>
+                  <LastState Value="-1082.147217" RealAddress="29C8ADE4794"/>
+                  <ShowAsSigned>0</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>Float</VariableType>
+                  <Address>29C8ADE4794</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>529</ID>
+                  <Description>"Map Hover Icon ID"</Description>
+                  <Options moManualExpandCollapse="1" moAllowManualCollapseAndExpand="1"/>
+                  <DropDownList ReadOnly="1" DescriptionOnly="1" DisplayValueAsItem="1">1:Your Location
+2:Horse
+5:Tower
+6:Shrine
+9:Objective
+11:Glow Stamp
+12:Stamp
+15:Room of Awakening
+17:Location
+24:Korok
+25:Device Dispenser
+26:Tear Drop
+32:Zonai Trader
+</DropDownList>
+                  <LastState Value="0" RealAddress="29C8ADE47C8"/>
+                  <ShowAsSigned>0</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C8ADE47C8</Address>
+                  <CheatEntries>
+                    <CheatEntry>
+                      <ID>530</ID>
+                      <Description>"Map Hover Icon ID Index"</Description>
+                      <LastState Value="-1" RealAddress="29C8ADE47CC"/>
+                      <ShowAsSigned>1</ShowAsSigned>
+                      <Color>4080FF</Color>
+                      <VariableType>4 Bytes</VariableType>
+                      <Address>29C8ADE47CC</Address>
+                    </CheatEntry>
+                  </CheatEntries>
+                </CheatEntry>
+              </CheatEntries>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>563</ID>
+              <Description>"Infinite Stamina"</Description>
+              <LastState Activated="1"/>
+              <Color>8000FF</Color>
+              <VariableType>Auto Assembler Script</VariableType>
+              <AssemblerScript>{$lua}
+
+[ENABLE]
+local al = getAddressList()
+stamina = al.getMemoryRecordByDescription('Stamina')
+
+t_stamina = createTimer()
+t_stamina.setInterval(50)
+t_stamina.onTimer = function()
+  if tonumber(stamina.Value) ~= 1000 then
+    stamina.Value = 1000
+  end
+end
+
+[DISABLE]
+t_stamina.destroy()
+</AssemblerScript>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>564</ID>
+              <Description>"Infinite Health"</Description>
+              <LastState Activated="1"/>
+              <Color>8000FF</Color>
+              <VariableType>Auto Assembler Script</VariableType>
+              <AssemblerScript>{$lua}
+
+[ENABLE]
+local al = getAddressList()
+hp = al.getMemoryRecordByDescription('Health')
+maxhp = al.getMemoryRecordByDescription('Max Health')
+
+t_health = createTimer()
+t_health.setInterval(50)
+t_health.onTimer = function()
+  if tonumber(hp.Value) ~= tonumber(maxhp.Value) then
+    hp.Value = maxhp.Value
+  end
+end
+
+[DISABLE]
+t_health.destroy()
+</AssemblerScript>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>566</ID>
+              <Description>"Infinite Rupees"</Description>
+              <LastState/>
+              <Color>8000FF</Color>
+              <VariableType>Auto Assembler Script</VariableType>
+              <AssemblerScript>{$lua}
+
+[ENABLE]
+local al = getAddressList()
+rupees = al.getMemoryRecordByDescription('Rupees')
+
+t_rupees = createTimer()
+t_rupees.setInterval(50)
+t_rupees.onTimer = function()
+  if tonumber(rupees.Value) ~= 100000 then
+    rupees.Value = 100000
+  end
+end
+
+[DISABLE]
+t_rupees.destroy()
+</AssemblerScript>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>565</ID>
+              <Description>"Infinite Zonai Energy"</Description>
+              <LastState Activated="1"/>
+              <Color>8000FF</Color>
+              <VariableType>Auto Assembler Script</VariableType>
+              <AssemblerScript>{$lua}
+
+[ENABLE]
+local al = getAddressList()
+ze = al.getMemoryRecordByDescription('Zonai Energy')
+
+t_zonaienergy = createTimer()
+t_zonaienergy.setInterval(50)
+t_zonaienergy.onTimer = function()
+  if tonumber(ze.Value) ~= 3000 then
+    ze.Value = 3000
+  end
+end
+
+[DISABLE]
+t_zonaienergy.destroy()
+</AssemblerScript>
+            </CheatEntry>
+          </CheatEntries>
+        </CheatEntry>
+        <CheatEntry>
+          <ID>640</ID>
+          <Description>"Bows and Arrows"</Description>
+          <Options moHideChildren="1" moManualExpandCollapse="1" moAllowManualCollapseAndExpand="1"/>
+          <LastState Value="" RealAddress="29C937F51D0"/>
+          <ShowAsSigned>0</ShowAsSigned>
+          <Color>FFFF00</Color>
+          <GroupHeader>1</GroupHeader>
+          <Address>29C937F51D0</Address>
+          <CheatEntries>
+            <CheatEntry>
+              <ID>154</ID>
+              <Description>"Arrows"</Description>
+              <LastState Value="467" RealAddress="29C937F51D0"/>
+              <ShowAsSigned>0</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F51D0</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>639</ID>
+              <Description>"Bows"</Description>
+              <Options moHideChildren="1" moManualExpandCollapse="1" moAllowManualCollapseAndExpand="1"/>
+              <LastState Value="" RealAddress="29C937F52D0"/>
+              <ShowAsSigned>0</ShowAsSigned>
+              <Color>FFFF00</Color>
+              <GroupHeader>1</GroupHeader>
+              <Address>29C937F52D0</Address>
+              <CheatEntries>
+                <CheatEntry>
+                  <ID>638</ID>
+                  <Description>"Bows Durability [Don't touch -1s]"</Description>
+                  <Options moHideChildren="1" moManualExpandCollapse="1" moAllowManualCollapseAndExpand="1"/>
+                  <LastState Value="" RealAddress="29C937F52D0"/>
+                  <ShowAsSigned>0</ShowAsSigned>
+                  <Color>FFFF00</Color>
+                  <GroupHeader>1</GroupHeader>
+                  <Address>29C937F52D0</Address>
+                  <CheatEntries>
+                    <CheatEntry>
+                      <ID>316</ID>
+                      <Description>"Slot 0"</Description>
+                      <LastState Value="34" RealAddress="29C937F52D0"/>
+                      <ShowAsSigned>1</ShowAsSigned>
+                      <Color>4080FF</Color>
+                      <VariableType>4 Bytes</VariableType>
+                      <Address>29C937F52D0</Address>
+                    </CheatEntry>
+                    <CheatEntry>
+                      <ID>318</ID>
+                      <Description>"Slot 1"</Description>
+                      <LastState Value="36" RealAddress="29C937F52D4"/>
+                      <ShowAsSigned>1</ShowAsSigned>
+                      <Color>4080FF</Color>
+                      <VariableType>4 Bytes</VariableType>
+                      <Address>29C937F52D4</Address>
+                    </CheatEntry>
+                    <CheatEntry>
+                      <ID>320</ID>
+                      <Description>"Slot 2"</Description>
+                      <LastState Value="35" RealAddress="29C937F52D8"/>
+                      <ShowAsSigned>1</ShowAsSigned>
+                      <Color>4080FF</Color>
+                      <VariableType>4 Bytes</VariableType>
+                      <Address>29C937F52D8</Address>
+                    </CheatEntry>
+                    <CheatEntry>
+                      <ID>322</ID>
+                      <Description>"Slot 3"</Description>
+                      <LastState Value="20" RealAddress="29C937F52DC"/>
+                      <ShowAsSigned>1</ShowAsSigned>
+                      <Color>4080FF</Color>
+                      <VariableType>4 Bytes</VariableType>
+                      <Address>29C937F52DC</Address>
+                    </CheatEntry>
+                    <CheatEntry>
+                      <ID>324</ID>
+                      <Description>"Slot 4"</Description>
+                      <LastState Value="35" RealAddress="29C937F52E0"/>
+                      <ShowAsSigned>1</ShowAsSigned>
+                      <Color>4080FF</Color>
+                      <VariableType>4 Bytes</VariableType>
+                      <Address>29C937F52E0</Address>
+                    </CheatEntry>
+                    <CheatEntry>
+                      <ID>356</ID>
+                      <Description>"Slot 5"</Description>
+                      <LastState Value="35" RealAddress="29C937F52E4"/>
+                      <ShowAsSigned>1</ShowAsSigned>
+                      <Color>4080FF</Color>
+                      <VariableType>4 Bytes</VariableType>
+                      <Address>29C937F52E4</Address>
+                    </CheatEntry>
+                    <CheatEntry>
+                      <ID>358</ID>
+                      <Description>"Slot 6"</Description>
+                      <LastState Value="26" RealAddress="29C937F52E8"/>
+                      <ShowAsSigned>1</ShowAsSigned>
+                      <Color>4080FF</Color>
+                      <VariableType>4 Bytes</VariableType>
+                      <Address>29C937F52E8</Address>
+                    </CheatEntry>
+                    <CheatEntry>
+                      <ID>360</ID>
+                      <Description>"Slot 7"</Description>
+                      <LastState Value="24" RealAddress="29C937F52EC"/>
+                      <ShowAsSigned>1</ShowAsSigned>
+                      <Color>4080FF</Color>
+                      <VariableType>4 Bytes</VariableType>
+                      <Address>29C937F52EC</Address>
+                    </CheatEntry>
+                    <CheatEntry>
+                      <ID>362</ID>
+                      <Description>"Slot 8"</Description>
+                      <LastState Value="35" RealAddress="29C937F52F0"/>
+                      <ShowAsSigned>1</ShowAsSigned>
+                      <Color>4080FF</Color>
+                      <VariableType>4 Bytes</VariableType>
+                      <Address>29C937F52F0</Address>
+                    </CheatEntry>
+                    <CheatEntry>
+                      <ID>364</ID>
+                      <Description>"Slot 9"</Description>
+                      <LastState Value="18" RealAddress="29C937F52F4"/>
+                      <ShowAsSigned>1</ShowAsSigned>
+                      <Color>4080FF</Color>
+                      <VariableType>4 Bytes</VariableType>
+                      <Address>29C937F52F4</Address>
+                    </CheatEntry>
+                    <CheatEntry>
+                      <ID>346</ID>
+                      <Description>"Slot 10"</Description>
+                      <LastState Value="21" RealAddress="29C937F52F8"/>
+                      <ShowAsSigned>1</ShowAsSigned>
+                      <Color>4080FF</Color>
+                      <VariableType>4 Bytes</VariableType>
+                      <Address>29C937F52F8</Address>
+                    </CheatEntry>
+                    <CheatEntry>
+                      <ID>348</ID>
+                      <Description>"Slot 11"</Description>
+                      <LastState Value="34" RealAddress="29C937F52FC"/>
+                      <ShowAsSigned>1</ShowAsSigned>
+                      <Color>4080FF</Color>
+                      <VariableType>4 Bytes</VariableType>
+                      <Address>29C937F52FC</Address>
+                    </CheatEntry>
+                    <CheatEntry>
+                      <ID>350</ID>
+                      <Description>"Slot 12"</Description>
+                      <LastState Value="34" RealAddress="29C937F5300"/>
+                      <ShowAsSigned>1</ShowAsSigned>
+                      <Color>4080FF</Color>
+                      <VariableType>4 Bytes</VariableType>
+                      <Address>29C937F5300</Address>
+                    </CheatEntry>
+                    <CheatEntry>
+                      <ID>352</ID>
+                      <Description>"Slot 13"</Description>
+                      <LastState Value="26" RealAddress="29C937F5304"/>
+                      <ShowAsSigned>1</ShowAsSigned>
+                      <Color>4080FF</Color>
+                      <VariableType>4 Bytes</VariableType>
+                      <Address>29C937F5304</Address>
+                    </CheatEntry>
+                    <CheatEntry>
+                      <ID>354</ID>
+                      <Description>"Slot 14"</Description>
+                      <LastState Value="-1" RealAddress="29C937F5308"/>
+                      <ShowAsSigned>1</ShowAsSigned>
+                      <Color>4080FF</Color>
+                      <VariableType>4 Bytes</VariableType>
+                      <Address>29C937F5308</Address>
+                    </CheatEntry>
+                  </CheatEntries>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>369</ID>
+                  <Description>"Bow Slot Equipped"</Description>
+                  <LastState Value="16" RealAddress="29C937F53B0"/>
+                  <ShowAsSigned>0</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F53B0</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>370</ID>
+                  <Description>"Number of Bow Slots (15 max)"</Description>
+                  <LastState Value="15" RealAddress="29C937F53C0"/>
+                  <ShowAsSigned>0</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F53C0</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>660</ID>
+                  <Description>"Infinite Bow Durability (Ghost Equip Method)"</Description>
+                  <LastState Activated="1"/>
+                  <Color>8000FF</Color>
+                  <VariableType>Auto Assembler Script</VariableType>
+                  <AssemblerScript>{$lua}
+
+[ENABLE]
+local al = getAddressList()
+bse = al.getMemoryRecordByDescription('Bow Slot Equipped')
+
+t_bowsdurability = createTimer()
+t_bowsdurability.setInterval(50)
+t_bowsdurability.onTimer = function()
+  if tonumber(bse.Value) ~= 16 then
+    bse.Value = 16
+  end
+end
+
+[DISABLE]
+t_bowsdurability.destroy()
+</AssemblerScript>
+                </CheatEntry>
+              </CheatEntries>
+            </CheatEntry>
+          </CheatEntries>
+        </CheatEntry>
+        <CheatEntry>
+          <ID>616</ID>
+          <Description>"Shields"</Description>
+          <Options moHideChildren="1" moManualExpandCollapse="1" moAllowManualCollapseAndExpand="1"/>
+          <LastState Value="" RealAddress="29C937FA1B0"/>
+          <ShowAsSigned>0</ShowAsSigned>
+          <Color>FFFF00</Color>
+          <GroupHeader>1</GroupHeader>
+          <Address>29C937FA1B0</Address>
+          <CheatEntries>
+            <CheatEntry>
+              <ID>615</ID>
+              <Description>"Shields Durability [Don't touch -1s]"</Description>
+              <Options moHideChildren="1" moManualExpandCollapse="1" moAllowManualCollapseAndExpand="1"/>
+              <LastState Value="" RealAddress="29C937FA1B0"/>
+              <ShowAsSigned>0</ShowAsSigned>
+              <Color>FFFF00</Color>
+              <GroupHeader>1</GroupHeader>
+              <Address>29C937FA1B0</Address>
+              <CheatEntries>
+                <CheatEntry>
+                  <ID>401</ID>
+                  <Description>"Slot 0"</Description>
+                  <LastState Value="5" RealAddress="29C937FA1B0"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937FA1B0</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>403</ID>
+                  <Description>"Slot 1"</Description>
+                  <LastState Value="5" RealAddress="29C937FA1B4"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937FA1B4</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>405</ID>
+                  <Description>"Slot 2"</Description>
+                  <LastState Value="16" RealAddress="29C937FA1B8"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937FA1B8</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>407</ID>
+                  <Description>"Slot 3"</Description>
+                  <LastState Value="12" RealAddress="29C937FA1BC"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937FA1BC</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>409</ID>
+                  <Description>"Slot 4"</Description>
+                  <LastState Value="16" RealAddress="29C937FA1C0"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937FA1C0</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>411</ID>
+                  <Description>"Slot 5"</Description>
+                  <LastState Value="12" RealAddress="29C937FA1C4"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937FA1C4</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>413</ID>
+                  <Description>"Slot 6"</Description>
+                  <LastState Value="5" RealAddress="29C937FA1C8"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937FA1C8</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>415</ID>
+                  <Description>"Slot 7"</Description>
+                  <LastState Value="17" RealAddress="29C937FA1CC"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937FA1CC</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>417</ID>
+                  <Description>"Slot 8"</Description>
+                  <LastState Value="5" RealAddress="29C937FA1D0"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937FA1D0</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>419</ID>
+                  <Description>"Slot 9"</Description>
+                  <LastState Value="20" RealAddress="29C937FA1D4"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937FA1D4</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>421</ID>
+                  <Description>"Slot 10"</Description>
+                  <LastState Value="17" RealAddress="29C937FA1D8"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937FA1D8</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>423</ID>
+                  <Description>"Slot 11"</Description>
+                  <LastState Value="16" RealAddress="29C937FA1DC"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937FA1DC</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>425</ID>
+                  <Description>"Slot 12"</Description>
+                  <LastState Value="16" RealAddress="29C937FA1E0"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937FA1E0</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>427</ID>
+                  <Description>"Slot 13"</Description>
+                  <LastState Value="15" RealAddress="29C937FA1E4"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937FA1E4</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>429</ID>
+                  <Description>"Slot 14"</Description>
+                  <LastState Value="15" RealAddress="29C937FA1E8"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937FA1E8</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>431</ID>
+                  <Description>"Slot 15"</Description>
+                  <LastState Value="15" RealAddress="29C937FA1EC"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937FA1EC</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>433</ID>
+                  <Description>"Slot 16"</Description>
+                  <LastState Value="16" RealAddress="29C937FA1F0"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937FA1F0</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>435</ID>
+                  <Description>"Slot 17"</Description>
+                  <LastState Value="18" RealAddress="29C937FA1F4"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937FA1F4</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>437</ID>
+                  <Description>"Slot 18"</Description>
+                  <LastState Value="15" RealAddress="29C937FA1F8"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937FA1F8</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>439</ID>
+                  <Description>"Slot 19"</Description>
+                  <LastState Value="18" RealAddress="29C937FA1FC"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937FA1FC</Address>
+                </CheatEntry>
+              </CheatEntries>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>365</ID>
+              <Description>"Shield Slot Equipped"</Description>
+              <LastState Value="21" RealAddress="29C937FA2F0"/>
+              <ShowAsSigned>0</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937FA2F0</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>366</ID>
+              <Description>"Number of Shield Slots (20 max)"</Description>
+              <LastState Value="20" RealAddress="29C937FA300"/>
+              <ShowAsSigned>0</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937FA300</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>661</ID>
+              <Description>"Infinite Shield Durability (Ghost Equip Method)"</Description>
+              <LastState Activated="1"/>
+              <Color>8000FF</Color>
+              <VariableType>Auto Assembler Script</VariableType>
+              <AssemblerScript>{$lua}
+
+[ENABLE]
+local al = getAddressList()
+sse = al.getMemoryRecordByDescription('Shield Slot Equipped')
+
+t_shieldsdurability = createTimer()
+t_shieldsdurability.setInterval(50)
+t_shieldsdurability.onTimer = function()
+  if tonumber(sse.Value) ~= 21 then
+    sse.Value = 21
+  end
+end
+
+[DISABLE]
+t_shieldsdurability.destroy()
+</AssemblerScript>
+            </CheatEntry>
+          </CheatEntries>
+        </CheatEntry>
+        <CheatEntry>
+          <ID>614</ID>
+          <Description>"Weapons"</Description>
+          <Options moHideChildren="1" moManualExpandCollapse="1" moAllowManualCollapseAndExpand="1"/>
+          <LastState Value="" RealAddress="29C937FABF0"/>
+          <ShowAsSigned>0</ShowAsSigned>
+          <Color>FFFF00</Color>
+          <GroupHeader>1</GroupHeader>
+          <Address>29C937FABF0</Address>
+          <CheatEntries>
+            <CheatEntry>
+              <ID>613</ID>
+              <Description>"Weapons Durability [Don't touch -1s]"</Description>
+              <Options moHideChildren="1" moManualExpandCollapse="1" moAllowManualCollapseAndExpand="1"/>
+              <LastState Value="" RealAddress="29C937FABF0"/>
+              <ShowAsSigned>0</ShowAsSigned>
+              <Color>FFFF00</Color>
+              <GroupHeader>1</GroupHeader>
+              <Address>29C937FABF0</Address>
+              <CheatEntries>
+                <CheatEntry>
+                  <ID>449</ID>
+                  <Description>"Slot 0"</Description>
+                  <LastState Value="5" RealAddress="29C937FABF0"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937FABF0</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>451</ID>
+                  <Description>"Slot 1"</Description>
+                  <LastState Value="20" RealAddress="29C937FABF4"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937FABF4</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>453</ID>
+                  <Description>"Slot 2"</Description>
+                  <LastState Value="35" RealAddress="29C937FABF8"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937FABF8</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>455</ID>
+                  <Description>"Slot 3"</Description>
+                  <LastState Value="15" RealAddress="29C937FABFC"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937FABFC</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>457</ID>
+                  <Description>"Slot 4"</Description>
+                  <LastState Value="9999" RealAddress="29C937FAC00"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937FAC00</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>459</ID>
+                  <Description>"Slot 5"</Description>
+                  <LastState Value="9999" RealAddress="29C937FAC04"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937FAC04</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>461</ID>
+                  <Description>"Slot 6"</Description>
+                  <LastState Value="9999" RealAddress="29C937FAC08"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937FAC08</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>463</ID>
+                  <Description>"Slot 7"</Description>
+                  <LastState Value="5" RealAddress="29C937FAC0C"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937FAC0C</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>465</ID>
+                  <Description>"Slot 8"</Description>
+                  <LastState Value="14" RealAddress="29C937FAC10"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937FAC10</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>467</ID>
+                  <Description>"Slot 9"</Description>
+                  <LastState Value="20" RealAddress="29C937FAC14"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937FAC14</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>469</ID>
+                  <Description>"Slot 10"</Description>
+                  <LastState Value="20" RealAddress="29C937FAC18"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937FAC18</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>471</ID>
+                  <Description>"Slot 11"</Description>
+                  <LastState Value="16" RealAddress="29C937FAC1C"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937FAC1C</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>473</ID>
+                  <Description>"Slot 12"</Description>
+                  <LastState Value="24" RealAddress="29C937FAC20"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937FAC20</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>475</ID>
+                  <Description>"Slot 13"</Description>
+                  <LastState Value="24" RealAddress="29C937FAC24"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937FAC24</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>477</ID>
+                  <Description>"Slot 14"</Description>
+                  <LastState Value="16" RealAddress="29C937FAC28"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937FAC28</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>479</ID>
+                  <Description>"Slot 15"</Description>
+                  <LastState Value="16" RealAddress="29C937FAC2C"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937FAC2C</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>481</ID>
+                  <Description>"Slot 16"</Description>
+                  <LastState Value="16" RealAddress="29C937FAC30"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937FAC30</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>483</ID>
+                  <Description>"Slot 17"</Description>
+                  <LastState Value="24" RealAddress="29C937FAC34"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937FAC34</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>485</ID>
+                  <Description>"Slot 18"</Description>
+                  <LastState Value="16" RealAddress="29C937FAC38"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937FAC38</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>487</ID>
+                  <Description>"Slot 19"</Description>
+                  <LastState Value="16" RealAddress="29C937FAC3C"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937FAC3C</Address>
+                </CheatEntry>
+              </CheatEntries>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>446</ID>
+              <Description>"Weapon Slot Equipped"</Description>
+              <LastState Value="21" RealAddress="29C937FAE70"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937FAE70</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>447</ID>
+              <Description>"Number of Weapon Slots (20 max)"</Description>
+              <LastState Value="20" RealAddress="29C937FAE80"/>
+              <ShowAsSigned>0</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937FAE80</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>659</ID>
+              <Description>"Infinite Weapon Durability (Ghost Equip Method)"</Description>
+              <LastState Activated="1"/>
+              <Color>8000FF</Color>
+              <VariableType>Auto Assembler Script</VariableType>
+              <AssemblerScript>{$lua}
+
+[ENABLE]
+local al = getAddressList()
+wse = al.getMemoryRecordByDescription('Weapon Slot Equipped')
+
+t_weaponsdurability = createTimer()
+t_weaponsdurability.setInterval(50)
+t_weaponsdurability.onTimer = function()
+  if tonumber(wse.Value) ~= 21 then
+    wse.Value = 21
+  end
+end
+
+[DISABLE]
+t_weaponsdurability.destroy()
+</AssemblerScript>
+            </CheatEntry>
+          </CheatEntries>
+        </CheatEntry>
+        <CheatEntry>
+          <ID>612</ID>
+          <Description>"Materials"</Description>
+          <Options moHideChildren="1" moManualExpandCollapse="1" moAllowManualCollapseAndExpand="1"/>
+          <LastState Value="" RealAddress="29C937F7CC0"/>
+          <ShowAsSigned>0</ShowAsSigned>
+          <Color>FFFF00</Color>
+          <GroupHeader>1</GroupHeader>
+          <Address>29C937F7CC0</Address>
+          <CheatEntries>
+            <CheatEntry>
+              <ID>641</ID>
+              <Description>"Selected Slot Number"</Description>
+              <LastState Value="2" RealAddress="29C8B893848"/>
+              <ShowAsSigned>0</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C8B893848</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>642</ID>
+              <Description>"Selected Slot Item Name"</Description>
+              <LastState RealAddress="29C8B89385C"/>
+              <ShowAsSigned>0</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>String</VariableType>
+              <Length>32</Length>
+              <Unicode>0</Unicode>
+              <CodePage>0</CodePage>
+              <ZeroTerminate>1</ZeroTerminate>
+              <Address>29C8B89385C</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>7</ID>
+              <Description>"Materials Slot 0"</Description>
+              <LastState Value="189" RealAddress="29C937F7CC0"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7CC0</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>99</ID>
+              <Description>"Materials Slot 1"</Description>
+              <LastState Value="124" RealAddress="29C937F7CC4"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7CC4</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>8</ID>
+              <Description>"Materials Slot 2"</Description>
+              <LastState Value="8" RealAddress="29C937F7CC8"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7CC8</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>9</ID>
+              <Description>"Materials Slot 3"</Description>
+              <LastState Value="22" RealAddress="29C937F7CCC"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7CCC</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>10</ID>
+              <Description>"Materials Slot 4"</Description>
+              <LastState Value="205" RealAddress="29C937F7CD0"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7CD0</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>11</ID>
+              <Description>"Materials Slot 5"</Description>
+              <LastState Value="12" RealAddress="29C937F7CD4"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7CD4</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>12</ID>
+              <Description>"Materials Slot 6"</Description>
+              <LastState Value="9" RealAddress="29C937F7CD8"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7CD8</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>13</ID>
+              <Description>"Materials Slot 7"</Description>
+              <LastState Value="300" RealAddress="29C937F7CDC"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7CDC</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>14</ID>
+              <Description>"Materials Slot 8"</Description>
+              <LastState Value="219" RealAddress="29C937F7CE0"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7CE0</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>15</ID>
+              <Description>"Materials Slot 9"</Description>
+              <LastState Value="47" RealAddress="29C937F7CE4"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7CE4</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>16</ID>
+              <Description>"Materials Slot 10"</Description>
+              <LastState Value="19" RealAddress="29C937F7CE8"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7CE8</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>17</ID>
+              <Description>"Materials Slot 11"</Description>
+              <LastState Value="39" RealAddress="29C937F7CEC"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7CEC</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>78</ID>
+              <Description>"Materials Slot 12"</Description>
+              <LastState Value="18" RealAddress="29C937F7CF0"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7CF0</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>79</ID>
+              <Description>"Materials Slot 13"</Description>
+              <LastState Value="20" RealAddress="29C937F7CF4"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7CF4</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>80</ID>
+              <Description>"Materials Slot 14"</Description>
+              <LastState Value="1" RealAddress="29C937F7CF8"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7CF8</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>81</ID>
+              <Description>"Materials Slot 15"</Description>
+              <LastState Value="11" RealAddress="29C937F7CFC"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7CFC</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>82</ID>
+              <Description>"Materials Slot 16"</Description>
+              <LastState Value="11" RealAddress="29C937F7D00"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7D00</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>83</ID>
+              <Description>"Materials Slot 17"</Description>
+              <LastState Value="10" RealAddress="29C937F7D04"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7D04</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>84</ID>
+              <Description>"Materials Slot 18"</Description>
+              <LastState Value="12" RealAddress="29C937F7D08"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7D08</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>85</ID>
+              <Description>"Materials Slot 19"</Description>
+              <LastState Value="1" RealAddress="29C937F7D0C"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7D0C</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>86</ID>
+              <Description>"Materials Slot 20"</Description>
+              <LastState Value="3" RealAddress="29C937F7D10"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7D10</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>87</ID>
+              <Description>"Materials Slot 21"</Description>
+              <LastState Value="12" RealAddress="29C937F7D14"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7D14</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>68</ID>
+              <Description>"Materials Slot 22"</Description>
+              <LastState Value="15" RealAddress="29C937F7D18"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7D18</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>69</ID>
+              <Description>"Materials Slot 23"</Description>
+              <LastState Value="11" RealAddress="29C937F7D1C"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7D1C</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>70</ID>
+              <Description>"Materials Slot 24"</Description>
+              <LastState Value="9" RealAddress="29C937F7D20"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7D20</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>71</ID>
+              <Description>"Materials Slot 25"</Description>
+              <LastState Value="2" RealAddress="29C937F7D24"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7D24</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>72</ID>
+              <Description>"Materials Slot 26"</Description>
+              <LastState Value="12" RealAddress="29C937F7D28"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7D28</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>73</ID>
+              <Description>"Materials Slot 27"</Description>
+              <LastState Value="14" RealAddress="29C937F7D2C"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7D2C</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>74</ID>
+              <Description>"Materials Slot 28"</Description>
+              <LastState Value="1" RealAddress="29C937F7D30"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7D30</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>75</ID>
+              <Description>"Materials Slot 29"</Description>
+              <LastState Value="6" RealAddress="29C937F7D34"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7D34</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>76</ID>
+              <Description>"Materials Slot 30"</Description>
+              <LastState Value="10" RealAddress="29C937F7D38"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7D38</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>77</ID>
+              <Description>"Materials Slot 31"</Description>
+              <LastState Value="5" RealAddress="29C937F7D3C"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7D3C</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>100</ID>
+              <Description>"Materials Slot 32"</Description>
+              <LastState Value="65" RealAddress="29C937F7D40"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7D40</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>59</ID>
+              <Description>"Materials Slot 33"</Description>
+              <LastState Value="25" RealAddress="29C937F7D44"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7D44</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>60</ID>
+              <Description>"Materials Slot 34"</Description>
+              <LastState Value="13" RealAddress="29C937F7D48"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7D48</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>61</ID>
+              <Description>"Materials Slot 35"</Description>
+              <LastState Value="9" RealAddress="29C937F7D4C"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7D4C</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>62</ID>
+              <Description>"Materials Slot 36"</Description>
+              <LastState Value="10" RealAddress="29C937F7D50"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7D50</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>63</ID>
+              <Description>"Materials Slot 37"</Description>
+              <LastState Value="30" RealAddress="29C937F7D54"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7D54</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>64</ID>
+              <Description>"Materials Slot 38"</Description>
+              <LastState Value="37" RealAddress="29C937F7D58"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7D58</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>65</ID>
+              <Description>"Materials Slot 39"</Description>
+              <LastState Value="15" RealAddress="29C937F7D5C"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7D5C</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>66</ID>
+              <Description>"Materials Slot 40"</Description>
+              <LastState Value="14" RealAddress="29C937F7D60"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7D60</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>67</ID>
+              <Description>"Materials Slot 41"</Description>
+              <LastState Value="2" RealAddress="29C937F7D64"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7D64</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>48</ID>
+              <Description>"Materials Slot 42"</Description>
+              <LastState Value="1" RealAddress="29C937F7D68"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7D68</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>49</ID>
+              <Description>"Materials Slot 43"</Description>
+              <LastState Value="12" RealAddress="29C937F7D6C"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7D6C</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>50</ID>
+              <Description>"Materials Slot 44"</Description>
+              <LastState Value="3" RealAddress="29C937F7D70"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7D70</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>51</ID>
+              <Description>"Materials Slot 45"</Description>
+              <LastState Value="18" RealAddress="29C937F7D74"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7D74</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>52</ID>
+              <Description>"Materials Slot 46"</Description>
+              <LastState Value="11" RealAddress="29C937F7D78"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7D78</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>53</ID>
+              <Description>"Materials Slot 47"</Description>
+              <LastState Value="1" RealAddress="29C937F7D7C"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7D7C</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>54</ID>
+              <Description>"Materials Slot 48"</Description>
+              <LastState Value="15" RealAddress="29C937F7D80"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7D80</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>55</ID>
+              <Description>"Materials Slot 49"</Description>
+              <LastState Value="3" RealAddress="29C937F7D84"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7D84</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>101</ID>
+              <Description>"Materials Slot 50"</Description>
+              <LastState Value="1" RealAddress="29C937F7D88"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7D88</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>109</ID>
+              <Description>"Materials Slot 51"</Description>
+              <LastState Value="12" RealAddress="29C937F7D8C"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7D8C</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>108</ID>
+              <Description>"Materials Slot 52"</Description>
+              <LastState Value="49" RealAddress="29C937F7D90"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7D90</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>107</ID>
+              <Description>"Materials Slot 53"</Description>
+              <LastState Value="17" RealAddress="29C937F7D94"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7D94</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>106</ID>
+              <Description>"Materials Slot 54"</Description>
+              <LastState Value="22" RealAddress="29C937F7D98"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7D98</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>105</ID>
+              <Description>"Materials Slot 55"</Description>
+              <LastState Value="1" RealAddress="29C937F7D9C"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7D9C</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>104</ID>
+              <Description>"Materials Slot 56"</Description>
+              <LastState Value="6" RealAddress="29C937F7DA0"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7DA0</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>103</ID>
+              <Description>"Materials Slot 57"</Description>
+              <LastState Value="10" RealAddress="29C937F7DA4"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7DA4</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>102</ID>
+              <Description>"Materials Slot 58"</Description>
+              <LastState Value="1" RealAddress="29C937F7DA8"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7DA8</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>130</ID>
+              <Description>"Materials Slot 59"</Description>
+              <LastState Value="10" RealAddress="29C937F7DAC"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7DAC</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>131</ID>
+              <Description>"Materials Slot 60"</Description>
+              <LastState Value="1" RealAddress="29C937F7DB0"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7DB0</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>132</ID>
+              <Description>"Materials Slot 61"</Description>
+              <LastState Value="12" RealAddress="29C937F7DB4"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7DB4</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>133</ID>
+              <Description>"Materials Slot 62"</Description>
+              <LastState Value="10" RealAddress="29C937F7DB8"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7DB8</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>134</ID>
+              <Description>"Materials Slot 63"</Description>
+              <LastState Value="13" RealAddress="29C937F7DBC"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7DBC</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>135</ID>
+              <Description>"Materials Slot 64"</Description>
+              <LastState Value="6" RealAddress="29C937F7DC0"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7DC0</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>136</ID>
+              <Description>"Materials Slot 65"</Description>
+              <LastState Value="1" RealAddress="29C937F7DC4"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7DC4</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>137</ID>
+              <Description>"Materials Slot 66"</Description>
+              <LastState Value="9" RealAddress="29C937F7DC8"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7DC8</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>138</ID>
+              <Description>"Materials Slot 67"</Description>
+              <LastState Value="6" RealAddress="29C937F7DCC"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7DCC</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>139</ID>
+              <Description>"Materials Slot 68"</Description>
+              <LastState Value="11" RealAddress="29C937F7DD0"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7DD0</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>120</ID>
+              <Description>"Materials Slot 69"</Description>
+              <LastState Value="46" RealAddress="29C937F7DD4"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7DD4</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>121</ID>
+              <Description>"Materials Slot 70"</Description>
+              <LastState Value="2" RealAddress="29C937F7DD8"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7DD8</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>122</ID>
+              <Description>"Materials Slot 71"</Description>
+              <LastState Value="4" RealAddress="29C937F7DDC"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7DDC</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>123</ID>
+              <Description>"Materials Slot 72"</Description>
+              <LastState Value="10" RealAddress="29C937F7DE0"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7DE0</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>124</ID>
+              <Description>"Materials Slot 73"</Description>
+              <LastState Value="15" RealAddress="29C937F7DE4"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7DE4</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>125</ID>
+              <Description>"Materials Slot 74"</Description>
+              <LastState Value="1" RealAddress="29C937F7DE8"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7DE8</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>126</ID>
+              <Description>"Materials Slot 75"</Description>
+              <LastState Value="1" RealAddress="29C937F7DEC"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7DEC</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>127</ID>
+              <Description>"Materials Slot 76"</Description>
+              <LastState Value="260" RealAddress="29C937F7DF0"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7DF0</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>128</ID>
+              <Description>"Materials Slot 77"</Description>
+              <LastState Value="129" RealAddress="29C937F7DF4"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7DF4</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>129</ID>
+              <Description>"Materials Slot 78"</Description>
+              <LastState Value="857" RealAddress="29C937F7DF8"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7DF8</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>110</ID>
+              <Description>"Materials Slot 79"</Description>
+              <LastState Value="22" RealAddress="29C937F7DFC"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7DFC</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>111</ID>
+              <Description>"Materials Slot 80"</Description>
+              <LastState Value="2" RealAddress="29C937F7E00"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7E00</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>112</ID>
+              <Description>"Materials Slot 81"</Description>
+              <LastState Value="40" RealAddress="29C937F7E04"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7E04</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>113</ID>
+              <Description>"Materials Slot 82"</Description>
+              <LastState Value="12" RealAddress="29C937F7E08"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7E08</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>114</ID>
+              <Description>"Materials Slot 83"</Description>
+              <LastState Value="2" RealAddress="29C937F7E0C"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7E0C</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>115</ID>
+              <Description>"Materials Slot 84"</Description>
+              <LastState Value="12" RealAddress="29C937F7E10"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7E10</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>116</ID>
+              <Description>"Materials Slot 85"</Description>
+              <LastState Value="3" RealAddress="29C937F7E14"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7E14</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>117</ID>
+              <Description>"Materials Slot 86"</Description>
+              <LastState Value="16" RealAddress="29C937F7E18"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7E18</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>118</ID>
+              <Description>"Materials Slot 87"</Description>
+              <LastState Value="6" RealAddress="29C937F7E1C"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7E1C</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>119</ID>
+              <Description>"Materials Slot 88"</Description>
+              <LastState Value="3" RealAddress="29C937F7E20"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7E20</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>140</ID>
+              <Description>"Materials Slot 89"</Description>
+              <LastState Value="10" RealAddress="29C937F7E24"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7E24</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>643</ID>
+              <Description>"Materials Slot 90"</Description>
+              <LastState Value="5" RealAddress="29C937F7E28"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7E28</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>647</ID>
+              <Description>"Materials Slot 91"</Description>
+              <LastState Value="13" RealAddress="29C937F7E2C"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7E2C</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>646</ID>
+              <Description>"Materials Slot 92"</Description>
+              <LastState Value="10" RealAddress="29C937F7E30"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7E30</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>645</ID>
+              <Description>"Materials Slot 93"</Description>
+              <LastState Value="17" RealAddress="29C937F7E34"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7E34</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>644</ID>
+              <Description>"Materials Slot 94"</Description>
+              <LastState Value="17" RealAddress="29C937F7E38"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7E38</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>653</ID>
+              <Description>"Materials Slot 95"</Description>
+              <LastState Value="16" RealAddress="29C937F7E3C"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7E3C</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>654</ID>
+              <Description>"Materials Slot 96"</Description>
+              <LastState Value="10" RealAddress="29C937F7E40"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7E40</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>655</ID>
+              <Description>"Materials Slot 97"</Description>
+              <LastState Value="46" RealAddress="29C937F7E44"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7E44</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>656</ID>
+              <Description>"Materials Slot 98"</Description>
+              <LastState Value="17" RealAddress="29C937F7E48"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7E48</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>657</ID>
+              <Description>"Materials Slot 99"</Description>
+              <LastState Value="38" RealAddress="29C937F7E4C"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7E4C</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>648</ID>
+              <Description>"Materials Slot 100"</Description>
+              <LastState Value="4" RealAddress="29C937F7E50"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7E50</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>649</ID>
+              <Description>"Materials Slot 101"</Description>
+              <LastState Value="24" RealAddress="29C937F7E54"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7E54</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>650</ID>
+              <Description>"Materials Slot 102"</Description>
+              <LastState Value="4" RealAddress="29C937F7E58"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7E58</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>651</ID>
+              <Description>"Materials Slot 103"</Description>
+              <LastState Value="16" RealAddress="29C937F7E5C"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7E5C</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>652</ID>
+              <Description>"Materials Slot 104"</Description>
+              <LastState Value="1" RealAddress="29C937F7E60"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F7E60</Address>
+            </CheatEntry>
+          </CheatEntries>
+        </CheatEntry>
+        <CheatEntry>
+          <ID>610</ID>
+          <Description>"Food"</Description>
+          <Options moHideChildren="1" moManualExpandCollapse="1" moAllowManualCollapseAndExpand="1"/>
+          <LastState Value="" RealAddress="29C937F53D0"/>
+          <ShowAsSigned>0</ShowAsSigned>
+          <Color>FFFF00</Color>
+          <GroupHeader>1</GroupHeader>
+          <Address>29C937F53D0</Address>
+          <CheatEntries>
+            <CheatEntry>
+              <ID>609</ID>
+              <Description>"Effects Level (3 is max) [Don't touch -1s or 0s]"</Description>
+              <Options moHideChildren="1" moManualExpandCollapse="1" moAllowManualCollapseAndExpand="1"/>
+              <LastState Value="" RealAddress="29C937F53D0"/>
+              <ShowAsSigned>0</ShowAsSigned>
+              <Color>FFFF00</Color>
+              <GroupHeader>1</GroupHeader>
+              <Address>29C937F53D0</Address>
+              <CheatEntries>
+                <CheatEntry>
+                  <ID>372</ID>
+                  <Description>"Food Slot 0"</Description>
+                  <LastState Value="2" RealAddress="29C937F53D0"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F53D0</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>373</ID>
+                  <Description>"Food Slot 1"</Description>
+                  <LastState Value="1" RealAddress="29C937F53D4"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F53D4</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>374</ID>
+                  <Description>"Food Slot 2"</Description>
+                  <LastState Value="1" RealAddress="29C937F53D8"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F53D8</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>375</ID>
+                  <Description>"Food Slot 3"</Description>
+                  <LastState Value="1" RealAddress="29C937F53DC"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F53DC</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>376</ID>
+                  <Description>"Food Slot 4"</Description>
+                  <LastState Value="1" RealAddress="29C937F53E0"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F53E0</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>377</ID>
+                  <Description>"Food Slot 5"</Description>
+                  <LastState Value="1" RealAddress="29C937F53E4"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F53E4</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>378</ID>
+                  <Description>"Food Slot 6"</Description>
+                  <LastState Value="1" RealAddress="29C937F53E8"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F53E8</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>379</ID>
+                  <Description>"Food Slot 7"</Description>
+                  <LastState Value="-1" RealAddress="29C937F53EC"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F53EC</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>380</ID>
+                  <Description>"Food Slot 8"</Description>
+                  <LastState Value="-1" RealAddress="29C937F53F0"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F53F0</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>381</ID>
+                  <Description>"Food Slot 9"</Description>
+                  <LastState Value="0" RealAddress="29C937F53F4"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F53F4</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>382</ID>
+                  <Description>"Food Slot 10"</Description>
+                  <LastState Value="0" RealAddress="29C937F53F8"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F53F8</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>383</ID>
+                  <Description>"Food Slot 11"</Description>
+                  <LastState Value="0" RealAddress="29C937F53FC"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F53FC</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>384</ID>
+                  <Description>"Food Slot 12"</Description>
+                  <LastState Value="3" RealAddress="29C937F5400"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F5400</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>385</ID>
+                  <Description>"Food Slot 13"</Description>
+                  <LastState Value="1" RealAddress="29C937F5404"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F5404</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>386</ID>
+                  <Description>"Food Slot 14"</Description>
+                  <LastState Value="1" RealAddress="29C937F5408"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F5408</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>387</ID>
+                  <Description>"Food Slot 15"</Description>
+                  <LastState Value="0" RealAddress="29C937F540C"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F540C</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>388</ID>
+                  <Description>"Food Slot 16"</Description>
+                  <LastState Value="0" RealAddress="29C937F5410"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F5410</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>389</ID>
+                  <Description>"Food Slot 17"</Description>
+                  <LastState Value="0" RealAddress="29C937F5414"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F5414</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>390</ID>
+                  <Description>"Food Slot 18"</Description>
+                  <LastState Value="-1" RealAddress="29C937F5418"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F5418</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>391</ID>
+                  <Description>"Food Slot 19"</Description>
+                  <LastState Value="1" RealAddress="29C937F541C"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F541C</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>392</ID>
+                  <Description>"Food Slot 20"</Description>
+                  <LastState Value="1" RealAddress="29C937F5420"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F5420</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>393</ID>
+                  <Description>"Food Slot 21"</Description>
+                  <LastState Value="0" RealAddress="29C937F5424"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F5424</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>394</ID>
+                  <Description>"Food Slot 22"</Description>
+                  <LastState Value="0" RealAddress="29C937F5428"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F5428</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>395</ID>
+                  <Description>"Food Slot 23"</Description>
+                  <LastState Value="0" RealAddress="29C937F542C"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F542C</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>396</ID>
+                  <Description>"Food Slot 24"</Description>
+                  <LastState Value="1" RealAddress="29C937F5430"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F5430</Address>
+                </CheatEntry>
+              </CheatEntries>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>608</ID>
+              <Description>"Effects Duration (in seconds) [Don't touch -1s or 0s]"</Description>
+              <Options moHideChildren="1" moManualExpandCollapse="1" moAllowManualCollapseAndExpand="1"/>
+              <LastState Value="" RealAddress="29C937F5790"/>
+              <ShowAsSigned>0</ShowAsSigned>
+              <Color>FFFF00</Color>
+              <GroupHeader>1</GroupHeader>
+              <Address>29C937F5790</Address>
+              <CheatEntries>
+                <CheatEntry>
+                  <ID>263</ID>
+                  <Description>"Food Slot 0"</Description>
+                  <LastState Value="520" RealAddress="29C937F5790"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F5790</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>264</ID>
+                  <Description>"Food Slot 1"</Description>
+                  <LastState Value="180" RealAddress="29C937F5794"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F5794</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>265</ID>
+                  <Description>"Food Slot 2"</Description>
+                  <LastState Value="220" RealAddress="29C937F5798"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F5798</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>266</ID>
+                  <Description>"Food Slot 3"</Description>
+                  <LastState Value="220" RealAddress="29C937F579C"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F579C</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>267</ID>
+                  <Description>"Food Slot 4"</Description>
+                  <LastState Value="240" RealAddress="29C937F57A0"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F57A0</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>268</ID>
+                  <Description>"Food Slot 5"</Description>
+                  <LastState Value="180" RealAddress="29C937F57A4"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F57A4</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>269</ID>
+                  <Description>"Food Slot 6"</Description>
+                  <LastState Value="180" RealAddress="29C937F57A8"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F57A8</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>270</ID>
+                  <Description>"Food Slot 7"</Description>
+                  <LastState Value="-1" RealAddress="29C937F57AC"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F57AC</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>271</ID>
+                  <Description>"Food Slot 8"</Description>
+                  <LastState Value="-1" RealAddress="29C937F57B0"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F57B0</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>272</ID>
+                  <Description>"Food Slot 9"</Description>
+                  <LastState Value="0" RealAddress="29C937F57B4"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F57B4</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>273</ID>
+                  <Description>"Food Slot 10"</Description>
+                  <LastState Value="0" RealAddress="29C937F57B8"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F57B8</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>274</ID>
+                  <Description>"Food Slot 11"</Description>
+                  <LastState Value="0" RealAddress="29C937F57BC"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F57BC</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>275</ID>
+                  <Description>"Food Slot 12"</Description>
+                  <LastState Value="550" RealAddress="29C937F57C0"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F57C0</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>276</ID>
+                  <Description>"Food Slot 13"</Description>
+                  <LastState Value="300" RealAddress="29C937F57C4"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F57C4</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>277</ID>
+                  <Description>"Food Slot 14"</Description>
+                  <LastState Value="150" RealAddress="29C937F57C8"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F57C8</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>278</ID>
+                  <Description>"Food Slot 15"</Description>
+                  <LastState Value="0" RealAddress="29C937F57CC"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F57CC</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>279</ID>
+                  <Description>"Food Slot 16"</Description>
+                  <LastState Value="0" RealAddress="29C937F57D0"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F57D0</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>280</ID>
+                  <Description>"Food Slot 17"</Description>
+                  <LastState Value="0" RealAddress="29C937F57D4"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F57D4</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>281</ID>
+                  <Description>"Food Slot 18"</Description>
+                  <LastState Value="-1" RealAddress="29C937F57D8"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F57D8</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>282</ID>
+                  <Description>"Food Slot 19"</Description>
+                  <LastState Value="0" RealAddress="29C937F57DC"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F57DC</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>283</ID>
+                  <Description>"Food Slot 20"</Description>
+                  <LastState Value="0" RealAddress="29C937F57E0"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F57E0</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>284</ID>
+                  <Description>"Food Slot 21"</Description>
+                  <LastState Value="0" RealAddress="29C937F57E4"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F57E4</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>285</ID>
+                  <Description>"Food Slot 22"</Description>
+                  <LastState Value="300" RealAddress="29C937F57E8"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F57E8</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>286</ID>
+                  <Description>"Food Slot 23"</Description>
+                  <LastState Value="0" RealAddress="29C937F57EC"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F57EC</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>287</ID>
+                  <Description>"Food Slot 24"</Description>
+                  <LastState Value="270" RealAddress="29C937F57F0"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F57F0</Address>
+                </CheatEntry>
+              </CheatEntries>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>607</ID>
+              <Description>"Health [Don't touch -1s]"</Description>
+              <Options moHideChildren="1" moManualExpandCollapse="1" moAllowManualCollapseAndExpand="1"/>
+              <LastState Value="" RealAddress="29C937F5B50"/>
+              <ShowAsSigned>0</ShowAsSigned>
+              <Color>FFFF00</Color>
+              <GroupHeader>1</GroupHeader>
+              <Address>29C937F5B50</Address>
+              <CheatEntries>
+                <CheatEntry>
+                  <ID>237</ID>
+                  <Description>"Food Slot 0"</Description>
+                  <LastState Value="0" RealAddress="29C937F5B50"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F5B50</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>238</ID>
+                  <Description>"Food Slot 1"</Description>
+                  <LastState Value="12" RealAddress="29C937F5B54"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F5B54</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>239</ID>
+                  <Description>"Food Slot 2"</Description>
+                  <LastState Value="0" RealAddress="29C937F5B58"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F5B58</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>240</ID>
+                  <Description>"Food Slot 3"</Description>
+                  <LastState Value="0" RealAddress="29C937F5B5C"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F5B5C</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>241</ID>
+                  <Description>"Food Slot 4"</Description>
+                  <LastState Value="0" RealAddress="29C937F5B60"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F5B60</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>242</ID>
+                  <Description>"Food Slot 5"</Description>
+                  <LastState Value="24" RealAddress="29C937F5B64"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F5B64</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>243</ID>
+                  <Description>"Food Slot 6"</Description>
+                  <LastState Value="20" RealAddress="29C937F5B68"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F5B68</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>244</ID>
+                  <Description>"Food Slot 7"</Description>
+                  <LastState Value="16" RealAddress="29C937F5B6C"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F5B6C</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>245</ID>
+                  <Description>"Food Slot 8"</Description>
+                  <LastState Value="16" RealAddress="29C937F5B70"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F5B70</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>246</ID>
+                  <Description>"Food Slot 9"</Description>
+                  <LastState Value="6" RealAddress="29C937F5B74"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F5B74</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>247</ID>
+                  <Description>"Food Slot 10"</Description>
+                  <LastState Value="3" RealAddress="29C937F5B78"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F5B78</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>248</ID>
+                  <Description>"Food Slot 11"</Description>
+                  <LastState Value="2" RealAddress="29C937F5B7C"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F5B7C</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>249</ID>
+                  <Description>"Food Slot 12"</Description>
+                  <LastState Value="0" RealAddress="29C937F5B80"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F5B80</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>250</ID>
+                  <Description>"Food Slot 13"</Description>
+                  <LastState Value="4" RealAddress="29C937F5B84"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F5B84</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>251</ID>
+                  <Description>"Food Slot 14"</Description>
+                  <LastState Value="20" RealAddress="29C937F5B88"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F5B88</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>252</ID>
+                  <Description>"Food Slot 15"</Description>
+                  <LastState Value="3" RealAddress="29C937F5B8C"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F5B8C</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>253</ID>
+                  <Description>"Food Slot 16"</Description>
+                  <LastState Value="3" RealAddress="29C937F5B90"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F5B90</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>254</ID>
+                  <Description>"Food Slot 17"</Description>
+                  <LastState Value="6" RealAddress="29C937F5B94"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F5B94</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>255</ID>
+                  <Description>"Food Slot 18"</Description>
+                  <LastState Value="8" RealAddress="29C937F5B98"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F5B98</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>256</ID>
+                  <Description>"Food Slot 19"</Description>
+                  <LastState Value="12" RealAddress="29C937F5B9C"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F5B9C</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>257</ID>
+                  <Description>"Food Slot 20"</Description>
+                  <LastState Value="16" RealAddress="29C937F5BA0"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F5BA0</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>258</ID>
+                  <Description>"Food Slot 21"</Description>
+                  <LastState Value="12" RealAddress="29C937F5BA4"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F5BA4</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>259</ID>
+                  <Description>"Food Slot 22"</Description>
+                  <LastState Value="6" RealAddress="29C937F5BA8"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F5BA8</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>260</ID>
+                  <Description>"Food Slot 23"</Description>
+                  <LastState Value="6" RealAddress="29C937F5BAC"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F5BAC</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>261</ID>
+                  <Description>"Food Slot 24"</Description>
+                  <LastState Value="16" RealAddress="29C937F5BB0"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F5BB0</Address>
+                </CheatEntry>
+              </CheatEntries>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>606</ID>
+              <Description>"Data [Don't touch -1s]"</Description>
+              <Options moHideChildren="1" moManualExpandCollapse="1" moAllowManualCollapseAndExpand="1"/>
+              <LastState Value="" RealAddress="29C937F5F10"/>
+              <ShowAsSigned>0</ShowAsSigned>
+              <Color>FFFF00</Color>
+              <GroupHeader>1</GroupHeader>
+              <Address>29C937F5F10</Address>
+              <CheatEntries>
+                <CheatEntry>
+                  <ID>211</ID>
+                  <Description>"Food Slot 0"</Description>
+                  <LastState Value="12" RealAddress="29C937F5F10"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F5F10</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>212</ID>
+                  <Description>"Food Slot 1"</Description>
+                  <LastState Value="14" RealAddress="29C937F5F14"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F5F14</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>213</ID>
+                  <Description>"Food Slot 2"</Description>
+                  <LastState Value="6" RealAddress="29C937F5F18"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F5F18</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>214</ID>
+                  <Description>"Food Slot 3"</Description>
+                  <LastState Value="6" RealAddress="29C937F5F1C"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F5F1C</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>215</ID>
+                  <Description>"Food Slot 4"</Description>
+                  <LastState Value="31" RealAddress="29C937F5F20"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F5F20</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>216</ID>
+                  <Description>"Food Slot 5"</Description>
+                  <LastState Value="14" RealAddress="29C937F5F24"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F5F24</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>217</ID>
+                  <Description>"Food Slot 6"</Description>
+                  <LastState Value="7" RealAddress="29C937F5F28"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F5F28</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>218</ID>
+                  <Description>"Food Slot 7"</Description>
+                  <LastState Value="23" RealAddress="29C937F5F2C"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F5F2C</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>219</ID>
+                  <Description>"Food Slot 8"</Description>
+                  <LastState Value="23" RealAddress="29C937F5F30"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F5F30</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>220</ID>
+                  <Description>"Food Slot 9"</Description>
+                  <LastState Value="12" RealAddress="29C937F5F34"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F5F34</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>221</ID>
+                  <Description>"Food Slot 10"</Description>
+                  <LastState Value="3" RealAddress="29C937F5F38"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F5F38</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>222</ID>
+                  <Description>"Food Slot 11"</Description>
+                  <LastState Value="2" RealAddress="29C937F5F3C"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F5F3C</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>223</ID>
+                  <Description>"Food Slot 12"</Description>
+                  <LastState Value="18" RealAddress="29C937F5F40"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F5F40</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>224</ID>
+                  <Description>"Food Slot 13"</Description>
+                  <LastState Value="9" RealAddress="29C937F5F44"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F5F44</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>225</ID>
+                  <Description>"Food Slot 14"</Description>
+                  <LastState Value="12" RealAddress="29C937F5F48"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F5F48</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>226</ID>
+                  <Description>"Food Slot 15"</Description>
+                  <LastState Value="5" RealAddress="29C937F5F4C"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F5F4C</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>227</ID>
+                  <Description>"Food Slot 16"</Description>
+                  <LastState Value="3" RealAddress="29C937F5F50"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F5F50</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>228</ID>
+                  <Description>"Food Slot 17"</Description>
+                  <LastState Value="9" RealAddress="29C937F5F54"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F5F54</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>229</ID>
+                  <Description>"Food Slot 18"</Description>
+                  <LastState Value="10" RealAddress="29C937F5F58"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F5F58</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>230</ID>
+                  <Description>"Food Slot 19"</Description>
+                  <LastState Value="16" RealAddress="29C937F5F5C"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F5F5C</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>231</ID>
+                  <Description>"Food Slot 20"</Description>
+                  <LastState Value="29" RealAddress="29C937F5F60"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F5F60</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>232</ID>
+                  <Description>"Food Slot 21"</Description>
+                  <LastState Value="8" RealAddress="29C937F5F64"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F5F64</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>233</ID>
+                  <Description>"Food Slot 22"</Description>
+                  <LastState Value="6" RealAddress="29C937F5F68"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F5F68</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>234</ID>
+                  <Description>"Food Slot 23"</Description>
+                  <LastState Value="9" RealAddress="29C937F5F6C"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F5F6C</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>235</ID>
+                  <Description>"Food Slot 24"</Description>
+                  <LastState Value="22" RealAddress="29C937F5F70"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F5F70</Address>
+                </CheatEntry>
+              </CheatEntries>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>605</ID>
+              <Description>"Count [Don't touch -1s]"</Description>
+              <Options moHideChildren="1" moManualExpandCollapse="1" moAllowManualCollapseAndExpand="1"/>
+              <LastState Value="" RealAddress="29C937F62D0"/>
+              <ShowAsSigned>0</ShowAsSigned>
+              <Color>FFFF00</Color>
+              <GroupHeader>1</GroupHeader>
+              <Address>29C937F62D0</Address>
+              <CheatEntries>
+                <CheatEntry>
+                  <ID>182</ID>
+                  <Description>"Food Slot 0"</Description>
+                  <LastState Value="1" RealAddress="29C937F62D0"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F62D0</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>183</ID>
+                  <Description>"Food Slot 1"</Description>
+                  <LastState Value="1" RealAddress="29C937F62D4"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F62D4</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>184</ID>
+                  <Description>"Food Slot 2"</Description>
+                  <LastState Value="1" RealAddress="29C937F62D8"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F62D8</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>185</ID>
+                  <Description>"Food Slot 3"</Description>
+                  <LastState Value="1" RealAddress="29C937F62DC"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F62DC</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>186</ID>
+                  <Description>"Food Slot 4"</Description>
+                  <LastState Value="1" RealAddress="29C937F62E0"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F62E0</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>187</ID>
+                  <Description>"Food Slot 5"</Description>
+                  <LastState Value="1" RealAddress="29C937F62E4"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F62E4</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>188</ID>
+                  <Description>"Food Slot 6"</Description>
+                  <LastState Value="1" RealAddress="29C937F62E8"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F62E8</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>189</ID>
+                  <Description>"Food Slot 7"</Description>
+                  <LastState Value="1" RealAddress="29C937F62EC"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F62EC</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>190</ID>
+                  <Description>"Food Slot 8"</Description>
+                  <LastState Value="1" RealAddress="29C937F62F0"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F62F0</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>191</ID>
+                  <Description>"Food Slot 9"</Description>
+                  <LastState Value="20" RealAddress="29C937F62F4"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F62F4</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>192</ID>
+                  <Description>"Food Slot 10"</Description>
+                  <LastState Value="24" RealAddress="29C937F62F8"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F62F8</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>193</ID>
+                  <Description>"Food Slot 11"</Description>
+                  <LastState Value="25" RealAddress="29C937F62FC"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F62FC</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>194</ID>
+                  <Description>"Food Slot 12"</Description>
+                  <LastState Value="1" RealAddress="29C937F6300"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F6300</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>195</ID>
+                  <Description>"Food Slot 13"</Description>
+                  <LastState Value="1" RealAddress="29C937F6304"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F6304</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>196</ID>
+                  <Description>"Food Slot 14"</Description>
+                  <LastState Value="1" RealAddress="29C937F6308"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F6308</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>197</ID>
+                  <Description>"Food Slot 15"</Description>
+                  <LastState Value="1" RealAddress="29C937F630C"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F630C</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>198</ID>
+                  <Description>"Food Slot 16"</Description>
+                  <LastState Value="4" RealAddress="29C937F6310"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F6310</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>199</ID>
+                  <Description>"Food Slot 17"</Description>
+                  <LastState Value="3" RealAddress="29C937F6314"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F6314</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>200</ID>
+                  <Description>"Food Slot 18"</Description>
+                  <LastState Value="1" RealAddress="29C937F6318"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F6318</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>201</ID>
+                  <Description>"Food Slot 19"</Description>
+                  <LastState Value="1" RealAddress="29C937F631C"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F631C</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>202</ID>
+                  <Description>"Food Slot 20"</Description>
+                  <LastState Value="1" RealAddress="29C937F6320"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F6320</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>203</ID>
+                  <Description>"Food Slot 21"</Description>
+                  <LastState Value="2" RealAddress="29C937F6324"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F6324</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>204</ID>
+                  <Description>"Food Slot 22"</Description>
+                  <LastState Value="3" RealAddress="29C937F6328"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F6328</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>205</ID>
+                  <Description>"Food Slot 23"</Description>
+                  <LastState Value="2" RealAddress="29C937F632C"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F632C</Address>
+                </CheatEntry>
+                <CheatEntry>
+                  <ID>206</ID>
+                  <Description>"Food Slot 24"</Description>
+                  <LastState Value="1" RealAddress="29C937F6330"/>
+                  <ShowAsSigned>1</ShowAsSigned>
+                  <Color>4080FF</Color>
+                  <VariableType>4 Bytes</VariableType>
+                  <Address>29C937F6330</Address>
+                </CheatEntry>
+              </CheatEntries>
+            </CheatEntry>
+          </CheatEntries>
+        </CheatEntry>
+        <CheatEntry>
+          <ID>611</ID>
+          <Description>"Zonai Devices"</Description>
+          <Options moHideChildren="1" moManualExpandCollapse="1" moAllowManualCollapseAndExpand="1"/>
+          <LastState Value="" RealAddress="29C937FA310"/>
+          <ShowAsSigned>0</ShowAsSigned>
+          <Color>FFFF00</Color>
+          <GroupHeader>1</GroupHeader>
+          <Address>29C937FA310</Address>
+          <CheatEntries>
+            <CheatEntry>
+              <ID>368</ID>
+              <Description>"Slot 0"</Description>
+              <LastState Value="157" RealAddress="29C937FA310"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937FA310</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>536</ID>
+              <Description>"Slot 1"</Description>
+              <LastState Value="85" RealAddress="29C937FA314"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937FA314</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>537</ID>
+              <Description>"Slot 2"</Description>
+              <LastState Value="39" RealAddress="29C937FA318"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937FA318</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>538</ID>
+              <Description>"Slot 3"</Description>
+              <LastState Value="79" RealAddress="29C937FA31C"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937FA31C</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>539</ID>
+              <Description>"Slot 4"</Description>
+              <LastState Value="150" RealAddress="29C937FA320"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937FA320</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>540</ID>
+              <Description>"Slot 5"</Description>
+              <LastState Value="111" RealAddress="29C937FA324"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937FA324</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>556</ID>
+              <Description>"Slot 6"</Description>
+              <LastState Value="87" RealAddress="29C937FA328"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937FA328</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>557</ID>
+              <Description>"Slot 7"</Description>
+              <LastState Value="25" RealAddress="29C937FA32C"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937FA32C</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>558</ID>
+              <Description>"Slot 8"</Description>
+              <LastState Value="26" RealAddress="29C937FA330"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937FA330</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>559</ID>
+              <Description>"Slot 9"</Description>
+              <LastState Value="44" RealAddress="29C937FA334"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937FA334</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>560</ID>
+              <Description>"Slot 10"</Description>
+              <LastState Value="117" RealAddress="29C937FA338"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937FA338</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>551</ID>
+              <Description>"Slot 11"</Description>
+              <LastState Value="75" RealAddress="29C937FA33C"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937FA33C</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>552</ID>
+              <Description>"Slot 12"</Description>
+              <LastState Value="38" RealAddress="29C937FA340"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937FA340</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>553</ID>
+              <Description>"Slot 13"</Description>
+              <LastState Value="64" RealAddress="29C937FA344"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937FA344</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>554</ID>
+              <Description>"Slot 14"</Description>
+              <LastState Value="105" RealAddress="29C937FA348"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937FA348</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>555</ID>
+              <Description>"Slot 15"</Description>
+              <LastState Value="66" RealAddress="29C937FA34C"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937FA34C</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>546</ID>
+              <Description>"Slot 16"</Description>
+              <LastState Value="25" RealAddress="29C937FA350"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937FA350</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>547</ID>
+              <Description>"Slot 17"</Description>
+              <LastState Value="48" RealAddress="29C937FA354"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937FA354</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>548</ID>
+              <Description>"Slot 18"</Description>
+              <LastState Value="-1" RealAddress="29C937FA358"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937FA358</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>549</ID>
+              <Description>"Slot 19"</Description>
+              <LastState Value="-1" RealAddress="29C937FA35C"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937FA35C</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>550</ID>
+              <Description>"Slot 20"</Description>
+              <LastState Value="-1" RealAddress="29C937FA360"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937FA360</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>541</ID>
+              <Description>"Slot 21"</Description>
+              <LastState Value="-1" RealAddress="29C937FA364"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937FA364</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>542</ID>
+              <Description>"Slot 22"</Description>
+              <LastState Value="-1" RealAddress="29C937FA368"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937FA368</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>543</ID>
+              <Description>"Slot 23"</Description>
+              <LastState Value="-1" RealAddress="29C937FA36C"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937FA36C</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>544</ID>
+              <Description>"Slot 24"</Description>
+              <LastState Value="-1" RealAddress="29C937FA370"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937FA370</Address>
+            </CheatEntry>
+          </CheatEntries>
+        </CheatEntry>
+        <CheatEntry>
+          <ID>618</ID>
+          <Description>"Key Items"</Description>
+          <Options moHideChildren="1" moManualExpandCollapse="1" moAllowManualCollapseAndExpand="1"/>
+          <LastState Value="" RealAddress="29C937F6690"/>
+          <ShowAsSigned>1</ShowAsSigned>
+          <Color>FFFF00</Color>
+          <GroupHeader>1</GroupHeader>
+          <Address>29C937F6690</Address>
+          <CheatEntries>
+            <CheatEntry>
+              <ID>617</ID>
+              <Description>"Slot 0"</Description>
+              <LastState Value="-1" RealAddress="29C937F6690"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F6690</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>619</ID>
+              <Description>"Slot 1"</Description>
+              <LastState Value="-1" RealAddress="29C937F6694"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F6694</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>620</ID>
+              <Description>"Slot 2"</Description>
+              <LastState Value="-1" RealAddress="29C937F6698"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F6698</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>621</ID>
+              <Description>"Slot 3"</Description>
+              <LastState Value="-1" RealAddress="29C937F669C"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F669C</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>622</ID>
+              <Description>"Slot 4"</Description>
+              <LastState Value="-1" RealAddress="29C937F66A0"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F66A0</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>623</ID>
+              <Description>"Slot 5"</Description>
+              <LastState Value="-1" RealAddress="29C937F66A4"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F66A4</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>624</ID>
+              <Description>"Slot 6"</Description>
+              <LastState Value="6" RealAddress="29C937F66A8"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F66A8</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>625</ID>
+              <Description>"Slot 7"</Description>
+              <LastState Value="3" RealAddress="29C937F66AC"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F66AC</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>626</ID>
+              <Description>"Slot 8"</Description>
+              <LastState Value="20" RealAddress="29C937F66B0"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F66B0</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>627</ID>
+              <Description>"Slot 9"</Description>
+              <LastState Value="8" RealAddress="29C937F66B4"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F66B4</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>628</ID>
+              <Description>"Slot 10"</Description>
+              <LastState Value="61" RealAddress="29C937F66B8"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F66B8</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>629</ID>
+              <Description>"Slot 11"</Description>
+              <LastState Value="20" RealAddress="29C937F66BC"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F66BC</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>630</ID>
+              <Description>"Slot 12"</Description>
+              <LastState Value="5" RealAddress="29C937F66C0"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F66C0</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>631</ID>
+              <Description>"Slot 13"</Description>
+              <LastState Value="-1" RealAddress="29C937F66C4"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F66C4</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>632</ID>
+              <Description>"Slot 14"</Description>
+              <LastState Value="-1" RealAddress="29C937F66C8"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F66C8</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>633</ID>
+              <Description>"Slot 15"</Description>
+              <LastState Value="-1" RealAddress="29C937F66CC"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F66CC</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>634</ID>
+              <Description>"Slot 16"</Description>
+              <LastState Value="-1" RealAddress="29C937F66D0"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F66D0</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>635</ID>
+              <Description>"Slot 17"</Description>
+              <LastState Value="-1" RealAddress="29C937F66D4"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F66D4</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>636</ID>
+              <Description>"Slot 18"</Description>
+              <LastState Value="-1" RealAddress="29C937F66D8"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F66D8</Address>
+            </CheatEntry>
+            <CheatEntry>
+              <ID>637</ID>
+              <Description>"Slot 19"</Description>
+              <LastState Value="-1" RealAddress="29C937F66DC"/>
+              <ShowAsSigned>1</ShowAsSigned>
+              <Color>4080FF</Color>
+              <VariableType>4 Bytes</VariableType>
+              <Address>29C937F66DC</Address>
+            </CheatEntry>
+          </CheatEntries>
+        </CheatEntry>
+      </CheatEntries>
+    </CheatEntry>
+  </CheatEntries>
+  <UserdefinedSymbols>
+    <SymbolEntry>
+      <Name>mwcx</Name>
+      <Address>179E6AA4790</Address>
+    </SymbolEntry>
+    <SymbolEntry>
+      <Name>mwcz</Name>
+      <Address>mwcx+4</Address>
+    </SymbolEntry>
+    <SymbolEntry>
+      <Name>mhiid</Name>
+      <Address>mwcx+38</Address>
+    </SymbolEntry>
+    <SymbolEntry>
+      <Name>mhiidi</Name>
+      <Address>mwcx+3C</Address>
+    </SymbolEntry>
+    <SymbolEntry>
+      <Name>mlayer</Name>
+      <Address>mwcx-10</Address>
+    </SymbolEntry>
+    <SymbolEntry>
+      <Name>bmppo</Name>
+      <Address>mwcx+11C</Address>
+    </SymbolEntry>
+    <SymbolEntry>
+      <Name>Health</Name>
+      <Address>286D5627418</Address>
+    </SymbolEntry>
+    <SymbolEntry>
+      <Name>initcurhp</Name>
+      <Address>3230EDE0000</Address>
+    </SymbolEntry>
+    <SymbolEntry>
+      <Name>initmaxhp</Name>
+      <Address>3230EDF0000</Address>
+    </SymbolEntry>
+    <SymbolEntry>
+      <Name>initstam</Name>
+      <Address>3230EE00000</Address>
+    </SymbolEntry>
+    <SymbolEntry>
+      <Name>initzonrgy</Name>
+      <Address>323135B0000</Address>
+    </SymbolEntry>
+    <SymbolEntry>
+      <Name>sscd</Name>
+      <Address>323135C0000</Address>
+    </SymbolEntry>
+    <SymbolEntry>
+      <Name>performcalculations</Name>
+      <Address>323135D0000</Address>
+    </SymbolEntry>
+  </UserdefinedSymbols>
+</CheatTable>

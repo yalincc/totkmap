@@ -1,0 +1,91 @@
+```html type="renderer"
+<html style="margin:0;padding:0;">
+<title>live-eden 定位大逻辑与踩坑根因</title>
+<div style="width:100%;box-sizing:border-box;font-family:system-ui,-apple-system,'Microsoft YaHei',sans-serif;background:#f7f8fa;padding:16px;color:#1a1d24;">
+  <div style="font-size:15px;font-weight:700;color:#1a1d24;margin-bottom:2px;">live-eden 定位大逻辑（2026-10-04 实测收敛版）</div>
+  <div style="font-size:12px;color:#8a8f99;margin-bottom:14px;">示意 · 基于 Eden 6GB 布局实测（神庙/走动/站桩/场景切换全闭环验证）</div>
+
+  <div style="display:flex;flex-wrap:wrap;align-items:stretch;gap:0;">
+    <!-- 锚点 -->
+    <div style="flex:1;min-width:150px;background:#e8f0fe;border:1.5px solid #2f6fed;border-radius:8px;padding:10px;font-size:12.5px;">
+      <div style="font-weight:700;color:#2f6fed;margin-bottom:4px;">① 存档锚点</div>
+      <div>slot_00 权威 + 800m 聚类<br/><span style="color:#8a8f99;">神庙污染槽距主簇 1603m 必剔除</span></div>
+    </div>
+    <div style="align-self:center;padding:0 6px;color:#2f6fed;font-weight:700;">→</div>
+    <!-- 扫描 -->
+    <div style="flex:1;min-width:150px;background:#e8f0fe;border:1.5px solid #2f6fed;border-radius:8px;padding:10px;font-size:12.5px;">
+      <div style="font-weight:700;color:#2f6fed;margin-bottom:4px;">② 窗口扫描</div>
+      <div>锚点圆心 ±120m<br/>占位池黑名单先过滤<br/><span style="color:#8a8f99;">copies>18000 无结构 / 三值相等 / 小值</span></div>
+    </div>
+    <div style="align-self:center;padding:0 6px;color:#2f6fed;font-weight:700;">→</div>
+    <!-- 锁定 -->
+    <div style="flex:1;min-width:150px;background:#e8f0fe;border:1.5px solid #2f6fed;border-radius:8px;padding:10px;font-size:12.5px;">
+      <div style="font-weight:700;color:#2f6fed;margin-bottom:4px;">③ 锁定</div>
+      <div>candidate：copies 数百<br/>struct&gt;0，距锚点近</div>
+    </div>
+    <div style="align-self:center;padding:0 6px;color:#2f6fed;font-weight:700;">→</div>
+    <!-- 判活 -->
+    <div style="flex:1.4;min-width:230px;background:#fff8e6;border:1.5px solid #e8a23d;border-radius:8px;padding:10px;font-size:12.5px;">
+      <div style="font-weight:700;color:#d4880b;margin-bottom:4px;">④ 判活 · 三选一</div>
+      <div style="display:flex;flex-direction:column;gap:4px;">
+        <div style="background:#e6f7e6;border-radius:5px;padding:5px 7px;color:#1f7a33;">移动确认：玩家动，槽跟随 3 拍 → verified</div>
+        <div style="background:#e6f7e6;border-radius:5px;padding:5px 7px;color:#1f7a33;">静止确认：站桩冻结 10s + 副本簇 → verified</div>
+        <div style="background:#fdecea;border-radius:5px;padding:5px 7px;color:#b02a1f;">都不满足 → 30s 共识 / 90s 冷却重扫</div>
+      </div>
+    </div>
+    <div style="align-self:center;padding:0 6px;color:#2f6fed;font-weight:700;">→</div>
+    <!-- 轮换接管 -->
+    <div style="flex:1;min-width:150px;background:#f0e8fe;border:1.5px solid #7b3fe0;border-radius:8px;padding:10px;font-size:12.5px;">
+      <div style="font-weight:700;color:#7b3fe0;margin-bottom:4px;">⑤ 副本轮换接管</div>
+      <div>锁冻结 + 池内 <b>15m 内</b>活副本<br/>连续动 2 拍 → 接管<br/><span style="color:#8a8f99;">位置闸门防 NPC（round1 教训）</span></div>
+    </div>
+    <div style="align-self:center;padding:0 6px;color:#2f6fed;font-weight:700;">→</div>
+    <!-- 场景检测 -->
+    <div style="flex:1;min-width:150px;background:#e6f7e6;border:1.5px solid #1f7a33;border-radius:8px;padding:10px;font-size:12.5px;">
+      <div style="font-weight:700;color:#1f7a33;margin-bottom:4px;">⑥ 场景检测</div>
+      <div>神庙本地坐标<br/>→ 输出入口坐标<br/><span style="color:#8a8f99;">shrine-hold · 红点停门口</span></div>
+    </div>
+    <div style="align-self:center;padding:0 6px;color:#2f6fed;font-weight:700;">→</div>
+    <!-- 输出 -->
+    <div style="flex:1;min-width:120px;background:#f0f1f3;border:1.5px solid #5a6472;border-radius:8px;padding:10px;font-size:12.5px;">
+      <div style="font-weight:700;color:#3c4451;margin-bottom:4px;">⑦ /pos 输出</div>
+      <div>X / Y北 / alt<br/>+ verified + layer</div>
+    </div>
+  </div>
+
+  <!-- 铁律 -->
+  <div style="margin-top:16px;font-size:13px;font-weight:700;color:#1a1d24;">四条铁律（踩坑总结）</div>
+  <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;">
+    <div style="flex:1;min-width:220px;background:#fff;border-left:4px solid #2f6fed;border-radius:5px;padding:8px 10px;font-size:12.5px;">
+      <b style="color:#2f6fed;">1 · 位置一致性 &gt; 移动性</b><br/>候选必须距玩家 15m 内，"在动"不是玩家证据
+    </div>
+    <div style="flex:1;min-width:220px;background:#fff;border-left:4px solid #1f7a33;border-radius:5px;padding:8px 10px;font-size:12.5px;">
+      <b style="color:#1f7a33;">2 · 站桩不是错误</b><br/>冻结时先问"池在动吗"，池静止=站桩=正常
+    </div>
+    <div style="flex:1;min-width:220px;background:#fff;border-left:4px solid #7b3fe0;border-radius:5px;padding:8px 10px;font-size:12.5px;">
+      <b style="color:#7b3fe0;">3 · 多信号源交叉</b><br/>锁读数+池活动+副本簇+锚点，单一信号不决策
+    </div>
+    <div style="flex:1;min-width:220px;background:#fff;border-left:4px solid #b02a1f;border-radius:5px;padding:8px 10px;font-size:12.5px;">
+      <b style="color:#b02a1f;">4 · 重扫要冷却</b><br/>90s 冷却 + bypassKnown 防锁回死槽
+    </div>
+  </div>
+
+  <!-- 踩坑时间线 -->
+  <div style="margin-top:16px;font-size:13px;font-weight:700;color:#1a1d24;">今天的三连坑（补丁互踩时间线）</div>
+  <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;">
+    <div style="flex:1;min-width:220px;background:#fdecea;border-radius:6px;padding:8px 10px;font-size:12px;">
+      <b style="color:#b02a1f;">round1 误锁 NPC</b><br/>站桩时"谁动锁谁" → 锁到 170m 外 NPC 槽，300m 闸门放行
+    </div>
+    <div style="flex:1;min-width:220px;background:#fdecea;border-radius:6px;padding:8px 10px;font-size:12px;">
+      <b style="color:#b02a1f;">round2 卡死</b><br/>加"玩家 5s 有位移"前置 → 轮换期锁读数不变，接管被挡
+    </div>
+    <div style="flex:1;min-width:220px;background:#fdecea;border-radius:6px;padding:8px 10px;font-size:12px;">
+      <b style="color:#b02a1f;">round3 永久卡死</b><br/>known 快路径池空 + !verified 挡共识 → 无恢复路径
+    </div>
+    <div style="flex:1;min-width:220px;background:#e6f7e6;border-radius:6px;padding:8px 10px;font-size:12px;">
+      <b style="color:#1f7a33;">收尾（当前）</b><br/>15m 闸门 + 池活动旁证 + 静止确认 + 场景检测 → 全闭环稳定
+    </div>
+  </div>
+</div>
+</html>
+```

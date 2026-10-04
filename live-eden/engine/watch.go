@@ -282,6 +282,14 @@ func dist3(a, b [3]float32) float32 {
 	return float32(math.Sqrt(float64(dx*dx + dy*dy + dz*dz)))
 }
 
+// isShrinePos 判定神庙/洞穴本地场景：TOTK 神庙为独立场景，玩家坐标切到以神庙
+// 原点为中心的本地坐标系。实测（2026-10-04 无尽洞窟）：X∈[0,32], Y北∈[54,87],
+// alt∈[-135,-117]。判据 |X|<200 && |Y北|<200 && alt<-50 留裕量；大地图地底玩家
+// 原点 200m 内会误判（红点停门口 vs 画在空洞，影响极小，可接受）。
+func isShrinePos(p [3]float32) bool {
+	return abs32(p[0]) < 200 && abs32(p[1]) < 200 && p[2] < -50
+}
+
 // consensusCopy 在 known 地址 + 最近扫描候选池里找最大一致簇（互相 <2m，排除本锁地址）。
 // 返回簇的一个代表地址与位置；成员 < consensusMin 视为无共识。
 // Eden 版：known 记忆的是绝对地址，直接读取，无块 rebase；knownPool 补足成员数。
@@ -335,6 +343,11 @@ func stateMachine() {
 	invalidN := 0 // 连续读数无效计数
 	frozenN := 0  // 锁读数停滞 tick 计数（共识兜底触发用）
 	lastConfirmAt := time.Time{}   // 静止确认检查节流（frozenConfirmEvery）
+	var shrineEntry [3]float32     // 进入神庙前最后大地图坐标（红点停门口）
+	shrineEntrySet := false
+	inShrine := false // 当前是否在神庙本地场景
+	var lastOverworld [3]float32  // 最近一次大地图坐标（独立于 prev：rescan/resetFollow
+	lastOverworldSet := false     // 会清空 prev，但进神庙跳变路径需要入口锚点）
 	savedKnown := false
 	lastKnownAt := time.Now().Add(-knownRetry)
 	lastConsensusAt := time.Time{}
@@ -782,15 +795,40 @@ func stateMachine() {
 		lock.mu.RLock()
 		verified, copies, src := lock.verified, lock.copies, lock.source
 		lock.mu.RUnlock()
+		// Fix 2026-10-04：神庙/洞穴场景检测——TOTK 神庙是独立场景，玩家坐标切到
+		// 本地坐标系（|X|<200, |Y北|<200, alt<-50，实测 0~32/54~87/-135~-117），
+		// 直接输出会画到大地图"地下"且 layer 被判为地底(19)。进入瞬间记录入口
+		// 大地图坐标（lastOverworld，独立于 prev——进神庙跳变路径会 rescan+
+		// resetFollow 清空 prev），神庙内 /pos 恒输出入口坐标（红点停门口）+
+		// source 标 shrine-hold；出神庙后自动恢复正常。启动即在神庙（无大地图
+		// 记录）时无入口记忆 → 原样输出（保持旧行为，日志提示）。
+		out, outSrc := cur, src
+		if isShrinePos(cur) {
+			if !inShrine && lastOverworldSet {
+				shrineEntry, shrineEntrySet = lastOverworld, true
+				fmt.Printf("  [sm] shrine detected (%.0f, %.0f, %.0f) - holding entry (%.0f, %.0f, %.0f)\n",
+					cur[0], cur[1], cur[2], lastOverworld[0], lastOverworld[1], lastOverworld[2])
+			} else if !shrineEntrySet {
+				fmt.Printf("  [sm] shrine start w/o entry anchor - raw output (%.0f, %.0f, %.0f)\n",
+					cur[0], cur[1], cur[2])
+			}
+			if shrineEntrySet {
+				out, outSrc = shrineEntry, "shrine-hold"
+			}
+			inShrine = true
+		} else {
+			inShrine = false
+			lastOverworld, lastOverworldSet = cur, true
+		}
 		state.mu.Lock()
 		state.ok = true
-		state.gx, state.gy, state.gz = cur[0], cur[1], cur[2]
-		state.mx, state.my = -cur[1], cur[0]
-		state.layer = layerOf(cur[0], cur[1], cur[2])
+		state.gx, state.gy, state.gz = out[0], out[1], out[2]
+		state.mx, state.my = -out[1], out[0]
+		state.layer = layerOf(out[0], out[1], out[2])
 		state.age = float64(time.Now().UnixNano()) / 1e9
 		state.verified = verified
 		state.copies = copies
-		state.source = src
+		state.source = outSrc
 		state.mu.Unlock()
 		prev = cur
 		hasPrev = true
