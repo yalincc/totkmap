@@ -38,6 +38,10 @@ export function PickDir(arg1) {
   return window['go']['main']['App']['PickDir'](arg1);
 }
 
+export function PollCoordsResult() {
+  return window['go']['main']['App']['PollCoordsResult']();
+}
+
 export function PollLogs() {
   return window['go']['main']['App']['PollLogs']();
 }
@@ -52,6 +56,10 @@ export function StartCore() {
 
 export function StopCore() {
   return window['go']['main']['App']['StopCore']();
+}
+
+export function SubmitCoords(arg1, arg2, arg3) {
+  return window['go']['main']['App']['SubmitCoords'](arg1, arg2, arg3);
 }
 
 export function TailLog() {

@@ -34,8 +34,8 @@ export const target = ref(null)
 export const progressData = ref({})
 
 // ---- 配置 / 环境 ----
-export const cfg = reactive({ ryujinxDir: '', saveDir: '' })
-export const envDetect = reactive({ ryujinx: false })
+export const cfg = reactive({ saveDir: '' })
+export const envDetect = reactive({ save: false })
 export const statusMapUrl = ref('')
 
 // ---- 日志 ----
@@ -61,7 +61,7 @@ export const locating = computed(() => coreRunning.value && !pos.ok)
 // ---- 状态文本（M2：结构化驱动，不再解析日志文本）----
 export const stateText = computed(() => {
   if (!coreRunning.value) return '就绪'
-  if (pos.source === 'waiting for Ryujinx' || (pos.pid === 0 && !pos.ok)) return '等待模拟器进程...'
+  if (pos.pid === 0 && !pos.ok) return '等待模拟器进程...'
   if (!pos.ok) return '定位中...'
   if (!pos.verified) return pos.source === 'known' ? '⚡ 秒锁 · 待移动确认' : '已锁定 · 待移动确认'
   return '已验证 · 跟随中'
@@ -136,12 +136,43 @@ export async function toggleLocating() {
   else { await api.StartCore(); isLocating.value = true }
 }
 export async function clearTarget() { await api.ClearTarget() }
-export async function pickRyujinx() { const d = await api.PickDir('选择 Ryujinx 目录'); if (d) cfg.ryujinxDir = d }
-export async function pickSave() { const d = await api.PickDir('选择存档目录'); if (d) cfg.saveDir = d }
+
+// ---- 坐标校准（V1.4.0：GUI 提交游戏 HUD 坐标 → core 全内存精确匹配定位）----
+export const coordsState = reactive({ busy: false, result: null })
+export async function submitCoords(x, y, z) {
+  // 校准是独立入口：core 未运行时自动拉起（校准需要 core 读内存做全内存扫描）。
+  // core 启动后 coordsLoop 会自动处理 coords-req.json，无需用户先手动开始定位。
+  if (!coreRunning.value) await api.StartCore()
+  coordsState.busy = true
+  coordsState.result = null
+  const r = await api.SubmitCoords(Number(x), Number(y), Number(z))
+  if (!r || !r.submitted) {
+    coordsState.busy = false
+    coordsState.result = { ok: false, error: (r && r.error) || '提交失败' }
+    return
+  }
+  pollCoordsResult(Date.now() + 60000) // 60s 超时兜底（含 core 启动时间，全内存扫描约 10-15s）
+}
+function pollCoordsResult(deadline) {
+  api.PollCoordsResult().then(r => {
+    if (r && r.ready) {
+      coordsState.busy = false
+      coordsState.result = r
+      return
+    }
+    if (Date.now() > deadline) {
+      coordsState.busy = false
+      coordsState.result = { ok: false, error: '校准超时：core 未响应（请确认已开始定位后重试）' }
+      return
+    }
+    setTimeout(() => pollCoordsResult(deadline), 1000)
+  })
+}
+export async function pickSave() { const d = await api.PickDir('选择存档目录（可选，默认自动探测）'); if (d) cfg.saveDir = d }
 export async function saveSettings() {
-  await api.SaveConfig({ ryujinxDir: cfg.ryujinxDir, saveDir: cfg.saveDir })
+  await api.SaveConfig({ saveDir: cfg.saveDir })
   const det = await api.EnvDetect()
-  envDetect.ryujinx = !!det.ryujinx
+  envDetect.save = !!det.save
 }
 export async function openLogDir() { await api.OpenLogDir() }
 export async function exportDiag() { await api.ExportDiagnostics() }
@@ -208,10 +239,9 @@ export async function initCore() {
   steps.value.forEach(s => { s.state = s.name === '就绪' ? 'done' : 'idle' })
   ver.value = await api.Version()
   const c = await api.LoadConfig()
-  if (c.ryujinxDir) cfg.ryujinxDir = c.ryujinxDir
   if (c.saveDir) cfg.saveDir = c.saveDir
   const det = await api.EnvDetect()
-  envDetect.ryujinx = !!det.ryujinx
+  envDetect.save = !!det.save
   const initial = await api.TailLog()
   pushLogs(initial)
   rt.EventsOn('log:append', pushLogs)

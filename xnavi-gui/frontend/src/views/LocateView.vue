@@ -7,7 +7,7 @@
         <span class="w-2.5 h-2.5 rounded-full" :class="syncDot"></span>
         <span class="text-white text-sm font-bold tracking-wide">TOTKNavi 定位导航</span>
         <span class="text-[10px] font-mono text-sky-300 bg-blue-500/10 border border-blue-500/40 rounded px-1.5 py-0.5">v{{ ver.replace('v','') }}</span>
-        <span class="text-[11px] text-slate-500 ml-1.5 pl-2.5 border-l border-slate-800">Ryujinx ➔ totk.yalin.site</span>
+        <span class="text-[11px] text-slate-500 ml-1.5 pl-2.5 border-l border-slate-800">Eden ➔ totk.yalin.site</span>
       </div>
       <div class="flex items-center gap-1 ml-auto shrink-0" style="--wails-draggable:no-drag;">
         <span class="text-[11px] font-mono mr-2" :class="syncClass">{{ syncText }}</span>
@@ -84,21 +84,36 @@
           </div>
         </section>
 
-        <!-- 网页地图选定目标卡 -->
-        <section class="bg-[#161b22] border border-slate-800 rounded-xl p-3.5 flex-1">
-          <div class="flex items-center justify-between text-xs pb-2 border-b border-slate-800/80 mb-2">
-            <span class="font-bold text-amber-400 flex items-center gap-1.5">网页地图选定目标</span>
-            <span class="text-[10px] text-slate-500">来自 totk.yalin.site</span>
+        <!-- 坐标校准卡（V1.4.0：无法定位/秒锁失败时，GUI 提交游戏 HUD 坐标精确匹配） -->
+        <section class="bg-[#161b22] border border-slate-800 rounded-xl p-3.5 shrink-0">
+          <div class="flex items-center justify-between text-xs pb-2 border-b border-slate-800/80 mb-2.5">
+            <span class="font-bold text-emerald-400 flex items-center gap-1.5">🧭 坐标校准</span>
+            <div class="flex items-center gap-2">
+              <span class="text-[10px] text-slate-500">定位失败时使用</span>
+              <button @click="doCalibrate" :disabled="calBusy"
+                class="bg-emerald-600 hover:bg-emerald-500 text-white px-2.5 py-1 rounded-md text-[10px] font-bold transition flex items-center gap-1 active:scale-95 disabled:opacity-60 disabled:cursor-wait">
+                <span>↻</span>
+                <span>提交校准</span>
+              </button>
+            </div>
           </div>
-          <div class="flex items-center justify-between mt-1 gap-3">
-            <div class="min-w-0">
-              <div class="text-xs font-semibold text-white truncate">{{ targetName }}</div>
-              <div class="text-[10px] text-slate-400 font-mono mt-0.5">Layer: {{ targetLayerText }}</div>
-            </div>
-            <div class="text-right shrink-0">
-              <div class="text-base font-mono font-bold text-amber-400">{{ distText }}</div>
-              <div class="text-[10px] text-slate-500 font-mono">直线测距</div>
-            </div>
+          <div class="text-[10px] text-slate-500 mb-2.5 leading-relaxed">填写右下角地图坐标后提交校准，角色保持站桩</div>
+          <div class="flex items-center gap-2">
+            <label class="flex-1 bg-[#0d1117] rounded-lg border border-slate-800 px-2 py-1.5 flex items-center gap-1.5">
+              <span class="text-[10px] text-slate-500 shrink-0">X</span>
+              <input v-model="calX" type="number" step="0.1" placeholder="如 -206.0"
+                class="bg-transparent outline-none text-white font-mono text-xs w-full placeholder:text-slate-600" />
+            </label>
+            <label class="flex-1 bg-[#0d1117] rounded-lg border border-slate-800 px-2 py-1.5 flex items-center gap-1.5">
+              <span class="text-[10px] text-slate-500 shrink-0">Y</span>
+              <input v-model="calY" type="number" step="0.1" placeholder="如 451.9"
+                class="bg-transparent outline-none text-white font-mono text-xs w-full placeholder:text-slate-600" />
+            </label>
+            <label class="flex-1 bg-[#0d1117] rounded-lg border border-slate-800 px-2 py-1.5 flex items-center gap-1.5">
+              <span class="text-[10px] text-slate-500 shrink-0">Z</span>
+              <input v-model="calZ" type="number" step="0.1" placeholder="如 21.6"
+                class="bg-transparent outline-none text-white font-mono text-xs w-full placeholder:text-slate-600" />
+            </label>
           </div>
         </section>
       </div>
@@ -136,8 +151,8 @@ import AboutPop from '../components/AboutPop.vue'
 import { findRegion } from '../data/regions'
 import {
   pos, steps, stepClass, stepDot, isLocating, toggleLocating, progressData,
-  target, targetDist, layerName, sourceLabel, LAYER_NAME, openMap,
-  ver, syncText, syncClass, syncDot, rt
+  layerName, sourceLabel, openMap, logs,
+  ver, syncText, syncClass, syncDot, rt, submitCoords, coordsState
 } from '../composables/useCore'
 
 function minWin() { rt.WindowMinimise() }
@@ -181,6 +196,44 @@ const progressCount = computed(() => {
 
 const lockAddrText = computed(() => (pos.lockAddr && pos.lockAddr !== '0x0' ? pos.lockAddr : '—'))
 
+// ---- 坐标校准状态 ----
+const calX = ref('')
+const calY = ref('')
+const calZ = ref('')
+const calBusy = ref(false)
+// 校准结果写入实时日志（复用 logs 共享 ref）：失败红色 / 成功绿色，不占按钮行空间
+function pushCalLog(text, ok) {
+  const t = new Date().toTimeString().slice(0, 8)
+  logs.value.push(ok
+    ? { time: t, text, level: 'ok', color: 'text-emerald-400', levelColor: 'text-emerald-500' }
+    : { time: t, text, level: 'error', color: 'text-red-400', levelColor: 'text-red-500' })
+  if (logs.value.length > 2000) logs.value = logs.value.slice(logs.value.length - 2000)
+}
+async function doCalibrate() {
+  const x = Number(calX.value), y = Number(calY.value), z = Number(calZ.value)
+  if (isNaN(x) || isNaN(y) || isNaN(z) || (x === 0 && y === 0 && z === 0)) {
+    pushCalLog('✗ 坐标校准：请填写游戏内坐标（X Y Z）', false)
+    return
+  }
+  calBusy.value = true
+  pushCalLog('↻ 坐标校准：提交中…（全内存匹配约 10-15s）', false)
+  await submitCoords(x, y, z)
+  // 轮询结果：coordsState.result 由 pollCoordsResult 更新（搜索约 10-15s）
+  const iv = setInterval(() => {
+    if (!coordsState.busy) {
+      clearInterval(iv)
+      calBusy.value = false
+      const r = coordsState.result
+      if (!r || !r.ok) {
+        pushCalLog(`✗ 坐标校准失败：${(r && r.error) || '未命中，请保持站桩重试'}`, false)
+      } else {
+        const cp = r.copies ? `（匹配 ${r.copies} 个副本）` : ''
+        pushCalLog(`✓ 坐标校准已锁定 ${r.addr}${cp}`, true)
+      }
+    }
+  }, 1000)
+}
+
 // 设置/关于卡片：互斥显示（同时只弹一个），点击外部全部关闭
 const showSettingsPop = ref(false)
 const showAboutPop = ref(false)
@@ -206,14 +259,4 @@ const regionText = computed(() => {
   return r ? `${r.name} · ${layerName.value} (${pos.layer})` : `${layerName.value} (${pos.layer})`
 })
 
-const targetName = computed(() => (target.value?.name || '未设置目标'))
-const distText = computed(() => {
-  const d = targetDist.value
-  return d == null ? '-' : Math.round(d) + ' m'
-})
-const targetLayerText = computed(() => {
-  const t = target.value
-  if (!t || t.layer == null) return '未指定'
-  return (LAYER_NAME[Number(t.layer)] || String(t.layer)) + ` (${t.layer})`
-})
 </script>

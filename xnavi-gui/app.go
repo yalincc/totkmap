@@ -22,7 +22,10 @@ import (
 )
 
 // guiVersion 导航程序版本（与地图网页版本解耦，见 BOTWmap 项目规则第 3 条）。
-const guiVersion = "v1.2.0"
+// V1.4.0：坐标校准（GUI 提交游戏 HUD 坐标 → 全内存三轴精确匹配定位）。
+// V1.4.9：UI 精简——移除"网页地图选定目标"卡；校准说明文案简化；
+//         校准按钮提交中保持原形状；锁定提示只显示地址。
+const guiVersion = "v1.4.9"
 
 // App Wails 后端：管理核心子进程 + 读 status.json / xnavi-gui-core.log + 网页端端口探测。
 // 与核心的通信完全走文件（status.json、xnavi-gui-core.log），不依赖 8766 HTTP——
@@ -38,11 +41,10 @@ type App struct {
 }
 
 // Config GUI 持久化配置（xnavi-gui-config.json）。
-// V1.1.0 精简：只保留 Ryujinx + TOTK（去掉 Cemu/Emulator/Game 选项）。
-// 旧 config json 的多余字段由 json.Unmarshal 自动忽略，向前兼容。
+// V1.3.0：Eden 专用，只保留可选存档路径（core 默认按 Eden 进程路径自动推导存档根，
+// 仅在特殊安装场景下用 saveDir 覆盖，通过 TOTK_SAVE_DIR 环境变量传给 core）。
 type Config struct {
-	RyujinxDir string `json:"ryujinxDir"`
-	SaveDir    string `json:"saveDir"`
+	SaveDir string `json:"saveDir"`
 }
 
 func (a *App) configPath() string { return filepath.Join(a.workDir, "xnavi-gui-config.json") }
@@ -267,6 +269,39 @@ func (a *App) eventBridge(ctx context.Context) {
 // Version 返回 GUI 版本号（前端显示用）。
 func (a *App) Version() string { return guiVersion }
 
+// SubmitCoords GUI 坐标校准（V1.4.0）：写 coords-req.json 到引擎同目录
+// （文件通道，与 nav-clear.json 同模式）。core 的 coordsLoop 消费后做
+// 全内存三轴精确匹配定位 → 命中即锁 + 写 known。
+// 坐标 = 游戏内地图界面显示的 HUD 坐标 (X, Y北显示, 高度)。
+func (a *App) SubmitCoords(x, y, z float64) map[string]any {
+	req := map[string]any{
+		"x":  x,
+		"y":  y,
+		"z":  z,
+		"ts": float64(time.Now().UnixNano()) / 1e9,
+	}
+	buf, _ := json.Marshal(req)
+	if err := os.WriteFile(filepath.Join(a.workDir, "coords-req.json"), buf, 0644); err != nil {
+		return map[string]any{"submitted": false, "error": err.Error()}
+	}
+	return map[string]any{"submitted": true}
+}
+
+// PollCoordsResult 读 core 写回的坐标校准结果（coords-resp.json，消费后删除）。
+// 前端在提交后轮询（全 RAM 扫描约 10-15s）；core 未写回时返回 ready=false。
+func (a *App) PollCoordsResult() map[string]any {
+	p := filepath.Join(a.workDir, "coords-resp.json")
+	data, err := os.ReadFile(p)
+	if err != nil {
+		return map[string]any{"ready": false}
+	}
+	os.Remove(p)
+	var obj map[string]any
+	json.Unmarshal(data, &obj)
+	obj["ready"] = true
+	return obj
+}
+
 // ClearTarget 请求 core 清除导航目标（V1.1.0）。
 // 文件通信：写 nav-clear.json，core 的 navClearLoop 消费后 clearTarget() 并删除；
 // 地图端 /pos 下一轮读到 target=null，引导线同步消失（双向同步，core 是唯一状态持有者）。
@@ -277,13 +312,15 @@ func (a *App) ClearTarget() string {
 	return "已请求清除目标（地图同步取消）"
 }
 
-// corePath 核心子进程 exe 路径：与 GUI 同目录的 xnavi-core.exe。
+// corePath 核心子进程 exe 路径：与 GUI 同目录的 xnavi-eden.exe（Eden 专用核心）。
+// 命名刻意不以 "eden" 开头：避免 findPid("eden") 的 HasPrefix 匹配误认核心进程。
 func (a *App) corePath() string {
-	return filepath.Join(a.workDir, "xnavi-core.exe")
+	return filepath.Join(a.workDir, "xnavi-eden.exe")
 }
 
-// StartCore 启动核心子进程（xnavi-core.exe --emu=ryujinx --game=totk --no-open [--ryujinx-dir=] [--save-dir=]）。
-// V1.1.0：固定 Ryujinx + TOTK，不再有模拟器/游戏选项。
+// StartCore 启动核心子进程（xnavi-eden.exe --no-open）。
+// V1.3.0：Eden 专用，无模拟器参数；存档根默认由 core 按 Eden 进程路径自动推导，
+// 若配置了 saveDir 则以 TOTK_SAVE_DIR 环境变量覆盖。
 // 重复调用会先停掉旧进程。
 func (a *App) StartCore() string {
 	a.mu.Lock()
@@ -291,19 +328,14 @@ func (a *App) StartCore() string {
 	a.stopCoreLocked()
 	exe := a.corePath()
 	if _, err := os.Stat(exe); err != nil {
-		return "找不到核心程序 xnavi-core.exe（应放在本程序同目录）"
+		return "找不到核心程序 xnavi-eden.exe（应放在本程序同目录）"
 	}
-	args := []string{"--emu=ryujinx", "--game=totk", "--no-open"}
-	if a.cfg != nil {
-		if a.cfg.RyujinxDir != "" {
-			args = append(args, "--ryujinx-dir="+a.cfg.RyujinxDir)
-		}
-		if a.cfg.SaveDir != "" {
-			args = append(args, "--save-dir="+a.cfg.SaveDir)
-		}
-	}
+	args := []string{"--no-open"}
 	cmd := exec.Command(exe, args...)
 	cmd.Dir = a.workDir
+	if a.cfg != nil && a.cfg.SaveDir != "" {
+		cmd.Env = append(os.Environ(), "TOTK_SAVE_DIR="+a.cfg.SaveDir)
+	}
 	// core 是控制台程序，但 GUI 已经在日志面板实时显示它的输出，
 	// 这里把它的控制台窗口隐藏，避免弹一个黑窗且里面空白（stdout 重定向到了文件）。
 	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true, CreationFlags: 0x08000000} // CREATE_NO_WINDOW
@@ -317,7 +349,7 @@ func (a *App) StartCore() string {
 	}
 	a.cmd = cmd
 	go func() { cmd.Wait(); a.mu.Lock(); if a.cmd == cmd { a.cmd = nil }; a.mu.Unlock() }()
-	return "核心已启动（Ryujinx · TOTK）"
+	return "核心已启动（Eden · TOTK）"
 }
 
 // StopCore 停止核心子进程。
@@ -494,11 +526,10 @@ func (a *App) ExportDiagnostics() string {
 
 	// 1) 系统信息
 	info := fmt.Sprintf(
-		"xnavi diagnostics\n===================\nGUI version: %s\nOS: %s/%s\nArch: %s\nCPU cores: %d\nHostname: %s\nTime: %s\nRyujinxDir configured: %q\nSaveDir override: %q\n\n",
+		"xnavi diagnostics\n===================\nGUI version: %s\nOS: %s/%s\nArch: %s\nCPU cores: %d\nHostname: %s\nTime: %s\nSaveDir override: %q\n\n",
 		guiVersion, stdruntime.GOOS, stdruntime.GOARCH, stdruntime.GOARCH,
 		stdruntime.NumCPU(), hostname(),
 		time.Now().Format("2006-01-02 15:04:05"),
-		func() string { if a.cfg != nil { return a.cfg.RyujinxDir }; return "" }(),
 		func() string { if a.cfg != nil { return a.cfg.SaveDir }; return "" }(),
 	)
 	if bw, e := w.Create("info.txt"); e == nil {
@@ -528,15 +559,15 @@ func portInUse(port int) bool {
 	return true
 }
 
-// EnvDetect 探测"已配置的"Ryujinx 路径是否存在（仅给前端做提示，不挡开始按钮）。
-// V1.1.0：只查 Ryujinx（TOTK 专用）。
+// EnvDetect 探测"已配置的"存档路径是否存在（仅给前端做提示，不挡开始按钮）。
+// V1.3.0：Eden 专用，只查可选存档路径（留空则由 core 自动推导）。
 func (a *App) EnvDetect() map[string]any {
 	a.mu.Lock()
 	cfg := a.cfg
 	a.mu.Unlock()
-	res := map[string]any{"ryujinx": false}
-	if cfg != nil && cfg.RyujinxDir != "" && pathExists(cfg.RyujinxDir) {
-		res["ryujinx"] = true
+	res := map[string]any{"save": false}
+	if cfg != nil && cfg.SaveDir != "" && pathExists(cfg.SaveDir) {
+		res["save"] = true
 	}
 	return res
 }

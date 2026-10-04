@@ -20,6 +20,8 @@ export function OpenLogDir():Promise<string>;
 
 export function PickDir(arg1:string):Promise<string>;
 
+export function PollCoordsResult():Promise<Record<string, any>>;
+
 export function PollLogs():Promise<Array<string>>;
 
 export function SaveConfig(arg1:main.Config):Promise<string>;
@@ -27,6 +29,8 @@ export function SaveConfig(arg1:main.Config):Promise<string>;
 export function StartCore():Promise<string>;
 
 export function StopCore():Promise<string>;
+
+export function SubmitCoords(arg1:number,arg2:number,arg3:number):Promise<Record<string, any>>;
 
 export function TailLog():Promise<Array<string>>;
 
