@@ -14,6 +14,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 )
 
 const (
@@ -171,6 +172,31 @@ func sortBySlot00ThenMtime(cands []cand) {
 	}
 }
 
+// ---- 锚点缓存 ----
+// 场景切换（进神庙/传送）触发游戏自动存档时 progress.sav/caption.sav 可能
+// 被独占写入，readTotkAnchors 瞬时读空（实测 2026-10-04：进神庙后窗口扫描
+// 爆炸为 114 万组，锚点读空 + 窗口过滤失效）。缓存最近一次成功锚点，
+// 读取全空时回退缓存，避免定位入口被瞬态文件锁击穿。
+var (
+	anchorCache   []*SaveAnchor
+	anchorCacheAt time.Time
+)
+
+const anchorCacheTTL = 10 * time.Minute
+
+func readTotkAnchorsCached() []*SaveAnchor {
+	a := readTotkAnchors()
+	if len(a) > 0 {
+		anchorCache = a
+		anchorCacheAt = time.Now()
+		return a
+	}
+	if len(anchorCache) > 0 && time.Since(anchorCacheAt) < anchorCacheTTL {
+		return anchorCache
+	}
+	return nil
+}
+
 // slotRank: slot_00=0，其余槽=1（越小越优先）。
 func slotRank(path string) int {
 	if strings.Contains(path, "slot_00") {
@@ -179,7 +205,25 @@ func slotRank(path string) int {
 	return 1
 }
 
-// anchorRefs 锚点去重合并（与 locate.py anchor_refs 同口径：merge=4 米内视为同一点）。
+// anchorClusterRadius 锚点聚类半径（米）：
+// 大地图历史存档点彼此通常 <300m（实测 217m），而神庙/洞穴本地坐标
+// 与大地图锚点相距 >1500m（实测 progress.sav slot_05 = (56.4,-11.9,-42.7)，
+// 距 slot_00 = (709.3,1690.3,1380.9) 约 1603m）。以 slot_00 为圆心、
+// 半径 800m 可以完整收下同区域历史锚点、同时剔除神庙本地坐标。
+// 见 2026-10-04 场景切换实验：神庙坐标混入 refs 后窗口过滤罩住全内存
+// 小数值占位区，窗口组数 2万 → 114万 爆炸，玩家真坐标被淹没。
+const anchorClusterRadius = 800.0
+
+func dist3f(a, b [3]float32) float32 {
+	dx, dy, dz := a[0]-b[0], a[1]-b[1], a[2]-b[2]
+	return float32(math.Sqrt(float64(dx*dx + dy*dy + dz*dz)))
+}
+
+// anchorRefs 锚点去重合并 + 离群剔除（与 locate.py anchor_refs 同口径：
+// merge=4 米内视为同一点）。修复：**以 slot_00（最新自动存档）为权威圆心，
+// 只保留与其距离 ≤ anchorClusterRadius 的锚点**。神庙/洞穴本地坐标
+// （进神庙时自动存档写入旧槽）距权威圆心 >1500m，必然被剔除，杜绝
+// 窗口过滤被小数值占位区污染。slot_00 缺失时退化为"最大簇"兜底。
 func anchorRefs(anchors []*SaveAnchor, limit int, merge float32) [][3]float32 {
 	if limit <= 0 {
 		limit = 8
@@ -187,8 +231,48 @@ func anchorRefs(anchors []*SaveAnchor, limit int, merge float32) [][3]float32 {
 	if merge <= 0 {
 		merge = 4.0
 	}
-	var out [][3]float32
+
+	// 1) 权威锚点 = slot_00（用户实际使用的最新自动存档槽）
+	var auth *SaveAnchor
 	for _, a := range anchors {
+		if strings.Contains(a.Path, "slot_00") {
+			auth = a
+			break
+		}
+	}
+
+	// 2) 收集权威圆心半径内的锚点（同区域簇）
+	var cluster []*SaveAnchor
+	if auth != nil {
+		cluster = append(cluster, auth)
+		for _, a := range anchors {
+			if a == auth {
+				continue
+			}
+			if dist3f(a.Pos, auth.Pos) <= anchorClusterRadius {
+				cluster = append(cluster, a)
+			}
+		}
+	} else {
+		// 无 slot_00（文件缺失/命名异常）→ 最大簇兜底
+		best := []*SaveAnchor{}
+		for i, a := range anchors {
+			c := []*SaveAnchor{a}
+			for j, b := range anchors {
+				if i != j && dist3f(a.Pos, b.Pos) <= anchorClusterRadius {
+					c = append(c, b)
+				}
+			}
+			if len(c) > len(best) {
+				best = c
+			}
+		}
+		cluster = best
+	}
+
+	// 3) merge 去重（4 米内视为同一点）+ 上限
+	var out [][3]float32
+	for _, a := range cluster {
 		r := a.Pos
 		dup := false
 		for _, o := range out {

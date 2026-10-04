@@ -209,6 +209,10 @@ func scanBytes(buf []byte, base uintptr, refs [][3]float32, window float32, hits
 		if z <= gz0 || z >= gz1 {
 			continue
 		}
+		// 占位池同值快速过滤（同 scanRegion）。
+		if abs32(x-y) < 0.5 && abs32(y-z) < 0.5 {
+			continue
+		}
 		bestD, bestRi := float32(1e18), 0
 		for ri, r := range refs {
 			dx, dy, dz := x-r[0], y-r[1], z-r[2]
@@ -276,6 +280,13 @@ func scanRegion(h uintptr, base, size uintptr, refs [][3]float32, window float32
 			if z < 5 && z > -5 {
 				continue
 			}
+			// 占位池同值快速过滤：255/8/72/20/512/-24.22 等"三值近似相等"
+			// 是占位 Actor 池的主特征（玩家真坐标三轴几乎不可能两两相等到 0.5m）。
+			// 窗口被神庙本地坐标污染时，这里能提前挡住绝大部分占位命中，
+			// 防止 hits 百万级导致分组/struct 检查开销爆炸。
+			if abs32(x-y) < 0.5 && abs32(y-z) < 0.5 {
+				continue
+			}
 			if x <= gx0 || x >= gx1 {
 				continue
 			}
@@ -299,6 +310,33 @@ func scanRegion(h uintptr, base, size uintptr, refs [][3]float32, window float32
 		}
 		off += n
 	}
+}
+
+// junkGroup 占位池垃圾组判定（2026-10-04 6GB 场景切换实验实测特征）：
+// 窗口过滤被神庙本地坐标污染时，占位池（-24.22/255/8/72/50.12 等）copies
+// 可达数万-百万、struct 全 0，把玩家真坐标（copies 数百-数千）压出 top30。
+// 在排序前丢弃，让玩家组浮出。注意：P0 锚点聚类修复后窗口不会罩住占位区，
+// 这里只是第二道防线（窗口仍被污染时的兜底）。
+func junkGroup(g *Group) bool {
+	// 1) 海量重复 + 无 Actor 结构 = 占位池主特征。
+	//    阈值 18000：玩家组实测最高 copies=15584（v5 窗口，struct=1），
+	//    站桩组 400-9000；占位组 2万-143万。
+	if g.Copies > 18000 && g.Struct == 0 {
+		return true
+	}
+	// 2) 三值近似相等（同值占位：255/8/72/20/512/-24.22 等）
+	if abs32(g.X-g.Y) < 0.5 && abs32(g.Y-g.Z) < 0.5 {
+		return true
+	}
+	// 3) 原点附近小值占位（|x|,|y|,|z| 全 <20：如 (9.9,9.12,7.42)）
+	if abs32(g.X) < 20 && abs32(g.Y) < 20 && abs32(g.Z) < 20 {
+		return true
+	}
+	// 4) 北轴近零 + 中小坐标占位（如 (80,100,1)，实测三时段稳定出现）
+	if abs32(g.Z) < 5 && abs32(g.X) < 500 && abs32(g.Y) < 500 {
+		return true
+	}
+	return false
 }
 
 // groupAndRank 命中分组打分（方案唯一规则，见重构方案文档第四节）：
@@ -329,9 +367,12 @@ func groupAndRank(h uintptr, hits []Hit) ([]*Group, []ShortlistEntry) {
 		byCopies = append(byCopies, g)
 	}
 	sort.Slice(byCopies, func(i, j int) bool { return byCopies[i].Copies > byCopies[j].Copies })
+	// 占位池过滤：先扩大到 top80 检查 struct，再丢弃垃圾组、截断 top30。
+	// （占位组 copies 巨大必然排最前，若直接截断 top30，玩家组被压在外面，
+	//   struct 永远检查不到、排序永远失败——2026-10-04 场景切换实测症状。）
 	top := byCopies
-	if len(top) > 30 {
-		top = top[:30]
+	if len(top) > 80 {
+		top = top[:80]
 	}
 	for _, g := range top {
 		// 检查组内全部地址（不限 64）：并发扫描使 hits 顺序不确定，
@@ -342,8 +383,18 @@ func groupAndRank(h uintptr, hits []Hit) ([]*Group, []ShortlistEntry) {
 			}
 		}
 	}
-	sort.Slice(top, func(i, j int) bool {
-		a, b := top[i], top[j]
+	kept := top[:0]
+	for _, g := range top {
+		if junkGroup(g) {
+			continue
+		}
+		kept = append(kept, g)
+	}
+	if len(kept) > 30 {
+		kept = kept[:30]
+	}
+	sort.Slice(kept, func(i, j int) bool {
+		a, b := kept[i], kept[j]
 		// 唯一排序规则：struct>0 门槛 → copies 降序 → dist 升序（不比较 struct 大小）。
 		aLive, bLive := a.Struct > 0, b.Struct > 0
 		if aLive != bLive {
@@ -354,8 +405,8 @@ func groupAndRank(h uintptr, hits []Hit) ([]*Group, []ShortlistEntry) {
 		}
 		return a.Dist < b.Dist
 	})
-	shortlist := make([]ShortlistEntry, 0, len(top))
-	for _, g := range top {
+	shortlist := make([]ShortlistEntry, 0, len(kept))
+	for _, g := range kept {
 		shortlist = append(shortlist, ShortlistEntry{
 			Hud:    [3]float32{g.X, -g.Z, g.Y - elevBias},
 			Copies: g.Copies,
@@ -365,7 +416,7 @@ func groupAndRank(h uintptr, hits []Hit) ([]*Group, []ShortlistEntry) {
 			Addrs:  g.Addrs[:min(len(g.Addrs), 24)],
 		})
 	}
-	return top, shortlist
+	return kept, shortlist
 }
 
 // locate 主流程：save anchor → 窗口扫描（120 / 400）→ 分组打分。
@@ -377,7 +428,7 @@ func locate(pid uint32, window float64, onlyBlocks []struct{ Base, Size uintptr 
 			logf(s)
 		}
 	}
-	anchors := readTotkAnchors()
+	anchors := readTotkAnchorsCached()
 	if len(anchors) == 0 {
 		log("no usable save anchor found")
 		return nil
