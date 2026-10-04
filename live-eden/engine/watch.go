@@ -196,13 +196,29 @@ const (
 	knownWatchEvery = 400 * time.Millisecond // 交替观察采样周期
 	knownWatchMoveN = 2                      // 观察偏移移动采样次数 ≥ 此值 → 判活槽
 	// 锁冻结单地址接管（Eden 副本轮换）：锁读数停滞 ≥3 tick 即扫 knownPool，
-	// 位移 ∈(0.5,100)m 连续 ≥2 次的地址判活副本 → 立即接管（远快于 30s 冻结共识，
+	// 位移 ∈(0.5,15)m 连续 ≥2 次的地址判活副本 → 立即接管（远快于 30s 冻结共识，
 	// 且不要求 ≥3 一致簇——真槽副本常不足 3 个）。poolMoveMax 防 2km 级闪变垃圾；
 	// poolFollowNear 防远处垃圾区（0x2AE5 区闪变地址坐标"合法"但距玩家 1500m+）。
+	// Fix 2026-10-04（6GB 场景切换实测事故）：poolFollowNear 曾为 300m——玩家站桩时
+	// 玩家槽冻结（值合法不变）→ pool-follow 误把 170m 外"在动的 NPC 槽"接管，
+	// /pos 跳到 NPC 位置且持续锁错。收紧到 15m + 新增 poolFollowOnlyIfMoving：
+	// 玩家站桩时冻结是正常现象，绝不触发 pool-follow 换锁（交给 frozen 共识兜底，
+	// 其逻辑正确：站桩不换、玩家一动才换）；玩家走动中副本轮换才允许接管。
 	poolScanEvery = 200 * time.Millisecond
 	poolMoveN     = 2
-	poolMoveMax   = 100.0
-	poolFollowNear = 300.0
+	poolMoveMax   = 15.0
+	poolFollowNear = 15.0
+	poolFollowOnlyIfMoving = 5 * time.Second // 玩家最近 5s 内有位移才允许 pool-follow
+	// known-fallback 换锁位置闸门（known 锁 30s 未确认时观察其他偏移，谁动锁谁；
+	// 同样受 poolFollowOnlyIfMoving 前置保护，站桩不换）。
+	knownFallbackNear = 30.0
+	// 静止确认（Fix 2026-10-04）：玩家站桩时锁读数冻结属正常，但移动确认永不
+	// 触发 → 锁永远 verified=false → 每 30s 冻结共识 → 候选"不动"被判死 → 全量
+	// 重扫循环（每 90s 一次 10s 扫描，期间 /pos ok=false）。站桩但锁位置有副本簇
+	// （≥3 一致成员在 15m 内）= 锁是活槽 → 直接确认。NPC 槽极少有 ≥3 一致副本簇。
+	frozenConfirmTicks = 50                     // 冻结 10s（50×200ms）即检查静止确认
+	frozenConfirmEvery = 2 * time.Second        // 静止确认检查间隔
+	frozenConfirmNear  = 15.0                   // 副本簇候选与本锁位置的最大差
 )
 
 // Eden 版冻结纠偏增强：
@@ -317,6 +333,8 @@ func stateMachine() {
 	moveN := 0    // 连续移动采样计数（≥moveConfirmN → verified）
 	invalidN := 0 // 连续读数无效计数
 	frozenN := 0  // 锁读数停滞 tick 计数（共识兜底触发用）
+	lastPlayerMoveAt := time.Now() // 玩家最近一次位置变化时刻（pool-follow 前置条件）
+	lastConfirmAt := time.Time{}   // 静止确认检查节流（frozenConfirmEvery）
 	savedKnown := false
 	lastKnownAt := time.Now().Add(-knownRetry)
 	lastConsensusAt := time.Time{}
@@ -650,6 +668,7 @@ func stateMachine() {
 		if hasPrev && delta > moveDist {
 			moveN++
 			frozenN = 0
+			lastPlayerMoveAt = time.Now()
 			if lockSrc == "known" {
 				knownSeenMove = true
 			}
@@ -672,6 +691,27 @@ func stateMachine() {
 			moveN = 0
 			if hasPrev {
 				frozenN++
+			}
+			// 静止确认（Fix 2026-10-04）：玩家站桩时锁读数冻结属正常，但移动确认
+			// 永不触发 → 锁一直 verified=false → 30s 冻结共识把"不动候选"判死 →
+			// 全量重扫循环。站桩但锁位置有副本簇（consensusCopy ≥3 一致成员且距
+			// 本锁 <15m）= 锁是活槽 → 直接确认 + 写 known 记忆。
+			if hasPrev && frozenN >= frozenConfirmTicks && time.Since(lastConfirmAt) >= frozenConfirmEvery {
+				if _, v2, ok := consensusCopy(h, a); ok && dist3(v2, cur) < frozenConfirmNear {
+					lock.mu.Lock()
+					if !lock.verified {
+						fmt.Printf("  [sm] lock 0x%X frozen steady (idle, copy %.0fm) - confirmed\n",
+							a, dist3(v2, cur))
+						lock.verified = true
+					}
+					lock.mu.Unlock()
+					probing = false
+					if !savedKnown {
+						savedKnown = true
+						saveKnown([]uintptr{a}, sessionBaseForKnown())
+					}
+					lastConfirmAt = time.Now()
+				}
 			}
 		}
 
@@ -713,6 +753,19 @@ func stateMachine() {
 				stale := a
 				adr := knownWatchAddrs[best]
 				if d := decodePos(readMem(h, adr, 12)); d != nil {
+					// Fix 2026-10-04：与 pool-follow 同源缺陷——known 锁站桩时未动
+					// 属正常（槽对但玩家没动），观察窗口会把附近"在动的 NPC 槽"当
+					// 真玩家换过去。前置：玩家最近 5s 内有位移（走动中槽轮换才换）
+					// + 位置闸门：候选距本锁读数 <30m。
+					if time.Since(lastPlayerMoveAt) >= poolFollowOnlyIfMoving ||
+						dist3([3]float32{d[0], d[1], d[2]}, cur) >= knownFallbackNear {
+						fmt.Printf("  [sm] known watch: 0x%X moving but rejected (%.0fm away / player idle) - ignore\n",
+							adr, dist3([3]float32{d[0], d[1], d[2]}, cur))
+						knownFailInc(stale)
+						knownWatchOn = false
+						knownWatchAddrs = nil
+						continue
+					}
 					knownFailInc(stale)
 					setLock(adr, false, 0, "known-fallback")
 					fmt.Printf("  [sm] known lock stale (no move %.0fs) -> fallback to live offset 0x%X (%.1f, %.1f, %.1f)\n",
@@ -744,9 +797,14 @@ func stateMachine() {
 		hasPrev = true
 
 		// 锁冻结快速接管（Eden 副本轮换）：锁读数停滞 ≥3 tick 且距上次池扫描 ≥200ms →
-		// 扫 knownPool 全部地址，位移 ∈(0.5,100)m 连续 ≥2 次的地址判活副本 → 立即接管。
+		// 扫 knownPool 全部地址，位移 ∈(0.5,15)m 连续 ≥2 次的地址判活副本 → 立即接管。
 		// 不要求 ≥3 一致簇（frozen 共识的痛点：真槽副本常 <3 个，永远凑不齐换不了）。
-		if frozenN >= 3 && time.Since(lastPoolScanAt) >= poolScanEvery {
+		// Fix 2026-10-04：前置条件"玩家最近 5s 内有位移"——玩家站桩时玩家槽冻结是
+		// 正常现象（值合法但不变），此时候选"在动的地址"多半是附近 NPC/实体，
+		// 误接管会把 /pos 锁到 NPC 位置（实测 170m 外 NPC 槽持续锁错）。
+		// 站桩冻结交给 frozen 共识兜底（其逻辑正确：站桩不换、玩家一动才换）。
+		if frozenN >= 3 && time.Since(lastPoolScanAt) >= poolScanEvery &&
+			time.Since(lastPlayerMoveAt) < poolFollowOnlyIfMoving {
 			lastPoolScanAt = time.Now()
 			// 池 = known 记忆地址（known 秒锁路径 knownPool 可能为空/过时）+ 最近扫描候选池。
 			// Eden 场景切换后 known 列表地址也可能全失效，此时池扫不到活副本属正常，
@@ -794,7 +852,9 @@ func stateMachine() {
 		// 冻结共识兜底（零扫描）：锁读数停滞 ≥30s 时，找 known 偏移里与本锁
 		// 差 >15m 的 ≥3 成员一致簇作候选；候选在下一次检查"动了"（活副本证明）
 		// 才换锁——玩家站桩时绝不误换，玩家一动 1~2s 内自愈。
-		if frozenN >= frozenTicks && time.Since(lastConsensusAt) >= consensusEvery {
+		// Fix 2026-10-04：前置 !verified——已确认的锁（移动/静止确认过）站桩冻结
+		// 是正常状态，不需要共识兜底；否则每 30s 触发共识 → 候选不动 → 误重扫。
+		if !lockVer && frozenN >= frozenTicks && time.Since(lastConsensusAt) >= consensusEvery {
 			lastConsensusAt = time.Now()
 			a2, v2, ok := consensusCopy(h, a)
 			if !ok {
@@ -823,16 +883,26 @@ func stateMachine() {
 				probing = false
 				continue
 			} else if time.Since(consensusCandAt) > consensusWatchMax {
-				// 候选 watching 超时不动 = 死候选（场景切换后死副本簇，如 2m 处死槽）
-				// → 无法零扫描自愈 → 强制重扫（bypassKnown 防锁回同批死槽）
-				fmt.Printf("  [sm] consensus candidate 0x%X dead %.0fs - rescanning\n",
-					a2, consensusWatchMax.Seconds())
-				consensusCand = 0
-				if time.Since(lastRelocateAt) >= reLocateCooldown {
-					lastRelocateAt = time.Now()
-					bypassKnown = true
-					inLocked = false
-					goUnlocked("frozen dead consensus candidate - rescanning")
+				// 候选 watching 超时不动。区分两种场景（Fix 2026-10-04）：
+				//  1) 玩家也站桩（≥5s 无位移）→ 候选（玩家副本簇）不动属正常
+				//     → 保持锁，不重扫
+				//  2) 玩家在动但候选不动 → 真死候选（场景切换后死副本簇）→ 重扫
+				// 原代码一律重扫：站桩玩家每 ~45s 误触发一次全量扫描（10s，期间
+				// /pos ok=false，地图红点闪烁）。
+				if time.Since(lastPlayerMoveAt) >= poolFollowOnlyIfMoving {
+					fmt.Printf("  [sm] consensus candidate 0x%X dead %.0fs but player idle - holding lock\n",
+						a2, consensusWatchMax.Seconds())
+					consensusCand = 0
+				} else {
+					fmt.Printf("  [sm] consensus candidate 0x%X dead %.0fs - rescanning\n",
+						a2, consensusWatchMax.Seconds())
+					consensusCand = 0
+					if time.Since(lastRelocateAt) >= reLocateCooldown {
+						lastRelocateAt = time.Now()
+						bypassKnown = true
+						inLocked = false
+						goUnlocked("frozen dead consensus candidate - rescanning")
+					}
 				}
 			}
 		}
