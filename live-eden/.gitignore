@@ -1,0 +1,8 @@
+# 运行时产物与诊断输出（不入库）
+*.exe
+*.log
+status_check*.txt
+eden_*.txt
+run_test*.err.log
+engine/known_addrs.json
+engine/status.json
