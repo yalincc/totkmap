@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	chunkSize  = 64 << 20 // 每次读取 64MB
+	chunkSize  = 8 << 20 // 每次读取 8MB（内存受限环境防 OOM）
 	hitCap     = 3000000  // 命中上限（防窗口过宽）
 	// Eden 版：minBlockMB 不再限定"只扫最大块"，guestBlocks 内部有 64KB 下限。
 	// 全 RW 区域扫描（25082 区域 / 24.4GB），玩家槽可能落在 0.44MB 微型区域。
@@ -86,6 +86,11 @@ func decodePos(d []byte) []float32 {
 	// Fix 5：近零残留（原点附近残留）判无效——known 快路径会锁零残留槽。
 	// 阈值 5.0 与运动扫描玩家候选门槛一致（真实坐标 |x|,|y| 都 >5）。
 	if abs32(gx) < 5 && abs32(gy) < 5 {
+		return nil
+	}
+	// Z_stored 近零判无效：内存 Y 轴 = 真实高度+105，未初始化槽恒为 0。
+	// 实测占位池垃圾（如 (-8,8,-105)、(12,-12,-93)）坐标"合法"但 Z_stored=0。
+	if abs32(zs) < 5 {
 		return nil
 	}
 	// denormal 必须按 1e-6 判，且三轴都要查。旧实现用 1e-20 形同虚设
@@ -261,6 +266,16 @@ func scanRegion(h uintptr, base, size uintptr, refs [][3]float32, window float32
 		a := floats(buf)
 		for i := 0; i+3 <= len(a); i++ {
 			x, y, z := a[i], a[i+1], a[i+2]
+			// 占位 Actor 池过滤：Eden 下大量未使用 Actor 槽结构完整但坐标全零，
+			// copies 可达千万级（排序永远第一）。近零三元组直接跳过（与 decodePos
+			// 88 行近零判据一致：真实坐标 |x|,|y| 都 >5）；z 为内存 Y 轴
+			// （=高度+105），近零 = 未初始化槽（实测占位池垃圾 Z_stored=0）。
+			if (x < 5 && x > -5) && (y < 5 && y > -5) {
+				continue
+			}
+			if z < 5 && z > -5 {
+				continue
+			}
 			if x <= gx0 || x >= gx1 {
 				continue
 			}
@@ -391,7 +406,11 @@ func locate(pid uint32, window float64, onlyBlocks []struct{ Base, Size uintptr 
 		total += b.Size
 	}
 	log(fmt.Sprintf("RW regions (>=64KB): %d  (%.1f GB)", len(blocks), float64(total)/1073741824.0))
-	for _, b := range blocks {
+	for i, b := range blocks {
+		if i >= 10 {
+			log(fmt.Sprintf("  ... %d more regions", len(blocks)-10))
+			break
+		}
 		log(fmt.Sprintf("  region 0x%012X  %8.0f MB", b.Base, float64(b.Size)/1048576.0))
 	}
 
@@ -413,6 +432,18 @@ func locate(pid uint32, window float64, onlyBlocks []struct{ Base, Size uintptr 
 		}
 		best = ranked[0]
 		if best.Struct > 0 {
+			// 锁定前 decodePos 校验：占位池/垃圾组可能排第一（坐标近零被窗口放过时），
+			// 从 ranked 依次取第一个 decodePos 非 nil 的组作候选。
+			for _, g := range ranked {
+				if d := decodePos(readMem(h, g.Addrs[0], 12)); d != nil {
+					if g != best {
+						log(fmt.Sprintf("    candidate #1 (copies=%d struct=%d) invalid pos - fallback to 0x%012X (copies=%d)",
+							best.Copies, best.Struct, g.Addrs[0], g.Copies))
+					}
+					best = g
+					break
+				}
+			}
 			break
 		}
 	}
@@ -451,6 +482,9 @@ func shortlistAddrs(sl []ShortlistEntry) int {
 func scanAll(h uintptr, blocks []struct{ Base, Size uintptr }, refs [][3]float32, window float32, hits *[]Hit) {
 	var jobs []struct{ base, size uintptr }
 	for _, b := range blocks {
+		if b.Size >= 2<<30 { // 跳过 ≥2GB 巨型块（DRAM 主映射，历史从未命中玩家槽）
+			continue
+		}
 		off := uintptr(0)
 		for off < b.Size {
 			n := uintptr(chunkSize)
@@ -462,8 +496,8 @@ func scanAll(h uintptr, blocks []struct{ Base, Size uintptr }, refs [][3]float32
 		}
 	}
 	workers := runtime.NumCPU()
-	if workers > 16 {
-		workers = 16
+	if workers > 6 {
+		workers = 6
 	}
 	var mu sync.Mutex
 	wg := sync.WaitGroup{}

@@ -1,0 +1,17 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 去壳化：禁选中、无网页痕迹 */
+html, body, #app {
+  height: 100%;
+  margin: 0;
+  user-select: none;
+  -webkit-user-select: none;
+  overflow: hidden;
+}
+/* 细窄深色滚动条（系统风） */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #30363d; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #3d444d; }

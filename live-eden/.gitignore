@@ -1,8 +1,13 @@
 # 运行时产物与诊断输出（不入库）
 *.exe
 *.log
-status_check*.txt
-eden_*.txt
-run_test*.err.log
+*.txt
 engine/known_addrs.json
 engine/status.json
+known_addrs.json
+status.json
+# GUI 构建产物与依赖（源码入库，产物重建）
+gui/node_modules/
+gui/frontend/node_modules/
+gui/frontend/dist/
+gui/build/

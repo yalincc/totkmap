@@ -181,12 +181,13 @@ const (
 	probeLife     = 60 * time.Second       // 监听确认最长持续时间
 	probeAddrCap  = 24                     // 每组最多观察的地址数
 	probeNearDist = 50.0                   // 换锁候选与本锁位置的最大差（防远处微动槽误换）
-	probeCopyKeep = 0.7                    // 换锁候选 copies 不得低于本锁的这个比例（copies 是主导维度）
+	probeCopyKeep = 0.1                    // 换锁候选 copies 不得低于本锁的这个比例（Eden 下存档镜像簇 copies 可大于真槽，0.7 会锁死真槽）
 	frozenTicks   = 150                    // 锁读数停滞 tick 数（30s）→ 启动共识兜底检查
 	consensusMin  = 3                      // 共识簇最少成员数
 	consensusDist = 15.0                   // 共识位置与本锁读数的最小差
 	consensusEvery = 1 * time.Second       // 共识检查间隔
 	reLocateCooldown = 90 * time.Second    // 冻结无共识 → 全量重锚 冷却（防站桩每 30s 重扫）
+	consensusWatchMax = 15 * time.Second   // 共识候选 watching 超时（候选不动=死副本簇→重扫）
 	// known 锁确认窗口（2026-10-02 实测补丁）：known 锁上后 30s 内从未出现
 	// 移动采样（锁错垃圾槽时玩家走动读数也不变），进入交替观察——轮读 known
 	// 列表其他偏移（微秒级），谁在动就是真玩家槽。秒锁正常 0.5s 就确认，
@@ -194,6 +195,14 @@ const (
 	knownConfirmWin = 30 * time.Second
 	knownWatchEvery = 400 * time.Millisecond // 交替观察采样周期
 	knownWatchMoveN = 2                      // 观察偏移移动采样次数 ≥ 此值 → 判活槽
+	// 锁冻结单地址接管（Eden 副本轮换）：锁读数停滞 ≥3 tick 即扫 knownPool，
+	// 位移 ∈(0.5,100)m 连续 ≥2 次的地址判活副本 → 立即接管（远快于 30s 冻结共识，
+	// 且不要求 ≥3 一致簇——真槽副本常不足 3 个）。poolMoveMax 防 2km 级闪变垃圾；
+	// poolFollowNear 防远处垃圾区（0x2AE5 区闪变地址坐标"合法"但距玩家 1500m+）。
+	poolScanEvery = 200 * time.Millisecond
+	poolMoveN     = 2
+	poolMoveMax   = 100.0
+	poolFollowNear = 300.0
 )
 
 // Eden 版冻结纠偏增强：
@@ -201,10 +210,16 @@ const (
 // 解决 known_addrs.json 只有 1-2 条绝对地址、凑不够 consensusMin=3 成员簇的问题。
 // bypassKnown：冻结无共识 / /rescan 时置位，强制跳过 known 快路径直接全量扫描，
 // 避免"锁回同一个冻结槽 → 再冻结"的死循环。
+// poolBase/poolMoved：锁冻结时的单地址移动接管——Eden 下玩家坐标副本在多个地址间
+// 轮换更新（单一地址会冻结、簇内其他地址活着），锁冻结后逐地址扫 knownPool，
+// 位移 ∈(0.5,100)m 且连续 ≥2 次的地址即活副本，立即接管（不要求 ≥3 一致簇）。
 var (
 	knownPool      []uintptr
 	bypassKnown    bool
 	lastRelocateAt time.Time
+	poolBase       map[uintptr][3]float32
+	poolMoved      map[uintptr]int
+	lastPoolScanAt time.Time
 )
 
 var (
@@ -228,7 +243,11 @@ func goUnlocked(reason string) {
 	state.ok = false
 	state.source = "locating..."
 	state.mu.Unlock()
-	lastScanAt = time.Time{} // 解锁后下一拍立即扫描；15s 冷却只约束"扫不到"的重试
+	// 解锁后重扫冷却：Eden 下场景切换垃圾期（占位池/未初始化槽）反复 scan 会
+	// 锁垃圾 → invalid → 解锁 → 立即重扫 → 风暴（实测 ws 飙 2.6GB、一直 locating）。
+	// 冷却 20s：垃圾期跳过重扫（场景加载完成后已知地址/候选恢复），真迁移靠
+	// frozen → reLocateCooldown 重锚兜底（该路径 bypassKnown 强制重扫不受此冷却影响）。
+	lastScanAt = time.Now().Add(20*time.Second - scanCooldown) // 解锁后 ~20s 才允许自动重扫
 	fmt.Printf("  [sm] -> UNLOCKED (%s)\n", reason)
 }
 
@@ -303,6 +322,7 @@ func stateMachine() {
 	lastConsensusAt := time.Time{}
 	consensusCand := uintptr(0) // 冻结共识候选（需"动了"才换锁）
 	var consensusCandPos [3]float32
+	var consensusCandAt time.Time // 候选 watching 起始时刻（超时不动=死候选→重扫）
 
 	// known 锁确认窗口状态（交替观察）
 	knownLockAt := time.Time{} // known 锁锁上时刻
@@ -323,6 +343,11 @@ func stateMachine() {
 	var probeRefPos [3]float32 // 换锁位置基准（展示序 X, Z, alt，与 decodeTripleAt 输出同序）
 	lastProbeIgnoreGi := -1    // ignore 限频：同组 30s 内只打一行
 	var lastProbeIgnoreAt time.Time
+
+	// 锁冻结快速接管（pool-follow）状态
+	poolBase = map[uintptr][3]float32{}
+	poolMoved = map[uintptr]int{}
+	lastPoolScanAt = time.Time{}
 
 	resetFollow := func() {
 		prev, hasPrev = [3]float32{}, false
@@ -426,6 +451,9 @@ func stateMachine() {
 					for _, g := range res.Shortlist {
 						knownPool = append(knownPool, g.Addrs...)
 					}
+					poolBase = map[uintptr][3]float32{} // 新池新基准（旧池地址已失效）
+					poolMoved = map[uintptr]int{}
+					lastPoolScanAt = time.Time{}
 					bypassKnown = false
 					// 建立监听确认：观察 shortlist 各组，谁在动锁谁
 					if len(res.Shortlist) > 0 {
@@ -565,26 +593,53 @@ func stateMachine() {
 			}
 			continue
 		}
-		invalidN = 0
 		cur := [3]float32{v[0], v[1], v[2]}
 		delta := dist3(cur, prev)
-
-		// 传送：verified 锁的大位移就是真传送，直接接受新位置（零扫描）。
+		// 传送/场景切换：verified 锁大位移分两种——真传送（玩家 teleport/坐载具快移，
+		// knownPool 副本同步更新到新位置）与场景切换垃圾跳变（锁地址读到另一处合法
+		// 坐标，副本未同步）。用 knownPool 交叉验证区分：新位置 100m 内有 ≥1 活副本
+		// = 真传送接受；无副本 = 垃圾跳变 → 保持旧输出 + 累积 invalid → 快速重锚，
+		// 避免"飘到地下/天空"（神庙进出实测：副本轮换期锁地址短暂读到远处合法坐标）。
 		// 未 verified 的锁出现大位移 = 坏槽跳变，回扫。
 		if hasPrev && delta > teleportDist {
 			lock.mu.RLock()
 			ver := lock.verified
 			lock.mu.RUnlock()
 			if ver {
-				incCounter("jumps")
-				frozenN = 0
-				fmt.Printf("  [sm] teleport jump %.0fm accepted in place (no scan)\n", delta)
+				liveCopy := 0
+				for _, ad := range knownPool {
+					dd := decodePos(readMem(h, ad, 12))
+					if dd == nil {
+						continue
+					}
+					if abs32(dd[0]-cur[0]) < 100 && abs32(dd[1]-cur[1]) < 100 && abs32(dd[2]-cur[2]) < 100 {
+						liveCopy++
+						break
+					}
+				}
+				if liveCopy > 0 {
+					incCounter("jumps")
+					frozenN = 0
+					fmt.Printf("  [sm] teleport jump %.0fm accepted (cross-verified %d copy)\n", delta, liveCopy)
+				} else {
+					// 场景切换垃圾跳变：/pos 保持上次有效值（红点停住不飘），
+					// 累计 invalidN → invalidMax 后 UNLOCKED → 加载完成重扫新槽
+					fmt.Printf("  [sm] scene-switch garbage jump %.0fm (no cross copy) - holding prev, reanchor in ~%.1fs\n",
+						delta, float64(invalidMax)*smTick.Seconds())
+					invalidN++
+					if invalidN >= invalidMax {
+						inLocked = false
+						goUnlocked(fmt.Sprintf("readings invalid x%d (scene switch garbage)", invalidMax))
+					}
+					continue // 跳过 state 更新 → /pos 保持上次有效坐标
+				}
 			} else {
 				inLocked = false
 				goUnlocked(fmt.Sprintf("teleport jump %.0fm on unverified lock -> rescan", delta))
 				continue
 			}
 		}
+		invalidN = 0 // 正常读数（含真传送接受）清零无效计数
 
 		// known 锁确认窗口状态：本锁槽出现移动采样 → 锁对（玩家在动且槽跟随）
 		lock.mu.RLock()
@@ -688,6 +743,54 @@ func stateMachine() {
 		prev = cur
 		hasPrev = true
 
+		// 锁冻结快速接管（Eden 副本轮换）：锁读数停滞 ≥3 tick 且距上次池扫描 ≥200ms →
+		// 扫 knownPool 全部地址，位移 ∈(0.5,100)m 连续 ≥2 次的地址判活副本 → 立即接管。
+		// 不要求 ≥3 一致簇（frozen 共识的痛点：真槽副本常 <3 个，永远凑不齐换不了）。
+		if frozenN >= 3 && time.Since(lastPoolScanAt) >= poolScanEvery {
+			lastPoolScanAt = time.Now()
+			// 池 = known 记忆地址（known 秒锁路径 knownPool 可能为空/过时）+ 最近扫描候选池。
+			// Eden 场景切换后 known 列表地址也可能全失效，此时池扫不到活副本属正常，
+			// 由 frozen 共识 watching 超时 → rescan 兜底。
+			poolAddrs := append([]uintptr{}, loadAddrs()...)
+			poolAddrs = append(poolAddrs, knownPool...)
+			for _, ad := range poolAddrs {
+				d := decodePos(readMem(h, ad, 12))
+				if d == nil {
+					continue
+				}
+				v := [3]float32{d[0], d[1], d[2]}
+				// 位置接近闸门：候选必须距当前锁读数 <300m（防远处垃圾区闪变地址）。
+				// 玩家正常走动/进入新场景不会瞬间移 300m（传送由 teleportDist 处理）。
+				if dist3(v, cur) > poolFollowNear {
+					poolBase[ad] = v
+					poolMoved[ad] = 0
+					continue
+				}
+				if b, ok := poolBase[ad]; ok {
+					dd := dist3(v, b)
+					if dd > moveDist && dd < poolMoveMax {
+						poolMoved[ad]++
+					} else {
+						poolMoved[ad] = 0
+					}
+				}
+				poolBase[ad] = v
+				if poolMoved[ad] >= poolMoveN {
+					fmt.Printf("  [sm] frozen lock -> pool-follow live addr 0x%X (%.1f, %.1f, %.1f)\n",
+						ad, v[0], v[1], v[2])
+					// 接管后不保留 verified，重新走移动确认（防接管垃圾地址后坐标异常）
+					setLock(ad, false, 0, "pool-follow")
+					resetFollow()
+					frozenN = 0
+					moveN = 0
+					a = ad
+					cur = v
+					saveKnown([]uintptr{ad}, sessionBaseForKnown())
+					break
+				}
+			}
+		}
+
 		// 冻结共识兜底（零扫描）：锁读数停滞 ≥30s 时，找 known 偏移里与本锁
 		// 差 >15m 的 ≥3 成员一致簇作候选；候选在下一次检查"动了"（活副本证明）
 		// 才换锁——玩家站桩时绝不误换，玩家一动 1~2s 内自愈。
@@ -709,6 +812,7 @@ func stateMachine() {
 				}
 			} else if a2 != consensusCand {
 				consensusCand, consensusCandPos = a2, v2
+				consensusCandAt = time.Now()
 				fmt.Printf("  [sm] lock frozen %.0fs, consensus candidate 0x%X (%.0fm away) - watching\n",
 					frozenTicks*smTick.Seconds(), a2, dist3(v2, cur))
 			} else if dist3(v2, consensusCandPos) > moveDist {
@@ -718,6 +822,18 @@ func stateMachine() {
 				resetFollow()
 				probing = false
 				continue
+			} else if time.Since(consensusCandAt) > consensusWatchMax {
+				// 候选 watching 超时不动 = 死候选（场景切换后死副本簇，如 2m 处死槽）
+				// → 无法零扫描自愈 → 强制重扫（bypassKnown 防锁回同批死槽）
+				fmt.Printf("  [sm] consensus candidate 0x%X dead %.0fs - rescanning\n",
+					a2, consensusWatchMax.Seconds())
+				consensusCand = 0
+				if time.Since(lastRelocateAt) >= reLocateCooldown {
+					lastRelocateAt = time.Now()
+					bypassKnown = true
+					inLocked = false
+					goUnlocked("frozen dead consensus candidate - rescanning")
+				}
 			}
 		}
 	}

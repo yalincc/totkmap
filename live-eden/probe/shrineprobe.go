@@ -299,9 +299,19 @@ func main() {
 		return true
 	})
 
-	fmt.Println("\ntop candidate groups (raw mem X, Z_stored, Y_north; alt=Z_stored-105):")
-	for i := 0; i < len(list) && i < 10; i++ {
-		g := list[i]
+	var real []*grp
+	for _, g := range list {
+		if math.IsInf(float64(g.x), 0) || math.IsInf(float64(g.y), 0) || math.IsInf(float64(g.z), 0) {
+			continue
+		}
+		if math.IsNaN(float64(g.x)) || math.IsNaN(float64(g.y)) || math.IsNaN(float64(g.z)) {
+			continue
+		}
+		real = append(real, g)
+	}
+	fmt.Println("\nreal candidate groups (raw mem X, Z_stored, Y_north; alt=Z_stored-105):")
+	for i := 0; i < len(real) && i < 40; i++ {
+		g := real[i]
 		adr := g.addrs[0]
 		var offs []string
 		for _, b := range blocks {
@@ -326,18 +336,7 @@ func valid(x, zs, yn float32) bool {
 	if x != x*0.5 || zs != zs*0.5 || yn != yn*0.5 {
 		return false
 	}
-	if isWhole32(x) && isWhole32(zs) && isWhole32(yn) {
-		return false
-	}
-	if abs32(x) < 5 && abs32(yn) < 5 {
-		return false
-	}
-	if x <= -6000 || x >= 6000 || yn <= -6000 || yn >= 6000 {
-		return false
-	}
-	if zs <= -1195 || zs >= 3305 {
-		return false
-	}
+
 	return true
 }
 
