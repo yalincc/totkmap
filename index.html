@@ -112,7 +112,7 @@
   </div>
 
   <footer class="side-foot">
-    <p class="foot-version">TOTKMAP V1.9.3 © 2026 yalincc</p>
+    <p class="foot-version">TOTKMAP V1.9.4 © 2026 yalincc</p>
     <p>GitHub <a href="https://github.com/yalincc/totkmap" target="_blank" rel="noopener">https://github.com/yalincc/totkmap</a></p>
   </footer>
 </aside>
@@ -304,5 +304,13 @@
 <script src="js/live.js?v=194"></script>
 <script src="js/explore-auto.js?v=193"></script>
 <script src="js/mat-auto.js?v=194"></script>
+<!-- V1.9.4 问题3：Service Worker 瓦片/静态资源持久缓存，地图打开秒开 -->
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register('sw.js').catch(function (e) { console.warn('SW 注册失败', e); });
+  });
+}
+</script>
 </body>
 </html>
