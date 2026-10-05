@@ -88,6 +88,20 @@ html, body {
 }
 .mk-label.done-label { opacity: .55; }
 
+/* V1.9.3 完成标记：图标本体 100% 清晰，右上角绿色小勾（参考游戏内洞穴「已发现」打勾） */
+.mk-done-icon { background: transparent; border: none; }
+.mk-done-icon .mk-done-check {
+  position: absolute;
+  right: -4px;
+  top: -5px;
+  font-size: 12px;
+  line-height: 1;
+  font-weight: 700;
+  color: #4ade80;
+  text-shadow: 0 0 2px rgba(0, 0, 0, .95), 0 0 2px rgba(0, 0, 0, .6);
+  pointer-events: none;
+}
+
 /* ---------- 区域名标签（贴合游戏：米黄地图字色 + 深色描边，参考游戏内地图） ---------- */
 .area-label {
   background: none;

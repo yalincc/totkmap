@@ -268,6 +268,23 @@
     }
     return iconCache[cat.icon];
   }
+  /* V1.9.3 完成标记：图标本体 100% 清晰 + 右上角绿色小勾（参考游戏内洞穴「已拿魔犹伊遗失物」打勾，
+   * 统一语义：已标记完成 = 右上角打勾）。divIcon 仅用于完成点，未完成仍用 L.icon，无性能负担 */
+  var doneIconCache = {};
+  function doneIconFor(cat) {
+    if (!cat || !cat.icon) return null;
+    if (!doneIconCache[cat.icon]) {
+      doneIconCache[cat.icon] = L.divIcon({
+        className: 'mk-done-icon',
+        html: '<img src="assets/icons/' + cat.icon + '" width="22" height="22" alt="">' +
+              '<span class="mk-done-check">✓</span>',
+        iconSize: [22, 22],
+        iconAnchor: [11, 11],
+        popupAnchor: [0, -10]
+      });
+    }
+    return doneIconCache[cat.icon];
+  }
 
   function renderMarkers() {
     Object.keys(state.groups).forEach(function (k) {
@@ -287,12 +304,12 @@
       if (state.filter === 'undone' && isDone) return;
 
       var cat = cats[m.cat];
-      var icon = iconFor(cat);
+      /* V1.9.3 完成标记：完成点用带右上角绿勾的 divIcon，未完成保持原 L.icon */
+      var icon = isDone ? doneIconFor(cat) : iconFor(cat);
       var opt = { riseOnHover: true };
       if (icon) opt.icon = icon;
       var mk = L.marker([m.x, m.y], opt);
-      if (isDone) mk.setOpacity(0.38);
-      mk.bindTooltip(m.name || m.full, {
+      mk.bindTooltip((isDone ? '✓ ' : '') + (m.name || m.full), {
         direction: 'top',
         offset: [0, -12],
         className: 'mk-label' + (isDone ? ' done-label' : '')
@@ -809,8 +826,9 @@
   var pendingPos = null;
   map.on('click', function (e) {
     if (!state.adding) {
-      // 点击地图空白处自动关闭详情卡片（V1.7.3）
+      // 点击地图空白处自动关闭详情卡片（V1.7.3；V1.9.3 补：探索卡片 exploreCard 一并关闭）
       $('detail').classList.add('hidden');
+      $('exploreCard').classList.add('hidden');
       state.current = null;
       return;
     }
@@ -1154,10 +1172,16 @@
     var mk = state.markers[mid];
     if (!mk) return;
     var m = null;
-    for (var i = 0; i < MARKERS.length; i++) { if (MARKERS[i].id === mid) { m = MARKERS[i]; break; } }
-    mk.setOpacity(state.done[mid] ? 0.38 : 1);
+    for (var i = 0; i < MARKERS.length; i++) {
+      if (String(MARKERS[i].id) === String(mid)) { m = MARKERS[i]; break; }
+    }
+    /* V1.9.3 完成标记：setIcon 在「原图标」与「右上角绿勾 divIcon」间即时切换，图标本体不降透明度 */
+    if (m) {
+      var _c = catById(state.layer, m.cat);
+      mk.setIcon(state.done[mid] ? doneIconFor(_c) : iconFor(_c));
+    }
     mk.unbindTooltip();
-    mk.bindTooltip(m ? (m.name || m.full) : '', {
+    mk.bindTooltip((state.done[mid] ? '✓ ' : '') + (m ? (m.name || m.full) : ''), {
       direction: 'top', offset: [0, -12],
       className: 'mk-label' + (state.done[mid] ? ' done-label' : '')
     });
