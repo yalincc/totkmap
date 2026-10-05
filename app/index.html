@@ -159,6 +159,16 @@
     <div class="ec-row" id="ecTowerRow"><span class="ec-label">塔域</span><span class="ec-value" id="ecTower"></span></div>
     <div class="ec-row" id="ecCoordRow"><span class="ec-label">坐标</span><span class="ec-value" id="ecCoord"></span></div>
     <div class="ec-row" id="ecTrialRow"><span class="ec-label">试炼</span><span class="ec-value" id="ecTrial"></span></div>
+    <!-- V2.0.2 神庙详情：desc 里的「位置 / 注意事项 / 宝箱」原先完全没显示，这里结构化补上 -->
+    <div class="ec-row" id="ecPlaceRow"><span class="ec-label">位置</span><span class="ec-value" id="ecPlace"></span></div>
+    <div class="ec-row" id="ecNoteRow">
+      <span class="ec-label">注意</span>
+      <span class="ec-value">
+        <span id="ecNoteText"></span>
+        <button type="button" class="ec-more" id="ecNoteMore">展开</button>
+      </span>
+    </div>
+    <div class="ec-row" id="ecChestRow"><span class="ec-label">宝箱</span><span class="ec-value" id="ecChest"></span></div>
     <div class="card-actions">
       <button id="ecNav" type="button" class="btn act">导航</button>
       <button id="ecAuto" type="button" class="btn act">自动导航</button>

@@ -21,6 +21,7 @@
   var LS_NAMES = 'totkmap_names_v1';
   var LS_SAVE = 'totkmap_save_v1';
   var LS_AREA = 'totkmap_area_v1';
+  var LS_SELECTED = 'totkmap_selected_v2';   // 各层选中的分类（按层存，切层/刷新均保持）
 
   var LAYER_KEY = { 18: 'ground', 19: 'depths', 20: 'sky' };
   var LAYER_NAME = { 18: '地上', 19: '地下', 20: '天空' };
@@ -33,7 +34,8 @@
 
   var state = {
     layer: 18,
-    selected: {},          // catalogId -> true（选中的分类）
+    selected: {},          // 当前层选中的分类 catalogId -> true（是 selectedByLayer[layer] 的引用）
+    selectedByLayer: {},   // layerId -> {catalogId:true} 各层独立的分类选择，跨切层/刷新保持
     done: {},              // markerId -> true（已完成）
     custom: [],            // 自定义标点 [{id,name,desc,x,y,layer}]
     filter: 'all',         // all | done | undone
@@ -223,14 +225,38 @@
         if (state.selected[id]) delete state.selected[id];
         else state.selected[id] = true;
         el.classList.toggle('active');
+        saveSelected();          // 按层落盘，切层/刷新后仍保持
         renderMarkers();
         updateCount();
       });
     });
   }
 
+  /* ---------------- 分类选择（按层保持） ----------------
+   * 背景：原先 state.selected 是单一对象，switchLayer() 每次切层都调 selectDefault()
+   *   把它清空重建 → 用户在「地上」勾的驿站/村庄，切到地下再切回来就没了。
+   * 现在：state.selectedByLayer[layer] 各层独立保存，切层时恢复本层选择；
+   *   本层从未选过才回退到默认分类。state.selected 始终指向当前层那份，
+   *   渲染逻辑（renderMarkers / buildCatalogPanel 等）无需改动。
+   * 同时落盘 localStorage，刷新页面也保持。 */
+  function saveSelected() { saveJson(LS_SELECTED, state.selectedByLayer); }
+  function loadSelected() {
+    state.selectedByLayer = loadJson(LS_SELECTED, {}) || {};
+  }
+  /* 保证 state.selected 指向当前层的对象（首次时建空对象） */
+  function bindSelected() {
+    var l = state.layer;
+    if (!state.selectedByLayer[l]) state.selectedByLayer[l] = {};
+    state.selected = state.selectedByLayer[l];
+  }
+  /* 该层是否已经由用户选过（区别于"默认兜底"） */
+  function hasUserSelection(l) {
+    return !!(state.selectedByLayer[l] && Object.keys(state.selectedByLayer[l]).length);
+  }
+
   function selectDefault() {
-    state.selected = {};
+    bindSelected();
+    if (hasUserSelection(state.layer)) return;   // 已有本层选择，原样恢复
     var def = { 18: [62, 63, 74], 19: [86, 87, 97], 20: [108, 109, 110] };
     var list = def[state.layer] || [];
     catsOfLayer(state.layer).forEach(function (c) {
@@ -240,6 +266,7 @@
       // 兜底：默认选中每层前 3 个分类
       catsOfLayer(state.layer).slice(0, 3).forEach(function (c) { state.selected[c.id] = true; });
     }
+    saveSelected();
   }
 
   function updateCount() {
@@ -671,6 +698,7 @@
         // 确保该分类被选中
         if (!state.selected[m.cat]) {
           state.selected[m.cat] = true;
+          saveSelected();
           buildCatalogPanel();
           renderMarkers();
         }
@@ -772,7 +800,7 @@
     $('searchResult').classList.add('hidden');
     $('searchInput').value = '';
     setTileLayer(id);
-    selectDefault();
+    selectDefault();      // 内部会 bindSelected()：恢复本层选择，无记录才用默认值
     buildCatalogPanel();
     renderAreas();
     buildAreaOverlays();
@@ -1061,6 +1089,7 @@
   loadDone();
   loadCustom();
   loadSaveSync();
+  loadSelected();          // 先取回各层分类选择，selectDefault() 才能判断"本层选过没"
 
   var savedLayer = loadJson(LS_LAYER, null);
   var validLayers = LAYERS.map(function (l) { return l.id; });
@@ -1201,12 +1230,68 @@
     return best ? best.name : '';
   }
 
-  /* 试炼名称：神庙 desc 首行「名称：XXX」；非神庙无此行则省略 */
-  function parseTrial(desc) {
-    if (!desc) return '';
-    var m = String(desc).match(/名称[:：]\s*([^\n]+)/);
-    return m ? m[1].trim() : '';
+  /* ---------------- 神庙/图鉴类 desc 解析 ----------------
+   * markers.js 里 cat 63（地上神庙）/ cat 109（天空神庙）的 desc 是统一四段格式：
+   *   名称：劳鲁的祝福
+   *   位置：位于海布拉山西北的洞窟内…
+   *   注意事项：与神庙互动后需要从冰水中拿到水晶…
+   *   宝箱：位于神庙终点，打开宝箱可获得黄玉。
+   * 原先只用正则取出「名称」当试炼名，**位置/注意事项/宝箱三段全部丢弃**，
+   * 而「注意事项」正是任务与解谜前置条件的关键信息。这里按行首标签结构化拆开。
+   * 非该格式（如洞穴/矿石的自由文本）返回空对象，调用方隐藏对应行即可。 */
+  var NOTE_LIMIT = 62;   /* 「注意」折叠时的显示字数 */
+
+  /* markers.js 有 13 条 desc 里带 HTML 标签（如 <div>宝箱位于…</div>，本意是换行）。
+   * 卡片用 textContent 注入（不会产生注入风险），但标签会原样显示成字面文本，
+   * 所以这里把块级标签换成空格、去掉零散标签，纯文本化。 */
+  function plainify(s) {
+    return String(s || '')
+      .replace(/<\s*br\s*\/?\s*>/gi, ' ')
+      .replace(/<\s*\/\s*(p|div|li|ul|ol)\s*>/gi, ' ')
+      .replace(/<\s*(p|div|li|ul|ol)\b[^>]*>/gi, ' ')
+      .replace(/<[^>]{1,80}>/g, ' ')      /* 兜底：其余零散标签 */
+      .replace(/\s{2,}/g, ' ')
+      .trim();
   }
+
+  function parseDescSections(desc) {
+    var out = { trial: '', place: '', note: '', chest: '' };
+    if (!desc) return out;
+    var lines = String(desc).split(/\r?\n/);
+    /* 标签写法不统一（半角/全角冒号都出现过），用宽松匹配 */
+    var re = {
+      trial:  /^\s*名称\s*[:：]\s*(.+)$/,
+      place:  /^\s*位置\s*[:：]\s*(.+)$/,
+      note:   /^\s*注意事项\s*[:：]\s*([\s\S]*)$/,
+      chest:  /^\s*宝箱\s*[:：]\s*([\s\S]*)$/
+    };
+    var cur = null;
+    lines.forEach(function (ln) {
+      for (var k in re) {
+        var m = ln.match(re[k]);
+        if (m) { out[k] = m[1].trim(); cur = (k === 'note' || k === 'chest') ? k : null; return; }
+      }
+      /* 无标签行：续接到上一段。先剥标签，若剥完这行以「宝箱：」开头
+       * 说明是 "<div>宝箱位于…</div>" 这类写法，转为宝箱段的新起点。
+       * （姆萨诺奇拉神庙把宝箱写在注意事项里，也靠这里兜住） */
+      if (cur && ln.trim()) {
+        var t = plainify(ln);
+        if (!t) return;
+        var cm = t.match(/^宝箱\s*[:：]\s*(.+)$/);
+        if (cm) { out.chest = cm[1].trim(); cur = 'chest'; return; }
+        var nm = t.match(/^名称\s*[:：]\s*(.+)$/);
+        if (nm) { out.trial = nm[1].trim(); return; }
+        out[cur] = (out[cur] + ' ' + t).trim();
+      }
+    });
+    out.trial = plainify(out.trial);
+    out.place = plainify(out.place);
+    out.note = plainify(out.note);
+    out.chest = plainify(out.chest);
+    return out;
+  }
+  /* 兼容旧调用点 */
+  function parseTrial(desc) { return parseDescSections(desc).trial; }
 
   /* 探索卡片定位（同 detail 规则：不挡侧栏、锚点侧、可视区钳制） */
   function positionExploreCard(ev) {
@@ -1271,9 +1356,27 @@
     $('ecRegion').textContent = nearestRegion(ll) || '未知';
     $('ecTower').textContent = nearestTower(ll) || '未知';
     $('ecCoord').textContent = 'X ' + Math.round(m.y) + ' · Z ' + Math.round(m.x);
-    var trial = parseTrial(m.desc || '');
-    $('ecTrialRow').style.display = trial ? '' : 'none';
-    $('ecTrial').textContent = trial;
+
+    /* V2.0.2：神庙 desc 的四段信息（试炼/位置/注意/宝箱）结构化上屏。
+     * 非神庙（该字段为空）对应行自动隐藏，卡片保持原来的紧凑外观。 */
+    var sec = parseDescSections(m.desc || '');
+    $('ecTrialRow').style.display = sec.trial ? '' : 'none';
+    $('ecTrial').textContent = sec.trial;
+    $('ecPlaceRow').style.display = sec.place ? '' : 'none';
+    $('ecPlace').textContent = sec.place;
+    $('ecChestRow').style.display = sec.chest ? '' : 'none';
+    $('ecChest').textContent = sec.chest;
+    /* 「注意」较长，默认折叠 + 展开按钮（不足一屏时按钮不出现） */
+    var noteRow = $('ecNoteRow'), noteText = $('ecNoteText'), noteMore = $('ecNoteMore');
+    noteRow.style.display = sec.note ? '' : 'none';
+    if (sec.note) {
+      var long = sec.note.length > NOTE_LIMIT;
+      noteText.textContent = long ? sec.note.slice(0, NOTE_LIMIT) + '…' : sec.note;
+      noteRow.classList.remove('expanded');
+      noteMore.style.display = long ? '' : 'none';
+      noteText.classList.toggle('clamped', long);
+      noteMore.textContent = '展开';
+    }
     var btnNav = $('ecNav'), btnAuto = $('ecAuto'), btnDone = $('ecDone');
     btnNav.textContent = '导航';
     if (window.LIVENAV && window.LIVENAV.currentTarget) {
@@ -1320,6 +1423,15 @@
   $('ecClose').addEventListener('click', function () {
     $('exploreCard').classList.add('hidden');
     state.current = null;
+  });
+  /* V2.0.2：神庙「注意事项」展开/收起 */
+  $('ecNoteMore').addEventListener('click', function () {
+    var row = $('ecNoteRow');
+    var txt = $('ecNoteText');
+    var open = !row.classList.contains('expanded');
+    row.classList.toggle('expanded', open);
+    txt.classList.toggle('clamped', !open);
+    this.textContent = open ? '收起' : '展开';
   });
   initExploreCardDrag();
 
@@ -1920,10 +2032,12 @@
   var ltClear = $('ltClear');
   if (ltAll) ltAll.addEventListener('click', function () {
     catsOfLayer(state.layer).forEach(function (c) { state.selected[c.id] = true; });
+    saveSelected();
     buildCatalogPanel(); renderMarkers(); updateCount(); updateLayerCount();
   });
   if (ltClear) ltClear.addEventListener('click', function () {
     catsOfLayer(state.layer).forEach(function (c) { delete state.selected[c.id]; });
+    saveSelected();
     buildCatalogPanel(); renderMarkers(); updateCount(); updateLayerCount();
   });
 
