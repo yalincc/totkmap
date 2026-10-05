@@ -69,7 +69,7 @@
       <span id="layerCount" class="lt-count">0/0 图层</span>
     </div>
 
-    <!-- 分类分组列表 -->
+    <!-- 分类分组列表（龙的轨迹作为「位置」大组末尾的小分类，见 catalogs.js id 229/230/231） -->
     <div class="catalog-body" id="catalogList"></div>
   </div>
 
@@ -112,7 +112,7 @@
   </div>
 
   <footer class="side-foot">
-    <p class="foot-version">TOTKMAP V1.9.4 © 2026 yalincc</p>
+    <p class="foot-version">TOTKMAP V2.0 © 2026 yalincc</p>
     <p>GitHub <a href="https://github.com/yalincc/totkmap" target="_blank" rel="noopener">https://github.com/yalincc/totkmap</a></p>
   </footer>
 </aside>
@@ -297,6 +297,8 @@
 <script src="data/area_depths.js"></script>
 <script src="data/markers.js"></script>
 <script src="data/materials.js?v=188"></script>
+<!-- 龙轨迹：ROM 官方轨道数据（Set_DragonRail_Static） -->
+<script src="data/dragon_paths_rom.js?v=200"></script>
 <!-- 图鉴站地址（联动「查看图鉴」按钮 / 对站跳转）：正式图鉴站地址配置后填写，留空则按钮不显示 -->
 <script>window.TOTK_COMPENDIUM_URL = '';</script>
 <script src="js/save-parser.js"></script>
@@ -304,6 +306,9 @@
 <script src="js/live.js?v=194"></script>
 <script src="js/explore-auto.js?v=193"></script>
 <script src="js/mat-auto.js?v=194"></script>
+<!-- V2.0：龙轨迹图层（独立模块）。数据已改为 ROM 官方轨道 dragon_paths_rom.js，
+     旧的社区近似数据 data/dragon_paths.js 不再加载（保留文件仅作对照） -->
+<script src="js/dragon-layer.js?v=200"></script>
 <!-- V1.9.4 问题3：Service Worker 瓦片/静态资源持久缓存，地图打开秒开 -->
 <script>
 if ('serviceWorker' in navigator) {

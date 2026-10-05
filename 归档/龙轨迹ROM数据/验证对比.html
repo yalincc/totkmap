@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>TOTK 龙轨迹数据验证 · ROM 官方 vs 社区近似</title>
+<style>
+  body{margin:0;background:#f5f6f8;font:14px/1.6 "Microsoft YaHei",sans-serif;color:#1f2430}
+  h1{font-size:20px;padding:16px 24px 4px;margin:0}
+  .sub{padding:0 24px 14px;color:#6b7280;font-size:13px}
+  .wrap{display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:0 24px 24px}
+  .card{background:#fff;border:1px solid #e3e6ec;border-radius:8px;padding:14px 16px}
+  .card h2{font-size:15px;margin:0 0 8px}
+  .card p{margin:0 0 10px;color:#6b7280;font-size:12.5px}
+  table{width:100%;border-collapse:collapse;font-size:12.5px}
+  th,td{padding:5px 8px;border-bottom:1px solid #eef0f4;text-align:left}
+  th{background:#f8f9fb;color:#4b5563;font-weight:600}
+  .sw{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:middle}
+  .tag{display:inline-block;padding:1px 7px;border-radius:10px;font-size:11.5px;font-weight:600}
+  .t-rom{background:#dcfce7;color:#15803d}
+  .t-old{background:#fef3c7;color:#b45309}
+  .k{display:flex;justify-content:space-between;padding:3px 0;font-size:12.5px}
+  .k span:first-child{color:#6b7280}
+  code{background:#f3f4f6;padding:1px 5px;border-radius:3px;font-size:12px}
+</style>
+</head>
+<body>
+<h1>TOTK 龙轨迹数据验证</h1>
+<div class="sub">左：ROM 官方轨道（贝塞尔精确） · 右：现有社区近似数据 —— 偏差量化对比</div>
+<div class="wrap">
+  <div class="card">
+    <h2>坐标偏差（社区点 → ROM 曲线最短距离）</h2>
+    <p>数值越小说明社区数据越准；中位 &gt; 500m 表示该龙轨迹需要用 ROM 数据替换。</p>
+    <table id="cmp"><thead><tr><th>龙</th><th>社区点数</th><th>ROM 采样点</th><th>中位偏差</th><th>最大偏差</th><th>结论</th></tr></thead><tbody></tbody></table>
+  </div>
+  <div class="card">
+    <h2>ROM 数据规模</h2>
+    <div id="stats"></div>
+  </div>
+  <div class="card" style="grid-column:1/-1">
+    <h2>ROM 轨道清单</h2>
+    <table id="rails"><thead><tr><th>轨道名</th><th>归属龙</th><th>原始控制点</th><th>采样点</th><th>长度(m)</th><th>飞行高度 Y</th><th>闭合</th></tr></thead><tbody></tbody></table>
+  </div>
+  <div class="card" style="grid-column:1/-1">
+    <h2>龙行为参数（DragonMgrParam）</h2>
+    <p>来自 <code>Scene/Component/DragonMgrParam/Default.game__scene__DragonMgrParam.bgyml</code>，决定龙沿轨移动的角速度、滚转与重算间隔。</p>
+    <table id="cfg"><thead><tr><th>内部名</th><th>重生绑定点</th><th>角速度</th><th>滚转角</th><th>重算间隔</th><th>位置写回</th></tr></thead><tbody></tbody></table>
+  </div>
+</div>
+<script>
+window.__ROM = null; window.__OLD = null; window.__RAILS = null; window.__CFG = null; window.__BATTLE = null;
+</script>
+<script src="../../app/data/dragon_paths_rom.js"></script>
+<script src="../../app/data/dragon_paths.js"></script>
+<script src="raw/dragon_rails_raw.js"></script>
+<script src="raw/dragon_config.js"></script>
+<script src="raw/dragon_battle.js"></script>
+<script>
+const ROM = window.TOTK_DRAGON_PATHS_ROM;
+const OLD = window.TOTK_DRAGON_PATHS;
+const RAW = window.__RAIL_RAW, CFG = window.__CFG, BATTLE = window.__BATTLE;
+
+function dist(p, segs){
+  let m = Infinity;
+  for(const [a,b] of segs){ m = Math.min(m, Math.hypot(a-p[0], b-p[1])); }
+  return m;
+}
+const oldMap = {}; OLD.items.forEach(i=>oldMap[i.id]=i);
+document.querySelector('#cmp tbody').innerHTML = ROM.items.map(it=>{
+  const o = oldMap[it.id]; if(!o) return '';
+  const ds = o.segments.map(p=>dist(p, it.segments)).sort((a,b)=>a-b);
+  const med = Math.round(ds[Math.floor(ds.length/2)]), mx = Math.round(ds[ds.length-1]);
+  const bad = med > 500;
+  return `<tr>
+    <td><span class="sw" style="background:${it.color}"></span>${it.name}</td>
+    <td>${o.segments.length}</td><td>${it.segments.length}</td>
+    <td><b>${med} m</b></td><td>${mx} m</td>
+    <td><span class="tag ${bad?'t-old':'t-rom'}">${bad?'建议替换':'基本准确'}</span></td></tr>`;
+}).join('');
+
+let total = 0;
+document.querySelector('#stats').innerHTML = ROM.items.map(it=>{
+  total += it.segments.length;
+  return `<div class="k"><span><span class="sw" style="background:${it.color}"></span>${it.name}
+    <span style="color:#9ca3af">（${it.railName}）</span></span>
+    <span><b>${it.segments.length}</b> 点 / ${(it.totalLengthM/1000).toFixed(1)} km / 高 ${it.altRange[0]}~${it.altRange[1]}m / 地标 ${it.marks.length}</span></div>`;
+}).join('') + `<div class="k" style="border-top:1px solid #e5e7eb;margin-top:6px;padding-top:6px">
+  <span><b>合计</b></span><span><b>${total}</b> 采样点（+ 白龙支线 ${ROM.items.find(i=>i.id==='light').extraRails.reduce((a,e)=>a+e.segments.length,0)} 点）</span></div>`;
+
+const NAMES = {light:'白龙', dinraal:'奥尔龙', faroons:'费罗龙', nailong:'聂尔龙'};
+const ROLE = {main:'主环线', link:'联络轨', branch:'支线'};
+const all = [];
+RAW.rails.forEach(r=>all.push(Object.assign({}, r, {dragon: r.meta.dragon, role: r.meta.role, pname: r.meta.name})));
+document.querySelector('#rails tbody').innerHTML = all.map(r=>`<tr>
+  <td><code>${r.uniqueName}</code></td>
+  <td>${NAMES[r.dragon]||'-'}</td>
+  <td>${r.pointCount}</td><td>${(r.totalLengthM/1000).toFixed(2)} km</td>
+  <td>${Math.min(...r.points.map(p=>p.Translate[1])).toFixed(0)} ~ ${Math.max(...r.points.map(p=>p.Translate[1])).toFixed(0)} m</td>
+  <td>${r.isClosed?'是':'否'}</td></tr>`).join('')
+  + `<tr><td colspan="6" style="background:#f8f9fb"><b>龙战涡旋点</b>（Set_DragonBattleAndZeldaCatch）</td></tr>`
+  + BATTLE.spirals.map(s=>`<tr><td><code>${s.uniqueName}</code></td><td>龙战</td>
+    <td colspan="2">中心 ${s.center.map(v=>v.toFixed(0)).join(', ')} / 高 ${s.yRange[0]}~${s.yRange[1]}m</td>
+    <td>${s.pointCount} 点</td><td>${s.isClosed?'闭合':'开放'}</td></tr>`).join('');
+
+document.querySelector('#cfg tbody').innerHTML = CFG.dragons.map(c=>`<tr>
+  <td><code>${c.fileName}</code></td><td>${c.bindPointRespawn||'-'}</td>
+  <td>${c.desiredAngularSpeed??'-'}</td><td>${c.desiredRollSpeed??'-'}</td>
+  <td>${c.calcSkipInterval??'-'}</td><td>${c.isWritePosToGameData?'是':'否'}</td></tr>`).join('');
+</script>
+</body>
+</html>

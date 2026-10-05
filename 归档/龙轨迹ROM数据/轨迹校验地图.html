@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>TOTK 龙轨迹地图校验</title>
+<link rel="stylesheet" href="../../app/vendor/leaflet.css">
+<style>
+  body{margin:0;font:13px/1.6 "Microsoft YaHei",sans-serif;color:#1f2430;overflow:hidden}
+  #map{position:absolute;inset:0 350px 0 0;background:#dcd8cc}
+  #side{position:absolute;right:0;top:0;bottom:0;width:350px;background:#fff;
+        border-left:1px solid #e3e6ec;padding:14px 16px;overflow-y:auto;z-index:1000}
+  h1{font-size:16px;margin:0 0 4px}
+  .sub{color:#6b7280;font-size:12px;margin-bottom:12px}
+  .chk{display:flex;align-items:center;gap:7px;padding:4px 0;font-size:12.5px;cursor:pointer}
+  .chk input{cursor:pointer}
+  .sw{display:inline-block;width:11px;height:11px;border-radius:50%;flex:none}
+  .ln{display:inline-block;width:22px;height:0;border-top-width:3px;border-top-style:solid;vertical-align:middle;flex:none}
+  .ln.dash{border-top-style:dashed}
+  .meta{background:#f8f9fb;border:1px solid #e8eaef;border-radius:6px;padding:9px 11px;margin:10px 0;font-size:12px;line-height:1.8}
+  .lv{display:flex;gap:5px;margin-bottom:12px}
+  .lv button{flex:1;padding:6px 0;font-size:12.5px;border:1px solid #d5d9e0;background:#fff;
+             border-radius:5px;cursor:pointer;font-family:inherit}
+  .lv button.on{background:#2563eb;color:#fff;border-color:#2563eb}
+  .sec{font-size:12px;color:#6b7280;margin:14px 0 5px;font-weight:600}
+  .lgd{font-size:11.5px;color:#6b7280;margin-top:12px;line-height:1.9;
+       border-top:1px solid #eef0f4;padding-top:10px}
+  #alt{position:absolute;left:14px;bottom:14px;background:rgba(255,255,255,.95);
+       border:1px solid #d5d9e0;border-radius:6px;padding:9px 11px;font-size:11.5px;z-index:900}
+  #alt .bar{height:9px;width:200px;border-radius:5px;margin:5px 0 3px;
+    background:linear-gradient(90deg,#2b6cb0,#38a169,#d69e2e,#e53e3e)}
+  #alt .lbl{display:flex;justify-content:space-between;font-size:10.5px;color:#6b7280}
+  code{background:#f3f4f6;padding:1px 5px;border-radius:3px;font-size:11.5px}
+</style>
+</head>
+<body>
+<div id="map"></div>
+<div id="side">
+  <h1>龙轨迹地图校验</h1>
+  <div class="sub">数据源：ROMFS 官方轨道 <code>Set_DragonRail_Static</code></div>
+
+  <div class="lv">
+    <button data-l="18" class="on">地上</button>
+    <button data-l="19">地下</button>
+    <button data-l="20">天空</button>
+  </div>
+
+  <div class="sec">ROM 官方轨道（实线，按飞行高度着色）</div>
+  <div id="romBox"></div>
+  <div class="chk" id="altChkWrap">
+    <input type="checkbox" id="altChk" checked>
+    <span>按高度着色（关掉则用龙的配色）</span>
+  </div>
+
+  <div class="sec">社区近似数据（虚线，仅作对照）</div>
+  <div id="oldBox"></div>
+
+  <div class="meta" id="info"></div>
+
+  <div class="lgd">
+    <b>白龙</b>：高空轨 Y1600~2370 与低空轨 Y700~1000 走向重合，另有 2 条联络轨 + 1 条初岛支线。<br>
+    <b>三元素龙</b>：地表与地底为<b>同一条闭合环线</b>，Y 为负即位于地下。<br>
+    <b>标注</b>：白心小圆 = 自动匹配的官方地标（神庙/鸟望台/深穴/洞窟），数字为距轨距离。
+  </div>
+</div>
+<div id="alt">
+  <b>飞行高度 Y</b>
+  <div class="bar"></div>
+  <div class="lbl"><span>地下 -600m</span><span>0</span><span>2400m</span></div>
+</div>
+
+<script src="../../app/vendor/leaflet.js"></script>
+<script src="../../app/data/dragon_paths_rom.js"></script>
+<script src="../../app/data/dragon_paths.js"></script>
+<script>
+var ROM = window.TOTK_DRAGON_PATHS_ROM;
+var OLD = window.TOTK_DRAGON_PATHS;
+
+/* ---- 与 app.js 完全一致的坐标系 ---- */
+var TOTK_CRS = L.Util.extend({}, L.CRS.Simple, {
+  transformation: new L.Transformation(4/256, 24000/256, 4/256, 20000/256)
+});
+var TILE_BOX = L.latLngBounds([-5000,-6000],[5000,6000]);
+var CENTER = [-140.80, -298.54];
+
+var LAYER_KEY = {18:'ground', 19:'depths', 20:'sky'};
+var map = L.map('map', {
+  crs: TOTK_CRS, center: CENTER, zoom: 5, minZoom: 2, maxZoom: 7,
+  zoomControl: true, attributionControl: false, zoomSnap: 0.5,
+  wheelPxPerZoomLevel: 140, doubleClickZoom: false,
+  maxBounds: TILE_BOX, maxBoundsViscosity: 1.0
+});
+
+var TotkTileLayer = L.TileLayer.extend({
+  getTileUrl: function(c){
+    var ext = (c.z <= 4) ? 'webp' : 'png';
+    return this._url.replace('{z}',c.z).replace('{x}',c.x).replace('{y}',c.y).replace('{ext}',ext);
+  }
+});
+var tileLayer = new TotkTileLayer('../../app/tiles_obj/' + LAYER_KEY[18] + '/{z}/{x}_{y}.{ext}', {
+  minZoom:2, maxZoom:7, maxNativeZoom:6, tileSize:256, noWrap:true, bounds:TILE_BOX
+});
+tileLayer.addTo(map);
+
+/* ---- 分组 ---- */
+var gRail = L.layerGroup().addTo(map);
+var gOld  = L.layerGroup().addTo(map);
+var gMk   = L.layerGroup().addTo(map);
+var showAlt = true;
+
+/* ---- 高度配色 ---- */
+function hColor(y){
+  var stops = [[-600,[43,108,176]],[0,[56,161,105]],[1200,[214,158,46]],[2400,[229,62,62]]];
+  if (y <= stops[0][0]) return 'rgb(43,108,176)';
+  for (var i=0;i<stops.length-1;i++){
+    if (y <= stops[i+1][0]){
+      var a=stops[i], b=stops[i+1], t=(y-a[0])/(b[0]-a[0]);
+      return 'rgb(' + a[1].map(function(v,k){
+        return Math.round(v + (b[1][k]-v)*t);
+      }).join(',') + ')';
+    }
+  }
+  return 'rgb(229,62,62)';
+}
+var DRAGON_COLORS = {light:'#8b8fa3', dinraal:'#ff7a45', faroons:'#7ad7f0', nailong:'#c9a0ff'};
+
+function drawLine(segs, alts, color, weight, opacity, dashed){
+  var ll = segs.map(function(s){ return [s[1], s[0]]; });  // [x,y] -> latlng(Z,X)
+  var base = {weight:weight, opacity:opacity, lineCap:'round', lineJoin:'round'};
+  if (dashed) base.dashArray = '5,6';
+  if (!showAlt || !alts || dashed){
+    base.color = color;
+    L.polyline(ll, base).addTo(gRail);
+    return;
+  }
+  var STEP = 6;
+  for (var i=0;i<ll.length-1;i+=STEP){
+    var end = Math.min(i+STEP+1, ll.length);
+    if (end - i < 2) break;
+    var sum = 0, n = 0;
+    for (var k=i;k<end;k++){ sum += alts[k]; n++; }
+    L.polyline(ll.slice(i,end), {
+      color: hColor(sum/n), weight:weight, opacity:opacity, lineCap:'round'
+    }).addTo(gRail);
+  }
+}
+
+function visible(item, layer){
+  if (item.layer === 20) return layer === 20;
+  return layer === 18 || layer === 19;
+}
+
+function redraw(){
+  gRail.clearLayers(); gOld.clearLayers(); gMk.clearLayers();
+  var layer = curLayer;
+
+  ROM.items.forEach(function(it){
+    if (!visible(it, layer)) return;
+    var depth = (layer === 19);
+    drawLine(it.segments, it.altitude, DRAGON_COLORS[it.id], depth?2.5:3.5, 0.95);
+    if (it.id === 'light'){
+      (it.extraRails||[]).forEach(function(e){
+        L.polyline(e.segments.map(function(s){return [s[1], s[0]]; }), {
+          color: DRAGON_COLORS.light, weight:1.6, opacity:0.5,
+          dashArray: e.railName.indexOf('Inter')>=0 ? '5,5' : '2,6'
+        }).addTo(gRail);
+      });
+    }
+    if (it.start){
+      L.circleMarker([it.start.y, it.start.x], {
+        radius:7, color:'#111', weight:2.5, fillColor:DRAGON_COLORS[it.id], fillOpacity:1
+      }).bindTooltip(it.name + ' 起点（ROM Actor 坐标）Y=' + it.start.height + 'm').addTo(gMk);
+    }
+    it.marks.forEach(function(m){
+      L.circleMarker([m.y, m.x], {radius:4, color:'#444', weight:1.2, fillColor:'#fff', fillOpacity:1})
+        .bindTooltip(m.label + '（' + m.kind + '）距轨 ' + m.dist + 'm').addTo(gMk);
+    });
+  });
+
+  if (showOld) OLD.items.forEach(function(o){
+    if (!visible(o, layer)) return;
+    L.polyline(o.segments.map(function(s){return [s[1], s[0]]; }), {
+      color:'#7a7a7a', weight:1.6, opacity:0.6, dashArray:'4,7'
+    }).addTo(gOld);
+  });
+}
+
+var curLayer = 18, showOld = true;
+
+document.querySelectorAll('.lv button').forEach(function(b){
+  b.addEventListener('click', function(){
+    document.querySelectorAll('.lv button').forEach(function(x){ x.classList.remove('on'); });
+    b.classList.add('on');
+    curLayer = Number(b.dataset.l);
+    map.removeLayer(tileLayer);
+    tileLayer = new TotkTileLayer('../../app/tiles_obj/' + LAYER_KEY[curLayer] + '/{z}/{x}_{y}.{ext}', {
+      minZoom:2, maxZoom:7, maxNativeZoom:6, tileSize:256, noWrap:true, bounds:TILE_BOX
+    });
+    tileLayer.addTo(map); tileLayer.bringToBack();
+    redraw();
+  });
+});
+
+/* 侧栏 */
+var romBox = document.getElementById('romBox');
+ROM.items.forEach(function(it){
+  var d = document.createElement('label'); d.className = 'chk';
+  d.innerHTML = '<input type=checkbox checked><span class="sw" style="background:' +
+    DRAGON_COLORS[it.id] + '"></span>' + it.name +
+    ' <span style="color:#9ca3af">' + it.segments.length + '点 / ' +
+    (it.totalLengthM/1000).toFixed(1) + 'km</span>';
+  d.querySelector('input').addEventListener('change', function(){
+    if (this.checked) gRail.addTo(map); else { /* 简化：仅重绘 */
+      var box = this.closest('label');
+      box.dataset.off = this.checked ? '0' : '1';
+      applyMask();
+    }
+  });
+  d.dataset.off = '0';
+  romBox.appendChild(d);
+});
+function applyMask(){
+  gRail.clearLayers(); gOld.clearLayers(); gMk.clearLayers();
+  var layer = curLayer;
+  var boxes = romBox.querySelectorAll('.chk');
+  var off = {};
+  boxes.forEach(function(b){ off[b.textContent.trim().split(' ')[0]] = b.dataset.off === '1'; });
+  ROM.items.forEach(function(it){
+    if (off[it.name]) return;
+    if (!visible(it, layer)) return;
+    var depth = (layer === 19);
+    drawLine(it.segments, it.altitude, DRAGON_COLORS[it.id], depth?2.5:3.5, 0.95);
+    if (it.id === 'light'){
+      (it.extraRails||[]).forEach(function(e){
+        L.polyline(e.segments.map(function(s){return [s[1], s[0]]; }), {
+          color: DRAGON_COLORS.light, weight:1.6, opacity:0.5,
+          dashArray: e.railName.indexOf('Inter')>=0 ? '5,5' : '2,6'
+        }).addTo(gRail);
+      });
+    }
+    if (it.start){
+      L.circleMarker([it.start.y, it.start.x], {
+        radius:7, color:'#111', weight:2.5, fillColor:DRAGON_COLORS[it.id], fillOpacity:1
+      }).bindTooltip(it.name + ' 起点 Y=' + it.start.height + 'm').addTo(gMk);
+    }
+    it.marks.forEach(function(m){
+      L.circleMarker([m.y, m.x], {radius:4, color:'#444', weight:1.2, fillColor:'#fff', fillOpacity:1})
+        .bindTooltip(m.label + '（' + m.kind + '）距轨 ' + m.dist + 'm').addTo(gMk);
+    });
+  });
+  if (showOld) OLD.items.forEach(function(o){
+    if (!visible(o, layer)) return;
+    L.polyline(o.segments.map(function(s){return [s[1], s[0]]; }), {
+      color:'#7a7a7a', weight:1.6, opacity:0.6, dashArray:'4,7'
+    }).addTo(gOld);
+  });
+}
+
+var oldBox = document.getElementById('oldBox');
+var oc = document.createElement('label'); oc.className = 'chk';
+oc.innerHTML = '<input type=checkbox checked><span class="ln dash" style="border-top-color:#7a7a7a"></span>社区近似（对照）';
+oldBox.appendChild(oc);
+oc.querySelector('input').addEventListener('change', function(){
+  showOld = this.checked; applyMask();
+});
+
+document.getElementById('altChk').addEventListener('change', function(){
+  showAlt = this.checked;
+  document.getElementById('alt').style.display = showAlt ? '' : 'none';
+  applyMask();
+});
+
+var totalPts = ROM.items.reduce(function(a,i){return a+i.segments.length;},0) +
+  ROM.items.filter(function(i){return i.id==='light';})[0].extraRails.reduce(function(a,e){return a+e.segments.length;},0);
+document.getElementById('info').innerHTML =
+  '<b>' + ROM.items.length + '</b> 条龙 · 合计 <b>' + totalPts + '</b> 采样点 · <b>8</b> 条轨道<br>' +
+  '白龙：低空主环 33.3km / 高空 33.8km / 2 条联络轨 / 初岛支线<br>' +
+  '元素龙：' + ROM.items.filter(function(i){return i.id!=='light';})
+    .map(function(i){return i.name + ' ' + (i.totalLengthM/1000).toFixed(1) + 'km';}).join(' · ');
+
+applyMask();
+map.fitBounds(TILE_BOX);
+</script>
+</body>
+</html>
