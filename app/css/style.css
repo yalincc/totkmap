@@ -621,6 +621,33 @@ html, body {
   color: #f2f5f9;
   word-break: break-all;
 }
+/* V2.0.3 名称行：名字 + 复制按钮同一行（复制名字去搜攻略） */
+.ec-name-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 2px;
+}
+.ec-name-row .card-name { flex: 1; min-width: 0; margin-bottom: 0; }
+.ec-copy {
+  flex: 0 0 auto;
+  margin-top: 1px;
+  padding: 1px 8px;
+  background: transparent;
+  border: 1px solid rgba(96,168,128,.55);
+  border-radius: 3px;
+  color: #8fc9a8;
+  font-size: 11px;
+  line-height: 17px;
+  cursor: pointer;
+  transition: background .15s, color .15s;
+}
+.ec-copy:hover { background: rgba(96,168,128,.16); color: #c8e8d6; }
+.ec-copy.done {
+  border-color: #eac27e;
+  color: #eac27e;
+  background: rgba(234,194,126,.12);
+}
 /* 材料卡片高清大图（居中，点击查看 256px 原图） */
 .card-img {
   display: block;

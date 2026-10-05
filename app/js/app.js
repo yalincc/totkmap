@@ -1424,7 +1424,7 @@
     $('exploreCard').classList.add('hidden');
     state.current = null;
   });
-  /* V2.0.2：神庙「注意事项」展开/收起 */
+  /* V2.0.3 神庙「注意事项」展开/收起 */
   $('ecNoteMore').addEventListener('click', function () {
     var row = $('ecNoteRow');
     var txt = $('ecNoteText');
@@ -1432,6 +1432,15 @@
     row.classList.toggle('expanded', open);
     txt.classList.toggle('clamped', !open);
     this.textContent = open ? '收起' : '展开';
+  });
+  /* V2.0.3 复制标点名称（查攻略用）。名称取 full（含「神庙-」前缀）优先，
+     避免与地图上其他分类重名；自定义标点无 full 时用 name。 */
+  $('ecCopy').addEventListener('click', function () {
+    var m = state.current;
+    if (!m) return;
+    var txt = (m.full || m.name || '').trim();
+    if (!txt) return;
+    copyText(txt, this, '已复制', 'done');
   });
   initExploreCardDrag();
 
@@ -2040,6 +2049,35 @@
     saveSelected();
     buildCatalogPanel(); renderMarkers(); updateCount(); updateLayerCount();
   });
+
+  /* ---------------- 复制到剪贴板（通用） ----------------
+   * navigator.clipboard 在 file:// 与非安全上下文中不可用/会 reject，
+   * 故保留 execCommand('copy') 兜底（项目既有做法）。 */
+  function copyText(txt, btn, doneText, cls) {
+    function flash() {
+      if (!btn) { if (doneText) flashHint(doneText); return; }
+      var old = btn.textContent;
+      btn.textContent = doneText || '已复制';
+      if (cls) btn.classList.add(cls);
+      setTimeout(function () { btn.textContent = old; if (cls) btn.classList.remove(cls); }, 1500);
+    }
+    function fallbackCopy() {
+      var ta = document.createElement('textarea');
+      ta.value = txt;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand('copy'); } catch (e) {}
+      document.body.removeChild(ta);
+      flash();
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(txt).then(flash).catch(fallbackCopy);
+    } else {
+      fallbackCopy();
+    }
+  }
 
   /* ---------------- 帮助弹窗路径复制按钮 ---------------- */
   Array.prototype.forEach.call(document.querySelectorAll('.copy-btn'), function (b) {
