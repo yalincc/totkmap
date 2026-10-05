@@ -4,11 +4,39 @@
 
 ## 直接使用
 
-用浏览器打开 **`index.html`** 即可，无需服务器。
+网页地图位于 **`app/`** 目录，两种方式任选：
+
+- **本地使用**：打开 `app/index.html` 即可，无需服务器；推荐用任意静态服务器打开（如 VS Code Live Server、`python -m http.server`），瓦片加载更快
+- **本地部署**：下载整个 `app/` 文件夹，放到任意静态服务器（Nginx / EdgeOne Pages / GitHub Pages 等）根目录即可，站点根目录指向 `app/` 内容
 
 在线版：**https://totk.yalin.site/**
 
 > 完成进度、自定义标记、图层选择自动保存在浏览器本地存储中，关页不丢。
+
+## 项目结构
+
+```
+TOTKmap/
+├── app/                            ← 网页地图（下载 / 部署只需这个文件夹）
+│   ├── index.html                  ← 入口页面
+│   ├── sw.js                       ← 离线缓存（Service Worker）
+│   ├── assets/                     ← 图标、材料图片
+│   ├── css/  js/  data/            ← 样式、逻辑、地图数据
+│   ├── vendor/                     ← 第三方库（Leaflet 等）
+│   └── tiles_obj/                  ← 三层地图瓦片（天空 / 地上 / 地下）
+├── live-go/                        ← 实时定位引擎（TOTKNavi 核心）
+├── live-eden/                      ← 定位引擎（Eden 版）
+├── live-python/                    ← 定位服务 Python 原型
+├── xnavi-gui/                      ← 桌面导航程序 TOTKNavi-GUI（Wails 工程）
+├── release/                        ← TOTKNavi 桌面端发布包（exe / zip）
+├── tools/                          ← 瓦片 / 数据构建工具（开发用）
+├── 归档/                           ← 历史文档、旧备份、已弃用瓦片
+└── *.md                            ← 开发计划、调研文档
+```
+
+**下载指引**：
+- 只要地图 → 下载 **`app/`** 文件夹即可
+- 需要桌面实时导航 → 再从 **`release/`** 下载 TOTKNavi 安装包（配合 `app/` 网页使用）
 
 ## 实时角色导航（可选）
 

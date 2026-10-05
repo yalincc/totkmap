@@ -1,5 +1,5 @@
-# 旧 gamersky 瓦片（V1.4.0 后弃用，约 200MB，本地保留不入库）
-tiles/
+# 旧 gamersky 瓦片（V1.4.0 后弃用，约 200MB，已移入归档，不入库）
+归档/tiles-已弃用/
 
 # 坐标换算前备份（git 历史已保留全部版本，本地备份不入库）
 *.bak
@@ -13,7 +13,7 @@ desktop.ini
 # 定位服务运行时数据（机器相关偏移，不入库）
 live-python/known_addrs.json
 live-go/known_addrs.json
-tiles_obj/*/7/
+app/tiles_obj/*/7/
 live-go/TOTKNavi.exe
 live-go/*.exe
 live-go/status.json
