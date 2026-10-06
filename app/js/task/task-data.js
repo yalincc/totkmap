@@ -74,11 +74,18 @@
         unlocks: arr(g.unlocks)
       };
 
-      /* 官方步骤：清掉 ROM 控制字符，丢掉没有文字的空步骤 */
-      var steps = (raw.steps || []).map(function (s) {
+      /* 官方步骤（★ 用 stepsUI，2026-10-06 起）
+       * ------------------------------------------------------------
+       * raw.steps 是 ROM 的**事件触发器数组**，不是玩家步骤列表：
+       * 1077 条里 600 条是空壳（Ready / Collect2nd 这类纯钩子，
+       * 游戏内也不显示文字），还有重复文案和未替换的变量占位符。
+       * 之前这里只按 text 非空过滤，Result 空壳虽然被丢掉了，
+       * 但**没做去重**，且清洗口径与数据层不一致。
+       * 现在统一由 tools/clean_steps.py 离线产出 stepsUI，
+       * 前端只做 HTML 转义，不再自己判断哪些该留。
+       * hasStepText=false 表示官方词条文件本身不存在 → 卡片要如实说明。 */
+      var stepsUI = (raw.stepsUI || []).map(function (s) {
         return { name: s.name || '', text: clean(s.text) };
-      }).filter(function (s) {
-        return s.text || s.name;
       });
 
       var t = {
@@ -106,8 +113,11 @@
         flowPts: (raw.flowPts || []).map(function (p) {
           return { gx: num(p.gx), gy: num(p.gy), gz: num(p.gz) };
         }),
-        steps: steps,
-        nSteps: raw.nSteps || steps.length,
+        steps: stepsUI,                /* 展示用（已清洗） */
+        stepsUI: stepsUI,              /* 同上，别名：卡片读这个名 */
+        nSteps: raw.nSteps || 0,       /* ROM 触发点总数（仅用于对照说明） */
+        nStepsUI: raw.nStepsUI != null ? raw.nStepsUI : stepsUI.length,
+        hasStepText: raw.hasStepText !== false,
 
         /* --- 任务链 --- */
         reqs: raw.reqs || [],           /* [{type,key,reqName,linkable}] */

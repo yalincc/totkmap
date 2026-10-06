@@ -50,16 +50,45 @@
     return section('前置', '<ul class="tk-list">' + items.join('') + '</ul>');
   }
 
-  /* 官方分步（ROM 权威） */
+  /* 官方分步（ROM 权威）
+   * ------------------------------------------------------------
+   * ★ 必须读 stepsUI，不能读 steps（2026-10-06 修正）。
+   *   ROM 的 steps 是「事件触发器数组」不是「玩家步骤列表」：
+   *   1077 条里 600 条是空壳（Ready / Collect2nd 这类纯钩子，
+   *   游戏内也不显示任何文字），12 条文字完全重复，
+   *   327 条含未替换的游戏变量占位符。
+   *   早期这里直接 map + i+1 编号，空壳照样占号 →
+   *   「来自地底的呼唤」显示成 1=空 2=正文 3=正文 4=空 5=正文，
+   *   看着像文字没对上，根因在数据。
+   *   stepsUI 由 tools/clean_steps.py 离线清洗（去空壳/去重/剥占位符），
+   *   原始 steps 保留在数据里给 M4 流程线取坐标用。
+   */
   function stepsHtml(t) {
-    if (!t.steps || !t.steps.length) return '';
-    var items = t.steps.map(function (s, i) {
+    var steps = t.stepsUI || [];
+    if (!steps.length) {
+      /* 该任务官方词条文件本身不存在（迷你挑战/赛事/佣兵支线共 12 个），
+         或正文全是空壳。此时**不显示**该分区，
+         绝不能给玩家一个「1 2 3 4」的空架子。 */
+      if (t.hasStepText === false && t.nSteps) {
+        return section('官方分步',
+          '<div class="tk-none">游戏内这个任务没有官方分步文本' +
+          '（仅有 ' + t.nSteps + ' 个内部触发点）</div>');
+      }
+      return '';
+    }
+    var items = steps.map(function (s, i) {
       var txt = s.text ? esc(s.text).replace(/\n/g, '<br>') : '';
       return '<li class="tk-step">' +
         '<span class="tk-step-no">' + (i + 1) + '</span>' +
         '<span class="tk-step-tx">' + txt + '</span></li>';
     });
-    return section('官方分步', '<ol class="tk-steps">' + items.join('') + '</ol>');
+    /* 标注数据来源与清洗口径，别让玩家以为是游戏内原文的完整列表 */
+    return section('官方分步<span class="tk-src">ROM 整理</span>',
+      '<ol class="tk-steps">' + items.join('') + '</ol>' +
+      (t.nSteps > steps.length
+        ? '<div class="tk-note">已合并 ' + (t.nSteps - steps.length) +
+          ' 条空壳/重复的内部触发点，只保留有说明的步骤</div>'
+        : ''));
   }
 
   /* 攻略段（社区整理，明确标注来源） */
@@ -124,7 +153,19 @@
     h += '<div class="tk-meta">';
     if (t.oldCat) h += '<div class="tk-mrow"><span class="tk-mk">原分类</span><span class="tk-mv">' + esc(t.oldCat) + '</span></div>';
     if (t.npcCn) h += '<div class="tk-mrow"><span class="tk-mk">相关 NPC</span><span class="tk-mv">' + esc(t.npcCn) + '</span></div>';
-    if (t.nSteps) h += '<div class="tk-mrow"><span class="tk-mk">步骤</span><span class="tk-mv">' + t.nSteps + ' 步</span></div>';
+    /* 步数用 nStepsUI（清洗后玩家真正看到的），不是 nSteps（ROM 触发点数）。
+       两者不一致时注明原始值，避免「说13 步却是 5 条」的对不上。 */
+    if (t.nStepsUI) {
+      h += '<div class="tk-mrow"><span class="tk-mk">步骤</span><span class="tk-mv">' +
+        t.nStepsUI + ' 步' +
+        (t.nSteps && t.nSteps !== t.nStepsUI
+          ? '<span class="tk-mv-sub">（游戏内 ' + t.nSteps + ' 个触发点）</span>'
+          : '') +
+        '</span></div>';
+    } else if (t.nSteps) {
+      h += '<div class="tk-mrow"><span class="tk-mk">步骤</span><span class="tk-mv">' +
+        t.nSteps + ' 个触发点<span class="tk-mv-sub">（无官方说明）</span></span></div>';
+    }
     if (t.gx != null && t.gz != null) {
       var co = 'X ' + Math.round(t.gx) + ' · Z ' + Math.round(t.gz);
       /* gy 缺失就明说「高度未知」，不猜 */
@@ -325,6 +366,7 @@
     '.tk-mrow { display:flex; gap:8px; font-size:12.5px; line-height:1.7; }',
     '.tk-mk { color:rgba(255,255,255,.42); flex:0 0 52px; }',
     '.tk-mv { color:rgba(255,255,255,.85); flex:1; }',
+    '.tk-mv-sub { color:rgba(255,255,255,.4); font-size:11.5px; }',
 
     '/* 分区 */',
     '.tk-sec { margin-top:12px; padding-top:10px; border-top:1px solid rgba(255,255,255,.07); }',
@@ -358,6 +400,13 @@
     '  background:rgba(234,194,126,.18); color:#eac27e;',
     '  font-variant-numeric:tabular-nums; margin-top:2px; }',
     '.tk-step-tx { flex:1; }',
+    '.tk-note {',
+    '  font-size:11.5px; color:rgba(255,255,255,.38);',
+    '  margin-top:6px; padding-left:25px; line-height:1.55; }',
+    '.tk-none {',
+    '  font-size:12.5px; color:rgba(255,255,255,.45);',
+    '  background:rgba(255,255,255,.04); border-radius:6px;',
+    '  padding:7px 9px; line-height:1.6; }',
 
     '/* 底部操作 */',
     '.tk-actions { display:flex; gap:8px; margin-top:14px; }',
