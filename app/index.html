@@ -181,6 +181,10 @@
   </div>
 </section>
 
+<!-- ============ 任务卡片（V2.1 独立模块，与 #exploreCard 完全分离） ============ -->
+<!-- 内层容器由 task-card.js 填充；外层只负责定位与显隐 -->
+<section id="taskCard" class="hidden"><div id="taskCardBody"></div></section>
+
 <!-- ============ 材料原图预览（点击卡片图标查看 256px 原图） ============ -->
 <div id="imgPreview" class="img-preview hidden">
   <img id="imgPreviewImg" src="" alt="">
@@ -323,6 +327,13 @@
 <!-- V2.0：龙轨迹图层（独立模块）。数据已改为 ROM 官方轨道 dragon_paths_rom.js，
      旧的社区近似数据 data/dragon_paths.js 不再加载（保留文件仅作对照） -->
 <script src="js/dragon-layer.js?v=200"></script>
+<!-- V2.1：任务板块（独立模块）。data/task-plan.js 由 tools/build_task_plan.py 生成，
+     依赖 app.js 暴露的 window.TOTK / TOTK_APP，必须排在app.js 之后。
+     要下线任务板块：删掉下面 4行即可，界面完全回到 V2.0 状态。 -->
+<script src="data/task-plan.js?v=210"></script>
+<script src="js/task/task-data.js?v=210"></script>
+<script src="js/task/task-panel.js?v=210"></script>
+<script src="js/task/task-card.js?v=210"></script>
 <!-- V1.9.4 问题3：Service Worker 瓦片/静态资源持久缓存，地图打开秒开 -->
 <script>
 if ('serviceWorker' in navigator) {
