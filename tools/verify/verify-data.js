@@ -70,9 +70,19 @@ const RULES = [
   },
   {
     id: 'nocoord', title: '无有效坐标（上不了地图）', level: 'warn',
-    test: t => !t.posValid,
+    /* ★ 排除已标注 noPlaceReason 的任务：
+     *   有 6 条本来就该没有坐标（4 条 ROM 内部事件 + 井内拍照 + 剧情碎片），
+     *   它们不是缺陷。不排除的话这个 WARN 会永远挂在报告里，
+     *   让人以为还有 bug 没修完 —— 长期挂着假警报的体检等于没有体检。*/
+    test: t => !t.posValid && !t.noPlaceReason,
     why: '卡片无导航按钮，地图无任务点',
-    fix: '若该任务本就没有固定地点（如剧情对话），在数据里显式标注，别当缺陷'
+    fix: '若该任务本就没有固定地点（如剧情对话），在 build_task_plan.py 的 NO_PLACE_REASON 里标注原因'
+  },
+  {
+    id: 'nocoord-known', title: '无坐标但已标注原因（正常）', level: 'info',
+    test: t => !t.posValid && !!t.noPlaceReason,
+    why: '这些任务本来就没有固定地点，不上图是正确的',
+    fix: '无需处理'
   },
   {
     id: 'cat-thin', title: '分类为「其他」（筛选粒度过粗）', level: 'warn',

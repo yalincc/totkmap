@@ -43,6 +43,32 @@ MINIGAME_PAT = re.compile(
 MINIGAME_HINT = re.compile(r"(小游戏|赛事|比赛|竞速|多合一|连打|对打)")
 
 
+# ------------------------------------------------------------------ 无坐标原因标注
+# ★ 为什么要有这个表：
+#   L1 体检里「无有效坐标」是WARN，但 6 条里有 4 条是 ROM 内部事件
+#   （ReactingStatue×4，玩家根本接不到）、1 条是德克塔族树桩的剧情碎片、
+#   1 条是井里的照片拍摄点—— 它们**本来就该没有地图坐标**。
+#   不标注的话，这个 WARN 会永远挂在体检报告里，让人以为还有 bug 没修完。
+#
+# 语义：noPlaceReason = 一句话说明「为什么这里没有坐标」，
+#verify-data.js 见到它就把该任务从「无坐标」WARN 里排除。
+# 只能给**确实无法获得坐标**的任务填；
+#   若是「上游漏抽了坐标」这种可修的，填了就是掩盖问题，别填。
+NO_PLACE_REASON = {
+    "GetMasterSword":
+        "德克塔族大树桩处的剧情碎片（注入Cokiri 地名但无实际坐标）",
+    "IchikaraDaughterPhoto":
+        "拍摄点在卡卡利科村井内（地下空间，地图无对应坐标）",
+}
+# ROM 内部事件：不是玩家可接的任务，key 本身就是内部名。
+# ★ 注意有一条是**无后缀**的（Npc_BaseCamp_Assistant_ReactingStatue），
+#   只循环 1~4 会漏掉它，体检就会一直报 1 条 WARN。
+NO_PLACE_INTERNAL = "ROM 内部事件（背景触发器），玩家不可接取，不该上图"
+NO_PLACE_REASON["Npc_BaseCamp_Assistant_ReactingStatue"] = NO_PLACE_INTERNAL
+for _i in (1, 2, 3, 4):
+    NO_PLACE_REASON["Npc_BaseCamp_Assistant_ReactingStatue%d" % _i] = NO_PLACE_INTERNAL
+
+
 def load_tasks():
     text = TASKS_JS.read_text(encoding="utf-8")
     data = json.loads(text[text.index("["): text.rindex("]") + 1])
@@ -227,6 +253,10 @@ def main():
         t["_onMap"] = bool(t.get("posValid") and t.get("gx") is not None
                           and t.get("gz") is not None
                           and not (abs(t.get("gx", 0)) < 1 and abs(t.get("gz", 0)) < 1))
+        # ★ 无坐标原因：说明白「为什么这里没坐标」，让 L1 体检别把它当缺陷。
+        #   没有坐标的任务里，只有本表列出的那些是「本来就该没有」；
+        #   其余的一律留空，让 WARN 继续报——那是真待修。
+        t["_noPlaceReason"] = NO_PLACE_REASON.get(t.get("key"))
         # ★ 同坐标重叠：地图上会叠成一个点，卡片里要分条列清
         t["_overlap"] = [o["name"] for o in overlap.get((t.get("gx"), t.get("gz")), [])
                          if o is not t]
@@ -355,6 +385,9 @@ def main():
                             for p in t["_flowPts"]]
             o["onMap"] = t["_onMap"]
             o["overlap"] = t["_overlap"]
+            # 无坐标原因（仅当确实无法获得坐标时才有值）
+            if t["_noPlaceReason"]:
+                o["noPlaceReason"] = t["_noPlaceReason"]
             o["reqs"] = t["_reqs"]
             o["unlockList"] = t["_unlocks"]
             # 展示用分步（已清洗）；原始 steps 保留在 o["steps"] 供 M4 流程线用

@@ -193,6 +193,33 @@ const L2 = [
     }
   },
   {
+    file: 'verify-series-list.js',
+    label: 'M6.3 同系列折叠列表',
+    check(out) {
+      const r = parseJsonLast(out)
+      if (!r) return { ok: false, why: '输出不是合法 JSON' }
+      const errs = r['错误'] || []
+      if (errs.length) return { ok: false, why: `页面报错 ${errs.length} 条：${errs[0]}` }
+      const fails = r['失败项'] || []
+      if (fails.length) return { ok: false, why: fails.slice(0, 2).join('；') }
+      return { ok: true, why: r['摘要'] || '系列列表渲染与交互正常' }
+    }
+  },
+  {
+    file: 'verify-mobile.js',
+    label: 'M6.4 移动端视口实测',
+    check(out) {
+      /* 视口数量直接从脚本汇总里读，不去解析第一段现场数据——
+       * parseJsonFirst 遇缩进 JSON + 尾随换行时判不稳（实测两次都拿到 0）。 */
+      const r = parseJsonLast(out)
+      if (!r) return { ok: false, why: '输出不是合法 JSON' }
+      const fails = r['失败项'] || []
+      if (fails.length) return { ok: false, why: fails.slice(0, 2).join('；') }
+      const n = r['视口数'] || 0
+      return { ok: true, why: `${n} 种手机视口（${r['视口清单'] || ''}）：卡片/按钮/侧栏/Tab 无溢出，触控面积达标` }
+    }
+  },
+  {
     file: 'task-done-map.js',
     label: 'M5.1 完成态上地图',
     optional: 'PROGRESS_SAV',
@@ -216,6 +243,22 @@ function parseJson(out) {
   const i = out.indexOf('{')
   if (i < 0) return null
   try { return JSON.parse(out.slice(i)) } catch (e) { return null }
+}
+
+/* 有些脚本会先打现场数据、再打一段汇总断言（两段 JSON）。
+ * parseJson 从第一个 { 起解到末尾，遇上这种输出必然失败。
+ * 从后往前找最后一个能独立解析成功的顶层对象。 */
+function parseJsonLast(out) {
+  if (!out) return null
+  const idx = []
+  for (let i = 0; i < out.length; i++) if (out[i] === '{') idx.push(i)
+  for (let k = idx.length - 1; k >= 0; k--) {
+    try {
+      const v = JSON.parse(out.slice(idx[k]))
+      if (v && typeof v === 'object' && !Array.isArray(v)) return v
+    } catch (e) { /* 继续往前找 */}
+  }
+  return null
 }
 
 async function runL2() {

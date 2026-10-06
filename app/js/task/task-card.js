@@ -261,18 +261,38 @@
         '</div>';
     }
 
-    /* --- 系列（同一主题的一批任务，顺序不重要）--- */
+    /* --- 系列（同一主题的一批任务，顺序不重要）---
+     * M6.3 改成可折叠列表：原先只给一个「本任务」按钮 + 一句
+     * 「名字相近可搜 XX」，玩家想看同系列其它任务必须关卡片、去搜索框
+     * 打字、再从结果里认哪个是自己要的——三步跳。
+     * 现在折叠展开直接列全部，点一下就切过去。
+     *
+     * 为什么用 <details> 而不是自造折叠：
+     *   「任务原文」折叠区已经用它了，同一套样式与键盘行为（可 Tab 可回车），
+     *   不引入第二套交互模型。老大原话也是「少而精」。
+     *
+     * 默认折叠：同系列最长15 条（PhotoSpot），全展开会把卡片撑到出屏。
+     * 头部仍然显示「共 N 个 · 已完成 M」——这是判断要不要展开的关键信息，
+     * 不能藏进折叠区里。 */
     if (rel.series) {
       var se = rel.series;
-      var selfDone = !!(TD && TD.isDone(t.key));
+      var doneN = se.list.filter(function (x) { return TD && TD.isDone(x.key); }).length;
+      var rows = se.list.map(function (x) {
+        var cls = 'tk-se-row';
+        if (x.key === t.key) cls += ' self';
+        if (TD && TD.isDone(x.key)) cls += ' done';
+        return '<button type="button" class="' + cls + '" data-tk-goto="' + esc(x.name) + '">' +
+          '<span class="tk-se-n">' + esc(x.name) + '</span>' +
+          '<span class="tk-se-m">' +
+            (x.key === t.key ? '当前' : (TD && TD.isDone(x.key) ? '已完成' : (x.locCn || x.catCn || ''))) +
+          '</span></button>';
+      }).join('');
       out += '<div class="tk-chain tk-series">' +
-        '<div class="tk-chain-h">同系列<span class="tk-src">共 ' + se.total + ' 个任务</span></div>' +
-        '<div class="tk-chain-c">' +
-        '<button type="button" class="tk-ch-c' + (selfDone ? ' done' : ' cur') +
-        '" data-tk-goto="' + esc(t.name) + '">本任务</button>' +
-        '<span class="tk-chain-tip">同系列还有 ' + (se.total - 1) + ' 个，' +
-        '名字相近可搜「' + esc(se.list[0].name.replace(/[0-9]+$/, '')) + '」</span>' +
-        '</div></div>';
+        '<details class="tk-details">' +
+        '<summary><span class="tk-chain-h">同系列' +
+        '<span class="tk-src">共 ' + se.total + ' 个 · 已完成 ' + doneN + '</span></span></summary>' +
+        '<div class="tk-se-list">' + rows + '</div>' +
+        '</details></div>';
     }
 
     return out;
@@ -445,9 +465,16 @@
        放在最后是因为它比前置/攻略次要，不该把正文挤下去。 */
     h += armorHtml(t);
 
-    /* 底部操作：导航 / 追踪 / 标记完成（复制已挪到右上角） */
+    /* ---------- 底部操作：导航 / 追踪 / 标记完成 ----------
+       无坐标时导航按钮置灰而不是隐藏：
+       隐藏会让玩家以为卡片缺功能；置灰 + 说明原因才讲得通
+       「这个任务本来就没有固定地点」不是 bug。 */
+    var noNav = (t.gx == null || t.gz == null || !t.onMap);
     h += '<div class="tk-actions">';
-    h += '<button type="button" class="btn act" id="tkNav">导航</button>';
+    h += '<button type="button" class="btn act' + (noNav ? ' is-off' : '') + '" id="tkNav"' +
+      (noNav ? ' disabled' : '') +
+      (noNav && t.noPlaceReason ? ' title="' + esc(t.noPlaceReason) + '"' : '') +
+      '>导航</button>';
     /* 追踪按钮文案跟随实际状态：追踪中显示「取消追踪」 */
     var tracking = global.TaskFlow && global.TaskFlow.isTracking(t.key);
     h += '<button type="button" class="btn act' + (tracking ? ' is-on' : '') +
@@ -466,6 +493,9 @@
         (t.flowPts.length > 1 ? '，可连成流程线' : '') + '</span>';
     } else if (t.tier === 'L2') {
       flow = '<span class="tk-flow-hint">这个任务只有 1 个地点，无需连线</span>';
+    } else if (t.noPlaceReason) {
+      /* 已知无地点：把原因说出来，玩家才不会反复找「导航怎么用不了」 */
+      flow = '<span class="tk-flow-hint">' + esc(t.noPlaceReason) + '</span>';
     } else {
       flow = '<span class="tk-flow-hint">这个任务没有可定位的地点</span>';
     }
@@ -942,11 +972,50 @@
     '  width:5px; height:5px; border-radius:50%;',
     '  background:#1f9d5c; box-shadow:0 0 2px rgba(0,0,0,.6); }',
     /* 系列条比链条轻一档，别跟链条抢注意力 */
-    '.tk-series { background:rgba(255,255,255,.03); border-style:dashed; }',
+    '.tk-series { background:rgba(255,255,255,.03); border-style:dashed; padding:0; }',
     '.tk-series .tk-ch-c { background:rgba(234,194,126,.12); border-color:rgba(234,194,126,.3); color:rgba(234,194,126,.8); }',
-    '.tk-series .tk-chain-tip {',
-    '  flex:1; min-width:0; margin-left:4px;',
-    '  font-size:11px; line-height:1.5; color:rgba(255,255,255,.42); }',
+
+    /* --- M6.3 系列折叠列表 ---
+       summary 复用「任务原文」折叠区的三角与交互（.tk-details 样式已在上方定义），
+       这里只补系列自己的排版。
+       头部做成 flex：左边「同系列」，右边「共 N 个 · 已完成 M」贴边对齐。 */
+    '.tk-series .tk-details > summary {',
+    '  padding:9px 10px; cursor:pointer; list-style:none;',
+    '  position:relative; padding-right:22px; user-select:none; }',
+    '.tk-series .tk-details > summary::-webkit-details-marker { display:none; }',
+    /* 箭头：与「任务原文」折叠区同一套语言（▸ 展开 ▾），
+       但不能复用 .tk-fold 的选择器——系列区没有那个父类，
+       照抄会导致箭头根本不渲染。 */
+    '.tk-series .tk-details > summary::after {',
+    '  content:"▸"; position:absolute; right:4px; top:50%; margin-top:-6px;',
+    '  font-size:11px; color:rgba(255,255,255,.42); transition:transform .15s; }',
+    '.tk-series .tk-details > summary:hover { background:rgba(255,255,255,.03); }',
+    '.tk-series .tk-details > summary:hover::after { color:rgba(255,255,255,.75); }',
+    '.tk-series .tk-details > summary .tk-chain-h { margin-bottom:0; width:100%; }',
+    '.tk-series .tk-details[open] > summary { border-bottom:1px solid rgba(255,255,255,.07); }',
+    '.tk-series .tk-details[open] > summary::after { transform:rotate(90deg); }',
+    /* 列表默认限高：PhotoSpot 系列 15 条全展开会把卡片撑到出屏，
+       超过 8 条内部滚动。头部数字已经够判断，滚不滚的无所谓。 */
+    '.tk-se-list { max-height:212px; overflow-y:auto; padding:4px 6px 6px; }',
+    '.tk-se-row {',
+    '  display:flex; align-items:center; gap:8px; width:100%;',
+    '  padding:5px 7px; border-radius:5px; cursor:pointer;',
+    '  font-size:12px; text-align:left;',
+    '  color:rgba(255,255,255,.72); background:transparent;',
+    '  border:0; text-shadow:none; transition:background .12s; }',
+    '.tk-se-row:hover { background:rgba(255,255,255,.07); color:#fff; }',
+    '.tk-se-n { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }',
+    '.tk-se-m {',
+    '  flex:none; font-size:10px; letter-spacing:.3em;',
+    '  color:rgba(255,255,255,.3); }',
+    /* 已完成：划掉压暗，和「任务原文」里的链接同一套语言 */
+    '.tk-se-row.done .tk-se-n { color:rgba(255,255,255,.4); text-decoration:line-through; }',
+    '.tk-se-row.done .tk-se-m { color:rgba(126,200,169,.6); }',
+    /* 当前这条：金底，和任务链「你正在看这一环」同一个信号 */
+    '.tk-se-row.self { background:rgba(234,194,126,.14); color:#f5d79c; }',
+    '.tk-se-row.self:hover { background:rgba(234,194,126,.2); }',
+    '.tk-se-row.self .tk-se-m { color:#eac27e; }',
+    '.tk-se-row.self.done .tk-se-n { color:rgba(245,215,156,.55); }',
 
     /* --- M6.1 本任务可获得的防具 ---
        复用链条区的容器语言（同色系圆角盒），但底色更淡一档：
@@ -999,7 +1068,10 @@
 
     '/* 底部操作 */',
     '.tk-actions { display:flex; gap:8px; margin-top:14px; }',
-    '.tk-actions .btn { flex:1; }',
+    /* 触控最小可点高度 40px（Apple/Google 的 44px 基线在窄屏放不下，
+       40px 是移动端公认的合格下限）。实测 34px 在手机上会误触。
+       用 min-height 而不是 height：文案变两行时不至于把字挤出去。 */
+    '.tk-actions .btn { flex:1; min-height:40px; }',
 
     '/* --- 标题行：左标题 + 右操作 --- */',
     '.tk-title-row {',
@@ -1017,6 +1089,14 @@
     '.tk-actions .btn.act.is-on {',
     '  background:rgba(234,194,126,.16); border-color:rgba(234,194,126,.45);',
     '  color:#eac27e; }',
+    /* 不可用态：置灰 + not-allowed 光标。
+       不用 display:none —— 藏掉按钮会让人以为卡片缺功能，
+       置灰（配title 说明原因）才讲得通「这任务没地点」。 */
+    '.tk-actions .btn.act.is-off {',
+    '  opacity:.36; cursor:not-allowed; }',
+    '.tk-actions .btn.act.is-off:hover {',
+    '  background:rgba(255,255,255,.06); border-color:rgba(255,255,255,.14);',
+    '  color:rgba(255,255,255,.8); transform:none; }',
 
     '/* --- 完成态 --- */',
     '/* 右上角勾：参考神庙完成标记，绿色实心 + 白勾，不降标题透明度 */',

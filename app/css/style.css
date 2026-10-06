@@ -848,7 +848,11 @@ html, body {
   border-bottom: 1px solid #45454d;
 }
 .lt-btn {
-  height: 26px;
+  /* ★ 触控下限：原来 height:26px 是纯鼠标时代的尺寸，
+     在手机上点不准（实测 375px 视口下按钮只有 26px 高）。
+     改 min-height:36px —— 工具栏是次要操作，40px 太大占地方，
+     36px 配合 full-width 的按钮横向有富余，够手指点。 */
+  min-height: 36px;
   padding: 0 12px;
   background: rgba(255,255,255,.1);
   border: 1px solid rgba(255,255,255,.12);
