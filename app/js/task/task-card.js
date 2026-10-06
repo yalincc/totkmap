@@ -138,14 +138,17 @@
   function buildHtml(t) {
     var h = '';
 
-    /* 顶部：分类标签 + 任务名 */
-    h += '<div class="tk-head">';
+    /* 顶部：分类标签 + 任务名。
+       ★ 整块 tk-grip（把手）覆盖头部和标题行 —— 这是拖动的显式入口，
+         光标变 grab，视觉上有六点抓手图案。
+         点关闭按钮（.tk-close 在里面）不启动拖动，见 makeDraggable 的closest 排除。 */
+    h += '<div class="tk-grip">';
     h += '<span class="tk-chip tk-chip-' + (t.cat === 'Main' ? 'main' : t.cat === 'ImportantMini' ? 'imp' : t.cat === 'Sub' ? 'sub' : 'oth') + '">' +
       esc(t.group) + '</span>';
     if (!t.hasName) {
       h += '<span class="tk-chip tk-noname" title="游戏内这个任务没有官方标题，用内部编号显示">暂无官方名</span>';
     }
-    h += '<button type="button" class="tk-close" id="tkClose">×</button>';
+    h += '<button type="button" class="tk-close" id="tkClose" title="关闭">×</button>';
     h += '</div>';
     h += '<h3 class="tk-name">' + esc(t.name) + '</h3>';
 
@@ -206,6 +209,101 @@
     return h;
   }
 
+  /* ---------- 拖动 ----------
+   * ------------------------------------------------------------
+   * 为什么要做：卡片是 fixed 定位、从点击位置弹出，
+   * 点完地图上的任务点后卡片常常正好压在那个点（甚至压住整片区域），
+   * 想看被挡的地图位置就只能先关卡片。
+   *
+   * 可拖区域 = 顶部标题区 + 卡片内所有非交互空白。
+   * 不可拖：按钮 / 链接 / 分步正文（那是选文本的地方）+ 滚动条。
+   *
+   * 用 pointer events + setPointerCapture，不用 mousedown/touchstart：
+   *   ① 鼠标/触摸/手写笔一套代码；
+   *   ② capture 之后即使指针移出卡片，move/up 仍然派发到卡片，
+   *      不会因为「指针跑到 Leaflet 上」被地图抢走（实测这是必须的）。
+   *
+   * ★ 拖动不会误关卡片：全局「点别处关闭」监听的是 click 事件，
+   *   而拖动不产生 click（浏览器只在按下抬起未移动时才发 click）。
+   *   即便只是点了一下空白，card.contains(el) 也会拦下关闭。
+   */
+  var DRAG_THRESHOLD = 3;   /* 小于这个位移仍算点击，不触发拖动 */
+
+  function makeDraggable(card) {
+    if (card.__tkDrag) return;
+    card.__tkDrag = true;
+
+    var st = null;   /* 拖动会话：{pid, ox, oy, x0, y0, moved} */
+
+    function start(e) {
+      /* 左键 / 触摸 / 手写笔；右键和中间键不管 */
+      if (e.pointerType === 'mouse' && e.button !== 0) return;
+      var el = e.target;
+      /* 交互元素不启动拖动，否则点按钮会变成拖按钮 */
+      if (el.closest && el.closest('button, a, input, select, textarea')) return;
+      /* 竖向滚动条区域（约12px 宽）不启动拖动，
+         否则在长卡片上想滚动条却变成了拖卡片 */
+      if (card.scrollHeight > card.clientHeight + 2) {
+        var r = card.getBoundingClientRect();
+        if (e.clientX > r.right - 14) return;
+      }
+      st = { pid: e.pointerId, ox: 0, oy: 0, x0: e.clientX, y0: e.clientY, moved: false };
+      var r = card.getBoundingClientRect();
+      st.ox = r.left; st.oy = r.top;
+      /* ★ 两个动作缺一不可，CSS 单独上不够（实测仍选中 8 字）：
+         ① e.preventDefault() —— 浏览器在 pointerdown 的**默认动作**里
+            建立文本选区，光写 user-select:none 只是 CSS 提示，
+            默认动作照样跑（headless Chrome 实测禁不掉）。
+            这里 preventDefault 才是真正掐断选区的那一刀。
+         ② 加 tk-press 类 —— 拖动全程保持 CSS 禁选，防止后续动作再拉。
+         若最终没移动（判定为点击），end() 会清掉类，
+         此时 preventDefault 的唯一副作用就是「不能选中把手文字」，
+         正文文字不受影响（它们不在 pointerdown 的落点上）。 */
+      card.classList.add('tk-press');
+      if (e.preventDefault) e.preventDefault();
+      /* 先 capture 再等move：保证指针移出卡片仍能收到事件 */
+      if (card.setPointerCapture) {
+        try { card.setPointerCapture(e.pointerId); } catch (_) { /* 忽略 */ }
+      }
+    }
+
+    function move(e) {
+      if (!st || e.pointerId !== st.pid) return;
+      var dx = e.clientX - st.x0, dy = e.clientY - st.y0;
+      if (!st.moved) {
+        if (Math.abs(dx) < DRAG_THRESHOLD && Math.abs(dy) < DRAG_THRESHOLD) return;
+        st.moved = true;
+        card.classList.add('tk-dragging');   /* 抓握光标 + 禁止选中文本 */
+      }
+      /* 视口内夹取：卡片宽高用实际渲染值，不写死 350/420 */
+      var r = card.getBoundingClientRect();
+      var x = st.ox + dx, y = st.oy + dy;
+      var maxX = Math.max(0, global.innerWidth - r.width);
+      var maxY = Math.max(0, global.innerHeight - r.height);
+      card.style.left = Math.min(Math.max(0, x), maxX) + 'px';
+      card.style.top = Math.min(Math.max(0, y), maxY) + 'px';
+    }
+
+    function end(e) {
+      if (!st || e.pointerId !== st.pid) return;
+      if (card.releasePointerCapture) {
+        try { card.releasePointerCapture(e.pointerId); } catch (_) { /* 忽略 */ }
+      }
+      card.classList.remove('tk-dragging');
+      card.classList.remove('tk-press');
+      /* 拖动过程中浏览器可能已建了选区，松手后清掉，
+         否则文本上永久留一块蓝色高亮。 */
+      var sel = global.getSelection && global.getSelection();
+      if (sel && st.moved && sel.removeAllRanges) sel.removeAllRanges();
+      st = null;
+    }
+
+    card.addEventListener('pointerdown', start);
+    card.addEventListener('pointermove', move);
+    card.addEventListener('pointerup', end);
+    card.addEventListener('pointercancel', end);
+  }
+
   /* ---------- 按钮区：统一阻止冒泡 ---------- */
   /* 卡片内任何交互都不能冒泡到 document 的「点别处关闭」监听器，
      否则点一下按钮卡片就消失了。 */
@@ -226,7 +324,12 @@
        - 从卡片内部跳转过来（点在#taskCard 里）→ 保持原位不动，
          否则用点击坐标会让卡片每次跳转都乱跑；
        - 从地图点进来 → 鼠标位置附近弹出。
-       均做视口内夹取，避免卡片跑到屏幕外找不见。 */
+       均做视口内夹取，避免卡片跑到屏幕外找不见。
+
+       ★ 偏移量从 +16 改成 +24 并优先往「远离点击点」的方向甩：
+         原本卡片总是落在点击点右下，正好压住刚点的那张任务点图标，
+         想看被挡的地图位置必须先关卡片。现在卡片尽量甩到点的另一侧，
+         刚点的点始终露在外面（配合拖动，玩家可以自己挪）。 */
     var W = 350, H = 420;
     var x, y;
     var fromCard = !!(evt && evt.target &&
@@ -236,13 +339,19 @@
       y = parseInt(card.style.top, 10) || 80;
     } else {
       var p = (evt && (evt.originalEvent || evt)) || null;
-      x = (p ? (p.clientX || 0) : 0) + 16;
-      y = (p ? (p.clientY || 0) : 0) + 16;
-      if (!p) { x = 80; y = 80; }
+      if (p) {
+        /* 点在屏幕左半边→ 卡片甩到右侧，反之甩到左侧：
+           这样卡片永远不会压在刚点的那一点上。 */
+        x = p.clientX < global.innerWidth / 2 ? p.clientX + 24 : p.clientX - W - 24;
+        y = p.clientY + 24;
+      } else {
+        x = 80; y = 80;
+      }
     }
     card.style.left = Math.min(Math.max(14, x), Math.max(14, global.innerWidth - W - 14)) + 'px';
     card.style.top = Math.min(Math.max(14, y), Math.max(14, global.innerHeight - H)) + 'px';
 
+    makeDraggable(card);
     bind(t);
   }
 
@@ -364,13 +473,36 @@
     '  border-radius:10px; box-shadow:0 8px 32px rgba(0,0,0,.55);',
     '  backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);',
     '  padding:14px 16px 16px; user-select:text;',
+    /* 拖动反馈：抓握光标提示可拖；拖动中禁用选中文本，
+       否则鼠标一动就拉出一片蓝色选区。
+       注意：这些行必须是完整字符串（含收尾单引号），
+       插在数组中间的 JS 注释虽然合法，但极易把相邻字符串的引号吃掉。 */
+    '  cursor:default;',
+    /* 按下即禁选：必须早于 move 判定生效，见 makeDraggable/start 注释 */
+    /* ★ 必须写 * 后代选择器：user-select 虽然可继承，
+       但子元素（.tk-chip 等）若自带 user-select:text 会覆盖掉父级的 none，
+       结果还是能拉出选区（实测拖动中选中 8 字）。 */
+    '.tk-press, .tk-press * { user-select:none !important; -webkit-user-select:none !important; }',
+    '.tk-dragging { cursor:grabbing; }',
+    '.tk-dragging * { cursor:grabbing !important; }',
     '  scrollbar-width:thin; scrollbar-color:rgba(255,255,255,.14) transparent; }',
     '#taskCard.hidden { display:none; }',
     '#taskCard::-webkit-scrollbar { width:3px; }',
     '#taskCard::-webkit-scrollbar-thumb { background:rgba(255,255,255,.12); border-radius:3px; }',
 
-    '/* 顶部 */',
-    '.tk-head { display:flex; align-items:center; gap:6px; margin-bottom:8px; }',
+    '/* 顶部：tk-grip 是显式拖动把手（六点抓手图案 + grab 光标） */',
+    '.tk-grip {',
+    '  display:flex; align-items:center; gap:6px; margin-bottom:8px;',
+    '  cursor:grab; padding:2px 0; margin-left:-2px; margin-right:-2px;',
+    '  border-bottom:1px solid rgba(255,255,255,.06); padding-bottom:6px;',
+    '  touch-action:none; /* ★ 必须：否则触摸设备上浏览器会接管手势，卡片拖不动 */',
+    '}',
+    '.tk-grip:active { cursor:grabbing; }',
+    '.tk-grip::before {',
+    '  content:""; flex:0 0 auto; width:11px; height:9px; opacity:.4;',
+    '  background-image:radial-gradient(currentColor 1px, transparent 1.1px);',
+    '  background-size:3.5px 3.5px; color:rgba(255,255,255,.9);',
+    '}',
     '.tk-chip {',
     '  font-size:11px; padding:2px 7px; border-radius:4px;',
     '  background:rgba(255,255,255,.08); color:rgba(255,255,255,.7);',
