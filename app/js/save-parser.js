@@ -147,10 +147,69 @@ var TOTKSaveParser = (function () {
     return out;
   }
 
+  /* V2.1 M5: 任务完成判定（配合 data/task-save.js）
+   * ------------------------------------------------------------
+   * 机制（已用真实 progress.sav 实测验证，285/285 命中）：
+   *   任务进度存在存档的同一张 hash 表里，键 = hash('Step_' + 任务key)。
+   *   值不是 0/1，而是「当前阶段名」的 murmur 哈希 —— 每个任务有
+   *   自己的阶段枚举，末项固定叫 Complete（哈希全局唯一 0x4c0a63f4）。
+   * 所以判定极简：值 === hash('Complete') 即已完成。
+   *
+   * map = window.TOTK_TASK_SAVE，形如
+   *   { "AisyaRescue": {hash:"0xe0c24add", done:"0x4c0a63f4", stages:[...]}, ... }
+   *
+   * 返回 { <任务key>: {done:true, stage:'Complete', idx:5, total:6}, ...}
+   * 只返回「存档里确实有值」的任务；不在 hash 表的（key=null 的攻略孤儿）不返回。
+   */
+  var QUEST_DONE_HASH = null;
+  function questDoneHash() {
+    /* hash() 是全局函数（vendor/murmurhash3js.min.js），算一次缓存住。
+       ⚠️ 不能硬编码 0x4c0a63f4 的十进制常数：不同 murmur 实现
+       算出的有符号值可能不同，统一现场算最稳。 */
+    if (QUEST_DONE_HASH === null) {
+      QUEST_DONE_HASH = (typeof hash === 'function') ? (hash('Complete') >>> 0) : 0x4c0a63f4;
+    }
+    return QUEST_DONE_HASH;
+  }
+
+  function questDone(parsed, saveMap) {
+    var out = {};
+    if (!parsed || !parsed.ok) return out;
+    var map = saveMap || window.TOTK_TASK_SAVE;
+    if (!map) return out;
+    var DONE = questDoneHash();
+
+    for (var key in map) {
+      if (!Object.prototype.hasOwnProperty.call(map, key)) continue;
+      var entry = map[key];
+      /* 产物里 hash 存的是 "0x..." 字符串；>>> 0 转无符号，
+         因为 murmur 结果可能落在 JS 的负整数区间 */
+      var h = parseInt(entry.hash, 16) >>> 0;
+      var off = parsed.valueByHash[h];
+      if (off === undefined) continue;          /* 该存档没有这个任务 → 跳过 */
+      var val = parsed.dv.getUint32(off, true);
+      var stages = entry.stages || [];
+      /* 反查阶段名（值是阶段名的哈希，只能等值匹配，不能比大小） */
+      var stage = '';
+      for (var i = 0; i < stages.length; i++) {
+        if ((hash(stages[i]) >>> 0) === val) { stage = stages[i]; break; }
+      }
+      out[key] = {
+        done: val === DONE,
+        stage: stage,
+        idx: stage ? stages.indexOf(stage) : -1,
+        total: stages.length
+      };
+    }
+    return out;
+  }
+
   return {
     parse: parse,
     collect: collect,
     pointDone: pointDone,
+    questDone: questDone,
+    questDoneHash: questDoneHash,
     count: count,
     countGuids: countGuids
   };

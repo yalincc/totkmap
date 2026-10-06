@@ -104,6 +104,41 @@
     return section('攻略要点<span class="tk-src">社区整理</span>', out);
   }
 
+  /* ---------- 官方分步 → 「任务原文」折叠区 ----------
+   * ------------------------------------------------------------
+   * 折叠规则（老大定的）：
+   *   有攻略要点时 → 官方原文降级为折叠区，攻略是主体
+   *   没有攻略时   → 不能把唯一可用的内容藏起来，直接平铺显示
+   * 理由：攻略是玩家真正要看的，官方分步是补充；但攻略缺失时
+   * 官方分步就是唯一信息源，藏起来等于这个卡片什么也没有。
+   */
+  function stepsSectionHtml(t) {
+    if (!t.stepsUI || !t.stepsUI.length) {
+      if (t.hasStepText === false) {
+        return section('官方步骤', '<div class="tk-empty">游戏内没有这个任务的文字说明</div>');
+      }
+      return '';
+    }
+    var body = stepsHtml(t);
+
+    var hasGuide = t.guide && (
+      (t.guide.start && t.guide.start.length) ||
+      (t.guide.note && t.guide.note.length) ||
+      (t.guide.reward && t.guide.reward.length));
+
+    if (!hasGuide) {
+      /* 没有攻略 → 平铺，官方原文是唯一可用内容 */
+      return section('官方步骤<span class="tk-src">游戏内原文</span>', body);
+    }
+    /* 有攻略 → 折叠。用 details/summary，零 JS 依赖、可键盘操作 */
+    return '<div class="tk-sec tk-fold">' +
+      '<details class="tk-details">' +
+      '<summary class="tk-sec-t">任务原文<span class="tk-src">游戏内 · ' +
+      t.stepsUI.length + ' 步</span></summary>' +
+      '<div class="tk-sec-b">' + body + '</div>' +
+      '</details></div>';
+  }
+
   /* 同坐标重叠：地图上会叠成一个点，必须列清（对应「卡片里一定要清楚」） */
   function overlapHtml(t) {
     if (!t.overlap || !t.overlap.length) return '';
@@ -130,6 +165,45 @@
     return '<div class="tk-sec"><div class="tk-sec-t">' + title + '</div>' +
       '<div class="tk-sec-b">' + body + '</div></div>';
   }
+
+  /* ---------- 完成态 ----------
+   * ------------------------------------------------------------
+   * 数据来源与优先级见 js/task/task-done.js：
+   *   src='save'   来自 progress.sav 的真实进度（权威，不可取消）
+   *   src='manual' 用户手动标记，存在 localStorage
+   * 阶段名（如「Ready」「Step2」）只在存档态下有值，来自 ROM 的阶段枚举。
+   */
+  function doneState(t) {
+    if (window.TaskDone && t.key) return window.TaskDone.status(t.key);
+    return { done: false, src: '', stage: '', idx: -1, total: 0 };
+  }
+
+  /* 右上角完成勾（参考神庙的完成标记：勾 + 标题不加粗降透明度） */
+  function doneBadgeHtml(t) {
+    var st = doneState(t);
+    if (!st.done) return '';
+    var tip = st.src === 'save'
+      ? '已完成（来自存档）'
+      : '已完成（手动标记）';
+    return '<span class="tk-done-tick" title="' + tip + '">✓</span>';
+  }
+
+  /* 底部「标记完成」按钮 */
+  function doneBtnHtml(t) {
+    var st = doneState(t);
+    /* ⚠️ 必须同时判 src 和 done：
+       TaskDone.status() 对**任何出现在存档里**的任务都返回 src='save'
+       （含未完成的，那是「读到存档数据了」而不是「存档说它完成了」）。
+       只判 src 会让全部 285 个任务都显示成「已完成 ✓」且不可点。 */
+    if (st.done && st.src === 'save') {
+      /* 存档里已完成：显示为不可取消的完成态 */
+      return '<button type="button" class="btn done is-done" id="tkDone" disabled ' +
+        'title="' + (st.stage ? '游戏内进度：' + esc(st.stage) : '存档记录已完成') +
+        '">已完成 ✓</button>';
+    }
+    return '<button type="button" class="btn done' + (st.done ? ' is-done' : '') +
+      '" id="tkDone">' + (st.done ? '取消完成' : '标记完成') + '</button>';
+  }
   function kv(k, v) {
     return '<div class="tk-kv"><span class="tk-k">' + k + '</span><span class="tk-v">' + v + '</span></div>';
   }
@@ -150,11 +224,20 @@
     }
     h += '<button type="button" class="tk-close" id="tkClose" title="关闭">×</button>';
     h += '</div>';
+    /* 标题行右侧：完成勾 + 复制（复制挪到右上角，按钮小图标不抢正文注意力） */
+    h += '<div class="tk-title-row">';
     h += '<h3 class="tk-name">' + esc(t.name) + '</h3>';
+    h += '<div class="tk-title-acts">';
+    h += doneBadgeHtml(t);
+    h += '<button type="button" class="tk-icon-btn" id="tkCopy" title="复制任务名">复制</button>';
+    h += '</div>';
+    h += '</div>';
 
     /* 关键信息行：类型 / 步骤数 / 坐标 */
     h += '<div class="tk-meta">';
     if (t.oldCat) h += '<div class="tk-mrow"><span class="tk-mk">原分类</span><span class="tk-mv">' + esc(t.oldCat) + '</span></div>';
+    /* 任务性质（迷你挑战/情节挑战/神庙探索…）—— M5 新增，比 ROM 的四分类更贴近玩家认知 */
+    if (t.kindCn) h += '<div class="tk-mrow"><span class="tk-mk">类型</span><span class="tk-mv">' + esc(t.kindCn) + '</span></div>';
     if (t.npcCn) h += '<div class="tk-mrow"><span class="tk-mk">相关 NPC</span><span class="tk-mv">' + esc(t.npcCn) + '</span></div>';
     /* 步数用 nStepsUI（清洗后玩家真正看到的），不是 nSteps（ROM 触发点数）。
        两者不一致时注明原始值，避免「说13 步却是 5 条」的对不上。 */
@@ -175,19 +258,34 @@
       co += t.hasHeight && t.gy != null ? ' · 高 ' + Math.round(t.gy) : ' · 高度未知';
       h += '<div class="tk-mrow"><span class="tk-mk">坐标</span><span class="tk-mv">' + esc(co) + '</span></div>';
     }
+    /* 完成进度：阶段名 + 「第 n/total 步」，让存档进度可见 */
+    var dst = doneState(t);
+    if (dst.src === 'save' && dst.stage) {
+      var pg = dst.total > 1
+        ? esc(dst.stage) + '<span class="tk-mv-sub">（第 ' + (dst.idx + 1) + '/' + dst.total + ' 步）</span>'
+        : esc(dst.stage);
+      h += '<div class="tk-mrow"><span class="tk-mk">进度</span><span class="tk-mv' +
+        (dst.done ? ' tk-mv-done' : '') + '">' + pg + '</span></div>';
+    }
     h += '</div>';
 
-    /* 各分区 */
+    /* 各分区。
+       顺序刻意调整为「攻略在前、任务原文在后」：
+       攻略是玩家真正要看的正文，官方分步退为补充。 */
     h += overlapHtml(t);
     h += reqsHtml(t);
-    h += stepsHtml(t);
     h += guideHtml(t);
+    h += stepsSectionHtml(t);
     h += unlockHtml(t);
 
-    /* 底部操作 */
+    /* 底部操作：导航 / 追踪 / 标记完成（复制已挪到右上角） */
     h += '<div class="tk-actions">';
     h += '<button type="button" class="btn act" id="tkNav">导航</button>';
-    h += '<button type="button" class="btn act" id="tkCopy">复制</button>';
+    /* 追踪按钮文案跟随实际状态：追踪中显示「取消追踪」 */
+    var tracking = global.TaskFlow && global.TaskFlow.isTracking(t.key);
+    h += '<button type="button" class="btn act' + (tracking ? ' is-on' : '') +
+      '" id="tkTrack">' + (tracking ? '取消追踪' : '追踪') + '</button>';
+    h += doneBtnHtml(t);
     h += '</div>';
 
     /* M4 流程线：L1 才是多点任务（可连线），L2/L3 直接说明为什么画不出。
@@ -355,6 +453,22 @@
     bind(t);
   }
 
+  /* 就地重绘当前卡片：只换 body 内容并重新绑事件，**不动卡片的位置**。
+   （完成态切换、追踪态切换后用，避免调open() 把卡片甩到别处）
+   注意：别写 render(t) —— 没有这个函数（曾踩过：点了没反应 + 控制台
+   PAGEERROR: render is not defined，白白排查一轮）。 */
+  function redraw() {
+    var t = cur;
+    if (!t) return;
+    var body = $('taskCardBody');
+    var card = $('taskCard');
+    if (!body || !card) return;
+    body.innerHTML = buildHtml(t);
+    /* 滚回顶部：内容高度变了还停在原来的滚动位置会显得错乱 */
+    body.scrollTop = 0;
+    bind(t);
+  }
+
   function close() {
     var card = $('taskCard');
     if (card) card.classList.add('hidden');
@@ -390,12 +504,45 @@
       else toast('流程线模块未加载');
     });
 
+    /* 追踪：流程线的持久化开关（关卡片后线仍留在地图上） */
+    var tr = $('tkTrack');
+    if (tr) tr.addEventListener('click', function (e) {
+      stopAll(e);
+      if (!global.TaskFlow) { toast('流程线模块未加载'); return; }
+      global.TaskFlow.toggleTrack();
+      /* 只改文案，不整卡重绘 —— 重绘会让用户滚动位置丢失 */
+      var on = global.TaskFlow.isTracking(t.key);
+      tr.textContent = on ? '取消追踪' : '追踪';
+      tr.classList.toggle('is-on', !!on);
+    });
+
     /* 复制任务名，便于搜攻略 */
     var cp = $('tkCopy');
     if (cp) cp.addEventListener('click', function (e) {
       stopAll(e);
       copy(t.name);
       toast('已复制：' + t.name);
+    });
+
+    /* 标记完成 / 取消完成。
+     * 存档态的任务不允许取消（那是游戏真实进度，强行改会和下次加载存档打架），
+     * 所以这个按钮在存档态下是 disabled 的。 */
+    var dn = $('tkDone');
+    if (dn) dn.addEventListener('click', function (e) {
+      stopAll(e);
+      if (!window.TaskDone) { toast('完成状态模块未加载'); return; }
+      if (!t.key) {
+        toast('这个任务没有存档标识，只能临时标记');
+        return;
+      }
+      var st = window.TaskDone.toggle(t.key);
+      if (st.done) {
+        toast(st.src === 'save' ? '已完成（来自存档）' : '已标记完成：' + t.name);
+      } else {
+        toast('已取消完成：' + t.name);
+      }
+      /* 重画卡片：完成勾、按钮文案、以及 meta 里新增的进度行都要变 */
+      redraw();
     });
 
     /* 卡片内跳转：任务链 / 同位置任务 */
@@ -451,7 +598,14 @@
     }, 0);
   });
 
-  global.TaskCard = { open: open, close: close, current: function () { return cur; } };
+  global.TaskCard = {
+    open: open,
+    close: close,
+    current: function () { return cur; },
+    /* 导出 buildHtml 供验收脚本全量渲染检查（undefined/NaN 泄漏）。
+       正常业务不调它，但留着能随时在浏览器里验证渲染结果。 */
+    buildHtml: buildHtml
+  };
 
   /* ---------- 卡片样式 ---------- */
   /* ★ 自足函数：CSS 以参数形式传进去，不依赖任何外层 var 的赋值顺序。
@@ -572,6 +726,49 @@
     '/* 底部操作 */',
     '.tk-actions { display:flex; gap:8px; margin-top:14px; }',
     '.tk-actions .btn { flex:1; }',
+
+    '/* --- 标题行：左标题 + 右操作 --- */',
+    '.tk-title-row {',
+    '  display:flex; align-items:flex-start; gap:8px; margin-bottom:10px; }',
+    '.tk-title-row .tk-name { flex:1; margin-bottom:0; min-width:0; }',
+    '.tk-title-acts {',
+    '  display:flex; align-items:center; gap:6px; flex:0 0 auto; }',
+    '/* 右上角复制：小按钮，不抢正文注意力 */',
+    '.tk-icon-btn {',
+    '  border:1px solid rgba(255,255,255,.14); background:rgba(255,255,255,.05);',
+    '  color:rgba(255,255,255,.62); font-size:11px; line-height:1;',
+    '  padding:5px 8px; border-radius:5px; cursor:pointer; }',
+    '.tk-icon-btn:hover { background:rgba(255,255,255,.1); color:#fff; }',
+    '/* 追踪开启态：按钮高亮，让「线还在地图上」这件事有视觉出口 */',
+    '.tk-actions .btn.act.is-on {',
+    '  background:rgba(234,194,126,.16); border-color:rgba(234,194,126,.45);',
+    '  color:#eac27e; }',
+
+    '/* --- 完成态 --- */',
+    '/* 右上角勾：参考神庙完成标记，绿色实心 + 白勾，不降标题透明度 */',
+    '.tk-done-tick {',
+    '  display:inline-flex; align-items:center; justify-content:center;',
+    '  width:19px; height:19px; border-radius:50%; flex:0 0 auto;',
+    '  background:#3f9c52; color:#fff; font-size:12px; font-weight:700;',
+    '  line-height:1; }',
+    '.tk-mv-done { color:#7fd18f; }',
+    '.btn.done.is-done {',
+    '  background:rgba(63,156,82,.16); border-color:rgba(63,156,82,.42);',
+    '  color:#8fd79c; cursor:default; }',
+    '.btn.done.is-done:disabled { opacity:1; }',
+
+    '/* --- 「任务原文」折叠区（有攻略时才出现）--- */',
+    '.tk-fold .tk-details { border:0; }',
+    '.tk-fold .tk-details > summary {',
+    '  cursor:pointer; list-style:none; position:relative;',
+    '  padding-right:20px; user-select:none; }',
+    '.tk-fold .tk-details > summary::-webkit-details-marker { display:none; }',
+    '/* 自制小箭头：默认 ▸，展开 ▾ */',
+    '.tk-fold .tk-details > summary::after {',
+    '  content:"▸"; position:absolute; right:2px; top:0;',
+    '  font-size:11px; color:rgba(255,255,255,.42); transition:transform .15s; }',
+    '.tk-fold .tk-details[open] > summary::after { transform:rotate(90deg); }',
+    '.tk-fold .tk-details > summary:hover::after { color:rgba(255,255,255,.75); }',
 
     '/* 流程线占位（M4 启用） */',
     '.tk-flow-row {',

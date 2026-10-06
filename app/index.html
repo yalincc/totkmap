@@ -329,9 +329,15 @@
 <script src="js/dragon-layer.js?v=200"></script>
 <!-- V2.1：任务板块（独立模块）。data/task-plan.js 由 tools/build_task_plan.py 生成，
      依赖 app.js 暴露的 window.TOTK / TOTK_APP，必须排在app.js 之后。
-     要下线任务板块：删掉下面 4行即可，界面完全回到 V2.0 状态。 -->
+     要下线任务板块：删掉下面 6 行即可，界面完全回到 V2.0 状态。
+
+     data/task-save.js 是任务存档变量表（hash 键 + 阶段枚举），由
+     tools/build_task_save.py 从 marcrobledo/savegame-editors 的 hashes.csv 生成。
+     它只是纯数据，解析逻辑在 js/save-parser.js 的 questDone()。 -->
 <script src="data/task-plan.js?v=210"></script>
+<script src="data/task-save.js?v=210"></script>
 <script src="js/task/task-data.js?v=210"></script>
+<script src="js/task/task-done.js?v=210"></script>
 <script src="js/task/task-panel.js?v=210"></script>
 <script src="js/task/task-card.js?v=210"></script>
 <script src="js/task/task-flow.js?v=210"></script>

@@ -97,6 +97,13 @@
         nameSrc: raw.nameSrc,          /* rom=官方中文名；guide=社区起名 */
         cat: raw.cat || 'Other',
         group: groupOf(raw.cat),
+        /* kindCn = 「情节/迷你挑战」这套玩家视角的分类（M5新增，
+           由 tools/add_kindcn.py 离线产出）。
+           与 cat/group 的区别：
+             cat/group 是 ROM 官方分类（主线/重要支线/普通支线/其他）
+             kindCn    是任务性质（主线剧情/迷你挑战/神庙探索/收集要素…）
+           两者正交：Other 里既有 121 条迷你挑战，也有 6 条地区任务。 */
+        kindCn: raw.kindCn || '其他任务',
 
         /* --- 坐标（★ 只用 gx/gy/gz，绝不用 mapX/mapY）
              Leaflet latlng = (gz, gx)，见 app.js 坐标系注释 --- */

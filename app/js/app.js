@@ -1167,6 +1167,19 @@
     var map = window.TOTK_EXPLORE_MAP || {};
     var pd = TOTKSaveParser.pointDone(parsed, map);
     applyProgressDone(Object.keys(pd || {}).map(Number));
+
+    /* V2.1 M5: 任务完成态同样以存档为准。
+     * 机制：hash('Step_<任务key>') 查到 hash 表 → 值等于 hash('Complete') 即完成。
+     * 实测 285/285 全部命中（见 TOTK任务存档同步机制-调研结论.md）。
+     * TaskDone 内部与 localStorage 手动态合并，存档优先。 */
+    try {
+      if (window.TaskDone) {
+        window.TaskDone.applySave(TOTKSaveParser.questDone(parsed, window.TOTK_TASK_SAVE));
+      }
+    } catch (err) {
+      /* 任务存档同步失败不该影响探索类的进度应用 */
+      if (window.console) console.warn('任务存档同步失败', err);
+    }
   }
 
   /* V1.8.0 M3：服务端存档自动同步（BOTWmap 同机制——服务自动定位存档、网页拉取、
@@ -1195,6 +1208,16 @@
           return;
         }
         applyProgressDone(res.doneIds);
+        /* V2.1 M5: 服务端同步路径的任务完成态。
+         * questDone = {任务key: {done, stage, idx, total}}，由 server.py 的
+         * _quest_done() 用同一套 hash 机制算出（与前端 questDone 同口径）。 */
+        if (res.questDone && window.TaskDone) {
+          try {
+            window.TaskDone.applySave(res.questDone);
+          } catch (e) {
+            if (window.console) console.warn('任务进度（服务端）应用失败', e);
+          }
+        }
         if (res.counts) {
           state.save = res.counts;
           state.saveVersion = (res.version || '') + ' · 服务端自动同步';

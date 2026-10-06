@@ -93,12 +93,20 @@
 
     var stats = D.statsByLayer(curLayer);
     /* 全是0（这层没任务）就不显示，避免出现空组 */
-    var total = 0;
-    stats.forEach(function (s) { total += s.count; });
+    var total = 0, totalDone = 0;
+    stats.forEach(function (s) {
+      total += s.count;
+      /* 完成数：本层该分组里已完成的任务（存档态 + 手动态，见 task-done.js） */
+      if (window.TaskDone) {
+        D.listBy(curLayer, s.cat).forEach(function (t) {
+          if (window.TaskDone.isDone(t.key)) totalDone++;
+        });
+      }
+    });
     if (!total) return;
 
     var html = '<div class="group-title tk-group">任务' +
-      '<span class="tk-count">' + total + '</span></div>';
+      '<span class="tk-count">' + totalDone + '/' + total + '</span></div>';
     html += '<div class="cat-grid tk-grid">';
     stats.forEach(function (s) {
       if (s.count <= 0) return;
@@ -242,8 +250,32 @@
       render: render,
       isOn: isOn,
       refresh: tick,
-      stats: function () { return D.statsByLayer(curLayer); }
+      stats: function () { return D.statsByLayer(curLayer); },
+      /* 完成数变化时刷新标题上的 done/total。
+         injectPanel 有「已注入就不重复注入」的短路，所以这里直接改
+         已存在的计数节点，而不是重跑 injectPanel。 */
+      refreshDoneCount: function () {
+        var el = document.querySelector('.tk-group .tk-count');
+        if (!el) return;
+        var total = 0, done = 0;
+        D.statsByLayer(curLayer).forEach(function (s) {
+          total += s.count;
+          if (global.TaskDone) {
+            D.listBy(curLayer, s.cat).forEach(function (t) {
+              if (global.TaskDone.isDone(t.key)) done++;
+            });
+          }
+        });
+        el.textContent = done + '/' + total;
+      }
     };
+
+    /* 订阅完成态变化：手动标记、或加载存档后，标题数字要跟着动 */
+    if (global.TaskDone) {
+      global.TaskDone.onChange(function () {
+        if (ready) global.TaskPanel.refreshDoneCount();
+      });
+    }
   }
 
   /* ---------- 样式（.tk- 前缀，与 app.js 的样式完全隔离） ---------- */

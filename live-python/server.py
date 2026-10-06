@@ -492,6 +492,7 @@ SAVE_GAME_VERSIONS = [
 HASH_TABLE_END = 0x03c800
 PROGRESS_CACHE_SEC = 2.0        # /progress 缓存，避免高频 IO（游戏保存后 2s 内可检测到）
 _progress_cache = {"t": 0.0, "payload": None, "mtime": 0.0}
+_task_save_cache = None          # app/data/task-save.js 的解析结果（进程内缓存，文件不变就不重读）
 
 
 def _find_save():
@@ -676,6 +677,71 @@ def _progress_counts(parsed):
     return out
 
 
+def _load_task_save():
+    """读 app/data/task-save.js 里的任务存档变量表。
+
+    文件是 JS 对象字面量（键有引号、值是裸标识符），不是合法 JSON，
+    所以用正则逐条抽，不用 json.loads。
+    """
+    global _task_save_cache
+    if _task_save_cache is not None:
+        return _task_save_cache
+    p = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "app", "data", "task-save.js")
+    out = {}
+    try:
+        with io.open(p, "r", encoding="utf-8") as f:
+            txt = f.read()
+        pat = re.compile(
+            r'"([^"]+)"\s*:\s*\{\s*hash\s*:\s*"(0x[0-9a-fA-F]+)"\s*,\s*'
+            r'done\s*:\s*"(0x[0-9a-fA-F]+)"\s*,\s*doneIdx\s*:\s*(\d+)\s*,\s*'
+            r'stages\s*:\s*\[([^\]]*)\]')
+        for m in pat.finditer(txt):
+            out[m.group(1)] = {
+                "hash": int(m.group(2), 16),
+                "done": int(m.group(3), 16),
+                "doneIdx": int(m.group(4)),
+                "stages": re.findall(r'"([^"]+)"', m.group(5)),
+            }
+    except (OSError, ValueError):
+        out = {}
+    _task_save_cache = out
+    return out
+
+
+def _quest_done(parsed):
+    """任务完成态：{<任务key>: {"done":bool, "stage":str, "idx":int, "total":int}}
+
+    机制（已用真实 progress.sav 实测验证，285/285 命中）：
+      键 = hash('Step_' + 任务key)，值 = 当前阶段名的 murmur 哈希，
+      末项固定叫 Complete，其哈希全局唯一 → 等值判定即完成。
+    """
+    tmap = _load_task_save()
+    if not tmap:
+        return {}
+    vb = parsed["valueByHash"]
+    data = parsed["data"]
+    done_hash = _murmur3_32("Complete")
+    out = {}
+    for key, ent in tmap.items():
+        off = vb.get(ent["hash"])
+        if off is None:
+            continue                      # 该存档没有这个任务
+        val = struct.unpack("<I", data[off:off + 4])[0]
+        stage = ""
+        idx = -1
+        for i, s in enumerate(ent["stages"]):
+            if _murmur3_32(s) == val:
+                stage, idx = s, i
+                break
+        out[key] = {
+            "done": val == done_hash,
+            "stage": stage,
+            "idx": idx,
+            "total": len(ent["stages"]),
+        }
+    return out
+
+
 def progress_payload(force=False):
     """重新解析当前槽存档 → doneIds（可逐点映射的已完成标点 id 列表）。"""
     now = time.time()
@@ -713,7 +779,9 @@ def progress_payload(force=False):
                 done_ids.append(int(mid))
     out = {"ok": True, "version": parsed["version"], "save": path, "doneIds": done_ids,
            "mapped": sum(len(emap.get(k) or {}) for k in ("towers", "tears", "bubbuls")),
-           "counts": _progress_counts(parsed), "mtime": mt}
+           "counts": _progress_counts(parsed),
+           "questDone": _quest_done(parsed),
+           "mtime": mt}
     _progress_cache.update({"t": now, "payload": out, "mtime": mt})
     return out
 

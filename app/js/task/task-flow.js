@@ -219,13 +219,70 @@
    *   流程线只能由玩家点「显示流程」按钮才出现。
    *   （实测踩过：包了 open 之后，一开卡片就有 4 个节点凭空出现，
    *     紧接着点按钮反而把它关掉 —— 行为完全反了。） */
+  /* ---------- 追踪（tracking）----------
+   * ------------------------------------------------------------
+   * ★ 追踪 = 「把这条流程线钉在地图上」，关掉卡片也留着。
+   *   之前 close() 一律收线，导致想对照地图看别的任务时线已经没了。
+   *
+   * 生命周期：
+   *   点「追踪」→ 线显示 + tracking=true
+   *   → 关卡片 → 线仍在地图上
+   *   → 重新打开该任务点「追踪」→ 关闭（toggle）
+   *   → 打开别的任务 → 旧线自动收掉（不能两条线叠着）
+   */
+  var tracking = false;     /* 追踪中：卡片关了线也留着 */
+  var trackKey = null;      /* 追踪中的任务 key */
+
+  /* 关卡片：普通收线；追踪中保留 */
+  function onCardClose() {
+    if (tracking) return;
+    clear();
+  }
+
+  /* 打开卡片：之前追踪的是别的任务就收掉旧线 */
+  function onCardOpen(t) {
+    if (tracking && trackKey !== (t && t.key)) {
+      tracking = false; trackKey = null;
+      clear();
+    }
+  }
+
+  /* 「追踪」按钮：持久化开关（与「显示流程」的临时显示不同） */
+  function toggleTrack() {
+    var t = global.TaskCard && global.TaskCard.current();
+    if (!t) { toast('请先打开一个任务'); return; }
+
+    if (tracking && trackKey === t.key) {
+      tracking = false; trackKey = null; clear();
+      toast('已关闭流程线');
+      return;
+    }
+    if (tracking && trackKey !== t.key) {
+      tracking = false; trackKey = null; clear();
+    }
+    if (t.tier === 'L3') { toast('这个任务没有可定位的地点'); return; }
+    tracking = true;
+    trackKey = t.key;
+    draw(t);
+    toast('已追踪：' + t.name + '（关掉卡片流程线也会留着）');
+  }
+
+  function isTracking(key) {
+    return tracking && (!key || trackKey === key);
+  }
+
   function hookCard() {
     var C = global.TaskCard;
     if (!C || C.__flowHooked) return;
     var origClose = C.close;
+    var origOpen = C.open;
     C.close = function () {
-      clear();                      /* 关卡片必收线，不留孤线 */
+      onCardClose();
       return origClose.apply(this, arguments);
+    };
+    C.open = function (t) {
+      onCardOpen(t);
+      return origOpen.apply(this, arguments);
     };
     C.__flowHooked = true;
   }
@@ -272,6 +329,8 @@
 
     global.TaskFlow = {
       toggle: toggle,
+      toggleTrack: toggleTrack,
+      isTracking: isTracking,
       draw: draw,
       clear: clear,
       current: function () { return cur; }
