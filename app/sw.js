@@ -3,10 +3,19 @@
  *   - 瓦片 tiles_obj/：cache-first（命中直接本地返回，miss 走网络并写入缓存）
  *   - 静态资源 assets/ data/ vendor/ css/ js/：cache-first（js/css 带 ?v= 版本参数，bump 即强刷）
  *   - index.html /：network-first（保证每次拿到最新页面）
- * 瓦片更新约定：更新瓦片后把 SW_VER 递增（如 'v1.9.4-1' -> 'v1.9.4-2'），
+ * 瓦片更新约定：更新瓦片后把 SW_VER 递增（如'v1.9.4-1' -> 'v1.9.4-2'），
  * 下次访问自动清理旧缓存并重新缓存新瓦片。
+ *
+ * ★★ V2.1 M6.5（2026-10-06）：不 bump SW_VER 会「改了代码但页面没变化」。
+ *   原因链：sw.js 自身也被 cache-first 缓存（index.html 里 register('sw.js')
+ *   没带 ?v=）→ 浏览器一直用第一次缓存的那份 SW → 缓存桶名不变
+ *   → 新写的 js/css 虽然 URL 换了 ?v=211，但**旧缓存桶里没有这个新 URL**，
+ *     cacheFirst 会去网络取新的（这个没问题）；
+ *     真正卡住的是 **sw.js 本身拿不到新版**，导致 activate 时的清理逻辑不生效。
+ *   所以凡是改了 js/css/data 又不 bump SW_VER，就会出现「老页面配新资源」
+ *   或干脆看不到新功能。
  */
-var SW_VER = 'v1.9.4-1';
+var SW_VER = 'v1.9.4-2';
 var TILES_CACHE = 'totk-tiles-' + SW_VER;
 var ASSETS_CACHE = 'totk-assets-' + SW_VER;
 var KEEP_CACHES = [TILES_CACHE, ASSETS_CACHE];

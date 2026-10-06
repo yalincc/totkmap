@@ -238,6 +238,17 @@ const L2 = [
     }
   },
   {
+    file: 'verify-sw-cache.js',
+    label: 'SW 缓存不挡新版本',
+    check(out) {
+      const r = parseJsonLast(out)
+      if (!r) return { ok: false, why: '输出不是合法 JSON' }
+      const fails = r['失败项'] || []
+      if (fails.length) return { ok: false, why: fails.slice(0, 2).join('；') }
+      return { ok: true, why: 'SW 装上后重开，拿到的是新 index.html / js / css / data' }
+    }
+  },
+  {
     file: 'task-done-map.js',
     label: 'M5.1 完成态上地图',
     optional: 'PROGRESS_SAV',

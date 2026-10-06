@@ -920,6 +920,26 @@
     toastTimer = setTimeout(function () { t.classList.add('hidden'); }, 2200);
   }
 
+  /* ---------------- Service Worker 更新提示（V2.1 M6.5） ----------------
+   * 这个项目开SW 纯粹是为了瓦片秒开，代价是「改了代码页面可能没变化」。
+   * 检测到新 SW 装好时在这里告诉用户刷一下，别让人以为改动没生效。
+   * 只提示一次（sessionStorage 记 flag）——每次都弹会很烦。 */
+  window.addEventListener('sw-updated', function () {
+    var KEY = 'totkmap_sw_notice';
+    try { if (sessionStorage.getItem(KEY)) return; } catch (e) { /* 隐私模式 */ }
+    try { sessionStorage.setItem(KEY, '1'); } catch (e) { /* 忽略 */ }
+    var t = $('toast');
+    if (!t) return;
+    /* 做成可点击：点一下直接刷，省得自己按 F5 */
+    t.innerHTML = '已下载新版本，<span id="swReload" style="cursor:pointer;' +
+      'text-decoration:underline;color:#eac27e">点此刷新</span>';
+    t.classList.remove('hidden');
+    var r = $('swReload');
+    if (r) r.addEventListener('click', function () { location.reload(); });
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { t.classList.add('hidden'); }, 6000);
+  });
+
   /* ---------------- 实时导航入口（V1.8.0，对接 js/live.js 的 LIVENAV） ---------------- */
   function liveNavTo(name, x, y, layer, type) {
     if (window.LIVENAV) {
