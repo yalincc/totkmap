@@ -54,9 +54,75 @@
   }
 
   /* ---------- 选中状态 ---------- */
+  /* ★ 迁移（2026-10-07 迷你挑战单列时加）
+   *
+   * 症状：改分类后，任务面板五档全部显示 0 且勾不上，地图上一个任务点都不画。
+   * 原因：localStorage 里存的是**旧格式的键**——ROM cat 名
+   *   （Main / ImportantMini / Sub / Other），而新代码按**中文 group** 查
+   *   （主线 / 重要支线 / 普通支线 / 迷你挑战 / 其他）。
+   *   键名对不上 → isOn() 全返回 false → 用户勾选意图整个失效。
+   *
+   * 这类「改了键命名但没管存量 localStorage」的坑很常见：
+   * 代码全对、数据全对，就是老用户什么都看不见。
+   * 所以这里做一次启动迁移，把旧键改名后写回。
+   */
+  var LEGACY_CAT_MAP = {
+    Main: '主线',
+    ImportantMini: '重要支线',
+    Sub: '普通支线',
+    Other: '其他'
+  };
+
   function load() {
-    try { userOn = JSON.parse(localStorage.getItem(LS) || '{}') || {}; }
+    var raw = null;
+    try { raw = localStorage.getItem(LS); } catch (e) { /* 隐私模式 */ }
+    try { userOn = JSON.parse(raw || '{}') || {}; }
     catch (e) { userOn = {}; }
+
+    /* 旧键迁移：把 ROM cat 名（Main/Sub/…）改成中文 group。
+       改键命名而不迁移存量localStorage，勾选意图会整个失效。 */
+    var needSave = false;
+    Object.keys(userOn).forEach(function (layer) {
+      var m = userOn[layer];
+      if (!m || typeof m !== 'object') return;
+      Object.keys(m).forEach(function (k) {
+        if (LEGACY_CAT_MAP[k] && LEGACY_CAT_MAP[k] !== k) {
+          m[LEGACY_CAT_MAP[k]] = m[k];
+          delete m[k];
+          needSave = true;
+        }
+      });
+    });
+
+    /* ★★ 关键：某层完全没有记录时，**默认把该层所有分类勾上**。
+       *
+       * 为什么必须有这一步（2026-10-07 事故）：
+       *   load() 只从 localStorage 读，读不到就是空对象，
+       *   isOn() 于是全返回 false → 分类项渲染出来但**一个都没勾** →
+       *   render() 里 Object.keys(on).length === 0 直接 return →
+       *   **地图上一个任务点都不画**，看上去像「任务大分类完全不显示」。
+       *
+       *   原设计意图是「任务分类默认全开」（用户看到五档带勾、地图一片点），
+       *   但这个默认只存在于老用户的 localStorage 里；
+       *   新用户 / 清过缓存 / 换键名后就全空了。
+       *   所以默认必须由代码兜住，不能指望存储。
+       */
+    if (raw === null) {
+      /* 首次访问：把所有有任务的分类默认勾上 */
+      needSave = true;
+    }
+    [18, 19, 20].forEach(function (layer) {
+      if (userOn[layer] && Object.keys(userOn[layer]).length) return;
+      var stats = D.statsByLayer(layer);
+      if (!stats.length) return;
+      /* 这层有任务的分类才勾，count=0 的不勾（也没必要显示） */
+      var picked = {};
+      var any = false;
+      stats.forEach(function (s) { if (s.count > 0) { picked[s.cat] = true; any = true; } });
+      if (any) userOn[layer] = picked;
+    });
+
+    if (needSave) save();
   }
   function save() {
     try { localStorage.setItem(LS, JSON.stringify(userOn)); } catch (e) { /* 隐私模式忽略 */ }
@@ -196,7 +262,13 @@
     var g = L.layerGroup();
     var list = D.listBy(curLayer);
     list.forEach(function (t) {
-      if (!on[t.cat]) return;
+      /* ★ 按 group 查，不是 t.cat（2026-10-07 迷你挑战单列）。
+       * 上面 on 的键是中文 group（主线/重要支线/…/迷你挑战/其他），
+       * 而 t.cat 还是 ROM 名（Main/ImportantMini/Sub/Other）——
+       * 用 t.cat 查就是键对不上，**每个任务都在这里被 return 掉**，
+       * 表现是「分类面板五档都在、勾了也勾不上、地图上一个点都不画」。
+       * 漏改这一处的教训：换了键命名要grep 全部读取点，别只改「看起来相关」的。 */
+      if (!on[t.group]) return;
       var isDone = !!(global.TaskDone && t.key && global.TaskDone.isDone(t.key));
       /* ★ Leaflet latlng = (gz, gx)，见 app.js 坐标系注释 */
       var m = L.marker([t.gz, t.gx], {

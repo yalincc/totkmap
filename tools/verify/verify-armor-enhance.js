@@ -44,7 +44,7 @@ const CHROME = 'C:/Program Files/Google/Chrome/Application/chrome.exe'
      * 断言五档齐全、且「迷你挑战」这一档点得动（能被 listBy 过滤出来）。
      * 这条专门防「改回按ROM cat 过滤」——那样迷你挑战会落进「其他」，
      * 面板上点不动、统计也归错地方。 */
-  R['-1_分类分组'] = await page.evaluate(() => {
+  R['-1_分类分组'] = await page.evaluate(async () => {
     const D = window.TaskData
     if (!D) return { 未加载: true }
     const layer = 18
@@ -60,6 +60,38 @@ const CHROME = 'C:/Program Files/Google/Chrome/Application/chrome.exe'
       迷你挑战总数: g['迷你挑战'] || 0,
       其他总数: g['其他'] || 0,
       迷你挑战可过滤: D.listBy(layer, '迷你挑战').length,
+      /* ★ 勾选「迷你挑战」后，地图上是否真的画出了这批任务的点。
+       * 这条防的是 M6.9 的真实事故：面板五档都渲染出来了、勾上也 active 了，
+       * 但地图上一个点都不画 —— 因为 render() 里用 `on[t.cat]` 查，
+       * 而 on 的键是中文 group、t.cat 是 ROM 名，键对不上全被 return 掉。
+       * 「面板正常 + 地图空」是最难自查的组合，必须有自动断言。
+       *
+       * 做法：先点掉全部分类（确认地图空了），再单独勾上「迷你挑战」，
+       *   看这批任务的点有没有画出来。 */
+      勾选后地图有迷你挑战点: await (async () => {
+        const before = document.querySelectorAll('.tk-dot-wrap').length
+        const cats = Array.prototype.slice.call(
+          document.querySelectorAll('#catalogList .tk-cat'))
+        cats.forEach(c => { if (c.className.indexOf('active') >= 0) c.click() })
+        return new Promise(res => setTimeout(() => {
+          const offAll = document.querySelectorAll('.tk-dot-wrap').length
+          const mini = document.querySelector(
+            '#catalogList .tk-cat[data-tkcat="迷你挑战"]')
+          if (!mini) { res({ 找不到分类项: true, 全取消后: offAll }); return }
+          mini.click()
+          setTimeout(() => {
+            const after = document.querySelectorAll('.tk-dot-wrap').length
+            res({
+              分类总数: cats.length,
+              默认点数: before,
+              全取消后: offAll,
+              只勾迷你挑战: after,
+              全取消后真的空了: offAll < before,
+              勾上后有新增: after > offAll
+            })
+          }, 700)
+        }, 700))
+      })(),
       迷你挑战有图例类: (() => {
         const t = D.listBy(layer, '迷你挑战')[0]
         return t ? t.group === '迷你挑战' : false
@@ -336,6 +368,20 @@ const CHROME = 'C:/Program Files/Google/Chrome/Application/chrome.exe'
     if (gc.其他总数 > 25) fails.push(`「其他」还有 ${gc.其他总数} 条，迷你挑战没被正确拆出`)
     if (!gc.迷你挑战可过滤) fails.push('listBy 过滤「迷你挑战」返回空——分组被改回按 ROM cat 了？')
     if (!gc.迷你挑战有图例类) fails.push('迷你挑战任务的 group 字段不对')
+    const mp = gc.勾选后地图有迷你挑战点
+    if (mp && !mp.找不到分类项) {
+      if (!mp.全取消后真的空了) {
+        fails.push(`点掉全部分类后地图还有 ${mp.全取消后} 个点（默认 ${mp.默认点数}）—— 取消没生效`)
+      }
+      if (!mp.勾上后有新增) {
+        fails.push(`只勾「迷你挑战」，地图点数没变（${mp.全取消后} → ${mp.只勾迷你挑战}）` +
+          ` —— render() 里多半还在按 t.cat 查`)
+      }
+      /* 该层 118 条迷你挑战里有坐标的约 118 个，明显偏少说明过滤有问题 */
+      if (mp.只勾迷你挑战 < 100) {
+        fails.push(`只勾「迷你挑战」只画出 ${mp.只勾迷你挑战} 个点，应 ≥100`)
+      }
+    }
   }
 
   const e = R['0_环境'] || {}
