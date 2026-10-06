@@ -37,20 +37,40 @@
   /* ---------- 分区构造 ---------- */
 
   /* 前置任务：quest型给可点链接，flag 型不给（那是条件标记不是任务名） */
+  /* 前置条件
+   * ------------------------------------------------------------
+   * ★ M6：同一条链里的前驱已由chainHtml 的进度格表达
+   *   （能点、能看完成状态），这里再列一遍纯冗余，
+   *   而且会让人以为「前置」和「任务链」是两回事。
+   *   所以只保留**链条之外**的条件：flag 型、跨链前置、以及
+   *   指向不在库内的解锁目标（那种更没法用进度格表达）。
+   */
   function reqsHtml(t) {
     if (!t.reqs || !t.reqs.length) return '';
-    var items = t.reqs.map(function (r) {
+    var D = global.TaskData;
+    var chain = D && D.chainOf ? D.chainOf(t.key) : null;
+    var inChain = {};
+    if (chain) chain.list.forEach(function (x) { inChain[x.key] = 1; });
+
+    var items = t.reqs.filter(function (r) {
+      /* 同链前驱 → 已由进度格表达，跳过 */
+      if (r.type === 'quest' && inChain[r.key]) return false;
+      return true;
+    }).map(function (r) {
       if (r.linkable && r.reqName) {
-        return '<li><a href="#" class="tk-link" data-tk-goto="' + esc(r.reqName) + '">' +
-          esc(r.reqName) + '</a></li>';
+        return '<li><a href="#" class="tk-link" data-tk-goto="' + esc(r.reqName) + '"' +
+          (global.TaskDone && global.TaskDone.isDone(r.key)
+            ? ' data-tk-done="1" title="（已完成）"' : '') +
+          '>' + esc(r.reqName) + '</a></li>';
       }
       /* flag 型：显示条件说明但不链接 */
       return '<li class="tk-flag">' + esc(r.reqName || r.key || '未命名条件') + '</li>';
     });
-    return section('前置', '<ul class="tk-list">' + items.join('') + '</ul>');
+    if (!items.length) return '';
+    return section('前置条件', '<ul class="tk-list">' + items.join('') + '</ul>');
   }
 
-  /* 官方分步（ROM 权威）
+  /* 官方步骤列表（**只出裸列表，不带分区标题**）
    * ------------------------------------------------------------
    * ★ 必须读 stepsUI，不能读 steps（2026-10-06 修正）。
    *   ROM 的 steps 是「事件触发器数组」不是「玩家步骤列表」：
@@ -62,17 +82,19 @@
    *   看着像文字没对上，根因在数据。
    *   stepsUI 由 tools/clean_steps.py 离线清洗（去空壳/去重/剥占位符），
    *   原始 steps 保留在数据里给 M4 流程线取坐标用。
+   *
+   * ★ 分区标题不归这里管：折叠与否、有攻略没攻略，标题都不一样，
+   *   统一由 stepsSectionHtml() 决定（见该函数注释里的重复渲染坑）。
    */
-  function stepsHtml(t) {
+  function stepsListHtml(t) {
     var steps = t.stepsUI || [];
     if (!steps.length) {
       /* 该任务官方词条文件本身不存在（迷你挑战/赛事/佣兵支线共 12 个），
          或正文全是空壳。此时**不显示**该分区，
          绝不能给玩家一个「1 2 3 4」的空架子。 */
       if (t.hasStepText === false && t.nSteps) {
-        return section('官方分步',
-          '<div class="tk-none">游戏内这个任务没有官方分步文本' +
-          '（仅有 ' + t.nSteps + ' 个内部触发点）</div>');
+        return '<div class="tk-none">游戏内这个任务没有官方分步文本' +
+          '（仅有 ' + t.nSteps + ' 个内部触发点）</div>';
       }
       return '';
     }
@@ -82,13 +104,12 @@
         '<span class="tk-step-no">' + (i + 1) + '</span>' +
         '<span class="tk-step-tx">' + txt + '</span></li>';
     });
-    /* 标注数据来源与清洗口径，别让玩家以为是游戏内原文的完整列表 */
-    return section('官方分步<span class="tk-src">ROM 整理</span>',
-      '<ol class="tk-steps">' + items.join('') + '</ol>' +
+    /* 标注清洗口径，别让玩家以为是游戏内原文的完整列表 */
+    return '<ol class="tk-steps">' + items.join('') + '</ol>' +
       (t.nSteps > steps.length
         ? '<div class="tk-note">已合并 ' + (t.nSteps - steps.length) +
           ' 条空壳/重复的内部触发点，只保留有说明的步骤</div>'
-        : ''));
+        : '');
   }
 
   /* 攻略段（社区整理，明确标注来源） */
@@ -111,6 +132,11 @@
    *   没有攻略时   → 不能把唯一可用的内容藏起来，直接平铺显示
    * 理由：攻略是玩家真正要看的，官方分步是补充；但攻略缺失时
    * 官方分步就是唯一信息源，藏起来等于这个卡片什么也没有。
+   *
+   * ★★ 修2026-10-06：stepsHtml() 自己会 return section('官方分步'...)，
+   *   这里直接把它当 body 塞进外层 section，等于**同一段文字渲染两遍**
+   *   （截图里能看到「官方步骤」和「官方分步」两个分区内容一样）。
+   *   正确做法：stepsHtml 出裸列表，分区标题一律由本函数决定。
    */
   function stepsSectionHtml(t) {
     if (!t.stepsUI || !t.stepsUI.length) {
@@ -119,7 +145,7 @@
       }
       return '';
     }
-    var body = stepsHtml(t);
+    var body = stepsListHtml(t);
 
     var hasGuide = t.guide && (
       (t.guide.start && t.guide.start.length) ||
@@ -151,14 +177,105 @@
   /* 解锁的后续任务 */
   function unlockHtml(t) {
     if (!t.unlockList || !t.unlockList.length) return '';
-    var items = t.unlockList.map(function (r) {
+    var D = global.TaskData;
+    var chain = D && D.chainOf ? D.chainOf(t.key) : null;
+    var inChain = {};
+    if (chain) chain.list.forEach(function (x) { inChain[x.key] = 1; });
+    /* 同链后继 → 进度格里已经能看到，不重复列 */
+    var items = t.unlockList.filter(function (r) {
+      if (r.key && inChain[r.key]) return false;
+      return true;
+    }).map(function (r) {
       if (r.linkable && r.reqName) {
-        return '<li><a href="#" class="tk-link" data-tk-goto="' + esc(r.reqName) + '">' +
-          esc(r.reqName) + '</a></li>';
+        return '<li><a href="#" class="tk-link" data-tk-goto="' + esc(r.reqName) + '"' +
+          (global.TaskDone && global.TaskDone.isDone(r.key)
+            ? ' data-tk-done="1" title="（已完成）"' : '') +
+          '>' + esc(r.reqName) + '</a></li>';
       }
-      return '<li>' + esc(r.reqName || r.key || '') + '</li>';
+      /* 指向不在库内的目标（小游戏、赛事等已剔除的条目）：
+         说清「不在任务板块里」，别让玩家点了没反应以为坏了 */
+      return '<li class="tk-flag">' + esc(r.reqName || r.key || '') +
+        '<span class="tk-none2">（不在任务板块）</span></li>';
     });
+    if (!items.length) return '';
     return section('完成后解锁', '<ul class="tk-list">' + items.join('') + '</ul>');
+  }
+
+  /* ---------- M6：任务链 / 系列 ---------- */
+  /* 链条区（严格前后：做完 A 才解锁 B）
+   * 显示成可点击的进度格：已完成 / 当前 / 未做
+   * ★ 每一格的完成态**必须查 TaskDone.isDone(key)**，
+   *   不能用「序号 < 当前序号」位置推断——
+   *   那样做的话玩家点了「标记完成」，当前环永远不会变绿，
+   *   链条区就成了摆设（这是第一版的 bug，真浏览器验收抓到的）。
+   * ★ 窄卡片放不下6 格以上的横排，所以超过 5 环就压缩成「前后各一环 + 省略号」。
+   */
+  function chainHtml(t) {
+    var D = global.TaskData;
+    if (!D || !D.relationsOf) return '';
+    var rel = D.relationsOf(t.key);
+    if (!rel) return '';
+
+    var out = '';
+    var TD = global.TaskDone;
+
+    /* 单格的class：done 查真实状态；cur 只表示「你正在看这一环」 */
+    function cellCls(x, i) {
+      var cls = 'tk-ch-c';
+      if (TD && TD.isDone(x.key)) cls += ' done';
+      if (i === ch.index) cls += ' cur';
+      return cls;
+    }
+
+    /* --- 链条 --- */
+    if (rel.chain) {
+      var ch = rel.chain;
+      function cell(i) {
+        var x = ch.list[i];
+        return '<button type="button" class="' + cellCls(x, i) + '" data-tk-goto="' +
+          esc(x.name) + '" title="' + esc(x.name) + '">' + (i + 1) + '</button>';
+      }
+      var cells;
+      if (ch.total <= 5) {
+        cells = ch.list.map(function (x, i) {
+          return cell(i);
+        }).join('<span class="tk-ch-ar">›</span>');
+      } else {
+        cells = [];
+        if (ch.index > 1) cells.push(cell(0), '<span class="tk-ch-ar">…</span>');
+        if (ch.index > 0) cells.push(cell(ch.index - 1), '<span class="tk-ch-ar">›</span>');
+        cells.push(cell(ch.index));
+        if (ch.index < ch.total - 1) {
+          cells.push('<span class="tk-ch-ar">›</span>', cell(ch.index + 1));
+        }
+        if (ch.index < ch.total - 2) cells.push('<span class="tk-ch-ar">…</span>', cell(ch.total - 1));
+        cells = cells.join('');
+      }
+      /* 完成了几环（真实状态，不是位置推断） */
+      var doneN = ch.list.filter(function (x) { return TD && TD.isDone(x.key); }).length;
+      out += '<div class="tk-chain">' +
+        '<div class="tk-chain-h">任务链<span class="tk-src">第 ' + (ch.index + 1) + ' / ' +
+        ch.total + ' 环 · 已完成 ' + doneN + '</span></div>' +
+        '<div class="tk-chain-c">' + cells + '</div>' +
+        '<div class="tk-chain-n">' + esc(ch.list[ch.index].name) + '</div>' +
+        '</div>';
+    }
+
+    /* --- 系列（同一主题的一批任务，顺序不重要）--- */
+    if (rel.series) {
+      var se = rel.series;
+      var selfDone = !!(TD && TD.isDone(t.key));
+      out += '<div class="tk-chain tk-series">' +
+        '<div class="tk-chain-h">同系列<span class="tk-src">共 ' + se.total + ' 个任务</span></div>' +
+        '<div class="tk-chain-c">' +
+        '<button type="button" class="tk-ch-c' + (selfDone ? ' done' : ' cur') +
+        '" data-tk-goto="' + esc(t.name) + '">本任务</button>' +
+        '<span class="tk-chain-tip">同系列还有 ' + (se.total - 1) + ' 个，' +
+        '名字相近可搜「' + esc(se.list[0].name.replace(/[0-9]+$/, '')) + '」</span>' +
+        '</div></div>';
+    }
+
+    return out;
   }
 
   function section(title, body) {
@@ -268,6 +385,14 @@
         (dst.done ? ' tk-mv-done' : '') + '">' + pg + '</span></div>';
     }
     h += '</div>';
+
+    /* ---------- M6：任务链 / 系列（放在 meta 之后、分区之前）----------
+     * 为什么放这个位置：这是卡片里唯一的「结构性信息」。
+     *   「这是系列第 3/6 环」必须**先看到**，玩家才知道
+     *   下面那些前置/解锁列表不是一堆无关任务名。
+     * 数据来源 task-data.js 的 chainOf / seriesOf（离线推导，不是 ROM 字段）。
+     */
+    h += chainHtml(t);
 
     /* 各分区。
        顺序刻意调整为「攻略在前、任务原文在后」：
@@ -607,6 +732,27 @@
     buildHtml: buildHtml
   };
 
+  /* ---------- 订阅完成态变化 ----------
+   * ★ 这个订阅不能省（第一版就漏了）：
+   *   玩家开着卡片时导入存档 / 另一个标签页标记完成，
+   *   卡片的完成勾、按钮文案、进度行、**M6 链条格的完成态**
+   *   全都不会变——看着像「功能没生效」。
+   *   按钮自己那条路径已经调 redraw()，这里补的是
+   *   「不是由这个卡片的按钮触发的」那些路径。
+   * 存档导入时 TaskDone 会连续 notify 十几次，
+   * 所以这里也做防抖，别把浏览器卡住。 */
+  if (global.TaskDone && typeof global.TaskDone.onChange === 'function') {
+    var redrawTimer = null;
+    global.TaskDone.onChange(function () {
+      if (!cur) return;
+      if (redrawTimer) clearTimeout(redrawTimer);
+      redrawTimer = setTimeout(function () {
+        redrawTimer = null;
+        if (cur) redraw();
+      }, 150);
+    });
+  }
+
   /* ---------- 卡片样式 ---------- */
   /* ★ 自足函数：CSS 以参数形式传进去，不依赖任何外层 var 的赋值顺序。
      （原先写成 `var CSS = [...]` + 后面 injectCSS() 调用，因为 var 只提升声明
@@ -705,6 +851,60 @@
 
     '.tk-link { color:#eac27e; text-decoration:none; border-bottom:1px solid rgba(234,194,126,.3); }',
     '.tk-link:hover { border-bottom-color:#eac27e; }',
+    '/* 已完成的前置/后继：划掉并压暗，和「未做的前置」一眼能分开 */',
+    '.tk-link[data-tk-done] { color:rgba(255,255,255,.42); border-bottom-color:rgba(255,255,255,.16); text-decoration:line-through; }',
+    '.tk-none2 { color:rgba(255,255,255,.32); font-size:11px; }',
+
+    /* --- M6 任务链 / 系列 ---
+       位置在 meta 之后、正文之前：这是卡片里唯一的结构性信息，
+       玩家得先知道「这是第几环」，才看得懂下面的前置列表。 */
+    '.tk-chain {',
+    '  margin:10px 0 2px; padding:9px 10px;',
+    '  background:rgba(255,255,255,.045);',
+    '  border:1px solid rgba(255,255,255,.08);',
+    '  border-radius:7px; }',
+    '.tk-chain-h {',
+    '  display:flex; align-items:baseline; gap:6px;',
+    '  font-size:11px; letter-spacing:.4em; color:rgba(255,255,255,.45);',
+    '  text-shadow:none; margin-bottom:7px; }',
+    '.tk-chain-h .tk-src { margin-left:auto; letter-spacing:0; }',
+    '.tk-chain-c { display:flex; align-items:center; flex-wrap:wrap; gap:3px; }',
+    '.tk-chain-n {',
+    '  margin-top:6px; font-size:12px; color:rgba(255,255,255,.78);',
+    '  overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }',
+    '.tk-ch-ar { color:rgba(255,255,255,.28); font-size:11px; margin:0 1px; }',
+    /* 三态：已完成(实心绿) / 当前(金，带光环) / 未做(空心) */
+    '.tk-ch-c {',
+    '  min-width:22px; height:22px; padding:0 5px;',
+    '  border-radius:6px; cursor:pointer;',
+    '  font-size:11px; font-weight:700; line-height:20px;',
+    '  font-variant-numeric:tabular-nums;',
+    '  color:rgba(255,255,255,.62);',
+    '  background:rgba(255,255,255,.05);',
+    '  border:1px solid rgba(255,255,255,.16);',
+    '  text-shadow:none;',
+    '  transition:transform .12s, background .12s; }',
+    '.tk-ch-c:hover { transform:scale(1.14); background:rgba(255,255,255,.14); color:#fff; }',
+    '.tk-ch-c.done {',
+    '  color:#0e2a1a; background:#7ec8a9; border-color:#8ad9bb;',
+    '  text-shadow:none; }',
+    '.tk-ch-c.cur {',
+    '  color:#241c08; background:#eac27e; border-color:#f5d79c;',
+    '  box-shadow:0 0 0 2px rgba(234,194,126,.25); text-shadow:none; }',
+    /* 既是当前环、又已完成 → 金底保留（当前优先），右上角补一个绿点区分。
+       不这么做的后果：玩家标完成当前环后，格子从金变绿，
+       「我现在看的是哪一环」这个信息就丢了。 */
+    '.tk-ch-c.done.cur { position:relative; }',
+    '.tk-ch-c.done.cur::after {',
+    '  content:""; position:absolute; right:2px; top:2px;',
+    '  width:5px; height:5px; border-radius:50%;',
+    '  background:#1f9d5c; box-shadow:0 0 2px rgba(0,0,0,.6); }',
+    /* 系列条比链条轻一档，别跟链条抢注意力 */
+    '.tk-series { background:rgba(255,255,255,.03); border-style:dashed; }',
+    '.tk-series .tk-ch-c { background:rgba(234,194,126,.12); border-color:rgba(234,194,126,.3); color:rgba(234,194,126,.8); }',
+    '.tk-series .tk-chain-tip {',
+    '  flex:1; min-width:0; margin-left:4px;',
+    '  font-size:11px; line-height:1.5; color:rgba(255,255,255,.42); }',
 
     '/* 官方分步 */',
     '.tk-steps { list-style:none; counter-reset:none; }',
