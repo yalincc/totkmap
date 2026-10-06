@@ -77,8 +77,23 @@ const CHROME = 'C:/Program Files/Google/Chrome/Application/chrome.exe'
        gotoArmor 内部会 findTaskMarker 式的按名反查 + gotoMarker。 */
     const A = (window.TOTK_ARMORS || []).find(a => a.name === p.name)
     if (!A) return { 找不到防具记录: true }
+    /*★ 时序检查（M6.7 bugfix）：
+       闪光必须在**地图停稳之后**才出现。
+       原来 flyTo 之后立刻加闪光类 → 0.7s 飞完动画早播完了，
+       玩家只看到一个不显眼的小图标。 */
+    let 闪光时地图已停稳 = null
+    let 地图停稳时刻 = 0
+    MP.once('moveend', () => { 地图停稳时刻 = Date.now() })
+    const 闪光观察 = new MutationObserver(() => {
+      if (document.querySelector('.mk-locate-flash')) {
+        闪光时地图已停稳 = 地图停稳时刻 > 0
+        闪光观察.disconnect()
+      }
+    })
+    闪光观察.observe(document.body, { subtree: true, attributes: true, attributeFilter: ['class'] })
+
     window.TOTK_APP.gotoArmor(A.key)
-    await new Promise(r => setTimeout(r, 1400))   /* 等flyTo 动画 */
+    await new Promise(r => setTimeout(r, 1600))
     const after = { center: MP.getCenter(), zoom: MP.getZoom() }
     const d = Math.hypot(after.center.lat - before.center.lat, after.center.lng - before.center.lng)
     const el = document.querySelector('.mk-locate-flash')
@@ -90,6 +105,7 @@ const CHROME = 'C:/Program Files/Google/Chrome/Application/chrome.exe'
       地图移动距离: Math.round(d),
       缩放: after.zoom,
       有闪烁高亮: !!el,
+      闪光时地图已停稳: 闪光时地图已停稳,
       卡片还开着: !document.getElementById('exploreCard').classList.contains('hidden')
     }
   }, pt0)
@@ -251,6 +267,10 @@ const CHROME = 'C:/Program Files/Google/Chrome/Application/chrome.exe'
     if (g1.地图移动距离 < 1) fails.push(`点跳转后地图没动（移动 ${g1.地图移动距离}px）`)
     if (!g1.现在已勾选) fails.push(`跳转后目标分类 ${g1.目标分类} 仍没勾上（会飞到空白）`)
     if (!g1.有闪烁高亮) fails.push('目标 marker 没有闪烁高亮')
+    /* 时序：闪光必须晚于地图停稳 */
+    if (g1.闪光时地图已停稳 === false) {
+      fails.push('闪光动画在地图还在飞的时候就播了（应等 moveend 之后）')
+    }
   }
 
   const g2 = R['2_同套跳转'] || {}

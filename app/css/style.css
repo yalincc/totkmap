@@ -1502,18 +1502,25 @@ html, body {
    动画：金色光圈脉冲 3 次，让眼睛能在缩略图大小的地图上抓住。
    ============================================================ */
 .mk-locate-flash {
-  animation: mkLocateFlash .85s ease-out 3;
+  animation: mkLocateFlash 1s ease-out 3;
   border-radius: 50%;
-  z-index: 900 !important;
+  /* ★ 目标图标只有 22px，在一堆小图标里根本不显眼。
+     定位时把它临时放大到2.2 倍并抬高z-index，让眼睛能一下抓住。
+     动画结束后 transform 由动画终态接管，不残留。 */
+  z-index: 950 !important;
+  position: relative;
+  pointer-events: none;
 }
+.mk-locate-flash img,
+.mk-locate-flash svg { transform: scale(2.2); transform-origin: center; }
 @keyframes mkLocateFlash {
   0% {
-    box-shadow: 0 0 0 0 rgba(234, 194, 126, .95), 0 0 14px 4px rgba(234, 194, 126, .7);
+    box-shadow: 0 0 0 0 rgba(234, 194, 126, .95), 0 0 18px 6px rgba(234, 194, 126, .8);
     transform: scale(1);
   }
   55% {
-    box-shadow: 0 0 0 12px rgba(234, 194, 126, 0), 0 0 20px 6px rgba(234, 194, 126, .35);
-    transform: scale(1.55);
+    box-shadow: 0 0 0 16px rgba(234, 194, 126, 0), 0 0 26px 8px rgba(234, 194, 126, .4);
+    transform: scale(1.7);
   }
   100% {
     box-shadow: 0 0 0 0 rgba(234, 194, 126, 0), 0 0 0 rgba(234, 194, 126, 0);

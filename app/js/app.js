@@ -1062,27 +1062,51 @@
     renderMarkers();
 
     var ll = [m.x, m.y];
-    map.flyTo(ll, Math.max(map.getZoom(), 6), { duration: 0.7 });
+    var target = Math.max(map.getZoom(), 6);
 
-    /* 高亮那个 marker：先闪一下，tooltip 强制打开 2.5秒再收 */
-    var mk = state.markers[m.id];
-    if (mk) {
-      var el = mk.getElement && mk.getElement();
+    /* ---------- 顺序要紧（M6.7 bugfix）----------
+       ★ 原来是 flyTo 之后**立刻**加闪光类：
+         flyTo 有 0.7s 动画，闪光同时开始 → 等地图停稳，动画早播完了，
+         玩家只看到「一个不显眼的小图标」，不知道那是目标。
+       正确：先飞，**等 moveend 再闪**。
+       ★ 还要在 moveend 里**重新取一次 marker**：
+         飞行途中 renderMarkers 可能重画，原来的 element 已经脱离文档，
+         往旧节点加class 等于白加（表现为「闪了一下就没了」）。 */
+    var flashed = false;
+    function flashNow() {
+      if (flashed) return;
+      flashed = true;
+      var mk2 = state.markers[m.id];
+      if (!mk2) { toast('已定位到「' + (m.name || m.full || '目标') + '」'); return; }
+      var el = mk2.getElement && mk2.getElement();
       if (el) {
         el.classList.remove('mk-locate-flash');
-        void el.offsetWidth;          /* 强制重排，动画才能重放 */
+        void el.offsetWidth;            /* 强制重排，动画才能重放 */
         el.classList.add('mk-locate-flash');
-        setTimeout(function () { el.classList.remove('mk-locate-flash'); }, 2600);
+        setTimeout(function () {
+          if (el.classList) el.classList.remove('mk-locate-flash');
+        }, 2600);
       }
       try {
-        mk.openTooltip();
-        setTimeout(function () { try { mk.closeTooltip(); } catch (e) { /* 图层已重画 */ } }, 2500);
+        mk2.openTooltip();
+        setTimeout(function () { try { mk2.closeTooltip(); } catch (e) { /* 图层已重画 */ } }, 2500);
       } catch (e) { /* 无关紧要 */ }
-    } else {
-      /* marker 确实没画出来（分类刚勾上、Leaflet 还没addLayer）——
-         给个 toast，别让人对着空白图找。 */
-      toast('已定位到「' + (m.name || m.full || '目标') + '」，该分类已自动勾选');
     }
+
+    /* 已在目标位置附近时 flyTo 不会触发 moveend（也没必要飞），
+       直接闪；否则等地图停稳再闪。 */
+    var cur = map.getCenter();
+    var near = Math.abs(cur.lat - m.x) < 1 && Math.abs(cur.lng - m.y) < 1
+      && map.getZoom() >= target;
+    if (near) {
+      flashNow();
+      return;
+    }
+    map.once('moveend', flashNow);
+    map.flyTo(ll, target, { duration: 0.7 });
+    /* 兜底：万一 moveend 没来（缩放相同 Leaflet 会跳过），
+       1.2 秒后仍没闪就补一下——宁可闪晚一拍，别不闪。 */
+    setTimeout(flashNow, 1200);
   }
 
   /* catalogs.js 里「防具」分类的 id 列表 */
