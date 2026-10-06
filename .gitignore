@@ -9,6 +9,12 @@
 *.bak
 *.bak-v141
 
+# ROM 解包缓存（tools/_quest，约 14MB；跑脚本自动重建，不入库）
+tools/_quest/*.sarc
+tools/_quest/*.byml
+tools/_quest/*.jsonl.gz
+tools/_quest/dicts/
+
 # 系统/编辑器
 Thumbs.db
 .DS_Store

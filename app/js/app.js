@@ -186,9 +186,23 @@
       if (relIdx.indexOf(g) < 0) relIdx.push(g);
     });
     relIdx.sort(function (a, b) { return a - b; });
+    /* ★ V2.1 M0：分组标题优先读分类自带的 groupCn，不再靠「第几组」猜名字。
+     *
+     * 旧逻辑（已移除）是把该层出现过的 groupIndex 排序后，按下标去
+     * GROUP_ORDER 里取名字 —— 也就是「第 1 组叫位置、第 2 组叫收集」。
+     * 只要往中间插入一个新组，或某个 count>0 的分类落进中间，
+     * 整层标题就会整体错位（玩家会看到「装备」下面写着「克洛格」）。
+     *
+     * 现在 groupCn 由 tools/add_group_cn.py 按 (layer, groupIndex) 写入，
+     * 且脚本内置「与旧渲染逐条比对」的回归校验，保证显示结果零变化。
+     * 下面的按下标推断保留作兜底，老数据（没有 groupCn）仍能正常显示。
+     */
     var groupName = {};
+    var byIndex = {};
+    cats.forEach(function (c) { byIndex[gidx(c)] = c; });
     relIdx.forEach(function (g, i) {
-      groupName[g] = GROUP_NAME[GROUP_ORDER[i]] || '其他';
+      var explicit = byIndex[g] && byIndex[g].groupCn;
+      groupName[g] = explicit || GROUP_NAME[GROUP_ORDER[i]] || '其他';
     });
 
     cats.forEach(function (c) {
