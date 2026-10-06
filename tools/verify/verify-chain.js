@@ -2,8 +2,11 @@
  * 关注点：① 链条序号对不对 ② 格子的完成态对不对 ③ 跳转能点吗
  *        ④ 「官方步骤/官方分步」重复渲染修掉了吗 ⑤ 无中文名的可读化
  * 用法：node verify-chain.js   （需先起 http://127.0.0.1:8899）
+ *★ 端口可被环境变量覆盖：PORT=8900 node verify-chain.js
+ *   平时直接跑 verify-all.js 就行，它自己起服务。
  */
 const { chromium } = require('playwright-core')
+const PORT = process.env.PORT || 8899
 
 const CASES = {
   六环链中间: 'MonsterFigures02',      // 6 环链的第 3 环
@@ -25,7 +28,7 @@ const CASES = {
   page.on('pageerror', e => { if (!NOISE.test(e.message)) errs.push('PAGEERROR ' + e.message) })
   page.on('console', m => { if (m.type() === 'error' && !NOISE.test(m.text())) errs.push('CONSOLE ' + m.text()) })
 
-await page.goto('http://127.0.0.1:8899/index.html', { waitUntil: 'domcontentloaded' })
+await page.goto(`http://127.0.0.1:${PORT}/index.html`, { waitUntil: 'domcontentloaded' })
 await page.waitForTimeout(4000)
 
 /* ★ 必须先清掉手动标记：否则读到的是上一轮测试的残留，

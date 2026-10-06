@@ -221,8 +221,12 @@ def main():
         t["_tier"] = flow_tier(len(pts))
         t["_group"] = CAT_TO_GROUP.get(t.get("cat"), "其他")
         # 可上图判定
+        # ★ (0,0) 不是空值，是海拉鲁城堡中心。tasks.js 里 posValid 对这类
+        #   没兜住（GetMasterSword 的 ROM 点就是 0,0），直接放行会把导航
+        #   传到城中心。这里补一道与 armors.py 同样的排除。
         t["_onMap"] = bool(t.get("posValid") and t.get("gx") is not None
-                          and t.get("gz") is not None)
+                          and t.get("gz") is not None
+                          and not (abs(t.get("gx", 0)) < 1 and abs(t.get("gz", 0)) < 1))
         # ★ 同坐标重叠：地图上会叠成一个点，卡片里要分条列清
         t["_overlap"] = [o["name"] for o in overlap.get((t.get("gx"), t.get("gz")), [])
                          if o is not t]

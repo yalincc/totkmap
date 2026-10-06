@@ -43,3 +43,7 @@ live-gui/
 # V2.1 任务板块归档的数据快照（tasks.js/task-plan.js/task-save.js/catalogs.js/task-panel.js）：
 # 与 app/data、app/js 下同名文件逐字节相同，git 里已有；快照只留本地做基线参照
 归档/V2.1任务板块-20261006/*.js
+
+# 验收脚本的截图产物（每次跑都会变，不入库）
+tools/verify/*.png
+app/*.png

@@ -10,7 +10,7 @@
  */
 const { chromium } = require('playwright-core')
 const CHROME = 'C:/Program Files/Google/Chrome/Application/chrome.exe'
-const URL = 'http://127.0.0.1:8899/index.html'
+const URL = `http://127.0.0.1:${process.env.PORT || 8899}/index.html`
 
 ;(async () => {
   const browser = await chromium.launch({ executablePath: CHROME, headless: true })

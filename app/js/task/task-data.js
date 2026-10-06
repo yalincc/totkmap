@@ -433,6 +433,120 @@
   }
   function byKeySafe(k) { return BY_KEY[k] || null; }
 
+  /* ============================================================
+   * M6.1：防具掉落反查（armorsOf）
+   * ------------------------------------------------------------
+   * 方向是「任务 → 能拿到哪些防具」，不是「防具 → 属于哪个任务」。
+   * 原因：136 件防具里只有 17 件来自任务（宝箱 53 / 商店 30 / 洞窟 20），
+   * 反向做的话覆盖率天然低；而且真正想查的是「做完这个任务能拿什么」。
+   *
+   * 两个数据来源，置信度分开：
+   *   A. armors.js 的 reqTasks —— extract_armors.py 按「防具名出现在任务名里」
+   *      匹配，conf=high 才是同名实指；conf=low 多半是地名巧合。
+   *      实测坑：「卓拉铠甲」会挂到「卓拉领地的希多」上，纯属「卓拉」撞词。
+   *      → low 全部丢弃，不给用户看错东西。
+   *   B. 任务自己的 guide.reward文本 —— 攻略作者自己写的掉落，最准。
+   *      但攻略爱用比喻：「铠甲蘑菇*10」「铠甲鲷鱼*3」是菜名不是防具。
+   *      → 用 armors.js 的真实 name 精确对撞，对不上的丢弃。
+   *
+   * 合并后按套装去重：同一套的 3 件（头/身/腿）只说一次，
+   * 否则「织梦之勇者」会在卡片里连占三行。
+   */
+  var ARMORS = global.TOTK_ARMORS || [];
+  var ARMOR_INDEX = null;   /* name -> armor记录，懒建 */
+  var ARMOR_BY_TASK = null;/* taskKey -> [armor]，懒建 */
+
+  function armorIndex() {
+    if (ARMOR_INDEX) return ARMOR_INDEX;
+    ARMOR_INDEX = {};
+    ARMORS.forEach(function (a) {
+      if (a.name) ARMOR_INDEX[a.name] = a;
+      /* 「“卓拉护胫”」这种攻略里带引号的写法 */
+      var clean = String(a.name).replace(/[“”"'「」]/g, '');
+      ARMOR_INDEX[clean] = a;
+    });
+    return ARMOR_INDEX;
+  }
+
+  var ARMOR_WORD = /防具|铠甲|套装|护胫|护肩|帽|兜帽|上衣|裤子|紧身|服$/;
+  /* 明显是食材/菜名/道具的误伤：攻略爱这么写 */
+  var ARMOR_FALSE = /蘑菇|鲷鱼|稠鱼|料理|菜|肉|果实|根|花|鱼|贝| Certifications/;
+
+  function armorReward(t) {
+    var g = t.guide;
+    if (!g || !g.reward || !g.reward.length) return [];
+    var idx = armorIndex();
+    var out = [];
+    g.reward.forEach(function (r) {
+      if (!r) return;
+      if (ARMOR_FALSE.test(r)) return;/* 「铠甲蘑菇」不是防具 */
+      if (!ARMOR_WORD.test(r)) return;/* 不像装备词 */
+      var a = idx[r] || idx[String(r).replace(/[“”"'「」]/g, '')];
+      /* ★ 必须能对撞上 armors.js 里的真实条目才认。
+       *   攻略写「神兽兵装·露塔」「异次元恶灵铠甲」这类，后者能对上，
+       *   前者对不上就不显示——宁可少给，不给错。 */
+      if (a) out.push({ armor: a, from: 'guide', conf: 'high' });
+    });
+    return out;
+  }
+
+  function armorsOf(key) {
+    if (!key) return null;
+    /* armors.js 没加载（脚本顺序错了、或将来下线防具数据）时静默返回 null，
+     * 卡片就不渲染这一区。不抛错——掉落实得是可选信息，不能拖垮整张卡。 */
+    if (!ARMORS.length) return null;
+    if (ARMOR_BY_TASK && ARMOR_BY_TASK[key] !== undefined) return ARMOR_BY_TASK[key];
+    var t = BY_KEY[key];
+    if (!t) return (ARMOR_BY_TASK = ARMOR_BY_TASK || {}, ARMOR_BY_TASK[key] = null);
+
+    var seen = {};   /* armorKey -> 记录 */
+    var list = [];
+    function put(a, from, conf) {
+      if (!a || !a.key || seen[a.key]) return;
+      seen[a.key] = 1;
+      list.push({
+        key: a.key, name: a.name, set: a.set, slot: a.slot,
+        icon: a.icon, def: a.def, rank: a.rank,
+        how: a.how, howFrom: from, conf: conf
+      });
+    }
+
+    /* 来源 A：armors.js 的 reqTasks，只信 high */
+    ARMORS.forEach(function (a) {
+      (a.reqTasks || []).forEach(function (r) {
+        if (r.key === key && r.conf === 'high') put(a, 'data', 'high');
+      });
+    });
+    /* 来源 B：任务自己的掉落文本 */
+    armorReward(t).forEach(function (x) { put(x.armor, 'guide', x.conf) });
+
+    if (!list.length) return (ARMOR_BY_TASK = ARMOR_BY_TASK || {}, ARMOR_BY_TASK[key] = null);
+
+    /* 按套装聚类：同套 3 件合成一条「套装（含头/身/腿）」。
+     * 用 setId（Armor_006）而不是 set 名（卓拉）做键——
+     * set 名是「套装名去掉部位词」，不同套装可能撞名。 */
+    var bySet = {};
+    var order = [];
+    list.forEach(function (x) {
+      var sid = x.setId || x.key.replace(/_(Head|Upper|Lower)$/, '') || x.set;
+      if (!bySet[sid]) { bySet[sid] = []; order.push(sid) }
+      bySet[sid].push(x);
+    });
+    var groups = order.map(function (sid) {
+      var arr = bySet[sid];
+      return {
+        set: arr[0].set || sid,
+        setId: sid,
+        items: arr,
+        slots: arr.map(function (x) { return x.slot }),
+        conf: arr.some(function (x) { return x.conf === 'high' }) ? 'high' : 'low'
+      };
+    });
+    var res = { groups: groups, total: list.length };
+    ARMOR_BY_TASK = ARMOR_BY_TASK || {};
+    return (ARMOR_BY_TASK[key] = res);
+  }
+
   global.TaskData = {
     tasks: TASKS,
     byName: function (n) { return BY_NAME[n] || null; },
@@ -449,6 +563,8 @@
     /* M6：任务链 / 系列（卡片与地图上的「这是第几环」靠这三个） */
     chainOf: chainOf,
     seriesOf: seriesOf,
-    relationsOf: relationsOf
+    relationsOf: relationsOf,
+    /* M6.1：任务 → 可获得的防具 */
+    armorsOf: armorsOf
   };
 })(window);

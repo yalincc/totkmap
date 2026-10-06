@@ -1,16 +1,19 @@
 /* V2.1M5.1 验收：任务完成态上地图
  * 验的是「真浏览器里地图上的任务点有没有跟着完成态变」——
  * 静态检查看不出来，signature 不带完成态这种bug 只有跑起来才暴露。
- * 用法：node task-done-map.js <progress.sav 路径>   （需先起 http://127.0.0.1:8899）
+ * 用法：node task-done-map.js <progress.sav 路径>
+ *   路径也可走环境变量 PROGRESS_SAV（verify-all.js 用这个）
+ *   端口走 PORT（默认 8899）
+ *   ★ 平时直接跑 verify-all.js 就行，它自己起服务。
  */
 const { chromium } = require('playwright-core')
 const path = require('path')
 
-const SAVE = process.argv[2]
+const SAVE = process.argv[2] || process.env.PROGRESS_SAV
 if (!SAVE) { console.error('需要 progress.sav 路径'); process.exit(1) }
 
 const EXEC = 'C:/Program Files/Google/Chrome/Application/chrome.exe'
-const BASE = 'http://127.0.0.1:8899/index.html'
+const BASE = `http://127.0.0.1:${process.env.PORT || 8899}/index.html`
 
 ;(async () => {
   const browser = await chromium.launch({ executablePath: EXEC, headless: true })

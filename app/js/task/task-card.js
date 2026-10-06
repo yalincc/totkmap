@@ -283,6 +283,45 @@
       '<div class="tk-sec-b">' + body + '</div></div>';
   }
 
+  /* ---------- M6.1：本任务可获得的防具 ----------
+   * 为什么单独一区而不是塞进「任务奖励」：
+   *   guide.reward 是攻略作者的自由文本（"50卢比、炸弹花*5、铠甲鲷鱼*3"），
+   *   防具有官方名、图标、防御值、套装归属，是结构化数据，
+   *   混在文字里会被当成普通奖励一样扫过去，白做。
+   *
+   * 只显示能确认的：来源 A 只取 conf=high，来源 B 必须对撞上真实条目。
+   * 低置信度的地名巧合（"卓拉铠甲" 撞 "卓拉领地的希多"）宁可不显示。
+   */
+  function armorHtml(t) {
+    var D = global.TaskData;
+    if (!D || !D.armorsOf) return '';
+    var a = D.armorsOf(t.key);
+    if (!a || !a.groups.length) return '';
+
+    var body = a.groups.map(function (g) {
+      var icons = g.items.map(function (x) {
+        return x.icon
+          ? '<img class="tk-ar-ic" src="' + esc(x.icon) + '" alt="' + esc(x.name) +
+            '" title="' + esc(x.name + (x.def != null ? ' · 防御 ' + x.def : '')) + '" loading="lazy">'
+          : '<span class="tk-ar-ic tk-ar-nopic" title="' + esc(x.name) + '">' +
+            esc(x.name.slice(0, 1)) + '</span>';
+      }).join('');
+      /* 多件套装才说明部位；单件直接说是什么 */
+      var what = g.slots.length > 1 ? g.slots.join(' / ') : (g.items[0].name);
+      var how = g.items.map(function (x) { return x.how }).filter(Boolean)[0];
+      return '<div class="tk-ar-g">' +
+        '<div class="tk-ar-icw">' + icons + '</div>' +
+        '<div class="tk-ar-tx">' +
+        '<div class="tk-ar-n">' + esc(g.set) + '</div>' +
+        '<div class="tk-ar-s">' + esc(what) + (how ? ' · ' + esc(how) : '') + '</div>' +
+        '</div></div>';
+    }).join('');
+
+    return '<div class="tk-ar">' +
+      '<div class="tk-ar-h">本任务可获得<span class="tk-src">防具 ' + a.total + ' 件</span></div>' +
+      body + '</div>';
+  }
+
   /* ---------- 完成态 ----------
    * ------------------------------------------------------------
    * 数据来源与优先级见 js/task/task-done.js：
@@ -402,6 +441,9 @@
     h += guideHtml(t);
     h += stepsSectionHtml(t);
     h += unlockHtml(t);
+    /* 防具区紧跟「完成后解锁」：两者都是「做完能得到什么」，逻辑相邻。
+       放在最后是因为它比前置/攻略次要，不该把正文挤下去。 */
+    h += armorHtml(t);
 
     /* 底部操作：导航 / 追踪 / 标记完成（复制已挪到右上角） */
     h += '<div class="tk-actions">';
@@ -905,6 +947,38 @@
     '.tk-series .tk-chain-tip {',
     '  flex:1; min-width:0; margin-left:4px;',
     '  font-size:11px; line-height:1.5; color:rgba(255,255,255,.42); }',
+
+    /* --- M6.1 本任务可获得的防具 ---
+       复用链条区的容器语言（同色系圆角盒），但底色更淡一档：
+       掉落是补充信息，不该跟「这是第几环」抢眼。
+       图标用 30px 方片并排——套装 3 件一眼看全，比文字列一堆强。 */
+    '.tk-ar {',
+    '  margin:8px 0 2px; padding:9px 10px;',
+    '  background:rgba(255,255,255,.035);',
+    '  border:1px solid rgba(255,255,255,.07);',
+    '  border-radius:7px; }',
+    '.tk-ar-h {',
+    '  display:flex; align-items:baseline; gap:6px;',
+    '  font-size:11px; letter-spacing:.4em; color:rgba(255,255,255,.45);',
+    '  text-shadow:none; margin-bottom:7px; }',
+    '.tk-ar-h .tk-src { margin-left:auto; letter-spacing:0; }',
+    '.tk-ar-g { display:flex; align-items:center; gap:9px; padding:3px 0; }',
+    '.tk-ar-g + .tk-ar-g { border-top:1px solid rgba(255,255,255,.055); }',
+    '.tk-ar-icw { display:flex; flex:0 0 auto; gap:2px; }',
+    '.tk-ar-ic {',
+    '  width:30px; height:30px; border-radius:5px; object-fit:contain;',
+    '  background:rgba(0,0,0,.25); border:1px solid rgba(255,255,255,.09); }',
+    /* 图标缺失时的占位：取名字首字，别留一个破图 */
+    '.tk-ar-nopic {',
+    '  display:flex; align-items:center; justify-content:center;',
+    '  font-size:12px; color:rgba(255,255,255,.4); }',
+    '.tk-ar-tx { flex:1; min-width:0; }',
+    '.tk-ar-n {',
+    '  font-size:12.5px; color:rgba(255,255,255,.85);',
+    '  overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }',
+    '.tk-ar-s {',
+    '  font-size:11px; line-height:1.5; color:rgba(255,255,255,.4);',
+    '  overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }',
 
     '/* 官方分步 */',
     '.tk-steps { list-style:none; counter-reset:none; }',
