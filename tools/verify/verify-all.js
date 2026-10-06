@@ -220,8 +220,8 @@ const L2 = [
     }
   },
   {
-    file: 'verify-armor-panel.js',
-    label: 'M6.5 防具面板与卡片',
+    file: 'verify-armor-enhance.js',
+    label: 'M6.6 防具信息增强（探索卡片）',
     check(out) {
       const r = parseJsonLast(out)
       if (!r) return { ok: false, why: '输出不是合法 JSON' }
@@ -229,12 +229,7 @@ const L2 = [
       if (errs.length) return { ok: false, why: `页面报错 ${errs.length} 条：${errs[0]}` }
       const fails = r['失败项'] || []
       if (fails.length) return { ok: false, why: fails.slice(0, 2).join('；') }
-      const d0 = r['0_数据'] || {}
-      /* ★ 统计数字由脚本自己放进汇总段（调用方只能可靠地解析到那一段） */
-      return {
-        ok: true,
-        why: `${r['防具数']} 件 / ${r['套装数']} 套，${r['可强化']} 件可强化；面板·卡片·套装链接·任务双向联动全通`
-      }
+      return { ok: true, why: `${r['单件']} 件单件卡 / ${r['套装统称']} 个套装统称 / ${r['无匹配']} 个不匹配，防御·强化摘要·同套·关联任务齐全` }
     }
   },
   {
@@ -375,6 +370,37 @@ async function runL2() {
   const results = []
   if (run1) results.push(await runL1())
   if (run2) results.push(...await runL2())
+
+  /* ★ L3：file:// 直开验收（老大平时就是这么看改动的）
+     单独一条，因为**不能走 http**——它要证明的就是「不用起服务器也能跑」。
+     所以它不进 L2（那里会自起静态服务器）。
+     定位服务(xnavi/live-python)没启动时的 pos?t= 报错不算缺陷。 */
+  if (!only.length || only.includes('--file')) {
+    const env = {
+      ...process.env,
+      /* findPw() 已在别处用（它会找 playwright-core 的实际位置，
+         本机它装在托管工作区里，不在 node_modules 常规路径） */
+      NODE_PATH: findPw()
+    }
+    const res = await runNode([path.join(HERE, 'verify-file-protocol.js')],
+      { cwd: APP, env, timeout: 240000 })
+    const r = parseJsonLast((res.out || '') + (res.err || ''))
+    const fails = (r && r['失败项']) || []
+    process.stdout.write('\n')
+    console.log('━'.repeat(56))
+    console.log('  L3  file:// 直开（不依赖任何服务器）')
+    console.log('━'.repeat(56))
+    if (!r) {
+      console.log('  [FAIL] 输出不是合法 JSON')
+      results.push({ name: 'L3 file:// 直开', code: 1 })
+    } else if (fails.length) {
+      console.log(`  [FAIL] ${fails.slice(0, 2).join('；')}`)
+      results.push({ name: 'L3 file:// 直开', code: 1 })
+    } else {
+      console.log(`  [ OK ] ${r['摘要'] || 'file:// 下全部正常'}`)
+      results.push({ name: 'L3 file:// 直开', code: 0 })
+    }
+  }
 
   console.log('\n' + '━'.repeat(56))
   console.log('  汇总')

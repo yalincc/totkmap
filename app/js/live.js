@@ -149,14 +149,73 @@
   }
   var toastTimer = null;
 
-  /* ---------------- 轮询 ---------------- */
+  /* ---------------- 轮询 ----------------
+   * ★ 定位服务（live-python / xnavi）没启动时，浏览器会在控制台里
+   *   每 600ms 刷一条红色的 GET /pos  ERR_CONNECTION_REFUSED，
+   *   刷一整天，人看着以为页面坏了。
+   *
+   *   这里**只改探测方式与节奏，不改对接逻辑**：
+   *     - 拿到过服务之前用 fetch 的 no-cors 模式探测。
+   *       no-cors 的网络错误 Chrome 不打控制台（opaque 响应，status=0），
+   *       但 resolve/reject 语义与普通 fetch 一致，reachable 判定完全相同。
+   *     - 连不上时退避到 5s 一次，不再高频刷。
+   *     - 一旦成功过（sawOnline），恢复 600ms 并走原来的普通 fetch，
+   *       这样 /pos 的字段解析、进度代次、传送检测等逻辑一行都没动。
+   *
+   *   反过来用「HEAD 请求探测 + GET 正常取」也行，但那样多发一次请求；
+   *   no-cors 一次搞定，且失败不落控制台。
+   */
+  var sawOnline = false;       // 本次会话是否成功连上过服务
+  var offlineSince = 0;        // 首次离线时刻
+  var probeFail = 0;           // 连续失败次数（用于退避）
+  var POLL_MS = 600;           // 在线时的轮询间隔（原值）
+  var OFFLINE_MAX_MS = 5000;   // 离线时的退避间隔
+
+  async function fetchPos() {
+    /* 已连上过 → 走普通 fetch（拿完整 JSON，字段齐全）。
+       ★ 这条路径必须保持原样，否则定位/进度/传送检测会失效。 */
+    if (sawOnline) {
+      var r = await fetch(LIVE_API + '/pos?t=' + Date.now(), { cache: 'no-store' });
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return await r.json();
+    }
+    /* 从未连上过 → no-cors 静默探测，避免控制台刷红 */
+    var r2 = await fetch(LIVE_API + '/pos?t=' + Date.now(), {
+      cache: 'no-store', mode: 'no-cors'
+    });
+    if (!r2 || r2.type !== 'opaque' && !r2.ok) throw new Error('probe failed');
+    /* opaque 响应读不出 body —— 这时按「可能已上线」处理，
+       下一轮切回普通 fetch 就能拿到真数据。 */
+    return { __opaque: true };
+  }
+
   async function poll() {
     var p = null;
     var reachable = true;
     try {
-      var r = await fetch(LIVE_API + '/pos?t=' + Date.now(), { cache: 'no-store' });
-      if (r.ok) p = await r.json();
+      var got = await fetchPos();
+      if (got && got.__opaque) {
+        /* 探测通了但拿不到内容 → 先标记在线并立刻用普通 fetch 取一次 */
+        reachable = true;
+        try {
+          var real = await fetch(LIVE_API + '/pos?t=' + Date.now(), { cache: 'no-store' });
+          if (real.ok) p = await real.json();
+          else { p = null; reachable = false; }
+        } catch (e2) { p = null; reachable = false; }
+      } else {
+        p = got;
+      }
     } catch (e) { p = null; reachable = false; }
+
+    if (reachable) {
+      if (!sawOnline) { sawOnline = true; offlineSince = 0; }
+      probeFail = 0;
+    } else {
+      /* 服务不可达：退避，别再高频刷 */
+      probeFail++;
+      /* sawOnline 不复位 —— xnavi 关掉后重新打开要能自动接回去，
+         所以不做「一旦离线就永久降级」的判断。 */
+    }
 
     pos.online = reachable;                 // 服务可达
     pos.located = !!(p && p.ok);            // 已拿到有效玩家位置
@@ -541,7 +600,22 @@
     buildPanel();
     setLocateBtns();
     bindFollowDrag();
-    setInterval(poll, 600);
+    /* 自调度轮询（取代 setInterval）：离线时自动退避到 5s，
+   ★ 这样 xnavi 没启动也不会一直高频打 8766 端口。
+   用 setInterval 的话离线期间永远是 600ms，节流无从谈起。
+   poll 内部即使抛错也不能断链，所以 catch 后仍继续排下一次。 */
+    function scheduleNext() {
+      var delay = probeFail > 0 ? OFFLINE_MAX_MS : POLL_MS;
+      /* 有连续失败时再往后推一点，避免刚关 xnavi 时的抖动 */
+      if (probeFail > 3) delay = Math.min(OFFLINE_MAX_MS * 2, 10000);
+      setTimeout(function () {
+        var pr;
+        try { pr = poll(); } catch (e) { pr = Promise.resolve(); }
+        Promise.resolve(pr).catch(function () { /* 单次失败不影响后续 */ })
+          .then(scheduleNext);
+      }, delay);
+    }
+    scheduleNext();
     document.addEventListener('visibilitychange', function () {
       if (!document.hidden) poll();
     });

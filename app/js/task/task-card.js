@@ -319,12 +319,13 @@
     if (!a || !a.groups.length) return '';
 
     var body = a.groups.map(function (g) {
-      /* M6.5：图标改成可点，点开防具卡片（任务 → 防具这一半联动）。
-         原来只是展示，玩家看到了还得自己去防具面板搜一遍。 */
+      /* M6.5 想让图标点开「防具卡片」，M6.6 改成：**跳到地图上那件防具的标点**。
+       防具信息已经并进 exploreCard 了（点地图图标即见），
+       再单独做一张防具卡片就是重复。 */
       var icons = g.items.map(function (x) {
         return x.icon
           ? '<img class="tk-ar-ic" src="' + esc(x.icon) + '" alt="' + esc(x.name) +
-            '" title="' + esc(x.name + (x.def != null ? ' · 防御 ' + x.def : '') + '（点击看详情）') +
+            '" title="' + esc(x.name + (x.def != null ? ' · 防御 ' + x.def : '')) +
             '" data-go-armor="' + esc(x.key) + '">'
           : '<span class="tk-ar-ic tk-ar-nopic" title="' + esc(x.name) + '">' +
             esc(x.name.slice(0, 1)) + '</span>';
@@ -766,17 +767,18 @@
       });
     });
 
-    /* M6.5：防具图标 / 套装名 → 打开防具卡片（任务 → 防具这一半联动）。
-       必须在 stopPropagation ——否则冒泡到全局监听器会把任务卡片关掉，
-       而防具卡片是 fixed 定位、跟任务卡片叠在一起，关掉就没法对着看了。 */
+    /* M6.5：防具图标 / 套装名 → 跳到地图上那件防具的标点。
+       ★ 防具信息已并入 exploreCard（点地图图标即见），所以这里不再另开卡片，
+         统一走「找到标点 → 打开它的探索卡片」这条路。
+       必须 stopPropagation ——否则冒泡到全局监听器会把任务卡片关掉。 */
     Array.prototype.forEach.call(card.querySelectorAll('[data-go-armor]'), function (a) {
       a.addEventListener('click', function (e) {
         e.preventDefault();
         e.stopPropagation();
         var key = a.getAttribute('data-go-armor');
-        var AC = global.ArmorCard;
-        if (!AC) { toast('防具卡片模块未加载'); return; }
-        AC.openByKey(key, { clientX: e.clientX, clientY: e.clientY });
+        var A = global.TOTK_APP;
+        if (A && A.gotoArmor) { A.gotoArmor(key); return; }
+        toast('防具跳转功能未加载');
       });
     });
   }

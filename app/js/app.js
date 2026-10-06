@@ -940,6 +940,71 @@
     toastTimer = setTimeout(function () { t.classList.add('hidden'); }, 6000);
   });
 
+  /* ---------- V2.1 M6.6：防具区块的交互 ---------- */
+  function bindArmorEnhance(box) {
+    if (!box) return;
+
+    /* 同套部件 / 套装统称里的图标 → 找该件的地图标点并打开它的卡片。
+     * ★ 不另开卡片：防具信息就在探索卡片里，点哪件就换哪件的内容。
+     *   找不到对应标点就退回「切到该件所在图层 + 面板提示」，
+     *   因为 armors.js 的 136 件与地图上的 120 个标点不是一一对应
+     *   （35 件商店防具地图上是一个「防具店」代表整家店）。 */
+    Array.prototype.forEach.call(box.querySelectorAll('[data-go-armor]'), function (b) {
+      b.addEventListener('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var key = b.getAttribute('data-go-armor');
+        gotoArmor(key);
+      });
+    });
+
+    /* 关联任务 → 打开任务卡片（复用任务板块的卡片） */
+    Array.prototype.forEach.call(box.querySelectorAll('[data-go-task]'), function (b) {
+      b.addEventListener('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var tk = b.getAttribute('data-go-task');
+        var TD = window.TaskData;
+        var t = TD && TD.byKey(tk);
+        if (!t) { toast('找不到该任务'); return; }
+        /* 任务卡片只在当前图层渲染，跨层先切 */
+        if (t.layer != null && t.layer !== state.layer) switchLayer(t.layer);
+        window.TaskCard.open(t, e);
+      });
+    });
+  }
+
+  /* 找到某件防具对应的地图标点并打开它的卡片 */
+  function gotoArmor(armorKey) {
+    var cats = catalogIdsOfArmor();
+    if (!cats.length) { toast('地图上没有防具分类'); return; }
+    /* 按名字反查标点 */
+    var A = (window.TOTK_ARMORS || []).filter(function (a) { return a.key === armorKey; })[0];
+    if (!A) { toast('找不到该防具'); return; }
+    var hit = MARKERS.filter(function (m) {
+      return cats.indexOf(m.cat) >= 0 && (m.name || '').trim() === A.name;
+    })[0];
+    if (!hit) {
+      /* 地图上没逐件标点（商店防具就是这样）：切到它所在图层并提示 */
+      if (A.layer != null) switchLayer(A.layer);
+      toast('「' + A.name + '」在地图上没有单独标点，商店类可在地图搜「防具店」');
+      return;
+    }
+    if (hit.layer !== state.layer) switchLayer(hit.layer);
+    openDetail(hit, null);
+  }
+
+  /* catalogs.js 里「防具」分类的 id 列表 */
+  var _armorCatCache = null;
+  function catalogIdsOfArmor() {
+    if (_armorCatCache) return _armorCatCache;
+    var out = [];
+    (window.TOTK_CATALOGS || []).forEach(function (c) {
+      if (c && c.group === '位置' && /^防具/.test(c.name)) out.push(c.id);
+    });
+    return (_armorCatCache = out);
+  }
+
   /* ---------------- 实时导航入口（V1.8.0，对接 js/live.js 的 LIVENAV） ---------------- */
   function liveNavTo(name, x, y, layer, type) {
     if (window.LIVENAV) {
@@ -1423,6 +1488,19 @@
     $('ecPlace').textContent = sec.place;
     $('ecChestRow').style.display = sec.chest ? '' : 'none';
     $('ecChest').textContent = sec.chest;
+
+    /* ---------- V2.1 M6.6：防具专属区块 ----------
+     * 只在点的是「防具」分类的标点时填充，其余情况置空（CSS :empty 隐藏）。
+     * ★ 不改 exploreCard 的任何现有字段 —— 区域/塔域/坐标/按钮/标记完成全保持原样，
+     *   只是在中间多一块信息。非防具标点的卡片外观与改动前完全一致。
+     * 防具标点名字对不上 armors.js 时（.mode==='set' 的整套统称、
+     *   或 '防具店' 这种根本不是某件防具的）会渲染对应形态或直接不渲染。 */
+    var aeBox = $('ecArmor');
+    if (aeBox) {
+      var AE = window.ArmorEnhance;
+      aeBox.innerHTML = (AE && AE.isArmorCat(m.cat)) ? (AE.blockFor(m.name) || '') : '';
+      bindArmorEnhance(aeBox);
+    }
     /* 「注意」较长，默认折叠 + 展开按钮（不足一屏时按钮不出现） */
     var noteRow = $('ecNoteRow'), noteText = $('ecNoteText'), noteMore = $('ecNoteMore');
     noteRow.style.display = sec.note ? '' : 'none';
@@ -1511,6 +1589,8 @@
     layerName: function (l) { return LAYER_NAME[l] || ''; },
     saveDone: saveDone,
     renderMarkers: renderMarkers,
+    /* V2.1 M6.6：跳到某件防具的地图标点（任务卡片的防具图标点它） */
+    gotoArmor: gotoArmor,
     liveNav: function (o) { if (window.LIVENAV) return window.LIVENAV.navigate(o); return false; },
     toast: toast,
     esc: esc,
@@ -1987,33 +2067,20 @@
     Array.prototype.forEach.call($('sideTabs').querySelectorAll('button'), function (b) {
       b.classList.toggle('active', b.getAttribute('data-tab') === tab);
     });
-    /* 探索搜索框只在探索 Tab 显示，材料/防具 Tab 隐藏（V1.7.2，M6.5 扩展到防具） */
+    /* 探索搜索框只在探索 Tab 显示，材料 Tab 隐藏（V1.7.2） */
     var globalSearch = document.querySelector('.search-box');
     if (globalSearch) globalSearch.classList.toggle('hidden', tab === 'material');
     var srBox = $('searchResult');
     if (srBox) srBox.classList.add('hidden');
     var explorePane = $('explorePane'), matPane = $('materialPane');
-    var armorPane = $('armorPane');
     if (tab === 'material') {
       explorePane.classList.add('hidden');
-      if (armorPane) armorPane.classList.add('hidden');
       matPane.classList.remove('hidden');
       // V1.7.5: 切到材料 Tab 时保留已勾选的探索标点（神庙/鸟望塔等），与材料位置叠加显示，便于同时定位
       buildMatPanel();
       renderMaterials();
-    } else if (tab === 'armor') {
-      /* M6.5 防具 Tab：与材料 Tab 一样保留探索标点，
-         并且防具自己也有地图点（勾选后画），三层可以叠在一起看 */
-      explorePane.classList.add('hidden');
-      matPane.classList.add('hidden');
-      if (armorPane) {
-        armorPane.classList.remove('hidden');
-        if (window.ArmorPanel) window.ArmorPanel.show();
-      }
-      renderMarkers();
     } else {
-      if (matPane) matPane.classList.add('hidden');
-      if (armorPane) armorPane.classList.add('hidden');
+      matPane.classList.add('hidden');
       explorePane.classList.remove('hidden');
       for (var mid in state.matGroups) map.removeLayer(state.matGroups[mid]);
       state.matGroups = {};

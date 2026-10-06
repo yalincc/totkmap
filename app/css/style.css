@@ -1416,3 +1416,80 @@ html, body {
 
 /* 底部导航置灰（无坐标时）——跟任务卡片同一处理 */
 .ac-card .btn.act.is-off { opacity: .36; cursor: not-allowed; }
+
+/* ============================================================
+   防具增强区块（V2.1 M6.6）
+   ------------------------------------------------------------
+   容器 #ecArmor 在 exploreCard 里，只在点的是防具标点时有内容。
+   ★ 必须处理 :empty —— 非防具标点时它是空的，要彻底不占位，
+     否则所有探索卡片都会莫名多出一段空白。
+   ============================================================ */
+#ecArmor:empty { display: none; }
+
+.ae {
+  margin: 9px 0 4px; padding: 9px 10px;
+  background: rgba(255,255,255,.045);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 7px;
+}
+/* 套装统称模式：标题 + 成员图标横排 */
+.ae[data-mode="set"] .ae-h {
+  display: flex; align-items: baseline; gap: 6px;
+  margin-bottom: 7px; font-size: 11px; letter-spacing: .3em;
+  color: rgba(255,255,255,.45);
+}
+.ae-src { margin-left: auto; letter-spacing: 0; font-size: 10px; color: rgba(255,255,255,.32); }
+.ae-pieces { display: flex; flex-wrap: wrap; gap: 6px; }
+.ae-piece {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 4px 7px; border-radius: 5px;
+  font-size: 11px; color: rgba(255,255,255,.72);
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.07);
+}
+.ae-piece img { width: 20px; height: 20px; object-fit: contain; }
+
+/* 单件模式：图标 + 名字 + 部位 */
+.ae-top { display: flex; align-items: center; gap: 9px; margin-bottom: 7px; }
+.ae-ic {
+  width: 34px; height: 34px; flex: 0 0 auto; object-fit: contain;
+  filter: drop-shadow(0 1px 3px rgba(0,0,0,.55));
+}
+.ae-id { min-width: 0; }
+.ae-n { font-size: 13px; color: rgba(255,255,255,.88); line-height: 1.3; }
+.ae-s { margin-top: 1px; font-size: 11px; color: rgba(255,255,255,.4); }
+
+/* 键值行：与 ec-row 同一套语言，但紧凑一档 */
+.ae-row {
+  display: flex; gap: 8px; align-items: baseline;
+  padding: 2px 0; font-size: 12px; line-height: 1.55;
+}
+.ae-l {
+  flex: 0 0 auto; min-width: 52px;
+  color: rgba(255,255,255,.38); letter-spacing: .3em;
+}
+.ae-v { flex: 1; min-width: 0; color: rgba(255,255,255,.85); }
+.ae-v.ae-dim { color: rgba(255,255,255,.48); font-size: 11px; }
+/* 满级防御的箭头：让人一眼看到强化收益 */
+.ae-arrow { color: #7ec8a9; font-weight: 600; }
+.ae-desc { color: rgba(255,255,255,.6); font-size: 11px; line-height: 1.6; }
+
+/* 关联任务 / 同套部件：可点的小按钮 */
+.ae-tasks, .ae-sibs { display: inline-flex; flex-wrap: wrap; gap: 5px; }
+.ae-task, .ae-sib {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 8px; border-radius: 20px; cursor:pointer;
+  font-size: 11px; text-align: left;
+  color: rgba(255,255,255,.72);
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.1);
+  transition: all .12s;
+}
+.ae-task:hover, .ae-sib:hover {
+  background: rgba(234,194,126,.16); color: #eac27e;
+  border-color: rgba(234,194,126,.4);
+}
+.ae-sib img { width: 15px; height: 15px; object-fit: contain; }
+
+/* 图鉴外链预留（这轮留空） */
+.ae-comp-slot:empty { display: none; }
