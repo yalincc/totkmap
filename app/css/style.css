@@ -1493,3 +1493,47 @@ html, body {
 
 /* 图鉴外链预留（这轮留空） */
 .ae-comp-slot:empty { display: none; }
+
+/* ============================================================
+   地图标点定位高亮（V2.1 M6.7）
+   ------------------------------------------------------------
+   需求：防具卡片里点「同套部件」「关联任务」后，光弹卡片不够——
+   地图必须跟着飞到那一点，否则玩家在图上根本找不到目标在哪。
+   动画：金色光圈脉冲 3 次，让眼睛能在缩略图大小的地图上抓住。
+   ============================================================ */
+.mk-locate-flash {
+  animation: mkLocateFlash .85s ease-out 3;
+  border-radius: 50%;
+  z-index: 900 !important;
+}
+@keyframes mkLocateFlash {
+  0% {
+    box-shadow: 0 0 0 0 rgba(234, 194, 126, .95), 0 0 14px 4px rgba(234, 194, 126, .7);
+    transform: scale(1);
+  }
+  55% {
+    box-shadow: 0 0 0 12px rgba(234, 194, 126, 0), 0 0 20px 6px rgba(234, 194, 126, .35);
+    transform: scale(1.55);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(234, 194, 126, 0), 0 0 0 rgba(234, 194, 126, 0);
+    transform: scale(1);
+  }
+}
+/* 减少动画偏好：直接定住，不闪 */
+@media (prefers-reduced-motion: reduce) {
+  .mk-locate-flash {
+    animation: none;
+    box-shadow: 0 0 0 3px rgba(234, 194, 126, .9);
+  }
+}
+
+/* 防具店区块（M6.7）：店内可买清单 */
+.ae-none { font-size: 11px; color: rgba(255,255,255,.35); }
+/* 价格贴在名字右边，买的时候最关心的就是这个 */
+.ae-price {
+  font-size: 10px; color: rgba(255,255,255,.4);
+  font-variant-numeric: tabular-nums; margin-left: 2px;
+}
+/* 「去哪买」那行按可点样式呈现 */
+.ae-v .ae-sib { background: rgba(234,194,126,.12); border-color: rgba(234,194,126,.3); color: #eac27e; }

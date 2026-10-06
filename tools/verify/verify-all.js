@@ -233,6 +233,19 @@ const L2 = [
     }
   },
   {
+    file: 'verify-armor-locate.js',
+    label: 'M6.7 跳转定位 + 商店聚合',
+    check(out) {
+      const r = parseJsonLast(out)
+      if (!r) return { ok: false, why: '输出不是合法 JSON' }
+      const errs = r['错误'] || []
+      if (errs.length) return { ok: false, why: `页面报错 ${errs.length} 条：${errs[0]}` }
+      const fails = r['失败项'] || []
+      if (fails.length) return { ok: false, why: fails.slice(0, 2).join('；') }
+      return { ok: true, why: `点部件/任务地图自动定位+高亮；${r['归店']} 件商店防具归入 5 家店，超阈值不硬塞` }
+    }
+  },
+  {
     file: 'verify-sw-cache.js',
     label: 'SW 缓存不挡新版本',
     check(out) {

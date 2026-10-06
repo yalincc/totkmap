@@ -174,12 +174,136 @@
         '<span class="ae-v ae-desc">' + esc(a.desc) + '</span></div>';
     }
 
+    /* 商店防具：告诉玩家去哪家店买（地图上没有逐件标点的那些） */
+    if (a.how === '商店购买') {
+      var sh = shopOf(a.key);
+      h += '<div class="ae-row"><span class="ae-l">去哪买</span>' +
+        '<span class="ae-v">' + (sh
+          ? '<button type="button" class="ae-sib" data-goto-pt="' + esc(sh.id) + '">' +
+            esc(sh.name || '防具店') + ' ›</button>'
+          : '<span class="ae-dim">地图上没有单独标点，可在地图搜「防具店」</span>') +
+        '</span></div>';
+    }
+
     /* 图鉴外链预留：老大说「强化文字太多可外链 totk-site」。
        这轮只留位不跳转，等发话。 */
     h += '<div class="ae-comp-slot" data-site="' + esc(a.sitePath || '') + '"></div>';
 
     h += '</div>';
     return h;
+  }
+
+  /* ---------- 商店防具聚合（M6.7） ----------
+   * 为什么要做：
+   *   30 件防具是「商店购买」，地图上**没有逐件标点**——只有一个「防具店」
+   *   标点代表一整家店（实测 6 个店，覆盖 5 个地区）。玩家看到「热沙护肩」
+   *   想知道去哪买，卡片里答不出来。
+   *
+   * 怎么挂：armors.js 的 gx/gz 就是**实际商店坐标**（逐点核对过：
+   *   海利亚系列 → 监视堡垒店、耐火石 → 鼓隆桥店、利特 → 利特村店、
+   *   潜行/夜光 → 卡卡利科店、热沙+珠宝 → 卡拉卡拉集市）。
+   *   所以按坐标就近归店，阈值 200 游戏单位（约 2 个地标间距），
+   *   超出阈值的**不硬塞**（实测 4 个怪物面罩距最近的店 2063 单位，
+   *   它们在怪物商人手里，本来就不属于防具店）。
+   *
+   * ★ 为什么不按 desc 解析：
+   *   实测 6 个店里只有 3 个 desc 写了商品清单（卡拉卡拉/鼓隆桥/利特），
+   *   卡卡利科那家明明卖潜行+夜光六件却是空的 —— desc 不可靠，坐标可靠。 */
+  var SHOP_RADIUS = 200;
+  var SHOP_CACHE = null;
+
+  /* 防具店分类的 id */
+  function shopCatIds() {
+    var out = [];
+    (global.TOTK_CATALOGS || []).forEach(function (c) {
+      if (c && c.group === '位置' && c.name === '防具店') out.push(c.id);
+    });
+    return out;
+  }
+
+  /* 「防具」分类的 id（用于判断某件是否已有逐件标点） */
+  function armorCatIds() {
+    var out = [];
+    (global.TOTK_CATALOGS || []).forEach(function (c) {
+      if (c && c.group === '位置' && /^防具/.test(c.name)) out.push(c.id);
+    });
+    return out;
+  }
+
+  /* 已经有逐件地图标点的防具名集合 */
+  var HAS_PT = null;
+  function hasOwnMarker() {
+    if (HAS_PT) return HAS_PT;
+    var cats = armorCatIds();
+    var s = {};
+    (global.TOTK_MARKERS || []).forEach(function (m) {
+      if (cats.indexOf(m.cat) >= 0 && m.name) s[m.name.trim()] = true;
+    });
+    return (HAS_PT = s);
+  }
+
+  /* { 店标点 → [防具, ...] }，只收录「无逐件标点且能归店」的 */
+  function shopGoods() {
+    if (SHOP_CACHE) return SHOP_CACHE;
+    var cats = shopCatIds();
+    if (!cats.length) return (SHOP_CACHE = {});
+    var shops = (global.TOTK_MARKERS || []).filter(function (m) {
+      return cats.indexOf(m.cat) >= 0;
+    });
+    var own = hasOwnMarker();
+    var map = {};
+    ARMORS.forEach(function (a) {
+      if (a.how !== '商店购买') return;
+      if (a.gx == null || a.gz == null) return;
+      /* ★ 已经有个自己的地图标点了（实测格鲁德小镇的热沙/珠宝 11 件都有），
+         走正常路径即可，别再往店里塞一遍造成重复。 */
+      if (own[a.name]) return;
+      var best = null, bd = 1e18;
+      shops.forEach(function (s) {
+        if (s.layer !== a.layer) return;
+        var d = Math.sqrt((s.x - a.gz) * (s.x - a.gz) + (s.y - a.gx) * (s.y - a.gx));
+        if (d < bd) { bd = d; best = s; }
+      });
+      /* 超出阈值不归店——宁可少给也不错给，
+         指着一个 2000 单位外的店会让玩家白跑路。 */
+      if (!best || bd > SHOP_RADIUS) return;
+      if (!map[best.id]) map[best.id] = { shop: best, items: [] };
+      map[best.id].items.push(a);
+    });
+    return (SHOP_CACHE = map);
+  }
+
+  /* 单件防具 → 它在哪家店买（买不到返回 null） */
+  function shopOf(armorKey) {
+    var g = shopGoods();
+    var found = null;
+    Object.keys(g).forEach(function (sid) {
+      g[sid].items.forEach(function (a) { if (a.key === armorKey) found = g[sid].shop; });
+    });
+    return found;
+  }
+
+  /* 「防具店」标点 → 店里卖的防具列表（渲染用） */
+  function blockForShop(shopPt) {
+    var g = shopGoods();
+    var hit = g[shopPt.id];
+    var rows;
+    if (hit && hit.items.length) {
+      rows = hit.items.map(function (a) {
+        return '<button type="button" class="ae-piece" data-go-armor="' + esc(a.key) + '">' +
+          (a.icon ? '<img src="' + esc(a.icon) + '" alt="">' : '') +
+          esc(a.name) + '<span class="ae-price">' + (a.buy != null ? a.buy : '') + '</span></button>';
+      }).join('');
+    } else {
+      /* 归店失败的那些不列——地图 desc 已经写了能买什么，
+         硬列会给出「这家店卖这个」的错误信息。 */
+      rows = '<div class="ae-none">该店的具体商品见上方说明</div>';
+    }
+    return '<div class="ae" data-mode="shop" data-shop="' + esc(shopPt.id) + '">' +
+      '<div class="ae-h">店内防具<span class="ae-src">' +
+      (hit && hit.items.length ? hit.items.length + ' 件可定位' : '清单未收录') + '</span></div>' +
+      '<div class="ae-pieces">' + rows + '</div>' +
+      '</div>';
   }
 
   /* ---------- 对外：给 exploreCard 用 ---------- */
@@ -193,8 +317,20 @@
     return false;
   }
 
+  /* 按标点 id 找标点（供「去哪家店买」跳转） */
+  function markerById(id) {
+    var M = global.TOTK_MARKERS || [];
+    for (var i = 0; i < M.length; i++) if (String(M[i].id) === String(id)) return M[i];
+    return null;
+  }
+
   global.ArmorEnhance = {
     blockFor: blockFor,
+    blockForShop: blockForShop,
+    isShopCat: function (catId) { return shopCatIds().indexOf(catId) >= 0; },
+    markerById: markerById,
+    shopOf: shopOf,
+    shopGoods: shopGoods,
     match: match,
     isArmorCat: isArmorCat,
     /* 供验收用 */

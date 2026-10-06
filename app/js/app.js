@@ -958,7 +958,22 @@
       });
     });
 
-    /* 关联任务 → 打开任务卡片（复用任务板块的卡片） */
+    /* 「去哪买」→ 飞到那家防具店（M6.7） */
+    Array.prototype.forEach.call(box.querySelectorAll('[data-goto-pt]'), function (b) {
+      b.addEventListener('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var AE2 = window.ArmorEnhance;
+        var pt = AE2 && AE2.markerById(b.getAttribute('data-goto-pt'));
+        if (!pt) { toast('找不到那个商店标点'); return; }
+        gotoMarker(pt);
+        openDetail(pt, null);
+      });
+    });
+
+    /* 关联任务 → 打开任务卡片，并**把地图飞到那个任务的标点**。
+       ★ 任务标点在侧栏「任务」大类里，用户未必勾了「任务」分类，
+         所以 gotoMarker 里的自动勾选很关键。 */
     Array.prototype.forEach.call(box.querySelectorAll('[data-go-task]'), function (b) {
       b.addEventListener('click', function (e) {
         e.preventDefault();
@@ -967,14 +982,35 @@
         var TD = window.TaskData;
         var t = TD && TD.byKey(tk);
         if (!t) { toast('找不到该任务'); return; }
-        /* 任务卡片只在当前图层渲染，跨层先切 */
-        if (t.layer != null && t.layer !== state.layer) switchLayer(t.layer);
+        /* 先跳地图（内部会处理切层+勾分类），再开卡片 */
+        var pt = findTaskMarker(t);
+        if (pt) gotoMarker(pt);
         window.TaskCard.open(t, e);
       });
     });
   }
 
-  /* 找到某件防具对应的地图标点并打开它的卡片 */
+  /* 任务 → 地图标点。
+     * ★ 不按分类名找：任务点在地图上挂在「迷你挑战」「情节挑战」「支线故事」
+     *   这些**攻略分类**下（实测「拉姆达的财宝」标点 cat=185「迷你挑战」），
+     *   不叫「任务」——按名字匹配必然落空。
+     *   改为按「同图层 + 同坐标 + 同名」定位，这是最稳的判据。 */
+  function findTaskMarker(t) {
+    if (!t || t.gx == null || t.gz == null) return null;
+    var byName = MARKERS.filter(function (m) {
+      return m.layer === t.layer && (m.full || m.name) === t.name;
+    })[0];
+    if (byName) return byName;
+    /* 名字对不上就退到坐标邻近（同图层 ±2 游戏单位） */
+    var cands = MARKERS.filter(function (m) {
+      return m.layer === t.layer
+        && Math.abs(m.x - t.gz) < 2 && Math.abs(m.y - t.gx) < 2;
+    });
+    return cands[0] || null;
+  }
+
+  /* 找到某件防具对应的地图标点并跳过去
+       （M6.7：光打开卡片不够，地图必须跟着动） */
   function gotoArmor(armorKey) {
     var cats = catalogIdsOfArmor();
     if (!cats.length) { toast('地图上没有防具分类'); return; }
@@ -985,13 +1021,68 @@
       return cats.indexOf(m.cat) >= 0 && (m.name || '').trim() === A.name;
     })[0];
     if (!hit) {
-      /* 地图上没逐件标点（商店防具就是这样）：切到它所在图层并提示 */
+      /* 地图上没逐件标点（商店防具就是这样，一个「防具店」代表整家店） */
       if (A.layer != null) switchLayer(A.layer);
       toast('「' + A.name + '」在地图上没有单独标点，商店类可在地图搜「防具店」');
       return;
     }
-    if (hit.layer !== state.layer) switchLayer(hit.layer);
+    gotoMarker(hit);
+    /* 卡片内容也跟着切过去（它读的是当前点的信息） */
     openDetail(hit, null);
+  }
+
+  /* ---------- V2.1 M6.7：跳到地图上的某个标点并高亮 ----------
+     * 需求来源：防具卡片里点「同套部件」「关联任务」之后，
+     *   卡片是弹出来了，但地图没动——玩家在图上根本找不到那件防具/那个任务在哪。
+     *   这跟材料面板的「点图上点→高亮侧栏」是同一条链路，反过来做一遍。
+     *
+     * 两个必须处理的坑：
+     *  ① **marker 只在该分类被勾选时才画**（renderMarkers 里 `if (!state.selected[m.cat]) return`）。
+     *     直接 flyTo 过去会飞到一片空白——目标 marker 根本没渲染。
+     *     所以要先自动勾上目标分类、等重画完，再飞。
+     *  ② 跨图层要先切图层，marker 是按 layer 分组渲染的。
+     */
+  function gotoMarker(m, opts) {
+    opts = opts || {};
+    if (!m) return;
+    /* 顺序要紧：先切图层，再勾分类。
+     * state.selected 是 selectedByLayer[当前层] 的**引用**，
+     * 切层会把它指向换成新层的对象——先勾后切等于白勾。 */
+    if (m.layer != null && m.layer !== state.layer) {
+      switchLayer(m.layer);
+    }
+    /* 自动勾上目标分类（未勾选则勾上），否则飞过去只看到空白地图 */
+    if (m.cat != null && !state.selected[m.cat]) {
+      state.selected[m.cat] = true;
+      saveSelected();
+      buildCatalogPanel();
+      updateCount();
+    }
+    /* 兜底再画一次：切图层/勾分类会触发重画，但防抖可能推迟 */
+    renderMarkers();
+
+    var ll = [m.x, m.y];
+    map.flyTo(ll, Math.max(map.getZoom(), 6), { duration: 0.7 });
+
+    /* 高亮那个 marker：先闪一下，tooltip 强制打开 2.5秒再收 */
+    var mk = state.markers[m.id];
+    if (mk) {
+      var el = mk.getElement && mk.getElement();
+      if (el) {
+        el.classList.remove('mk-locate-flash');
+        void el.offsetWidth;          /* 强制重排，动画才能重放 */
+        el.classList.add('mk-locate-flash');
+        setTimeout(function () { el.classList.remove('mk-locate-flash'); }, 2600);
+      }
+      try {
+        mk.openTooltip();
+        setTimeout(function () { try { mk.closeTooltip(); } catch (e) { /* 图层已重画 */ } }, 2500);
+      } catch (e) { /* 无关紧要 */ }
+    } else {
+      /* marker 确实没画出来（分类刚勾上、Leaflet 还没addLayer）——
+         给个 toast，别让人对着空白图找。 */
+      toast('已定位到「' + (m.name || m.full || '目标') + '」，该分类已自动勾选');
+    }
   }
 
   /* catalogs.js 里「防具」分类的 id 列表 */
@@ -1498,7 +1589,16 @@
     var aeBox = $('ecArmor');
     if (aeBox) {
       var AE = window.ArmorEnhance;
-      aeBox.innerHTML = (AE && AE.isArmorCat(m.cat)) ? (AE.blockFor(m.name) || '') : '';
+      var html = '';
+      if (AE) {
+        /* M6.7：三种来源分别用不同的区块
+         * ① 「防具店」标点 → 店内防具清单（无逐件标点的那些按坐标归店）
+         * ② 「防具」标点（逐件）→ 单件信息
+         * ③ 其它分类 → 什么都不出 */
+        if (AE.isShopCat(m.cat)) html = AE.blockForShop(m);
+        else if (AE.isArmorCat(m.cat)) html = AE.blockFor(m.name) || '';
+      }
+      aeBox.innerHTML = html;
       bindArmorEnhance(aeBox);
     }
     /* 「注意」较长，默认折叠 + 展开按钮（不足一屏时按钮不出现） */
