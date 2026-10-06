@@ -246,6 +246,19 @@ const L2 = [
     }
   },
   {
+    file: 'verify-locate-btn.js',
+    label: 'M6.8 坐标定位按钮 + 点击回归',
+    check(out) {
+      const r = parseJsonLast(out)
+      if (!r) return { ok: false, why: '输出不是合法 JSON' }
+      const errs = r['错误'] || []
+      if (errs.length) return { ok: false, why: `页面报错：${errs[0]}` }
+      const fails = r['失败项'] || []
+      if (fails.length) return { ok: false, why: fails.slice(0, 2).join('；') }
+      return { ok: true, why: '坐标旁定位按钮可用（纯前端不依赖 xnavi）；任务卡片防具真实点击 + 拖动都正常' }
+    }
+  },
+  {
     file: 'verify-sw-cache.js',
     label: 'SW 缓存不挡新版本',
     check(out) {

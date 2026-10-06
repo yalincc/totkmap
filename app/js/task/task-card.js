@@ -549,6 +549,13 @@
       var el = e.target;
       /* 交互元素不启动拖动，否则点按钮会变成拖按钮 */
       if (el.closest && el.closest('button, a, input, select, textarea')) return;
+      /* ★ 防具图标（data-go-armor）也必须排除，否则点了没反应。
+         根因：end() 里的 card.releasePointerCapture(pointerId)
+         会**重定向后续 click 的 target** —— 原本落在<img> 上的 click
+         被改派到捕获元素（#taskCard 自己），于是img 上的 click handler
+         永远不触发。表现是「elementFromPoint 明明命中 IMG，
+         真实鼠标点却毫无反应」（实测：ic.click() 有效、真实点击无效）。 */
+      if (el.closest && el.closest('[data-go-armor]')) return;
       /* 竖向滚动条区域（约12px 宽）不启动拖动，
          否则在长卡片上想滚动条却变成了拖卡片 */
       if (card.scrollHeight > card.clientHeight + 2) {

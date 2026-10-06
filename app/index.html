@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>塞尔达传说：王国之泪 · 互动地图</title>
 <link rel="stylesheet" href="vendor/leaflet.css">
-<link rel="stylesheet" href="css/style.css?v=216">
+<link rel="stylesheet" href="css/style.css?v=217">
 </head>
 <body>
 
@@ -161,7 +161,24 @@
     </div>
     <div class="ec-row" id="ecRegionRow"><span class="ec-label">区域</span><span class="ec-value" id="ecRegion"></span></div>
     <div class="ec-row" id="ecTowerRow"><span class="ec-label">塔域</span><span class="ec-value" id="ecTower"></span></div>
-    <div class="ec-row" id="ecCoordRow"><span class="ec-label">坐标</span><span class="ec-value" id="ecCoord"></span></div>
+    <div class="ec-row" id="ecCoordRow">
+      <span class="ec-label">坐标</span>
+      <span class="ec-value">
+        <span id="ecCoord"></span>
+        <!-- V2.1 M6.8：回到该图标在地图上的位置。
+             有少数标点在地图上没有独立图标（防具店代表的 19 件商店防具、
+             任务点挂在别的分类下），点跳转只会弹 toast 飞不过去。
+             坐标是现成的，直接按坐标飞过去兜底。 -->
+        <button type="button" class="ec-locate" id="ecLocate"
+                title="回到该点在地图上的位置" aria-label="定位到地图">
+          <svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true">
+            <path d="M8 1.6c-2.5 0-4.5 2-4.5 4.5 0 3.4 4.5 8.3 4.5 8.3s4.5-4.9 4.5-8.3c0-2.5-2-4.5-4.5-4.5z"
+                  fill="none" stroke="currentColor" stroke-width="1.3"/>
+            <circle cx="8" cy="6" r="1.7" fill="currentColor"/>
+          </svg>
+        </button>
+      </span>
+    </div>
     <div class="ec-row" id="ecTrialRow"><span class="ec-label">试炼</span><span class="ec-value" id="ecTrial"></span></div>
     <!-- V2.0.2 神庙详情：desc 里的「位置 / 注意事项 / 宝箱」原先完全没显示，这里结构化补上 -->
     <div class="ec-row" id="ecPlaceRow"><span class="ec-label">位置</span><span class="ec-value" id="ecPlace"></span></div>
@@ -323,8 +340,8 @@
 <!-- 图鉴站地址（联动「查看图鉴」按钮 / 对站跳转）：正式图鉴站地址配置后填写，留空则按钮不显示 -->
 <script>window.TOTK_COMPENDIUM_URL = '';</script>
 <script src="js/save-parser.js"></script>
-<script src="js/app.js?v=216"></script>
-<script src="js/live.js?v=216"></script>
+<script src="js/app.js?v=217"></script>
+<script src="js/live.js?v=217"></script>
 <script src="js/explore-auto.js?v=193"></script>
 <script src="js/mat-auto.js?v=194"></script>
 <!-- V2.0：龙轨迹图层（独立模块）。数据已改为 ROM 官方轨道 dragon_paths_rom.js，
@@ -337,23 +354,23 @@
      data/task-save.js 是任务存档变量表（hash 键 + 阶段枚举），由
      tools/build_task_save.py 从 marcrobledo/savegame-editors 的 hashes.csv 生成。
      它只是纯数据，解析逻辑在 js/save-parser.js 的 questDone()。 -->
-<script src="data/task-plan.js?v=216"></script>
-<script src="data/task-save.js?v=216"></script>
+<script src="data/task-plan.js?v=217"></script>
+<script src="data/task-save.js?v=217"></script>
 <!-- M6.1：防具数据。task-data.js 的 armorsOf() 要读window.TOTK_ARMORS
      做「任务 → 可获得防具」反查，必须排在自己之前，否则反查全空。 -->
-<script src="data/armors.js?v=216"></script>
+<script src="data/armors.js?v=217"></script>
 <!-- M6.5：防具强化数据（每级星星数 + 材料，生成脚本 tools/build_armor_upgrade.py）。
      armor-data.js 的 upgradeOf() 直接读它。 -->
-<script src="data/armor-upgrade.js?v=216"></script>
-<script src="js/task/task-data.js?v=216"></script>
-<script src="js/task/task-done.js?v=216"></script>
-<script src="js/task/task-panel.js?v=216"></script>
-<script src="js/task/task-card.js?v=216"></script>
-<script src="js/task/task-flow.js?v=216"></script>
+<script src="data/armor-upgrade.js?v=217"></script>
+<script src="js/task/task-data.js?v=217"></script>
+<script src="js/task/task-done.js?v=217"></script>
+<script src="js/task/task-panel.js?v=217"></script>
+<script src="js/task/task-card.js?v=217"></script>
+<script src="js/task/task-flow.js?v=217"></script>
 <!-- M6.5：防具面板 + 数据合并层。必须在 data/armors.js / data/armor-upgrade.js
      之后加载（ArmorData 依赖它们），且在 ArmorCard 之前。 -->
 <!-- V2.1 M6.6：防具增强（给探索卡片补防具信息，不新增 Tab/面板） -->
-<script src="js/armor/armor-enhance.js?v=216"></script>
+<script src="js/armor/armor-enhance.js?v=217"></script>
 <!-- V1.9.4 问题3：Service Worker 瓦片/静态资源持久缓存，地图打开秒开
      ★ V2.1 M6.5 补：sw.js 自己也走 cache-first（注册没带 ?v=），
        不 bump 它的 SW_VER 就永远拿不到新版 —— 表现为「改了代码页面没变化」。

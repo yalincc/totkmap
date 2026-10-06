@@ -1671,6 +1671,29 @@
     $('ecTower').textContent = nearestTower(ll) || '未知';
     $('ecCoord').textContent = 'X ' + Math.round(m.y) + ' · Z ' + Math.round(m.x);
 
+    /* ---------- V2.1 M6.8：坐标旁的定位按钮 ----------
+     * 需求：「点击左边可以定位回地图上的图标位置即可。因为有时候点击套装和
+     *   任务切换的时候，需要切换一下地图位置而已。」
+     * 为什么需要它：gotoArmor 要先按名字找到对应的**地图标点**才能跳；
+     *   找不到时（比如防具店代表的 19 件商店防具、任务点挂在别的分类下）
+     *   就只弹 toast 飞不过去。但坐标是现成的 —— 直接按坐标飞过去兜底。 */
+    var btnLocate = $('ecLocate');
+    if (btnLocate) {
+      var canLoc = m.x != null && m.y != null;
+      btnLocate.disabled = !canLoc;
+      btnLocate.style.display = canLoc ? '' : 'none';
+      btnLocate.onclick = function (e) {
+        e.stopPropagation();
+        if (!canLoc) return;
+        /* 复用 gotoMarker 的完整流程：切层 → 勾分类 → 飞过去 → 加光圈。
+           传一个「代理标点」对象即可，gotoMarker 只用 m.id / m.cat / m.x / m.y / m.name。 */
+        gotoMarker({
+          id: m.id, cat: m.cat, layer: m.layer, x: m.x, y: m.y,
+          name: m.name || m.full || '目标'
+        });
+      };
+    }
+
     /* V2.0.2：神庙 desc 的四段信息（试炼/位置/注意/宝箱）结构化上屏。
      * 非神庙（该字段为空）对应行自动隐藏，卡片保持原来的紧凑外观。 */
     var sec = parseDescSections(m.desc || '');

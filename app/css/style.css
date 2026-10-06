@@ -1564,3 +1564,35 @@ html, body {
 @media (prefers-reduced-motion: reduce) {
   .mk-locate-ring { animation: none; transform: scale(1.35); opacity: 1; }
 }
+
+/* ============================================================
+   坐标旁的定位按钮（V2.1 M6.8）
+   ------------------------------------------------------------
+   需求：「点击左边可以定位回地图上的图标位置即可。因为有时候点击套装和
+   任务切换的时候，需要切换一下地图位置而已。」
+   跟底部「导航」按钮的区别（别混淆）：
+     · 导航 = 交给 xnavi 引导玩家在**游戏里**走过去（要服务在跑）
+     · 这个 = 只把**网页地图视角**移回该点，服务不开也能用
+   所以它不依赖任何后端，纯前端 flyTo。
+   ============================================================ */
+.ec-locate {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 18px; height: 18px; margin-left: 5px;
+  vertical-align: -3px;
+  border-radius: 50%; cursor: pointer;
+  color: rgba(255,255,255,.32);
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(255,255,255,.12);
+  transition: all .14s;
+}
+.ec-locate:hover {
+  color: #eac27e;
+  background: rgba(234,194,126,.16);
+  border-color: rgba(234,194,126,.45);
+}
+.ec-locate:active { transform: scale(.9); }
+.ec-locate:disabled {
+  opacity: .3; cursor: not-allowed;
+}
+/* 图标是路径+圆，currentColor 跟随 hover 变色 */
+.ec-locate svg { display: block; }
