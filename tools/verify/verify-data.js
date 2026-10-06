@@ -86,7 +86,7 @@ const RULES = [
   },
   {
     id: 'cat-thin', title: '分类为「其他」（筛选粒度过粗）', level: 'warn',
-    test: t => t.catCn === '其他',
+    test: t => (t.group || '其他') === '其他',
     why: '占位分类，用户按分类筛任务时一大半任务挤在一起',
     fix: 'V2.2 考虑按 oldCat/kindCn 拆子类（老大已决定暂不拆，仅登记）'
   },
@@ -135,7 +135,9 @@ const overview = {
   上得了地图: stat(t => t.onMap),
   有攻略: stat(t => !!t.guide),
   成链: stat(t => t.tier === 'L1' || t.tier === 'L2'),
-  分类分布: TASKS.reduce((a, t) => { a[t.catCn] = (a[t.catCn] || 0) + 1; return a }, {}),
+  /* ★ 用 group 而非 catCn：迷你挑战单列（2026-10-07）后界面分类看group，
+       catCn 是从 ROM cat 推的，会把 120 条迷你挑战算进「其他」。 */
+      分类分布: TASKS.reduce((a, t) => { const k = t.group || '(无)'; a[k] = (a[k] || 0) + 1; return a }, {}),
   攻略分类分布: TASKS.reduce((a, t) => {
     const k = t.guide ? '有攻略' : '纯官方'; a[k] = (a[k] || 0) + 1; return a
   }, {})

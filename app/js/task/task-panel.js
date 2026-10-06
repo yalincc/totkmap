@@ -147,9 +147,8 @@
 
   /* 分类图标复用现有 assets/icons，不新增图片 */
   function taskIcon(cat) {
-    if (cat === 'Main') return 'origin_3845393_70484.png';
-    if (cat === 'ImportantMini') return 'origin_3845393_70484.png';
-    if (cat === 'Sub') return 'origin_3845393_70484.png';
+    /* 五档共用同一个图标（本来就没有分类专属图标）。
+       分类靠标题文字 + 右侧计数区分，不靠图标。 */
     return 'origin_3845393_70484.png';
   }
 
@@ -163,7 +162,15 @@
      （.mk-done-check）完全一致。同时 glyph 换成 ✓，双通道编码：
      形状给流程档位，勾给完成态，色块给任务分类。 */
   function taskIconDot(t) {
-    var cls = 'tk-dot tk-' + (t.cat === 'Main' ? 'main' : t.cat === 'ImportantMini' ? 'imp' : t.cat === 'Sub' ? 'sub' : 'oth');
+    /* ★ 按 group 判色（2026-10-07 迷你挑战单列）。
+     * 原来按 t.cat（ROM 四档）判，迷你挑战会落到 'oth' 灰色里，
+     * 地图上跟「其他」分不开。现在迷你挑战有自己的紫蓝色。 */
+    var gk = t.group || '其他';
+    var cls = 'tk-dot tk-' + (gk === '主线' ? 'main'
+      : gk === '重要支线' ? 'imp'
+        : gk === '普通支线' ? 'sub'
+          : gk === '迷你挑战' ? 'mini'
+            : 'oth');
     var isDone = !!(global.TaskDone && t.key && global.TaskDone.isDone(t.key));
     var glyph = isDone ? '✓' : t.tier === 'L1' ? '◆' : t.tier === 'L2' ? '●' : '○';
     if (isDone) cls += ' is-done';
@@ -321,6 +328,7 @@
     '.tk-main { background:#eac27e; color:#3a2f18; }',   /* 主线：主调金 */
     '.tk-imp  { background:#7ec8a9; color:#1d3b30; }',   /* 重要支线：绿 */
     '.tk-sub  { background:#6fb3e0; color:#16324a; }',   /* 普通支线：蓝 */
+    '.tk-mini { background:#b8a0e8; color:#2b1f45; }',   /* 迷你挑战：紫（120条，与灰「其他」区分） */
     '.tk-oth  { background:#8a8f9a; color:#23262c; }',   /* 其他：灰 */
     /* --- V2.1M5.1 完成态 ---
        语义与探索侧 .mk-done-check 一致：右上角绿勾= 已完成。

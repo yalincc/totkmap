@@ -406,7 +406,10 @@
          光标变 grab，视觉上有六点抓手图案。
          点关闭按钮（.tk-close 在里面）不启动拖动，见 makeDraggable 的closest 排除。 */
     h += '<div class="tk-grip">';
-    h += '<span class="tk-chip tk-chip-' + (t.cat === 'Main' ? 'main' : t.cat === 'ImportantMini' ? 'imp' : t.cat === 'Sub' ? 'sub' : 'oth') + '">' +
+    /* ★ 按 group 判（2026-10-07 迷你挑战单列）。
+     * 原来按 t.cat（ROM 四档）判，迷你挑战会落到 'oth'（灰），
+     * 卡片上显示成「其他」，跟真正的「其他」任务混为一谈。 */
+    h += '<span class="tk-chip tk-chip-' + (t.group === '主线' ? 'main' : t.group === '重要支线' ? 'imp' : t.group === '普通支线' ? 'sub' : t.group === '迷你挑战' ? 'mini' : 'oth') + '">' +
       esc(t.group) + '</span>';
     if (!t.hasName) {
       h += '<span class="tk-chip tk-noname" title="游戏内这个任务没有官方标题，用内部编号显示">暂无官方名</span>';
@@ -917,6 +920,7 @@
     '.tk-chip-main { background:rgba(234,194,126,.16); color:#eac27e; }',
     '.tk-chip-imp  { background:rgba(126,200,169,.16); color:#7ec8a9; }',
     '.tk-chip-sub  { background:rgba(111,179,224,.16); color:#6fb3e0; }',
+    '.tk-chip-mini { background:rgba(184,160,232,.16); color:#c4b0f0; }',  /* 迷你挑战：紫 */
     '.tk-chip-oth  { background:rgba(138,143,154,.16); color:#a8adb8; }',
     '.tk-noname { background:rgba(255,180,90,.13); color:#d9a05e; }',
     '.tk-close {',

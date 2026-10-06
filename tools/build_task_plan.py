@@ -135,7 +135,29 @@ CAT_TO_GROUP = {
     "Sub": "普通支线",
     "Other": "其他",
 }
-GROUP_ORDER = ["主线", "重要支线", "普通支线", "其他"]
+GROUP_ORDER = ["主线", "重要支线", "普通支线", "迷你挑战", "其他"]
+
+# ★ 迷你挑战单列（2026-10-07 老大决定）
+#
+# 起因：ROM 的 cat 只有 Main/ImportantMini/Sub/Other 四档，游戏里正式存在的
+# 「迷你挑战」被塞进 Other → 界面上「其他」有 139 条，其中 120 条是迷你挑战，
+# 占 86%。用户按分类筛任务时一大半挤在占位类里。
+#
+# 判据用 oldCat 而非 ROM cat：oldCat 来自**地图标点分类 id**
+# （extract_quests.py 里185/192 = 迷你挑战），那是玩家攻略侧的标记，
+# 已被 add_kindcn.py 认定为可信来源；ROM cat 反而是最粗的那一档。
+# 实测：oldCat=='迷你挑战' 120 条，kindCn 也是 120 条，两边一致。
+#
+# 顺序放在「普通支线」之后、「其他」之前 —— 迷你挑战是平行主线的补充，
+# 重要性低于正式支线，但高于「其他」这个兜底类。
+MINI_CHALLENGE = "迷你挑战"
+
+
+def group_of(t):
+    """任务 → 界面分类。迷你挑战优先于 ROM cat。"""
+    if t.get("oldCat") == MINI_CHALLENGE:
+        return MINI_CHALLENGE
+    return CAT_TO_GROUP.get(t.get("cat"), "其他")
 
 
 def main():
@@ -245,7 +267,7 @@ def main():
         t["_flowPts"] = pts
         t["_flowN"] = len(pts)
         t["_tier"] = flow_tier(len(pts))
-        t["_group"] = CAT_TO_GROUP.get(t.get("cat"), "其他")
+        t["_group"] = group_of(t)
         # 可上图判定
         # ★ (0,0) 不是空值，是海拉鲁城堡中心。tasks.js 里 posValid 对这类
         #   没兜住（GetMasterSword 的 ROM 点就是 0,0），直接放行会把导航

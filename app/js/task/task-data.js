@@ -76,15 +76,38 @@
 
   /* ---------- 图层 / 分组常量 ---------- */
   var LAYER_NAME = { 18: '地上', 19: '地下', 20: '天空' };
-  /* ★ 界面展示顺序（主线 → 重要支线 → 普通支线 → 其他）。
-     用数组而不是对象，遍历顺序才不会依赖 JS 对象的键序。 */
-  var CAT_ORDER = ['Main', 'ImportantMini', 'Sub', 'Other'];
-  var CAT_CN = { Main: '主线任务', ImportantMini: '重要支线', Sub: '普通支线', Other: '其他任务' };
-  var GROUP_CN = CAT_CN;
 
-  /* ROM 的 cat → 界面分组名。与 M2 的 build_task_plan.py 保持一致。 */
-  function groupOf(cat) {
-    return CAT_CN[cat] || '其他任务';
+  /* ★ 界面分组改用**中文 group 名**作键（2026-10-07 迷你挑战单列）。
+   *
+   * 为什么不再用 ROM 的 cat（Main/ImportantMini/Sub/Other）：
+   *   ROM cat 只有四档，游戏里正式存在的「迷你挑战」被塞进 Other，
+   *   导致「其他」有 139 条、其中 120 条是迷你挑战（占 86%）。
+   *   分组判据改用 oldCat（玩家攻略侧的标记，可信度更高），
+   *   由 tools/build_task_plan.py 的 group_of() 算好写进 raw.group。
+   *
+   * 换口径的连带影响：所有按 cat 过滤/统计的地方都要改成 group，
+   *   否则「迷你挑战」这组点不动、也统计不到。
+   * 用数组而不是对象，遍历顺序才不会依赖 JS 对象的键序。 */
+  var CAT_ORDER = ['主线', '重要支线', '普通支线', '迷你挑战', '其他'];
+  var CAT_CN = {
+    '主线': '主线任务',
+    '重要支线': '重要支线',
+    '普通支线': '普通支线',
+    '迷你挑战': '迷你挑战',
+    '其他': '其他任务'
+  };
+  var GROUP_CN = CAT_CN;
+  /* 旧代码还有按 ROM cat 名问的（如 armor 掉落区、reqs 反查），
+     保留一个映射表兜底，别让它们因为找不到键而全部落到「其他」。 */
+  var ROM_CAT_TO_GROUP = {
+    Main: '主线', ImportantMini: '重要支线', Sub: '普通支线', Other: '其他'
+  };
+
+  /* ROM cat → 界面分组名。优先用数据里算好的 group，缺失时按 ROM cat 兜底。 */
+  function groupOf(t) {
+    if (t && t.group) return t.group;
+    var cat = typeof t === 'string' ? t : (t && t.cat);
+    return ROM_CAT_TO_GROUP[cat] || '其他';
   }
 
   /* ---------- 主处理 ---------- */
@@ -144,7 +167,8 @@
         hasRealName: raw.nameSrc !== 'key',   /* 界面据此提示「官方无中文名」 */
         nameSrc: raw.nameSrc,          /* rom=官方中文名；guide=社区起名；key=ROM 里就没中文 */
         cat: raw.cat || 'Other',
-        group: groupOf(raw.cat),
+        /* 界面分组：build_task_plan.py 已按 oldCat 优先算好 */
+        group: raw.group || ROM_CAT_TO_GROUP[raw.cat] || '其他',
         /* kindCn = 「情节/迷你挑战」这套玩家视角的分类（M5新增，
            由 tools/add_kindcn.py 离线产出）。
            与 cat/group 的区别：
@@ -214,11 +238,12 @@
 
   /* ---------- 统计（面板标题上的数字） ---------- */
   function statsByLayer(layerId) {
-    var g = { Main: 0, ImportantMini: 0, Sub: 0, Other: 0 };
+    var g = {};
     TASKS.forEach(function (t) {
       if (t.layer !== layerId) return;
       if (!t.onMap) return;
-      g[t.cat] = (g[t.cat] || 0) + 1;
+      var k = t.group || '其他';
+      g[k] = (g[k] || 0) + 1;
     });
     return CAT_ORDER.map(function (cat) {
       return { cat: cat, name: CAT_CN[cat], count: g[cat] || 0 };
@@ -242,7 +267,7 @@
     TASKS.forEach(function (t) {
       if (t.layer !== layerId) return;
       if (!t.onMap) return;
-      if (cat && t.cat !== cat) return;
+      if (cat && (t.group || '其他') !== cat) return;
       out.push(t);
     });
     out.sort(function (a, b) {

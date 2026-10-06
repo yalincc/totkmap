@@ -40,6 +40,34 @@ const CHROME = 'C:/Program Files/Google/Chrome/Application/chrome.exe'
   const R = {}
 
   /* ---- 0. 前置 ---- */
+  /* ---- -1. 分类分组（2026-10-07 迷你挑战单列）----
+     * 断言五档齐全、且「迷你挑战」这一档点得动（能被 listBy 过滤出来）。
+     * 这条专门防「改回按ROM cat 过滤」——那样迷你挑战会落进「其他」，
+     * 面板上点不动、统计也归错地方。 */
+  R['-1_分类分组'] = await page.evaluate(() => {
+    const D = window.TaskData
+    if (!D) return { 未加载: true }
+    const layer = 18
+    const stats = D.statsByLayer(layer)
+    const names = stats.map(s => s.name)
+    const g = {}
+    D.tasks.forEach(t => { const k = t.group || '(无)'; g[k] = (g[k] || 0) + 1 })
+    return {
+      分档: stats.map(s => s.name + ':' + s.count).join(' / '),
+      五档齐全: ['主线任务', '重要支线', '普通支线', '迷你挑战', '其他任务']
+        .every(n => names.indexOf(n) >= 0),
+      全库分布: g,
+      迷你挑战总数: g['迷你挑战'] || 0,
+      其他总数: g['其他'] || 0,
+      迷你挑战可过滤: D.listBy(layer, '迷你挑战').length,
+      迷你挑战有图例类: (() => {
+        const t = D.listBy(layer, '迷你挑战')[0]
+        return t ? t.group === '迷你挑战' : false
+      })()
+    }
+  })
+
+
   R['0_环境'] = await page.evaluate(() => {
     const C = window.TOTK_CATALOGS || []
     const M = window.TOTK_MARKERS || []
@@ -299,6 +327,17 @@ const CHROME = 'C:/Program Files/Google/Chrome/Application/chrome.exe'
 
   /* ---- 汇总 ---- */
   const fails = []
+  /* 分类分组断言（2026-10-07 迷你挑战单列） */
+  const gc = R['-1_分类分组'] || {}
+  if (gc.未加载) fails.push('TaskData 未加载')
+  else {
+    if (!gc.五档齐全) fails.push(`分类不是五档：${gc.分档}`)
+    if (gc.迷你挑战总数 !== 120) fails.push(`迷你挑战 ${gc.迷你挑战总数} 条，应为 120`)
+    if (gc.其他总数 > 25) fails.push(`「其他」还有 ${gc.其他总数} 条，迷你挑战没被正确拆出`)
+    if (!gc.迷你挑战可过滤) fails.push('listBy 过滤「迷你挑战」返回空——分组被改回按 ROM cat 了？')
+    if (!gc.迷你挑战有图例类) fails.push('迷你挑战任务的 group 字段不对')
+  }
+
   const e = R['0_环境'] || {}
   if (!e.ArmorEnhance已加载) fails.push('ArmorEnhance 未加载')
   if (e.有防具Tab) fails.push('侧栏还有防具 Tab（应该撤掉了）')
@@ -372,6 +411,8 @@ const CHROME = 'C:/Program Files/Google/Chrome/Application/chrome.exe'
   console.log('\n' + JSON.stringify({
     错误: [...new Set(errs)].slice(0, 5),
     失败项: fails,
+    迷你挑战: gc.迷你挑战总数,
+    其他: gc.其他总数,
     单件: e.单件,
     套装统称: e.套装统称,
     无匹配: e.无匹配,
