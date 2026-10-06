@@ -61,7 +61,18 @@
 
   /* ---------- 强化数据 ---------- */
   function upgradeOf(a) {
-    var rec = UPGRADE[a.key];
+    /* ★ 参数是「防具对象」不是 key 字符串。
+     * 传错时（UPGRADE["xxx"] → UPGRADE[undefined]）会**静默返回空**，
+     * 表现为「强化数据在、条数也对、但全都说不可强化」，极难排查。
+     * （我自己核对时传了字符串，stats 一看 0 就以为功能坏了。）
+     * 所以这里显式拦一道。 */
+    var key = (typeof a === 'string') ? a : (a && a.key);
+    if (typeof a === 'string') {
+      if (global.console && console.warn) {
+        console.warn('[防具] upgradeOf 应传防具对象而非 key 字符串：' + a);
+      }
+    }
+    var rec = UPGRADE[key];
     if (!rec || !rec.steps || !rec.steps.length) {
       return { steps: [], maxLevel: 1, upgradeable: false };
     }
@@ -335,11 +346,19 @@
     isArmorCat: isArmorCat,
     /* 供验收用 */
     stats: function () {
-      var names = Object.keys(BY_NAME), sets = Object.keys(BY_SET);
+      var ids = {};
+      ARMORS.forEach(function (a) {
+        var sid = a.setId || a.key.replace(/_(Head|Upper|Lower)$/, '');
+        ids[sid] = 1;
+      });
       return {
         防具条数: ARMORS.length,
-        名字索引: names.length,
-        套装数: sets.length,
+        名字索引: Object.keys(BY_NAME).length,
+        /* ★ 按 **setId** 去重，不是按套装名。
+         * 同名不同 ID 是常态（海利亚套装有 Armor_001 与 Armor_005 两个 ID），
+         * 用套装名去重会漏算（实测 64 vs 真实 67）。 */
+        套装数: Object.keys(ids).length,
+        套装名数: Object.keys(BY_SET).length,
         可强化: ARMORS.filter(function (a) { return upgradeOf(a).upgradeable; }).length
       };
     },
