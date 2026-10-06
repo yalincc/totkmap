@@ -24,6 +24,9 @@
   var curLayer = 18;
   var ready = false;
   var lastSig = '';
+  /* 完成态版本号：TaskDone 每次变化（手动标记/ 载入存档）自增，
+     混进 signature 里做重绘判据。见 signature() 注释。 */
+  var doneRev = 0;
   var userOn = {};           // {layer: {cat:true}} 用户勾选意图
 
   /* ---------- 小工具 ---------- */
@@ -76,7 +79,9 @@
   }
   function signature() {
     var m = userOn[curLayer] || {};
-    var s = curLayer + '|';
+    var s = curLayer + '|' + doneRev + '|';   /* doneRev：完成态一变就强制重绘，
+                                               不去遍历 259 个任务算哈希（那样每次
+                                               tick 都是 259 次查表，浪费） */
     D.catOrder.forEach(function (cat) {
       s += m[cat] ? '1' : '0';
     });
@@ -152,14 +157,19 @@
   /* 任务点用「方形徽标」，与站内现有圆形图标（神庙/鸟望台/克洛格）明显区分。
      z5 全图下圆点太小会淹没在图标海里，方形+ 深色底 + 亮色边最醒目。
      ★ divIcon 只能放 HTML，所以 data-tkkey 挂在里面的 .tk-dot 上
-       （挂在 divIcon 的 className 上取不到，那是 Leaflet 自己生成的）。 */
+       （挂在 divIcon 的 className 上取不到，那是 Leaflet 自己生成的）。
+
+     V2.1M5.1：完成态= 右上角绿勾 + 整体降透明，语义与探索侧
+     （.mk-done-check）完全一致。同时 glyph 换成 ✓，双通道编码：
+     形状给流程档位，勾给完成态，色块给任务分类。 */
   function taskIconDot(t) {
     var cls = 'tk-dot tk-' + (t.cat === 'Main' ? 'main' : t.cat === 'ImportantMini' ? 'imp' : t.cat === 'Sub' ? 'sub' : 'oth');
-    var glyph = t.tier === 'L1' ? '◆' : t.tier === 'L2' ? '●' : '○';
+    var isDone = !!(global.TaskDone && t.key && global.TaskDone.isDone(t.key));
+    var glyph = isDone ? '✓' : t.tier === 'L1' ? '◆' : t.tier === 'L2' ? '●' : '○';
+    if (isDone) cls += ' is-done';
     return L.divIcon({
       className: 'tk-dot-wrap',
-      /* data-tkkey 给验收脚本和流程线做稳定标识；
-         key 为 null 的是攻略孤儿条目（见 task-card.js 说明），标出来便于区分 */
+      /* data-tkkey 给验收脚本和流程线做稳定标识 */
       html: '<div class="' + cls + '" data-tkkey="' + esc(t.key || '') + '" title="' +
             esc(t.name) + '">' + glyph + '</div>',
       iconSize: [18, 18],
@@ -180,22 +190,19 @@
     var list = D.listBy(curLayer);
     list.forEach(function (t) {
       if (!on[t.cat]) return;
+      var isDone = !!(global.TaskDone && t.key && global.TaskDone.isDone(t.key));
       /* ★ Leaflet latlng = (gz, gx)，见 app.js 坐标系注释 */
       var m = L.marker([t.gz, t.gx], {
         icon: taskIconDot(t),
         title: t.name,
         riseOnHover: true
       });
-      m.bindTooltip(t.name, { direction: 'top', offset: [0, -8], className: 'mk-label tk-tip' });
+      /* 已完成的加✓ 前缀，与探索侧 tooltip 口径一致 */
+      m.bindTooltip((isDone ? '✓ ' : '') + t.name, {
+        direction: 'top', offset: [0, -8],
+        className: 'mk-label tk-tip' + (isDone ? ' done-label' : '')
+      });
       m.on('click', function (e) {
-        /* ★ 攻略孤儿条目（tasks.js 里 key=null，全库 1 条「一发入魂！？」）：
-           它只来自玩家攻略 markers.js，ROM 的 RSDB/Challenge 里查不到，
-           所以既没有官方名也没有步骤，卡片里是空的。
-           这里给明确提示，别让玩家点了没反应以为坏了。 */
-        if (!t.key) {
-          toast('这条是玩家攻略收录的条目，游戏内没有对应任务文本' +
-                '（名称与步骤来自社区整理）');
-        }
         if (global.TaskCard) global.TaskCard.open(t, e);
       });
       m.addTo(g);
@@ -270,9 +277,15 @@
       }
     };
 
-    /* 订阅完成态变化：手动标记、或加载存档后，标题数字要跟着动 */
+    /* 订阅完成态变化：手动标记、或加载存档后，标题数字要跟着动。
+       ★ 地图任务点的重绘**不在这里做**——只把 doneRev 加一，
+         下一轮 tick()（150ms 轮询）比对 signature 发现变了自然会重画。
+         早先在这里直接调 render() 是冗余的：存档加载时 TaskDone 连续
+         notify 十几次，每次全量重建 254 个 marker，明显卡顿。
+         地图任务点重绘的判据见 signature() 里的 doneRev 注释。 */
     if (global.TaskDone) {
       global.TaskDone.onChange(function () {
+        doneRev++;
         if (ready) global.TaskPanel.refreshDoneCount();
       });
     }
@@ -309,6 +322,14 @@
     '.tk-imp  { background:#7ec8a9; color:#1d3b30; }',   /* 重要支线：绿 */
     '.tk-sub  { background:#6fb3e0; color:#16324a; }',   /* 普通支线：蓝 */
     '.tk-oth  { background:#8a8f9a; color:#23262c; }',   /* 其他：灰 */
+    /* --- V2.1M5.1 完成态 ---
+       语义与探索侧 .mk-done-check 一致：右上角绿勾= 已完成。
+       额外压低不透明度 + 去饱和，让已完成任务在密集图标海里退到背景，
+       未完成的自动跳出来 —— 这比只加个勾更省眼力。 */
+    '.tk-dot.is-done {',
+    '  opacity:.42; filter:saturate(.45);',
+    '  box-shadow:0 1px 3px rgba(0,0,0,.5), 0 0 0 1px rgba(255,255,255,.08); }',
+    '.tk-dot.is-done:hover { opacity:.9; filter:none; }',
     /* 悬停标签与现有 .mk-label 同风格 */
     '.tk-tip { white-space:nowrap; }'
   ].join('\n');
