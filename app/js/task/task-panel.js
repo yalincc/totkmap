@@ -142,13 +142,18 @@
 
   /* ---------- 地图绘制 ---------- */
   /* 任务点用「方形徽标」，与站内现有圆形图标（神庙/鸟望台/克洛格）明显区分。
-     z5 全图下圆点太小会淹没在图标海里，方形+ 深色底 + 亮色边最醒目。 */
+     z5 全图下圆点太小会淹没在图标海里，方形+ 深色底 + 亮色边最醒目。
+     ★ divIcon 只能放 HTML，所以 data-tkkey 挂在里面的 .tk-dot 上
+       （挂在 divIcon 的 className 上取不到，那是 Leaflet 自己生成的）。 */
   function taskIconDot(t) {
     var cls = 'tk-dot tk-' + (t.cat === 'Main' ? 'main' : t.cat === 'ImportantMini' ? 'imp' : t.cat === 'Sub' ? 'sub' : 'oth');
     var glyph = t.tier === 'L1' ? '◆' : t.tier === 'L2' ? '●' : '○';
     return L.divIcon({
       className: 'tk-dot-wrap',
-      html: '<div class="' + cls + '" title="' + esc(t.name) + '">' + glyph + '</div>',
+      /* data-tkkey 给验收脚本和流程线做稳定标识；
+         key 为 null 的是攻略孤儿条目（见 task-card.js 说明），标出来便于区分 */
+      html: '<div class="' + cls + '" data-tkkey="' + esc(t.key || '') + '" title="' +
+            esc(t.name) + '">' + glyph + '</div>',
       iconSize: [18, 18],
       iconAnchor: [9, 9]
     });
@@ -175,6 +180,14 @@
       });
       m.bindTooltip(t.name, { direction: 'top', offset: [0, -8], className: 'mk-label tk-tip' });
       m.on('click', function (e) {
+        /* ★ 攻略孤儿条目（tasks.js 里 key=null，全库 1 条「一发入魂！？」）：
+           它只来自玩家攻略 markers.js，ROM 的 RSDB/Challenge 里查不到，
+           所以既没有官方名也没有步骤，卡片里是空的。
+           这里给明确提示，别让玩家点了没反应以为坏了。 */
+        if (!t.key) {
+          toast('这条是玩家攻略收录的条目，游戏内没有对应任务文本' +
+                '（名称与步骤来自社区整理）');
+        }
         if (global.TaskCard) global.TaskCard.open(t, e);
       });
       m.addTo(g);

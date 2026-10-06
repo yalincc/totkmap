@@ -187,14 +187,21 @@
     h += '<button type="button" class="btn act" id="tkCopy">复制</button>';
     h += '</div>';
 
-    /* M4 预留：流程线开关。当前只对 L1 显示且按钮禁用，
-       等task-flow.js 落地后再启用。 */
+    /* M4 流程线：L1 才是多点任务（可连线），L2/L3 直接说明为什么画不出。
+       档位术语（L1/L2/L3）是内部约定，不给玩家看。 */
+    var flow = '';
     if (t.tier === 'L1') {
-      h += '<div class="tk-flow-row"><span class="tk-flow-hint">' +
-        '流程线（' + t.flowPts.length + ' 个节点）</span>' +
-        '<button type="button" class="btn ghost tk-flow-btn" id="tkFlow" disabled' +
-        ' title="流程连线将在下个版本上线">下个版本</button></div>';
+      flow = '<button type="button" class="btn ghost tk-flow-btn" id="tkFlow">' +
+        '显示流程</button>' +
+        '<span class="tk-flow-hint" id="tkFlowHint">' +
+        '共 ' + t.flowPts.length + ' 个地点' +
+        (t.flowPts.length > 1 ? '，可连成流程线' : '') + '</span>';
+    } else if (t.tier === 'L2') {
+      flow = '<span class="tk-flow-hint">这个任务只有 1 个地点，无需连线</span>';
+    } else {
+      flow = '<span class="tk-flow-hint">这个任务没有可定位的地点</span>';
     }
+    h += '<div class="tk-flow-row">' + flow + '</div>';
 
     return h;
   }
@@ -266,6 +273,14 @@
       }
     });
 
+    /* 流程线：交给 task-flow.js（独立模块，出问题也不影响卡片其他功能） */
+    var fl = $('tkFlow');
+    if (fl) fl.addEventListener('click', function (e) {
+      stopAll(e);
+      if (global.TaskFlow) global.TaskFlow.toggle();
+      else toast('流程线模块未加载');
+    });
+
     /* 复制任务名，便于搜攻略 */
     var cp = $('tkCopy');
     if (cp) cp.addEventListener('click', function (e) {
@@ -294,8 +309,19 @@
   }
 
   /* ---------- 键盘 / 全局 ---------- */
+  /* ★ 这里必须调 `TaskCard.close`（对外暴露的那个），**不能调闭包内的 close()**。
+     task-flow.js 为了「关卡片即收线」包装了 global.TaskCard.close；
+     若这里调闭包内的 close()，包装就被绕过 —— 表现为
+     按 Esc 关卡片后地图上留一条流程线（实测踩过）。
+     同理下面 document click 里的 close() 也一样。 */
+  function closePublic() {
+    var C = global.TaskCard;
+    if (C && typeof C.close === 'function') C.close();
+    else close();
+  }
+
   document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape') close();
+    if (e.key === 'Escape') closePublic();
   });
   document.addEventListener('click', function (e) {
     /* ★ 必须延后一拍判断：Leaflet 的 marker click 与这次 DOM click 是同一轮派发，
@@ -308,8 +334,11 @@
       var el = e.target && e.target.nodeType === 1 ? e.target : (e.target && e.target.parentElement);
       if (!el) return;
       if (card.contains(el)) return;          /* 卡片内点击不关 */
-      if (cur && cur.key && el.closest && el.closest('.tk-dot-wrap')) return;  /* 点任务点不关 */
-      close();
+      /* 点任务点不关 —— 这里不能只判 cur.key：
+         攻略孤儿条目（key=null，全库 1 条）会漏判，
+         点了它自己的点反而把刚开的卡片关了。改成按元素类名判。 */
+      if (el.closest && el.closest('.tk-dot-wrap')) return;
+      closePublic();
     }, 0);
   });
 
@@ -416,7 +445,7 @@
     '.tk-flow-row {',
     '  display:flex; align-items:center; gap:8px; margin-top:10px;',
     '  padding-top:10px; border-top:1px solid rgba(255,255,255,.07); }',
-    '.tk-flow-hint { font-size:12px; color:rgba(255,255,255,.55); flex:1; }',
-    '.tk-flow-btn { opacity:.55; cursor:default; }'
+    '.tk-flow-hint { font-size:12px; color:rgba(255,255,255,.55); flex:1; line-height:1.55; }',
+    '.tk-flow-btn { flex:0 0 auto; }',
   ].join('\n'));
 })(window);
