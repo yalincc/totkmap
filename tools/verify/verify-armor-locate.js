@@ -84,19 +84,21 @@ const CHROME = 'C:/Program Files/Google/Chrome/Application/chrome.exe'
     let 闪光时地图已停稳 = null
     let 地图停稳时刻 = 0
     MP.once('moveend', () => { 地图停稳时刻 = Date.now() })
+    /* ★ fix3：光圈是独立插入的 div（不是改marker 的 class），
+       所以观察 childList 而不是 attributes */
     const 闪光观察 = new MutationObserver(() => {
-      if (document.querySelector('.mk-locate-flash')) {
+      if (document.querySelector('.mk-locate-ring')) {
         闪光时地图已停稳 = 地图停稳时刻 > 0
         闪光观察.disconnect()
       }
     })
-    闪光观察.observe(document.body, { subtree: true, attributes: true, attributeFilter: ['class'] })
+    闪光观察.observe(document.body, { childList: true, subtree: true })
 
     window.TOTK_APP.gotoArmor(A.key)
     await new Promise(r => setTimeout(r, 1600))
     const after = { center: MP.getCenter(), zoom: MP.getZoom() }
     const d = Math.hypot(after.center.lat - before.center.lat, after.center.lng - before.center.lng)
-    const el = document.querySelector('.mk-locate-flash')
+    const el = document.querySelector('.mk-locate-ring')
     return {
       目标: p.name,
       目标分类: p.cat,
@@ -104,7 +106,7 @@ const CHROME = 'C:/Program Files/Google/Chrome/Application/chrome.exe'
       现在已勾选: !!S.selected[p.cat],
       地图移动距离: Math.round(d),
       缩放: after.zoom,
-      有闪烁高亮: !!el,
+      有光圈: !!el,
       闪光时地图已停稳: 闪光时地图已停稳,
       卡片还开着: !document.getElementById('exploreCard').classList.contains('hidden')
     }
@@ -143,7 +145,7 @@ const CHROME = 'C:/Program Files/Google/Chrome/Application/chrome.exe'
       起点: pt.name,
       点的是,
       地图移动: Math.round(d),
-      有高亮: !!document.querySelector('.mk-locate-flash'),
+      有光圈: !!document.querySelector('.mk-locate-ring'),
       现在显示: nameEl ? nameEl.textContent : null,
       切过去了: nameEl ? nameEl.textContent === 点的是 : false
     }
@@ -175,7 +177,7 @@ const CHROME = 'C:/Program Files/Google/Chrome/Application/chrome.exe'
     return {
       任务名,
       地图移动: Math.round(d),
-      有高亮: !!document.querySelector('.mk-locate-flash'),
+      有光圈: !!document.querySelector('.mk-locate-ring'),
       任务卡片打开: tc && !tc.classList.contains('hidden'),
       说明: d === 0 ? '地图没动（该任务在地图上可能没有标点）' : '已定位'
     }
@@ -266,7 +268,7 @@ const CHROME = 'C:/Program Files/Google/Chrome/Application/chrome.exe'
   else {
     if (g1.地图移动距离 < 1) fails.push(`点跳转后地图没动（移动 ${g1.地图移动距离}px）`)
     if (!g1.现在已勾选) fails.push(`跳转后目标分类 ${g1.目标分类} 仍没勾上（会飞到空白）`)
-    if (!g1.有闪烁高亮) fails.push('目标 marker 没有闪烁高亮')
+    if (!g1.有光圈) fails.push('目标点没有定位光圈')
     /* 时序：闪光必须晚于地图停稳 */
     if (g1.闪光时地图已停稳 === false) {
       fails.push('闪光动画在地图还在飞的时候就播了（应等 moveend 之后）')
@@ -276,7 +278,7 @@ const CHROME = 'C:/Program Files/Google/Chrome/Application/chrome.exe'
   const g2 = R['2_同套跳转'] || {}
   if (!g2.跳过) {
     if (g2.地图移动 < 1) fails.push(`点同套部件后地图没动（${g2.点的是}，移动 ${g2.地图移动}px）`)
-    if (!g2.有高亮) fails.push('同套跳转没有高亮')
+    if (!g2.有光圈) fails.push('同套跳转没有定位光圈')
     if (!g2.切过去了) fails.push(`同套跳转后卡片没切（现显示 ${g2.现在显示}）`)
   }
 

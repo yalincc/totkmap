@@ -1026,9 +1026,11 @@
       toast('「' + A.name + '」在地图上没有单独标点，商店类可在地图搜「防具店」');
       return;
     }
-    gotoMarker(hit);
-    /* 卡片内容也跟着切过去（它读的是当前点的信息） */
+    /* 顺序：先开卡片（确定卡片尺寸与位置），再 gotoMarker。
+       反过来的话markNow 里moveCardAside 挪开的卡片会被随后的
+       openDetail → positionExploreCard 又推回视口中间 → 重新压住目标。 */
     openDetail(hit, null);
+    gotoMarker(hit);
   }
 
   /* ---------- V2.1 M6.7：跳到地图上的某个标点并高亮 ----------
@@ -1064,49 +1066,124 @@
     var ll = [m.x, m.y];
     var target = Math.max(map.getZoom(), 6);
 
-    /* ---------- 顺序要紧（M6.7 bugfix）----------
-       ★ 原来是 flyTo 之后**立刻**加闪光类：
-         flyTo 有 0.7s 动画，闪光同时开始 → 等地图停稳，动画早播完了，
-         玩家只看到「一个不显眼的小图标」，不知道那是目标。
-       正确：先飞，**等 moveend 再闪**。
-       ★ 还要在 moveend 里**重新取一次 marker**：
-         飞行途中 renderMarkers 可能重画，原来的 element 已经脱离文档，
-         往旧节点加class 等于白加（表现为「闪了一下就没了」）。 */
-    var flashed = false;
-    function flashNow() {
-      if (flashed) return;
-      flashed = true;
+    /* ---------- 定位高亮（M6.7 fix3）----------
+     * 需求：飞到目标后把那个图标凸显出来。
+     *
+     * ★ 试过三种做法都失败，实测结论（别再走回头路）：
+     *   ① transform 动画 → Leaflet 用 transform:translate3d() **定位** marker，
+     *      关键帧里的 scale() 整个覆盖它，平移量被吃掉，图标飞到左上角。
+     *   ② 放大图标 → marker 本身就是 <img>（L.icon），不是 div>img；
+     *      且 .leaflet-marker-icon 自带 overflow:clip，放大必被裁成空白。
+     *   ③ box-shadow 打亮 → marker 背景是 transparent，
+     *      box-shadow 贴在透明元素外框上，看不到光。
+     *
+     * ✓ 现在的做法：**独立光圈 DOM**。
+     *   在目标 marker 的屏幕位置插一个绝对定位的 div（append 到地图容器），
+     *   不动 marker 自己 —— 于是不受它的 overflow / transform / 背景影响。
+     *   z-index 940压过 leaflet-marker-pane(600)，保证一定看得见。
+     *   动画播完换成静态环再留 3 秒——光脉冲 2.2 秒就没了的话，
+     *   玩家还是不知道哪个是目标。 */
+    var PULSE_MS = 2300;   /* 2 次 × 1.1s + 余量 */
+    var HOLD_MS = 3000;    /* 静态环保留时长 */
+    var done = false;
+
+    /* 清掉上一次的（避免多次定位叠一堆环） */
+    Array.prototype.forEach.call(
+      document.querySelectorAll('.mk-locate-ring'), function (n) { n.remove(); });
+    Array.prototype.forEach.call(
+      document.querySelectorAll('.mk-locate-target'), function (n) {
+        n.classList.remove('mk-locate-target');
+      });
+
+    function markNow() {
+      if (done) return;
+      done = true;
       var mk2 = state.markers[m.id];
       if (!mk2) { toast('已定位到「' + (m.name || m.full || '目标') + '」'); return; }
       var el = mk2.getElement && mk2.getElement();
-      if (el) {
-        el.classList.remove('mk-locate-flash');
-        void el.offsetWidth;            /* 强制重排，动画才能重放 */
-        el.classList.add('mk-locate-flash');
+      if (!el) { toast('已定位到「' + (m.name || m.full || '目标') + '」'); return; }
+
+      /* 目标本体加金色滤镜（marker 背景透明，靠 filter 的drop-shadow 才看得出） */
+      el.classList.add('mk-locate-target');
+
+      /* 独立光圈：按 marker 的屏幕位置算，插到地图容器里。
+         用 getBoundingClientRect 而不是 offsetLeft —— marker 祖先带 zoom 动画 transform。 */
+      var host = map.getContainer();
+      var hr = host.getBoundingClientRect();
+      var r = el.getBoundingClientRect();
+      var size = Math.max(r.width, r.height) + 26;   /* 环要比图标大一圈 */
+      var ring = document.createElement('div');
+      ring.className = 'mk-locate-ring';
+      ring.style.width = size + 'px';
+      ring.style.height = size + 'px';
+      /* 定位到图标正中心。父容器是 position:relative 的地图容器，
+         坐标 = 图标中心 - 地图容器左上角 - 环自身一半。
+         ★ 必须在 append 之前算好 left/top：append 之后元素进入动画态，
+           动画的 transform:scale() 会覆盖 transform-origin 之外的定位，
+           实测会整体偏移半个身位。 */
+      var cx0 = r.left - hr.left + r.width / 2;
+      var cy0 = r.top - hr.top + r.height / 2;
+      ring.style.left = (cx0 - size / 2) + 'px';
+      ring.style.top = (cy0 - size / 2) + 'px';
+      host.appendChild(ring);
+
+      /* 脉冲结束后换成静态环再留 3 秒，然后清干净 */
+      setTimeout(function () {
+        if (!ring.parentNode) { el.classList.remove('mk-locate-target'); return; }
+        ring.classList.add('static');
         setTimeout(function () {
-          if (el.classList) el.classList.remove('mk-locate-flash');
-        }, 2600);
-      }
+          ring.remove();
+          el.classList.remove('mk-locate-target');
+        }, HOLD_MS);
+      }, PULSE_MS);
+
+      /* tooltip 常开 3.5 秒，环消失时它也差不多消失 */
       try {
         mk2.openTooltip();
-        setTimeout(function () { try { mk2.closeTooltip(); } catch (e) { /* 图层已重画 */ } }, 2500);
+        setTimeout(function () { try { mk2.closeTooltip(); } catch (e) { /* 图层已重画 */ } },
+          PULSE_MS + HOLD_MS - 500);
       } catch (e) { /* 无关紧要 */ }
+
+      moveCardAside(r);
     }
 
-    /* 已在目标位置附近时 flyTo 不会触发 moveend（也没必要飞），
-       直接闪；否则等地图停稳再闪。 */
-    var cur = map.getCenter();
-    var near = Math.abs(cur.lat - m.x) < 1 && Math.abs(cur.lng - m.y) < 1
-      && map.getZoom() >= target;
-    if (near) {
-      flashNow();
-      return;
+    /* 卡片压住目标时把它挪开 ——
+       实测（fix3 调试）flyTo 把目标放在**视口中心**，而卡片
+       positionExploreCard 也定位在视口中部，两者 100% 重叠。
+       表现就是「飞到了、图上有标签、就是看不见图标」。
+       这里把卡片推到目标点的左侧（优先），推不开才放右侧。 */
+    function moveCardAside(rect) {
+      var card = $('exploreCard');
+      if (!card || card.classList.contains('hidden')) return;
+      var cw = card.offsetWidth || 280, ch = card.offsetHeight || 220;
+      var pad = 52;   /* 目标点半径 + 光圈半径(38/2)+ 余量 */
+      var cx = rect.left + rect.width / 2, cy = rect.top + rect.height / 2;
+      var cr = card.getBoundingClientRect();
+      var overlap = !(cr.right < cx - pad || cr.left > cx + pad
+        || cr.bottom < cy - pad || cr.top > cy + pad);
+      if (!overlap) return;
+      var vw = window.innerWidth, vh = window.innerHeight;
+      var left = cx + pad;                 /* 先试右边 */
+      if (left + cw > vw - 10) left = cx - pad - cw;   /* 右边放不下 → 左边 */
+      /* 左边也放不下（视口很窄）→ 只能压着，挪到最不挡的一侧 */
+      if (left < 10) left = Math.min(Math.max(10, cx - cw / 2), Math.max(10, vw - cw - 10));
+      var top = cy - ch / 2;
+      top = Math.max(10, Math.min(top, vh - 90));
+      card.style.left = left + 'px';
+      card.style.top = top + 'px';
     }
-    map.once('moveend', flashNow);
-    map.flyTo(ll, target, { duration: 0.7 });
-    /* 兜底：万一 moveend 没来（缩放相同 Leaflet 会跳过），
-       1.2 秒后仍没闪就补一下——宁可闪晚一拍，别不闪。 */
-    setTimeout(flashNow, 1200);
+
+    /* 已在目标位置附近时 flyTo 不会动地图（也不该等 moveend），直接标记 */
+    var cur = map.getCenter();
+    var tgtZoom = Math.max(map.getZoom(), 6);
+    var near = Math.abs(cur.lat - m.x) < 1 && Math.abs(cur.lng - m.y) < 1
+      && map.getZoom() >= tgtZoom;
+    if (near) { markNow(); return; }
+
+    map.once('moveend', markNow);
+    map.flyTo([m.x, m.y], tgtZoom, { duration: 0.7 });
+    /* 兜底：缩放级别相同时 Leaflet 会跳过 moveend */
+    setTimeout(markNow, 1200);
   }
 
   /* catalogs.js 里「防具」分类的 id 列表 */

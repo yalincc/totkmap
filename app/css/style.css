@@ -1495,52 +1495,72 @@ html, body {
 .ae-comp-slot:empty { display: none; }
 
 /* ============================================================
-   地图标点定位高亮（V2.1 M6.7）
+   地图标点定位高亮（V2.1 M6.7 / fix2 / fix3）
    ------------------------------------------------------------
-   需求：防具卡片里点「同套部件」「关联任务」后，光弹卡片不够——
-   地图必须跟着飞到那一点，否则玩家在图上根本找不到目标在哪。
-   动画：金色光圈脉冲 3 次，让眼睛能在缩略图大小的地图上抓住。
+   需求：地图飞到目标后，把那个图标凸显出来。
+
+   ★★ 为什么**前三版都失败**（都是实测出来的，别再走回头路）：
+
+   1. transform 动画 —— Leaflet 用 `transform: translate3d()` **定位** marker，
+      关键帧里的 scale() 会整个覆盖它。实测 computed 从
+      matrix(1,0,0,1,600,450) 变成 matrix(1.18,0,0,1.18,**0,0**）——
+      平移量被吃掉，图标飞到左上角。**transform 绝对不能碰。**
+
+   2. 放大图标 —— marker 元素本身就是 `<img>`（L.icon 生成，
+      不是 div>img 结构），且 `.leaflet-marker-icon` 自带
+      **`overflow: clip`**（实测）→ 放大必被裁成空白。
+
+   3. box-shadow 打亮 —— marker 本身 background:none + 透明，
+      box-shadow 贴在**透明元素的外框**上，看不到任何光。
+      （实测 getComputedStyle：backgroundColor rgba(0,0,0,0)、
+        backgroundImage none）
+
+   ✓ 最终方案（fix3）：**独立光圈 DOM**。
+     在目标 marker 的位置插一个绝对定位的 div（append 到地图容器，
+     不动 marker 自己），画双层圆环 + 脉冲。
+     它不受 marker 的 overflow / transform / 背景 影响，
+     z-index 压过所有 marker 容器 → 一定看得见。
+     动画播完移除（或留一个静态环3 秒做持续凸显）。
    ============================================================ */
-.mk-locate-flash {
-  animation: mkLocateFlash 1s ease-out 3;
-  border-radius: 50%;
-  /* ★ 目标图标只有 22px，在一堆小图标里根本不显眼。
-     定位时把它临时放大到2.2 倍并抬高z-index，让眼睛能一下抓住。
-     动画结束后 transform 由动画终态接管，不残留。 */
-  z-index: 950 !important;
-  position: relative;
+
+/* 定位光圈：独立于 marker 的绝对定位元素（坐标由 JS 按屏幕位置算） */
+.mk-locate-ring {
+  position: absolute;
+  z-index: 940;                /* 高于 leaflet-marker-pane(600) 与选中态 */
   pointer-events: none;
+  border-radius: 50%;
+  box-sizing: border-box;
+  /* 双层圆环：内环实、外环柔，缩略图地图上也一眼可见 */
+  border: 2px solid rgba(255, 226, 150, .95);
+  box-shadow: 0 0 0 3px rgba(234, 194, 126, .35),
+    0 0 18px 6px rgba(234, 194, 126, .8),
+    inset 0 0 8px rgba(255, 226, 150, .5);
+  animation: mkRingPulse 1.1s ease-out 2;
 }
-.mk-locate-flash img,
-.mk-locate-flash svg { transform: scale(2.2); transform-origin: center; }
-@keyframes mkLocateFlash {
-  0% {
-    box-shadow: 0 0 0 0 rgba(234, 194, 126, .95), 0 0 18px 6px rgba(234, 194, 126, .8);
-    transform: scale(1);
-  }
-  55% {
-    box-shadow: 0 0 0 16px rgba(234, 194, 126, 0), 0 0 26px 8px rgba(234, 194, 126, .4);
-    transform: scale(1.7);
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba(234, 194, 126, 0), 0 0 0 rgba(234, 194, 126, 0);
-    transform: scale(1);
-  }
+@keyframes mkRingPulse {
+  0% { transform: scale(.55); opacity: 0; }
+  30% { opacity: 1; }
+  100% { transform: scale(1.9); opacity: 0; }
 }
-/* 减少动画偏好：直接定住，不闪 */
-@media (prefers-reduced-motion: reduce) {
-  .mk-locate-flash {
-    animation: none;
-    box-shadow: 0 0 0 3px rgba(234, 194, 126, .9);
-  }
+/* 动画结束后的静态凸显环：留在那3 秒，玩家能确认「就是这里」 */
+.mk-locate-ring.static {
+  animation: none;
+  transform: scale(1.35);
+  opacity: 1;
+  border-color: rgba(255, 226, 150, 1);
+  box-shadow: 0 0 0 4px rgba(234, 194, 126, .4),
+    0 0 22px 8px rgba(234, 194, 126, .9),
+    inset 0 0 10px rgba(255, 226, 150, .6);
+}
+/* 目标 marker 本体也压一层金色滤镜（img 透明背景也能看出来） */
+.mk-locate-target {
+  z-index: 935 !important;
+  filter: drop-shadow(0 0 6px rgba(234, 194, 126, 1))
+    drop-shadow(0 0 14px rgba(234, 194, 126, .7))
+    brightness(1.25);
 }
 
-/* 防具店区块（M6.7）：店内可买清单 */
-.ae-none { font-size: 11px; color: rgba(255,255,255,.35); }
-/* 价格贴在名字右边，买的时候最关心的就是这个 */
-.ae-price {
-  font-size: 10px; color: rgba(255,255,255,.4);
-  font-variant-numeric: tabular-nums; margin-left: 2px;
+/* 减少动画偏好：不脉冲，直接静态环 */
+@media (prefers-reduced-motion: reduce) {
+  .mk-locate-ring { animation: none; transform: scale(1.35); opacity: 1; }
 }
-/* 「去哪买」那行按可点样式呈现 */
-.ae-v .ae-sib { background: rgba(234,194,126,.12); border-color: rgba(234,194,126,.3); color: #eac27e; }
