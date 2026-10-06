@@ -319,20 +319,32 @@
     if (!a || !a.groups.length) return '';
 
     var body = a.groups.map(function (g) {
+      /* M6.5：图标改成可点，点开防具卡片（任务 → 防具这一半联动）。
+         原来只是展示，玩家看到了还得自己去防具面板搜一遍。 */
       var icons = g.items.map(function (x) {
         return x.icon
           ? '<img class="tk-ar-ic" src="' + esc(x.icon) + '" alt="' + esc(x.name) +
-            '" title="' + esc(x.name + (x.def != null ? ' · 防御 ' + x.def : '')) + '" loading="lazy">'
+            '" title="' + esc(x.name + (x.def != null ? ' · 防御 ' + x.def : '') + '（点击看详情）') +
+            '" data-go-armor="' + esc(x.key) + '">'
           : '<span class="tk-ar-ic tk-ar-nopic" title="' + esc(x.name) + '">' +
             esc(x.name.slice(0, 1)) + '</span>';
       }).join('');
       /* 多件套装才说明部位；单件直接说是什么 */
       var what = g.slots.length > 1 ? g.slots.join(' / ') : (g.items[0].name);
       var how = g.items.map(function (x) { return x.how }).filter(Boolean)[0];
+      /* 套装名也做成链接：点套装名能跳到该套第一件，省得一件件点。
+         ★ 外面仍保留 .tk-ar-n 那个 div —— M6.1 的验收脚本按
+           .tk-ar-n 取套装名，改成 button 会让它取不到（实测踩过）。
+           所以只在 div 里塞一个可点的「›」按钮，不动原有层级。 */
+      var setLink = g.items.length > 1
+        ? '<button type="button" class="tk-ar-setgo" data-go-armor="' +
+          esc(g.items[0].key) + '" title="查看这套防具的' + (g.slots.length || 0) +
+          ' 件">›</button>'
+        : '';
       return '<div class="tk-ar-g">' +
         '<div class="tk-ar-icw">' + icons + '</div>' +
         '<div class="tk-ar-tx">' +
-        '<div class="tk-ar-n">' + esc(g.set) + '</div>' +
+        '<div class="tk-ar-n">' + esc(g.set) + setLink + '</div>' +
         '<div class="tk-ar-s">' + esc(what) + (how ? ' · ' + esc(how) : '') + '</div>' +
         '</div></div>';
     }).join('');
@@ -753,6 +765,20 @@
         open(target, e);
       });
     });
+
+    /* M6.5：防具图标 / 套装名 → 打开防具卡片（任务 → 防具这一半联动）。
+       必须在 stopPropagation ——否则冒泡到全局监听器会把任务卡片关掉，
+       而防具卡片是 fixed 定位、跟任务卡片叠在一起，关掉就没法对着看了。 */
+    Array.prototype.forEach.call(card.querySelectorAll('[data-go-armor]'), function (a) {
+      a.addEventListener('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var key = a.getAttribute('data-go-armor');
+        var AC = global.ArmorCard;
+        if (!AC) { toast('防具卡片模块未加载'); return; }
+        AC.openByKey(key, { clientX: e.clientX, clientY: e.clientY });
+      });
+    });
   }
 
   function copy(text) {
@@ -1037,6 +1063,19 @@
     '.tk-ar-ic {',
     '  width:30px; height:30px; border-radius:5px; object-fit:contain;',
     '  background:rgba(0,0,0,.25); border:1px solid rgba(255,255,255,.09); }',
+    /* M6.5：图标变成「打开防具卡片」的入口，得给出可点的暗示 */
+    '.tk-ar-ic[data-go-armor] { cursor:pointer; transition:transform .12s, box-shadow .12s; }',
+    '.tk-ar-ic[data-go-armor]:hover {',
+    '  transform:scale(1.1); box-shadow:0 0 0 1px rgba(234,194,126,.5); }',
+    /* 套装跳转按钮：套���名右侧的小箭头。
+       外面仍是 .tk-ar-n div —— M6.1 的验收按 .tk-ar-n 取套装名，
+       把整个 div 换成 button 会让老脚本取不到（实测踩过）。 */
+    '.tk-ar-setgo {',
+    '  display:inline-block; margin-left:5px; padding:0 3px;',
+    '  font-size:12px; line-height:1; cursor:pointer;',
+    '  color:rgba(255,255,255,.3); background:none;',
+    '  border:0; text-shadow:none; vertical-align:middle; }',
+    '.tk-ar-setgo:hover { color:#eac27e; }',
     /* 图标缺失时的占位：取名字首字，别留一个破图 */
     '.tk-ar-nopic {',
     '  display:flex; align-items:center; justify-content:center;',

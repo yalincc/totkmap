@@ -74,7 +74,11 @@ const CASES = [
         任务名: t.name,
         期望套装: expect,
         有防具区: !!ar,
-        实际套装: ar ? [...ar.querySelectorAll('.tk-ar-n')].map(e => e.textContent.trim()) : [],
+        /* ★ M6.5 起.tk-ar-n 里多了个套装跳转按钮（文字「›」），
+           textContent 会把它一起读出来（"鬼神›" ≠ "鬼神"）。
+           取套装名时剥掉跳转按钮的文本——不要去改页面结构迁就脚本。 */
+        实际套装: ar ? [...ar.querySelectorAll('.tk-ar-n')]
+          .map(e => e.textContent.replace(/›/g, '').trim()) : [],
         分组数: ar ? ar.querySelectorAll('.tk-ar-g').length : 0,
         部位说明: ar ? [...ar.querySelectorAll('.tk-ar-s')].map(e => e.textContent.trim()) : [],
         标题后缀: ar ? (ar.querySelector('.tk-ar-h .tk-src') || {}).textContent : null

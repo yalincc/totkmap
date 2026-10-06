@@ -220,6 +220,24 @@ const L2 = [
     }
   },
   {
+    file: 'verify-armor-panel.js',
+    label: 'M6.5 防具面板与卡片',
+    check(out) {
+      const r = parseJsonLast(out)
+      if (!r) return { ok: false, why: '输出不是合法 JSON' }
+      const errs = r['错误'] || []
+      if (errs.length) return { ok: false, why: `页面报错 ${errs.length} 条：${errs[0]}` }
+      const fails = r['失败项'] || []
+      if (fails.length) return { ok: false, why: fails.slice(0, 2).join('；') }
+      const d0 = r['0_数据'] || {}
+      /* ★ 统计数字由脚本自己放进汇总段（调用方只能可靠地解析到那一段） */
+      return {
+        ok: true,
+        why: `${r['防具数']} 件 / ${r['套装数']} 套，${r['可强化']} 件可强化；面板·卡片·套装链接·任务双向联动全通`
+      }
+    }
+  },
+  {
     file: 'task-done-map.js',
     label: 'M5.1 完成态上地图',
     optional: 'PROGRESS_SAV',

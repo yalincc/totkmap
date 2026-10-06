@@ -1181,3 +1181,238 @@ html, body {
 
 /* V1.8.3 视图跟随激活态（定位我 / 🎯 高亮） */
 #zoomLocate.active, #npLocate.active { background: #ffb703 !important; color: #222 !important; }
+
+/* ============================================================
+   防具面板（V2.1 M6.5）
+   ------------------------------------------------------------
+   跟材料面板最大的不同：**有图标**。
+   材料是纯文字列表（名字+点数），防具有 30×30 的官方图标，
+   网格密度就得降下来——两列，每格带图，扫一眼能认出来。
+   ============================================================ */
+
+/* 获取方式筛选条：横向可滚动的胶囊 */
+.arm-how {
+  display: flex; gap: 5px; overflow-x: auto; padding: 6px 8px;
+  scrollbar-width: none;
+}
+.arm-how::-webkit-scrollbar { display: none; }
+.arm-h {
+  flex: 0 0 auto;
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 5px 10px; border-radius: 20px; cursor: pointer;
+  font-size: 12px; white-space: nowrap;
+  color: rgba(255,255,255,.62);
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(255,255,255,.12);
+  transition: all .15s;
+}
+.arm-h:hover { background: rgba(255,255,255,.1); color: #fff; }
+.arm-h.on {
+  background: rgba(234,194,126,.16);
+  border-color: rgba(234,194,126,.45);
+  color: #eac27e;
+}
+.arm-h-n {
+  font-size: 10px; font-variant-numeric: tabular-nums;
+  color: rgba(255,255,255,.35);
+}
+.arm-h.on .arm-h-n { color: rgba(234,194,126,.7); }
+
+/* 套装小标题：点它跳到该套第一件（老大要的「套装链接」） */
+.arm-set-h {
+  display: flex; align-items: baseline; gap: 6px;
+  margin: 10px 0 5px; padding: 0 2px;
+  font-size: 12px; color: rgba(255,255,255,.5);
+  user-select: none;
+}
+.arm-set-h[data-set] { cursor: pointer; }
+.arm-set-h[data-set]:hover .arm-set-n { color: #eac27e; }
+.arm-set-n { font-weight: 400; letter-spacing: .3em; }
+.arm-set-c { font-size: 10px; color: rgba(255,255,255,.3); }
+
+/* 图标网格：两列。每格 = 图标 + 名字 + 部位 */
+.arm-list {
+  /* ★ 必须保留 catalog-body 的 flex:1，否则侧栏不会给它分配高度，
+     136 件会一路撑到底把整个面板顶出视口（材料面板靠这个滚动）。 */
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  align-content: start;
+  gap: 7px; padding: 2px 8px 10px;
+  /* 套装小标题要跨两列 */
+}
+.arm-list > .arm-set-h { grid-column: 1 / -1; margin-top: 8px; }
+.arm-item {
+  display: flex; align-items: center; gap: 7px;
+  min-width: 0; padding: 5px 6px; border-radius: 6px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: background .12s, border-color .12s;
+}
+.arm-item:hover { background: rgba(255,255,255,.06); }
+.arm-item.checked {
+  background: rgba(234,194,126,.1);
+  border-color: rgba(234,194,126,.35);
+}
+.arm-ic {
+  width: 30px; height: 30px; flex: 0 0 auto;
+  object-fit: contain;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,.5));
+}
+.arm-item.checked .arm-ic { filter: drop-shadow(0 0 3px rgba(234,194,126,.55)); }
+.arm-n {
+  flex: 1; min-width: 0;
+  font-size: 12px; color: rgba(255,255,255,.72);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.arm-item.checked .arm-n { color: #eac27e; }
+.arm-m {
+  flex: 0 0 auto; font-size: 10px;
+  color: rgba(255,255,255,.3);
+}
+
+/* 套装链接跳转时的高亮闪一下 */
+.arm-item.flash { animation: armFlash .9s ease-out; }
+@keyframes armFlash {
+  0% { background: rgba(234,194,126,.42); }
+  100% { background: transparent; }
+}
+
+.arm-tip {
+  margin: 4px 10px 10px; font-size: 11px;
+  color: rgba(255,255,255,.3);
+}
+
+/* ============================================================
+   防具卡片（V2.1 M6.5）
+   ------------------------------------------------------------
+   复用 .detail / .detail-card / .chip 的定位与外框（跟材料卡片同一套外壳），
+   只补防具专属的排版：图标+名字行、强化链、套装链接、获取说明。
+   ============================================================ */
+
+/* 防具卡片比材料宽一点：强化链一行要放得下「Lv / 防御 / 星星 / 材料」 */
+#armorCard { width: 340px; }
+.ac-card { max-height: 78vh; overflow-y: auto; }
+
+.ac-head {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 8px;
+}
+.ac-close {
+  width: 22px; height: 22px; line-height: 20px;
+  border-radius: 5px; cursor: pointer; font-size: 15px;
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.12);
+  color: rgba(255,255,255,.6);
+}
+.ac-close:hover { background: rgba(255,255,255,.12); color: #fff; }
+
+/* 图标 + 名字：图标可点（看原图 / 以后跳图鉴），所以留 pointer */
+.ac-name-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.ac-ic {
+  width: 46px; height: 46px; flex: 0 0 auto;
+  object-fit: contain; cursor: pointer;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,.55));
+}
+.ac-ic:hover { filter: drop-shadow(0 0 6px rgba(234,194,126,.6)); }
+.ac-nm { min-width: 0; }
+.ac-name {
+  margin: 0; font-size: 15px; font-weight: 600;
+  color: #fff; line-height: 1.3;
+}
+.ac-sub { margin-top: 2px; font-size: 11px; color: rgba(255,255,255,.42); }
+
+/* 键值行（防御/售价/地区/坐标） */
+.ac-rows { margin-bottom: 4px; }
+.ac-row {
+  display: flex; gap: 8px; align-items: baseline;
+  padding: 3px 0;
+  font-size: 12px; line-height: 1.5;
+}
+.ac-l {
+  flex: 0 0 auto; min-width: 52px;
+  color: rgba(255,255,255,.38); letter-spacing: .3em;
+}
+.ac-v { flex: 1; min-width: 0; color: rgba(255,255,255,.85); }
+.ac-v.ac-dim { color: rgba(255,255,255,.5); }
+.ac-v.ac-para { white-space: pre-wrap; }
+
+/* 分区：与任务卡片的 tk-sec 同一套语言 */
+.ac-sec { margin-top: 11px; }
+.ac-sec-t {
+  display: flex; align-items: baseline; gap: 6px;
+  margin-bottom: 5px; padding-bottom: 4px;
+  font-size: 11px; letter-spacing: .4em;
+  color: rgba(255,255,255,.42);
+  border-bottom: 1px solid rgba(255,255,255,.07);
+}
+.ac-src { margin-left: auto; letter-spacing: 0; font-size: 10px; color: rgba(255,255,255,.32); }
+.ac-sec-b { font-size: 12px; }
+.ac-none { color: rgba(255,255,255,.35); font-size: 11px; }
+.ac-para { line-height: 1.65; color: rgba(255,255,255,.72); }
+
+/* 强化链：每级一行，当前级高亮 */
+.ac-ups { display: flex; flex-direction: column; gap: 3px; }
+.ac-up {
+  display: flex; align-items: baseline; gap: 7px;
+  padding: 4px 6px; border-radius: 5px;
+  font-size: 11px; line-height: 1.5;
+  color: rgba(255,255,255,.55);
+}
+.ac-up.cur {
+  background: rgba(234,194,126,.1);
+  color: #eac27e;
+}
+.ac-up-lv { flex: 0 0 auto; min-width: 30px; font-weight: 600; }
+.ac-up-d { flex: 0 0 auto; min-width: 46px; font-variant-numeric: tabular-nums; }
+.ac-up-s {
+  flex: 0 0 auto; min-width: 92px;
+  color: #8fc7ff;
+}
+.ac-up.cur .ac-up-s { color: #9ad0ff; }
+/* 材料是最长的一段，独占一行更好读 */
+.ac-up-m {
+  flex: 1 1 100%; min-width: 0;
+  color: rgba(255,255,255,.42); font-size: 10px;
+}
+
+/* 套装链接：点一下切到同套那件 */
+.ac-sets { display: flex; flex-direction: column; gap: 4px; }
+.ac-set-i {
+  display: flex; align-items: center; gap: 7px;
+  width: 100%; padding: 5px 7px; border-radius: 6px;
+  cursor: pointer; text-align: left;
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.07);
+  color: rgba(255,255,255,.78); font-size: 12px;
+  transition: background .12s;
+}
+.ac-set-i:hover { background: rgba(255,255,255,.09); color: #fff; }
+.ac-set-i img {
+  width: 22px; height: 22px; flex: 0 0 auto;
+  object-fit: contain;
+}
+.ac-set-i span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ac-set-s { flex: 0 0 auto !important; font-size: 10px; color: rgba(255,255,255,.32); }
+
+/* 关联任务：点一下跳任务卡片 */
+.ac-tasks { list-style: none; margin: 0; padding: 0; }
+.ac-tasks li { margin: 0 0 3px; }
+.ac-task {
+  width: 100%; padding: 5px 7px; border-radius: 6px;
+  cursor: pointer; text-align: left;
+  font-size: 12px;
+  color: rgba(255,255,255,.75);
+  background: rgba(255,255,255,.04);
+  border: 0;
+}
+.ac-task:hover {
+  background: rgba(234,194,126,.14); color: #eac27e;
+}
+
+/* 图鉴跳转预留：当前为空占位，等老大发话填 */
+.ac-comp-slot:empty { display: none; }
+
+/* 底部导航置灰（无坐标时）——跟任务卡片同一处理 */
+.ac-card .btn.act.is-off { opacity: .36; cursor: not-allowed; }

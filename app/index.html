@@ -52,6 +52,7 @@
   <div class="side-tabs" id="sideTabs">
     <button type="button" data-tab="explore" class="active">探索</button>
     <button type="button" data-tab="material">材料</button>
+    <button type="button" data-tab="armor">防具</button>
   </div>
 
   <!-- 搜索 -->
@@ -88,7 +89,24 @@
     <div class="catalog-body mat-list" id="matList"></div>
   </div>
 
-  <!-- 探索度（加载存档后显示） -->
+  <!-- ===== 防具面板（V2.1 M6.5） ===== -->
+  <!-- 叫「防具」不叫「装备」：防具是唯一不会损坏的装备，武器盾牌会坏 -->
+  <div id="armorPane" class="hidden">
+    <div class="search-box">
+      <input id="armorSearch" type="search" placeholder="搜索防具/套装..." autocomplete="off">
+    </div>
+    <!-- 获取方式分档：防具最要紧的信息是「哪来的」 -->
+    <div class="arm-how" id="armorHow"></div>
+    <div class="layer-toolbar">
+      <button id="armorAll" type="button" class="lt-btn">全选防具</button>
+      <button id="armorClear" type="button" class="lt-btn">清空防具</button>
+      <span id="armorCount" class="lt-count">0/0 防具</span>
+    </div>
+    <div class="catalog-body arm-list" id="armorList"></div>
+    <p class="arm-tip">单击勾选（地图画点）· 双击看详情</p>
+  </div>
+
+  <!-- ===== 探索度（加载存档后显示） ===== -->
   <div class="progress-section" id="progressSection">
     <div class="progress-head" id="progressHead" title="点击展开/收起">
       <span class="progress-toggle" id="progressToggle">▾</span>
@@ -184,6 +202,10 @@
 <!-- ============ 任务卡片（V2.1 独立模块，与 #exploreCard 完全分离） ============ -->
 <!-- 内层容器由 task-card.js 填充；外层只负责定位与显隐 -->
 <section id="taskCard" class="hidden"><div id="taskCardBody"></div></section>
+
+<!-- ============ 防具卡片（V2.1 M6.5，与材料卡片/探索卡片完全分离） ============ -->
+<!-- 内层由 js/armor/armor-card.js 填充 -->
+<section id="armorCard" class="detail hidden"><div class="detail-card ac-card" id="armorCardBody"></div></section>
 
 <!-- ============ 材料原图预览（点击卡片图标查看 256px 原图） ============ -->
 <div id="imgPreview" class="img-preview hidden">
@@ -339,11 +361,19 @@
 <!-- M6.1：防具数据。task-data.js 的 armorsOf() 要读window.TOTK_ARMORS
      做「任务 → 可获得防具」反查，必须排在自己之前，否则反查全空。 -->
 <script src="data/armors.js?v=210"></script>
+<!-- M6.5：防具强化数据（每级星星数 + 材料，生成脚本 tools/build_armor_upgrade.py）。
+     armor-data.js 的 upgradeOf() 直接读它。 -->
+<script src="data/armor-upgrade.js?v=210"></script>
 <script src="js/task/task-data.js?v=210"></script>
 <script src="js/task/task-done.js?v=210"></script>
 <script src="js/task/task-panel.js?v=210"></script>
 <script src="js/task/task-card.js?v=210"></script>
 <script src="js/task/task-flow.js?v=210"></script>
+<!-- M6.5：防具面板 + 数据合并层。必须在 data/armors.js / data/armor-upgrade.js
+     之后加载（ArmorData 依赖它们），且在 ArmorCard 之前。 -->
+<script src="js/armor/armor-data.js?v=210"></script>
+<script src="js/armor/armor-panel.js?v=210"></script>
+<script src="js/armor/armor-card.js?v=210"></script>
 <!-- V1.9.4 问题3：Service Worker 瓦片/静态资源持久缓存，地图打开秒开 -->
 <script>
 if ('serviceWorker' in navigator) {

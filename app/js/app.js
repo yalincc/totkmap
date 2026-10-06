@@ -1967,20 +1967,33 @@
     Array.prototype.forEach.call($('sideTabs').querySelectorAll('button'), function (b) {
       b.classList.toggle('active', b.getAttribute('data-tab') === tab);
     });
-    // 探索搜索框只在探索 Tab 显示，材料 Tab 隐藏（V1.7.2）
+    /* 探索搜索框只在探索 Tab 显示，材料/防具 Tab 隐藏（V1.7.2，M6.5 扩展到防具） */
     var globalSearch = document.querySelector('.search-box');
     if (globalSearch) globalSearch.classList.toggle('hidden', tab === 'material');
     var srBox = $('searchResult');
     if (srBox) srBox.classList.add('hidden');
     var explorePane = $('explorePane'), matPane = $('materialPane');
+    var armorPane = $('armorPane');
     if (tab === 'material') {
       explorePane.classList.add('hidden');
+      if (armorPane) armorPane.classList.add('hidden');
       matPane.classList.remove('hidden');
       // V1.7.5: 切到材料 Tab 时保留已勾选的探索标点（神庙/鸟望塔等），与材料位置叠加显示，便于同时定位
       buildMatPanel();
       renderMaterials();
-    } else {
+    } else if (tab === 'armor') {
+      /* M6.5 防具 Tab：与材料 Tab 一样保留探索标点，
+         并且防具自己也有地图点（勾选后画），三层可以叠在一起看 */
+      explorePane.classList.add('hidden');
       matPane.classList.add('hidden');
+      if (armorPane) {
+        armorPane.classList.remove('hidden');
+        if (window.ArmorPanel) window.ArmorPanel.show();
+      }
+      renderMarkers();
+    } else {
+      if (matPane) matPane.classList.add('hidden');
+      if (armorPane) armorPane.classList.add('hidden');
       explorePane.classList.remove('hidden');
       for (var mid in state.matGroups) map.removeLayer(state.matGroups[mid]);
       state.matGroups = {};
