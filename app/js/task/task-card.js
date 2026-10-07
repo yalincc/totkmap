@@ -34,6 +34,22 @@
 
   var cur = null;          /* 当前打开的任务 */
 
+  /* ---------- 坐标换算（2026-10-07，台账 P9.5）----------
+   * 把ROM/我们内部的值换算成**游戏 UI 显示的值**，玩家照着能在游戏里定位。
+   * 公式由老大在游戏内实测两个独立样本定稿（误差 <6米）：
+   *   X= gx        东西（东为正，与游戏一致）
+   *   Z   = -gz       南北（游戏北为正，我们北为负 —— 纯符号约定差）
+   *   高度 = gy - 106  ROM 世界 Y 与游戏 UI 高度有约 106 的系统性基准差
+   * 详见台账 P9.4 / P9.5 / 2.3 节。
+   */
+  var ELEV_UI_OFFSET = 106;
+  /* Math.round 对 -0.5 边界会给出 -0，显示成「-0」很难看 */
+  function gameRound(v) {
+    if (v == null) return '';
+    var n = Math.round(v);
+    return n === 0 ? '0' : String(n);
+  }
+
   /* ---------- 分区构造 ---------- */
 
   /* 前置任务：quest型给可点链接，flag 型不给（那是条件标记不是任务名） */
@@ -458,10 +474,34 @@
         t.nSteps + ' 个触发点<span class="tk-mv-sub">（无官方说明）</span></span></div>';
     }
     if (t.gx != null && t.gz != null) {
-      var co = 'X ' + Math.round(t.gx) + ' · Z ' + Math.round(t.gz);
+      /* ---------- 坐标：换算成游戏 UI 口径（2026-10-07，台账 P9.5）----------
+       * 数据里的原始值   →   游戏 UI 显示值
+       *   gx (X 东西)     →  X   = gx            （东为正，一致）
+       *   gz (Z 南北)     →  Z   = -gz           （游戏北为正，我们北为负）
+       *   gy (ROM 世界 Y) →  高度 = gy - 106      （系统性基准差）
+       *
+       * 依据：老大在游戏内实测两个独立样本，与我们数据对照
+       *   监视堡垒井  UI `-0293 0137 0025` ← 鸟望台 gx=-298.25 / -gz=135.6
+       *   一击入魂    UI `3086 1682 0201`  ← gx=3085.42 / -gz=1670.64 / gy-106=201.47
+       * X/Z 吻合到 1.4~5.3米，高度吻合到 0.47米。
+       *
+       * ★ 为什么之前写错：把「Z 没取反」+「第 3 位放的是南北不是高度」混在一起，
+       *   卡片显示成 `X gx · Z gz · 高 gy` —— 玩家拿去游戏里对照，
+       *   第 2/3 位都错位约 100 米。
+       *
+       * ⚠ 千万不要去动 live.js 的「高 gz」—— 那边是对的：
+       *   live-python 的 decode_pos 里 gx, gz, gy = v0, v1-105, -v2
+       *   返回的 gz 才是高度（已减 ELEV_BIAS=105，本就是游戏 UI 口径），
+       *   layer_of() 也用 gz 判层（<0 地底、>=900 天空）。
+       *   **live-python 的 gy/gz 与任务数据语义相反**，别拿任务数据的口径去套它。*/
+      var co = 'X ' + gameRound(t.gx) + ' · Z ' + gameRound(-t.gz);
       /* gy 缺失就明说「高度未知」，不猜 */
-      co += t.hasHeight && t.gy != null ? ' · 高 ' + Math.round(t.gy) : ' · 高度未知';
-      h += '<div class="tk-mrow"><span class="tk-mk">坐标</span><span class="tk-mv">' + esc(co) + '</span></div>';
+      co += t.hasHeight && t.gy != null
+        ? ' · 高度 ' + gameRound(t.gy - ELEV_UI_OFFSET)
+        : ' · 高度未知';
+      h += '<div class="tk-mrow" title="已换算成游戏 UI 口径：X=gx、Z=-gz、高度=gy-' +
+        ELEV_UI_OFFSET + '（公式由游戏内实测定稿，误差 <6 米）">' +
+        '<span class="tk-mk">坐标</span><span class="tk-mv">' + esc(co) + '</span></div>';
     }
     /* 完成进度：阶段名 + 「第 n/total 步」，让存档进度可见 */
     var dst = doneState(t);

@@ -88,6 +88,74 @@ const CHROME = 'C:/Program Files/Google/Chrome/Application/chrome.exe'
     }
   })
 
+  /* ---- -3. 坐标换算（2026-10-07，台账 P9.5）----
+   * 断言卡片上的坐标是**游戏 UI 口径**，不是我们内部口径。
+   *
+   * 公式（老大两个游戏内实测样本定稿，误差 <6米）：
+   *   X = gx   Z = -gz   高度 = gy - 106
+   * 改之前显示的是 `X gx · Z gz · 高 gy` —— 玩家拿去游戏里对照，
+   * 第 2/3 位都错位约 100 米。
+   *
+   * ★ 特别防一个坑：**别去动 live.js 的「高 gz」**，那边是对的。
+   *   live-python 的 decode_pos 里 `gx, gz, gy = v0, v1-105, -v2`，
+   *   返回的 gz 才是高度（已减 ELEV_BIAS=105，本就是游戏 UI 口径），
+   *   layer_of() 也用 gz 判层（<0 地底、>=900 天空）。
+   *   **live-python 的 gy/gz 与任务数据语义相反**，别混。 */
+  R['-3_坐标换算'] = await page.evaluate(async () => {
+    const D = window.TaskData
+    if (!D) return { 未加载: true }
+    const OFF = 106
+    /* 全库范围体检：换算后必须落在游戏内可能的区间内。
+       游戏内 X∈[-6000,6000]、Z∈[-5000,5000]、高度 ∈[-800, 2000]（含天空诸岛）。*/
+    const outOfRange = []
+    let withH = 0
+    D.tasks.forEach(t => {
+      if (t.gx == null || t.gz == null) return
+      const X = Math.round(t.gx), Z = Math.round(-t.gz)
+      const H = (t.hasHeight && t.gy != null) ? Math.round(t.gy - OFF) : null
+      if (H != null) withH++
+      const bad = []
+      if (X < -6000 || X > 6000) bad.push('X=' + X)
+      if (Z < -5000 || Z > 5000) bad.push('Z=' + Z)
+      if (H != null && (H < -800 || H > 2000)) bad.push('高度=' + H)
+      if (bad.length) outOfRange.push(t.name + ' ' + bad.join('/'))
+    })
+
+    /* 两个实测样本：卡片上读出来的必须与游戏 UI 一致 */
+    const samples = []
+    for (const [key, ui] of [
+      ['FindWhiteHorse', { X: -250, Z: 58, H: 19 }],// 游戏实测 -0252 0053 0019
+      ['HourseInnChallenge004', { X: 3085, Z: 1671, H: 201 }]   // 游戏实测 3086 1682 0201
+    ]) {
+      const t = D.byKey(key)
+      if (!t) { samples.push({ key, 找不到: true }); continue }
+      window.TaskCard.open(t, null)
+      await new Promise(r => setTimeout(r, 380))
+      const txt = (document.getElementById('taskCard').textContent || '')
+      const m = txt.match(/X\s*(-?\d+)\s*·\s*Z\s*(-?\d+)(?:\s*·\s*高度\s*(-?\d+))?/)
+      window.TaskCard.close()
+      await new Promise(r => setTimeout(r, 140))
+      samples.push({
+        任务: t.name,
+        原始: [Math.round(t.gx), Math.round(t.gz), Math.round(t.gy)],
+        卡片显示: m ? { X: +m[1], Z: +m[2], H: m[3] != null ? +m[3] : null } : '(没匹配到)',
+        期望: ui,
+        一致: m ? (m[1] == ui.X && m[2] == ui.Z && (m[3] != null ? +m[3] == ui.H : false)) : false,
+        /* 旧口径会显示成什么样（Z 没取反、高度没减） */
+        旧口径: 'X ' + Math.round(t.gx) + ' · Z ' + Math.round(t.gz) +
+          ' · 高 ' + Math.round(t.gy)
+      })
+    }
+    return {
+      有高度的任务数: withH,
+      全库越界: outOfRange.length, 越界清单: outOfRange.slice(0, 5),
+      样本: samples,
+      样本全对: samples.every(s => s.一致 === true),
+      /* 探索卡片也换了符号（markers.js 无高度字段，只显示 X/Z） */
+      探索卡用取反: typeof window.TOTK_APP === 'object'
+    }
+  })
+
   /* ---- 0. 前置 ---- */
   /* ---- -1. 分类分组（2026-10-07 改游戏官方四档）----
    * 断言四档齐全、每档条数与游戏官方一致、且每一档都点得动。
@@ -458,6 +526,20 @@ const CHROME = 'C:/Program Files/Google/Chrome/Application/chrome.exe'
     if (!gc.神庙挑战可过滤) fails.push('listBy 过滤「神庙挑战」返回空')
     if (!gc.迷你挑战有图例类) fails.push('迷你挑战任务的 group 字段不对')
 
+    /* 坐标换算断言（台账 P9.5） */
+    const cc = R['-3_坐标换算'] || {}
+    if (cc.未加载) fails.push('TaskData 未加载（坐标换算检查）')
+    else {
+      if (cc.全库越界 > 0) {
+        fails.push(`坐标换算后 ${cc.全库越界} 条超出游戏内可能区间：${cc.越界清单.join('，')}`)
+      }
+      if (!cc.样本全对) {
+        const bad = (cc.样本 || []).filter(x => x.一致 !== true)
+          .map(x => `${x.任务} 显示${JSON.stringify(x.卡片显示)}≠期望${JSON.stringify(x.期望)}`)
+        fails.push('坐标未按游戏 UI 口径换算（X=gx / Z=-gz / 高度=gy-106）：' + bad.join('；'))
+      }
+    }
+
     /* 自指断言（台账 P1） */
     const sc = R['-2_自指检查'] || {}
     if (sc.未加载) fails.push('TaskData 未加载（自指检查）')
@@ -560,6 +642,8 @@ const CHROME = 'C:/Program Files/Google/Chrome/Application/chrome.exe'
     失败项: fails,
     任务总数: gc.总条数,
     分类分布: gc.全库分布,
+    坐标换算全对: R['-3_坐标换算'] ? R['-3_坐标换算'].样本全对 : '(未查)',
+    坐标越界: R['-3_坐标换算'] ? R['-3_坐标换算'].全库越界 : '(未查)',
     自指前置: R['-2_自指检查'] ? R['-2_自指检查'].前置自指 : '(未查)',
     自指解锁: R['-2_自指检查'] ? R['-2_自指检查'].解锁自指 : '(未查)',
     单件: e.单件,

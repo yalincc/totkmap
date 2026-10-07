@@ -1669,7 +1669,14 @@
     var ll = [m.x, m.y];
     $('ecRegion').textContent = nearestRegion(ll) || '未知';
     $('ecTower').textContent = nearestTower(ll) || '未知';
-    $('ecCoord').textContent = 'X ' + Math.round(m.y) + ' · Z ' + Math.round(m.x);
+    /* ---------- 坐标：换算成游戏 UI 口径（2026-10-07，台账 P9.5）----------
+     * 地图标点的 m.x / m.y 语义：m.y = X 东西（东为正）、m.x = Z 南北（北为负）。
+     * 游戏 UI 显示的是「北为正」，所以第二位的符号要取反。
+     *   X = m.y（不变）  Z = -m.x（取反）
+     * 高度：markers.js 里**没有高度字段**，所以这里不显示高度，
+     *不去编造。需要高度的任务卡片里有（走 task-plan.js 的 gy - 106）。
+     */
+    $('ecCoord').textContent = 'X ' + Math.round(m.y) + ' · Z ' + Math.round(-m.x);
 
     /* ---------- V2.1 M6.8：坐标旁的定位按钮 ----------
      * 需求：「点击左边可以定位回地图上的图标位置即可。因为有时候点击套装和
