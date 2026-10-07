@@ -42,6 +42,44 @@ MINIGAME_PAT = re.compile(
 # 人工确认：name/desc 里带这些词但 key 没匹配到的
 MINIGAME_HINT = re.compile(r"(小游戏|赛事|比赛|竞速|多合一|连打|对打)")
 
+# ------------------------------------------------------------------ 人工确认要剔除的条目
+# ★ 老大 2026-10-07 拍板（校对台账 P11.5 / P11.6），共 10 条：
+#
+# ① 4 条 ROM 内部事件空壳：Npc_BaseCamp_Assistant_ReactingStatue{,2,3,4}
+#    实测完全空壳 —— 无中文名(nameSrc=key)、无坐标、stepsUI=0 条、guide 全空、
+#    玩家根本接不到、冒险笔记里也查不到 → 不该进任务板块。
+#
+# ② 6 条补录重复：「为〇〇带来和平！」被收录了两次
+#      ROM 版  key = MercenaryChallenge_{Akkare,Eldin,Firone,Hateru,Hebra,HyrulePlain}
+#              sort = 451~456，全角叹号，src=rom+guide   ← 保留这条
+#      补录版  key = Mercenary_{...}_Bloody
+#              sort = null，半角叹号，src=rom，无攻略    ← 删这条
+#    两组在上游 tasks.js(286 条) 里都存在，所以必须在这里剔。
+#
+# ★★ 必须改**生成脚本**，不能手改 task-plan.js —— 后者是生成物，重跑管线会被覆盖。
+DROP_KEY_PAT = re.compile(
+    r"^(Npc_BaseCamp_Assistant_ReactingStatue\d*|Mercenary_\w+_Bloody"
+    r"|IchikaraDaughterPhoto)$")
+
+# ------------------------------------------------------------------ 小游戏白名单（补回 6 条）
+# ★ 老大 2026-10-07 拍板：这 6 条**补回**任务板块（校对台账 P12）。
+#
+#   背景：2026-10-06 定的口径是「小游戏/赛事归地点组，不进任务板块」，
+#   但老大用 A9VG + Game8 两个独立来源交叉出的**139 条官方迷你挑战名单**里
+#   明确包含这 6 条，且它们的 `sort` 全部落在 5000+（迷你挑战区间）。
+#   → 两条证据都说明：**它们就是迷你挑战，之前是误剔**。
+#
+#   注意：这些 key 会被 MINIGAME_PAT 匹配到（MiniGame_ / Circuit_ / SkyRingChallenge），
+#   所以必须在 is_minigame() 里**先命中白名单再判正则**，否则补不回来。
+KEEP_MINIGAME_KEYS = {
+    "Hebra_SkyRingChallenge",          # 利特族的新式飞行训练      sort=5296
+    "Goron_MiniGame_Tutorial_01",      # 开园！矿车乐园！          sort=5441
+    "Goron_MiniGame_Tutorial_02",      # 速射矿车游戏！            sort=5442
+    "Goron_MiniGame_Tutorial_03",      # 超高难度的死亡之山赛道！  sort=5443
+    "Circuit_Ichikara",                # 征服一始拉力赛            sort=5511
+    "IchikaraCircuit_Tutorial",        # 熟练驾驭左纳乌装置吧      sort=5513
+}
+
 
 # ------------------------------------------------------------------ 无坐标原因标注
 # ★ 为什么要有这个表：
@@ -78,6 +116,10 @@ def load_tasks():
 def is_minigame(t):
     """判断是否小游戏/赛事。返回 (是否, 原因) —— 原因写进输出便于人工复核。"""
     key = str(t.get("key") or "")
+    # ★ 白名单优先：这 6 条虽然 key/名字带 MiniGame、Circuit、SkyRingChallenge 字样，
+    #   但它们是**正式的迷你挑战**，必须留在任务板块。
+    if key in KEEP_MINIGAME_KEYS:
+        return False, None
     if MINIGAME_PAT.search(key):
         return True, "key 匹配赛事模式: %s" % key
     blob = (t.get("name") or "") + " " + str(t.get("npc") or "")
@@ -155,6 +197,11 @@ MINI_CHALLENGE = "迷你挑战"
 
 def group_of(t):
     """任务 → 界面分类。迷你挑战优先于 ROM cat。"""
+    # ★ 白名单 6 条（原被误剔的小游戏）老大 2026-10-07 确认是迷你挑战。
+    #   它们没有攻略标点（oldCat 为空），按 ROM cat 兜底会掉进「其他」，
+    #   所以这里按已确认的结论直接钉死。
+    if str(t.get("key") or "") in KEEP_MINIGAME_KEYS:
+        return MINI_CHALLENGE
     if t.get("oldCat") == MINI_CHALLENGE:
         return MINI_CHALLENGE
     return CAT_TO_GROUP.get(t.get("cat"), "其他")
@@ -171,15 +218,20 @@ def main():
     text, tasks = load_tasks()
     print("读入 %d 条任务" % len(tasks))
 
-    # ---------- 1. 剔除小游戏 ----------
+    # ---------- 1. 剔除小游戏 + 人工确认的废条目 ----------
     keep, dropped = [], []
+    n_manual = 0
     for t in tasks:
         hit, why = is_minigame(t)
         if hit:
             dropped.append((t, why))
+        elif DROP_KEY_PAT.match(str(t.get("key") or "")):
+            dropped.append((t, "人工剔除（空壳/重复）"))
+            n_manual += 1
         else:
             keep.append(t)
-    print("\n【1】剔除小游戏/赛事 %d 条" % len(dropped))
+    print("\n【1】剔除小游戏/赛事 %d 条（其中人工剔除空壳+重复 %d 条）"
+          % (len(dropped), n_manual))
     for t, why in dropped[:30]:
         print("    %-30s key=%-32s %s" % ((t.get("name") or "")[:30],
                                        str(t.get("key"))[:32], why))

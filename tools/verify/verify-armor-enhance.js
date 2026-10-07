@@ -364,7 +364,14 @@ const CHROME = 'C:/Program Files/Google/Chrome/Application/chrome.exe'
   if (gc.未加载) fails.push('TaskData 未加载')
   else {
     if (!gc.五档齐全) fails.push(`分类不是五档：${gc.分档}`)
-    if (gc.迷你挑战总数 !== 120) fails.push(`迷你挑战 ${gc.迷你挑战总数} 条，应为 120`)
+    /* ★ 2026-10-07 改：不再写死 120。
+     * 校对过程中条目数一直在变（补回 6 条误剔的小游戏、删 4 条空壳、
+     * 删普莉珂的秘密基地），写死数字每改一次数据就要改一次断言。
+     * 这条真正要防的是「分组被改回按 ROM cat」——那样迷你挑战会落进「其他」，
+     * 所以只要断言「这一档存在且非空」就够了，具体条数以 L1 体检为准。 */
+    if (!(gc.迷你挑战总数 > 0)) {
+      fails.push(`迷你挑战档为空（${gc.迷你挑战总数}）—— 分组被改回按 ROM cat 了？`)
+    }
     if (gc.其他总数 > 25) fails.push(`「其他」还有 ${gc.其他总数} 条，迷你挑战没被正确拆出`)
     if (!gc.迷你挑战可过滤) fails.push('listBy 过滤「迷你挑战」返回空——分组被改回按 ROM cat 了？')
     if (!gc.迷你挑战有图例类) fails.push('迷你挑战任务的 group 字段不对')

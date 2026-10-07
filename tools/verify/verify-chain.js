@@ -14,7 +14,14 @@ const CASES = {
   三点蘑菇: 'MushroomSisters_2',       // 3 环链的中间环
   PhotoSpot系列: 'PhotoSpot_Challenge_01', // 15 条系列（不成链）
   长主线11点: 'HyruleCastleIncident', // 11 个流程点，但不成任务链
-  无中文名: 'Mercenary_Akkare_Bloody'  // nameSrc=key
+  /* ★ 2026-10-07 换样本：原来用 'Mercenary_Akkare_Bloody'，
+   *   但该条是「为〇〇带来和平」的补录重复版，已随 10 条废条目一起删除
+   *   （见 tools/build_task_plan.py 的 DROP_KEY_PAT）。
+   *   现在全库只剩这一条 nameSrc='key'（无官方中文名）：FindSunaNui2。
+   *   ⚠ 老大已核实它的中文名是「第八位英雄」—— 一旦补进去，这条就不再是
+   *     nameSrc='key'，本用例需要再换样本（或改成直接测 prettyKey() 函数）。
+   */
+  无中文名: 'FindSunaNui2'
 }
 
 ;(async () => {
