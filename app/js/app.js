@@ -683,9 +683,26 @@
         if (hits.length >= 30) break;
       }
     }
+    /* ---------- 任务也要能搜（2026-10-07 补）----------
+     * ★ 缺口：搜索框只遍历 MARKERS（探索标点），**任务从来没接进来**。
+     *   输入框 placeholder 写着「搜索神庙/地名/任务/物品」，但「任务」是骗人的——
+     *   搜"WANTED"、搜"未建成的马厩"全都返回「未找到相关标点」，
+     *   而这些任务明明就在地图上那200 多个点里。
+     *
+     * 任务数据侧早就有 `TaskData.search()`（按 name + key 搜），
+     * 只是搜索框一直没调用它。这里把任务命中**混进同一份结果列表**，
+     * 标一个「任务」角标区分，不另开一个结果区。
+     *
+     * 跨层任务在当前层搜不到时也列出来（标层名），否则「未知的天空巨人」
+     * 之类只在天空层有坐标的任务，在地表层就彻底搜不到了。 */
+    var taskHits = [];
+    var TD = window.TaskData;
+    if (TD && TD.search) {
+      taskHits = TD.search(q) || [];
+    }
     var box = $('searchResult');
-    if (!hits.length) {
-      box.innerHTML = '<div class="sr-empty">未找到相关标点</div>';
+    if (!hits.length && !taskHits.length) {
+      box.innerHTML = '<div class="sr-empty">未找到相关标点或任务</div>';
       box.classList.remove('hidden');
       return;
     }
@@ -698,8 +715,52 @@
         '<span class="sr-cat">' + esc(cat ? cat.name : '') + '</span>' +
         '</div>';
     });
+    taskHits.forEach(function (t) {
+      var tag = TD.layerName ? TD.layerName(t.layer) : '';
+      html += '<div class="sr-item" data-tk-search="' + esc(t.key || t.name) + '">' +
+        '<span class="sr-name">' + esc(t.name) + '</span>' +
+        '<span class="sr-cat sr-cat-task">任务' + (tag ? ' · ' + esc(tag) : '') + '</span>' +
+        '</div>';
+    });
     box.innerHTML = html;
     box.classList.remove('hidden');
+
+    /* 任务结果：切层 → 勾分类 → 飞行 + 光圈 → 开卡片 */
+    Array.prototype.forEach.call(box.querySelectorAll('[data-tk-search]'), function (el) {
+      el.addEventListener('click', function () {
+        var key = el.getAttribute('data-tk-search');
+        var t = window.TaskData.byKey ? window.TaskData.byKey(key) : null;
+        if (!t) return;
+        box.classList.add('hidden');
+        $('searchInput').value = '';
+        /* TaskPanel.locate() 会：切到该任务所在层 → 勾上分类 → 重绘，
+           并返回该层内的真实 marker。
+           ★ 传 preferLayer = 任务主坐标所在层。
+           多目标任务（如「未知的天空巨人」layers=[18,20]：城堡交差 + 天空诸岛战斗）
+           必须在**它真正发生的那层**定位；不指定的话 locate() 会停在当前层，
+           停在错误层就等于没定位。 */
+        if (window.TaskPanel && window.TaskPanel.locate) {
+          /* preferLayer 取**最高层**（20 天空 > 19 地底 > 18 地表）：
+             多任务里战斗/采集发生在高处，接任务/交任务在地面（城堡、村子）。
+             定位要带玩家**去打架的地方**，所以选最高那层。
+             （`t.layer` 字段是「第一个流程点」的层，对跨层任务往往是接任务那层，
+               例如「未知的天空巨人」layer=18 其实是海拉鲁城堡。） */
+          var prefer = 18;
+          (t.layers || []).forEach(function (x) { if (x > prefer) prefer = x; });
+          var ll = window.TaskPanel.locate(t, { preferLayer: prefer });
+          if (ll && window.TOTK.gotoMarker) {
+            window.TOTK.gotoMarker({
+              x: ll.gz, y: ll.gx, cat: null, name: t.name,
+              marker: ll.marker || null
+            });
+          }
+        }
+        /* 等地图飞到位再开卡片，否则卡片会把光圈盖住（定位刚加的毛病） */
+        setTimeout(function () {
+          if (window.TaskCard) window.TaskCard.open(t, null);
+        }, 820);
+      });
+    });
 
     Array.prototype.forEach.call(box.querySelectorAll('.sr-item'), function (el) {
       el.addEventListener('click', function () {
@@ -1098,7 +1159,11 @@
     function markNow() {
       if (done) return;
       done = true;
-      var mk2 = state.markers[m.id];
+      /* ★ 优先用调用方直接给的 marker，其次才查 state.markers。
+       * 原因：任务点（task-panel.js 的独立图层）**不在 state.markers 里**，
+       *   TaskPanel.locate() 会把真实 marker 通过 m.marker 传进来。
+       *   没有这一步，任务卡片点定位只会移动地图、**没有光圈**。 */
+      var mk2 = m.marker || state.markers[m.id];
       if (!mk2) { toast('已定位到「' + (m.name || m.full || '目标') + '」'); return; }
       var el = mk2.getElement && mk2.getElement();
       if (!el) { toast('已定位到「' + (m.name || m.full || '目标') + '」'); return; }
@@ -1153,9 +1218,22 @@
        表现就是「飞到了、图上有标签、就是看不见图标」。
        这里把卡片推到目标点的左侧（优先），推不开才放右侧。 */
     function moveCardAside(rect) {
+      /* ★ V2.1（2026-10-07）：原来只挪探索卡片，任务卡片定位时会被压住 ——
+       * 任务卡片是 position:fixed + z-index1400，比光圈（940）高得多，
+       * 飞过去后卡片正好盖在目标点上，玩家看到的是「飞了但什么都没发生」。
+       * 两张卡片都试着挪开，探索卡片优先（它更大、更容易挡视线）。 */
       var card = $('exploreCard');
-      if (!card || card.classList.contains('hidden')) return;
-      var cw = card.offsetWidth || 280, ch = card.offsetHeight || 220;
+      if (card && !card.classList.contains('hidden')) {
+        aside(card, rect, 280, 220);
+      }
+      var tcard = $('taskCard');
+      if (tcard && !tcard.classList.contains('hidden')) {
+        aside(tcard, rect, tcard.offsetWidth || 350, tcard.offsetHeight || 300);
+      }
+    }
+
+    /* 把一张卡片挪到目标点旁边（先右后左，都放不下就压着挪到最不挡的一侧） */
+    function aside(card, rect, cw, ch) {
       var pad = 52;   /* 目标点半径 + 光圈半径(38/2)+ 余量 */
       var cx = rect.left + rect.width / 2, cy = rect.top + rect.height / 2;
       var cr = card.getBoundingClientRect();
@@ -1175,7 +1253,11 @@
 
     /* 已在目标位置附近时 flyTo 不会动地图（也不该等 moveend），直接标记 */
     var cur = map.getCenter();
-    var tgtZoom = Math.max(map.getZoom(), 6);
+    /* ★ keepZoom：调用方已经算好了合适的倍率（如 task-flow 的视野自适应
+     *   为「跨度大的任务」把地图拉远到 z3/z4），这时**不要**用下面的
+     *   `max(zoom, 6)` 把它又拉回来——那样起点会被推出屏幕外。
+     *   触发方式：m.keepZoom 为真时沿用当前倍率。 */
+    var tgtZoom = m.keepZoom ? map.getZoom() : Math.max(map.getZoom(), 6);
     var near = Math.abs(cur.lat - m.x) < 1 && Math.abs(cur.lng - m.y) < 1
       && map.getZoom() >= tgtZoom;
     if (near) { markNow(); return; }
@@ -1867,7 +1949,13 @@
     openDetail: openDetail,
     switchLayer: switchLayer,
     refreshLabels: refreshLabels,
-    catById: catById
+    catById: catById,
+    /* V2.1（2026-10-07）：任务卡片坐标旁的定位按钮要用。
+     * 任务点挂在 tk-* 这个独立图层分类下，不在 markers.js 里，
+     * 所以不能走 gotoArmor 的「按名字找标点」那条路，
+     * 直接传一个代理标点（只用 x/y/layer/cat/name）复用完整流程：
+     * 切层 → 勾分类 → flyTo → 光圈。 */
+    gotoMarker: gotoMarker
   };
 
   /* ============================================================

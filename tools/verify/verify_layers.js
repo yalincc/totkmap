@@ -15,8 +15,22 @@ const { chromium } = require('playwright-core');
 const CHROME = 'C:/Program Files/Google/Chrome/Application/chrome.exe';
 const URL = 'http://127.0.0.1:8899/index.html';
 
-/* 各地层的预期点数（与 task-plan.js 统计一致，变了要同步改这里） */
-const EXPECT = { 18: 236, 19: 3, 20: 15 };
+/* 各地层的预期点数（与 task-plan.js 统计一致，变了要同步改这里）
+ *
+ * ★ 2026-10-07 更新：口径从「单层计数」改为「多点任务所有涉及层都显示」，
+ *   地底/天空的任务数因此变多（跨层任务会在多个层各出现一次）。
+ *   数字取自 build_task_plan.py 的 inLayer() 统计，且这里数的是
+ *   `.tk-dot-wrap` —— 即**可上图**的点数（onMap=true），比任务总数少 1（地表）。
+ *     地表 236 条任务 / 235 可上图 · 地底 7/7 · 天空 21/21 · 三层去重 253
+ *   旧的 236/3/15 是「一层只算第一个流程点」时代的断言，已过期。 */
+/* 各地层的预期点数（= task-plan.js 里 onMap=true 的任务数，变了要同步改这里）
+ *
+ * 2026-10-07 更新：天空层 21 → 22。
+ *   「未知的天空巨人」是**跨层任务**（layers=[18,20]）：
+ *   战斗在西海布拉天空诸岛（天空层），交差在海拉鲁城堡（地表层）。
+ *   见 build_task_plan.py 的 MANUAL_LAYERS。
+ *   脚本数的是 `.tk-dot-wrap`（实际渲染出来的点= 可上图数），所以是 22 不是 21。 */
+const EXPECT = { 18: 235, 19: 7, 20: 22 };
 
 (async () => {
   const browser = await chromium.launch({ executablePath: CHROME, headless: true });
@@ -65,7 +79,7 @@ const EXPECT = { 18: 236, 19: 3, 20: 15 };
     };
   }
 
-  /* 跨层往返：18 → 20 → 18，点数应恢复成 236 */
+  /* 跨层往返：18 → 20 → 18，点数应恢复成地表的可上图点数 */
   await selectAll(18);
   await page.click('#layerSwitch button[data-layer="20"]');
   await page.waitForTimeout(1400);

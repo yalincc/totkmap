@@ -20,6 +20,18 @@
       return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
     });
   };
+  /* 把 `**文字**` 转成 <b>（2026-10-07）
+   * ★ 为什么需要：攻略文本（MANUAL_GUIDE）里用 `**` 标重点，
+   *   但卡片直接原样输出，卡片上就会看到一堆星号（`凌晨 5 点消失`）。
+   *   攻略要点里「会让玩家白跑的关键点」必须一眼看到，所以要真的加粗。
+   *
+   * ★ 必须在 esc() **之后**调用：esc 已把 `<` `>` 转成实体，
+   *   这里只替换我们自己插入的 `<b>`/`</b>`，不会引入注入面。
+   *   不匹配 `**`（少于 2 个、或空内容）就原样返回，不破坏普通文本。 */
+  function mdBold(s) {
+    return String(s == null ? '' : s)
+      .replace(/\*\*([^*\n]+)\*\*/g, '<b>$1</b>');
+  }
   function $(id) { return document.getElementById(id); }
   function toast(msg) {
     var A = global.TOTK_APP;
@@ -89,9 +101,13 @@
        *   并标注这是条件而非任务。
        *   —— 真实前置缺失的情况已登记为台账 P2/P3（需并入攻略前置）。*/
       if (r.selfRef) {
-        return '<li class="tk-flag tk-flag-self">需满足特定条件才能接取（未收录具体条件）</li>';
+        return '<li class="tk-flag tk-flag-self tk-req">需满足特定条件才能接取（未收录具体条件）</li>';
       }
-      return '<li class="tk-flag">' + esc(r.reqName || r.key || '未命名条件') + '</li>';
+      /* tk-req = 前置条件专用醒目色（见样式区注释）。
+         quest 型是可点击的 quest 前置，也一起上色——
+         「要先做完这个」和「要满足某个条件」同属"限制"，用同一个颜色。 */
+      return '<li class="tk-flag tk-req' + (r.linkable && r.reqName ? ' tk-req-link' : '') +
+        '">' + esc(r.reqName || r.key || '未命名条件') + '</li>';
     });
     if (!items.length) return '';
     return section('前置条件', '<ul class="tk-list">' + items.join('') + '</ul>');
@@ -167,7 +183,7 @@
     if (g.start) out += kv('如何接取', esc(g.start));
     if (g.note) {
       var suspect = GUIDE_NOTE_SUSPECT[t.key];
-      out += kv('注意事项', esc(g.note).replace(/\n/g, '<br>') +
+      out += kv('注意事项', mdBold(esc(g.note)).replace(/\n/g, '<br>') +
         (suspect
           ? '<div class="tk-guide-warn" title="游戏内实际校对发现这条攻略与官方步骤矛盾">' +
             '<b>⚠ 此条攻略可能有误</b>' + esc(suspect) +
@@ -237,24 +253,31 @@
     var chain = D && D.chainOf ? D.chainOf(t.key) : null;
     var inChain = {};
     if (chain) chain.list.forEach(function (x) { inChain[x.key] = 1; });
-    /* 同链后继 → 进度格里已经能看到，不重复列 */
-    var items = t.unlockList.filter(function (r) {
-      if (r.key && inChain[r.key]) return false;
-      return true;
-    }).map(function (r) {
+    /* 分两类处理，避免 map 里返回 null 留下空洞：
+     *   ① 能跳转的任务 → 正常列，链内后继已在进度格显示、不重复
+     *   ② 指向不在库内的目标（小游戏/赛事等已剔除的条目）→ **收成一句话**。
+     *      ★ 这些条目的 key只是内部名（Circuit_Desert_MiniGame…），
+     *        玩家完全看不懂，逐个列出来就是一串英文噪音。
+     *      原本还有个 bug：reqName 为 null 时会渲染成空白行。 */
+    var links = [], extraCnt = 0;
+    t.unlockList.forEach(function (r) {
+      if (r.key && inChain[r.key]) return;          /* 同链后继，链格已显示 */
       if (r.linkable && r.reqName) {
-        return '<li><a href="#" class="tk-link" data-tk-goto="' + esc(r.reqName) + '"' +
+        links.push('<li><a href="#" class="tk-link" data-tk-goto="' + esc(r.reqName) + '"' +
           (global.TaskDone && global.TaskDone.isDone(r.key)
             ? ' data-tk-done="1" title="（已完成）"' : '') +
-          '>' + esc(r.reqName) + '</a></li>';
+          '>' + esc(r.reqName) + '</a></li>');
+      } else {
+        extraCnt++;
       }
-      /* 指向不在库内的目标（小游戏、赛事等已剔除的条目）：
-         说清「不在任务板块里」，别让玩家点了没反应以为坏了 */
-      return '<li class="tk-flag">' + esc(r.reqName || r.key || '') +
-        '<span class="tk-none2">（不在任务板块）</span></li>';
     });
+    if (extraCnt) {
+      links.push('<li class="tk-flag">另外解锁 ' + extraCnt + ' 个小游戏/赛事' +
+        '<span class="tk-none2">（不在任务板块）</span></li>');
+    }
+    var items = links;
     if (!items.length) return '';
-    return section('完成后解锁', '<ul class="tk-list">' + items.join('') + '</ul>');
+    return section('后续解锁', '<ul class="tk-list">' + items.join('') + '</ul>');
   }
 
   /* ---------- M6：任务链 / 系列 ---------- */
@@ -483,25 +506,20 @@
     h += '</div>';
     h += '</div>';
 
-    /* 关键信息行：类型 / 步骤数 / 坐标 */
+    /* 关键信息行：NPC / 坐标 / 进度
+     *
+     * ★ 2026-10-07 老大精简（截图指正）：删掉「原分类」「类型」「步骤」三行。
+     *   - 原分类(oldCat)：攻略侧分类，和顶部徽章（group）重复
+     *   - 类型(kindCn)：写的是「其他任务」，既跟顶部「迷你挑战」重复，
+     *     又是个没信息量的兜底值（默认值就是它），最容易误导
+     *   - 步骤(nStepsUI)：下面「任务原文」分区已经列了同样的内容，
+     *     顶部再来一次是重复（截图里两处都显示"1 步"）
+     * 顶部徽章已经承担了分类展示，分类信息不会丢。 */
     h += '<div class="tk-meta">';
-    if (t.oldCat) h += '<div class="tk-mrow"><span class="tk-mk">原分类</span><span class="tk-mv">' + esc(t.oldCat) + '</span></div>';
-    /* 任务性质（迷你挑战/情节挑战/神庙探索…）—— M5 新增，比 ROM 的四分类更贴近玩家认知 */
-    if (t.kindCn) h += '<div class="tk-mrow"><span class="tk-mk">类型</span><span class="tk-mv">' + esc(t.kindCn) + '</span></div>';
-    if (t.npcCn) h += '<div class="tk-mrow"><span class="tk-mk">相关 NPC</span><span class="tk-mv">' + esc(t.npcCn) + '</span></div>';
-    /* 步数用 nStepsUI（清洗后玩家真正看到的），不是 nSteps（ROM 触发点数）。
-       两者不一致时注明原始值，避免「说13 步却是 5 条」的对不上。 */
-    if (t.nStepsUI) {
-      h += '<div class="tk-mrow"><span class="tk-mk">步骤</span><span class="tk-mv">' +
-        t.nStepsUI + ' 步' +
-        (t.nSteps && t.nSteps !== t.nStepsUI
-          ? '<span class="tk-mv-sub">（游戏内 ' + t.nSteps + ' 个触发点）</span>'
-          : '') +
-        '</span></div>';
-    } else if (t.nSteps) {
-      h += '<div class="tk-mrow"><span class="tk-mk">步骤</span><span class="tk-mv">' +
-        t.nSteps + ' 个触发点<span class="tk-mv-sub">（无官方说明）</span></span></div>';
-    }
+    /* NPC：做成 meta 区的一个小标签，**不占独立一行**（2026-10-07 老大要求）。
+       原来「相关 NPC  陀特茨」占一整行，和下面「如何接取」里的 NPC 名重复、
+       还会自动换行把卡片撑长。现在缩成 `NPC 陀特茨` 跟在坐标后面。 */
+    if (t.npcCn) h += '<span class="tk-mtag">NPC ' + esc(t.npcCn) + '</span>';
     if (t.gx != null && t.gz != null) {
       /* ---------- 坐标：换算成游戏 UI 口径（2026-10-07，台账 P9.5）----------
        * 数据里的原始值   →   游戏 UI 显示值
@@ -530,7 +548,24 @@
         : ' · 高度未知';
       h += '<div class="tk-mrow" title="已换算成游戏 UI 口径：X=gx、Z=-gz、高度=gy-' +
         ELEV_UI_OFFSET + '（公式由游戏内实测定稿，误差 <6 米）">' +
-        '<span class="tk-mk">坐标</span><span class="tk-mv">' + esc(co) + '</span></div>';
+        '<span class="tk-mk">坐标</span><span class="tk-mv">' + esc(co) +
+        /* ---------- V2.1（2026-10-07）：坐标旁的定位按钮 ----------
+         * 需求：点它回到**这个任务图标在地图上的位置**（只动网页地图，不传送）。
+         * 视觉与探索卡片（#ecLocate）完全一致，同一个定位图钉 SVG + .ec-locate 样式。
+         *
+         * 为什么不能直接用 app.js 的 gotoMarker：任务点画在 task-panel.js 的
+         * 独立图层里，分类勾选走 userOn[layer][group]，不在 state.selected 中。
+         * 所以先让 TaskPanel.locate() 把层+分类确保勾上并重绘，拿到该层内坐标，
+         * 再交给 gotoMarker 做「flyTo + 光圈」。
+         * ★ 跨层任务用 pointInLayer 挑当前层那个点，不是永远用主坐标。 */
+        (t.onMap ? '<button type="button" class="ec-locate tk-locate"' +
+          ' data-tk-locate="1" title="回到该任务在地图上的位置"' +
+          ' aria-label="定位到地图">' +
+          '<svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true">' +
+          '<path d="M8 1.6c-2.5 0-4.5 2-4.5 4.5 0 3.4 4.5 8.3 4.5 8.3s4.5-4.9 4.5-8.3c0-2.5-2-4.5-4.5-4.5z"' +
+          ' fill="none" stroke="currentColor" stroke-width="1.3"/>' +
+          '<circle cx="8" cy="6" r="1.7" fill="currentColor"/></svg></button>' : '') +
+        '</span></div>';
     }
     /* 完成进度：阶段名 + 「第 n/total 步」，让存档进度可见 */
     var dst = doneState(t);
@@ -553,17 +588,29 @@
 
     /* 各分区。
        顺序刻意调整为「攻略在前、任务原文在后」：
-       攻略是玩家真正要看的正文，官方分步退为补充。 */
+       攻略是玩家真正要看的正文，官方分步退为补充。
+       ★ 2026-10-07 老大定：「后续解锁」紧跟「前置条件」下方——
+         这两栏是同一个任务链的两头（前→后），放一起才看得出
+         「我做它之前要先怎样，做完它之后会怎样」。
+         原来它排在「任务原文」之后，被夹在正文中间，割裂。 */
     h += overlapHtml(t);
     h += reqsHtml(t);
+    h += unlockHtml(t);
     h += guideHtml(t);
     h += stepsSectionHtml(t);
-    h += unlockHtml(t);
     /* 防具区紧跟「完成后解锁」：两者都是「做完能得到什么」，逻辑相邻。
        放在最后是因为它比前置/攻略次要，不该把正文挤下去。 */
     h += armorHtml(t);
 
-    /* ---------- 底部操作：导航 / 追踪 / 标记完成 ----------
+    /* ---------- 底部操作：任务点 / 任务目标 / 标记完成 ----------
+       ★ 2026-10-07 老大两轮调整按钮文案（原来叫「导航/追踪/显示流程」）：
+         第一轮：导航→接任务、追踪+显示流程→任务点；
+         第二轮（**仅改文案，功能没动**）：接任务→**任务点**、任务点→**任务目标**。
+         所以现在的对应关系是：
+           - **任务点**（id=tkNav，功能=游戏内导航，走 xnavi）
+           - **任务目标**（id=tkTrack，功能=流程线追踪，在地图上标出各任务点）
+         ★ 文案和功能对不上是老大定的（他按玩家心智命名，不是按实现命名），
+           **别看到「任务点」按钮就去改成地图定位** —— 它干的是导航。
        无坐标时导航按钮置灰而不是隐藏：
        隐藏会让玩家以为卡片缺功能；置灰 + 说明原因才讲得通
        「这个任务本来就没有固定地点」不是 bug。 */
@@ -572,27 +619,27 @@
     h += '<button type="button" class="btn act' + (noNav ? ' is-off' : '') + '" id="tkNav"' +
       (noNav ? ' disabled' : '') +
       (noNav && t.noPlaceReason ? ' title="' + esc(t.noPlaceReason) + '"' : '') +
-      '>导航</button>';
+      '>任务点</button>';
     /* 追踪按钮文案跟随实际状态：追踪中显示「取消追踪」 */
     var tracking = global.TaskFlow && global.TaskFlow.isTracking(t.key);
     h += '<button type="button" class="btn act' + (tracking ? ' is-on' : '') +
-      '" id="tkTrack">' + (tracking ? '取消追踪' : '追踪') + '</button>';
+      '" id="tkTrack">' + (tracking ? '取消追踪' : '任务目标') + '</button>';
     h += doneBtnHtml(t);
     h += '</div>';
 
-    /* M4 流程线：L1 才是多点任务（可连线），L2/L3 直接说明为什么画不出。
-       档位术语（L1/L2/L3）是内部约定，不给玩家看。 */
+    /* 流程线：L1 才是多点任务（可连线），L2/L3 直接说明为什么画不出。
+       档位术语（L1/L2/L3）是内部约定，不给玩家看。
+       ★ 2026-10-07：原来这里是「显示流程」按钮 + 文字提示两个元素，
+         老大要求**只保留文字提示**（按钮已并入上面的「任务点」）。 */
     var flow = '';
     if (t.tier === 'L1') {
-      flow = '<button type="button" class="btn ghost tk-flow-btn" id="tkFlow">' +
-        '显示流程</button>' +
-        '<span class="tk-flow-hint" id="tkFlowHint">' +
+      flow = '<span class="tk-flow-hint" id="tkFlowHint">' +
         '共 ' + t.flowPts.length + ' 个地点' +
         (t.flowPts.length > 1 ? '，可连成流程线' : '') + '</span>';
     } else if (t.tier === 'L2') {
       flow = '<span class="tk-flow-hint">这个任务只有 1 个地点，无需连线</span>';
     } else if (t.noPlaceReason) {
-      /* 已知无地点：把原因说出来，玩家才不会反复找「导航怎么用不了」 */
+      /* 已知无地点：把原因说出来，玩家才不会反复找「接任务怎么用不了」 */
       flow = '<span class="tk-flow-hint">' + esc(t.noPlaceReason) + '</span>';
     } else {
       flow = '<span class="tk-flow-hint">这个任务没有可定位的地点</span>';
@@ -632,7 +679,9 @@
       /* 左键 / 触摸 / 手写笔；右键和中间键不管 */
       if (e.pointerType === 'mouse' && e.button !== 0) return;
       var el = e.target;
-      /* 交互元素不启动拖动，否则点按钮会变成拖按钮 */
+      /* 交互元素不启动拖动，否则点按钮会变成拖按钮。
+         ★ 坐标旁的定位按钮（data-tk-locate）是 <button>，已被这一行覆盖，
+           不需要像 data-go-armor 那样单独排除（那个是 <img>，button 规则抓不到）。*/
       if (el.closest && el.closest('button, a, input, select, textarea')) return;
       /* ★ 防具图标（data-go-armor）也必须排除，否则点了没反应。
          根因：end() 里的 card.releasePointerCapture(pointerId)
@@ -798,15 +847,10 @@
       }
     });
 
-    /* 流程线：交给 task-flow.js（独立模块，出问题也不影响卡片其他功能） */
-    var fl = $('tkFlow');
-    if (fl) fl.addEventListener('click', function (e) {
-      stopAll(e);
-      if (global.TaskFlow) global.TaskFlow.toggle();
-      else toast('流程线模块未加载');
-    });
-
-    /* 追踪：流程线的持久化开关（关卡片后线仍留在地图上） */
+    /* 追踪：流程线的持久化开关（关卡片后线仍留在地图上）
+       ★ 2026-10-07 老大把这个入口改名叫「任务点」（原「追踪」）——
+         它干的事就是在地图上标出任务涉及的各个点，「追踪」太含糊。
+         原来还有一个「显示流程」按钮，职责与它重复，已删（见 buildHtml）。 */
     var tr = $('tkTrack');
     if (tr) tr.addEventListener('click', function (e) {
       stopAll(e);
@@ -814,7 +858,7 @@
       global.TaskFlow.toggleTrack();
       /* 只改文案，不整卡重绘 —— 重绘会让用户滚动位置丢失 */
       var on = global.TaskFlow.isTracking(t.key);
-      tr.textContent = on ? '取消追踪' : '追踪';
+      tr.textContent = on ? '取消追踪' : '任务目标';
       tr.classList.toggle('is-on', !!on);
     });
 
@@ -845,6 +889,51 @@
       }
       /* 重画卡片：完成勾、按钮文案、以及 meta 里新增的进度行都要变 */
       redraw();
+    });
+
+    /* ---------- 坐标旁的定位按钮（V2.1，2026-10-07）----------
+     * 只移动网页地图到该任务图标所在位置，**不传送、不导航**。
+     * 与底部「导航」按钮语义不同，别混：导航是给游戏内指引（走 xnavi），
+     * 这个纯粹是「地图上找不到它在哪」时的定位。
+     *
+     * 两步走（顺序不能反）：
+     *   ① TaskPanel.locate(t)：确保该任务所在层 + 所在分类已勾选并重绘
+     *      ——不做这步会飞到一片空白，因为任务点没渲染。
+     *   ② TOTK.gotoMarker(代理标点)：flyTo + 独立光圈高亮。
+     *      传 cat=null 让它跳过「自动勾分类」（那是 state.selected 体系，任务点不归它管）。 */
+    Array.prototype.forEach.call(card.querySelectorAll('[data-tk-locate]'), function (b) {
+      b.addEventListener('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();          /* 必须：否则冒泡到全局监听器把卡片关了 */
+        if (!t.onMap) { toast('这个任务没有可定位的坐标'); return; }
+        if (!global.TaskPanel || !global.TaskPanel.locate) {
+          toast('任务面板尚未就绪');
+          return;
+        }
+        /* ★ preferLayer 取**最高层**（20 天空 > 19 地底 > 18 地表）。
+         * 多任务里战斗发生在高处（西海布拉天空诸岛），接/交任务在地面（城堡）。
+         * 定位是带玩家**去打架的地方**，所以选最高那层。
+         * 不传的话 locate() 停在当前层——「未知的天空巨人」停在地表就等于没定位。
+         * 同 app.js 搜索结果点击的取法，两处保持一致。 */
+        var prefer = 18;
+        (t.layers || []).forEach(function (x) { if (x > prefer) prefer = x; });
+        var ll = global.TaskPanel.locate(t, { preferLayer: prefer });
+
+        if (!ll || ll.gx == null || ll.gz == null) { toast('定位失败'); return; }
+        /* Leaflet 坐标是 (latlng=Z, lng=X)，见 app.js 坐标系注释。
+         * gotoMarker 内部用 m.x=Z / m.y=X，别直接传 gx/gz。 */
+        if (global.TOTK && global.TOTK.gotoMarker) {
+          global.TOTK.gotoMarker({
+            x: ll.gz, y: ll.gx, cat: null, name: t.name,
+            /* ★ 必须带上真实 marker，否则光圈不出现：
+             *   gotoMarker 画光圈靠 marker.getElement() 的屏幕位置，
+             *   拿不到就只弹 toast。task-panel 的 locate() 会返回它。 */
+            marker: ll.marker || null
+          });
+        } else {
+          global.TOTK.map.setView([ll.gz, ll.gx], Math.max(global.TOTK.map.getZoom(), 6));
+        }
+      });
     });
 
     /* 卡片内跳转：任务链 / 同位置任务 */
@@ -909,8 +998,14 @@
       if (card.contains(el)) return;          /* 卡片内点击不关 */
       /* 点任务点不关 —— 这里不能只判 cur.key：
          攻略孤儿条目（key=null，全库 1 条）会漏判，
-         点了它自己的点反而把刚开的卡片关了。改成按元素类名判。 */
-      if (el.closest && el.closest('.tk-dot-wrap')) return;
+         点了它自己的点反而把刚开的卡片关了。改成按元素类名判。
+         ★★ 2026-10-07 补上流程线节点：点「任务目标」画出的**序号节点/起徽标**
+         *   也会调 TaskCard.open()（老大要求点线上的点能回卡片），
+         *   它们在 `.tkf-node-wrap` 里，原来不在豁免名单里
+         *   → 卡片在弹出的同一瞬间被这条 document click 关掉，
+         *   表现为「卡片闪一下就没了」（实测复现）。
+         *   凡是「会打开任务卡片」的地图元素都要在这里豁免。 */
+      if (el.closest && el.closest('.tk-dot-wrap, .tkf-node-wrap')) return;
       closePublic();
     }, 0);
   });
@@ -1014,11 +1109,14 @@
     '  font-size:17px; font-weight:600; line-height:1.35;',
     '  color:#f0f1f3; margin-bottom:10px; }',
 
-    '/* 关键信息 */',
-    '.tk-meta { margin-bottom:4px; }',
+    '/* 关键信息（NPC 标签 + 坐标行并排，2026-10-07 改 flex） */',
+    '.tk-meta { margin-bottom:4px; display:flex; align-items:baseline; gap:8px; flex-wrap:wrap; }',
     '.tk-mrow { display:flex; gap:8px; font-size:12.5px; line-height:1.7; }',
     '.tk-mk { color:rgba(255,255,255,.42); flex:0 0 52px; }',
     '.tk-mv { color:rgba(255,255,255,.85); flex:1; }',
+    /* 坐标旁的定位按钮：与探索卡片 #ecLocate 同一套视觉，这里只补布局对齐
+       （.ec-locate 是给固定宽度的 flex 容器设计的，任务卡里要贴着坐标文字）。*/
+    '.tk-locate { margin-left:6px; vertical-align:middle; flex:0 0 auto; }',
     '.tk-mv-sub { color:rgba(255,255,255,.4); font-size:11.5px; }',
 
     '/* 分区 */',
@@ -1040,6 +1138,21 @@
     '.tk-list li::before {',
     '  content:"·"; position:absolute; left:2px; color:rgba(255,255,255,.35); }',
     '.tk-flag { color:rgba(255,255,255,.5); }',
+    /* ★ 前置条件专用色（2026-10-07 老大：字体颜色不明显，要更醒目的提醒色）。
+       用项目里已有的琥珀色 `#eac27e` —— 与「攻略有疑」警示块同色系，视觉一致。
+       ★ **不能直接改 .tk-flag**：解锁栏的「另外解锁 N 个小游戏/赛事」也用它，
+         改了会把那边一起染黄（解锁是「得到」，前置是「限制」，语义不同）。
+       所以前置单独挂tk-req 类。*/
+    '.tk-req { color:#eac27e; }',
+    '.tk-req .tk-none2 { color:rgba(234,194,126,.6); }',
+    /* 可点击的前置：任务名，用琥珀色 + 虚线下划线表示「能点进去」 */
+    '.tk-req-link { text-decoration:underline; text-decoration-style:dotted; text-underline-offset:3px; }',
+    /* NPC 标签：2026-10-07 从独立一行改成 meta 区的小标签，
+       避免「相关 NPC  陀特茨」占一整行又和「如何接取」重复。 */
+    '.tk-mtag {',
+    '  display:inline-block; font-size:11.5px; line-height:1.6;',
+    '  padding:1px 7px; border-radius:4px; flex:0 0 auto;',
+    '  background:rgba(255,255,255,.08); color:rgba(255,255,255,.7); }',
     /* 自指降级来的条件（台账P1）：斜体 + 更淡，视觉上就与其他条件不同，
        提示玩家「这不是另一条任务，是个我们还没收录的条件」。 */
     '.tk-flag-self { color:rgba(255,255,255,.34); font-style:italic; }',
@@ -1197,6 +1310,9 @@
     '.tk-note {',
     '  font-size:11.5px; color:rgba(255,255,255,.38);',
     '  margin-top:6px; padding-left:25px; line-height:1.55; }',
+    /* 攻略要点里的重点（`**文字**` → <b>，见 mdBold）：只加粗不换色，
+       避免和「攻略有疑」的琥珀色警示块混淆。 */
+    '.tk-kv b, .tk-note b { color:rgba(255,255,255,.9); font-weight:600; }',
     /* ★ 攻略有疑标记（台账 P10，2026-10-07）
        「遭遇海盗袭击的村庄」的 note 会误导玩家白打一场，
        所以在note 下方挂一个醒目但不喧宾夺主的警示块。

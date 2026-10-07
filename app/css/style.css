@@ -400,6 +400,9 @@ html, body {
 .search-result .sr-item img { width: 18px; height: 18px; flex: 0 0 auto; }
 .search-result .sr-item .sr-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .search-result .sr-item .sr-cat { font-size: 11.5px; color: #7c8591; flex: 0 0 auto; }
+/* 任务命中项的角标：探索标点用图标区分，任务用文字角标（2026-10-07） */
+.search-result .sr-cat-task { color: #c4b0f0; background: rgba(184,160,232,.14);
+  padding: 1px 6px; border-radius: 4px; }
 .search-result .sr-empty { padding: 10px 12px; color: #7c8591; font-size: 13px; text-align: center; }
 
 /* 分类列表 */

@@ -86,23 +86,20 @@ def main():
     # 5) 分类标记统一成「迷你挑战」（这是玩家攻略侧的分类名，可信）
     if not master.get('oldCat'):
         master['oldCat'] = '迷你挑战'
-    # 6) 前置任务：补 reqs + guide.前置任务
-    # ★ type 必须是 'flag' 不是 '前置'（2026-10-07 修正）
-    #   全库 reqs 的 type 只有两种语义：quest=另一条任务（可跳转）、
-    #   flag=游戏内部条件标记（不给链接）。凭空造第三种 '前置' 会：
-    #     · 在统计里变成孤立的第3 类（实测「前置」1 条）
-    #     · 走进 else 分支拿不到 flag，卡片上不给链接也不显示条件说明
-    #   「海拉鲁城堡的异变」是**主线任务名**但没有 ROM key（合并时没匹配上），
-    #   所以按 flag 处理：显示为条件、不给跳转链接。���确名称等信息在 reqName 里。
-    reqs = master.get('reqs') or []
-    if not any((r or {}).get('reqName') == '海拉鲁城堡的异变' for r in reqs):
-        reqs.append({'type': 'flag', 'key': None,
-                     'reqName': '海拉鲁城堡的异变', 'linkable': False,
-                     'noKey': True})
-    master['reqs'] = reqs
-    g = master.setdefault('guide', {})
-    if isinstance(g, dict) and '海拉鲁城堡的异变' not in (g.get('前置任务') or ''):
-        g['前置任务'] = '完成「海拉鲁城堡的异变」'
+    # 6) 前置任务：**这里原本硬编码塞了「海拉鲁城堡的异变」，2026-10-07 已删除。**
+    #
+    # ★ 为什么删（这是个错误，不是数据）：
+    #   「一击入魂」是 sort=5561 的**迷你挑战**，「海拉鲁城堡的异变」是 sort=6
+    #   的**主线第一环**。让一个迷你挑战挂在主线第一环上不成立——
+    #   玩家升到监视堡垒南边的马厩附近就会自然遇到它，用不着先通关城堡。
+    #   台账里也**从没记录过这个前置的来源**，属于早前误判后被当成
+    #   「已合并的攻略信息」一路沿用下来的。
+    #
+    #   要补这条前置的话，正确做法是往 build_task_plan.py 的
+    #   MANUAL_REQUIRES 里加（按任务 key），并由老大/DS 确认后再写。
+    #
+    #   合并本身只做「把攻略侧条目（key=null）的信息吸收到官方条目」，
+    #   **不凭猜测新增前置** —— 无依据的前置宁可留空。
 
     # 7) 删除重复条目
     arr = [t for t in arr if t is not dup]

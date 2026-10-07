@@ -321,15 +321,37 @@
     return out;
   }
 
-  /* 名称搜索（任务名 / key / 攻略里出现的词） */
+  /* 搜索别名（2026-10-07）
+   * ★ 起因：WANTED 系列共 6 条，但**只有 3 条名字里带 WANTED**
+   *   （岩石巨人/莫尔德拉吉克/西诺克斯），另外 3 条叫「未知的天空巨人」
+   *   「未知的三首之怪物」「未知的巨大之影」—— 搜 "WANTED" 只出 3 条，
+   *   玩家会以为另外 3 条不存在。
+   *   它们同属一个系列（同一 NPC 谷拉廉斯接单、分两批），
+   *   所以给这 3 条补 WANTED 别名，搜系列名出全套 6 条。
+   *
+   * 语义：别名只影响**搜索命中**，不改显示名、不改分类、不改坐标。
+   * key → 别名，多个用空格分隔（都会被匹配）。
+   */
+  var SEARCH_ALIAS = {
+    'DefeatHugeEnemy_4': 'WANTED 未知的天空巨人',
+    'DefeatHugeEnemy_5': 'WANTED 未知的三首之怪物',
+    'DefeatHugeEnemy_6': 'WANTED 未知的巨大之影',
+    /* 「讨伐」是这套任务在游戏内的另一个叫法，顺手一起接上 */
+    'DefeatHugeEnemy_1': 'WANTED 讨伐',
+    'DefeatHugeEnemy_2': 'WANTED 讨伐',
+    'DefeatHugeEnemy_3': 'WANTED 讨伐'
+  };
+
+  /* 名称搜索（任务名 / key / 别名 / 攻略里出现的词） */
   function search(q) {
     var ql = String(q || '').trim().toLowerCase();
     if (!ql) return [];
     var out = [];
     for (var i = 0; i < TASKS.length; i++) {
       var t = TASKS[i];
-      if (String(t.name).toLowerCase().indexOf(ql) >= 0 ||
-          String(t.key || '').toLowerCase().indexOf(ql) >= 0) {
+      var hay = String(t.name) + ' ' + String(t.key || '') + ' ' +
+                String(SEARCH_ALIAS[t.key] || '');
+      if (hay.toLowerCase().indexOf(ql) >= 0) {
         out.push(t);
         if (out.length >= 40) break;
       }
