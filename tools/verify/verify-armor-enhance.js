@@ -156,6 +156,49 @@ const CHROME = 'C:/Program Files/Google/Chrome/Application/chrome.exe'
     }
   })
 
+  /* ---- -4. 跨层任务（2026-10-07 老大定：多点任务所有涉及层都显示）----
+   * 断言：
+   * ① 跨层任务的 layers 有值，且每一层都能在 listBy 里查到
+   * ② 每一层的任务数 ≥ 单层口径（跨层任务必须真的多出来了）
+   * ③ 各层合计 235 / 7 / 21（实测值，改数据时要同步）
+   * ④ 跨层任务在每一层画的是**该层内的那个点**，不是主点
+   *
+   * 这条防的是「加了 layers 字段但只改了一处过滤」的漏改——
+   * 我第一版就只改了 statsByLayer，totalByLayer / listBy 没改，
+   * 数据算出来 235/7/21 但前端跑出 233/3/16。 */
+  R['-4_跨层任务'] = await page.evaluate(async () => {
+    const D = window.TaskData
+    if (!D) return { 未加载: true }
+    const EXPECT = { 18: 235, 19: 7, 20: 21 }   /* 实测基准 */
+    const multi = D.tasks.filter(t => t.layers && t.layers.length > 1)
+    const layers = {}
+    ;[18, 19, 20].forEach(L => {
+      layers[L] = { total: D.totalByLayer(L), listBy: D.listBy(L).length,
+                    单层口径: D.tasks.filter(t => t.layer === L && t.onMap).length }
+    })
+    /* 每条跨层任务在每一层都要能查到 */
+    const missing = []
+    multi.forEach(t => {
+      t.layers.forEach(L => {
+        if (!D.listBy(L).some(x => x.key === t.key)) {
+          missing.push(t.name + ' 不在 L' + L)
+        }
+      })
+    })
+    return {
+      跨层数: multi.length,
+      跨层清单: multi.map(t => `${t.name}[${t.layers.join(',')}]`),
+      各层: layers,
+      期望值: EXPECT,
+      各层与期望一致: [18, 19, 20].every(L => layers[L].total === EXPECT[L]),
+      各层listBy与total一致: [18, 19, 20].every(L => layers[L].total === layers[L].listBy),
+      跨层任务多出来: [18, 19, 20].every(L => layers[L].total >= layers[L].单层口径),
+      漏查: missing,
+      无漏查: missing.length === 0,
+      inLayer已导出: typeof D.inLayer === 'function'
+    }
+  })
+
   /* ---- 0. 前置 ---- */
   /* ---- -1. 分类分组（2026-10-07 改游戏官方四档）----
    * 断言四档齐全、每档条数与游戏官方一致、且每一档都点得动。
@@ -526,6 +569,25 @@ const CHROME = 'C:/Program Files/Google/Chrome/Application/chrome.exe'
     if (!gc.神庙挑战可过滤) fails.push('listBy 过滤「神庙挑战」返回空')
     if (!gc.迷你挑战有图例类) fails.push('迷你挑战任务的 group 字段不对')
 
+    /* 跨层任务断言（2026-10-07 老大定：多点任务所有涉及层都显示） */
+    const ly = R['-4_跨层任务'] || {}
+    if (ly.未加载) fails.push('TaskData 未加载（跨层任务检查）')
+    else {
+      if (!ly.inLayer已导出) fails.push('TaskData.inLayer 未导出')
+      if (ly.跨层数 < 1) fails.push('全库没有跨层任务——layers 字段没生效？')
+      if (!ly.无漏查) fails.push(`跨层任务在某些层查不到：${ly.漏查.join('，')}`)
+      if (!ly.各层listBy与total一致) {
+        const bad = [18, 19, 20].filter(L => ly.各层[L].total !== ly.各层[L].listBy)
+          .map(L => `L${L} total=${ly.各层[L].total} vs listBy=${ly.各层[L].listBy}`)
+        fails.push('totalByLayer 与 listBy 不一致——可能只改了其中一处：' + bad.join('；'))
+      }
+      if (!ly.各层与期望一致) {
+        const bad = [18, 19, 20].filter(L => ly.各层[L].total !== ly.期望值[L])
+          .map(L => `L${L} ${ly.各层[L].total}≠${ly.期望值[L]}`)
+        fails.push('各层任务数与基准不符：' + bad.join('，'))
+      }
+    }
+
     /* 坐标换算断言（台账 P9.5） */
     const cc = R['-3_坐标换算'] || {}
     if (cc.未加载) fails.push('TaskData 未加载（坐标换算检查）')
@@ -642,6 +704,8 @@ const CHROME = 'C:/Program Files/Google/Chrome/Application/chrome.exe'
     失败项: fails,
     任务总数: gc.总条数,
     分类分布: gc.全库分布,
+    跨层任务数: R['-4_跨层任务'] ? R['-4_跨层任务'].跨层数 : '(未查)',
+    各层任务数: R['-4_跨层任务'] ? JSON.stringify(Object.keys(R['-4_跨层任务'].各层).reduce((a, k) => { a['L' + k] = R['-4_跨层任务'].各层[k].total; return a }, {})) : '(未查)',
     坐标换算全对: R['-3_坐标换算'] ? R['-3_坐标换算'].样本全对 : '(未查)',
     坐标越界: R['-3_坐标换算'] ? R['-3_坐标换算'].全库越界 : '(未查)',
     自指前置: R['-2_自指检查'] ? R['-2_自指检查'].前置自指 : '(未查)',

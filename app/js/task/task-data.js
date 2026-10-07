@@ -192,6 +192,18 @@
         gz: num(raw.gz),
         hasHeight: !!raw.hasHeight,
         layer: raw.layer || 18,
+        /* ★★ 该任务**涉及的所有图层**（2026-10-07 老大定：多点任务所有涉及层都显示）。
+         *
+         * 原来只有 `layer` 一个值，按**第一个流程点**的高度判定 ——
+         * 于是跨层任务在别的层完全看不到：全库 253 条里有 11 条涉及多层，
+         * 切到地底层只剩 3 条任务、天空层16 条，看着像「那两层没任务」。
+         *
+         * 改后各层可见数：地表 233→236 / 地底 3→7 / 天空 16→21。
+         *
+         * ★ `layer` 字段**保留不变**（导航、串流程线仍需要一个"主层"，
+         *   一般是第一个流程点所在层）。所有「这层有哪些任务」的判断改用 layers。
+         * 缺失时退回 [layer] 兜底，老数据不至于一个都查不到。*/
+        layers: (raw.layers && raw.layers.length) ? raw.layers.slice() : [raw.layer || 18],
         romLayer: raw.romLayer || null,
         onMap: !!raw.onMap,
 
@@ -245,10 +257,22 @@
   build();
 
   /* ---------- 统计（面板标题上的数字） ---------- */
+  /* ★ 该任务是否属于这一层（2026-10-07）
+   *
+   * **所有「这层有哪些任务」的判断都该走这个函数**，别再直接比 `t.layer`。
+   * `t.layer` 只是「主层」（第一个流程点所在层），跨层任务在别的层也该出现。
+   * 数据层给了 `layers`（涉及的所有层）；老数据没有时退回 `layer`。
+   */
+  function inLayer(t, layerId) {
+    if (!t) return false;
+    if (t.layers && t.layers.length) return t.layers.indexOf(layerId) >= 0;
+    return t.layer === layerId;
+  }
+
   function statsByLayer(layerId) {
     var g = {};
     TASKS.forEach(function (t) {
-      if (t.layer !== layerId) return;
+      if (!inLayer(t, layerId)) return;
       if (!t.onMap) return;
       var k = t.group || '迷你挑战';
       g[k] = (g[k] || 0) + 1;
@@ -262,9 +286,18 @@
   function totalByLayer(layerId) {
     var n = 0;
     TASKS.forEach(function (t) {
-      if (t.layer === layerId && t.onMap) n++;
+      if (inLayer(t, layerId) && t.onMap) n++;
     });
     return n;
+  }
+
+  /* 全库任务总数（**去重**，不是各层相加）
+   *
+   * 跨层任务（2026-10-07 起 11 条）在两个层都出现，`totalByLayer` 相加会得到 263
+   * 而不是真实的 253。侧栏标题要用真实总数，所以单独提供这个。
+   */
+  function totalAllLayers() {
+    return TASKS.filter(function (t) { return t.onMap; }).length;
   }
 
   /* 按分组取该层任务。
@@ -273,7 +306,7 @@
   function listBy(layerId, cat) {
     var out = [];
     TASKS.forEach(function (t) {
-      if (t.layer !== layerId) return;
+      if (!inLayer(t, layerId)) return;
       if (!t.onMap) return;
       if (cat && (t.group || '迷你挑战') !== cat) return;
       out.push(t);
@@ -596,8 +629,10 @@
     catCn: CAT_CN,
     catOrder: CAT_ORDER,
     layerName: function (l) { return LAYER_NAME[l] || ''; },
+    inLayer: inLayer,
     statsByLayer: statsByLayer,
     totalByLayer: totalByLayer,
+    totalAllLayers: totalAllLayers,
     listBy: listBy,
     search: search,
     clean: clean,

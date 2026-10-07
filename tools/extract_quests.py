@@ -419,6 +419,25 @@ def main():
         rom_layer = layer_of(pts[0]["gy"]) if pts else None
         rom_pt = dict(pts[0]) if pts else None
 
+        # ★★ 该任务涉及的所有图层（2026-10-07 老大定：多点任务所有涉及层都显示）
+        #
+        # 原来 layer 只按**第一个流程点**判，于是跨层任务在别的层完全看不到。
+        # 现在把所有流程点 + 标点高度都判一遍，收集去重。
+        # 判据与 layer_of 一致（gy<-250 地底/ >=700 天空 / 其余地表）。
+        #
+        # ★ 标点高度缺失的流程点跳过（layer_of(None) 返回 18 会造成误判，
+        #   把一堆本没有高度数据的点算成地表）。
+        all_layers = set()
+        for p in pts or []:
+            if p.get("gy") is not None:
+                all_layers.add(layer_of(p["gy"]))
+        if gy is not None:
+            all_layers.add(layer_of(gy))
+        if not all_layers:
+            all_layers.add(layer)          # 兜底：至少含主层
+        # 主层排第一（前端导航等仍以 layer 为准），其余升序
+        all_layers = [layer] + sorted(x for x in all_layers if x != layer)
+
         rec = {
             "key": key,
             "name": name or key,
@@ -429,6 +448,19 @@ def main():
             "oldCat": {"177": "情节挑战", "185": "迷你挑战", "192": "迷你挑战",
                        "200": "情节挑战", "214": "情节挑战"}.get(str(g["cat"])) if g else None,
             "layer": layer,
+            # ★★ 该任务**涉及的所有图层**（2026-10-07 老大定：多点任务所有涉及层都显示）
+            #
+            # 为什么加这个字段：原来 layer 是按**第一个流程点**判的，
+            # 于是「跨层任务」在别的层完全看不到。
+            # 实测全库 253 条里有 10 条涉及多层：
+            #   洛美岛/南洛美/北洛美的预言、讨伐加侬多夫、给地底人拍照！
+            #   鼓隆城的阿沅、来自太古的指引、利特村的丘栗、卓拉领地的希多、未知的巨大之影
+            # 其中 5 条涉及地底、5 条涉及天空 → 切到那两层几乎看不到东西。
+            #
+            # 改后各层可见数：地表 233→235 / 地底 3→7 / 天空 16→21
+            # **layer 字段保留不变**（导航、串流程线等仍需要一个"主层"），
+            # 前端筛选改用 layers。
+            "layers": all_layers,
             # ★ 游戏坐标（唯一对外口径，用户看到的就是这三个）
             "gx": round(gx, 3) if gx is not None else None,
             "gy": round(gy, 2) if gy is not None else None,

@@ -194,7 +194,9 @@
      * 数据没问题，是**标题没交代口径**。
      *
      * 改法：标题带图层名 + 补全库总数，让人一眼看出这是分层统计。
-     * 「全库 253」用斜体小字跟在后面，避免有人误以为本层只有 253 条。
+     * 「全库」用斜体小字跟在后面，避免有人误以为本层只有这么多条。
+     * ★ 全库数是**去重后的任务总数**（253），不是各层相加——
+     *   跨层任务（2026-10-07 起11 条）在两层都出现，相加会得到 263。
      */
     var layerCn = { 18: '地表', 19: '地底', 20: '天空' }[curLayer] || '';
     var allTotal = 0;
@@ -203,7 +205,8 @@
     }
     var html = '<div class="group-title tk-group">任务·' + esc(layerCn) +
       '<span class="tk-count">' + totalDone + '/' + total +
-      (allTotal && allTotal !== total ? '<span class="tk-count-all">全库 ' + allTotal + '</span>' : '') +
+      (allTotal && allTotal !== total
+        ? '<span class="tk-count-all">全库 ' + D.totalAllLayers() + '</span>' : '') +
       '</span></div>';
     html += '<div class="cat-grid tk-grid">';
     stats.forEach(function (s) {
@@ -254,6 +257,32 @@
      V2.1M5.1：完成态= 右上角绿勾 + 整体降透明，语义与探索侧
      （.mk-done-check）完全一致。同时 glyph 换成 ✓，双通道编码：
      形状给流程档位，勾给完成态，色块给任务分类。 */
+  /* 该任务在指定层内应画在哪个点上（2026-10-07）
+   *
+   * 判层标准与数据层一致（extract_quests.py 的 layer_of）：
+   *   gy < -250 → 地底 19 · gy >= 700 → 天空 20 · 其余 → 地表 18
+   * 缺 gy 的点跳过（判成地表会造成误判）。
+   *
+   * 优先挑流程点（flowPts，多点任务在每层各有各的点），
+   * 没有流程点就退回主坐标（gx/gz）。
+   */
+  function layerOfY(y) {
+    if (y == null) return null;
+    if (y < -250) return 19;
+    if (y >= 700) return 20;
+    return 18;
+  }
+  function pointInLayer(t, layerId) {
+    var i;
+    for (i = 0; i < (t.flowPts || []).length; i++) {
+      var p = t.flowPts[i];
+      if (layerOfY(p.gy) === layerId) return p;
+    }
+    /* 流程点都不在这一层：主坐标在这一层就用它，否则真没有该层坐标 */
+    if (layerOfY(t.gy) === layerId) return { gx: t.gx, gz: t.gz };
+    return null;
+  }
+
   function taskIconDot(t) {
     /* ★ 按 group 判色（2026-10-07 迷你挑战单列）。
      * 原来按 t.cat（ROM 四档）判，迷你挑战会落到 'oth' 灰色里，
@@ -300,8 +329,17 @@
        * 漏改这一处的教训：换了键命名要grep 全部读取点，别只改「看起来相关」的。 */
       if (!on[t.group]) return;
       var isDone = !!(global.TaskDone && t.key && global.TaskDone.isDone(t.key));
-      /* ★ Leaflet latlng = (gz, gx)，见 app.js 坐标系注释 */
-      var m = L.marker([t.gz, t.gx], {
+      /* ★★ 跨层任务要画在**当前层内的那个点**上（2026-10-07 老大定：所有涉及层都显示）
+       *
+       * 原来不管哪一层都画 `t.gz/t.gx`（主点= 第一个流程点），
+       * 于是「切到地底层，看到的却是地表那个点」——点虽然出现了，位置是错的。
+       * 现在用 pointInLayer() 在 flowPts 里找一个真属于当前层的点；
+       * 找不到（高度数据缺失等）才退回主点。
+       *
+       * ★ Leaflet latlng = (gz, gx)，见 app.js 坐标系注释。 */
+      var pt = pointInLayer(t, curLayer);
+      if (!pt) { pt = { gz: t.gz, gx: t.gx }; }
+      var m = L.marker([pt.gz, pt.gx], {
         icon: taskIconDot(t),
         title: t.name,
         riseOnHover: true
