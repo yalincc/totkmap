@@ -107,9 +107,12 @@ const MIN_TAP = 40
       const list = document.querySelector('#catalogList')
       out['catalogList宽'] = list ? Math.round(list.getBoundingClientRect().width) : 0
       out['横向滚动'] = list ? list.scrollWidth > list.clientWidth + 1 : false
-      /* 任务 4 分类是否都渲染出来了 */
+      /* 任务分类是否都渲染出来了。
+       * ★ 2026-10-07 改游戏官方四档：主剧情挑战 / 情节挑战 / 神庙挑战 / 迷你挑战。
+       *   旧断言写的是「主线任务/重要支线/普通支线/其他任务」——
+       *   分类改造后一个都不存在于界面，断言会误报「0/4 齐全」。*/
       const txt = (list && list.textContent) || ''
-      out['四分类齐全'] = ['主线任务', '重要支线', '普通支线', '其他任务']
+      out['四分类齐全'] = ['主剧情挑战', '情节挑战', '神庙挑战', '迷你挑战']
         .filter(c => txt.includes(c))
       /* 工具栏三个控件不能被压到点不中 */
       out['工具栏'] = ['ltAll', 'ltClear', 'layerCount'].map(id => {
@@ -178,7 +181,7 @@ const MIN_TAP = 40
 
     if (V['侧栏']['横向滚动']) fails.push(`${vp.name}：侧栏分类列表横向滚动`)
     if (V['侧栏']['四分类齐全'].length !== 4) {
-      fails.push(`${vp.name}：任务分类只渲染出 ${V['侧栏']['四分类齐全'].length}/4 个（缺 ${['主线任务', '重要支线', '普通支线', '其他任务'].filter(c => !V['侧栏']['四分类齐全'].includes(c)).join('、')}）`)
+      fails.push(`${vp.name}：任务分类只渲染出 ${V['侧栏']['四分类齐全'].length}/4 个（缺 ${['主剧情挑战', '情节挑战', '神庙挑战', '迷你挑战'].filter(c => !V['侧栏']['四分类齐全'].includes(c)).join('、')}）`)
     }
     if (!V['侧栏']['探索面板可见']) fails.push(`${vp.name}：切回探索面板后不可见`)
     if (V['侧栏']['材料横向滚动']) fails.push(`${vp.name}：材料面板横向滚动`)

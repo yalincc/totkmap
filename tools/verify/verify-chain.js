@@ -13,16 +13,16 @@ const CASES = {
   六环链末环: 'MonsterFigures05',      // 应显示 6/6
   三点蘑菇: 'MushroomSisters_2',       // 3 环链的中间环
   PhotoSpot系列: 'PhotoSpot_Challenge_01', // 15 条系列（不成链）
-  长主线11点: 'HyruleCastleIncident', // 11 个流程点，但不成任务链
-  /* ★ 2026-10-07 换样本：原来用 'Mercenary_Akkare_Bloody'，
-   *   但该条是「为〇〇带来和平」的补录重复版，已随 10 条废条目一起删除
-   *   （见 tools/build_task_plan.py 的 DROP_KEY_PAT）。
-   *   现在全库只剩这一条 nameSrc='key'（无官方中文名）：FindSunaNui2。
-   *   ⚠ 老大已核实它的中文名是「第八位英雄」—— 一旦补进去，这条就不再是
-   *     nameSrc='key'，本用例需要再换样本（或改成直接测 prettyKey() 函数）。
-   */
-  无中文名: 'FindSunaNui2'
+  长主线11点: 'HyruleCastleIncident' // 11 个流程点，但不成任务链
 }
+/* ★ 「无中文名可读化」用例已从 CASES 移除（2026-10-07）。
+ *   过程值得记：这个用例的样本被换过两次，每次都是因为样本被删——
+ *     ① 原样本 Mercenary_Akkare_Bloody（「为〇〇带来和平」补录重复版）
+ *     ② 换成 FindSunaNui2（全库最后一条 nameSrc='key'）
+ *     ③ FindSunaNui2 也被删了（校对确认 139 条官方名单里没有它）
+ *   全库现在**没有** nameSrc='key' 的任务，靠样本无法继续验证这个逻辑。
+ *   → 改成直接测 prettyKey() 函数本身，见下方「无中文名可读化」段。
+ *   教训：验收样本写死具体 key，数据一删就断。函数级测试更稳。 */
 
 ;(async () => {
   const browser = await chromium.launch({
@@ -82,6 +82,47 @@ await page.waitForTimeout(4000)
     await page.evaluate(() => window.TaskCard.close())
     await page.waitForTimeout(150)
   }
+
+  /* 无中文名可读化：直接测 prettyKey()，不再依赖具体样本
+   * （样本已被删光，见 CASES 处的注释） */
+  R['无中文名可读化'] = await page.evaluate(() => {
+    const D = window.TaskData
+    if (!D || typeof D.prettyKey !== 'function') {
+      return { prettyKey已导出: false }
+    }
+    /* 期望值必须与 KEY_WORD_HINT 表（task-data.js:51）里真实登记的词一致。
+     * ★ 我第一版凭想象编了「怪物图鉴02」「工坊成员」这类中文，
+     *   结果 4 条全红 —— 函数只做「词间分隔 + 表内词翻译」，
+     *   表里没有的词原样保留（设计如此：凭空猜中文地名会误导玩家）。
+     *   教训：写断言要先读实现，别照着「应该是什么样」猜。*/
+    /* ★ 两种分隔符别搞混（我第一版就搞错了）：
+     *   段内翻译用「·」无空格 —— MonsterFigures02 → 怪物收藏品·02
+     *   段间分隔用「 · 」带空格 —— Mercenary_Akkare_Bloody → 佣兵 · Akkare · Bloody
+     * 因为分词是按 _ 切的，段内是「一个词译成中文」，段间是「多个词并列」。 */
+    const cases = [
+      /* 表内词：整段命中 → 译成中文 + 保留数字后缀（段内用 ·） */
+      ['MonsterFigures02', '怪物收藏品·02'],
+      ['MushroomSisters_2', '蘑菇姐妹 · 2'],
+      /* 下划线分词：每段各自查表（段间用 · 且带空格） */
+      ['Mercenary_Akkare_Bloody', '佣兵 · Akkare · Bloody'],
+      /* 前缀匹配（Rito 开头） */
+      ['Rito_Something', '里特 · Something'],
+      /* 表里没有的词 → 原样返回，不瞎猜 */
+      ['BuildinguildMember', 'BuildinguildMember'],
+      /* 空值不炸 */
+      ['', '']
+    ]
+    const out = cases.map(([raw, want]) => {
+      const got = String(D.prettyKey(raw))
+      return { 输入: raw, 期望: want, 实际: got, 通过: got === want }
+    })
+    return {
+      prettyKey已导出: true,
+      用例: out,
+      全通过: out.every(x => x.通过),
+      库内无nameSrc为key的任务: D.tasks.filter(t => t.nameSrc === 'key').length
+    }
+  })
 
   /* 跳转：从链条格点进去，卡片应换成目标任务 */
   R['链条跳转'] = await page.evaluate(async () => {

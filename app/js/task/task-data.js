@@ -77,37 +77,45 @@
   /* ---------- 图层 / 分组常量 ---------- */
   var LAYER_NAME = { 18: '地上', 19: '地下', 20: '天空' };
 
-  /* ★ 界面分组改用**中文 group 名**作键（2026-10-07 迷你挑战单列）。
+  /* ★ 界面分组 = 游戏官方四档「冒险笔记」分类（2026-10-07 老大定调）。
    *
-   * 为什么不再用 ROM 的 cat（Main/ImportantMini/Sub/Other）：
-   *   ROM cat 只有四档，游戏里正式存在的「迷你挑战」被塞进 Other，
-   *   导致「其他」有 139 条、其中 120 条是迷你挑战（占 86%）。
-   *   分组判据改用 oldCat（玩家攻略侧的标记，可信度更高），
-   *   由 tools/build_task_plan.py 的 group_of() 算好写进 raw.group。
+   * 老大原话：「现在你的任务分类不大合适，应该尊重游戏本身的分类，
+   *            这样比较容易查找。」
    *
-   * 换口径的连带影响：所有按 cat 过滤/统计的地方都要改成 group，
-   *   否则「迷你挑战」这组点不动、也统计不到。
+   * 判据是 ROM 的 sort 字段（SortIndex），由 tools/build_task_plan.py 的
+   * group_of() 算好写进 raw.group。实测四档与游戏官方**精确一致**：
+   *   sort < 100   → 主剧情挑战 23（官方 23）
+   *   100 ~ 999    → 情节挑战   60（官方 60）
+   *   1000 ~ 4999  → 神庙挑战   31（官方 31）
+   *   >= 5000      → 迷你挑战  139（官方 139）
+   *
+   * 为什么不按 ROM 的 cat（Main/ImportantMini/Sub/Other）：
+   *   cat 只有四档，是 ROM 的粗粒度归类，把迷你挑战塞进了 Other，
+   *   与游戏「冒险笔记」里看到的分类对不上，用户按分类筛任务时找不到东西。
+   *
+   * 换口径的连带影响：所有按 cat 过滤/统计的地方都要改成 group。
    * 用数组而不是对象，遍历顺序才不会依赖 JS 对象的键序。 */
-  var CAT_ORDER = ['主线', '重要支线', '普通支线', '迷你挑战', '其他'];
+  var CAT_ORDER = ['主剧情挑战', '情节挑战', '神庙挑战', '迷你挑战'];
   var CAT_CN = {
-    '主线': '主线任务',
-    '重要支线': '重要支线',
-    '普通支线': '普通支线',
-    '迷你挑战': '迷你挑战',
-    '其他': '其他任务'
+    '主剧情挑战': '主剧情挑战',
+    '情节挑战': '情节挑战',
+    '神庙挑战': '神庙挑战',
+    '迷你挑战': '迷你挑战'
   };
   var GROUP_CN = CAT_CN;
   /* 旧代码还有按 ROM cat 名问的（如 armor 掉落区、reqs 反查），
-     保留一个映射表兜底，别让它们因为找不到键而全部落到「其他」。 */
+     保留一个映射表兜底，别让它们因为找不到键而全部落到最后一项。
+     ★ 这张表只在 raw.group 缺失时才用——正常路径一律读 group。 */
   var ROM_CAT_TO_GROUP = {
-    Main: '主线', ImportantMini: '重要支线', Sub: '普通支线', Other: '其他'
+    Main: '主剧情挑战', ImportantMini: '情节挑战',
+    Sub: '神庙挑战', Other: '迷你挑战'
   };
 
-  /* ROM cat → 界面分组名。优先用数据里算好的 group，缺失时按 ROM cat 兜底。 */
+  /* 任务 → 界面分组名。优先用数据里算好的 group，缺失时按 ROM cat 兜底。 */
   function groupOf(t) {
     if (t && t.group) return t.group;
     var cat = typeof t === 'string' ? t : (t && t.cat);
-    return ROM_CAT_TO_GROUP[cat] || '其他';
+    return ROM_CAT_TO_GROUP[cat] || '迷你挑战';
   }
 
   /* ---------- 主处理 ---------- */
@@ -168,11 +176,11 @@
         nameSrc: raw.nameSrc,          /* rom=官方中文名；guide=社区起名；key=ROM 里就没中文 */
         cat: raw.cat || 'Other',
         /* 界面分组：build_task_plan.py 已按 oldCat 优先算好 */
-        group: raw.group || ROM_CAT_TO_GROUP[raw.cat] || '其他',
+        group: raw.group || ROM_CAT_TO_GROUP[raw.cat] || '迷你挑战',
         /* kindCn = 「情节/迷你挑战」这套玩家视角的分类（M5新增，
            由 tools/add_kindcn.py 离线产出）。
            与 cat/group 的区别：
-             cat/group 是 ROM 官方分类（主线/重要支线/普通支线/其他）
+             group是游戏官方四档（主剧情挑战/情节挑战/神庙挑战/迷你挑战）
              kindCn    是任务性质（主线剧情/迷你挑战/神庙探索/收集要素…）
            两者正交：Other 里既有 121 条迷你挑战，也有 6 条地区任务。 */
         kindCn: raw.kindCn || '其他任务',
@@ -242,7 +250,7 @@
     TASKS.forEach(function (t) {
       if (t.layer !== layerId) return;
       if (!t.onMap) return;
-      var k = t.group || '其他';
+      var k = t.group || '迷你挑战';
       g[k] = (g[k] || 0) + 1;
     });
     return CAT_ORDER.map(function (cat) {
@@ -260,14 +268,14 @@
   }
 
   /* 按分组取该层任务。
-     排序：先按界面分组顺序（主线→支线→其他），同组内按 ROM 的 sort 值，
+     排序：先按官方四档顺序（主剧情→情节→神庙→迷你），同组内按 ROM 的 sort 值，
      sort 缺失时退回 idx（保持 M2 的原始顺序，不重排）。 */
   function listBy(layerId, cat) {
     var out = [];
     TASKS.forEach(function (t) {
       if (t.layer !== layerId) return;
       if (!t.onMap) return;
-      if (cat && (t.group || '其他') !== cat) return;
+      if (cat && (t.group || '迷你挑战') !== cat) return;
       out.push(t);
     });
     out.sort(function (a, b) {
@@ -576,6 +584,14 @@
     tasks: TASKS,
     byName: function (n) { return BY_NAME[n] || null; },
     byKey: function (k) { return BY_KEY[k] || null; },
+    /* ★ 导出 prettyKey（2026-10-07）。
+     * 用途：给「ROM 里就没有中文名」的任务显示一个可读的名字。
+     * 现状：全库已无 nameSrc='key' 的任务（空壳都清完了），
+     *   但这个函数是**兜底逻辑**——将来补数据时遇到没中文名的条目，
+     *   卡片不会退化成显示一串英文 key。
+     * 导出是为了让验收能直接测它（verify-chain.js 的「无中文名可读化」）。
+     * 以前那个用例靠具体样本，样本被删两次就断了 —— 改成函数级测试更稳。 */
+    prettyKey: prettyKey,
     groupOf: groupOf,
     catCn: CAT_CN,
     catOrder: CAT_ORDER,

@@ -39,12 +39,69 @@ const CHROME = 'C:/Program Files/Google/Chrome/Application/chrome.exe'
 
   const R = {}
 
+  /* ---- -2. 前置/解锁自指（2026-10-07，台账 P1）----
+   * 断言全库没有任何「前置条件＝自己」或「解锁＝自己」。
+   *
+   * 起因：ROM 的 DependFlagName 里有「本任务自己的启动条件」这类flag，
+   * 从 flag 反推 key 会切出本任务的 key → 卡片显示「前置条件＝未建成的马厩」
+   * （任务就是未建成的马厩）。连带「完成后解锁」也变成自己。
+   * 已在 build_task_plan.py 的 drop_self_reference / drop_self_unlocks 修掉。
+   *
+   * 这类缺陷体检（verify-data）也曾报WARN，但含义模糊；
+   * 这里做**精确断言**：一条都不该有。 */
+  R['-2_自指检查'] = await page.evaluate(async () => {
+    const D = window.TaskData
+    if (!D) return { 未加载: true }
+    const rq = [], un = []
+    D.tasks.forEach(t => {
+      ;(t.reqs || []).forEach(r => {
+        if (r.key && r.key === t.key && r.type === 'quest') rq.push(t.name)
+      })
+      ;(t.unlockList || []).forEach(u => {
+        if (u.key && u.key === t.key) un.push(t.name)
+      })
+    })
+    /* ★ 顺带验文案：自指降级成 flag 后，卡片上不能还显示自己的名字。
+     *   否则会出现「前置条件 · 马儿去向何方」而任务名也是马儿去向何方，
+     *   玩家会以为前置是「再做一个自己」。 */
+    const selfCards = []
+    for (const t of D.tasks) {
+      if (!(t.reqs || []).some(r => r.selfRef)) continue
+      window.TaskCard.open(t, null)
+      await new Promise(r => setTimeout(r, 260))
+      const txt = document.getElementById('taskCard').textContent || ''
+      selfCards.push({
+        任务: t.name,
+        卡片里还出现自己: txt.indexOf('前置条件' + t.name) >= 0
+          || (txt.indexOf('前置条件') >= 0 && txt.indexOf(t.name) >= 0
+              && txt.indexOf('未收录具体条件') < 0)
+      })
+      window.TaskCard.close()
+      await new Promise(r => setTimeout(r, 120))
+    }
+    return {
+      前置自指: rq.length, 前置自指清单: rq.join(' / '),
+      解锁自指: un.length, 解锁自指清单: un.join(' / '),
+      降级为flag的: D.tasks.filter(t => (t.reqs || []).some(r => r.selfRef)).length,
+      自指卡片: selfCards,
+      自指文案干净: selfCards.every(x => !x.卡片里还出现自己)
+    }
+  })
+
   /* ---- 0. 前置 ---- */
-  /* ---- -1. 分类分组（2026-10-07 迷你挑战单列）----
-     * 断言五档齐全、且「迷你挑战」这一档点得动（能被 listBy 过滤出来）。
-     * 这条专门防「改回按ROM cat 过滤」——那样迷你挑战会落进「其他」，
-     * 面板上点不动、统计也归错地方。 */
-  R['-1_分类分组'] = await page.evaluate(async () => {
+  /* ---- -1. 分类分组（2026-10-07 改游戏官方四档）----
+   * 断言四档齐全、每档条数与游戏官方一致、且每一档都点得动。
+   *
+   * ★ 判据是 ROM 的 sort 字段，官方四档（2026-10-07 老大定调）：
+   *   主剧情挑战 23 / 情节挑战 60 / 神庙挑战 31 / 迷你挑战 139 = 253
+   * 这四档数字**不是**我拍脑袋写的，是与游戏「冒险笔记」逐条校对过的
+   * （见 TOTKmap-V2.1任务校对台账.md P11.4 / P11.6 / P12）。
+   * 所以这里可以写死断言 —— 数据变了就该红。
+   *
+   * 这条同时防「改回按 ROM cat 过滤」：那样迷你挑战会掉进Other，
+   * 面板上点不动、统计也归错地方。 */
+  const OFFICIAL = { '主剧情挑战': 23, '情节挑战': 60, '神庙挑战': 31, '迷你挑战': 139 }
+  R['-1_分类分组'] = await page.evaluate(async (OFFICIAL) => {
     const D = window.TaskData
     if (!D) return { 未加载: true }
     const layer = 18
@@ -52,14 +109,27 @@ const CHROME = 'C:/Program Files/Google/Chrome/Application/chrome.exe'
     const names = stats.map(s => s.name)
     const g = {}
     D.tasks.forEach(t => { const k = t.group || '(无)'; g[k] = (g[k] || 0) + 1 })
+    /* ★ 额外核对：界面 group 与 ROM sort 推出来的档位必须逐档一致。
+     * 这是「分类判据有没有被改回别的字段」的最直接检验。 */
+    const bySort = {}
+    D.tasks.forEach(t => {
+      const s = t.sort
+      const k = s == null ? '(无sort)'
+        : s < 100 ? '主剧情挑战' : s < 1000 ? '情节挑战'
+          : s < 5000 ? '神庙挑战' : '迷你挑战'
+      bySort[k] = (bySort[k] || 0) + 1
+    })
     return {
       分档: stats.map(s => s.name + ':' + s.count).join(' / '),
-      五档齐全: ['主线任务', '重要支线', '普通支线', '迷你挑战', '其他任务']
-        .every(n => names.indexOf(n) >= 0),
+      四档齐全: Object.keys(OFFICIAL).every(n => names.indexOf(n) >= 0),
       全库分布: g,
-      迷你挑战总数: g['迷你挑战'] || 0,
-      其他总数: g['其他'] || 0,
+      官方分布: OFFICIAL,
+      总条数: D.tasks.length,
+      每档与官方一致: Object.keys(OFFICIAL).every(k => g[k] === OFFICIAL[k]),
+      group与sort一致: Object.keys(OFFICIAL).every(k => g[k] === bySort[k]),
+      无其他档: !g['其他'] && !g['主线'] && !g['重要支线'] && !g['普通支线'],
       迷你挑战可过滤: D.listBy(layer, '迷你挑战').length,
+      神庙挑战可过滤: D.listBy(layer, '神庙挑战').length,
       /* ★ 勾选「迷你挑战」后，地图上是否真的画出了这批任务的点。
        * 这条防的是 M6.9 的真实事故：面板五档都渲染出来了、勾上也 active 了，
        * 但地图上一个点都不画 —— 因为 render() 里用 `on[t.cat]` 查，
@@ -97,7 +167,7 @@ const CHROME = 'C:/Program Files/Google/Chrome/Application/chrome.exe'
         return t ? t.group === '迷你挑战' : false
       })()
     }
-  })
+  }, OFFICIAL)
 
 
   R['0_环境'] = await page.evaluate(() => {
@@ -359,22 +429,46 @@ const CHROME = 'C:/Program Files/Google/Chrome/Application/chrome.exe'
 
   /* ---- 汇总 ---- */
   const fails = []
-  /* 分类分组断言（2026-10-07 迷你挑战单列） */
+  /* 分类分组断言（2026-10-07 改游戏官方四档） */
   const gc = R['-1_分类分组'] || {}
   if (gc.未加载) fails.push('TaskData 未加载')
   else {
-    if (!gc.五档齐全) fails.push(`分类不是五档：${gc.分档}`)
-    /* ★ 2026-10-07 改：不再写死 120。
-     * 校对过程中条目数一直在变（补回 6 条误剔的小游戏、删 4 条空壳、
-     * 删普莉珂的秘密基地），写死数字每改一次数据就要改一次断言。
-     * 这条真正要防的是「分组被改回按 ROM cat」——那样迷你挑战会落进「其他」，
-     * 所以只要断言「这一档存在且非空」就够了，具体条数以 L1 体检为准。 */
-    if (!(gc.迷你挑战总数 > 0)) {
-      fails.push(`迷你挑战档为空（${gc.迷你挑战总数}）—— 分组被改回按 ROM cat 了？`)
+    if (!gc.四档齐全) fails.push(`分类不是官方四档：${gc.分档}`)
+    /* ★ 条数写死断言（2026-10-07）。
+     * 之前刻意不写死（「校对中条目一直在变」）是权宜 —— 现在校对收口，
+     * 四档数字已与游戏「冒险笔记」逐条对齐（23/60/31/139 = 253），
+     * 可以写死了。写死的好处：数据一旦偏离官方数就立刻红，
+     * 不用等人工发现。 */
+    if (gc.总条数 !== 253) {
+      fails.push(`任务总数 ${gc.总条数}，应为 253（= 游戏官方任务总数）`)
     }
-    if (gc.其他总数 > 25) fails.push(`「其他」还有 ${gc.其他总数} 条，迷你挑战没被正确拆出`)
+    if (!gc.每档与官方一致) {
+      const bad = Object.keys(gc.官方分布)
+        .filter(k => (gc.全库分布[k] || 0) !== gc.官方分布[k])
+        .map(k => `${k} ${gc.全库分布[k] || 0}≠${gc.官方分布[k]}`)
+      fails.push(`分类条数与游戏官方不符：${bad.join('，')}`)
+    }
+    if (!gc.group与sort一致) {
+      fails.push('界面 group 与 ROM sort 推出的档位不一致—— 分类判据被改回别的字段了？')
+    }
+    if (!gc.无其他档) {
+      fails.push(`还存在旧五档的成员：${JSON.stringify(gc.全库分布)}`)
+    }
     if (!gc.迷你挑战可过滤) fails.push('listBy 过滤「迷你挑战」返回空——分组被改回按 ROM cat 了？')
+    if (!gc.神庙挑战可过滤) fails.push('listBy 过滤「神庙挑战」返回空')
     if (!gc.迷你挑战有图例类) fails.push('迷你挑战任务的 group 字段不对')
+
+    /* 自指断言（台账 P1） */
+    const sc = R['-2_自指检查'] || {}
+    if (sc.未加载) fails.push('TaskData 未加载（自指检查）')
+    else {
+      if (sc.前置自指 > 0) fails.push(`${sc.前置自指} 条任务「前置条件＝自己」：${sc.前置自指清单}`)
+      if (sc.解锁自指 > 0) fails.push(`${sc.解锁自指} 条任务「解锁＝自己」：${sc.解锁自指清单}`)
+      if (sc.降级为flag的 > 0 && !sc.自指文案干净) {
+        const bad = (sc.自指卡片 || []).filter(x => x.卡片里还出现自己).map(x => x.任务)
+        fails.push(`自指任务的卡片仍显示自己的名字当「前置条件」：${bad.join('、')}`)
+      }
+    }
     const mp = gc.勾选后地图有迷你挑战点
     if (mp && !mp.找不到分类项) {
       if (!mp.全取消后真的空了) {
@@ -464,8 +558,10 @@ const CHROME = 'C:/Program Files/Google/Chrome/Application/chrome.exe'
   console.log('\n' + JSON.stringify({
     错误: [...new Set(errs)].slice(0, 5),
     失败项: fails,
-    迷你挑战: gc.迷你挑战总数,
-    其他: gc.其他总数,
+    任务总数: gc.总条数,
+    分类分布: gc.全库分布,
+    自指前置: R['-2_自指检查'] ? R['-2_自指检查'].前置自指 : '(未查)',
+    自指解锁: R['-2_自指检查'] ? R['-2_自指检查'].解锁自指 : '(未查)',
     单件: e.单件,
     套装统称: e.套装统称,
     无匹配: e.无匹配,

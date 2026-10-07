@@ -2,7 +2,7 @@
  * 任务板块 · M3 · 侧栏面板（TOTKMAP V2.1）
  * ------------------------------------------------------------
  * 在 app.js 的分类列表末尾注入一个「任务」大组，内含 4 个小分类：
- *   主线任务 / 重要支线 / 普通支线 / 其他任务
+ *   主剧情挑战 / 情节挑战 / 神庙挑战 / 迷你挑战（= 游戏「冒险笔记」四档）
  * 勾选后在地图上画任务点，点击弹任务卡片。
  *
  * ★ 与 app.js 完全隔离
@@ -57,20 +57,29 @@
   /* ★ 迁移（2026-10-07 迷你挑战单列时加）
    *
    * 症状：改分类后，任务面板五档全部显示 0 且勾不上，地图上一个任务点都不画。
-   * 原因：localStorage 里存的是**旧格式的键**——ROM cat 名
-   *   （Main / ImportantMini / Sub / Other），而新代码按**中文 group** 查
-   *   （主线 / 重要支线 / 普通支线 / 迷你挑战 / 其他）。
+   * 原因：localStorage 里存的是**旧格式的键**，而新代码按**官方四档 group** 查。
    *   键名对不上 → isOn() 全返回 false → 用户勾选意图整个失效。
    *
-   * 这类「改了键命名但没管存量 localStorage」的坑很常见：
-   * 代码全对、数据全对，就是老用户什么都看不见。
-   * 所以这里做一次启动迁移，把旧键改名后写回。
+   * ★ 这类坑我踩过两次（M6.9 迷你挑战单列 / 本次改官方四档），所以现在
+   *   把历次旧键都列全，以后再改分类名只需往这里加一行。
+   *
+   * 迁移对照：
+   *   Main         → 主剧情挑战   （旧「主线」，官方叫法不同）
+   *   ImportantMini→ 情节挑战     （旧「重要支线」）
+   *   Sub          → 神庙挑战     （旧「普通支线」）
+   *   Other/迷你挑战 → 迷你挑战
+   *   ⚠ 「其他」这一档已随 FindSunaNui2 删除而消失（2026-10-07），
+   *     旧存储里若有「其他」，映射到迷你挑战（它本来就是被误分进去的）。
    */
   var LEGACY_CAT_MAP = {
-    Main: '主线',
-    ImportantMini: '重要支线',
-    Sub: '普通支线',
-    Other: '其他'
+    'Main': '主剧情挑战',
+    'ImportantMini': '情节挑战',
+    'Sub': '神庙挑战',
+    'Other': '迷你挑战',
+    '主线': '主剧情挑战',
+    '重要支线': '情节挑战',
+    '普通支线': '神庙挑战',
+    '其他': '迷你挑战'
   };
 
   function load() {
@@ -231,12 +240,15 @@
     /* ★ 按 group 判色（2026-10-07 迷你挑战单列）。
      * 原来按 t.cat（ROM 四档）判，迷你挑战会落到 'oth' 灰色里，
      * 地图上跟「其他」分不开。现在迷你挑战有自己的紫蓝色。 */
-    var gk = t.group || '其他';
-    var cls = 'tk-dot tk-' + (gk === '主线' ? 'main'
-      : gk === '重要支线' ? 'imp'
-        : gk === '普通支线' ? 'sub'
-          : gk === '迷你挑战' ? 'mini'
-            : 'oth');
+    /* ★ 按官方四档 group 判色（2026-10-07 分类改造）。
+     * 四档对应游戏「冒险笔记」：主剧情挑战（金）/ 情节挑战（绿）/
+     * 神庙挑战（蓝）/ 迷你挑战（紫）。原来有第五档「其他」的灰色，
+     * 随FindSunaNui2 删除后已无成员。 */
+    var gk = t.group || '迷你挑战';
+    var cls = 'tk-dot tk-' + (gk === '主剧情挑战' ? 'main'
+      : gk === '情节挑战' ? 'imp'
+        : gk === '神庙挑战' ? 'sub'
+          : 'mini');
     var isDone = !!(global.TaskDone && t.key && global.TaskDone.isDone(t.key));
     var glyph = isDone ? '✓' : t.tier === 'L1' ? '◆' : t.tier === 'L2' ? '●' : '○';
     if (isDone) cls += ' is-done';
@@ -263,7 +275,7 @@
     var list = D.listBy(curLayer);
     list.forEach(function (t) {
       /* ★ 按 group 查，不是 t.cat（2026-10-07 迷你挑战单列）。
-       * 上面 on 的键是中文 group（主线/重要支线/…/迷你挑战/其他），
+       * 上面 on 的键是官方四档 group（主剧情挑战/情节挑战/神庙挑战/迷你挑战），
        * 而 t.cat 还是 ROM 名（Main/ImportantMini/Sub/Other）——
        * 用 t.cat 查就是键对不上，**每个任务都在这里被 return 掉**，
        * 表现是「分类面板五档都在、勾了也勾不上、地图上一个点都不画」。
@@ -397,11 +409,11 @@
     '  box-shadow:0 1px 5px rgba(0,0,0,.6), 0 0 0 1px rgba(255,255,255,.14);',
     '  transition:transform .12s; user-select:none; }',
     '.tk-dot-wrap:hover .tk-dot { transform:scale(1.3); z-index:900; }',
-    '.tk-main { background:#eac27e; color:#3a2f18; }',   /* 主线：主调金 */
-    '.tk-imp  { background:#7ec8a9; color:#1d3b30; }',   /* 重要支线：绿 */
-    '.tk-sub  { background:#6fb3e0; color:#16324a; }',   /* 普通支线：蓝 */
-    '.tk-mini { background:#b8a0e8; color:#2b1f45; }',   /* 迷你挑战：紫（120条，与灰「其他」区分） */
-    '.tk-oth  { background:#8a8f9a; color:#23262c; }',   /* 其他：灰 */
+    /* 官方四档配色（2026-10-07）。分类名与游戏「冒险笔记」一致。 */
+    '.tk-main { background:#eac27e; color:#3a2f18; }',   /* 主剧情挑战：金（23 条） */
+    '.tk-imp  { background:#7ec8a9; color:#1d3b30; }',   /* 情节挑战：绿（60 条） */
+    '.tk-sub  { background:#6fb3e0; color:#16324a; }',   /* 神庙挑战：蓝（31 条） */
+    '.tk-mini { background:#b8a0e8; color:#2b1f45; }',   /* 迷你挑战：紫（139 条） */
     /* --- V2.1M5.1 完成态 ---
        语义与探索侧 .mk-done-check 一致：右上角绿勾= 已完成。
        额外压低不透明度 + 去饱和，让已完成任务在密集图标海里退到背景，

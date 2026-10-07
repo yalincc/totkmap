@@ -64,6 +64,17 @@
           '>' + esc(r.reqName) + '</a></li>';
       }
       /* flag 型：显示条件说明但不链接 */
+      /* ★ selfRef 特殊处理（2026-10-07，台账 P1）：
+       *   自指被降级成 flag 后，reqName 存的还是**本任务自己的名字**
+       *   （decorate_requires 用 key2name 反查，key 就是自己）。
+       *   直接显示的话，卡片上会出现「前置条件 · 马儿去向何方」，
+       *   而任务名也是马儿去向何方 —— 玩家会以为前置是"再做一个自己"。
+       *   正确做法：显示 flag 里的真实信息（这是「满足什么条件才可开始」），
+       *   并标注这是条件而非任务。
+       *   —— 真实前置缺失的情况已登记为台账 P2/P3（需并入攻略前置）。*/
+      if (r.selfRef) {
+        return '<li class="tk-flag tk-flag-self">需满足特定条件才能接取（未收录具体条件）</li>';
+      }
       return '<li class="tk-flag">' + esc(r.reqName || r.key || '未命名条件') + '</li>';
     });
     if (!items.length) return '';
@@ -409,7 +420,9 @@
     /* ★ 按 group 判（2026-10-07 迷你挑战单列）。
      * 原来按 t.cat（ROM 四档）判，迷你挑战会落到 'oth'（灰），
      * 卡片上显示成「其他」，跟真正的「其他」任务混为一谈。 */
-    h += '<span class="tk-chip tk-chip-' + (t.group === '主线' ? 'main' : t.group === '重要支线' ? 'imp' : t.group === '普通支线' ? 'sub' : t.group === '迷你挑战' ? 'mini' : 'oth') + '">' +
+    /* ★ 按官方四档 group 判（2026-10-07 分类改造，与地图点配色一致）。
+     * 原来有第五档 'oth' 灰色，随 FindSunaNui2 删除后已无成员。 */
+    h += '<span class="tk-chip tk-chip-' + (t.group === '主剧情挑战' ? 'main' : t.group === '情节挑战' ? 'imp' : t.group === '神庙挑战' ? 'sub' : 'mini') + '">' +
       esc(t.group) + '</span>';
     if (!t.hasName) {
       h += '<span class="tk-chip tk-noname" title="游戏内这个任务没有官方标题，用内部编号显示">暂无官方名</span>';
@@ -921,7 +934,6 @@
     '.tk-chip-imp  { background:rgba(126,200,169,.16); color:#7ec8a9; }',
     '.tk-chip-sub  { background:rgba(111,179,224,.16); color:#6fb3e0; }',
     '.tk-chip-mini { background:rgba(184,160,232,.16); color:#c4b0f0; }',  /* 迷你挑战：紫 */
-    '.tk-chip-oth  { background:rgba(138,143,154,.16); color:#a8adb8; }',
     '.tk-noname { background:rgba(255,180,90,.13); color:#d9a05e; }',
     '.tk-close {',
     '  margin-left:auto; width:22px; height:22px; line-height:1;',
@@ -959,6 +971,9 @@
     '.tk-list li::before {',
     '  content:"·"; position:absolute; left:2px; color:rgba(255,255,255,.35); }',
     '.tk-flag { color:rgba(255,255,255,.5); }',
+    /* 自指降级来的条件（台账P1）：斜体 + 更淡，视觉上就与其他条件不同，
+       提示玩家「这不是另一条任务，是个我们还没收录的条件」。 */
+    '.tk-flag-self { color:rgba(255,255,255,.34); font-style:italic; }',
 
     '.tk-link { color:#eac27e; text-decoration:none; border-bottom:1px solid rgba(234,194,126,.3); }',
     '.tk-link:hover { border-bottom-color:#eac27e; }',

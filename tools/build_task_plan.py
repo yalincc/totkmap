@@ -43,7 +43,7 @@ MINIGAME_PAT = re.compile(
 MINIGAME_HINT = re.compile(r"(小游戏|赛事|比赛|竞速|多合一|连打|对打)")
 
 # ------------------------------------------------------------------ 人工确认要剔除的条目
-# ★ 老大 2026-10-07 拍板（校对台账 P11.5 / P11.6），共 10 条：
+# ★ 老大 2026-10-07 拍板（校对台账 P11.5 / P11.6 / P12），共 11 条：
 #
 # ① 4 条 ROM 内部事件空壳：Npc_BaseCamp_Assistant_ReactingStatue{,2,3,4}
 #    实测完全空壳 —— 无中文名(nameSrc=key)、无坐标、stepsUI=0 条、guide 全空、
@@ -56,10 +56,18 @@ MINIGAME_HINT = re.compile(r"(小游戏|赛事|比赛|竞速|多合一|连打|�
 #              sort = null，半角叹号，src=rom，无攻略    ← 删这条
 #    两组在上游 tasks.js(286 条) 里都存在，所以必须在这里剔。
 #
+# ③ FindSunaNui2 —— 补完6 条小游戏后，多出来的那 1 条。
+#    实测：nameSrc=key（无中文名，卡片上显示英文 key）、stepsUI 0 条、
+#    npc=Npc_oasis016、sort=5914、reqs 指向「和缇克尔比试！」。
+#    ★ 它**不是**「第八位英雄」—— 老大拿A9VG+Game8 交叉出的139 条官方名单
+#      核对过：第八位英雄是EightHeroStatues_After（sort=5915，本来就在库、有中文名）。
+#      FindSunaNui2 是另一条任务，139 条名单里没有它。
+#    删掉后：254 → 253 = 游戏官方任务总数（23+60+31+139），四档精确命中。
+#
 # ★★ 必须改**生成脚本**，不能手改 task-plan.js —— 后者是生成物，重跑管线会被覆盖。
 DROP_KEY_PAT = re.compile(
     r"^(Npc_BaseCamp_Assistant_ReactingStatue\d*|Mercenary_\w+_Bloody"
-    r"|IchikaraDaughterPhoto)$")
+    r"|IchikaraDaughterPhoto|FindSunaNui2)$")
 
 # ------------------------------------------------------------------ 小游戏白名单（补回 6 条）
 # ★ 老大 2026-10-07 拍板：这 6 条**补回**任务板块（校对台账 P12）。
@@ -170,41 +178,127 @@ def flow_tier(n):
     return "L1" if n >= 2 else ("L2" if n == 1 else "L3")
 
 
-# ROM cat（字符串）→ 界面分类
-CAT_TO_GROUP = {
-    "Main": "主线",
-    "ImportantMini": "重要支线",
-    "Sub": "普通支线",
-    "Other": "其他",
-}
-GROUP_ORDER = ["主线", "重要支线", "普通支线", "迷你挑战", "其他"]
+# ===================================================================
+# 界面分类 = 游戏官方四档（2026-10-07 老大定调，P11）
+# -------------------------------------------------------------------
+# 起因：之前用 ROM 的 cat（Main/ImportantMini/Sub/Other 四档），
+# 与游戏「冒险笔记」里的分类对不上——用户按分类筛任务时找不到东西。
+#
+# ★ 判据改成 ROM 的 sort 字段（SortIndex）——它本身就编码了游戏分类。
+#   实测三档精确命中官方数（这是决定性证据）：
+#     sort < 100      → 主剧情挑战  23 条  官方 23✅
+#     100 ~ 999       → 情节挑战    60 条  官方 60 ✅
+#     1000 ~ 4999     → 神庙挑战    31 条  官方 31 ✅
+#     >= 5000         → 迷你挑战   139 条  官方 139✅
+#
+#   各档实测范围：主剧情 2–92 / 情节 111–803 / 神庙 2191–3073 / 迷你 5111–7205。
+#   区间之间有大量空档（1000~2190、3074~5110），说明这是**分类编号**不是排序权重。
+#
+# 为什么 sort 比 group/kindCn 都可靠：
+#   · sort 是 ROM 挑战表里的原生字段，作者按官方分类顺序填的
+#   · cat 只有四档，是ROM 的粗粒度归类，把迷你挑战塞进了 Other
+#   · oldCat/kindCn 来自社区攻略标点，会写错
+#     （实测「来自地底的呼唤」攻略标"迷你挑战"，但 sort=792 → 情节挑战）
+#
+# 顺带解决了挂很久的悬案：见上。
+GROUP_ORDER = ["主剧情挑战", "情节挑战", "神庙挑战", "迷你挑战"]
 
-# ★ 迷你挑战单列（2026-10-07 老大决定）
-#
-# 起因：ROM 的 cat 只有 Main/ImportantMini/Sub/Other 四档，游戏里正式存在的
-# 「迷你挑战」被塞进 Other → 界面上「其他」有 139 条，其中 120 条是迷你挑战，
-# 占 86%。用户按分类筛任务时一大半挤在占位类里。
-#
-# 判据用 oldCat 而非 ROM cat：oldCat 来自**地图标点分类 id**
-# （extract_quests.py 里185/192 = 迷你挑战），那是玩家攻略侧的标记，
-# 已被 add_kindcn.py 认定为可信来源；ROM cat 反而是最粗的那一档。
-# 实测：oldCat=='迷你挑战' 120 条，kindCn 也是 120 条，两边一致。
-#
-# 顺序放在「普通支线」之后、「其他」之前 —— 迷你挑战是平行主线的补充，
-# 重要性低于正式支线，但高于「其他」这个兜底类。
-MINI_CHALLENGE = "迷你挑战"
+# sort 区间→ 官方分类名。上界用开区间，None 代表无上界。
+SORT_BANDS = [
+    (100, "主剧情挑战"),
+    (1000, "情节挑战"),
+    (5000, "神庙挑战"),
+    (None, "迷你挑战"),
+]
+
+# 旧口径（按 ROM cat 兜底）——只在 sort 缺失时用。
+# 理论上不该走到：实测 254 条全有 sort。留着是为了将来新增数据源时兜底不崩。
+CAT_FALLBACK = {
+    "Main": "主剧情挑战",
+    "ImportantMini": "情节挑战",
+    "Sub": "神庙挑战",
+    "Other": "迷你挑战",
+}
+
+_sort_warned = set()
 
 
 def group_of(t):
-    """任务 → 界面分类。迷你挑战优先于 ROM cat。"""
-    # ★ 白名单 6 条（原被误剔的小游戏）老大 2026-10-07 确认是迷你挑战。
-    #   它们没有攻略标点（oldCat 为空），按 ROM cat 兜底会掉进「其他」，
-    #   所以这里按已确认的结论直接钉死。
-    if str(t.get("key") or "") in KEEP_MINIGAME_KEYS:
-        return MINI_CHALLENGE
-    if t.get("oldCat") == MINI_CHALLENGE:
-        return MINI_CHALLENGE
-    return CAT_TO_GROUP.get(t.get("cat"), "其他")
+    """任务 → 游戏官方分类。判据：ROM 的 sort 字段。"""
+    s = t.get("sort")
+    if s is None:
+        # sort 缺失：按 ROM cat 兜底，并 warn 一次（同类只warn 一次，别刷屏）
+        key = str(t.get("key") or "?")
+        if key not in _sort_warned:
+            _sort_warned.add(key)
+            sys.stderr.write(
+                "[warn] sort 缺失，group_of 退回按 ROM cat 推断: %s (cat=%s)\n"
+                % (key, t.get("cat"))
+            )
+        return CAT_FALLBACK.get(t.get("cat"), "迷你挑战")
+    s = int(s)
+    for upper, name in SORT_BANDS:
+        if upper is None or s < upper:
+            return name
+    return "迷你挑战"
+
+
+def drop_self_reference(t, reqs):
+    """剔除「前置条件＝自己」（台账 P1，2026-10-07）。
+
+    ROM 的 DependFlagName 里有一类flag 是「**本任务自己的启动条件**」，
+    不是前置任务。从 flag 反推 key 时会切出**本任务的 key**，
+    于是卡片上出现「前置条件＝未建成的马厩」这种荒唐结果（任务=未建成的马厩）。
+
+    实测 3 条：
+      未建成的马厩   flag=BuildingMaterialsTutorial_CanBeStart
+      马儿去向何方   flag=FindWhiteHorse_CanStart_Exp
+      来自古代的信息 flag=ZonauReliefSearch_Ready
+
+    连带伤害：decorate_unlocks 的反向索引（谁依赖我）会把这个自指当 legit 前置，
+    于是「完成后解锁」也变成自己 —— 同一个根因、两个表现。
+    所以 **reqs 和 unlocks 都要过一遍**这个函数：前者是「我要先做什么」，
+    后者是「我做完解锁什么」，自指时两者都指向自己。
+
+    ★ 为什么两层都改：
+      extract_quests.py 里也加了同样过滤（那是真正该修的地方），
+      但 tasks.js 是**已生成的产物**，重跑 extract 要全量重解 ROM。
+      这里补一道是为了让修法**立刻生效**、且不依赖重跑上游。
+      两层逻辑一致、幂等，重复过滤不会出问题（第二次已无自指）。
+
+    降级而非丢弃：这类 flag 携带信息（「满足条件后才可开始」），
+    降级成 type=flag 后卡片显示灰字条件提示、不给跳转链接，
+    与现有 flag 型的展示口径一致。
+    """
+    own = t.get("key")
+    if not own or not reqs:
+        return reqs
+    out = []
+    for rq in reqs:
+        if rq.get("type") == "quest" and rq.get("key") == own:
+            rq["type"] = "flag"
+            rq["selfRef"] = True      # 留痕，便于日后核对时识别
+            rq["linkable"] = False    # 明确不给跳转链接
+        out.append(rq)
+    return out
+
+
+def drop_self_unlocks(t, unlocks):
+    """剔除「解锁＝自己」（台账 P1 的第二个表现）。
+
+    unlocks 来自 extract_quests.py 的 dependents 反向索引：
+    谁在 requires 里引用了我，我就解锁谁。当某条任务的 requires 是自指时，
+    反向索引会把「自己」登记成自己的解锁方→ 卡片上「完成后解锁＝自己」。
+
+    unlockList 的项结构是 {key, reqName, linkable}，**没有 type 字段**，
+    所以不能复用 drop_self_reference（那个判 type=='quest'）。
+    这里是整条丢弃而不是降级：unlockList 只用于「完成后解锁」这一行展示，
+    留一条「解锁自己」没有意义（那个 flag 信息已在 reqs 里以灰字呈现）。
+    """
+    own = t.get("key")
+    if not own or not unlocks:
+        return unlocks
+    return [u for u in unlocks if u.get("key") != own]
 
 
 def main():
@@ -334,8 +428,8 @@ def main():
         # ★ 同坐标重叠：地图上会叠成一个点，卡片里要分条列清
         t["_overlap"] = [o["name"] for o in overlap.get((t.get("gx"), t.get("gz")), [])
                          if o is not t]
-        t["_reqs"] = decorate_requires(t)
-        t["_unlocks"] = decorate_unlocks(t)
+        t["_reqs"] = drop_self_reference(t, decorate_requires(t))
+        t["_unlocks"] = drop_self_unlocks(t, decorate_unlocks(t))
         # ---------- 官方分步清洗（M3.1）----------
         # ★ ROM 的 steps 是「事件触发器数组」不是「玩家步骤列表」：
         #   600/1077 条是空壳（Ready / Collect2nd 这类纯钩子，占号但无字），

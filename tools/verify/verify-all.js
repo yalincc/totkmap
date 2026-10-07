@@ -142,19 +142,30 @@ const L2 = [
       if (r.错误 && r.ERROR && r.ERROR.length) return { ok: false, why: '页面报错 ' + r.错误.length + ' 条' }
       const errs = (r['错误'] || [])
       if (errs.length) return { ok: false, why: `页面报错 ${errs.length} 条：${errs[0]}` }
-      const cases = ['六环链中间', '六环链末环', '三点蘑菇', 'PhotoSpot系列', '长主线11点', '无中文名']
+      /* ★ 「无中文名」用例已改为函数级测试（2026-10-07）：
+       * 原样本被删两次（Mercenary_Akkare_Bloody → FindSunaNui2 → 全空），
+       * 现在直接测 prettyKey()，不依赖任何具体任务。*/
+      const cases = ['六环链中间', '六环链末环', '三点蘑菇', 'PhotoSpot系列', '长主线11点']
       const miss = cases.filter(k => !r[k] || r[k]['找不到'])
       if (miss.length) return { ok: false, why: '用例未跑通：' + miss.join(', ') }
       const noChain = cases.filter(k => r[k] && !r[k]['有链条区'] && k !== '长主线11点')
       if (noChain.length) return { ok: false, why: '缺任务链区：' + noChain.join(', ') }
       const dup = cases.filter(k => r[k] && r[k]['有重复的官方分步区'])
       if (dup.length) return { ok: false, why: '官方分步区重复渲染：' + dup.join(', ') }
+      /* prettyKey 可读化（无中文名任务的兜底显示） */
+      const pk = r['无中文名可读化']
+      if (!pk || !pk['prettyKey已导出']) return { ok: false, why: 'prettyKey未导出（无中文名任务会显示英文 key）' }
+      if (!pk['全通过']) {
+        const bad = (pk['用例'] || []).filter(x => !x['通过'])
+          .map(x => `${x['输入']}→「${x['实际']}」`).join('，')
+        return { ok: false, why: 'prettyKey 可读化不对：' + bad }
+      }
       const link = r['标记完成联动']
       if (!link) return { ok: false, why: '缺标记完成联动用例' }
       if (!link['标记后有增加']) return { ok: false, why: '标记完成后链条格没变绿' }
       if (!link['取消后能恢复']) return { ok: false, why: '取消完成后状态没恢复' }
       if (!link['下一环能看到前一环已完成']) return { ok: false, why: '下一环看不到前一环完成态' }
-      return { ok: true, why: `6 用例 + 标记完成联动 4 断言全过` }
+      return { ok: true, why: `5 卡片用例 + prettyKey 6 断言 + 标记完成联动 4 断言全过` }
     }
   },
   {
