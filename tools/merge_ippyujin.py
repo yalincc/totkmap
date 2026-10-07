@@ -87,10 +87,18 @@ def main():
     if not master.get('oldCat'):
         master['oldCat'] = '迷你挑战'
     # 6) 前置任务：补 reqs + guide.前置任务
+    # ★ type 必须是 'flag' 不是 '前置'（2026-10-07 修正）
+    #   全库 reqs 的 type 只有两种语义：quest=另一条任务（可跳转）、
+    #   flag=游戏内部条件标记（不给链接）。凭空造第三种 '前置' 会：
+    #     · 在统计里变成孤立的第3 类（实测「前置」1 条）
+    #     · 走进 else 分支拿不到 flag，卡片上不给链接也不显示条件说明
+    #   「海拉鲁城堡的异变」是**主线任务名**但没有 ROM key（合并时没匹配上），
+    #   所以按 flag 处理：显示为条件、不给跳转链接。���确名称等信息在 reqName 里。
     reqs = master.get('reqs') or []
     if not any((r or {}).get('reqName') == '海拉鲁城堡的异变' for r in reqs):
-        reqs.append({'type': '前置', 'key': None,
-                     'reqName': '海拉鲁城堡的异变', 'linkable': True})
+        reqs.append({'type': 'flag', 'key': None,
+                     'reqName': '海拉鲁城堡的异变', 'linkable': False,
+                     'noKey': True})
     master['reqs'] = reqs
     g = master.setdefault('guide', {})
     if isinstance(g, dict) and '海拉鲁城堡的异变' not in (g.get('前置任务') or ''):

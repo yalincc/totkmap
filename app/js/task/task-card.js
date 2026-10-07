@@ -139,12 +139,41 @@
         : '');
   }
 
+  /* ★ 已确认「攻略 note 写错」的任务（2026-10-07 校对，台账 P10）
+   *
+   * 起因：老大在游戏里核实「遭遇海盗袭击的村庄」，发现攻略 note 写的是
+   * 「消灭沃托里村的海盗」，但 ROM 官方步骤明确说——
+   *   「从沃托里村的洛泽尔那里打听到了村民们的安危。虽然村子被海盗袭击了，
+   *     但是村民们**全都平安逃走了**。向监视堡垒的穆贝和利迦尼**转达这个消息**吧。」
+   * → 官方要的是「打听 + 转达」，「消灭海盗」是**后续情节挑战**的内容，
+   *   被社区攻略串到这条来了。玩家照着做会白打一场。
+   *
+   * ★ 为什么只标记不删掉 note：攻略来源（社区整理）仍可能有其他有用信息，
+   *   直接删是破坏性操作。而且**这类错误体检发现不了**（数据格式正常、
+   *   内容也有），只能靠游戏实际校对——所以要留个显眼的提示。
+   *
+   * ★ 以后校对出新的错误，往这个表里加一行即可（key → 一句话说明）。
+   *   加之前先确认 ROM 官方步骤（stepsUI）与之矛盾，别凭感觉标。 */
+  var GUIDE_NOTE_SUSPECT = {
+    NowInTheVillageOfLurelin:
+      '攻略说「消灭沃托里村的海盗」，但官方步骤是「打听安危 + 向监视堡垒转达」。' +
+      '「消灭海盗」是后续任务的内容，照做会白打一场。'
+  };
+
   /* 攻略段（社区整理，明确标注来源） */
   function guideHtml(t) {
     var g = t.guide || {};
     var out = '';
     if (g.start) out += kv('如何接取', esc(g.start));
-    if (g.note) out += kv('注意事项', esc(g.note).replace(/\n/g, '<br>'));
+    if (g.note) {
+      var suspect = GUIDE_NOTE_SUSPECT[t.key];
+      out += kv('注意事项', esc(g.note).replace(/\n/g, '<br>') +
+        (suspect
+          ? '<div class="tk-guide-warn" title="游戏内实际校对发现这条攻略与官方步骤矛盾">' +
+            '<b>⚠ 此条攻略可能有误</b>' + esc(suspect) +
+            '<span class="tk-guide-fix">以官方步骤为准 →</span></div>'
+          : ''));
+    }
     if (g.reward && g.reward.length) {
       out += kv('任务奖励', g.reward.map(function (r) { return esc(r); }).join('、'));
     }
@@ -1168,6 +1197,16 @@
     '.tk-note {',
     '  font-size:11.5px; color:rgba(255,255,255,.38);',
     '  margin-top:6px; padding-left:25px; line-height:1.55; }',
+    /* ★ 攻略有疑标记（台账 P10，2026-10-07）
+       「遭遇海盗袭击的村庄」的 note 会误导玩家白打一场，
+       所以在note 下方挂一个醒目但不喧宾夺主的警示块。
+       颜色沿用项目里的琥珀色（#eac27e 系），与普通攻略文字区分开。 */
+    '.tk-guide-warn {',
+    '  margin-top:6px; padding:7px 9px; border-radius:6px;',
+    '  background:rgba(234,194,126,.08); border:1px solid rgba(234,194,126,.28);',
+    '  color:rgba(255,220,150,.9); font-size:11.5px; line-height:1.6; }',
+    '.tk-guide-warn b { color:#eac27e; display:block; margin-bottom:2px; }',
+    '.tk-guide-fix { display:block; margin-top:4px; color:rgba(255,220,150,.55); font-size:11px; }',
     '.tk-none {',
     '  font-size:12.5px; color:rgba(255,255,255,.45);',
     '  background:rgba(255,255,255,.04); border-radius:6px;',

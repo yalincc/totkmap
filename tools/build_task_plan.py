@@ -380,6 +380,16 @@ def main():
     #   - type='flag'  → 只有 flag 字符串（游戏内部条件标记，共 14 种），
     #     不是任务名，**界面不给链接**，灰字显示。
     key2name = {t.get("key"): t.get("name") for t in merged if t.get("key")}
+    # ★ 攻略侧的任务名 → key 反查表（2026-10-07新增，P2）
+    name2key = {}
+    for t in merged:
+        k = t.get("key")
+        if not k:
+            continue
+        nm = (t.get("name") or "").strip()
+        # 同名只取第一个（实测无重名；有的话也不该硬取，交给人工裁决）
+        if nm and nm not in name2key:
+            name2key[nm] = k
 
     def decorate_requires(t):
         out = []
@@ -392,8 +402,51 @@ def main():
                 o["linkable"] = o["reqName"] is not None  # 解析不到就不给链接
             else:
                 o["flag"] = r.get("flag")
+                o["reqName"] = r.get("reqName")         # ★ merge脚本塞的条件名
                 o["linkable"] = False                   # ★ flag 永不给链接
             out.append(o)
+
+        # ---------- ★★攻略侧前置并入（P2，2026-10-07）----------
+        # 起因：「马儿去向何方」的真实前置是「未建成的马厩」，
+        # **攻略里明明写着**（guide.requires），但我们只读 ROM 的 requires，
+        # 正确答案被扔掉、留了个错的（自指）。
+        #
+        # 实测全库：攻略侧有前置 56 条，其中能反查到 task key 的 23 条：
+        #   · 18 条 ROM 无 quest 前置、攻略有 → **纯增量，白捡**
+        #   ·  4 条 两边完全一致        → 跳过
+        #   ·  3 条 两边冲突            → **ROM 优先**（见下）
+        #   · 33 条 反查不到（写的是「完成主线」这类文字）→ 跳过
+        #
+        # ★★ 冲突判定：ROM 侧**已有任何 quest 型前置**就整条跳过攻略，
+        #   不是只比 key 是否相同。
+        #   我第一版只查 `k in gset`（key 是否重复），结果 3 条冲突全被加进去，
+        #   「永无止境的说教」变成前置有两个（卓拉领地的希多 + 友好之证）。
+        #   ★ 与 group_of() 用 sort 作判据是同一套口径：ROM 原生字段优先于社区攻略。
+        #   依据不是猜，两条都能自证：
+        #     「永无止境的说教」ROM 前置=卓拉领地的希多（主线 sort=46），
+        #       攻略说=友好之证（sort=5618）——攻略那条比它晚 6 号，不可能是前置；
+        #       官方步骤也提到"感谢你拯救了领地"（承接主线）。
+        #     「第八位英雄」ROM 前置=英雄们的秘密（sort=5911）紧挨 5915，
+        #       攻略说=迷路的商队队员（sort=5923）——在它之后，也不可能。
+        gset = set()
+        rom_q = 0
+        for r in out:
+            if r.get("type") == "quest" and r.get("key"):
+                gset.add(r["key"])
+                rom_q += 1
+        own = t.get("key")
+        for nm in ((t.get("guide") or {}).get("requires") or []) if rom_q == 0 else []:
+            nm = str(nm).strip()
+            if not nm:
+                continue
+            k = name2key.get(nm)
+            if not k or k == own:      # 反查不到 / 自指 → 跳过
+                continue
+            if k in gset:              # 重复 → 跳过
+                continue
+            out.append({"type": "quest", "key": k, "reqName": key2name.get(k),
+                        "linkable": True, "src": "guide"})
+            gset.add(k)
         return out
 
     def decorate_unlocks(t):
@@ -441,6 +494,37 @@ def main():
         t["_hasStepText"] = bool(t["_stepsUI"])
         # nStepsUI = 玩家真正看到的步数（卡片顶部「N 步」用这个）
         t["_nStepsUI"] = len(t["_stepsUI"])
+
+    # ---------- ★★ 反向解锁链：先算完全部 reqs，再建索引（P2，2026-10-07）----------
+    # 为什么要两轮：攻略并入的前置是在 decorate_requires 里逐条加的，
+    #   一条任务的「完成后解锁」依赖**别的**任务的 reqs，必须等所有 reqs 定完。
+    # 改动前 unlocks 只来自 extract_quests 的 dependents 反向索引（基于 ROM 前置），
+    #   实测「有前置无解锁」68 条 —— 攻略补进来的那些前置会没有对应解锁项，
+    #   卡片上就出现「A 的前置是 B，但 B 完成后不解锁 A」的矛盾。
+    _dep = defaultdict(list)
+    for t in merged:
+        own = t.get("key")
+        if not own:
+            continue
+        for r in t["_reqs"]:
+            if r.get("type") == "quest" and r.get("key") and r["key"] != own:
+                _dep[r["key"]].append(own)
+    n_add_unlock = 0
+    for t in merged:
+        tk = t.get("key")
+        if not tk:
+            continue
+        have = set(u.get("key") for u in t["_unlocks"] if u.get("key"))
+        for k in _dep.get(tk, []):
+            if k in have:
+                continue
+            t["_unlocks"].append({"key": k, "reqName": key2name.get(k),
+                                  "linkable": key2name.get(k) is not None,
+                                  "src": "reverse"})
+            have.add(k)
+            n_add_unlock += 1
+    if n_add_unlock:
+        print("      反向解锁链：补 %d 条（攻略并入前置带来的）" % n_add_unlock)
 
     print("\n【3】按任务种类分组（ROM 权威 cat，非自编）")
     grp = defaultdict(list)
