@@ -185,8 +185,26 @@
     });
     if (!total) return;
 
-    var html = '<div class="group-title tk-group">任务' +
-      '<span class="tk-count">' + totalDone + '/' + total + '</span></div>';
+    /* ★ 标题要标明「本图层」（2026-10-07）
+     *
+     * 问题：原来只写「任务 0/233」，老大看到 233 与全库 253 不符，以为数据错了。
+     * 真相：statsByLayer(curLayer) **只统计当前图层**——
+     *   地表 234 条（onMap 233）/ 地底 3 / 天空 16 = 全库 253。
+     * 切到地底层只剩 3 条（台账 P5 记的「图层归属倾斜」就是这个）。
+     * 数据没问题，是**标题没交代口径**。
+     *
+     * 改法：标题带图层名 + 补全库总数，让人一眼看出这是分层统计。
+     * 「全库 253」用斜体小字跟在后面，避免有人误以为本层只有 253 条。
+     */
+    var layerCn = { 18: '地表', 19: '地底', 20: '天空' }[curLayer] || '';
+    var allTotal = 0;
+    for (var li = 18; li <= 20; li++) {
+      allTotal += D.totalByLayer ? D.totalByLayer(li) : 0;
+    }
+    var html = '<div class="group-title tk-group">任务·' + esc(layerCn) +
+      '<span class="tk-count">' + totalDone + '/' + total +
+      (allTotal && allTotal !== total ? '<span class="tk-count-all">全库 ' + allTotal + '</span>' : '') +
+      '</span></div>';
     html += '<div class="cat-grid tk-grid">';
     stats.forEach(function (s) {
       if (s.count <= 0) return;
@@ -398,6 +416,10 @@
     '.tk-group .tk-count {',
     '  margin-left:8px; font-size:11px; color:rgba(255,255,255,.3);',
     '  font-variant-numeric:tabular-nums; }',
+    /* 「全库 N」：斜体更淡，区分于本层数字。
+       它的作用是让人一眼看出标题里的数字是**分层统计**而不是全量，
+       避免切到地底层看到「0/3」时以为数据丢了。 */
+    '.tk-count-all { margin-left:7px; font-style:italic; color:rgba(255,255,255,.2); }',
     /* 任务点在地图上：方形徽标，按种类分色。glyph 区分流程档位
        ◆=L1 有流程线可画 ●=L2 单点 ○=L3 仅列表（玩家看不到 L1/L2 术语，只看到形状不同） */
     '.tk-dot-wrap { background:none; border:none; }',
