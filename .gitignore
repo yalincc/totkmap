@@ -54,3 +54,7 @@ app/data/task-save.json
 # Python 缓存
 __pycache__/
 *.pyc
+
+# 校对清单（由 tools/export_card_review.js 生成，可重新导出）
+任务卡片校对清单.md
+任务卡片校对清单-高危86条.md
