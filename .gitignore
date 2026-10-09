@@ -76,3 +76,25 @@ xnavi/status.json
 xnavi/coords-*.json
 xnavi/data-check.txt
 xnavi/build-check.txt
+
+# V2.5 治理（2026-10-09，对齐 BOTWmap 原则）：
+# 数据流水线/工具脚本、归档、已废弃定位实现、发布包、大压缩包——产物已打进 app/，不入库
+归档/
+tools/
+live-python/
+release/
+app.rar
+
+# 一次性调试脚本（_ 前缀）
+**/_*.py
+
+# 调试工具表 / 备份残留
+*.CT
+*.bak*
+
+# 过程文档不入库：全仓库只保留 README.md / CHANGELOG.md
+*.md
+!README.md
+!**/README.md
+!CHANGELOG.md
+!**/CHANGELOG.md
