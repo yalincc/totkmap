@@ -58,3 +58,21 @@ __pycache__/
 # 校对清单（由 tools/export_card_review.js 生成，可重新导出）
 任务卡片校对清单.md
 任务卡片校对清单-高危86条.md
+
+# 任务板块待补清单（由 tools/task_audit.py 生成，实测产物，可重跑刷新）
+任务板块-待补清单.md
+任务板块-待补清单.csv
+
+# 任务内容体检清单（由 tools/task_check.py 生成，可重跑刷新）
+待补作业清单.md
+
+# xnavi 运行产物（源码入库，V2.4.0 起；产物不入库：exe/日志/检查/截图/机器相关数据）
+xnavi/*.exe
+xnavi/*.log
+xnavi/*-check.txt
+xnavi/gui-shot*.png
+xnavi/known_*.json
+xnavi/status.json
+xnavi/coords-*.json
+xnavi/data-check.txt
+xnavi/build-check.txt

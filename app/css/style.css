@@ -74,6 +74,45 @@ html, body {
   #zoomControls button { width: 34px; height: 34px; }
 }
 
+/* ---------- 手机镜像面板（V2.4.0，BOTW V1.5.0 同款） ---------- */
+#btnMirror.on { background: #ffb703 !important; color: #222 !important; border-color: #ffb703 !important; }
+#mirrorPanel {
+  position: fixed; right: 14px; bottom: 104px; z-index: 2000;
+  width: 252px; padding: 12px 12px 10px;
+  border-radius: 10px;
+  background: rgba(13,15,18,.92);
+  border: 1px solid #eac27e;
+  color: #e8ecf1;
+  box-shadow: 0 4px 18px rgba(0,0,0,.5);
+}
+#mirrorPanel .mp-close {
+  position: absolute; right: 6px; top: 4px;
+  background: none; border: none; color: #aeb6c0;
+  font-size: 18px; line-height: 1; cursor: pointer;
+}
+#mirrorPanel .mp-close:hover { color: #fff; }
+#mirrorPanel .mp-head { font-size: 14px; font-weight: 600; color: #eac27e; margin-bottom: 10px; }
+#mirrorPanel .mp-qr img {
+  width: 184px; height: 184px; display: block; margin: 0 auto 10px;
+  border-radius: 6px; background: #fff; padding: 4px;
+}
+#mirrorPanel .mp-url-wrap { display: flex; gap: 6px; }
+#mirrorPanel .mp-url-wrap input {
+  flex: 1; min-width: 0; padding: 5px 6px;
+  border-radius: 6px; border: 1px solid #3a3f45;
+  background: #1a1d21; color: #eac27e; font-size: 12px;
+}
+#mirrorPanel .mp-url-wrap button {
+  padding: 5px 10px; border-radius: 6px;
+  border: 1px solid #eac27e; background: rgba(234,194,126,.15);
+  color: #eac27e; font-size: 12px; cursor: pointer;
+}
+#mirrorPanel .mp-url-wrap button:hover { background: rgba(234,194,126,.28); }
+#mirrorPanel .mp-hint { font-size: 11px; color: #9aa3ad; margin: 8px 0 0; line-height: 1.5; }
+@media (max-width: 720px) {
+  #mirrorPanel { right: 10px; bottom: 96px; }
+}
+
 /* ---------- 标记点标签（标点名称） ---------- */
 .mk-label {
   background: rgba(10,12,14,.62);

@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>塞尔达传说：王国之泪 · 互动地图</title>
 <link rel="stylesheet" href="vendor/leaflet.css">
-<link rel="stylesheet" href="css/style.css?v=240">
+<link rel="stylesheet" href="css/style.css?v=241">
 </head>
 <body>
 
@@ -19,6 +19,19 @@
   <button id="zoomOut" type="button" title="缩小">－</button>
   <button id="zoomFit" type="button" title="回到全图">⌂</button>
   <button id="zoomLocate" type="button" title="定位（实时服务在线→玩家，否则监视堡垒）">🎯</button>
+  <button id="btnMirror" type="button" title="手机镜像：同一 WiFi 下扫码，手机打开同一地图">📱</button>
+</div>
+
+<!-- 手机镜像面板（V2.4.0）：同一 WiFi 下扫码/复制链接，手机打开同源地图（BOTW V1.5.0 同款） -->
+<div id="mirrorPanel" class="hidden">
+  <button id="mirrorClose" type="button" class="mp-close" title="关闭">×</button>
+  <div class="mp-head">📱 手机镜像 · 同一 WiFi</div>
+  <div class="mp-qr"><img id="mirrorQr" alt="手机镜像二维码" src="" draggable="false"></div>
+  <div class="mp-url-wrap">
+    <input id="mirrorUrl" type="text" readonly spellcheck="false">
+    <button id="mirrorCopy" type="button" title="复制链接">复制</button>
+  </div>
+  <p id="mirrorHint" class="mp-hint">手机打开后：红点跟随 / 点图标导航 / 收集进度与电脑一致</p>
 </div>
 
 <!-- ============ 左侧筛选面板 ============ -->
@@ -112,7 +125,7 @@
   </div>
 
   <footer class="side-foot">
-    <p class="foot-version">TOTKMAP V2.1 © 2026 yalincc</p>
+    <p class="foot-version">TOTKMAP V2.4.0 © 2026 yalincc</p>
     <p>GitHub <a href="https://github.com/yalincc/totkmap" target="_blank" rel="noopener">https://github.com/yalincc/totkmap</a></p>
   </footer>
 </aside>
@@ -214,7 +227,7 @@
 <!-- ============ 底部工具条 ============ -->
 <div class="bottom-bar">
   <button id="addMarkerBtn" class="bar-btn">+ 新增标点</button>
-  <button id="navBtn" class="bar-btn" title="实时定位导航（需本地 live-go 服务）">🧭 导航</button>
+  <button id="navBtn" class="bar-btn" title="实时定位导航（需本地 TOTKNavi 服务）">🧭 导航</button>
   <button id="feedbackBtn" class="bar-btn">? 问题</button>
 </div>
 
@@ -340,8 +353,8 @@
 <!-- 图鉴站地址（联动「查看图鉴」按钮 / 对站跳转）：正式图鉴站地址配置后填写，留空则按钮不显示 -->
 <script>window.TOTK_COMPENDIUM_URL = '';</script>
 <script src="js/save-parser.js"></script>
-<script src="js/app.js?v=270"></script>
-<script src="js/live.js?v=233"></script>
+<script src="js/app.js?v=272"></script>
+<script src="js/live.js?v=241"></script>
 <script src="js/explore-auto.js?v=193"></script>
 <script src="js/mat-auto.js?v=194"></script>
 <!-- V2.0：龙轨迹图层（独立模块）。数据已改为 ROM 官方轨道 dragon_paths_rom.js，

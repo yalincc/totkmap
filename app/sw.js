@@ -15,7 +15,7 @@
  *   所以凡是改了 js/css/data 又不 bump SW_VER，就会出现「老页面配新资源」
  *   或干脆看不到新功能。
  */
-var SW_VER = 'v1.9.4-24';
+var SW_VER = 'v1.9.4-25';
 var TILES_CACHE = 'totk-tiles-' + SW_VER;
 var ASSETS_CACHE = 'totk-assets-' + SW_VER;
 var KEEP_CACHES = [TILES_CACHE, ASSETS_CACHE];
@@ -44,7 +44,9 @@ self.addEventListener('fetch', function (e) {
   var path = url.pathname;
 
   // index.html 走网络优先，保证页面/版本更新立即可见
-  if (path === '/' || path === '/index.html') {
+  // V2.4.0: 手机镜像入口 /botw/ 也走 network-first（否则被 cache-first 缓存旧 index.html，
+  // 改版后镜像页永远拿旧页面 —— 实测 live.js?v=235 卡死即此坑）
+  if (path === '/' || path === '/index.html' || path === '/botw/' || path === '/botw/index.html') {
     e.respondWith(networkFirst(req));
     return;
   }

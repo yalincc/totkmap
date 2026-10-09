@@ -16,7 +16,14 @@
 (function () {
   'use strict';
 
-  var LIVE_API = 'http://127.0.0.1:8766';
+  /* V2.4.0 手机镜像：/botw/ 镜像页（手机/iPad 同 WiFi 访问，host=PC 局域网 IP）→ 同源 location.origin；
+   * 其余（PC 本机打开、在线站导航跳转 https://totk.yalin.site/?follow=1）→ 保持旧版写死
+   * http://127.0.0.1:8766 跨域连本机 xnavi。
+   * ★ 2026-10-09 真机实测回退：不能用「非本机即同源」判定 —— 导航跳转打开的是在线站，
+   *   同源判定会把 API 指到在线站自身（无 /pos）→ 定位失效（红点错/不跟随）。
+   *   回归最初逻辑：只有 /botw/ 镜像页走同源，其余一律 127.0.0.1:8766。 */
+  var LIVE_API = (location.pathname.indexOf('/botw/') === 0 && location.protocol === 'http:')
+    ? location.origin : 'http://127.0.0.1:8766';
   var LS_FOLLOW = 'totkmap.live.follow.v1';
   var LS_AUTOLAYER = 'totkmap.live.autolayer.v1';
   var LS_ARRIVE = 'totkmap.live.arrive.v1';
@@ -31,6 +38,7 @@
   var target = null;                  // {x,y,name,type,layer} 服务端目标
   var follow = false, autoLayer = true, arriveM = ARRIVE_DEF, holdSec = HOLD_DEF, paused = false;
   var lastProgGen = null, lastProgFetch = 0;   // 存档进度代次（服务端 /pos.progressGen）
+  var mirrorShown = false, lastLanUrl = '';      // V2.4.0 手机镜像面板状态 / 服务端 lanUrl
   var arrivedShown = false;
   var layerLock = null;                        // 手动层级锁定：null=自动，18/19/20=锁定该层（传送后恢复自动）
   var lastMX = null, lastMY = null;            // 上一采样位置（传送检测）
@@ -260,6 +268,18 @@
       offlineStreak++;
       lastPosKey = null;
     }
+    /* V2.4.0 手机镜像：服务端 lanUrl 变化 → 更新面板；
+       ★ 2026-10-09：面板开着时，服务不可达 / 未定位 → 降级提示「未检测到本地定位服务」
+       （原逻辑只在 URL 变化时更新，xnavi 关闭后面板仍挂旧链接，用户无感知） */
+    if (mirrorShown) {
+      var lanOk = !!(p && p.ok && typeof p.lanUrl === 'string' && p.lanUrl);
+      if (lanOk) {
+        if (p.lanUrl !== lastLanUrl) { lastLanUrl = p.lanUrl; renderMirror(p.lanUrl, false); }
+      } else if (lastLanUrl !== '') {
+        lastLanUrl = '';
+        renderMirror('', true);
+      }
+    }
     /* 存档进度代次：游戏内保存 → 存档 mtime 变化 → progressGen 变化 → 自动重新拉取进度
        （BOTWmap 同机制：服务自动定位存档，网页无需上传；服务可达即检测，不依赖定位成功） */
     if (p && typeof p.progressGen === 'string' && p.progressGen && p.progressGen !== lastProgGen) {
@@ -363,14 +383,16 @@
   /* 单次定位：居中玩家，保持缩放 */
   function centerOnPlayer() {
     if (pos.mx == null) return;
-    map.flyTo([pos.mx, pos.my], Math.max(map.getZoom(), 5), { duration: 0.6 });
+    map.flyTo([pos.mx, pos.my], Math.max(map.getZoom(), 6), { duration: 0.6 }); // V2.4.0: 800%
   }
-  /* 跟随：红点偏离视口中心超 30% 才平移一次（游戏跟随视角式，范围内不动） */
+  /* 跟随（V2.4.0 方案2+3，2026-10-09 老大拍板）：
+   *   死区 30% → 10%（红点偏离视口中心 10% 即拉回，原 30% 太迟钝）；
+   *   panTo 300ms 平滑动画 = 软跟随（避免 BOTW 式每拍硬居中跳变）。 */
   function followCenter() {
     if (pos.mx == null) return;
     var cp = map.latLngToContainerPoint([pos.mx, pos.my]);
     var cc = map.latLngToContainerPoint(map.getCenter());
-    var lim = Math.min(map.getSize().x, map.getSize().y) * 0.3;
+    var lim = Math.min(map.getSize().x, map.getSize().y) * 0.1;
     if (Math.abs(cp.x - cc.x) > lim || Math.abs(cp.y - cc.y) > lim) {
       map.panTo([pos.mx, pos.my], { animate: true, duration: 0.3 });
     }
@@ -438,6 +460,55 @@
     notifyQueueEnd();
   }
 
+  /* ---------------- 手机镜像面板（V2.4.0，BOTW V1.5.0 同款） ---------------- */
+  function toggleMirror() {
+    var b = $('btnMirror');
+    var el = $('mirrorPanel');
+    if (!b || !el) return;
+    if (mirrorShown) { hideMirror(); return; }
+    mirrorShown = true;
+    el.classList.remove('hidden');
+    b.classList.add('on');
+    if (!lastLanUrl) toast('未检测到本地定位服务，请先启动 TOTKnavi');
+  }
+  function hideMirror() {
+    mirrorShown = false;
+    var el = $('mirrorPanel');
+    var b = $('btnMirror');
+    if (el) el.classList.add('hidden');
+    if (b) b.classList.remove('on');
+  }
+  function renderMirror(url, offline) {
+    var el = $('mirrorPanel');
+    if (!el) return;
+    var input = $('mirrorUrl');
+    var img = $('mirrorQr');
+    var hint = $('mirrorHint');
+    if (!input || !img) return;
+    if (!url || offline) {
+      input.value = '';
+      img.removeAttribute('src');
+      img.style.display = 'none';
+      if (hint) hint.textContent = '未检测到本地定位服务，请先启动 TOTKnavi';
+      return;
+    }
+    input.value = url;
+    img.style.display = '';
+    img.onerror = function () { img.style.display = 'none'; };
+    img.src = 'https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=6&data=' + encodeURIComponent(url);
+    if (hint) hint.textContent = '手机打开后：红点跟随 / 点图标导航 / 收集进度与电脑一致';
+  }
+  function copyMirrorUrl() {
+    var input = $('mirrorUrl');
+    if (!input || !input.value) { toast('暂无可复制的链接'); return; }
+    input.focus();
+    input.select();
+    input.setSelectionRange(0, 99999);
+    var ok = false;
+    try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+    toast(ok ? '链接已复制 · 手机需与电脑在同一 WiFi' : '复制失败，请长按选择复制');
+  }
+
   /* 导航按钮切换：同一目标再次点击 = 停止导航 */
   function toggleNav(opts) {
     if (!pos.online) { toast('实时定位服务未连接（live-python 未启动）'); return 'offline'; }
@@ -479,6 +550,14 @@
       panel.classList.toggle('hidden', !h);
       btn.classList.toggle('active', h);
     });
+
+    /* V2.4.0 手机镜像面板按钮 */
+    var bMir = $('btnMirror');
+    if (bMir) bMir.addEventListener('click', toggleMirror);
+    var bClose = $('mirrorClose');
+    if (bClose) bClose.addEventListener('click', hideMirror);
+    var bCopy = $('mirrorCopy');
+    if (bCopy) bCopy.addEventListener('click', copyMirrorUrl);
 
     var mini = $('npToggle');
     if (mini) mini.addEventListener('click', function () {
@@ -589,6 +668,26 @@
       if (_sp.get('follow') === '1') {
         follow = true;
         lsSet(LS_FOLLOW, '1');
+        /* V2.4.0：导航程序跳转地图 → 直接放大到 800%（z6）并跟随（原 400% 太小）。
+           ★ 用 setView(animate:false) 而非 setZoom：setZoom 走缩放动画，会被 poll 的
+           panTo 打断导致 zoom 卡死在中途值（实测日志 after z=3 / 5.5），必须瞬时生效 */
+        /* V2.4.0：导航程序跳转地图 → 直接放大到 800%（z6）并跟随（原 400% 太小）。
+           ★ 必须延后到 app.js 初始化 zoom 动画结束后再放大（2026-10-09 实测定位）：
+             app.js 初始化 setView(CENTER,3) 走 Leaflet 缩放动画，动画进行中
+             _animatingZoom=true → 此时任何 setZoom/setView 都被 _tryAnimatedZoom 的
+             "已在动画"分支吞掉 → zoom 卡 3（400%），这就是此前手动点 2 次才 800% 的根因。
+           ★ 放大用 setView(animate:false) 而非 setZoom：setZoom 的缩放动画同样会被
+             poll 的 panTo 打断卡死在中途值。
+           ★ 同时直接 panTo 玩家居中（avoid poll 首拍被吞导致的 center 不动）。 */
+        setTimeout(function () {
+          try {
+            if (map._animatingZoom) { map._stop(); map._animatingZoom = false; map._tempFireZoomEvent = false; }
+          } catch (e) {}
+          if (map && map.setView) map.setView(map.getCenter(), 6, { animate: false });
+          if (map && map.panTo && pos.mx != null && pos.my != null) {
+            map.panTo([pos.mx, pos.my], { animate: false });
+          }
+        }, 400);
       }
     } catch (e) {}
     try { autoLayer = lsGet(LS_AUTOLAYER, '1') !== '0'; } catch (e) {}

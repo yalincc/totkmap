@@ -1,0 +1,213 @@
+// known_addrs.json 持久化：记住坐标槽相对 guest DRAM 块的偏移，重启秒开。
+// 偏移相对块基址（Ryujinx 重启后基址变化，偏移不变）。
+//
+// 平台化：Ryujinx 用 known_addrs.json（块+偏移，保持与 live-go 兼容，老数据不浪费）；
+// Eden 内存碎片化无固定块锚点，阶段二用 known_eden_totk.json（绝对地址缓存），
+// 文件与逻辑在 eden_locator.go 中另行实现，互不混写。
+
+package main
+
+import (
+	"encoding/json"
+	"fmt"
+	"os"
+	"path/filepath"
+	"strconv"
+	"strings"
+	"time"
+)
+
+const knownFile = "known_addrs.json"
+
+// Fix 4：偏移记忆条数上限——旧版无限追加，实测积累 40+ 条垃圾偏移，
+// 快路径投票被污染、启动锁错槽。只保留最近 knownCap 条。
+const knownCap = 10
+
+// knownEvictFail 偏移连续失败次数达到该值 → 移出 known_addrs.json。
+// 背景（2026-10-02 实测）：known 锁确认超窗被踢时记一次 fail，防垃圾偏移
+// 一直霸位、每次 tryOffsets 都白试一轮。
+const knownEvictFail = 3
+
+// maxKnownOff 允许的块内偏移上限。旧值是 0x100000000（4GB），但 Ryujinx 实测
+// guest DRAM 有 6088MB，玩家槽相对块基址的偏移可达 5.5GB，被这条上限直接拒掉
+// → known_addrs.json 写成 offsets:null，快路径永久失效、每次都得重新扫描。
+const maxKnownOff = 0x10000000000 // 1TB，远超任何实际块大小
+
+// sessionBaseForKnown 返回写 known_addrs.json 用的锚块基址。
+// currentSessionBase 在"未检测到新块"时恒为 0（启动常态），拿 0 当基址会让偏移
+// 退化成绝对地址（3.4TB 量级）从而必被拒绝。这里依次兜底：
+// 会话块 → 当前平台最大块 → 上次记录的块。
+func sessionBaseForKnown() uintptr {
+	if currentSessionBase != 0 {
+		return currentSessionBase
+	}
+	if p := currentPlatform(); p != nil && p.Handle() != 0 {
+		if base, size := p.LargestBlock(minBlockMB); base != 0 && size > 0 {
+			return base
+		}
+	}
+	return loadKnownBlock()
+}
+
+type knownData struct {
+	Block   string         `json:"block"`
+	Offsets []string       `json:"offsets"`
+	Fails   map[string]int `json:"fails,omitempty"` // 偏移 -> 失败次数（连续 knownEvictFail 次移出）
+	Updated string         `json:"updated"`
+}
+
+// knownFails 偏移失败计数（hex8 -> count）。只由状态机 goroutine 读写。
+var knownFails map[string]int
+
+func init() {
+	var d knownData
+	if data, err := os.ReadFile(knownPath()); err == nil {
+		json.Unmarshal(data, &d)
+	}
+	knownFails = d.Fails
+	if knownFails == nil {
+		knownFails = map[string]int{}
+	}
+}
+
+func failReached(a uintptr) bool {
+	return knownFails[hex8(a)] >= knownEvictFail
+}
+
+// knownFailInc 给偏移记一次失败；达到 knownEvictFail 次则把该偏移移出
+// known_addrs.json（重写文件，其余偏移与 fails 状态保留）。
+// 注意：key 必须是"相对块基址的偏移"（与 offsets 列表同口径），绝对地址
+// 跨会话/块变化后与列表对不上，踢出逻辑会失效（2026-10-02 实测修正）。
+// （Ryujinx 版；Eden 版在 eden_known.go，接口方法 knownFailInc 分派。）
+func knownFailIncRyu(a uintptr) {
+	blk := currentSessionBase
+	if blk == 0 {
+		blk = loadKnownBlock()
+	}
+	o := a
+	if blk != 0 && a > blk {
+		o = a - blk
+	}
+	key := hex8(o)
+	knownFails[key]++
+	var d knownData
+	if data, err := os.ReadFile(knownPath()); err == nil {
+		json.Unmarshal(data, &d)
+	}
+	var offs []string
+	for _, v := range d.Offsets {
+		if !failReached(parseHex(v)) {
+			offs = append(offs, v)
+		}
+	}
+	d.Offsets = offs
+	d.Fails = knownFails
+	d.Updated = time.Now().Format("2006-01-02 15:04:05")
+	buf, _ := json.MarshalIndent(d, "", "  ")
+	os.WriteFile(knownPath(), buf, 0644)
+	fmt.Printf("  [known] offset %s fail=%d (evict>=%d)\n", key, knownFails[key], knownEvictFail)
+}
+
+func knownPath() string {
+	exe, _ := os.Executable()
+	return filepath.Join(filepath.Dir(exe), knownFile)
+}
+
+func parseHex(v string) uintptr {
+	s := strings.TrimPrefix(strings.TrimSpace(v), "0x")
+	s = strings.TrimPrefix(s, "0X")
+	n, err := strconv.ParseUint(s, 16, 64)
+	if err != nil {
+		return 0
+	}
+	return uintptr(n)
+}
+
+// loadKnownBlock 返回 known_addrs.json 记录的块基址（上次会话块，重启参照用）。
+func loadKnownBlock() uintptr {
+	var d knownData
+	if data, err := os.ReadFile(knownPath()); err == nil {
+		json.Unmarshal(data, &d)
+	}
+	return parseHex(d.Block)
+}
+
+func loadOffsets() []uintptr {
+	var d knownData
+	if data, err := os.ReadFile(knownPath()); err == nil {
+		json.Unmarshal(data, &d)
+	}
+	var out []uintptr
+	add := func(v uintptr) {
+		if v > 0 && v < maxKnownOff {
+			for _, x := range out {
+				if x == v {
+					return
+				}
+			}
+			out = append(out, v)
+		}
+	}
+	blk := parseHex(d.Block)
+	for _, v := range d.Offsets {
+		add(parseHex(v))
+	}
+	for _, v := range d.Offsets { // 兼容旧格式：绝对地址转偏移
+		a := parseHex(v)
+		if a > blk {
+			add(a - blk)
+		}
+	}
+	return out
+}
+
+// （Ryujinx 版；Eden 版在 eden_known.go，接口方法 saveKnown 分派。）
+func knownSaveRyu(addrs []uintptr, block uintptr) {
+	// Fix 6：block==0 时兜底——调用方（如移动确认路径）曾直接传
+	// currentSessionBase（启动常态为 0），把 known_addrs.json 的 block
+	// 覆盖成 0x0，导致 loadKnownBlock() 失效、快路径 rebase 失败、每次重扫。
+	if block == 0 {
+		block = sessionBaseForKnown()
+	}
+	seen := map[uintptr]bool{}
+	var offs []string
+	for _, a := range addrs {
+		o := a
+		if block != 0 && a > block {
+			o = a - block
+		}
+		if o > 0 && o < maxKnownOff && !seen[o] {
+			seen[o] = true
+			offs = append(offs, hex8(o))
+		}
+	}
+	for _, o := range loadOffsets() {
+		if !seen[o] && !failReached(o) {
+			seen[o] = true
+			offs = append(offs, hex8(o))
+		}
+	}
+	if len(offs) > knownCap {
+		offs = offs[:knownCap]
+	}
+	d := knownData{
+		Block:   hex12(block),
+		Offsets: offs,
+		Fails:   knownFails,
+		Updated: time.Now().Format("2006-01-02 15:04:05"),
+	}
+	buf, _ := json.MarshalIndent(d, "", "  ")
+	os.WriteFile(knownPath(), buf, 0644)
+}
+
+func hex8(v uintptr) string {
+	return "0x" + strings.ToUpper(strconv.FormatUint(uint64(v), 16))
+}
+
+func hex12(v uintptr) string {
+	s := "0x" + strings.ToUpper(strconv.FormatUint(uint64(v), 16))
+	for len(s) < 14 {
+		s = "0x0" + s[2:]
+	}
+	return s
+}
