@@ -1,11 +1,11 @@
 # make-release.ps1 - package a self-contained nav release (nav + progress data only)
-# Usage: powershell -File make-release.ps1 [-Version TOTKNavi-v2.1.0]
+# Usage: powershell -File make-release.ps1 [-Version TOTKNavi-v2.1.1]
 # Output: release\<Version>\ with data\<required progress/sky files> + TOTKnavi.exe + xnavi.exe
 # The map web app (app/) is NOT bundled: PC uses the online map (totk.yalin.site);
 # phone mirror (/botw/) only activates when an app/ dir is present next to the exe
 # (development machine), and its absence does not affect navigation/progress.
 param(
-  [string]$Version = "TOTKNavi-v2.1.0"
+  [string]$Version = "TOTKNavi-v2.1.1"
 )
 $ErrorActionPreference = 'Stop'
 $root   = Split-Path -Parent $PSScriptRoot
@@ -37,7 +37,22 @@ if (Test-Path $appDst) { Remove-Item $appDst -Force -Recurse }
 Copy-Item (Join-Path $root "xnavi\xnavi.exe")                  $rel -Force
 Copy-Item (Join-Path $root "xnavi-gui\build\bin\TOTKnavi.exe") $rel -Force
 
-# 4) verify
+# 4) certs (V2.1.1 phone anti-sleep Https): ship rootCA.pem + server.pem/key
+#    rootCA.pem = phone install once; server.pem/key = core --tls.
+#    Missing certs/ -> GUI Https option will report missing cert on core start.
+$certsSrc = Join-Path $root "certs"
+$certsDst = Join-Path $rel "certs"
+if (Test-Path $certsSrc) {
+  New-Item -ItemType Directory -Force $certsDst | Out-Null
+  Copy-Item (Join-Path $certsSrc "rootCA.pem") (Join-Path $certsDst "rootCA.pem") -Force
+  Copy-Item (Join-Path $certsSrc "server.pem") (Join-Path $certsDst "server.pem") -Force
+  Copy-Item (Join-Path $certsSrc "server.key") (Join-Path $certsDst "server.key") -Force
+  Write-Host "  certs/ rootCA.pem server.pem server.key"
+} else {
+  Write-Host "  [warn] certs/ not found - Https mode unavailable (run certs/gen-cert.ps1)"
+}
+
+# 5) verify
 $sz = (Get-ChildItem $rel -Recurse -File | Measure-Object -Property Length -Sum).Sum
 Write-Host "done. package=$([Math]::Round($sz/1MB,1)) MB"
 Get-ChildItem $dataDst | ForEach-Object { Write-Host "  data/$($_.Name) $($_.Length)" }

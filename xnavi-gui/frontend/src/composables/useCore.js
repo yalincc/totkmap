@@ -34,8 +34,8 @@ export const target = ref(null)
 export const progressData = ref({})
 
 // ---- 配置 / 环境 ----
-export const cfg = reactive({ saveDir: '' })
-export const envDetect = reactive({ save: false })
+export const cfg = reactive({ saveDirRyujinx: '', saveDirEden: '', emu: 'auto', tls: false })
+export const envDetect = reactive({ save: false, saveRyu: false, saveEden: false })
 export const statusMapUrl = ref('')
 
 // ---- 日志 ----
@@ -168,11 +168,19 @@ function pollCoordsResult(deadline) {
     setTimeout(() => pollCoordsResult(deadline), 1000)
   })
 }
-export async function pickSave() { const d = await api.PickDir('选择存档目录（可选，默认自动探测）'); if (d) cfg.saveDir = d }
+export async function pickSave(which) {
+  const d = await api.PickDir('选择存档目录（可选，默认自动探测）')
+  if (d) {
+    if (which === 'ryu') cfg.saveDirRyujinx = d
+    else cfg.saveDirEden = d
+  }
+}
 export async function saveSettings() {
-  await api.SaveConfig({ saveDir: cfg.saveDir })
+  await api.SaveConfig({ saveDirRyujinx: cfg.saveDirRyujinx, saveDirEden: cfg.saveDirEden, emu: cfg.emu, tls: cfg.tls })
   const det = await api.EnvDetect()
   envDetect.save = !!det.save
+  envDetect.saveRyu = !!det.saveRyu
+  envDetect.saveEden = !!det.saveEden
 }
 export async function openLogDir() { await api.OpenLogDir() }
 export async function exportDiag() { await api.ExportDiagnostics() }
@@ -239,9 +247,14 @@ export async function initCore() {
   steps.value.forEach(s => { s.state = s.name === '就绪' ? 'done' : 'idle' })
   ver.value = await api.Version()
   const c = await api.LoadConfig()
-  if (c.saveDir) cfg.saveDir = c.saveDir
+  if (c.saveDirRyujinx) cfg.saveDirRyujinx = c.saveDirRyujinx
+  if (c.saveDirEden) cfg.saveDirEden = c.saveDirEden
+  if (c.emu) cfg.emu = c.emu
+  cfg.tls = !!c.tls
   const det = await api.EnvDetect()
   envDetect.save = !!det.save
+  envDetect.saveRyu = !!det.saveRyu
+  envDetect.saveEden = !!det.saveEden
   const initial = await api.TailLog()
   pushLogs(initial)
   rt.EventsOn('log:append', pushLogs)

@@ -1,7 +1,10 @@
 export namespace main {
 	
 	export class Config {
-	    saveDir: string;
+	    saveDirRyujinx?: string;
+	    saveDirEden?: string;
+	    emu?: string;
+	    tls?: boolean;
 	
 	    static createFrom(source: any = {}) {
 	        return new Config(source);
@@ -9,7 +12,10 @@ export namespace main {
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.saveDir = source["saveDir"];
+	        this.saveDirRyujinx = source["saveDirRyujinx"];
+	        this.saveDirEden = source["saveDirEden"];
+	        this.emu = source["emu"];
+	        this.tls = source["tls"];
 	    }
 	}
 
