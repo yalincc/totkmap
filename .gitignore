@@ -85,6 +85,9 @@ live-python/
 release/
 app.rar
 
+# 证书体系跟发布包（TOTKNavi zip）走，不入库（本地 certs/ 完整保留）
+certs/
+
 # 一次性调试脚本（_ 前缀）
 **/_*.py
 
