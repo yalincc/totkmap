@@ -37,17 +37,19 @@ if (Test-Path $appDst) { Remove-Item $appDst -Force -Recurse }
 Copy-Item (Join-Path $root "xnavi\xnavi.exe")                  $rel -Force
 Copy-Item (Join-Path $root "xnavi-gui\build\bin\TOTKnavi.exe") $rel -Force
 
-# 4) certs (V2.1.1 phone anti-sleep Https): ship rootCA.pem + server.pem/key
-#    rootCA.pem = phone install once; server.pem/key = core --tls.
-#    Missing certs/ -> GUI Https option will report missing cert on core start.
+# 4) certs (V2.1.1 phone anti-sleep Https): ship rootCA.pem + gen-cert.ps1 + README.md
+#    NO private keys in the public package (server.pem/key are machine-specific,
+#    each machine runs certs/gen-cert.ps1 to mint its own).
+#    rootCA.pem = phone install once (10y). Missing certs/ -> Https option unavailable.
 $certsSrc = Join-Path $root "certs"
 $certsDst = Join-Path $rel "certs"
 if (Test-Path $certsSrc) {
   New-Item -ItemType Directory -Force $certsDst | Out-Null
-  Copy-Item (Join-Path $certsSrc "rootCA.pem") (Join-Path $certsDst "rootCA.pem") -Force
-  Copy-Item (Join-Path $certsSrc "server.pem") (Join-Path $certsDst "server.pem") -Force
-  Copy-Item (Join-Path $certsSrc "server.key") (Join-Path $certsDst "server.key") -Force
-  Write-Host "  certs/ rootCA.pem server.pem server.key"
+  Copy-Item (Join-Path $certsSrc "rootCA.pem")  (Join-Path $certsDst "rootCA.pem")  -Force
+  Copy-Item (Join-Path $certsSrc "gen-cert.ps1") (Join-Path $certsDst "gen-cert.ps1") -Force
+  Copy-Item (Join-Path $certsSrc "README.md")   (Join-Path $certsDst "README.md")   -Force
+  Copy-Item (Join-Path $certsSrc "serve-cert.ps1") (Join-Path $certsDst "serve-cert.ps1") -Force
+  Write-Host "  certs/ rootCA.pem gen-cert.ps1 serve-cert.ps1 README.md (no keys)"
 } else {
   Write-Host "  [warn] certs/ not found - Https mode unavailable (run certs/gen-cert.ps1)"
 }
