@@ -16,13 +16,53 @@
 (function () {
   'use strict';
 
-  /* V2.4.0 手机镜像：/botw/ 镜像页（手机/iPad 同 WiFi 访问，host=PC 局域网 IP）→ 同源 location.origin；
-   * 其余（PC 本机打开、在线站导航跳转 https://totk.yalin.site/?follow=1）→ 保持旧版写死
-   * http://127.0.0.1:8766 跨域连本机 xnavi。
+  /* V2.4.1 手机防息屏（双层 + 手势续命）：
+   * ① Screen Wake Lock —— secure context（localhost / https 隧道）标准 API；Android Chrome /
+   *    iOS 16.4+ Safari 生效，**无需用户手势**，页面加载即请求，回前台自动续（visibilitychange 可用）；
+   * ② 静音视频保亮降级 —— 局域网 http（非 secure context）时 wakeLock 不可用 → 播放 keep_awake.mp4。
+   *    ★ V2.4.1 修正：视频改 1px 可见（index.html），并借用户手势续播 —— Chrome Android 会挂起
+   *      display:none 的隐藏视频（V2.4.0 版约 5 分钟息屏的可疑主因），且部分浏览器要求手势内 play。
+   * 手势事件里再 enable 一次 = NoSleep.js 同款「必须在用户手势中激活」策略的兜底。 */
+  (function wakeLockKeeper() {
+    var vid = document.getElementById('keepAwake');
+    var sentinel = null;
+    function keepOn() {
+      try {
+        if ('wakeLock' in navigator && navigator.wakeLock) {
+          navigator.wakeLock.request('screen').then(function (s) {
+            sentinel = s;
+            s.addEventListener('release', function () { sentinel = null; });
+          }).catch(function () {});
+        } else if (vid) {
+          var p = vid.play();
+          if (p && p.catch) p.catch(function () {});
+        }
+      } catch (e) {}
+    }
+    function pauseVid() { if (vid) { try { vid.pause(); } catch (e) {} } }
+    /* 手势续命：每次 touch/click 都续播视频（防被浏览器掐）；sentinel 被释放时手势内补 request */
+    function onGesture() {
+      if (vid) { var p = vid.play(); if (p && p.catch) p.catch(function () {}); }
+      if (sentinel == null && 'wakeLock' in navigator) keepOn();
+    }
+    document.addEventListener('pointerdown', onGesture, true);
+    document.addEventListener('touchstart', onGesture, { passive: true, capture: true });
+    document.addEventListener('visibilitychange', function () {
+      if (document.visibilityState === 'visible') keepOn(); else pauseVid();
+    });
+    keepOn();
+  })();
+
+  /* V2.4.0 手机镜像：/botw/ 镜像页（手机/iPad 同 WiFi 访问，host=PC 局域网 IP，或 V2.4.1 https 隧道）
+   * → 同源 location.origin；其余（PC 本机打开、在线站导航跳转 https://totk.yalin.site/?follow=1）→
+   * 保持旧版写死 http://127.0.0.1:8766 跨域连本机 xnavi。
    * ★ 2026-10-09 真机实测回退：不能用「非本机即同源」判定 —— 导航跳转打开的是在线站，
    *   同源判定会把 API 指到在线站自身（无 /pos）→ 定位失效（红点错/不跟随）。
-   *   回归最初逻辑：只有 /botw/ 镜像页走同源，其余一律 127.0.0.1:8766。 */
-  var LIVE_API = (location.pathname.indexOf('/botw/') === 0 && location.protocol === 'http:')
+   *   回归最初逻辑：只有 /botw/ 镜像页走同源，其余一律 127.0.0.1:8766。
+   * ★ V2.4.1：放开 protocol 限制（去掉了 === 'http:'）—— /botw/ 前缀只有 xnavi 静态托管会挂
+   *   （在线站部署在根路径，不会命中），https 隧道（cloudflared）同样由 xnavi 托管 /botw/，
+   *   必须同源，否则隧道页定位连到 127.0.0.1 失效。 */
+  var LIVE_API = (location.pathname.indexOf('/botw/') === 0)
     ? location.origin : 'http://127.0.0.1:8766';
   var LS_FOLLOW = 'totkmap.live.follow.v1';
   var LS_AUTOLAYER = 'totkmap.live.autolayer.v1';

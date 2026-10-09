@@ -135,6 +135,8 @@
       var guide = {
         requires: arr(g.requires),
         start: stripBracket(g.start),
+        /* ★ V2.3-2/3：交付（任务物品/拍照/送人）——必须透传，否则卡片交付行永远不显示 */
+        deliver: stripBracket(g.deliver),
         note: stripBracket(g.note),
         reward: arr(g.reward),
         unlocks: arr(g.unlocks)
@@ -175,7 +177,7 @@
         hasRealName: raw.nameSrc !== 'key',   /* 界面据此提示「官方无中文名」 */
         nameSrc: raw.nameSrc,          /* rom=官方中文名；guide=社区起名；key=ROM 里就没中文 */
         cat: raw.cat || 'Other',
-        /* 界面分组：build_task_plan.py 已按 oldCat 优先算好 */
+        /* 界面分组：build_task_plan.py 已按 sort 派生 group（官方四档）算好 */
         group: raw.group || ROM_CAT_TO_GROUP[raw.cat] || '迷你挑战',
         /* kindCn = 「情节/迷你挑战」这套玩家视角的分类（M5新增，
            由 tools/add_kindcn.py 离线产出）。
@@ -228,6 +230,9 @@
 
         /* --- 杂项 --- */
         sort: raw.sort != null ? raw.sort : null,
+        /* V2.3.1：档内序号（卡片标题 #N / 地图 tooltip / 搜索 #N 共用一套） */
+        no: raw.no || 0,
+        groupTotal: raw.groupTotal || 0,
         npc: raw.npc || null,
         npcCn: raw.npcCn || null,
         loc: raw.loc || null,
@@ -357,6 +362,15 @@
       }
     }
     return out;
+  }
+
+  /* ★ V2.3.1：按档内序号查（搜索「#8」用）。
+   * 四档各自从 1 编号（主剧情 1~23 / 情节 1~60 / 神庙 1~31 / 迷你 1~139），
+   * 同序号最多 4 条（每档一条）；只有可上图任务参与编号。 */
+  function byNo(n) {
+    var nn = parseInt(n, 10);
+    if (!(nn >= 1)) return [];
+    return TASKS.filter(function (t) { return t.onMap && t.no === nn; });
   }
 
   /* ---------- M6：任务链 / 系列推导 ----------
@@ -657,6 +671,7 @@
     totalAllLayers: totalAllLayers,
     listBy: listBy,
     search: search,
+    byNo: byNo,               /* V2.3.1：搜索「#8」按档内序号直达 */
     clean: clean,
     /* M6：任务链 / 系列（卡片与地图上的「这是第几环」靠这三个） */
     chainOf: chainOf,

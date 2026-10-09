@@ -98,3 +98,24 @@ app.rar
 !**/README.md
 !CHANGELOG.md
 !**/CHANGELOG.md
+
+# GUI 编译产物与临时文件
+xnavi-gui/xnavi-gui.exe
+xnavi-gui/test/
+xnavi-gui/frontend/package.json.md5
+
+# xnavi 一次性脚本与调试残留
+xnavi/*.py
+xnavi/exe-scan.txt
+xnavi/icon-src.txt
+
+# live-eden 调试备份 / live-go 构建产物
+live-eden/backup/
+live-eden/engine/*.rewrite
+live-eden/engine/*.wip-*
+live-go/build-err.log
+live-go/dist/
+
+# 编辑器与验收截图（本地留底）
+.vscode/
+verify-*.png

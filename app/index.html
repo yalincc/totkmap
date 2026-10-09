@@ -32,6 +32,7 @@
     <button id="mirrorCopy" type="button" title="复制链接">复制</button>
   </div>
   <p id="mirrorHint" class="mp-hint">手机打开后：红点跟随 / 点图标导航 / 收集进度与电脑一致</p>
+  <p class="mp-hint mp-hint-sub">屏幕仍会自动变暗？手机「设置→显示→自动锁屏」调长，或开启开发者选项「保持唤醒」（充电时屏幕不休眠）</p>
 </div>
 
 <!-- ============ 左侧筛选面板 ============ -->
@@ -125,7 +126,7 @@
   </div>
 
   <footer class="side-foot">
-    <p class="foot-version">TOTKMAP V2.4.0 © 2026 yalincc</p>
+    <p class="foot-version">TOTKMAP V2.4.1 © 2026 yalincc</p>
     <p>GitHub <a href="https://github.com/yalincc/totkmap" target="_blank" rel="noopener">https://github.com/yalincc/totkmap</a></p>
   </footer>
 </aside>
@@ -354,9 +355,14 @@
 <script>window.TOTK_COMPENDIUM_URL = '';</script>
 <script src="js/save-parser.js"></script>
 <script src="js/app.js?v=272"></script>
-<script src="js/live.js?v=241"></script>
+<script src="js/live.js?v=242"></script>
 <script src="js/explore-auto.js?v=193"></script>
 <script src="js/mat-auto.js?v=194"></script>
+<!-- 手机防息屏降级（V2.4.1）：wakeLock 不可用（局域网 http / iOS 旧版）时播放静音视频保持屏幕常亮；
+     1.5KB 黑帧静音。★ V2.4.1 修正：1px 可见（position:fixed）而非 display:none ——
+     Chrome Android 会挂起完全隐藏的视频（V2.4.0 版约 5 分钟息屏的可疑主因），
+     NoSleep.js 同款规避；手势续播逻辑见 live.js wakeLockKeeper -->
+<video id="keepAwake" src="keep_awake.mp4" muted loop playsinline webkit-playsinline preload="auto" aria-hidden="true" style="position:fixed;right:0;bottom:0;width:1px;height:1px;opacity:0;pointer-events:none"></video>
 <!-- V2.0：龙轨迹图层（独立模块）。数据已改为 ROM 官方轨道 dragon_paths_rom.js，
      旧的社区近似数据 data/dragon_paths.js 不再加载（保留文件仅作对照） -->
 <script src="js/dragon-layer.js?v=200"></script>

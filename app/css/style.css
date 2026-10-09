@@ -109,6 +109,7 @@ html, body {
 }
 #mirrorPanel .mp-url-wrap button:hover { background: rgba(234,194,126,.28); }
 #mirrorPanel .mp-hint { font-size: 11px; color: #9aa3ad; margin: 8px 0 0; line-height: 1.5; }
+#mirrorPanel .mp-hint-sub { font-size: 10px; color: #6b7480; margin-top: 4px; }
 @media (max-width: 720px) {
   #mirrorPanel { right: 10px; bottom: 96px; }
 }

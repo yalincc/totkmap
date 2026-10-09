@@ -1,7 +1,9 @@
 {
   "$schema": "https://wails.io/schemas/config.v2.json",
   "name": "totknavi-gui",
-  "outputfilename": "TOTKNavi-Eden",
+  "outputfilename": "TOTKnavi",
+  "frontend:install": "npm install",
+  "frontend:build": "npm run build",
   "frontend:dist": "frontend/dist",
   "author": {
     "name": "yalincc",

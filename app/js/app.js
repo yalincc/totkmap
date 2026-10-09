@@ -14,7 +14,7 @@
   var AREA_SKY = window.TOTK_AREA_SKY || [];
   var AREA_DEPTHS = window.TOTK_AREA_DEPTHS || [];
 
-  var VERSION = 'TOTKMAP V2.1';
+  var VERSION = 'TOTKMAP V2.4.1';
   var LS_DONE = 'totkmap_done_v1';
   var LS_CUSTOM = 'totkmap_custom_v1';
   var LS_LAYER = 'totkmap_layer_v1';
@@ -700,6 +700,14 @@
     if (TD && TD.search) {
       taskHits = TD.search(q) || [];
     }
+    /* ★ V2.3.1：「#N」按档内序号直达——四档各自第 N 个任务
+       （卡片标题 / 地图 tooltip 上看到的「#8」直接搜过来就能跳）。
+       命中直接覆盖关键词结果；没命中则退回普通关键词搜索。 */
+    var hashNo = /^#\s*(\d{1,3})$/.exec(q.trim());
+    if (hashNo && TD && TD.byNo) {
+      var bn = TD.byNo(parseInt(hashNo[1], 10));
+      if (bn.length) taskHits = bn;
+    }
     var box = $('searchResult');
     if (!hits.length && !taskHits.length) {
       box.innerHTML = '<div class="sr-empty">未找到相关标点或任务</div>';
@@ -717,9 +725,12 @@
     });
     taskHits.forEach(function (t) {
       var tag = TD.layerName ? TD.layerName(t.layer) : '';
+      /* V2.3.1：结果带档内序号（「#8 马儿去向何方」），#N 搜索多档命中时可区分 */
+      var noPre = t.no ? '#' + t.no + ' ' : '';
       html += '<div class="sr-item" data-tk-search="' + esc(t.key || t.name) + '">' +
-        '<span class="sr-name">' + esc(t.name) + '</span>' +
-        '<span class="sr-cat sr-cat-task">任务' + (tag ? ' · ' + esc(tag) : '') + '</span>' +
+        '<span class="sr-name">' + esc(noPre + t.name) + '</span>' +
+        '<span class="sr-cat sr-cat-task">' + esc(t.group || '任务') +
+        (tag ? ' · ' + esc(tag) : '') + '</span>' +
         '</div>';
     });
     box.innerHTML = html;
@@ -1033,8 +1044,9 @@
     });
 
     /* 关联任务 → 打开任务卡片，并**把地图飞到那个任务的标点**。
-       ★ 任务标点在侧栏「任务」大类里，用户未必勾了「任务」分类，
-         所以 gotoMarker 里的自动勾选很关键。 */
+       ★ V2.3-5：任务定位统一走 TaskPanel.locate（切层+勾任务分类+重绘，
+         并带回真实 marker 让光圈能画），不再查旧 MARKERS 表——
+         旧表是 V2.1 攻略标点（cat=177/185，坐标未校对），已随旧分类下线。 */
     Array.prototype.forEach.call(box.querySelectorAll('[data-go-task]'), function (b) {
       b.addEventListener('click', function (e) {
         e.preventDefault();
@@ -1044,18 +1056,22 @@
         var t = TD && TD.byKey(tk);
         if (!t) { toast('找不到该任务'); return; }
         /* 先跳地图（内部会处理切层+勾分类），再开卡片 */
-        var pt = findTaskMarker(t);
-        if (pt) gotoMarker(pt);
+        if (window.TaskPanel && window.TaskPanel.locate) {
+          var loc = window.TaskPanel.locate(t, { preferLayer: t.layer });
+          if (loc) gotoMarker({ x: loc.gz, y: loc.gx, layer: loc.layer,
+                                marker: loc.marker, name: t.name });
+        } else {
+          var pt = findTaskMarker(t);
+          if (pt) gotoMarker(pt);
+        }
         window.TaskCard.open(t, e);
       });
     });
   }
 
-  /* 任务 → 地图标点。
-     * ★ 不按分类名找：任务点在地图上挂在「迷你挑战」「情节挑战」「支线故事」
-     *   这些**攻略分类**下（实测「拉姆达的财宝」标点 cat=185「迷你挑战」），
-     *   不叫「任务」——按名字匹配必然落空。
-     *   改为按「同图层 + 同坐标 + 同名」定位，这是最稳的判据。 */
+  /* 任务 → 地图标点（★ V2.3-5 起仅作**兜底**：正常路径是 TaskPanel.locate，
+    直接拿任务自己的坐标和 marker。此处保留旧 MARKERS 按名/坐标匹配，
+    只在任务面板未加载时用——旧标点坐标未校对，跳转可能不准）。 */
   function findTaskMarker(t) {
     if (!t || t.gx == null || t.gz == null) return null;
     var byName = MARKERS.filter(function (m) {

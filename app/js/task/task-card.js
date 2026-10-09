@@ -181,6 +181,8 @@
     var g = t.guide || {};
     var out = '';
     if (g.start) out += kv('如何接取', esc(g.start));
+    /* ★ V2.3-3：交付（任务物品/拍照/送人）——流程三段的关键点，紧跟接取之后 */
+    if (g.deliver) out += kv('交付', mdBold(esc(g.deliver)).replace(/\n/g, '<br>'));
     if (g.note) {
       var suspect = GUIDE_NOTE_SUSPECT[t.key];
       out += kv('注意事项', mdBold(esc(g.note)).replace(/\n/g, '<br>') +
@@ -363,7 +365,7 @@
         return '<button type="button" class="' + cls + '" data-tk-goto="' + esc(x.name) + '">' +
           '<span class="tk-se-n">' + esc(x.name) + '</span>' +
           '<span class="tk-se-m">' +
-            (x.key === t.key ? '当前' : (TD && TD.isDone(x.key) ? '已完成' : (x.locCn || x.catCn || ''))) +
+            (x.key === t.key ? '当前' : (TD && TD.isDone(x.key) ? '已完成' : (x.locCn || x.group || ''))) +
           '</span></button>';
       }).join('');
       out += '<div class="tk-chain tk-series">' +
@@ -497,9 +499,13 @@
     }
     h += '<button type="button" class="tk-close" id="tkClose" title="关闭">×</button>';
     h += '</div>';
-    /* 标题行右侧：完成勾 + 复制（复制挪到右上角，按钮小图标不抢正文注意力） */
+    /* 标题行右侧：完成勾 + 复制（复制挪到右上角，按钮小图标不抢正文注意力）。
+       ★ V2.3.1：标题带档内序号「#N」——按 ROM sort 的游戏内冒险笔记顺序，
+       与地图 tooltip、搜索「#8」同一套编号，方便对照游戏/攻略查找。 */
     h += '<div class="tk-title-row">';
-    h += '<h3 class="tk-name">' + esc(t.name) + '</h3>';
+    h += '<h3 class="tk-name">' +
+      (t.no ? '<span class="tk-no">#' + esc(t.no) + '</span> ' : '') +
+      esc(t.name) + '</h3>';
     h += '<div class="tk-title-acts">';
     h += doneBadgeHtml(t);
     h += '<button type="button" class="tk-icon-btn" id="tkCopy" title="复制任务名">复制</button>';
@@ -602,13 +608,14 @@
        放在最后是因为它比前置/攻略次要，不该把正文挤下去。 */
     h += armorHtml(t);
 
-    /* ---------- 底部操作：任务点 / 任务目标 / 标记完成 ----------
+    /* ---------- 底部操作：任务点 / 目标地点 / 标记完成 ----------
        ★ 2026-10-07 老大两轮调整按钮文案（原来叫「导航/追踪/显示流程」）：
          第一轮：导航→接任务、追踪+显示流程→任务点；
-         第二轮（**仅改文案，功能没动**）：接任务→**任务点**、任务点→**任务目标**。
+         第二轮（**仅改文案，功能没动**）：接任务→**任务点**、任务点→**任务目标**；
+         2026-10-08 老大再改：**任务目标→目标地点**（标的是各流程点，叫地点更准）。
          所以现在的对应关系是：
            - **任务点**（id=tkNav，功能=游戏内导航，走 xnavi）
-           - **任务目标**（id=tkTrack，功能=流程线追踪，在地图上标出各任务点）
+           - **目标地点**（id=tkTrack，功能=流程线追踪，在地图上标出各任务点）
          ★ 文案和功能对不上是老大定的（他按玩家心智命名，不是按实现命名），
            **别看到「任务点」按钮就去改成地图定位** —— 它干的是导航。
        无坐标时导航按钮置灰而不是隐藏：
@@ -623,7 +630,7 @@
     /* 追踪按钮文案跟随实际状态：追踪中显示「取消追踪」 */
     var tracking = global.TaskFlow && global.TaskFlow.isTracking(t.key);
     h += '<button type="button" class="btn act' + (tracking ? ' is-on' : '') +
-      '" id="tkTrack">' + (tracking ? '取消追踪' : '任务目标') + '</button>';
+      '" id="tkTrack">' + (tracking ? '取消追踪' : '目标地点') + '</button>';
     h += doneBtnHtml(t);
     h += '</div>';
 
@@ -641,12 +648,34 @@
     } else if (t.noPlaceReason) {
       /* 已知无地点：把原因说出来，玩家才不会反复找「接任务怎么用不了」 */
       flow = '<span class="tk-flow-hint">' + esc(t.noPlaceReason) + '</span>';
+    } else if (t.gx != null && t.gz != null && t.onMap) {
+      /* ★ V2.3-5：有主坐标但没流程点的任务（如 GetMasterSword 高度不编造、
+         只有主坐标）——它**有可定位地点**，别再说「没有可定位的地点」误导。 */
+      flow = '<span class="tk-flow-hint">这个任务有 1 个地点（无流程线）</span>';
     } else {
       flow = '<span class="tk-flow-hint">这个任务没有可定位的地点</span>';
     }
     h += '<div class="tk-flow-row">' + flow + '</div>';
 
     return h;
+  }
+
+  /* ★★★ V2.3-3：卡片渲染注册表（弹性扩展口，2026-10-08）
+   * -------------------------------------------------------------
+   * 默认只注册「通用卡片」：所有任务用 buildHtml 渲染，字段有则显示无则隐藏。
+   * 以后要加新的任务卡类型（例如觉得「神庙显现」「系列进度」值得特殊展示）：
+   *   往 CARD_RENDERERS 里 push 一条 { match, render }，先匹配先渲染。
+   *   匹配条件自由：group / 某字段存在 / 档案显式 cardType（产物 o.cardType）。
+   * 都不命中 → 兜底通用卡片。这样加新类型不动通用卡、无回归。
+   */
+  var CARD_RENDERERS = [];
+
+  function renderCard(t) {
+    for (var i = 0; i < CARD_RENDERERS.length; i++) {
+      var r = CARD_RENDERERS[i];
+      if (r.match && r.match(t)) return r.render(t);
+    }
+    return buildHtml(t);
   }
 
   /* ---------- 拖动 ----------
@@ -766,7 +795,7 @@
     var body = $('taskCardBody');
     if (!card || !body) return;
 
-    body.innerHTML = buildHtml(t);
+    body.innerHTML = renderCard(t);
     card.classList.remove('hidden');
 
     /* 定位规则：
@@ -814,7 +843,7 @@
     var body = $('taskCardBody');
     var card = $('taskCard');
     if (!body || !card) return;
-    body.innerHTML = buildHtml(t);
+    body.innerHTML = renderCard(t);
     /* 滚回顶部：内容高度变了还停在原来的滚动位置会显得错乱 */
     body.scrollTop = 0;
     bind(t);
@@ -858,7 +887,7 @@
       global.TaskFlow.toggleTrack();
       /* 只改文案，不整卡重绘 —— 重绘会让用户滚动位置丢失 */
       var on = global.TaskFlow.isTracking(t.key);
-      tr.textContent = on ? '取消追踪' : '任务目标';
+      tr.textContent = on ? '取消追踪' : '目标地点';
       tr.classList.toggle('is-on', !!on);
     });
 
@@ -1015,8 +1044,10 @@
     close: close,
     current: function () { return cur; },
     /* 导出 buildHtml 供验收脚本全量渲染检查（undefined/NaN 泄漏）。
-       正常业务不调它，但留着能随时在浏览器里验证渲染结果。 */
-    buildHtml: buildHtml
+       正常业务不调它，但留着能随时在浏览器里验证渲染结果。
+       renderCard 是 V2.3-3 注册表分发入口（open 走它），也导出供自定义渲染器调试。 */
+    buildHtml: buildHtml,
+    renderCard: renderCard
   };
 
   /* ---------- 订阅完成态变化 ----------
@@ -1108,6 +1139,8 @@
     '.tk-name {',
     '  font-size:17px; font-weight:600; line-height:1.35;',
     '  color:#f0f1f3; margin-bottom:10px; }',
+    '/* 档内序号（V2.3.1）：金色小字，与地图点徽标同色系 */',
+    '.tk-name .tk-no { color:#f5c96b; font-weight:700; font-size:15px; }',
 
     '/* 关键信息（NPC 标签 + 坐标行并排，2026-10-07 改 flex） */',
     '.tk-meta { margin-bottom:4px; display:flex; align-items:baseline; gap:8px; flex-wrap:wrap; }',

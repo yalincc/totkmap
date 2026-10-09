@@ -7,7 +7,7 @@
         <span class="w-2.5 h-2.5 rounded-full" :class="syncDot"></span>
         <span class="text-white text-sm font-bold tracking-wide">TOTKNavi 定位导航</span>
         <span class="text-[10px] font-mono text-sky-300 bg-blue-500/10 border border-blue-500/40 rounded px-1.5 py-0.5">v{{ ver.replace('v','') }}</span>
-        <span class="text-[11px] text-slate-500 ml-1.5 pl-2.5 border-l border-slate-800">Eden ➔ totk.yalin.site</span>
+        <span class="text-[11px] text-slate-500 ml-1.5 pl-2.5 border-l border-slate-800">{{ emuLabel }} ➔ totk.yalin.site</span>
       </div>
       <div class="flex items-center gap-1 ml-auto shrink-0" style="--wails-draggable:no-drag;">
         <span class="text-[11px] font-mono mr-2" :class="syncClass">{{ syncText }}</span>
@@ -38,6 +38,12 @@
         </template>
       </div>
       <div class="flex items-center gap-2.5 shrink-0">
+        <select v-model="cfg.emu" @change="onEmuChange" title="选择模拟器（改后需重启定位）"
+          class="bg-[#0d1117] border border-slate-700 rounded-lg px-2 py-2 text-xs font-medium text-slate-300 hover:border-slate-500 focus:outline-none transition">
+          <option value="auto">🔄 自动探测</option>
+          <option value="ryujinx">Ryujinx</option>
+          <option value="eden">Eden</option>
+        </select>
         <button @click="openMap" class="w-[136px] py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-sky-400 text-xs font-medium border border-slate-700 flex items-center justify-center gap-1.5 transition">
           🧭 打开网页地图
         </button>
@@ -152,12 +158,26 @@ import { findRegion } from '../data/regions'
 import {
   pos, steps, stepClass, stepDot, isLocating, toggleLocating, progressData,
   layerName, sourceLabel, openMap, logs,
-  ver, syncText, syncClass, syncDot, rt, submitCoords, coordsState
+  ver, syncText, syncClass, syncDot, rt, submitCoords, coordsState, cfg, saveSettings
 } from '../composables/useCore'
 
 function minWin() { rt.WindowMinimise() }
 // Wails 无边框(Frameless)下 WindowClose() 不触发关闭，改用 Quit() 强制退出
 function closeWin() { rt.Quit() }
+
+// 模拟器选择（V2.0.0）：改动即保存；core 运行中则提示需重启定位生效
+const emuLabel = computed(() => {
+  const e = cfg.emu || 'auto'
+  if (e === 'ryujinx') return 'Ryujinx'
+  if (e === 'eden') return 'Eden'
+  return '自动探测'
+})
+async function onEmuChange() {
+  await saveSettings()
+  if (isLocating.value) {
+    logs.value.push({ time: new Date().toTimeString().slice(0, 8), text: '⚠ 模拟器已切换：请停止后重新开始定位生效', level: 'warn', color: 'text-amber-400', levelColor: 'text-amber-500' })
+  }
+}
 
 // 全量 20 类（与 core progressCounts 对齐）
 const allCategories = [

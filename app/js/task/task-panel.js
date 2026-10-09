@@ -390,8 +390,13 @@
          *   （节点缩小一点、给任务点留白也解决不了——它们中心重合。） */
         zIndexOffset: 900
       });
-      /* 已完成的加✓ 前缀，与探索侧 tooltip 口径一致 */
-      m.bindTooltip((isDone ? '✓ ' : '') + t.name, {
+      /* 已完成加✓ 前缀，与探索侧 tooltip 口径一致。
+         ★ V2.3.3：tooltip 简化为「#8 迷你挑战 未知的天空巨人」——
+         档内序号 + 档名 + 任务名（不再显示序号/总数）。 */
+      var tip = (isDone ? '✓ ' : '') +
+        (t.no ? '#' + t.no + ' ' + esc(t.group || '') + ' ' : '') +
+        t.name;
+      m.bindTooltip(tip, {
         direction: 'top', offset: [0, -8],
         className: 'mk-label tk-tip' + (isDone ? ' done-label' : '')
       });
