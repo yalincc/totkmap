@@ -212,7 +212,10 @@
         /* --- 流程 --- */
         tier: raw.tier || 'L3',        /* L1=多点可画线 / L2=单点 / L3=无点 */
         flowPts: (raw.flowPts || []).map(function (p) {
-          return { gx: num(p.gx), gy: num(p.gy), gz: num(p.gz) };
+          var o = { gx: num(p.gx), gy: num(p.gy), gz: num(p.gz) };
+          /* ★ V2.5.0：保留档案 _note 地点名（卡片流程点显示用） */
+          if (p.note) o.note = p.note;
+          return o;
         }),
         steps: stepsUI,                /* 展示用（已清洗） */
         stepsUI: stepsUI,              /* 同上，别名：卡片读这个名 */

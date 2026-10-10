@@ -86,10 +86,13 @@
       return true;
     }).map(function (r) {
       if (r.linkable && r.reqName) {
+        /* V2.5.0：链接文本带档内序号 →【#N 任务名】（老大定的） */
+        var bk = r.key ? (D.byKey(r.key) || null) : null;
+        var label = (bk && bk.no) ? '#' + bk.no + ' ' + esc(r.reqName) : esc(r.reqName);
         return '<li><a href="#" class="tk-link" data-tk-goto="' + esc(r.reqName) + '"' +
           (global.TaskDone && global.TaskDone.isDone(r.key)
             ? ' data-tk-done="1" title="（已完成）"' : '') +
-          '>' + esc(r.reqName) + '</a></li>';
+          '>' + label + '</a></li>';
       }
       /* flag 型：显示条件说明但不链接 */
       /* ★ selfRef 特殊处理（2026-10-07，台账 P1）：
@@ -109,7 +112,10 @@
       return '<li class="tk-flag tk-req' + (r.linkable && r.reqName ? ' tk-req-link' : '') +
         '">' + esc(r.reqName || r.key || '未命名条件') + '</li>';
     });
-    if (!items.length) return '';
+    if (!items.length) {
+      /* V2.5.0：无前置也显示该栏，用「—」（老大定的，不再整栏隐藏） */
+      return section('前置条件', '<ul class="tk-list"><li class="tk-dash">—</li></ul>');
+    }
     return section('前置条件', '<ul class="tk-list">' + items.join('') + '</ul>');
   }
 
@@ -171,32 +177,39 @@
    * ★ 以后校对出新的错误，往这个表里加一行即可（key → 一句话说明）。
    *   加之前先确认 ROM 官方步骤（stepsUI）与之矛盾，别凭感觉标。 */
   var GUIDE_NOTE_SUSPECT = {
-    NowInTheVillageOfLurelin:
-      '攻略说「消灭沃托里村的海盗」，但官方步骤是「打听安危 + 向监视堡垒转达」。' +
-      '「消灭海盗」是后续任务的内容，照做会白打一场。'
+    /* 2026-10-11 已修：NowInTheVillageOfLurelin 的 note 已按 ROM 官方步骤重写（打听安危+转达），
+       不再需要警告，从白名单移除。今后校对出新错误按原注释规则加回。 */
   };
 
   /* 攻略段（社区整理，明确标注来源） */
   function guideHtml(t) {
     var g = t.guide || {};
     var out = '';
-    if (g.start) out += kv('如何接取', esc(g.start));
-    /* ★ V2.3-3：交付（任务物品/拍照/送人）——流程三段的关键点，紧跟接取之后 */
-    if (g.deliver) out += kv('交付', mdBold(esc(g.deliver)).replace(/\n/g, '<br>'));
+    var npc = t.npcCn || '';
+    /* 接取（★ V2.5.0 v4 定稿：模板化，老大定的）：
+       对话型（有 NPC）→「对话+NPC名+（地点）」；自动触发（无 NPC）→ 保留档案原文 */
+    if (g.start || npc) {
+      var start = npc
+        ? '对话' + esc(npc) + (t.locCn ? '（' + esc(t.locCn) + '）' : '')
+        : esc(g.start);
+      out += kv('接取', start);
+    }
+    /* 注意（V2.5.0：note 提到交付之前——老大定的「接取→注意→交付→奖励」顺序） */
     if (g.note) {
       var suspect = GUIDE_NOTE_SUSPECT[t.key];
-      out += kv('注意事项', mdBold(esc(g.note)).replace(/\n/g, '<br>') +
+      out += kv('注意', mdBold(esc(g.note)).replace(/\n/g, '<br>') +
         (suspect
           ? '<div class="tk-guide-warn" title="游戏内实际校对发现这条攻略与官方步骤矛盾">' +
             '<b>⚠ 此条攻略可能有误</b>' + esc(suspect) +
             '<span class="tk-guide-fix">以官方步骤为准 →</span></div>'
           : ''));
     }
+    if (g.deliver) out += kv('交付', mdBold(esc(g.deliver)).replace(/\n/g, '<br>'));
     if (g.reward && g.reward.length) {
-      out += kv('任务奖励', g.reward.map(function (r) { return esc(r); }).join('、'));
+      out += kv('奖励', g.reward.map(function (r) { return esc(r); }).join('、'));
     }
     if (!out) return '';
-    return section('攻略要点<span class="tk-src">社区整理</span>', out);
+    return section('任务要点', out);
   }
 
   /* ---------- 官方分步 → 「任务原文」折叠区 ----------
@@ -250,8 +263,11 @@
 
   /* 解锁的后续任务 */
   function unlockHtml(t) {
-    if (!t.unlockList || !t.unlockList.length) return '';
     var D = global.TaskData;
+    if (!t.unlockList || !t.unlockList.length) {
+      /* V2.5.0：无后续也显示该栏，用「—」（老大定的，不再整栏隐藏） */
+      return section('后续解锁', '<ul class="tk-list"><li class="tk-dash">—</li></ul>');
+    }
     var chain = D && D.chainOf ? D.chainOf(t.key) : null;
     var inChain = {};
     if (chain) chain.list.forEach(function (x) { inChain[x.key] = 1; });
@@ -265,10 +281,13 @@
     t.unlockList.forEach(function (r) {
       if (r.key && inChain[r.key]) return;          /* 同链后继，链格已显示 */
       if (r.linkable && r.reqName) {
+        /* V2.5.0：链接文本带档内序号 →【#N 任务名】（老大定的） */
+        var bk = r.key ? (D.byKey(r.key) || null) : null;
+        var label = (bk && bk.no) ? '#' + bk.no + ' ' + esc(r.reqName) : esc(r.reqName);
         links.push('<li><a href="#" class="tk-link" data-tk-goto="' + esc(r.reqName) + '"' +
           (global.TaskDone && global.TaskDone.isDone(r.key)
             ? ' data-tk-done="1" title="（已完成）"' : '') +
-          '>' + esc(r.reqName) + '</a></li>');
+          '>' + label + '</a></li>');
       } else {
         extraCnt++;
       }
@@ -278,7 +297,9 @@
         '<span class="tk-none2">（不在任务板块）</span></li>');
     }
     var items = links;
-    if (!items.length) return '';
+    if (!items.length) {
+      return section('后续解锁', '<ul class="tk-list"><li class="tk-dash">—</li></ul>');
+    }
     return section('后续解锁', '<ul class="tk-list">' + items.join('') + '</ul>');
   }
 
@@ -499,16 +520,15 @@
     }
     h += '<button type="button" class="tk-close" id="tkClose" title="关闭">×</button>';
     h += '</div>';
-    /* 标题行右侧：完成勾 + 复制（复制挪到右上角，按钮小图标不抢正文注意力）。
-       ★ V2.3.1：标题带档内序号「#N」——按 ROM sort 的游戏内冒险笔记顺序，
-       与地图 tooltip、搜索「#8」同一套编号，方便对照游戏/攻略查找。 */
+    /* 标题行（★ V2.5.0 v4 定稿，老大确认）：金底序号徽标 + 任务名 + 复制 + 上一个/下一个。
+       完成勾不再放标题区（完成状态由底部「标记完成/已完成」按钮表达）。 */
     h += '<div class="tk-title-row">';
-    h += '<h3 class="tk-name">' +
-      (t.no ? '<span class="tk-no">#' + esc(t.no) + '</span> ' : '') +
-      esc(t.name) + '</h3>';
+    h += '<span class="tk-no-badge">' + (t.no ? '#' + esc(t.no) : '') + '</span>';
+    h += '<h3 class="tk-name">' + esc(t.name) + '</h3>';
     h += '<div class="tk-title-acts">';
-    h += doneBadgeHtml(t);
-    h += '<button type="button" class="tk-icon-btn" id="tkCopy" title="复制任务名">复制</button>';
+    h += '<button type="button" class="tk-icon-btn tk-nav" id="tkCopy" title="复制任务名">⧉</button>';
+    h += '<button type="button" class="tk-icon-btn tk-nav" id="tkPrev" title="上一个（本档序号前一个）">‹</button>';
+    h += '<button type="button" class="tk-icon-btn tk-nav" id="tkNext" title="下一个（本档序号后一个）">›</button>';
     h += '</div>';
     h += '</div>';
 
@@ -522,57 +542,20 @@
      *     顶部再来一次是重复（截图里两处都显示"1 步"）
      * 顶部徽章已经承担了分类展示，分类信息不会丢。 */
     h += '<div class="tk-meta">';
-    /* NPC：做成 meta 区的一个小标签，**不占独立一行**（2026-10-07 老大要求）。
-       原来「相关 NPC  陀特茨」占一整行，和下面「如何接取」里的 NPC 名重复、
-       还会自动换行把卡片撑长。现在缩成 `NPC 陀特茨` 跟在坐标后面。 */
-    if (t.npcCn) h += '<span class="tk-mtag">NPC ' + esc(t.npcCn) + '</span>';
+    /* 坐标（★ V2.5.0 v4 定稿）：金色链接式，hover 单下划线，点击地图定位；
+       统一格式 (X，Z，高) 全角括号+中文逗号，无文字前缀；无高度省略第三位。
+       NPC 名不再单独显示（已并入「任务要点 · 接取」的对话模板）。 */
     if (t.gx != null && t.gz != null) {
-      /* ---------- 坐标：换算成游戏 UI 口径（2026-10-07，台账 P9.5）----------
-       * 数据里的原始值   →   游戏 UI 显示值
-       *   gx (X 东西)     →  X   = gx            （东为正，一致）
-       *   gz (Z 南北)     →  Z   = -gz           （游戏北为正，我们北为负）
-       *   gy (ROM 世界 Y) →  高度 = gy - 106      （系统性基准差）
-       *
-       * 依据：老大在游戏内实测两个独立样本，与我们数据对照
-       *   监视堡垒井  UI `-0293 0137 0025` ← 鸟望台 gx=-298.25 / -gz=135.6
-       *   一击入魂    UI `3086 1682 0201`  ← gx=3085.42 / -gz=1670.64 / gy-106=201.47
-       * X/Z 吻合到 1.4~5.3米，高度吻合到 0.47米。
-       *
-       * ★ 为什么之前写错：把「Z 没取反」+「第 3 位放的是南北不是高度」混在一起，
-       *   卡片显示成 `X gx · Z gz · 高 gy` —— 玩家拿去游戏里对照，
-       *   第 2/3 位都错位约 100 米。
-       *
-       * ⚠ 千万不要去动 live.js 的「高 gz」—— 那边是对的：
-       *   live-python 的 decode_pos 里 gx, gz, gy = v0, v1-105, -v2
-       *   返回的 gz 才是高度（已减 ELEV_BIAS=105，本就是游戏 UI 口径），
-       *   layer_of() 也用 gz 判层（<0 地底、>=900 天空）。
-       *   **live-python 的 gy/gz 与任务数据语义相反**，别拿任务数据的口径去套它。*/
-      var co = 'X ' + gameRound(t.gx) + ' · Z ' + gameRound(-t.gz);
-      /* gy 缺失就明说「高度未知」，不猜 */
-      co += t.hasHeight && t.gy != null
-        ? ' · 高度 ' + gameRound(t.gy - ELEV_UI_OFFSET)
-        : ' · 高度未知';
-      h += '<div class="tk-mrow" title="已换算成游戏 UI 口径：X=gx、Z=-gz、高度=gy-' +
-        ELEV_UI_OFFSET + '（公式由游戏内实测定稿，误差 <6 米）">' +
-        '<span class="tk-mk">坐标</span><span class="tk-mv">' + esc(co) +
-        /* ---------- V2.1（2026-10-07）：坐标旁的定位按钮 ----------
-         * 需求：点它回到**这个任务图标在地图上的位置**（只动网页地图，不传送）。
-         * 视觉与探索卡片（#ecLocate）完全一致，同一个定位图钉 SVG + .ec-locate 样式。
-         *
-         * 为什么不能直接用 app.js 的 gotoMarker：任务点画在 task-panel.js 的
-         * 独立图层里，分类勾选走 userOn[layer][group]，不在 state.selected 中。
-         * 所以先让 TaskPanel.locate() 把层+分类确保勾上并重绘，拿到该层内坐标，
-         * 再交给 gotoMarker 做「flyTo + 光圈」。
-         * ★ 跨层任务用 pointInLayer 挑当前层那个点，不是永远用主坐标。 */
-        (t.onMap ? '<button type="button" class="ec-locate tk-locate"' +
-          ' data-tk-locate="1" title="回到该任务在地图上的位置"' +
-          ' aria-label="定位到地图">' +
-          '<svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true">' +
-          '<path d="M8 1.6c-2.5 0-4.5 2-4.5 4.5 0 3.4 4.5 8.3 4.5 8.3s4.5-4.9 4.5-8.3c0-2.5-2-4.5-4.5-4.5z"' +
-          ' fill="none" stroke="currentColor" stroke-width="1.3"/>' +
-          '<circle cx="8" cy="6" r="1.7" fill="currentColor"/></svg></button>' : '') +
-        '</span></div>';
+      var co = '(' + gameRound(t.gx) + '，' + gameRound(-t.gz);
+      if (t.hasHeight && t.gy != null) co += '，' + gameRound(t.gy - ELEV_UI_OFFSET);
+      co += ')';
+      h += '<span class="tk-mk">坐标</span>' +
+        '<span class="co-link"' + (t.onMap ? ' data-tk-locate="1"' : '') +
+        ' title="点击定位到该坐标">' + esc(co) + '</span>';
+    } else {
+      h += '<span class="tk-mk">坐标</span><span class="co-none">(—)</span>';
     }
+    h += '</div>';
     /* 完成进度：阶段名 + 「第 n/total 步」，让存档进度可见 */
     var dst = doneState(t);
     if (dst.src === 'save' && dst.stage) {
@@ -603,7 +586,7 @@
     h += reqsHtml(t);
     h += unlockHtml(t);
     h += guideHtml(t);
-    h += stepsSectionHtml(t);
+    /* ★ V2.5.0：任务原文（官方分步）已取消——老大定的，后期接图鉴网站再恢复 */
     /* 防具区紧跟「完成后解锁」：两者都是「做完能得到什么」，逻辑相邻。
        放在最后是因为它比前置/攻略次要，不该把正文挤下去。 */
     h += armorHtml(t);
@@ -629,28 +612,37 @@
       '>任务点</button>';
     /* 追踪按钮文案跟随实际状态：追踪中显示「取消追踪」 */
     var tracking = global.TaskFlow && global.TaskFlow.isTracking(t.key);
-    h += '<button type="button" class="btn act' + (tracking ? ' is-on' : '') +
+    h += '<button type="button" class="btn act tk-ghost' + (tracking ? ' is-on' : '') +
       '" id="tkTrack">' + (tracking ? '取消追踪' : '目标地点') + '</button>';
     h += doneBtnHtml(t);
     h += '</div>';
 
-    /* 流程线：L1 才是多点任务（可连线），L2/L3 直接说明为什么画不出。
-       档位术语（L1/L2/L3）是内部约定，不给玩家看。
-       ★ 2026-10-07：原来这里是「显示流程」按钮 + 文字提示两个元素，
-         老大要求**只保留文字提示**（按钮已并入上面的「任务点」）。 */
+    /* 流程地点（★ V2.5.0 v4 定稿）：有 flowPts 就渲染可点击的流程点网格——
+       纯黄数字 ①②③ 无底色 + 地点名 + hover 浮出坐标，点击定位到该点；
+       无流程点时才回退文字提示。 */
     var flow = '';
-    if (t.tier === 'L1') {
-      flow = '<span class="tk-flow-hint" id="tkFlowHint">' +
-        '共 ' + t.flowPts.length + ' 个地点' +
-        (t.flowPts.length > 1 ? '，可连成流程线' : '') + '</span>';
-    } else if (t.tier === 'L2') {
-      flow = '<span class="tk-flow-hint">这个任务只有 1 个地点，无需连线</span>';
+    var fpts = (t.flowPts || []).filter(function (q) {
+      return q && q.gx != null && q.gz != null;
+    });
+    if (fpts.length) {
+      var num = ['①','②','③','④','⑤','⑥','⑦','⑧','⑨','⑩','⑪','⑫','⑬','⑭','⑮','⑯','⑰','⑱','⑲','⑳'];
+      var ptsHtml = fpts.map(function (q, i) {
+        var nm = q.note || (i + 1) + ' 号点';
+        var tip = '(' + gameRound(q.gx) + '，' + gameRound(-q.gz) +
+          (q.gy != null ? '，' + gameRound(q.gy - ELEV_UI_OFFSET) : '') + ')';
+        return '<span class="fp" data-tk-pt="' + i + '" title="点击定位">' +
+          '<span class="num">' + (num[i] || (i + 1)) + '</span>' +
+          '<span class="txt">' + esc(nm) + '</span>' +
+          '<span class="tip"><span class="xy">' + esc(tip) + '</span></span></span>';
+      }).join('');
+      flow = '<div class="tk-flow-t">流程地点' +
+        (fpts.length > 1 ? ' · ' + fpts.length + ' 处' : '') + '</div>' +
+        '<div class="flow-pts">' + ptsHtml + '</div>';
     } else if (t.noPlaceReason) {
       /* 已知无地点：把原因说出来，玩家才不会反复找「接任务怎么用不了」 */
       flow = '<span class="tk-flow-hint">' + esc(t.noPlaceReason) + '</span>';
     } else if (t.gx != null && t.gz != null && t.onMap) {
-      /* ★ V2.3-5：有主坐标但没流程点的任务（如 GetMasterSword 高度不编造、
-         只有主坐标）——它**有可定位地点**，别再说「没有可定位的地点」误导。 */
+      /* 有主坐标但没流程点的任务：有可定位地点，别误导说没有 */
       flow = '<span class="tk-flow-hint">这个任务有 1 个地点（无流程线）</span>';
     } else {
       flow = '<span class="tk-flow-hint">这个任务没有可定位的地点</span>';
@@ -899,6 +891,47 @@
       toast('已复制：' + t.name);
     });
 
+    /* 上一个 / 下一个（★ V2.5.0 v4 定稿：按本档内序号 ±1 跳转，卡片保持原位） */
+    function navBy(delta) {
+      var D = global.TaskData;
+      if (!D || !D.tasks) { toast('任务数据未就绪'); return; }
+      var list = D.tasks.filter(function (x) {
+        return x.onMap && x.group === t.group && x.no != null;
+      }).sort(function (a, b) { return a.no - b.no; });
+      var i = list.findIndex(function (x) { return x.key === t.key; });
+      if (i < 0) return;
+      var j = i + delta;
+      if (j < 0 || j >= list.length) {
+        toast(delta < 0 ? '已是本档第一个任务' : '已是本档最后一个任务');
+        return;
+      }
+      open(list[j], { target: card });
+    }
+    var pv = $('tkPrev');
+    if (pv) pv.addEventListener('click', function (e) { stopAll(e); navBy(-1); });
+    var nx = $('tkNext');
+    if (nx) nx.addEventListener('click', function (e) { stopAll(e); navBy(1); });
+
+    /* 流程点定位（★ V2.5.0 v4：点击 ①②③ 数字定位到对应流程点坐标） */
+    Array.prototype.forEach.call(card.querySelectorAll('[data-tk-pt]'), function (el) {
+      el.addEventListener('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var i = parseInt(el.getAttribute('data-tk-pt'), 10);
+        var q = (t.flowPts || [])[i];
+        if (!q || q.gx == null || q.gz == null) { toast('该流程点没有坐标'); return; }
+        if (global.TOTK && global.TOTK.gotoMarker) {
+          /* Leaflet 坐标 (latlng=Z, lng=X)：x=q.gz、y=q.gx，同现有定位逻辑 */
+          global.TOTK.gotoMarker({ x: q.gz, y: q.gx, cat: null,
+            name: t.name + ' · 点' + (i + 1) });
+        } else if (global.TOTK && global.TOTK.map) {
+          global.TOTK.map.setView([q.gz, q.gx], Math.max(global.TOTK.map.getZoom(), 6));
+        } else {
+          toast('地图尚未就绪');
+        }
+      });
+    });
+
     /* 标记完成 / 取消完成。
      * 存档态的任务不允许取消（那是游戏真实进度，强行改会和下次加载存档打架），
      * 所以这个按钮在存档态下是 disabled 的。 */
@@ -1137,26 +1170,35 @@
     '.tk-close:hover { background:rgba(255,255,255,.1); color:#fff; }',
 
     '.tk-name {',
-    '  font-size:17px; font-weight:600; line-height:1.35;',
-    '  color:#f0f1f3; margin-bottom:10px; }',
-    '/* 档内序号（V2.3.1）：金色小字，与地图点徽标同色系 */',
-    '.tk-name .tk-no { color:#f5c96b; font-weight:700; font-size:15px; }',
+    '  font-size:16px; font-weight:600; line-height:1.4;',
+    '  color:#f0f1f3; margin-bottom:0; min-width:0; flex:1; }',
+    '/* 档内序号徽标（★ V2.5.0 v4 定稿）：金底黑字，不再用金色小字 */',
+    '.tk-no-badge {',
+    '  background:#c9a227; color:#14181c; font-weight:bold; font-size:12px;',
+    '  padding:2px 7px; border-radius:4px; flex:0 0 auto; margin-top:1px; }',
 
     '/* 关键信息（NPC 标签 + 坐标行并排，2026-10-07 改 flex） */',
     '.tk-meta { margin-bottom:4px; display:flex; align-items:baseline; gap:8px; flex-wrap:wrap; }',
     '.tk-mrow { display:flex; gap:8px; font-size:12.5px; line-height:1.7; }',
     '.tk-mk { color:rgba(255,255,255,.42); flex:0 0 52px; }',
     '.tk-mv { color:rgba(255,255,255,.85); flex:1; }',
+    '/* 坐标链接（★ V2.5.0 v4）：金色链接式，hover 单下划线，点击定位 */',
+    '.co-link { color:#eac27e; font-weight:600; font-size:13px; cursor:pointer;',
+    '  text-decoration:none; letter-spacing:.3px; }',
+    '.co-link:hover { text-decoration:underline; }',
+    '.co-none { color:rgba(255,255,255,.45); font-weight:600; }',
+    '/* 无前置/无后续的「—」 */',
+    '.tk-dash { color:rgba(255,255,255,.5); font-weight:bold; }',
     /* 坐标旁的定位按钮：与探索卡片 #ecLocate 同一套视觉，这里只补布局对齐
        （.ec-locate 是给固定宽度的 flex 容器设计的，任务卡里要贴着坐标文字）。*/
     '.tk-locate { margin-left:6px; vertical-align:middle; flex:0 0 auto; }',
     '.tk-mv-sub { color:rgba(255,255,255,.4); font-size:11.5px; }',
 
-    '/* 分区 */',
-    '.tk-sec { margin-top:12px; padding-top:10px; border-top:1px solid rgba(255,255,255,.07); }',
+    '/* 分区（★ V2.5.0：间距收 1-2px、分割线保留、小标题暗金不抢注意力） */',
+    '.tk-sec { margin-top:9px; padding-top:9px; border-top:1px solid rgba(255,255,255,.07); }',
     '.tk-sec-t {',
-    '  font-size:11.5px; color:rgba(255,255,255,.42);',
-    '  margin-bottom:6px; display:flex; align-items:center; gap:6px; }',
+    '  font-size:11.5px; color:#9a8a6c;',
+    '  margin-bottom:5px; display:flex; align-items:center; gap:6px; }',
     '.tk-src {',
     '  font-size:10px; color:rgba(255,255,255,.28);',
     '  border:1px solid rgba(255,255,255,.12); border-radius:3px; padding:0 4px; }',
@@ -1367,6 +1409,16 @@
        40px 是移动端公认的合格下限）。实测 34px 在手机上会误触。
        用 min-height 而不是 height：文案变两行时不至于把字挤出去。 */
     '.tk-actions .btn { flex:1; min-height:40px; }',
+    /* ★ V2.5.0 v4：底部按钮统一地图金色主题——主按钮金色渐变，
+       目标地点（追踪）用描边金幽灵；追踪开启态保留亮金高亮 */
+    '.tk-actions .btn.act {',
+    '  border:1px solid #c9a227; background:linear-gradient(180deg,#e0b64e,#c9a227);',
+    '  color:#14181c; font-weight:bold; }',
+    '.tk-actions .btn.act:hover { filter:brightness(1.08); }',
+    '.tk-actions .btn.act.tk-ghost {',
+    '  background:rgba(201,162,39,.12); color:#eac27e;',
+    '  border:1px solid rgba(201,162,39,.55); font-weight:bold; }',
+    '.tk-actions .btn.act.tk-ghost:hover { background:rgba(201,162,39,.22); filter:none; }',
 
     '/* --- 标题行：左标题 + 右操作 --- */',
     '.tk-title-row {',
@@ -1380,6 +1432,11 @@
     '  color:rgba(255,255,255,.62); font-size:11px; line-height:1;',
     '  padding:5px 8px; border-radius:5px; cursor:pointer; }',
     '.tk-icon-btn:hover { background:rgba(255,255,255,.1); color:#fff; }',
+    '/* 标题行右侧按钮（★ V2.5.0 v4：复制 ⧉ / 上一个 ‹ / 下一个 ›，统一 26px 方形） */',
+    '.tk-nav {',
+    '  width:26px; height:26px; padding:0; border-radius:6px;',
+    '  display:flex; align-items:center; justify-content:center;',
+    '  font-size:14px; line-height:1; }',
     '/* 追踪开启态：按钮高亮，让「线还在地图上」这件事有视觉出口 */',
     '.tk-actions .btn.act.is-on {',
     '  background:rgba(234,194,126,.16); border-color:rgba(234,194,126,.45);',
@@ -1394,6 +1451,11 @@
     '  color:rgba(255,255,255,.8); transform:none; }',
 
     '/* --- 完成态 --- */',
+    '/* ★ V2.5.0：标记完成按钮统一金色主题（done 态 is-done 绿勾样式在后，覆盖之） */',
+    '.tk-actions .btn.done {',
+    '  border:1px solid #c9a227; background:linear-gradient(180deg,#e0b64e,#c9a227);',
+    '  color:#14181c; font-weight:bold; }',
+    '.tk-actions .btn.done:hover { filter:brightness(1.08); }',
     '/* 右上角勾：参考神庙完成标记，绿色实心 + 白勾，不降标题透明度 */',
     '.tk-done-tick {',
     '  display:inline-flex; align-items:center; justify-content:center;',
@@ -1422,8 +1484,26 @@
     '/* 流程线占位（M4 启用） */',
     '.tk-flow-row {',
     '  display:flex; align-items:center; gap:8px; margin-top:10px;',
-    '  padding-top:10px; border-top:1px solid rgba(255,255,255,.07); }',
+    '  padding-top:10px; border-top:1px solid rgba(255,255,255,.07);',
+    '  flex-wrap:wrap; }',
     '.tk-flow-hint { font-size:12px; color:rgba(255,255,255,.55); flex:1; line-height:1.55; }',
     '.tk-flow-btn { flex:0 0 auto; }',
+    '/* 流程地点（★ V2.5.0 v4 定稿）：小标题 + 1-3 列自适应网格 */',
+    '.tk-flow-t { font-size:11.5px; color:#9a8a6c; font-weight:bold;',
+    '  letter-spacing:1px; margin-bottom:2px; flex:1 1 100%; display:block; }',
+    '.flow-pts { display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr));',
+    '  gap:8px; flex:1 1 100%; }',
+    '.fp { display:flex; align-items:center; gap:6px; background:#232b33;',
+    '  border:1px solid #333d47; border-radius:8px; padding:6px 9px; cursor:pointer;',
+    '  font-size:12px; position:relative; min-width:0; }',
+    '.fp:hover { border-color:#eac27e; }',
+    '/* 纯黄数字无底色（老大定的，不要金底圆块） */',
+    '.fp .num { color:#eac27e; font-weight:bold; font-size:13px; flex:0 0 16px; text-align:center; }',
+    '.fp .txt { color:#dcd7cb; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }',
+    '.fp .tip { display:none; position:absolute; bottom:125%; left:50%; transform:translateX(-50%);',
+    '  background:#0d1114; border:1px solid #3a434d; border-radius:6px; padding:4px 8px;',
+    '  font-size:11px; color:#eac27e; white-space:nowrap; z-index:9; }',
+    '.fp:hover .tip { display:block; }',
+    '.fp .tip .xy { color:#b8b2a6; }',
   ].join('\n'));
 })(window);
