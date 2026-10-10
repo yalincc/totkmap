@@ -1,0 +1,16 @@
+# 任务档案 · PhotoSpot_Challenge_02.yaml（task_batch 导入生成）
+# ★ 2026-10-10 P0 补导：start/note/reward 来自 迷你挑战139条-整理数据.json（V3，zd+ROM 双源）
+#   requires/npc/loc/place 保持档案原状（FindWhiteHorse 的 flag requires=老大确认口径，未覆盖）
+key: PhotoSpot_Challenge_02
+npc:
+  cn: 主人基叙
+loc: 森林驿站
+start: 在森林驿站中调查空画框进入对话
+note: |-
+  在鼓隆城中的温泉处拍摄泡温泉的鼓隆族
+reward:
+  - 1点驿站点数
+  - 一份速速蔬菜咖喱饭
+
+requires:
+  - 给地底人拍照！

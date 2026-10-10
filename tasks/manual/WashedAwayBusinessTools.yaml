@@ -1,0 +1,32 @@
+# 任务档案 · WashedAwayBusinessTools.yaml · 迷你挑战（V2.3 批量导入）
+# ★ 数据源：迷你挑战139条-整理数据.json（2026-10-08 V3，139/139 齐备）
+key: WashedAwayBusinessTools
+
+npc:
+  cn: 利迦尼
+
+loc: 沃托里村
+
+start: 与利迦尼对话
+
+note: |-
+  将哈特诺小岛上的船开回沃托里村
+
+reward:
+  - 星星碎片
+
+requires:
+  - 遭遇海盗袭击的村庄
+
+# 主坐标覆盖：统一用校对接取点（卡片坐标区/图标/图层都跟它走）
+place:
+  X: 2952
+  Z: -3492
+  H: 1
+
+flowPts:
+  - X: 2952
+    Z: -3492
+    H: 1
+
+_source: 2026-10-08 迷你挑战 139 条批量导入（迷你挑战139条-整理数据.json）

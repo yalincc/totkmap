@@ -1,0 +1,19 @@
+# 任务档案 · TakeAnimals.yaml（task_batch 导入生成）
+key: TakeAnimals
+loc: 平原外围的驿站
+npc:
+  cn: 陀特茨
+guide:
+  start: 平原外围驿站马厩旁，与看马人陀特茨对话接取。
+  note: |-
+    两阶段：先驯骷髅马交差，再驯鹿（或熊）交差。
+    ① 骷髅马只在夜间出现，**凌晨 5 点消失**，务必天亮前骑回驿站；
+    ② 鹿骑上后**千万别中途下马**，一下马它就跑了。
+  reward:
+    - 紫卢比 50 + 1 点驿站点数（完成骷髅马阶段）
+    - 银卢比 100 + 1 点驿站点数（完成鹿阶段）
+flowPts:
+  - X: -1688
+    Z: -680
+    H: 124
+_source: 老大 2026-10-07 档案；RequestActor=Npc_HyruleDepthHatago007 即陀特茨（Toffa）

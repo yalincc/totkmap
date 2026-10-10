@@ -1,0 +1,16 @@
+# 任务档案 · PhotoSpot_Challenge_13.yaml（task_batch 导入生成）
+# ★ 2026-10-10 P0 补导：start/note/reward 来自 迷你挑战139条-整理数据.json（V3，zd+ROM 双源）
+#   requires/npc/loc/place 保持档案原状（FindWhiteHorse 的 flag requires=老大确认口径，未覆盖）
+key: PhotoSpot_Challenge_13
+npc:
+  cn: 狄姆奇
+loc: 南阿卡莱驿站
+start: 在南阿卡莱驿站中调查空画框
+note: |-
+  在一始村中央拍摄结之钟即可
+reward:
+  - 1点驿站点数
+  - 一份高级炖肉
+
+requires:
+  - 给地底人拍照！

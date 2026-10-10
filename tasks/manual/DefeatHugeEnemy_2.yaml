@@ -1,0 +1,13 @@
+# 任务档案 · DefeatHugeEnemy_2.yaml（task_batch 导入生成）
+key: DefeatHugeEnemy_2
+npc:
+  cn: 谷拉廉斯
+loc: 监视堡垒（避难所）
+requires:
+  - type: flag
+    reqName: 完成任意一条「为〇〇带来和平！」
+guide:
+  start: 监视堡垒避难壕，与谷拉廉斯对话选「大型怪物的情报」。
+  note: 站在高处往沙地投炸弹花，把它引出来；别站在沙地上。
+  reward:
+    - 银卢比

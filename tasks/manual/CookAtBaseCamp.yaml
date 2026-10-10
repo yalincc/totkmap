@@ -1,0 +1,15 @@
+# 任务档案 · CookAtBaseCamp.yaml（task_batch 导入生成）
+key: CookAtBaseCamp
+loc: 监视堡垒
+npc:
+  cn: 波侬
+requires:
+  - type: quest
+    reqName: 海拉鲁城堡的异变
+    key: HyruleCastleIncident
+guide:
+  start: 监视堡垒避难壕，与厨师波侬对话。
+  note: 提前准备好苹果（地表商人穆贝处有卖）。
+  reward:
+    - 一份「水果拌蘑菇」
+_source: 老大 2026-10-07 档案；RequestActor=Npc_BaseCamp001 即波侬（Burmano），监视堡垒避难壕灶台旁厨师

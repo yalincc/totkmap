@@ -1,0 +1,29 @@
+# 任务档案 · GerudoCanyon_TumbleweedSweep.yaml · 迷你挑战（V2.3 批量导入）
+# ★ 数据源：迷你挑战139条-整理数据.json（2026-10-08 V3，139/139 齐备）
+key: GerudoCanyon_TumbleweedSweep
+
+npc:
+  cn: 姿姆琪
+
+loc: 格鲁德峡谷
+
+start: 与姿姆琪对话
+
+note: |-
+  用火将风滚草全部烧光
+
+reward:
+  - 王族盾
+
+# 主坐标覆盖：统一用校对接取点（卡片坐标区/图标/图层都跟它走）
+place:
+  X: -1014
+  Z: -3583
+  H: 113
+
+flowPts:
+  - X: -1014
+    Z: -3583
+    H: 113
+
+_source: 2026-10-08 迷你挑战 139 条批量导入（迷你挑战139条-整理数据.json）

@@ -1,0 +1,29 @@
+# 任务档案 · LookingForTheVoiceLord.yaml · 情节挑战（V2.3 批量导入）
+# ★ 数据源：情节挑战60条-整理数据.json（2026-10-08 校对，60/60 齐备）
+key: LookingForTheVoiceLord
+
+npc:
+  cn: 洁琳
+
+loc: 监视堡垒
+
+start: 与洁琳对话开启
+
+note: |-
+  跟着声音方向前进即可
+
+reward:
+  - 卢比
+
+# 主坐标覆盖：统一用校对接取点（卡片坐标区/图标/图层都跟它走）
+place:
+  X: -258
+  Z: 102
+  H: 8
+
+flowPts:
+  - X: -258
+    Z: 102
+    H: 8
+
+_source: 2026-10-08 情节挑战 60 条批量导入（情节挑战60条-整理数据.json）

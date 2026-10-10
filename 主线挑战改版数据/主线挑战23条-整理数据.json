@@ -1,0 +1,1074 @@
+{
+ "meta": {
+  "title": "主剧情挑战 23 条 · V2.3 改版整理数据",
+  "source": "app/data/task-plan.js（ROM 权威）+ 任务名自含人名 + 前两轮已证映射 + zeldadungeon 主线页（V2）",
+  "group": "主剧情挑战",
+  "total": 23,
+  "missingHeight": 1,
+  "missingNpc": 0,
+  "missingLoc": 0,
+  "updated": "2026-10-08（V2 网络查证补丁定稿候选）",
+  "coordSystem": {
+   "rule": "UI X=gx / UI Z=-gz / 高度=gy-106；★三元组同源（x/z/h 必须同一点）",
+   "layers": "h<-250 地底 / h>=700 天空 / 其余地表"
+  },
+  "changelog": [
+   "V1：npcCn 补 6（劳鲁/塞尔达公主/丘栗/阿沅/英帕/管家魔像——任务名自含+前两轮已证映射）",
+   "V1：locCn 补 10（8 复用迷你挑战映射 + 初始空岛 + 时之神殿）；WhiteZora/RosomaLake/ZonauTriedForceSkyIsland 留 V2",
+   "V1：高度 23/23 已有（唯一坏点 GetMasterSword 0,0,0 → PENDING_COORD）",
+   "V1：guide 四字段（start/note/reward/requires）库内全空，全部留给 V2 zeldadungeon 逐页查证",
+   "V2：guide 四字段补齐 22/23 条（zd 23 页逐页查证，Adventure Log step1 + ROM 原文互证）",
+   "V2：DefeatGanondorf（讨伐加侬多夫）zd 页抓取失败（WebFetch×4+urllib 502+curl 403），note 用 ROM 原文，start/reward/requires 留待",
+   "V2：NPC 修正 4——英帕→卡多（GroundPaintingAir01，zd+ROM 双证）、Npc_ZoraFencer→优娜×3（ROM 原文双证）",
+   "V2：loc 落地 4——WhiteZora=卓拉领地 / RosomaLake=托托湖 / ZonauTriedForceSkyIsland=龙头岛 / BeginningIsland=初始空岛（双证）",
+   "V2：GetMasterSword 坐标修复 UI(417,2145)（markers.js id=3782 克洛格森林点），高度不编造保持缺失",
+   "V2：guide 四字段补齐 22/23 条（zd 23 页逐页查证，Adventure Log step1 + ROM 原文互证）",
+   "V2：DefeatGanondorf（讨伐加侬多夫）zd 页抓取失败（WebFetch×4+urllib 502+curl 403），note 用 ROM 原文，start/reward/requires 留待",
+   "V2：NPC 修正 4——英帕→卡多（GroundPaintingAir01，zd+ROM 双证）、Npc_ZoraFencer→优娜×3（ROM 原文双证）",
+   "V2：loc 落地 4——WhiteZora=卓拉领地 / RosomaLake=托托湖 / ZonauTriedForceSkyIsland=龙头岛 / BeginningIsland=初始空岛（双证）",
+   "V2：GetMasterSword 坐标修复 UI(417,2145)（markers.js id=3782 克洛格森林点），高度不编造保持缺失"
+  ],
+  "pendingConfirm": [
+   "DefeatGanondorf（讨伐加侬多夫）：zd Destroy Ganondorf 页抓取失败，start/reward/requires 待补（note 已用 ROM 原文）",
+   "SageOfFire/SageOfGerudo 奖励：zd 页未列 Rewards 栏，「心之容器+贤者誓言」为同系列模式推定，待实机",
+   "「雷光套服」（Charged Set）官方中文名待核（GotoFironeZonauRemains 奖励）",
+   "优娜用字差异：主线 ROM 原文「优娜」，迷你挑战轮同 NPC（CreateArmor）写作「尤诺瓦」（zd 音译），建议跨轮统一",
+   "SurveyOfFourVillages requires=海拉鲁城堡的异变：实为该任务第 7 步开启（非完成前置），已按任务级简写"
+  ],
+  "guideFill": {
+   "start": 22,
+   "note": 23,
+   "reward": 22,
+   "requires": 19
+  }
+ },
+ "tasks": [
+  {
+   "key": "LookingForLightSpot",
+   "name": "紧闭之门",
+   "group": "主剧情挑战",
+   "sort": 2,
+   "layer": "天空",
+   "npc": {
+    "cn": "劳鲁",
+    "id": "Dm_Npc_Raul",
+    "source": "前轮已证映射（迷你挑战轮 Dm_Npc_Raul=劳鲁）；zd The Closed Door: Rauru"
+   },
+   "loc": {
+    "cn": "初始空岛",
+    "en": "BeginningIsland"
+   },
+   "start": "在初始空岛时之神殿前尝试开门时，与劳鲁对话获得",
+   "note": "当你尝试推开时之神殿的大门时，劳鲁现身了——他说自己正是你这新手臂的原主人。要让手臂恢复力量、凭触碰打开那扇门，就去造访岛上的神庙吧，每座神庙上空都盘旋着绿色光柱。",
+   "reward": [
+    "究极手",
+    "祝福之光×4",
+    "余料建造",
+    "能源槽",
+    "能源井×3",
+    "通天术",
+    "心之容器"
+   ],
+   "requires": [],
+   "coord": {
+    "x": 453,
+    "z": -847,
+    "h": 1451,
+    "status": "OK",
+    "isMissingHeight": false,
+    "flowPointCount": 1,
+    "hSource": ""
+   },
+   "romText": "调查时之神殿的门时，右臂之主 □ / 走遍神庙，恢复右手的力量后， 劳鲁再一次现身。 按劳鲁的说法，现在自己通过了3座神庙 并恢复了力量，似乎已经可以打开 □",
+   "sources": {
+    "npc": "前轮已证映射（迷你挑战轮 Dm_Npc_Raul=劳鲁）；zd The Closed Door: Rauru",
+    "startNote": "zeldadungeon 主线页 + ROM 原文互证",
+    "reward": "zeldadungeon 主线页",
+    "loc": "ROM key 映射（V2 落地：zd Great Sky Island 双证（V1 已写，去除待确认标记））",
+    "requires": "zeldadungeon 主线页（无前置）"
+   },
+   "_game_gx": 453.0,
+   "_game_gy": 1557.0,
+   "_game_gz": 847.0
+  },
+  {
+   "key": "GOToTheCastleOfHyrule",
+   "name": "前往海拉鲁大地",
+   "group": "主剧情挑战",
+   "sort": 3,
+   "layer": "地表",
+   "npc": {
+    "cn": "塞尔达公主",
+    "id": "UnknownNPC_Zelda",
+    "source": "前轮已证同类特殊映射；zd Find Princess Zelda"
+   },
+   "loc": {
+    "cn": "时之神殿",
+    "en": "AncientTimeShrine"
+   },
+   "start": "将腐朽的大师之剑送入时之神殿最深处的神秘之光（完成紧闭之门后）",
+   "note": "在时之神殿，你眼看着大师之剑消失在一道神秘光芒中。随后一条白龙腾空而起，拨开了云海。你确信听到了塞尔达公主的呼唤：「林克，一定要找到我。」到下方的大陆寻找她下落的线索吧——没有什么比从空岛勇敢一跃更快的方式了。",
+   "reward": [
+    "开启海拉鲁城堡的异变"
+   ],
+   "requires": [
+    "紧闭之门"
+   ],
+   "coord": {
+    "x": -240,
+    "z": 150,
+    "h": 30,
+    "status": "OK",
+    "isMissingHeight": false,
+    "flowPointCount": 1,
+    "hSource": ""
+   },
+   "romText": "大师之剑消失在了时之神殿的神秘光芒中， 当白龙飞向天空，划破云海时， 听到了塞尔达公主的声音：“来寻找我吧……” 回到地面，寻找她的下落吧。 是时候鼓起勇气，从苏醒的岛屿一跃而下了。",
+   "sources": {
+    "npc": "前轮已证同类特殊映射；zd Find Princess Zelda",
+    "startNote": "zeldadungeon 主线页 + ROM 原文互证",
+    "reward": "zeldadungeon 主线页",
+    "loc": "ROM key 映射（新证映射）",
+    "requires": "zd Prerequisite（时之神殿女神像第4心之容器=紧闭之门完成）"
+   },
+   "_game_gx": -239.6,
+   "_game_gy": 135.87,
+   "_game_gz": -149.9
+  },
+  {
+   "key": "SurveyOfFourVillages",
+   "name": "调查四地区的异变",
+   "group": "主剧情挑战",
+   "sort": 4,
+   "layer": "地表",
+   "npc": {
+    "cn": "普尔亚",
+    "id": "Npc_AncientDoctor",
+    "source": "原有"
+   },
+   "loc": {
+    "cn": "监视堡垒",
+    "en": "City_BaseCamp"
+   },
+   "start": "激活监视堡垒鸟望台后与普尔亚对话获得",
+   "note": "普尔亚把寻找公主的方向转向四个各自出现怪象的地区：西北的海布拉、东北的奥尔汀、西南的格鲁德、东边的拉聂尔。乔舒亚听到传闻，说在海布拉的利特村可能有人见过公主。",
+   "reward": [
+    "无"
+   ],
+   "requires": [
+    "海拉鲁城堡的异变"
+   ],
+   "coord": {
+    "x": -3590,
+    "z": 1802,
+    "h": 213,
+    "status": "OK",
+    "isMissingHeight": false,
+    "flowPointCount": 5,
+    "hSource": ""
+   },
+   "romText": "作为搜寻塞尔达公主的下一步， 普尔亚提议对各地发生的异变进行调查。 异变集中的地区还有2个。 / 作为搜寻塞尔达公主的下一步， 普尔亚提议对各地发生的异变进行调查。 异变集中的地区还有一个。 / 为了寻找塞尔达公主的线索， 对异变集中的四个地区进行了调查。 每个地区都有塞尔达公主现身， 包括由秘石所看到的古代记忆中， 也出现了塞尔达公主的身影。 在监视堡垒等待的普尔亚或许知道些什么。",
+   "sources": {
+    "npc": "原有",
+    "startNote": "zeldadungeon 主线页 + ROM 原文互证",
+    "reward": "无（zd 页无 Rewards 栏）",
+    "loc": "ROM key 映射（复用迷你挑战轮已核对映射）",
+    "requires": "zd Requirements（属 Crisis 第7步，此处按任务级简写）"
+   },
+   "_game_gx": -3590.15,
+   "_game_gy": 318.57,
+   "_game_gz": -1802.35
+  },
+  {
+   "key": "ClueTotheSixthSage",
+   "name": "寻找第五位贤者",
+   "group": "主剧情挑战",
+   "sort": 5,
+   "layer": "地表",
+   "npc": {
+    "cn": "普尔亚",
+    "id": "Npc_AncientDoctor",
+    "source": "原有"
+   },
+   "loc": {
+    "cn": "监视堡垒",
+    "en": "City_BaseCamp"
+   },
+   "start": "在监视堡垒与普尔亚对话获得（海拉鲁城堡的异变段击败 10 个幻影加侬后）",
+   "note": "远古封印战争中，塞尔达公主与其他五位贤者曾同劳鲁王并肩对抗魔王。普尔亚告诉你，要寻找第五位贤者，应当去调查传说时代的遗迹。贤者们已各自回领地，你要去搜索其他地方。",
+   "reward": [
+    "无"
+   ],
+   "requires": [
+    "海拉鲁城堡的异变"
+   ],
+   "coord": {
+    "x": -254,
+    "z": 155,
+    "h": 26,
+    "status": "OK",
+    "isMissingHeight": false,
+    "flowPointCount": 2,
+    "hSource": ""
+   },
+   "romText": "在远古的封印战争中，与国王劳鲁 并肩抵抗魔王的是塞尔达公主和五位贤者。 据普尔亚所说，要想寻找第五位贤者， 就必须 □ / 据塔乌洛所说，环卡遗迹中 留存着 □ / 见到神秘声音的主人——魂之贤者米涅鲁后， 得知了远古时与魔王战斗的“封印战争” 以及塞尔达公主打算 令大师之剑苏醒的坚定决心。 所需的线索已经找齐了， 向 □",
+   "sources": {
+    "npc": "原有",
+    "startNote": "zeldadungeon 主线页 + ROM 原文互证",
+    "reward": "无（zd 页无 Rewards 栏）",
+    "loc": "ROM key 映射（复用迷你挑战轮已核对映射）",
+    "requires": "zd Prerequisite: Defeat the 10 Phantom Ganons（属 Crisis 段）"
+   },
+   "_game_gx": -253.937,
+   "_game_gy": 131.94,
+   "_game_gz": -155.383
+  },
+  {
+   "key": "HyruleCastleIncident",
+   "name": "海拉鲁城堡的异变",
+   "group": "主剧情挑战",
+   "sort": 6,
+   "layer": "地表",
+   "npc": {
+    "cn": "普尔亚",
+    "id": "Npc_AncientDoctor",
+    "source": "原有"
+   },
+   "loc": {
+    "cn": "监视堡垒",
+    "en": "City_BaseCamp"
+   },
+   "start": "抵达监视堡垒与普尔亚对话获得（前往海拉鲁大地完成时自动衔接）",
+   "note": "天地异变伊始，海拉鲁城堡连同其下的地壳一同升上了天空。普尔亚相信塞尔达公主可能正从大地深处呼唤你。加入搜索队，去海拉鲁城堡下方寻找公主吧。",
+   "reward": [
+    "滑翔伞",
+    "心之容器"
+   ],
+   "requires": [
+    "前往海拉鲁大地"
+   ],
+   "coord": {
+    "x": -333,
+    "z": 843,
+    "h": 134,
+    "status": "OK",
+    "isMissingHeight": false,
+    "flowPointCount": 11,
+    "hSource": ""
+   },
+   "romText": "出现在海拉鲁城堡的塞尔达公主化作一道光消失了。 作为搜寻塞尔达公主的下一步， 普尔亚提议对各地发生的天地异变进行调查。 首先需要在普尔亚平板上 □ / 出现在海拉鲁城堡的塞尔达公主化作一道光消失了。 作为搜寻塞尔达公主的下一步， 普尔亚提议对各地发生的天地异变进行调查。 首先需要在普尔亚平板上 □ / 出现在海拉鲁城堡的塞尔达公主化作一道光消失了。 作为搜寻塞尔达公主的下一步， 普尔亚提议对各地发生的天地异变进行调查。 首先需要在普尔亚平板上 □ / 红月和塞尔达公主 突然出现于浮在空中的海拉鲁城堡。 虽然眼下仍有许多蹊跷之处， 但还是先前往身处海拉鲁城堡的塞尔达公主身边吧。 / 顺利登上了海拉鲁城堡 并来到了塞尔达公主身边。 然而，那只是木乃伊制造出来的冒牌货， 那神似塞尔达公主之人， 化作不祥的姿态袭击而来。",
+   "sources": {
+    "npc": "原有",
+    "startNote": "zeldadungeon 主线页 + ROM 原文互证",
+    "reward": "zeldadungeon 主线页",
+    "loc": "ROM key 映射（复用迷你挑战轮已核对映射）",
+    "requires": "zd Prerequisite: Complete To the Kingdom of Hyrule"
+   },
+   "_game_gx": -333.497,
+   "_game_gy": 240.12,
+   "_game_gz": -843.004
+  },
+  {
+   "key": "MasterSwordClues",
+   "name": "大师之剑的线索",
+   "group": "主剧情挑战",
+   "sort": 7,
+   "layer": "地表",
+   "npc": {
+    "cn": "米涅鲁",
+    "id": "Dm_Npc_Raumi",
+    "source": "原有"
+   },
+   "loc": {
+    "cn": "魂之神殿",
+    "en": "LargeDungeonSoul"
+   },
+   "start": "在魂之神殿与米涅鲁对话获得（完成来自太古的指引后）",
+   "note": "连上古贤者都无法击败的魔王，却被封印黑暗的大师之剑所伤。据米涅鲁所说，塞尔达公主曾说过：关于大师之剑的事，可以去问德库树。德库树就在克洛格森林。",
+   "reward": [
+    "引出丢失的勇者之剑"
+   ],
+   "requires": [
+    "来自太古的指引"
+   ],
+   "coord": {
+    "x": 430,
+    "z": 2146,
+    "h": 163,
+    "status": "OK",
+    "isMissingHeight": false,
+    "flowPointCount": 1,
+    "hSource": ""
+   },
+   "romText": "就连古代贤者也无法对付的魔王， 驱魔之剑“大师之剑”却能令其负伤。 据米涅鲁所言，塞尔达公主说过， 要寻求大师之剑时， 就去德库树那边。 看来 □ / 就连古代贤者也无法对付的魔王， 驱魔之剑“大师之剑”却能令其负伤。 据米涅鲁所言，塞尔达公主说过， 要寻求大师之剑时， 就去德库树那边。 而这德库树似乎是在 □",
+   "sources": {
+    "npc": "原有",
+    "startNote": "zeldadungeon 主线页 + ROM 原文互证",
+    "reward": "zeldadungeon 主线页",
+    "loc": "ROM key 映射（复用迷你挑战轮已核对映射）",
+    "requires": "zd Prerequisite: Complete Guidance from Ages Past"
+   },
+   "_game_gx": 430.254,
+   "_game_gy": 269.1,
+   "_game_gz": -2145.751
+  },
+  {
+   "key": "GetMasterSword",
+   "name": "丢失的勇者之剑",
+   "group": "主剧情挑战",
+   "sort": 8,
+   "layer": "地表",
+   "npc": {
+    "cn": "克洛格森林的大精灵",
+    "id": "TwnObj_Village_Korok_DekuTree_A_01",
+    "source": "原有"
+   },
+   "loc": {
+    "cn": "克洛格森林",
+    "en": "Cokiri"
+   },
+   "start": "与克洛格森林的大精灵（德库树）对话获得（大师之剑的线索段击败德库树深穴底部的幻影加侬后）",
+   "note": "封印黑暗之剑——大师之剑，在初始空岛的时之神殿消失了。德库树能感觉到剑的气息，它说大师之剑正在移动。这究竟意味着什么……",
+   "reward": [
+    "大师之剑"
+   ],
+   "requires": [
+    "大师之剑的线索"
+   ],
+   "coord": {
+    "x": 417,
+    "z": 2145,
+    "h": null,
+    "status": "★缺高度（x/z 已修复）",
+    "isMissingHeight": true,
+    "flowPointCount": 0,
+    "hSource": "markers.js id=3782「克洛格森林」（描述含本任务）：m.y=gx→UI X=417；m.x=gz→UI Z=-m.x=2144.9≈2145；markers 无高度字段，h 不编造保持缺失"
+   },
+   "romText": "驱魔之剑“大师之剑” 从初始空岛的时之神殿消失了。 □",
+   "sources": {
+    "npc": "原有",
+    "startNote": "zeldadungeon 主线页 + ROM 原文互证",
+    "reward": "zeldadungeon 主线页",
+    "loc": "ROM key 映射（复用迷你挑战轮已核对映射）",
+    "requires": "zd Prerequisite（德库树深穴幻影加侬=大师之剑的线索段）"
+   },
+   "_game_gx": 0.0,
+   "_game_gy": 0.0,
+   "_game_gz": 0.0
+  },
+  {
+   "key": "SageOfWind",
+   "name": "利特村的丘栗",
+   "group": "主剧情挑战",
+   "sort": 21,
+   "layer": "地表",
+   "npc": {
+    "cn": "丘栗",
+    "id": "Npc_ValleyVillage010",
+    "source": "任务名「利特村的丘栗」自含；zd Tulin of Rito Village"
+   },
+   "loc": {
+    "cn": "利特村",
+    "en": "Rito"
+   },
+   "start": "抵达利特村顶部，与丘栗、特巴和沙琪对话获得",
+   "note": "一场猛烈的暴风雪袭击了利特村，村子陷入危机。特巴没有关于公主的情报，但建议你去山脚小屋问哈兹——小屋在村子北面、海布拉山脚下，有两堆篝火作标记。",
+   "reward": [
+    "心之容器",
+    "丘栗的贤者誓言"
+   ],
+   "requires": [
+    "调查四地区的异变"
+   ],
+   "coord": {
+    "x": -3572,
+    "z": 2260,
+    "h": 142,
+    "status": "OK",
+    "isMissingHeight": false,
+    "flowPointCount": 9,
+    "hSource": ""
+   },
+   "romText": "哈茨也不知道关于塞尔达公主的线索。 异变发生以来，丘栗进行调查的范围最广， 因此哈茨建议去找丘栗打听情况。 丘栗似乎和基藏、索里莱丝一起前往了 □ / 抵达大杉树后，发现丘栗就在那里望着天空， 看起来一副很懊恼的样子。 据他所说，他的弓 被会飞的怪物夺走了。 / 在洞窟中并没有见到丘栗。 不过根据基藏所说的情报，丘栗前往了 □ / 抵达大杉树后，发现丘栗就在那里， 看起来一副很懊恼的样子。 据他所说，他的弓 被会飞的怪物夺走了。 打倒怪物，把 □ / 打倒了卡库达， 成功夺回了丘栗的弓。 但是又出现了新的卡库达， 在丢下波克布林后便离去了。 和丘栗一起打倒怪物吧。 / 丘栗所说的地方并没有塞尔达公主的身影， 但上空却突然传来“请来寻吾”的声音， 同时在云中发现了巨大的船影， 与《天鸟船之歌》中描绘的船一模一样。 在空中回响的神秘声音 是不是在引导丘栗前往 □ / 积雨云中飘浮着一艘巨大的船， 丘栗称这艘船就是天鸟船。 船的甲板上有个疑似塞尔达公主的人影， 但是转眼间就消失了…… 无休无止的暴风雪从 □ / 即使操作终端也无法打开甲板上的门， 此时，那个神秘的声音又说， 只要解开5把锁，就能把门打开…… 为了将利特村从暴风雪中拯救， 为了得到塞尔达公主的线索， 遵循声音的指示，去解开这 □ / 5把锁都解开了。 现在，只要 □ / 打倒怪物后，覆盖在祭坛上的冰开始融化， 一块被供奉的 □",
+   "sources": {
+    "npc": "任务名「利特村的丘栗」自含；zd Tulin of Rito Village",
+    "startNote": "zeldadungeon 主线页 + ROM 原文互证",
+    "reward": "zeldadungeon 主线页",
+    "loc": "ROM key 映射（复用迷你挑战轮已核对映射）",
+    "requires": "zd Quests: Regional Phenomena（隶属）"
+   },
+   "_game_gx": -3571.62,
+   "_game_gy": 247.64,
+   "_game_gz": -2260.3
+  },
+  {
+   "key": "SageOfFire",
+   "name": "鼓隆城的阿沅",
+   "group": "主剧情挑战",
+   "sort": 31,
+   "layer": "地表",
+   "npc": {
+    "cn": "阿沅",
+    "id": "Npc_Goron_Yunbo",
+    "source": "任务名「鼓隆城的阿沅」自含；zd Yunobo of Goron City"
+   },
+   "loc": {
+    "cn": "鼓隆城",
+    "en": "Goron"
+   },
+   "start": "抵达鼓隆城，与布留多和阿沅对话获得",
+   "note": "鼓隆城的许多鼓隆族正无节制地吃着大理石纹岩烧肉，阿沅和一位金发女子似乎与这种新出现的岩石有关。随后阿沅一行人前往阿沅公司总部，去处理大理石纹岩烧肉的生意。",
+   "reward": [
+    "心之容器",
+    "阿沅的贤者誓言"
+   ],
+   "requires": [
+    "调查四地区的异变"
+   ],
+   "coord": {
+    "x": 1647,
+    "z": 2839,
+    "h": -106,
+    "status": "OK",
+    "isMissingHeight": false,
+    "flowPointCount": 8,
+    "hSource": ""
+   },
+   "romText": "鼓隆城挤满了无节制地 食用可口岩的鼓隆族。 这片景象中不仅有阿沅的身影， 事情似乎还与一名 □ / 虽然打倒了出现在死亡之山的巨大怪物， 但是附近并没有出现塞尔达公主的身影。 阿沅担心塞尔达公主是不是 失足坠入了火山口， 便自己跳入深不见底的火山口之中。 / 在火山口底下， 是一片充斥着熔岩的灼热之地。 环顾四周时， 听见了一个神秘的声音说着“过来”…… 循声而去，发现了一座 在熔岩中浮起的巨大建筑。 / 在阿沅的协助下， 成功打开了5把挂锁。 塞尔达公主被天花板吸走的那个房间的 铁格栅应该也打开了。 / 为了救出被吸入的塞尔达公主， 正在试图破坏天花板的赤色岩石， 此时出现了一只四足的巨大怪物。 这怪物的身体也被 □",
+   "sources": {
+    "npc": "任务名「鼓隆城的阿沅」自含；zd Yunobo of Goron City",
+    "startNote": "zeldadungeon 主线页 + ROM 原文互证",
+    "reward": "推定（zd 页未列 Rewards 栏，同系列丘栗/希多页模式）",
+    "loc": "ROM key 映射（复用迷你挑战轮已核对映射）",
+    "requires": "zd Quests: Regional Phenomena（隶属）"
+   },
+   "_game_gx": 1647.0,
+   "_game_gy": 0.0,
+   "_game_gz": -2839.0
+  },
+  {
+   "key": "CleanStatue",
+   "name": "被淤泥埋没的石像",
+   "group": "主剧情挑战",
+   "sort": 41,
+   "layer": "地表",
+   "npc": {
+    "cn": "优娜",
+    "id": "Npc_ZoraFencer",
+    "source": "zd Start「Listen to Yona, Khira and Chroma speaking」+ ROM 原文（卓拉未婚妻称谓）"
+   },
+   "loc": {
+    "cn": "卓拉领地",
+    "en": "WhiteZora"
+   },
+   "start": "在卓拉领地中央广场旁听优娜、琪拉、库洛玛的对话后与优娜对话获得",
+   "note": "你抵达卓拉领地，却发现这里的人们正为从天而降的淤泥而苦恼。领地中央的石像对卓拉族意义重大，此刻正被淤泥层层包裹。用水泡泡果冲净石像上的淤泥吧。",
+   "reward": [
+    "解锁卓拉领地的希多"
+   ],
+   "requires": [
+    "调查四地区的异变"
+   ],
+   "coord": {
+    "x": 3305,
+    "z": 478,
+    "h": 142,
+    "status": "OK",
+    "isMissingHeight": false,
+    "flowPointCount": 1,
+    "hSource": ""
+   },
+   "romText": "一路跋涉到了卓拉领地， 却发现这里遭受到淤泥的灾害， 居民们正手忙脚乱地应对。 卓拉族人似乎尤为看重领地中央的石像， 由于上面被 □",
+   "sources": {
+    "npc": "网络查证修正（V2）",
+    "startNote": "zeldadungeon 主线页 + ROM 原文互证",
+    "reward": "zeldadungeon 主线页",
+    "loc": "ROM key 映射（V2 落地：zd 三页（被淤泥埋没的石像/卓拉领地的希多/修复卓拉铠甲）Location 均为 Zora's Domain）",
+    "requires": "zd Quests: Regional Phenomena（隶属）"
+   },
+   "_game_gx": 3305.299,
+   "_game_gy": 248.01,
+   "_game_gz": -477.534
+  },
+  {
+   "key": "DividedSlate",
+   "name": "断裂的石碑",
+   "group": "主剧情挑战",
+   "sort": 42,
+   "layer": "地表",
+   "npc": {
+    "cn": "基奥托",
+    "id": "Npc_Zora035",
+    "source": "原有"
+   },
+   "loc": {
+    "cn": "托托湖",
+    "en": "RosomaLake"
+   },
+   "start": "在托托湖与学者基奥托对话获得",
+   "note": "与历史学家基奥托交谈后得知，他发现了一块古老的卓拉石碑。上面记着与天空有关的信息，但石碑断裂，完整含义无从解读。这或许是寻找公主的线索，得想办法补全它。",
+   "reward": [
+    "解锁前往天空的线索"
+   ],
+   "requires": [
+    "卓拉领地的希多"
+   ],
+   "coord": {
+    "x": 3411,
+    "z": 878,
+    "h": 402,
+    "status": "OK",
+    "isMissingHeight": false,
+    "flowPointCount": 1,
+    "hSource": ""
+   },
+   "romText": "与学者基奥托交谈后得知， 他发现了一座古老的石碑， 上面似乎有着关于天空的描述。 然而 □",
+   "sources": {
+    "npc": "原有",
+    "startNote": "zeldadungeon 主线页 + ROM 原文互证",
+    "reward": "zeldadungeon 主线页",
+    "loc": "ROM key 映射（V2 落地：zd Location: Toto Lake + ROM 原文「向托托湖的□」双证）",
+    "requires": "zd Prerequisite: Begin the Sidon of the Zora quest"
+   },
+   "_game_gx": 3411.269,
+   "_game_gy": 507.6,
+   "_game_gz": -878.376
+  },
+  {
+   "key": "RepairArmor",
+   "name": "修复卓拉铠甲",
+   "group": "主剧情挑战",
+   "sort": 44,
+   "layer": "地表",
+   "npc": {
+    "cn": "优娜",
+    "id": "Npc_ZoraFencer",
+    "source": "ROM 原文「优娜正在帮忙修复」+ zd Start「Speak with Yona at the Infirmary」"
+   },
+   "loc": {
+    "cn": "卓拉领地",
+    "en": "WhiteZora"
+   },
+   "start": "在卓拉领地的疗养所与优娜对话获得（卓拉领地的希多开始后）",
+   "note": "穿上卓拉铠甲，就能溯流攀上瀑布。优娜确信这将成为你冒险路上的利器。但要完成修复，似乎需要一条难以寻觅的古代三纹鱼。找到后带给优娜吧。",
+   "reward": [
+    "卓拉铠甲"
+   ],
+   "requires": [
+    "卓拉领地的希多"
+   ],
+   "coord": {
+    "x": 3336,
+    "z": 532,
+    "h": 151,
+    "status": "OK",
+    "isMissingHeight": false,
+    "flowPointCount": 2,
+    "hSource": ""
+   },
+   "romText": "卓拉铠甲曾在战斗中受损， 一直寄放在卓拉领地，而优娜正在帮忙修复。 有了卓拉铠甲，想必就能攀瀑了。 要完成铠甲的修复工作， 似乎需要用到 □",
+   "sources": {
+    "npc": "网络查证修正（V2）",
+    "startNote": "zeldadungeon 主线页 + ROM 原文互证",
+    "reward": "zeldadungeon 主线页",
+    "loc": "ROM key 映射（V2 落地：zd 三页（被淤泥埋没的石像/卓拉领地的希多/修复卓拉铠甲）Location 均为 Zora's Domain）",
+    "requires": "zd Prerequisite: Begin Sidon of the Zora"
+   },
+   "_game_gx": 3335.51,
+   "_game_gy": 257.24,
+   "_game_gz": -531.843
+  },
+  {
+   "key": "WaterBridgePlace",
+   "name": "前往天空的线索",
+   "group": "主剧情挑战",
+   "sort": 45,
+   "layer": "地表",
+   "npc": {
+    "cn": "基奥托",
+    "id": "Npc_Zora035",
+    "source": "原有"
+   },
+   "loc": {
+    "cn": "托托湖",
+    "en": "RosomaLake"
+   },
+   "start": "完成断裂的石碑后自动获得",
+   "note": "基奥托解读出的碑文写道：「立足于空鱼之地，放眼望身后身前。浮半空层叠群岩，水滴形历历可辨。王之证射穿水滴，水架桥方位自现。」（ROM 原文）碑文指向「空鱼之地」与「王之证」，向多雷凡大王请教后，线索指向东边的水库湖。",
+   "reward": [
+    "在东方水库湖开启光柱传送门"
+   ],
+   "requires": [
+    "断裂的石碑"
+   ],
+   "coord": {
+    "x": 3410,
+    "z": 868,
+    "h": 399,
+    "status": "OK",
+    "isMissingHeight": false,
+    "flowPointCount": 1,
+    "hSource": ""
+   },
+   "romText": "“立足于空鱼之地，放眼望身后身前。 浮半空层叠群岩，水滴形历历可辨。 王之证射穿水滴，水架桥方位自现。 天民同我等卓拉，藉此桥遥遥相连。” 基奥托表示，或许应该向 □ / 从卓拉领地里的孩子们那里打听到， 多雷凡大王现在正在清流王居。 秘密入口似乎就隐藏在 □",
+   "sources": {
+    "npc": "原有",
+    "startNote": "zd Prerequisite（Given after The Broken Slate）",
+    "reward": "zeldadungeon 主线页",
+    "loc": "ROM key 映射（V2 落地：zd Location: Toto Lake + ROM 原文「向托托湖的□」双证）",
+    "requires": "zd Prerequisite: Complete the The Broken Slate"
+   },
+   "_game_gx": 3410.34,
+   "_game_gy": 505.14,
+   "_game_gz": -868.052
+  },
+  {
+   "key": "SageOfZora",
+   "name": "卓拉领地的希多",
+   "group": "主剧情挑战",
+   "sort": 46,
+   "layer": "地表",
+   "npc": {
+    "cn": "优娜",
+    "id": "Npc_ZoraFencer",
+    "source": "ROM 原文「卓拉王子的未婚妻优娜」+ zd Start（完成石像任务后接引）"
+   },
+   "loc": {
+    "cn": "卓拉领地",
+    "en": "WhiteZora"
+   },
+   "start": "完成被淤泥埋没的石像后自动获得",
+   "note": "天地异变后，淤泥从天而降，令卓拉领地苦不堪言。卓拉王子的未婚妻优娜向你说明了领地的困境，并请你前往波光山山顶的米法公园与希多见面。",
+   "reward": [
+    "心之容器",
+    "希多的贤者誓言"
+   ],
+   "requires": [
+    "被淤泥埋没的石像"
+   ],
+   "coord": {
+    "x": 3846,
+    "z": 569,
+    "h": 487,
+    "status": "OK",
+    "isMissingHeight": false,
+    "flowPointCount": 10,
+    "hSource": ""
+   },
+   "romText": "天地异变之后，淤泥从天而降。 卓拉领地内受其污染影响的受害者层出不穷。 从卓拉王子的未婚妻优娜口中得知了详情， 她希望你前往雷兽山山顶的米法公园， 与 □ / 在米法公园顺利地见到了希多。 希多认为产生淤泥的原因或许在于天空中， 于是指派学者基奥托 对从天而降的遗迹和史书展开调查。 向托托湖的 □ / 依靠从基奥托和领地的孩子们那里得到的情报， 成功找到了多雷凡大王。 他被疑似塞尔达公主的人物驱使的怪物所伤。 淤泥、怪物和塞尔达公主…… 一切的一切似乎都因“天空”联系起来。 将收集到的情报讲给 □ / 在清流王居见到了多雷凡大王。 他被疑似塞尔达公主的人物 驱使的怪物所伤。 淤泥、怪物和塞尔达公主…… 一切的一切似乎都因“天空”联系起来。 将收集到的情报讲给 □ / 希多以其豪迈的泳姿在储水湖中卷起了大漩涡， 湖底随即出现了疑似入口的地方。 为了取得有关 □ / 启动了古代卓拉祭殿的神秘装置后， 远在高空的遗迹喷出了大量的水， 形成了一道巨大的瀑布。 据说就算是海利亚人， 只要穿上 □ / 深入探索空岛，来到了一座巨大的遗迹前。 这里是否会有一切谜团的谜底呢？ 追上先行一步的希多吧。 / 攀瀑进入遗迹后， 终于找到了看似淤泥源头的地方。 希多表示，利用正面的巨大 □ / 即便用瓶中积攒的水冲洗， 淤泥也还是会恢复原样。 看来还需要更多的水才行。 前往 □ / 与希多齐心协力， 成功打倒了淤泥中出现的怪物。 周围的淤泥也消失了，看来威胁已经不复存在。 而希多则一直盯着 淤泥消失后出现的神秘石头。",
+   "sources": {
+    "npc": "网络查证修正（V2）",
+    "startNote": "zeldadungeon 主线页 + ROM 原文互证",
+    "reward": "zeldadungeon 主线页",
+    "loc": "ROM key 映射（V2 落地：zd 三页（被淤泥埋没的石像/卓拉领地的希多/修复卓拉铠甲）Location 均为 Zora's Domain）",
+    "requires": "zd Prerequisite: Complete The Sludge-Covered Statue"
+   },
+   "_game_gx": 3845.573,
+   "_game_gy": 592.71,
+   "_game_gz": -568.693
+  },
+  {
+   "key": "SageOfGerudo",
+   "name": "格鲁德小镇的露珠",
+   "group": "主剧情挑战",
+   "sort": 51,
+   "layer": "地表",
+   "npc": {
+    "cn": "露珠",
+    "id": "Npc_Gerudo_Queen_Young",
+    "source": "原有"
+   },
+   "loc": {
+    "cn": "格鲁德之镇",
+    "en": "Gerudo"
+   },
+   "start": "在格鲁德之镇地下避难所与布莉拉对话获得",
+   "note": "格鲁德之镇被不祥的沙尘笼罩，人们被迫撤入地下避难所，然而首领露珠却不见踪影。所幸布莉拉告诉你，这位格鲁德首领正在北格鲁德遗迹修炼。",
+   "reward": [
+    "心之容器",
+    "露珠的贤者誓言"
+   ],
+   "requires": [
+    "调查四地区的异变"
+   ],
+   "coord": {
+    "x": -3782,
+    "z": -2643,
+    "h": 47,
+    "status": "OK",
+    "isMissingHeight": false,
+    "flowPointCount": 7,
+    "hSource": ""
+   },
+   "romText": "前往北格鲁德遗迹后， 找到了正在训练的露珠。 协助她进行雷击的练习吧。 / 对着稻草人放箭的同时， 露珠漂亮地用雷击将其命中。 他们听到了奇妙的声响，并从随后的报告中得知 卡拉卡拉集市遭遇袭击的消息。 追上露珠，前往位于格鲁德小镇 东北方向的卡拉卡拉集市吧。 / 抵达卡拉卡拉集市时， 战斗已经开始了。 露珠发挥在遗迹中训练的成果， 在千钧一发之际，使用雷击搭救了碧优拉。 与露珠一起战斗，击退吉波得吧！ / 击退卡拉卡拉集市的怪物后不久， 塞尔达公主的身影突然出现， 接着，格鲁德小镇周围刮起了神秘的龙卷风。 塞尔达公主在往格鲁德小镇的方向去后 便消失了踪影。追上已在回小镇路上的露珠她们吧。 / 从格鲁德小镇周围的巢穴中出现了大量吉波得。 保护好格鲁德小镇和露珠！ / 和士兵们合力击退了 从格鲁德小镇周围的巢穴中出现的大量吉波得。 前往露珠所说的 格鲁德地下街大厅深处的壁画那儿去找她吧。 / 格鲁德地下街的壁画上写着： □ / 用光照射赤色石柱后， 耀眼的光芒互相交汇，呈巨大的三角形。 照格鲁德地下街的壁画上的文字所说， 三角的中心应该出现了什么东西。 / 露珠在机关上施加雷击后，出现了一座神殿， 或许能在神殿里找到那神秘声音的主人。 在神殿内部进行调查吧。",
+   "sources": {
+    "npc": "原有",
+    "startNote": "zeldadungeon 主线页 + ROM 原文互证",
+    "reward": "推定（zd 页未列 Rewards 栏，同系列丘栗/希多页模式）",
+    "loc": "ROM key 映射（复用迷你挑战轮已核对映射）",
+    "requires": "zd Quests: Regional Phenomena（隶属）"
+   },
+   "_game_gx": -3781.59,
+   "_game_gy": 153.0,
+   "_game_gz": 2642.74
+  },
+  {
+   "key": "GotoFironeZonauRemains",
+   "name": "环卡遗迹的秘密",
+   "group": "主剧情挑战",
+   "sort": 61,
+   "layer": "地表",
+   "npc": {
+    "cn": "塔乌洛",
+    "id": "Npc_AncientAssistant003_K1",
+    "source": "原有"
+   },
+   "loc": {
+    "cn": "卡卡利科村",
+    "en": "Kakariko"
+   },
+   "start": "在卡卡利科村与帕雅和塔乌洛对话获得（寻找第五位贤者开始后）",
+   "note": "塔乌洛等人解读了环卡遗迹石板上的左纳乌文字，认为海拉鲁东南方费罗尼地区的左纳乌遗迹群中藏着什么。为展开调查，一行人来到泡泡拉高地的鸟望台设立据点，塔乌洛则前往东南方的遗迹群。",
+   "reward": [
+    "开启来自太古的指引",
+    "雷光套服"
+   ],
+   "requires": [
+    "寻找第五位贤者"
+   ],
+   "coord": {
+    "x": 1816,
+    "z": -949,
+    "h": 112,
+    "status": "OK",
+    "isMissingHeight": false,
+    "flowPointCount": 6,
+    "hSource": ""
+   },
+   "romText": "通过解读环卡遗迹的石板上所刻的左纳乌文字， 塔乌洛等人认为海拉鲁东南方的亚热带 费罗尼地区的左纳乌遗迹群中有某种东西。 为了进行调查，他们前往了 □ / 来到了泡泡拉高地的鸟望台。 据设立完调查据点的卡里尤所说， 塔乌洛前往了这里东南方的左纳乌遗迹群。 塔乌洛似乎说过他打算 从 □ / 在龙之石像遗迹和塔乌洛再次碰面， 塔乌洛将遗迹内古代浮雕上的密文 解读出来的内容告诉了你： □",
+   "sources": {
+    "npc": "原有",
+    "startNote": "zeldadungeon 主线页 + ROM 原文互证",
+    "reward": "zeldadungeon 主线页",
+    "loc": "ROM key 映射（复用迷你挑战轮已核对映射）",
+    "requires": "zd Prerequisite: Start Find the Fifth Sage"
+   },
+   "_game_gx": 1816.5,
+   "_game_gy": 218.47,
+   "_game_gz": 949.0
+  },
+  {
+   "key": "SageOfSoul",
+   "name": "来自太古的指引",
+   "group": "主剧情挑战",
+   "sort": 62,
+   "layer": "地表",
+   "npc": {
+    "cn": "米涅鲁",
+    "id": "UnknownNPC_Mineru",
+    "source": "原有"
+   },
+   "loc": {
+    "cn": "龙头岛",
+    "en": "ZonauTriedForceSkyIsland"
+   },
+   "start": "在费罗尼草原上空雷霆岛群的龙头岛上，找到并触碰米涅鲁的面具获得",
+   "note": "你在龙头岛发现了一件奇妙的遗物，它射出一道细长的光束，笔直指向地表。触碰遗物时，一个神秘的声音让你带上它，「跟随光走」。",
+   "reward": [
+    "心之容器",
+    "米涅鲁的贤者誓言",
+    "开启大师之剑的线索"
+   ],
+   "requires": [
+    "调查四地区的异变"
+   ],
+   "coord": {
+    "x": 1364,
+    "z": -3261,
+    "h": 431,
+    "status": "OK",
+    "isMissingHeight": false,
+    "flowPointCount": 5,
+    "hSource": ""
+   },
+   "romText": "在龙头岛发现了放出一道光的神秘遗物， 光看起来像是笔直地延伸至地面上。 “请将它带往 □ / 将遗物放置于地下室的台座上之后， 地板开始移动，并通往更深的地下。 “我们必须尽快相遇。” 再次听到的神秘声音如此说道。 抵达有着巨大遗迹的地下空间后， 遗物开始向 □ / 打倒了被魔王的魔力操控的魔像。 这个魔像出自过去的米涅鲁之手， 它的残骸随弥漫神殿的瘴气 一同消失殆尽了。 祭坛上的 □",
+   "sources": {
+    "npc": "原有",
+    "startNote": "zeldadungeon 主线页 + ROM 原文互证",
+    "reward": "zeldadungeon 主线页",
+    "loc": "ROM key 映射（V2 落地：zd Location 首项 Dragonhead Island（雷霆岛群）+ 主点坐标吻合）",
+    "requires": "zd Prerequisite: start Regional Phenomena"
+   },
+   "_game_gx": 1363.903,
+   "_game_gy": 537.35,
+   "_game_gz": 3261.213
+  },
+  {
+   "key": "GetCamera",
+   "name": "给地底人拍照！",
+   "group": "主剧情挑战",
+   "sort": 71,
+   "layer": "地表",
+   "npc": {
+    "cn": "乔舒亚",
+    "id": "Npc_BaseCamp_Assistant",
+    "source": "原有"
+   },
+   "loc": {
+    "cn": "监视堡垒",
+    "en": "City_BaseCamp"
+   },
+   "start": "在监视堡垒与洛贝利和乔舒亚对话获得（激活监视堡垒鸟望台后）",
+   "note": "乔舒亚给你看了一块来自地底的石板，上面拓着一个人形画像，她认为这是曾生活在地底的种族存在的证据。洛贝利说要亲自下地底帮她寻找更多画像，并希望你必要时用普尔亚平板的相机拍照。去监视堡垒以南的巨穴与他会合吧。",
+   "reward": [
+    "明亮花籽",
+    "箭",
+    "相机",
+    "海拉鲁图鉴",
+    "左纳乌材料×5"
+   ],
+   "requires": [
+    "海拉鲁城堡的异变"
+   ],
+   "coord": {
+    "x": -255,
+    "z": -297,
+    "h": 12,
+    "status": "OK",
+    "isMissingHeight": false,
+    "flowPointCount": 3,
+    "hSource": ""
+   },
+   "romText": "在地底发现了一块碎片， 乔舒亚非常关注上面的 □ / 在深穴内的地底和洛贝利顺利会合。 他帮忙解锁了锁定的照相机， 现在可以使用了。 洛贝利让你去拍摄 酷似 □",
+   "sources": {
+    "npc": "原有",
+    "startNote": "zeldadungeon 主线页 + ROM 原文互证",
+    "reward": "zeldadungeon 主线页",
+    "loc": "ROM key 映射（复用迷你挑战轮已核对映射）",
+    "requires": "zd Prerequisite: Activate Lookout Landing Skyview Tower（属 Crisis 步骤）"
+   },
+   "_game_gx": -254.57,
+   "_game_gy": 118.45,
+   "_game_gz": 297.38
+  },
+  {
+   "key": "DeepHoleSurvey2",
+   "name": "沉睡于地底神殿的谜团",
+   "group": "主剧情挑战",
+   "sort": 72,
+   "layer": "地表",
+   "npc": {
+    "cn": "乔舒亚",
+    "id": "Npc_BaseCamp_Assistant",
+    "source": "原有"
+   },
+   "loc": {
+    "cn": "监视堡垒",
+    "en": "City_BaseCamp"
+   },
+   "start": "在监视堡垒与乔舒亚对话获得（完成给地底人拍照！且至少通过一座神殿后）",
+   "note": "乔舒亚有了新的发现，正为此寻找一同前往地底调查的伙伴。她说「你来的正是时候」，并任命你为她的搭档。跟上乔舒亚，问清调查内容吧。",
+   "reward": [
+    "巨大明亮花籽×10",
+    "箭×10",
+    "蓝图",
+    "大结晶能源",
+    "扇风机翼设计图",
+    "热气球设计图",
+    "大的左纳乌材料",
+    "解锁哈特诺村研究所与依盖队首领任务"
+   ],
+   "requires": [
+    "给地底人拍照！"
+   ],
+   "coord": {
+    "x": -255,
+    "z": 144,
+    "h": 20,
+    "status": "OK",
+    "isMissingHeight": false,
+    "flowPointCount": 1,
+    "hSource": ""
+   },
+   "romText": "乔舒亚称自己有了新的发现， 正为此寻找前往地底调查的同伴。 她表示“你来的正是时候”， 并任命你为她的搭档。 跟上乔舒亚，问清调查内容吧。 / 乔舒亚将描绘着人形像的石板碎片 顺利拼成了一幅巨大的壁画。 她注意到画在中间的 □ / 向乔舒亚报告了 有关“蓝图”的内容后， 她表示想见识一下这种神奇的力量。 她希望你能运用 □",
+   "sources": {
+    "npc": "原有",
+    "startNote": "zeldadungeon 主线页 + ROM 原文互证",
+    "reward": "zeldadungeon 主线页",
+    "loc": "ROM key 映射（复用迷你挑战轮已核对映射）",
+    "requires": "zd Prerequisite（Camera Work + 至少一座迷宫，后者写入 start 括注）"
+   },
+   "_game_gx": -254.795,
+   "_game_gy": 126.29,
+   "_game_gz": -143.771
+  },
+  {
+   "key": "GroundPaintingAir01",
+   "name": "英帕与地上图画",
+   "group": "主剧情挑战",
+   "sort": 81,
+   "layer": "地表",
+   "npc": {
+    "cn": "卡多",
+    "id": "Npc_Kakariko005_Guide",
+    "source": "zd Start「Speak with Cado」+ ROM 原文「向博嘉多传达……他建议你去找英帕」（博嘉多=卡多 Cado；英帕是寻访目标而非接取者）——V1 误提名「英帕」已修正"
+   },
+   "loc": {
+    "cn": "新玛丽塔驿站",
+    "en": "NewHyruleWestHatago"
+   },
+   "start": "在海拉鲁森林公园与卡多对话获得（卡多出现于 9 处位置均可触发）",
+   "note": "卡多告诉你，英帕为了亲眼看看大地上出现的「地上图画」，正在周游海拉鲁。他说英帕就在新玛丽塔驿站附近的遗迹，而他自己也正要前去会合。若你在那里见到英帕，或许能打听到公主下落的线索。",
+   "reward": [
+    "无"
+   ],
+   "requires": [],
+   "coord": {
+    "x": -1313,
+    "z": 823,
+    "h": 95,
+    "status": "OK",
+    "isMissingHeight": false,
+    "flowPointCount": 2,
+    "hSource": ""
+   },
+   "romText": "向博嘉多传达了塞尔达公主行踪的情况后， 他建议你去找英帕打听一下消息。 英帕现在正位于新玛丽塔驿站前的遗迹。 英帕是否拥有 □ / 英帕在调查新玛丽塔驿站 附近的地上图画。 然而从地面上无法一览其全貌， 她为此束手无策。 如果能修好那个损坏的热气球， 或许就能把英帕送到高空中。 / 英帕乘坐热气球，纵览了地上图画的全貌。 按她的说法，地上图画的某处 似乎有种叫作 □",
+   "sources": {
+    "npc": "网络查证修正（V2）",
+    "startNote": "zeldadungeon 主线页 + ROM 原文互证",
+    "reward": "无（zd 页无 Rewards 栏）",
+    "loc": "ROM key 映射（复用迷你挑战轮已核对映射）",
+    "requires": "zeldadungeon 主线页（无 Prerequisite 栏）"
+   },
+   "_game_gx": -1313.137,
+   "_game_gy": 201.33,
+   "_game_gz": -823.495
+  },
+  {
+   "key": "MemoryOfTheDragon",
+   "name": "龙之泪",
+   "group": "主剧情挑战",
+   "sort": 82,
+   "layer": "地表",
+   "npc": {
+    "cn": "博嘉多",
+    "id": "Npc_Wanderer",
+    "source": "原有"
+   },
+   "loc": {
+    "cn": "新玛丽塔驿站",
+    "en": "NewHyruleWestHatago"
+   },
+   "start": "完成英帕与地上图画后自动开启",
+   "note": "你在地上图画中找到了一处神秘的龙之泪，触碰后看到了关于塞尔达公主的幻象。英帕认为地上图画之谜可能与遗忘神殿里的东西有关——神殿位于海布拉某处峡谷的底部。",
+   "reward": [
+    "无"
+   ],
+   "requires": [
+    "英帕与地上图画"
+   ],
+   "coord": {
+    "x": -1421,
+    "z": 2277,
+    "h": -51,
+    "status": "OK",
+    "isMissingHeight": false,
+    "flowPointCount": 2,
+    "hSource": ""
+   },
+   "romText": "在地上图画见到了被称为龙之泪的神奇泉水， 甚至其中还出现了 □ / 在忘却神殿的入口见到了博嘉多。 神殿某处似乎有 □ / 忘却神殿内发现了11张壁画和世界地图， 壁画上的图案和地上图画相同。 似乎伴随着塞尔达公主失踪的那场天地异变， 这些地上图画在各地出现。 还剩 □",
+   "sources": {
+    "npc": "原有",
+    "startNote": "zd Prerequisite（Quest begins immediately after Impa and the Geoglyphs）",
+    "reward": "无（zd 页无 Rewards 栏）",
+    "loc": "ROM key 映射（复用迷你挑战轮已核对映射）",
+    "requires": "zd Prerequisite"
+   },
+   "_game_gx": -1421.443,
+   "_game_gy": 54.56,
+   "_game_gz": -2276.699
+  },
+  {
+   "key": "DefeatGanondorf",
+   "name": "讨伐加侬多夫",
+   "group": "主剧情挑战",
+   "sort": 91,
+   "layer": "地表",
+   "npc": {
+    "cn": "普尔亚",
+    "id": "Npc_AncientDoctor",
+    "source": "原有"
+   },
+   "loc": {
+    "cn": "监视堡垒",
+    "en": "City_BaseCamp"
+   },
+   "start": "",
+   "note": "风、火、水、雷、魂——五位贤者已经觉醒，并将力量托付于你。目前还不知道魔王加侬多夫的所在地。按普尔亚的说法，地底较为可疑。如果与负责调查地底的乔舒亚合作，或许能得到线索。",
+   "reward": [],
+   "requires": [],
+   "coord": {
+    "x": -252,
+    "z": 151,
+    "h": 27,
+    "status": "OK",
+    "isMissingHeight": false,
+    "flowPointCount": 2,
+    "hSource": ""
+   },
+   "romText": "风、火、水、雷、魂， 五位贤者已经觉醒，并将力量托付于你。 目前还不知道魔王加侬多夫的所在地。 按普尔亚的说法，地底较为可疑。 如果找负责调查地底的乔舒亚合作， 或许会得到些线索。",
+   "sources": {
+    "npc": "原有",
+    "startNote": "ROM 原文（zd 页抓取失败）",
+    "reward": "ROM 原文（zd 页抓取失败），待补",
+    "loc": "ROM key 映射（复用迷你挑战轮已核对映射）",
+    "requires": "ROM 原文（zd 页抓取失败），待补"
+   },
+   "_game_gx": -251.5,
+   "_game_gy": 132.92,
+   "_game_gz": -151.0
+  },
+  {
+   "key": "MainChallenge",
+   "name": "寻找塞尔达",
+   "group": "主剧情挑战",
+   "sort": 92,
+   "layer": "天空",
+   "npc": {
+    "cn": "管家魔像",
+    "id": "Npc_Zonau_Golem_Servant_FirstIsland_00",
+    "source": "前轮已证映射（情节挑战轮 FirstIsland_20=管家魔像）"
+   },
+   "loc": {
+    "cn": "初始空岛",
+    "en": "BeginningIsland"
+   },
+   "start": "在初始空岛时之神殿所在的时之庭园，与最初遇到的管家魔像对话获得",
+   "note": "睁眼醒来，发现自己身处一座浮在空中的神奇岛屿。管家魔像声称塞尔达公主把她的普尔亚平板托付给它，为的就是把平板交到你手上。平板地图上显示着一个黄色光点，魔像说在那里就能找到公主。",
+   "reward": [
+    "游戏通关"
+   ],
+   "requires": [],
+   "coord": {
+    "x": 453,
+    "z": -811,
+    "h": 1457,
+    "status": "OK",
+    "isMissingHeight": false,
+    "flowPointCount": 4,
+    "hSource": ""
+   },
+   "romText": "睁眼醒来，发现自己身处一座浮在空中的神奇岛屿。 管家魔像把 □ / 一靠近时之神殿内的祭坛， 塞尔达公主的幻影便随着耀眼的光芒出现。 按她的幻影指引，握住她手的那一刻， 一股力量注入了右手，领会了时之力 □ / 向女神像献上祝福之光以后， 成功祛除了侵蚀躯体的一部分瘴气。 身体的力量虽未完全恢复， 但足以打开那扇门了。 劳鲁留下一句“塞尔达就交给你了”便消失无踪。 这句话真正的意义，也许就在 □ / 并没有在醒来的空岛上找到塞尔达公主。 然而，触碰飘浮在时之神殿最深处的光芒时， 脑海中响起了一句 □",
+   "sources": {
+    "npc": "前轮已证映射（情节挑战轮 FirstIsland_20=管家魔像）",
+    "startNote": "zeldadungeon 主线页 + ROM 原文互证",
+    "reward": "zeldadungeon 主线页",
+    "loc": "ROM key 映射（V2 落地：zd Great Sky Island 双证（V1 已写，去除待确认标记））",
+    "requires": "zeldadungeon 主线页（无前置）"
+   },
+   "_game_gx": 453.0,
+   "_game_gy": 1563.0,
+   "_game_gz": 811.0
+  }
+ ]
+}

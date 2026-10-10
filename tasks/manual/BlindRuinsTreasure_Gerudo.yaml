@@ -1,0 +1,32 @@
+# 任务档案 · BlindRuinsTreasure_Gerudo.yaml · 情节挑战（V2.3 批量导入）
+# ★ 数据源：情节挑战60条-整理数据.json（2026-10-08 校对，60/60 齐备）
+key: BlindRuinsTreasure_Gerudo
+
+npc:
+  cn: 卡兹纳比
+
+loc: 德依布朗遗迹（迷途之森林）
+
+start: 无
+
+note: |-
+  使用电击击打图示标记石块
+
+reward:
+  - 黄玉*3
+
+requires:
+  - 调查德依布朗遗迹吧
+
+# 主坐标覆盖：统一用校对接取点（卡片坐标区/图标/图层都跟它走）
+place:
+  X: 353
+  Z: 3089
+  H: 174
+
+flowPts:
+  - X: 353
+    Z: 3089
+    H: 174
+
+_source: 2026-10-08 情节挑战 60 条批量导入（情节挑战60条-整理数据.json）

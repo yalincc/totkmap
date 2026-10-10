@@ -1,0 +1,14 @@
+# _flags.yaml —— flag → 中文名（迁移自 build_task_plan.py FLAG_CN，2026-10-08）
+# 按 flag 索引：一条 flag 常被多条任务共用。
+Complete_Two_SageChallenges: 通关 2 个主线贤者挑战
+EnemyKilled_AccidentOfDekutree: 打倒德克树长老
+Hateno_FirstEvent_Inside: 哈特诺村的初次事件（村长选举）
+Rito_Npc_AfterSecretStoneOrAfterSong: 通关风之神殿后
+ZonauReliefSearch_Ready: 与监视堡垒的里德乌对话后
+Hateno_ChallengeComplete_04: 完成哈特诺村全部情节挑战后
+Step_SageOfFire_VillagersSchedule: 推进火之神殿主线后
+Clear_GerudoCanyon_ColdEnduranceComparison: 完成格鲁德峡谷的寒冷耐力比赛后
+Gerudo_NpcOasis001_CameGerudo: 首次到访格鲁德小镇后
+HatenoVillage_FinaleEvent: 完成哈特诺村长选举后
+Revive_FinaleEvent_Finish: 完成沃托里村重建后
+Revive_Restaurant_Event: 完成沃托里村餐厅重建后

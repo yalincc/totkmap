@@ -1,0 +1,32 @@
+# 任务档案 · MercenaryChallenge_Akkare.yaml · 情节挑战（V2.3 批量导入）
+# ★ 数据源：情节挑战60条-整理数据.json（2026-10-08 校对，60/60 齐备）
+key: MercenaryChallenge_Akkare
+
+npc:
+  cn: 陀鲁
+
+loc: 奥尔汀峡谷
+
+start: 跟随任务指引与陀鲁对话
+
+note: |-
+  跟随士兵前往【阿卡莱大桥】，消灭全部怪物即可
+
+reward:
+  - 100卢比
+
+requires:
+  - 为奥尔汀带来和平
+
+# 主坐标覆盖：统一用校对接取点（卡片坐标区/图标/图层都跟它走）
+place:
+  X: 3007
+  Z: 1071
+  H: 282
+
+flowPts:
+  - X: 3007
+    Z: 1071
+    H: 282
+
+_source: 2026-10-08 情节挑战 60 条批量导入（情节挑战60条-整理数据.json）

@@ -1,0 +1,32 @@
+# 任务档案 · MercenaryChallenge_Hebra.yaml · 情节挑战（V2.3 批量导入）
+# ★ 数据源：情节挑战60条-整理数据.json（2026-10-08 校对，60/60 齐备）
+key: MercenaryChallenge_Hebra
+
+npc:
+  cn: 霍司塔
+
+loc: 海拉鲁平原
+
+start: 与霍司塔对话
+
+note: |-
+  将所有怪物清除
+
+reward:
+  - 卢比
+
+requires:
+  - 为海拉鲁平原带来和平
+
+# 主坐标覆盖：统一用校对接取点（卡片坐标区/图标/图层都跟它走）
+place:
+  X: 2227
+  Z: -1810
+  H: 14
+
+flowPts:
+  - X: 2227
+    Z: -1810
+    H: 14
+
+_source: 2026-10-08 情节挑战 60 条批量导入（情节挑战60条-整理数据.json）

@@ -1,0 +1,29 @@
+# 任务档案 · NowInTheVillageOfLurelin.yaml · 迷你挑战（V2.3 批量导入）
+# ★ 数据源：迷你挑战139条-整理数据.json（2026-10-08 V3，139/139 齐备）
+key: NowInTheVillageOfLurelin
+
+npc:
+  cn: 利迦尼
+
+loc: 监视堡垒
+
+start: 与利迦尼对话
+
+note: |-
+  消灭沃托里村的海盗
+
+reward:
+  - 力量岩盐烤蟹
+
+# 主坐标覆盖：统一用校对接取点（卡片坐标区/图标/图层都跟它走）
+place:
+  X: -206
+  Z: 72
+  H: 19
+
+flowPts:
+  - X: -206
+    Z: 72
+    H: 19
+
+_source: 2026-10-08 迷你挑战 139 条批量导入（迷你挑战139条-整理数据.json）

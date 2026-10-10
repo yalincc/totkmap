@@ -1,0 +1,18 @@
+# 任务档案 · FindWhiteHorse.yaml（task_batch 导入生成）
+# ★ 2026-10-10 P0 补导：start/note/reward 来自 迷你挑战139条-整理数据.json（V3，zd+ROM 双源）
+#   requires/npc/loc/place 保持档案原状（FindWhiteHorse 的 flag requires=老大确认口径，未覆盖）
+key: FindWhiteHorse
+npc:
+  cn: 赖斯
+loc: 监视堡垒
+start: 与赖斯对话
+note: |-
+  找到斑点马驯服后骑回来
+reward:
+  - 卢比
+  - 速速胡萝卜
+
+requires:
+  - type: flag
+    reqName: 通关 2 个主线贤者挑战
+_source: 老大确认口径：至少通关 2 个主线贤者挑战（Complete_Two_SageChallenges）

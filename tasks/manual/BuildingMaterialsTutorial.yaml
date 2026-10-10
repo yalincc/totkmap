@@ -1,0 +1,17 @@
+# 任务档案 · BuildingMaterialsTutorial.yaml（task_batch 导入生成）
+# ★ 2026-10-10 P0 补导：start/note/reward 来自 迷你挑战139条-整理数据.json（V3，zd+ROM 双源）
+#   requires/npc/loc/place 保持档案原状（FindWhiteHorse 的 flag requires=老大确认口径，未覆盖）
+key: BuildingMaterialsTutorial
+npc:
+  cn: 赖斯
+loc: 监视堡垒
+start: 与赖斯对话
+note: |-
+  使用究极手补上屋顶
+reward:
+  - 解锁监视堡垒马厩
+
+requires:
+  - type: flag
+    reqName: 通关 1 个主线贤者挑战
+_source: ROM 只给了自指 flag；老大手工确认：需通关任意 1 个主线贤者挑战

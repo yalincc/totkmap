@@ -1,0 +1,16 @@
+# 任务档案 · PhotoSpot_Challenge_01.yaml（task_batch 导入生成）
+# ★ 2026-10-10 P0 补导：start/note/reward 来自 迷你挑战139条-整理数据.json（V3，zd+ROM 双源）
+#   requires/npc/loc/place 保持档案原状（FindWhiteHorse 的 flag requires=老大确认口径，未覆盖）
+key: PhotoSpot_Challenge_01
+npc:
+  cn: 思普林
+loc: 新玛丽塔驿站
+start: 在新玛丽塔驿站中调查空画框进入对话
+note: |-
+  在北海拉鲁平原空地图案处上方拍摄“地上图画” 需要热气球等其他物品升空，从空中向地下拍摄
+reward:
+  - 1点驿站点数
+  - 一份
+
+requires:
+  - 给地底人拍照！

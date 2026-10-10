@@ -1,0 +1,2982 @@
+{
+ "meta": {
+  "name": "神庙挑战 31 条 · 完整数据（含序号）",
+  "generated": "2026-10-08",
+  "source": "app/data/task-plan.js（build+merge 最终产物，与网页一致）",
+  "total": 31,
+  "noRule": "档内 no 按 ROM sort 升序 = 游戏内冒险笔记顺序",
+  "coordSystem": "X=gx, Z=-gz, H=gy-106（游戏 UI 口径）",
+  "layerMap": {
+   "18": "地表",
+   "19": "地底",
+   "20": "天空"
+  }
+ },
+ "tasks": [
+  {
+   "key": "CarryToShrine09",
+   "name": "萨托利山的神庙与水晶",
+   "nameSrc": "rom",
+   "cat": "Sub",
+   "kind": "side",
+   "layer": 18,
+   "layers": [
+    18
+   ],
+   "gx": -2275,
+   "gy": 211,
+   "gz": 723,
+   "hasHeight": true,
+   "mapX": 875.0,
+   "mapY": -2136.0,
+   "posSrc": "rom",
+   "posValid": true,
+   "romLayer": 18,
+   "romPt": {
+    "gx": -2136.0,
+    "gy": 199.0,
+    "gz": 875.0
+   },
+   "npc": "UnknownNPC_MysteryVoice",
+   "npcCn": null,
+   "loc": "PoponMt",
+   "locCn": null,
+   "sort": 2191,
+   "nSteps": 2,
+   "steps": [
+    {
+     "name": "Ready",
+     "text": "",
+     "pts": []
+    },
+    {
+     "name": "Carry",
+     "text": "献上水晶后，\n似乎就能进入破魔神庙。\n\n跟随光线指示的方向，\n将水晶献给神庙吧。",
+     "pts": [
+      {
+       "gx": -2136.0,
+       "gy": 199.0,
+       "gz": 875.0
+      }
+     ]
+    }
+   ],
+   "requires": [],
+   "dependFlag": null,
+   "markerId": null,
+   "match": null,
+   "src": "rom",
+   "unlocks": [],
+   "guide": {
+    "start": "在乌萨诸马神庙前触发，光线指示水晶所在，即可开始搬运。",
+    "note": "水晶在**萨托利山山脚洞窟深处，击败西诺克斯掉落**。\n⚠ **搬运途中不能传送**，也不能放手——水晶会原地停留，人离开就掉落。\n神庙正对面有山洞，进入山脚洞窟深处找到西诺克斯，击败后掉落绿色晶体，用究极手带回洞口。宝箱：左纳尼乌姆之强枪。",
+    "deliver": "把水晶搬到乌萨诸马神庙底座凹槽处放下（神庙随之升起、可进入）。",
+    "reward": [
+     "神庙可进入",
+     "祝福之光"
+    ]
+   },
+   "group": "神庙挑战",
+   "no": 1,
+   "groupTotal": 31,
+   "tier": "L1",
+   "flowPts": [
+    {
+     "gx": -2275,
+     "gy": 211,
+     "gz": 723
+    },
+    {
+     "gx": -2138,
+     "gy": 199,
+     "gz": 875
+    }
+   ],
+   "onMap": true,
+   "overlap": [],
+   "reqs": [],
+   "unlockList": [],
+   "stepsUI": [
+    {
+     "name": "Carry",
+     "text": "献上水晶后，\n似乎就能进入破魔神庙。\n\n跟随光线指示的方向，\n将水晶献给神庙吧。"
+    }
+   ],
+   "nStepsUI": 1,
+   "hasStepText": true
+  },
+  {
+   "key": "Rito_ShadowCave",
+   "name": "白鸟所指引的洞窟",
+   "nameSrc": "rom",
+   "cat": "Sub",
+   "kind": "side",
+   "layer": 18,
+   "layers": [
+    18
+   ],
+   "gx": -3634.184,
+   "gy": 311.86,
+   "gz": -1827.367,
+   "hasHeight": true,
+   "mapX": -1827.367,
+   "mapY": -3634.184,
+   "posSrc": "rom",
+   "posValid": true,
+   "romLayer": 18,
+   "romPt": {
+    "gx": -3634.184,
+    "gy": 311.86,
+    "gz": -1827.367
+   },
+   "npc": "Npc_HighMountain030",
+   "npcCn": "索里莱丝",
+   "loc": "Rito",
+   "locCn": null,
+   "sort": 2211,
+   "nSteps": 3,
+   "steps": [
+    {
+     "name": "Ready",
+     "text": "",
+     "pts": []
+    },
+    {
+     "name": "Search",
+     "text": "利特村的居民索里莱丝正在为\n想不起之前发现的洞窟位置而烦恼。\n据说那座洞窟里有　\u0003\u0002",
+     "pts": [
+      {
+       "gx": -3634.184,
+       "gy": 311.86,
+       "gz": -1827.367
+      }
+     ]
+    },
+    {
+     "name": "GetHint",
+     "text": "利特村的居民索里莱丝正在为\n想不起之前发现的洞窟所烦恼。\n据她所述，当朝阳升起之时，\n在梅德栖木的影子处看见了停落的白鸟。\n但实际走到那里时，并没有找到白鸟，\n而是发现了那座　\u0003\u0002",
+     "pts": [
+      {
+       "gx": -3634.184,
+       "gy": 311.86,
+       "gz": -1827.367
+      }
+     ]
+    }
+   ],
+   "requires": [
+    {
+     "type": "quest",
+     "key": "SageOfWind",
+     "resolved": true,
+     "flag": "SageOfWind_IsAfter_TouchSecretStone_Exp"
+    }
+   ],
+   "dependFlag": "SageOfWind_IsAfter_TouchSecretStone_Exp",
+   "markerId": null,
+   "match": null,
+   "src": "rom",
+   "unlocks": [],
+   "guide": {
+    "start": "利特村，与居民「索里莱丝」对话",
+    "note": "前往利特村最高处点火堆消磨时间到**早上**；朝山的方向看，找一个**形似小鸟的积雪层**（用望远镜才看得清）；直接飞过去，在洞窟中找到神庙。\n⚠ 必须**早上**才看得到，其它时段无效；「白鸟」不是真鸟，是雪地光影明暗形成的景观；洞窟里还有宝箱和魔犹依，别漏。\n**神庙内部**：杠杆之力（有解谜）。",
+    "deliver": "神庙显现并可进入。",
+    "reward": [
+     "神庙可进入",
+     "祝福之光"
+    ]
+   },
+   "group": "神庙挑战",
+   "no": 2,
+   "groupTotal": 31,
+   "tier": "L2",
+   "flowPts": [
+    {
+     "gx": -3634.184,
+     "gy": 311.86,
+     "gz": -1827.367
+    }
+   ],
+   "onMap": true,
+   "overlap": [],
+   "reqs": [
+    {
+     "type": "quest",
+     "key": "SageOfWind",
+     "reqName": "利特村的丘栗",
+     "linkable": true
+    }
+   ],
+   "unlockList": [],
+   "stepsUI": [
+    {
+     "name": "Search",
+     "text": "利特村的居民索里莱丝正在为\n想不起之前发现的洞窟位置而烦恼。\n据说那座洞窟里有"
+    },
+    {
+     "name": "GetHint",
+     "text": "利特村的居民索里莱丝正在为\n想不起之前发现的洞窟所烦恼。\n据她所述，当朝阳升起之时，\n在梅德栖木的影子处看见了停落的白鸟。\n但实际走到那里时，并没有找到白鸟，\n而是发现了那座"
+    }
+   ],
+   "nStepsUI": 2,
+   "hasStepText": true
+  },
+  {
+   "key": "CarryToShrine02",
+   "name": "沉睡于吉萨的环形山的水晶",
+   "nameSrc": "rom",
+   "cat": "Sub",
+   "kind": "side",
+   "layer": 18,
+   "layers": [
+    18
+   ],
+   "gx": -3944,
+   "gy": 179,
+   "gz": -1057,
+   "hasHeight": true,
+   "mapX": -1140.0,
+   "mapY": -3951.0,
+   "posSrc": "rom",
+   "posValid": true,
+   "romLayer": 18,
+   "romPt": {
+    "gx": -3951.0,
+    "gy": 218.0,
+    "gz": -1140.0
+   },
+   "npc": "UnknownNPC_MysteryVoice",
+   "npcCn": null,
+   "loc": "TabantaCrater",
+   "locCn": null,
+   "sort": 2290,
+   "nSteps": 2,
+   "steps": [
+    {
+     "name": "Ready",
+     "text": "",
+     "pts": []
+    },
+    {
+     "name": "Carry",
+     "text": "献上水晶后，\n似乎就能进入破魔神庙。\n\n跟随光线指示的方向，\n将水晶献给神庙吧。",
+     "pts": [
+      {
+       "gx": -3951.0,
+       "gy": 218.0,
+       "gz": -1140.0
+      }
+     ]
+    }
+   ],
+   "requires": [],
+   "dependFlag": null,
+   "markerId": null,
+   "match": null,
+   "src": "rom",
+   "unlocks": [],
+   "guide": {
+    "start": "在伊卡塔克神庙前触发，光线指示水晶所在，即可开始搬运。",
+    "note": "水晶在**吉萨山丘洞窟**。\n⚠ **搬运途中不能传送**，也不能放手——水晶会原地停留，人离开就掉落。",
+    "deliver": "把水晶搬到伊卡塔克神庙底座凹槽处放下（神庙随之升起、可进入）。",
+    "reward": [
+     "神庙可进入",
+     "祝福之光"
+    ]
+   },
+   "group": "神庙挑战",
+   "no": 3,
+   "groupTotal": 31,
+   "tier": "L1",
+   "flowPts": [
+    {
+     "gx": -3944,
+     "gy": 179,
+     "gz": -1057
+    },
+    {
+     "gx": -3952,
+     "gy": 217,
+     "gz": -1140
+    }
+   ],
+   "onMap": true,
+   "overlap": [],
+   "reqs": [],
+   "unlockList": [],
+   "stepsUI": [
+    {
+     "name": "Carry",
+     "text": "献上水晶后，\n似乎就能进入破魔神庙。\n\n跟随光线指示的方向，\n将水晶献给神庙吧。"
+    }
+   ],
+   "nStepsUI": 1,
+   "hasStepText": true
+  },
+  {
+   "key": "CarryToShrine15",
+   "name": "海布拉山北方的神庙与水晶",
+   "nameSrc": "rom",
+   "cat": "Sub",
+   "kind": "side",
+   "layer": 18,
+   "layers": [
+    18
+   ],
+   "gx": -2685,
+   "gy": 347,
+   "gz": -3355,
+   "hasHeight": true,
+   "mapX": -3354.169,
+   "mapY": -2558.532,
+   "posSrc": "rom",
+   "posValid": true,
+   "romLayer": 18,
+   "romPt": {
+    "gx": -2558.532,
+    "gy": 350.14,
+    "gz": -3354.169
+   },
+   "npc": "UnknownNPC_MysteryVoice",
+   "npcCn": null,
+   "loc": "MapArea_HeburaMountains",
+   "locCn": "海布拉山脉",
+   "sort": 2291,
+   "nSteps": 2,
+   "steps": [
+    {
+     "name": "Ready",
+     "text": "",
+     "pts": []
+    },
+    {
+     "name": "Carry",
+     "text": "献上水晶后，\n似乎就能进入破魔神庙。\n\n跟随光线指示的方向，\n将水晶献给神庙吧。",
+     "pts": [
+      {
+       "gx": -2558.532,
+       "gy": 350.14,
+       "gz": -3354.169
+      }
+     ]
+    }
+   ],
+   "requires": [],
+   "dependFlag": null,
+   "markerId": null,
+   "match": null,
+   "src": "rom",
+   "unlocks": [],
+   "guide": {
+    "start": "在希斯拉纳神庙前触发，光线指示水晶所在，即可开始搬运。",
+    "note": "水晶在**海布拉山东岳北边，击败冰岩巨人**。\n⚠ **搬运途中不能传送**，也不能放手——水晶会原地停留，人离开就掉落。\n用爆炸道具可融化冰岩巨人表面的寒冰。宝箱：蓝宝石。",
+    "deliver": "把水晶搬到希斯拉纳神庙底座凹槽处放下（神庙随之升起、可进入）。",
+    "reward": [
+     "神庙可进入",
+     "祝福之光"
+    ]
+   },
+   "group": "神庙挑战",
+   "no": 4,
+   "groupTotal": 31,
+   "tier": "L1",
+   "flowPts": [
+    {
+     "gx": -2685,
+     "gy": 347,
+     "gz": -3355
+    },
+    {
+     "gx": -2558,
+     "gy": 350,
+     "gz": -3354
+    }
+   ],
+   "onMap": true,
+   "overlap": [],
+   "reqs": [],
+   "unlockList": [],
+   "stepsUI": [
+    {
+     "name": "Carry",
+     "text": "献上水晶后，\n似乎就能进入破魔神庙。\n\n跟随光线指示的方向，\n将水晶献给神庙吧。"
+    }
+   ],
+   "nStepsUI": 1,
+   "hasStepText": true
+  },
+  {
+   "key": "CarryToShrine16",
+   "name": "沉睡于海布拉山西北的洞窟中的水晶",
+   "nameSrc": "rom",
+   "cat": "Sub",
+   "kind": "side",
+   "layer": 18,
+   "layers": [
+    18
+   ],
+   "gx": -2995,
+   "gy": 605,
+   "gz": -3160,
+   "hasHeight": true,
+   "mapX": -3102.083,
+   "mapY": -2996.957,
+   "posSrc": "rom",
+   "posValid": true,
+   "romLayer": 18,
+   "romPt": {
+    "gx": -2996.957,
+    "gy": 620.48,
+    "gz": -3102.083
+   },
+   "npc": "UnknownNPC_MysteryVoice",
+   "npcCn": null,
+   "loc": "Cave_Hebra_0022",
+   "locCn": "海布拉山西北的洞窟",
+   "sort": 2292,
+   "nSteps": 2,
+   "steps": [
+    {
+     "name": "Ready",
+     "text": "",
+     "pts": []
+    },
+    {
+     "name": "Carry",
+     "text": "献上水晶后，\n似乎就能进入破魔神庙。\n\n跟随光线指示的方向，\n将水晶献给神庙吧。",
+     "pts": [
+      {
+       "gx": -2996.957,
+       "gy": 620.48,
+       "gz": -3102.083
+      }
+     ]
+    }
+   ],
+   "requires": [],
+   "dependFlag": null,
+   "markerId": null,
+   "match": null,
+   "src": "rom",
+   "unlocks": [],
+   "guide": {
+    "start": "在鲁塔富乌每神庙前触发，光线指示水晶所在，即可开始搬运。",
+    "note": "水晶在**洞窟内坡道旁，水晶沉在冰水中**。\n⚠ **搬运途中不能传送**，也不能放手——水晶会原地停留，人离开就掉落。\n进入洞窟向左前方深入，在坡道上找到神庙；水晶沉在冰水中——用火融化湖边冰块可发现宝箱，用胶囊召唤「翼」与水晶组合取出。宝箱：黄玉。",
+    "deliver": "把水晶搬到鲁塔富乌每神庙底座凹槽处放下（神庙随之升起、可进入）。",
+    "reward": [
+     "神庙可进入",
+     "祝福之光"
+    ]
+   },
+   "group": "神庙挑战",
+   "no": 5,
+   "groupTotal": 31,
+   "tier": "L1",
+   "flowPts": [
+    {
+     "gx": -2995,
+     "gy": 605,
+     "gz": -3160
+    },
+    {
+     "gx": -2999,
+     "gy": 620,
+     "gz": -3101
+    }
+   ],
+   "onMap": true,
+   "overlap": [],
+   "reqs": [],
+   "unlockList": [],
+   "stepsUI": [
+    {
+     "name": "Carry",
+     "text": "献上水晶后，\n似乎就能进入破魔神庙。\n\n跟随光线指示的方向，\n将水晶献给神庙吧。"
+    }
+   ],
+   "nStepsUI": 1,
+   "hasStepText": true
+  },
+  {
+   "key": "Korok_CarryToShrine",
+   "name": "漂亮的石头与金苹果",
+   "nameSrc": "rom",
+   "cat": "Sub",
+   "kind": "side",
+   "layer": 18,
+   "layers": [
+    18
+   ],
+   "gx": 829.0,
+   "gy": 296.0,
+   "gz": -2405.0,
+   "hasHeight": true,
+   "mapX": -2405.0,
+   "mapY": 829.0,
+   "posSrc": "rom",
+   "posValid": true,
+   "romLayer": 18,
+   "romPt": {
+    "gx": 829.0,
+    "gy": 296.0,
+    "gz": -2405.0
+   },
+   "npc": "Npc_Kokiri011",
+   "npcCn": "达秘达米",
+   "loc": "Cokiri",
+   "locCn": null,
+   "sort": 2311,
+   "nSteps": 4,
+   "steps": [
+    {
+     "name": "Ready",
+     "text": "",
+     "pts": []
+    },
+    {
+     "name": "Step01",
+     "text": "",
+     "pts": [
+      {
+       "gx": 829.0,
+       "gy": 296.0,
+       "gz": -2405.0
+      }
+     ]
+    },
+    {
+     "name": "Carry",
+     "text": "将5个金苹果交给了达秘达米。\n达秘达米拿到了许多喜欢的金苹果\n因此看起来心满意足。\n按照约定，达秘达米将\n　\u0003\u0002",
+     "pts": [
+      {
+       "gx": 565.0,
+       "gy": 264.0,
+       "gz": -2160.0
+      }
+     ]
+    },
+    {
+     "name": "Crystal",
+     "text": "达秘达米将散发绿光的漂亮石头送给了你。\n献上石头后，\n似乎就能进入破魔神庙。\n\n跟随光线指示的方向，\n将水晶献给神庙吧。",
+     "pts": [
+      {
+       "gx": 622.0,
+       "gy": 269.0,
+       "gz": -2211.0
+      }
+     ]
+    }
+   ],
+   "requires": [
+    {
+     "type": "flag",
+     "key": null,
+     "resolved": false,
+     "flag": "EnemyKilled_AccidentOfDekutree"
+    }
+   ],
+   "dependFlag": "EnemyKilled_AccidentOfDekutree",
+   "markerId": null,
+   "match": null,
+   "src": "rom",
+   "unlocks": [],
+   "guide": {
+    "start": "克洛格森林中央广场东侧，与「达秘达米」对话（他身旁就是发光绿石）",
+    "note": "达秘达米要 **5 个金苹果** 换发光绿石；金苹果在**米多沼泽北侧**的树上（沿他旁边的小路深入）；交 5 个金苹果拿到绿石（水晶），把水晶带到神庙底座。\n⚠ 沼泽是**无底泥沼**，踩进去会下沉——爬上大树用滑翔，或用原木搭桥；达秘达米**不介意金苹果从哪来**，身上有 5 个可直接给；沿途敌人不必打。\n**神庙内部**：劳鲁的祝福（无解谜），宝箱 = 左纳尼乌姆之刚剑。",
+    "deliver": "神庙显现并可进入。",
+    "reward": [
+     "神庙可进入",
+     "祝福之光"
+    ]
+   },
+   "group": "神庙挑战",
+   "no": 6,
+   "groupTotal": 31,
+   "tier": "L1",
+   "flowPts": [
+    {
+     "gx": 829.0,
+     "gy": 296.0,
+     "gz": -2405.0
+    },
+    {
+     "gx": 565.0,
+     "gy": 264.0,
+     "gz": -2160.0
+    },
+    {
+     "gx": 622.0,
+     "gy": 269.0,
+     "gz": -2211.0
+    }
+   ],
+   "onMap": true,
+   "overlap": [],
+   "reqs": [
+    {
+     "type": "flag",
+     "flag": "EnemyKilled_AccidentOfDekutree",
+     "reqName": "打倒德克树长老",
+     "linkable": false
+    },
+    {
+     "type": "flag",
+     "reqName": "击败德库树深处的幻影加侬",
+     "linkable": false
+    }
+   ],
+   "unlockList": [],
+   "stepsUI": [
+    {
+     "name": "Carry",
+     "text": "将5个金苹果交给了达秘达米。\n达秘达米拿到了许多喜欢的金苹果\n因此看起来心满意足。\n按照约定，达秘达米将"
+    },
+    {
+     "name": "Crystal",
+     "text": "达秘达米将散发绿光的漂亮石头送给了你。\n献上石头后，\n似乎就能进入破魔神庙。\n\n跟随光线指示的方向，\n将水晶献给神庙吧。"
+    }
+   ],
+   "nStepsUI": 2,
+   "hasStepText": true
+  },
+  {
+   "key": "NoTrespassing",
+   "name": "前方禁止进入？",
+   "nameSrc": "rom",
+   "cat": "Sub",
+   "kind": "side",
+   "layer": 18,
+   "layers": [
+    18
+   ],
+   "gx": 341.246,
+   "gy": 256.33,
+   "gz": -2167.101,
+   "hasHeight": true,
+   "mapX": -2167.101,
+   "mapY": 341.246,
+   "posSrc": "rom",
+   "posValid": true,
+   "romLayer": 18,
+   "romPt": {
+    "gx": 341.246,
+    "gy": 256.33,
+    "gz": -2167.101
+   },
+   "npc": "Npc_Kokiri010",
+   "npcCn": "阿兹基",
+   "loc": "Cokiri",
+   "locCn": null,
+   "sort": 2312,
+   "nSteps": 3,
+   "steps": [
+    {
+     "name": "Ready",
+     "text": "",
+     "pts": []
+    },
+    {
+     "name": "Step01",
+     "text": "据阿兹基所说，曾经去过的森林深处\n有座像神庙一样的东西，\n但是现在出现了许多怪物，\n因此他正在看守，阻拦克洛格们进入。\n\n如果不是克洛格的话，他似乎可以放行。",
+     "pts": [
+      {
+       "gx": 341.246,
+       "gy": 256.33,
+       "gz": -2167.101
+      }
+     ]
+    },
+    {
+     "name": "Carry",
+     "text": "在森林深处发现了神庙。\n阿兹基所说的地方，应该就是这里吧。\n\n似乎只要献上水晶，\n就能进入破魔神庙。\n跟随光线指示，将水晶献给神庙吧。",
+     "pts": [
+      {
+       "gx": 341.246,
+       "gy": 256.33,
+       "gz": -2167.101
+      }
+     ]
+    }
+   ],
+   "requires": [
+    {
+     "type": "flag",
+     "key": null,
+     "resolved": false,
+     "flag": "EnemyKilled_AccidentOfDekutree"
+    }
+   ],
+   "dependFlag": "EnemyKilled_AccidentOfDekutree",
+   "markerId": null,
+   "match": null,
+   "src": "rom",
+   "unlocks": [],
+   "guide": {
+    "start": "克洛格森林中央广场西北角，与「阿兹基」对话",
+    "note": "沿前方小路前进（跟着路边的潜行草走）→ 消灭沿途敌人 → 前方找到神庙 → 跟随指引**击败一只岩石巨人**拿到水晶 → 把水晶带回神庙。\n阿兹基在阻拦克洛格们进入，非克洛格可放行。\n**神庙内部**：无解谜。",
+    "deliver": "神庙显现并可进入。",
+    "reward": [
+     "神庙可进入",
+     "祝福之光"
+    ]
+   },
+   "group": "神庙挑战",
+   "no": 7,
+   "groupTotal": 31,
+   "tier": "L2",
+   "flowPts": [
+    {
+     "gx": 341.246,
+     "gy": 256.33,
+     "gz": -2167.101
+    }
+   ],
+   "onMap": true,
+   "overlap": [],
+   "reqs": [
+    {
+     "type": "flag",
+     "flag": "EnemyKilled_AccidentOfDekutree",
+     "reqName": "打倒德克树长老",
+     "linkable": false
+    }
+   ],
+   "unlockList": [],
+   "stepsUI": [
+    {
+     "name": "Step01",
+     "text": "据阿兹基所说，曾经去过的森林深处\n有座像神庙一样的东西，\n但是现在出现了许多怪物，\n因此他正在看守，阻拦克洛格们进入。\n\n如果不是克洛格的话，他似乎可以放行。"
+    },
+    {
+     "name": "Carry",
+     "text": "在森林深处发现了神庙。\n阿兹基所说的地方，应该就是这里吧。\n\n似乎只要献上水晶，\n就能进入破魔神庙。\n跟随光线指示，将水晶献给神庙吧。"
+    }
+   ],
+   "nStepsUI": 2,
+   "hasStepText": true
+  },
+  {
+   "key": "InfiltrationFromTheSky",
+   "name": "玛卡玛喀的珍藏地点",
+   "nameSrc": "rom",
+   "cat": "Sub",
+   "kind": "side",
+   "layer": 18,
+   "layers": [
+    18
+   ],
+   "gx": 360.0,
+   "gy": 297.0,
+   "gz": -1898.0,
+   "hasHeight": true,
+   "mapX": -1898.0,
+   "mapY": 360.0,
+   "posSrc": "rom",
+   "posValid": true,
+   "romLayer": 18,
+   "romPt": {
+    "gx": 360.0,
+    "gy": 297.0,
+    "gz": -1898.0
+   },
+   "npc": "Npc_kokiri005",
+   "npcCn": "玛卡玛喀",
+   "loc": "Cokiri",
+   "locCn": null,
+   "sort": 2313,
+   "nSteps": 2,
+   "steps": [
+    {
+     "name": "Ready",
+     "text": "",
+     "pts": []
+    },
+    {
+     "name": "Step01",
+     "text": "玛卡玛喀透露了自己的一个珍藏地点，\n但他说一片迷途之雾笼罩着那里，\n只有克洛格才能走过去。\n那地方似乎有绿色的圈圈，还能看见空中的岛屿。\n“　\u0003\u0002",
+     "pts": [
+      {
+       "gx": 360.0,
+       "gy": 297.0,
+       "gz": -1898.0
+      }
+     ]
+    }
+   ],
+   "requires": [
+    {
+     "type": "flag",
+     "key": null,
+     "resolved": false,
+     "flag": "EnemyKilled_AccidentOfDekutree"
+    }
+   ],
+   "dependFlag": "EnemyKilled_AccidentOfDekutree",
+   "markerId": null,
+   "match": null,
+   "src": "rom",
+   "unlocks": [],
+   "guide": {
+    "start": "克洛格森林中央广场西南角，与「玛卡玛喀」对话",
+    "note": "他会提示珍藏地点有迷途之雾、绿色圈圈、能看见空中的岛屿 → 前往**克洛格森林上方的空岛** → 从空岛向**下方的神庙俯冲** → 落地即进入。\n**神庙内部**：无解谜。",
+    "deliver": "神庙显现并可进入。",
+    "reward": [
+     "神庙可进入",
+     "祝福之光"
+    ]
+   },
+   "group": "神庙挑战",
+   "no": 8,
+   "groupTotal": 31,
+   "tier": "L2",
+   "flowPts": [
+    {
+     "gx": 360.0,
+     "gy": 297.0,
+     "gz": -1898.0
+    }
+   ],
+   "onMap": true,
+   "overlap": [],
+   "reqs": [
+    {
+     "type": "flag",
+     "flag": "EnemyKilled_AccidentOfDekutree",
+     "reqName": "打倒德克树长老",
+     "linkable": false
+    }
+   ],
+   "unlockList": [],
+   "stepsUI": [
+    {
+     "name": "Step01",
+     "text": "玛卡玛喀透露了自己的一个珍藏地点，\n但他说一片迷途之雾笼罩着那里，\n只有克洛格才能走过去。\n那地方似乎有绿色的圈圈，还能看见空中的岛屿。\n“"
+    }
+   ],
+   "nStepsUI": 1,
+   "hasStepText": true
+  },
+  {
+   "key": "CarryToShrine01",
+   "name": "死亡破火山口的神庙与水晶",
+   "nameSrc": "rom",
+   "cat": "Sub",
+   "kind": "side",
+   "layer": 18,
+   "layers": [
+    18
+   ],
+   "gx": 2630,
+   "gy": 635,
+   "gz": -2745,
+   "hasHeight": true,
+   "mapX": -2757.0,
+   "mapY": 2961.0,
+   "posSrc": "rom",
+   "posValid": true,
+   "romLayer": 18,
+   "romPt": {
+    "gx": 2961.0,
+    "gy": 630.0,
+    "gz": -2757.0
+   },
+   "npc": "UnknownNPC_MysteryVoice",
+   "npcCn": null,
+   "loc": "DeathCaldera",
+   "locCn": null,
+   "sort": 2491,
+   "nSteps": 2,
+   "steps": [
+    {
+     "name": "Ready",
+     "text": "",
+     "pts": []
+    },
+    {
+     "name": "Carry",
+     "text": "献上水晶后，\n似乎就能进入破魔神庙。\n\n跟随光线指示的方向，\n将水晶献给神庙吧。",
+     "pts": [
+      {
+       "gx": 2961.0,
+       "gy": 630.0,
+       "gz": -2757.0
+      }
+     ]
+    }
+   ],
+   "requires": [],
+   "dependFlag": null,
+   "markerId": null,
+   "match": null,
+   "src": "rom",
+   "unlocks": [],
+   "guide": {
+    "start": "在死亡之山的破魔神庙（摩摩希卡神庙）前触发，光线指示水晶所在，即可开始搬运。",
+    "note": "水晶在**矿山半山腰的坑道内**（死亡之山东坑道）——破岩进洞、搭矿车前进，击败**熔岩巨人**取得水晶，再用矿车把水晶运出山洞。\n⚠ **搬运途中不能传送**，也不能放手——水晶会原地停留，人离开就掉落。\n洞内温度很高，**需要防火套装/耐火料理**；洞口若被封需用炸弹花炸开。\n雨天水晶容易滑落，可等雨停再搬。",
+    "deliver": "把水晶搬到摩摩希卡神庙底座凹槽处放下（神庙随之升起、可进入）。",
+    "reward": [
+     "神庙可进入",
+     "祝福之光"
+    ]
+   },
+   "group": "神庙挑战",
+   "no": 9,
+   "groupTotal": 31,
+   "tier": "L1",
+   "flowPts": [
+    {
+     "gx": 2630,
+     "gy": 635,
+     "gz": -2745
+    },
+    {
+     "gx": 2961,
+     "gy": 630,
+     "gz": -2758
+    }
+   ],
+   "onMap": true,
+   "overlap": [],
+   "reqs": [],
+   "unlockList": [],
+   "stepsUI": [
+    {
+     "name": "Carry",
+     "text": "献上水晶后，\n似乎就能进入破魔神庙。\n\n跟随光线指示的方向，\n将水晶献给神庙吧。"
+    }
+   ],
+   "nStepsUI": 1,
+   "hasStepText": true
+  },
+  {
+   "key": "CarryToShrine03",
+   "name": "沉睡于幽芬湖的洞窟中的水晶",
+   "nameSrc": "rom",
+   "cat": "Sub",
+   "kind": "side",
+   "layer": 18,
+   "layers": [
+    18
+   ],
+   "gx": 2493,
+   "gy": 242,
+   "gz": -1855,
+   "hasHeight": true,
+   "mapX": -1902.0,
+   "mapY": 2680.0,
+   "posSrc": "rom",
+   "posValid": true,
+   "romLayer": 18,
+   "romPt": {
+    "gx": 2680.0,
+    "gy": 236.0,
+    "gz": -1902.0
+   },
+   "npc": "UnknownNPC_MysteryVoice",
+   "npcCn": null,
+   "loc": "Cave_Eldin_0031",
+   "locCn": null,
+   "sort": 2492,
+   "nSteps": 2,
+   "steps": [
+    {
+     "name": "Ready",
+     "text": "",
+     "pts": []
+    },
+    {
+     "name": "Carry",
+     "text": "献上水晶后，\n似乎就能进入破魔神庙。\n\n跟随光线指示的方向，\n将水晶献给神庙吧。",
+     "pts": [
+      {
+       "gx": 2680.0,
+       "gy": 236.0,
+       "gz": -1902.0
+      }
+     ]
+    }
+   ],
+   "requires": [],
+   "dependFlag": null,
+   "markerId": null,
+   "match": null,
+   "src": "rom",
+   "unlocks": [],
+   "guide": {
+    "start": "在摩夏皮恩神庙前触发，光线指示水晶所在，即可开始搬运。",
+    "note": "水晶在**盖洛湖旁洞窟，岔路口向左，左侧山洞高台上**。\n⚠ **搬运途中不能传送**，也不能放手——水晶会原地停留，人离开就掉落。\n先到鼓隆城买两件耐火防具；消灭敌人后用炸弹破坏岩石前进，岔路口向左；用水龙头往岩浆浇水制造石板，石板+风扇组小船运水晶过岩浆湖。宝箱：左纳尼乌姆之坚盾。",
+    "deliver": "把水晶搬到摩夏皮恩神庙底座凹槽处放下（神庙随之升起、可进入）。",
+    "reward": [
+     "神庙可进入",
+     "祝福之光"
+    ]
+   },
+   "group": "神庙挑战",
+   "no": 10,
+   "groupTotal": 31,
+   "tier": "L1",
+   "flowPts": [
+    {
+     "gx": 2493,
+     "gy": 242,
+     "gz": -1855
+    },
+    {
+     "gx": 2680,
+     "gy": 236,
+     "gz": -1904
+    }
+   ],
+   "onMap": true,
+   "overlap": [],
+   "reqs": [],
+   "unlockList": [],
+   "stepsUI": [
+    {
+     "name": "Carry",
+     "text": "献上水晶后，\n似乎就能进入破魔神庙。\n\n跟随光线指示的方向，\n将水晶献给神庙吧。"
+    }
+   ],
+   "nStepsUI": 1,
+   "hasStepText": true
+  },
+  {
+   "key": "IchikaraChallenge03",
+   "name": "卖了这块石头",
+   "nameSrc": "rom",
+   "cat": "Sub",
+   "kind": "side",
+   "layer": 18,
+   "layers": [
+    18
+   ],
+   "gx": 3921.695,
+   "gy": 235.05,
+   "gz": -1597.942,
+   "hasHeight": true,
+   "mapX": -1597.942,
+   "mapY": 3921.695,
+   "posSrc": "rom",
+   "posValid": true,
+   "romLayer": 18,
+   "romPt": {
+    "gx": 3921.695,
+    "gy": 235.05,
+    "gz": -1597.942
+   },
+   "npc": "Npc_UMiiVillage009",
+   "npcCn": "哈吉",
+   "loc": "UMiiVillage",
+   "locCn": null,
+   "sort": 2511,
+   "nSteps": 2,
+   "steps": [
+    {
+     "name": "Ready",
+     "text": "",
+     "pts": []
+    },
+    {
+     "name": "Search",
+     "text": "哈吉企图以100卢比的价格\n强行卖出怪石头，\n被妻子哈鲁丽教训后，\n降价到50卢比。",
+     "pts": [
+      {
+       "gx": 3921.695,
+       "gy": 235.05,
+       "gz": -1597.942
+      }
+     ]
+    }
+   ],
+   "requires": [],
+   "dependFlag": null,
+   "markerId": null,
+   "match": null,
+   "src": "rom",
+   "unlocks": [],
+   "guide": {
+    "start": "一始村（阿卡莱高原）轨道车站旁，与「哈吉」对话（绿水晶在他身后）",
+    "note": "哈吉开价 **100 卢比** → 选「再便宜一点」他降到 80 → **继续还价**，妻子哈鲁丽介入压到 **50 卢比** → 花 50 买下；再与哈吉对话搭轨道车，用究极手把水晶**固定在轨道车平台上**防掉落，搭车到松达建筑店作业场所；用木材+风扇做**木筏**，把水晶运过河到神庙。\n⚠ **一定要还价等妻子介入**，直接买多付 50 卢比；水晶**不能收进袋子**，必须固定在载具上运输；绿光会直接指向神庙底座。\n**神庙内部**：劳鲁的祝福，宝箱 = **钻石**。",
+    "deliver": "神庙显现并可进入。",
+    "reward": [
+     "神庙可进入",
+     "祝福之光"
+    ]
+   },
+   "group": "神庙挑战",
+   "no": 11,
+   "groupTotal": 31,
+   "tier": "L2",
+   "flowPts": [
+    {
+     "gx": 3921.695,
+     "gy": 235.05,
+     "gz": -1597.942
+    }
+   ],
+   "onMap": true,
+   "overlap": [],
+   "reqs": [],
+   "unlockList": [],
+   "stepsUI": [
+    {
+     "name": "Search",
+     "text": "哈吉企图以100卢比的价格\n强行卖出怪石头，\n被妻子哈鲁丽教训后，\n降价到50卢比。"
+    }
+   ],
+   "nStepsUI": 1,
+   "hasStepText": true
+  },
+  {
+   "key": "CraftShadowPicture",
+   "name": "染作漆黑",
+   "nameSrc": "rom",
+   "cat": "Sub",
+   "kind": "side",
+   "layer": 18,
+   "layers": [
+    18
+   ],
+   "gx": 2390.409,
+   "gy": 265.64,
+   "gz": 521.866,
+   "hasHeight": true,
+   "mapX": 521.866,
+   "mapY": 2390.409,
+   "posSrc": "rom",
+   "posValid": true,
+   "romLayer": 18,
+   "romPt": {
+    "gx": 2390.409,
+    "gy": 265.64,
+    "gz": 521.866
+   },
+   "npc": "Npc_Zonau_Golem_Servant_Shrine_01",
+   "npcCn": "管家魔像",
+   "loc": "MapArea_LanayruWaterSources",
+   "locCn": null,
+   "sort": 2690,
+   "nSteps": 2,
+   "steps": [
+    {
+     "name": "Ready",
+     "text": "",
+     "pts": []
+    },
+    {
+     "name": "Step1",
+     "text": "坠落在拉聂尔山西北阔塔台地的遗迹内\n有一座圣之神庙，\n管家魔像传达了指引发现神庙的话语：\n　\u0003\u0002",
+     "pts": [
+      {
+       "gx": 2390.409,
+       "gy": 265.64,
+       "gz": 521.866
+      }
+     ]
+    }
+   ],
+   "requires": [],
+   "dependFlag": null,
+   "markerId": null,
+   "match": null,
+   "src": "rom",
+   "unlocks": [],
+   "guide": {
+    "start": "拉聂尔山西北阔塔台地遗迹，与「管家魔像」对话",
+    "note": "把地上的**两块木板**插进装置（十字滚筒），用究极手转动；拼出与墙上白色纹路吻合的阴影形状（装置上另有一块**不可挪动**的遗迹板）；旁边火堆休息跳到**早上**，等阳光照射使阴影**完全覆盖**墙上白色砖块 → 神庙显现。\n⚠ 必须等到**早上太阳升起**，阴影与图案重合才触发。提示：「太阳苏醒之时，将白色纹路染作漆黑」。\n**神庙内部**：无解谜。",
+    "deliver": "神庙显现并可进入。",
+    "reward": [
+     "神庙可进入",
+     "祝福之光"
+    ]
+   },
+   "group": "神庙挑战",
+   "no": 12,
+   "groupTotal": 31,
+   "tier": "L2",
+   "flowPts": [
+    {
+     "gx": 2390.409,
+     "gy": 265.64,
+     "gz": 521.866
+    }
+   ],
+   "onMap": true,
+   "overlap": [],
+   "reqs": [],
+   "unlockList": [],
+   "stepsUI": [
+    {
+     "name": "Step1",
+     "text": "坠落在拉聂尔山西北阔塔台地的遗迹内\n有一座圣之神庙，\n管家魔像传达了指引发现神庙的话语："
+    }
+   ],
+   "nStepsUI": 1,
+   "hasStepText": true
+  },
+  {
+   "key": "SnowyMountain_Surfing",
+   "name": "高天之泉与光环的传说",
+   "nameSrc": "rom",
+   "cat": "Sub",
+   "kind": "side",
+   "layer": 18,
+   "layers": [
+    18
+   ],
+   "gx": 3958.67,
+   "gy": 571.04,
+   "gz": 1359.88,
+   "hasHeight": true,
+   "mapX": 1359.88,
+   "mapY": 3958.67,
+   "posSrc": "rom",
+   "posValid": true,
+   "romLayer": 18,
+   "romPt": {
+    "gx": 3958.67,
+    "gy": 571.04,
+    "gz": 1359.88
+   },
+   "npc": "Npc_Road_033",
+   "npcCn": "纳兹比",
+   "loc": "MapArea_LiveMountain",
+   "locCn": null,
+   "sort": 2691,
+   "nSteps": 2,
+   "steps": [
+    {
+     "name": "Ready",
+     "text": "",
+     "pts": []
+    },
+    {
+     "name": "Step1",
+     "text": "在拉聂尔山山顶附近的智慧之泉边，\n纳兹比把流传于此地的传说告诉了你。\n　\u0003\u0002",
+     "pts": [
+      {
+       "gx": 3958.67,
+       "gy": 571.04,
+       "gz": 1359.88
+      }
+     ]
+    }
+   ],
+   "requires": [],
+   "dependFlag": null,
+   "markerId": null,
+   "match": null,
+   "src": "rom",
+   "unlocks": [],
+   "guide": {
+    "start": "拉聂尔山顶智慧之泉边，烤火的旅行者「纳兹比」（也可直接去空岛触发）",
+    "note": "从拉聂尔山鸟望台弹射升空（或从大勇之岛朝南拉聂尔天空诸岛的高空浮岛飞）；在浮岛最高处调查**发光的纹章机关**启动挑战；从高空跳台一跃而下，**盾牌滑雪**沿雪山依次穿过所有**绿色光圈**；到达终点 → 神庙显现。\n⚠ **速度太慢会失败** → 建议盾牌滑雪（空中按住 ZL 再按 A）；挑战起点会自动存档，失败可直接读档重来。传说谜面：「掠过雪地，从高天之泉到脚下的山脉。穿过光环，看见祝福之光」。\n**神庙内部**：赤膊上阵 · 上升（试炼，没收装备）。",
+    "deliver": "神庙显现并可进入。",
+    "reward": [
+     "神庙可进入",
+     "祝福之光"
+    ]
+   },
+   "group": "神庙挑战",
+   "no": 13,
+   "groupTotal": 31,
+   "tier": "L2",
+   "flowPts": [
+    {
+     "gx": 3958.67,
+     "gy": 571.04,
+     "gz": 1359.88
+    }
+   ],
+   "onMap": true,
+   "overlap": [],
+   "reqs": [],
+   "unlockList": [],
+   "stepsUI": [
+    {
+     "name": "Step1",
+     "text": "在拉聂尔山山顶附近的智慧之泉边，\n纳兹比把流传于此地的传说告诉了你。"
+    }
+   ],
+   "nStepsUI": 1,
+   "hasStepText": true
+  },
+  {
+   "key": "CarryToShrine10",
+   "name": "拉聂尔参道的神庙与水晶",
+   "nameSrc": "rom",
+   "cat": "Sub",
+   "kind": "side",
+   "layer": 18,
+   "layers": [
+    18
+   ],
+   "gx": 2679,
+   "gy": 232,
+   "gz": 1375,
+   "hasHeight": true,
+   "mapX": 1089.604,
+   "mapY": 2754.787,
+   "posSrc": "rom",
+   "posValid": true,
+   "romLayer": 18,
+   "romPt": {
+    "gx": 2754.787,
+    "gy": 207.28,
+    "gz": 1089.604
+   },
+   "npc": "UnknownNPC_MysteryVoice",
+   "npcCn": null,
+   "loc": "ShigonDam",
+   "locCn": null,
+   "sort": 2692,
+   "nSteps": 2,
+   "steps": [
+    {
+     "name": "Ready",
+     "text": "",
+     "pts": []
+    },
+    {
+     "name": "Carry",
+     "text": "献上水晶后，\n似乎就能进入破魔神庙。\n\n跟随光线指示的方向，\n将水晶献给神庙吧。",
+     "pts": [
+      {
+       "gx": 2754.787,
+       "gy": 207.28,
+       "gz": 1089.604
+      }
+     ]
+    }
+   ],
+   "requires": [],
+   "dependFlag": null,
+   "markerId": null,
+   "match": null,
+   "src": "rom",
+   "unlocks": [],
+   "guide": {
+    "start": "在欧欧基恩神庙前触发，光线指示水晶所在，即可开始搬运。",
+    "note": "水晶在**河三岔口旁遗迹；毁岩找滑翔翼，组装飞机运回**。\n⚠ **搬运途中不能传送**，也不能放手——水晶会原地停留，人离开就掉落。",
+    "deliver": "把水晶搬到欧欧基恩神庙底座凹槽处放下（神庙随之升起、可进入）。",
+    "reward": [
+     "神庙可进入",
+     "祝福之光"
+    ]
+   },
+   "group": "神庙挑战",
+   "no": 14,
+   "groupTotal": 31,
+   "tier": "L1",
+   "flowPts": [
+    {
+     "gx": 2679,
+     "gy": 232,
+     "gz": 1375
+    },
+    {
+     "gx": 2756,
+     "gy": 205,
+     "gz": 1088
+    }
+   ],
+   "onMap": true,
+   "overlap": [],
+   "reqs": [],
+   "unlockList": [],
+   "stepsUI": [
+    {
+     "name": "Carry",
+     "text": "献上水晶后，\n似乎就能进入破魔神庙。\n\n跟随光线指示的方向，\n将水晶献给神庙吧。"
+    }
+   ],
+   "nStepsUI": 1,
+   "hasStepText": true
+  },
+  {
+   "key": "CarryToShrine08_Zora",
+   "name": "沉睡于拉尔斯水脉的神庙与水晶",
+   "nameSrc": "rom",
+   "cat": "Sub",
+   "kind": "side",
+   "layer": 18,
+   "layers": [
+    18
+   ],
+   "gx": 2922,
+   "gy": 257,
+   "gz": -215,
+   "hasHeight": true,
+   "mapX": -510.2,
+   "mapY": 2920.118,
+   "posSrc": "rom",
+   "posValid": true,
+   "romLayer": 18,
+   "romPt": {
+    "gx": 2920.118,
+    "gy": 262.21,
+    "gz": -510.2
+   },
+   "npc": "UnknownNPC_MysteryVoice",
+   "npcCn": null,
+   "loc": "Cave_Lanayru_0048",
+   "locCn": null,
+   "sort": 2693,
+   "nSteps": 2,
+   "steps": [
+    {
+     "name": "Ready",
+     "text": "",
+     "pts": []
+    },
+    {
+     "name": "Step1",
+     "text": "献上水晶后，\n似乎就能进入破魔神庙。\n\n跟随光线指示的方向，\n将水晶献给神庙吧。",
+     "pts": [
+      {
+       "gx": 2920.118,
+       "gy": 262.21,
+       "gz": -510.2
+      }
+     ]
+    }
+   ],
+   "requires": [],
+   "dependFlag": null,
+   "markerId": null,
+   "match": null,
+   "src": "rom",
+   "unlocks": [],
+   "guide": {
+    "start": "在乔尼乌神庙前触发，光线指示水晶所在，即可开始搬运。",
+    "note": "⚠ **搬运途中不能传送**，也不能放手——水晶会原地停留，人离开就掉落。",
+    "deliver": "把水晶搬到乔尼乌神庙底座凹槽处放下（神庙随之升起、可进入）。",
+    "reward": [
+     "神庙可进入",
+     "祝福之光"
+    ]
+   },
+   "group": "神庙挑战",
+   "no": 15,
+   "groupTotal": 31,
+   "tier": "L1",
+   "flowPts": [
+    {
+     "gx": 2922,
+     "gy": 257,
+     "gz": -215
+    },
+    {
+     "gx": 2918,
+     "gy": 260,
+     "gz": -508
+    }
+   ],
+   "onMap": true,
+   "overlap": [],
+   "reqs": [],
+   "unlockList": [],
+   "stepsUI": [
+    {
+     "name": "Step1",
+     "text": "献上水晶后，\n似乎就能进入破魔神庙。\n\n跟随光线指示的方向，\n将水晶献给神庙吧。"
+    }
+   ],
+   "nStepsUI": 1,
+   "hasStepText": true
+  },
+  {
+   "key": "IceMaking",
+   "name": "由水而生的钥匙",
+   "nameSrc": "rom",
+   "cat": "Sub",
+   "kind": "side",
+   "layer": 18,
+   "layers": [
+    18
+   ],
+   "gx": 944.5,
+   "gy": 122.85,
+   "gz": 1908.7,
+   "hasHeight": true,
+   "mapX": 1908.7,
+   "mapY": 944.5,
+   "posSrc": "rom",
+   "posValid": true,
+   "romLayer": 18,
+   "romPt": {
+    "gx": 944.5,
+    "gy": 122.85,
+    "gz": 1908.7
+   },
+   "npc": "Npc_Zonau_Golem_Servant_Shrine_00",
+   "npcCn": "管家魔像",
+   "loc": "MapArea_WestHateru",
+   "locCn": null,
+   "sort": 2790,
+   "nSteps": 2,
+   "steps": [
+    {
+     "name": "Ready",
+     "text": "",
+     "pts": []
+    },
+    {
+     "name": "Step1",
+     "text": "坠落在双子山山脚的遗迹内\n有一座圣之神庙，\n管家魔像传达了指引通往神庙的话语：\n　\u0003\u0002",
+     "pts": [
+      {
+       "gx": 944.5,
+       "gy": 122.85,
+       "gz": 1908.7
+      }
+     ]
+    }
+   ],
+   "requires": [],
+   "dependFlag": null,
+   "markerId": null,
+   "match": null,
+   "src": "rom",
+   "unlocks": [],
+   "guide": {
+    "start": "双子山山脚遗迹，与「管家魔像」对话",
+    "note": "用河水制冰——把**白色丘丘胶**粘在箭上射向河面；把冰块放在**篝火上融化**成石碑凹槽的大小；石碑**三个凹槽**都嵌上冰块 → 神庙开启。",
+    "deliver": "神庙显现并可进入。",
+    "reward": [
+     "神庙可进入",
+     "祝福之光"
+    ]
+   },
+   "group": "神庙挑战",
+   "no": 16,
+   "groupTotal": 31,
+   "tier": "L2",
+   "flowPts": [
+    {
+     "gx": 944.5,
+     "gy": 122.85,
+     "gz": 1908.7
+    }
+   ],
+   "onMap": true,
+   "overlap": [],
+   "reqs": [],
+   "unlockList": [],
+   "stepsUI": [
+    {
+     "name": "Step1",
+     "text": "坠落在双子山山脚的遗迹内\n有一座圣之神庙，\n管家魔像传达了指引通往神庙的话语："
+    }
+   ],
+   "nStepsUI": 1,
+   "hasStepText": true
+  },
+  {
+   "key": "CarryToShrine13",
+   "name": "沉睡于拉纳湖的洞窟中的水晶",
+   "nameSrc": "rom",
+   "cat": "Sub",
+   "kind": "side",
+   "layer": 18,
+   "layers": [
+    18
+   ],
+   "gx": 2373,
+   "gy": 67,
+   "gz": 2286,
+   "hasHeight": true,
+   "mapX": 2191.159,
+   "mapY": 2448.337,
+   "posSrc": "rom",
+   "posValid": true,
+   "romLayer": 18,
+   "romPt": {
+    "gx": 2448.337,
+    "gy": 77.01,
+    "gz": 2191.159
+   },
+   "npc": "UnknownNPC_MysteryVoice",
+   "npcCn": null,
+   "loc": "Cave_LanayruMountain_0008",
+   "locCn": null,
+   "sort": 2791,
+   "nSteps": 2,
+   "steps": [
+    {
+     "name": "Ready",
+     "text": "",
+     "pts": []
+    },
+    {
+     "name": "Carry",
+     "text": "献上水晶后，\n似乎就能进入破魔神庙。\n\n跟随光线指示的方向，\n将水晶献给神庙吧。",
+     "pts": [
+      {
+       "gx": 2448.337,
+       "gy": 77.01,
+       "gz": 2191.159
+      }
+     ]
+    }
+   ],
+   "requires": [],
+   "dependFlag": null,
+   "markerId": null,
+   "match": null,
+   "src": "rom",
+   "unlocks": [],
+   "guide": {
+    "start": "在拖奇悠乌神庙前触发，光线指示水晶所在，即可开始搬运。",
+    "note": "水晶在**拉纳湖东侧洞窟内部（需躲滚石与巨石球）**。\n⚠ **搬运途中不能传送**，也不能放手——水晶会原地停留，人离开就掉落。\n进入洞窟内部找到水晶，旁边大门打开；躲左右滚落的石头穿过山洞，狭窄通道遇巨大滚石站坑道最边缘躲避。宝箱：大的左纳乌能源。",
+    "deliver": "把水晶搬到拖奇悠乌神庙底座凹槽处放下（神庙随之升起、可进入）。",
+    "reward": [
+     "神庙可进入",
+     "祝福之光"
+    ]
+   },
+   "group": "神庙挑战",
+   "no": 17,
+   "groupTotal": 31,
+   "tier": "L1",
+   "flowPts": [
+    {
+     "gx": 2448.337,
+     "gy": 77.01,
+     "gz": 2191.159
+    },
+    {
+     "gx": 2303,
+     "gy": 76,
+     "gz": 2378
+    }
+   ],
+   "onMap": true,
+   "overlap": [],
+   "reqs": [],
+   "unlockList": [],
+   "stepsUI": [
+    {
+     "name": "Carry",
+     "text": "献上水晶后，\n似乎就能进入破魔神庙。\n\n跟随光线指示的方向，\n将水晶献给神庙吧。"
+    }
+   ],
+   "nStepsUI": 1,
+   "hasStepText": true
+  },
+  {
+   "key": "GiantHorse",
+   "name": "带来巨大的马匹",
+   "nameSrc": "rom",
+   "cat": "Sub",
+   "kind": "side",
+   "layer": 18,
+   "layers": [
+    18
+   ],
+   "gx": -695.5,
+   "gy": 278.39,
+   "gz": 3399.211,
+   "hasHeight": true,
+   "mapX": 3399.211,
+   "mapY": -695.5,
+   "posSrc": "rom",
+   "posValid": true,
+   "romLayer": 18,
+   "romPt": {
+    "gx": -695.5,
+    "gy": 278.39,
+    "gz": 3399.211
+   },
+   "npc": "Npc_Road_035",
+   "npcCn": "巴特克",
+   "loc": "MapArea_FironeGrassland",
+   "locCn": null,
+   "sort": 2892,
+   "nSteps": 4,
+   "steps": [
+    {
+     "name": "Ready",
+     "text": "",
+     "pts": []
+    },
+    {
+     "name": "Step1",
+     "text": "遇见了一位名叫巴特克的爱马男子，\n他在费罗尼草原西南的山上捡到了一块漂亮的水晶。\n巴特克表示，这附近有人目击到了传闻中　\u0003\u0002",
+     "pts": [
+      {
+       "gx": -695.5,
+       "gy": 278.39,
+       "gz": 3399.211
+      }
+     ]
+    },
+    {
+     "name": "Step2",
+     "text": "见识到巨马后，巴特克非常感激，\n将散发淡淡光芒的　\u0003\u0002",
+     "pts": [
+      {
+       "gx": -696.524,
+       "gy": 278.43,
+       "gz": 3396.574
+      }
+     ]
+    },
+    {
+     "name": "Step3",
+     "text": "",
+     "pts": [
+      {
+       "gx": -566.03,
+       "gy": 234.88,
+       "gz": 3523.912
+      }
+     ]
+    }
+   ],
+   "requires": [],
+   "dependFlag": null,
+   "markerId": null,
+   "match": null,
+   "src": "rom",
+   "unlocks": [],
+   "guide": {
+    "start": "费罗尼草原西南的山上，与「巴特克」对话（他捡到一块漂亮水晶，想看传闻中的巨马）",
+    "note": "前往**马神湖**抓一匹**巨大的白马** → 骑马回到巴特克附近与他对话 → 完成任务拿到水晶 → 把水晶送到神庙。",
+    "deliver": "神庙显现并可进入。",
+    "reward": [
+     "神庙可进入",
+     "祝福之光"
+    ]
+   },
+   "group": "神庙挑战",
+   "no": 18,
+   "groupTotal": 31,
+   "tier": "L1",
+   "flowPts": [
+    {
+     "gx": -695.5,
+     "gy": 278.39,
+     "gz": 3399.211
+    },
+    {
+     "gx": -696.524,
+     "gy": 278.43,
+     "gz": 3396.574
+    },
+    {
+     "gx": -566.03,
+     "gy": 234.88,
+     "gz": 3523.912
+    }
+   ],
+   "onMap": true,
+   "overlap": [],
+   "reqs": [],
+   "unlockList": [],
+   "stepsUI": [
+    {
+     "name": "Step1",
+     "text": "遇见了一位名叫巴特克的爱马男子，\n他在费罗尼草原西南的山上捡到了一块漂亮的水晶。\n巴特克表示，这附近有人目击到了传闻中"
+    },
+    {
+     "name": "Step2",
+     "text": "见识到巨马后，巴特克非常感激，\n将散发淡淡光芒的"
+    }
+   ],
+   "nStepsUI": 2,
+   "hasStepText": true
+  },
+  {
+   "key": "CarryToShrine06",
+   "name": "海利亚湖的神庙与水晶",
+   "nameSrc": "rom",
+   "cat": "Sub",
+   "kind": "side",
+   "layer": 20,
+   "layers": [
+    20
+   ],
+   "gx": 123,
+   "gy": 779,
+   "gz": 2508,
+   "hasHeight": true,
+   "mapX": 2509.958,
+   "mapY": 121.619,
+   "posSrc": "rom",
+   "posValid": true,
+   "romLayer": 20,
+   "romPt": {
+    "gx": 121.619,
+    "gy": 1023.78,
+    "gz": 2509.958
+   },
+   "npc": "UnknownNPC_MysteryVoice",
+   "npcCn": null,
+   "loc": "LakeHylia",
+   "locCn": null,
+   "sort": 2893,
+   "nSteps": 2,
+   "steps": [
+    {
+     "name": "Ready",
+     "text": "",
+     "pts": []
+    },
+    {
+     "name": "Carry",
+     "text": "献上水晶后，\n似乎就能进入破魔神庙。\n\n跟随光线指示的方向，\n将水晶献给神庙吧。",
+     "pts": [
+      {
+       "gx": 121.619,
+       "gy": 1023.78,
+       "gz": 2509.958
+      }
+     ]
+    }
+   ],
+   "requires": [],
+   "dependFlag": null,
+   "markerId": null,
+   "match": null,
+   "src": "rom",
+   "unlocks": [],
+   "guide": {
+    "start": "在艾恩欧马神庙前触发，光线指示水晶所在，即可开始搬运。",
+    "note": "水晶在**海利亚湖大漩涡上方的空岛（泡泡拉高地鸟望台可飞达）**。\n⚠ **搬运途中不能传送**，也不能放手——水晶会原地停留，人离开就掉落。\n神庙在大漩涡下的洞窟里，水晶位于大漩涡上方的空岛，可从泡泡拉高地鸟望台直接飞到空岛。宝箱：左纳尼乌姆之刚剑。",
+    "deliver": "把水晶搬到艾恩欧马神庙底座凹槽处放下（神庙随之升起、可进入）。",
+    "reward": [
+     "神庙可进入",
+     "祝福之光"
+    ]
+   },
+   "group": "神庙挑战",
+   "no": 19,
+   "groupTotal": 31,
+   "tier": "L1",
+   "flowPts": [
+    {
+     "gx": 123,
+     "gy": 779,
+     "gz": 2508
+    },
+    {
+     "gx": 25,
+     "gy": 1514,
+     "gz": 1504
+    }
+   ],
+   "onMap": true,
+   "overlap": [],
+   "reqs": [],
+   "unlockList": [],
+   "stepsUI": [
+    {
+     "name": "Carry",
+     "text": "献上水晶后，\n似乎就能进入破魔神庙。\n\n跟随光线指示的方向，\n将水晶献给神庙吧。"
+    }
+   ],
+   "nStepsUI": 1,
+   "hasStepText": true
+  },
+  {
+   "key": "DevoteSpring",
+   "name": "投枪的传说",
+   "nameSrc": "rom",
+   "cat": "Sub",
+   "kind": "side",
+   "layer": 18,
+   "layers": [
+    18
+   ],
+   "gx": 1208.705,
+   "gy": 201.45,
+   "gz": 2489.63,
+   "hasHeight": true,
+   "mapX": 2489.63,
+   "mapY": 1208.705,
+   "posSrc": "rom",
+   "posValid": true,
+   "romLayer": 18,
+   "romPt": {
+    "gx": 1208.705,
+    "gy": 201.45,
+    "gz": 2489.63
+   },
+   "npc": "FldObj_DevoteSpring_Book",
+   "npcCn": "老旧的笔记",
+   "loc": "Cave_Firone_0009",
+   "locCn": null,
+   "sort": 2894,
+   "nSteps": 2,
+   "steps": [
+    {
+     "name": "Ready",
+     "text": "",
+     "pts": []
+    },
+    {
+     "name": "Step1",
+     "text": "在比托谷的洞窟的深处发现了一处泉水。\n泉水边上有着不知何人写下的笔记，\n上面记载着有关左纳乌文明的传说。\n　\u0003\u0002",
+     "pts": [
+      {
+       "gx": 1208.705,
+       "gy": 201.45,
+       "gz": 2489.63
+      }
+     ]
+    }
+   ],
+   "requires": [],
+   "dependFlag": null,
+   "markerId": null,
+   "match": null,
+   "src": "rom",
+   "unlocks": [],
+   "guide": {
+    "start": "费罗尼地区**比托谷洞窟**最深处，泉水边调查「老旧的笔记」触发",
+    "note": "在笔记旁拾取**左纳尼乌姆之枪**；用余料建造把**蝙蝠的翅膀**装配到枪上；站在**绿色圆盘**上，把枪投向对面的**绿色光环**；命中穿过光环 → 神庙显现。\n**神庙内部**：劳鲁的祝福，宝箱 = 大的左纳乌能源。",
+    "deliver": "神庙显现并可进入。",
+    "reward": [
+     "神庙可进入",
+     "祝福之光"
+    ]
+   },
+   "group": "神庙挑战",
+   "no": 20,
+   "groupTotal": 31,
+   "tier": "L2",
+   "flowPts": [
+    {
+     "gx": 1208.705,
+     "gy": 201.45,
+     "gz": 2489.63
+    }
+   ],
+   "onMap": true,
+   "overlap": [],
+   "reqs": [],
+   "unlockList": [],
+   "stepsUI": [
+    {
+     "name": "Step1",
+     "text": "在比托谷的洞窟的深处发现了一处泉水。\n泉水边上有着不知何人写下的笔记，\n上面记载着有关左纳乌文明的传说。"
+    }
+   ],
+   "nStepsUI": 1,
+   "hasStepText": true
+  },
+  {
+   "key": "CarryToShrine07",
+   "name": "格鲁德峡谷的神庙与水晶",
+   "nameSrc": "rom",
+   "cat": "Sub",
+   "kind": "side",
+   "layer": 18,
+   "layers": [
+    18
+   ],
+   "gx": -1900,
+   "gy": 105,
+   "gz": 2342,
+   "hasHeight": true,
+   "mapX": 1848.0,
+   "mapY": -2037.0,
+   "posSrc": "rom",
+   "posValid": true,
+   "romLayer": 18,
+   "romPt": {
+    "gx": -2037.0,
+    "gy": 171.0,
+    "gz": 1848.0
+   },
+   "npc": "UnknownNPC_MysteryVoice",
+   "npcCn": null,
+   "loc": "GerudoCanyon",
+   "locCn": null,
+   "sort": 2991,
+   "nSteps": 2,
+   "steps": [
+    {
+     "name": "Ready",
+     "text": "",
+     "pts": []
+    },
+    {
+     "name": "Carry",
+     "text": "献上水晶后，\n似乎就能进入破魔神庙。\n\n跟随光线指示的方向，\n将水晶献给神庙吧。",
+     "pts": [
+      {
+       "gx": -2037.0,
+       "gy": 171.0,
+       "gz": 1848.0
+      }
+     ]
+    }
+   ],
+   "requires": [],
+   "dependFlag": null,
+   "markerId": null,
+   "match": null,
+   "src": "rom",
+   "unlocks": [],
+   "guide": {
+    "start": "在拉卡克达吉托神庙前触发，光线指示水晶所在，即可开始搬运。",
+    "note": "水晶在**峡谷中远处的篝火旁（需组装六轮车运回）**。\n⚠ **搬运途中不能传送**，也不能放手——水晶会原地停留，人离开就掉落。\n跟随指引在远处的篝火旁找到水晶，用旁边左纳乌装置组装一辆六轮车，把水晶装车上带回神庙。宝箱：左纳尼乌姆之刚大剑。",
+    "deliver": "把水晶搬到拉卡克达吉托神庙底座凹槽处放下（神庙随之升起、可进入）。",
+    "reward": [
+     "神庙可进入",
+     "祝福之光"
+    ]
+   },
+   "group": "神庙挑战",
+   "no": 21,
+   "groupTotal": 31,
+   "tier": "L1",
+   "flowPts": [
+    {
+     "gx": -1900,
+     "gy": 105,
+     "gz": 2342
+    },
+    {
+     "gx": -2037,
+     "gy": 170,
+     "gz": 1852
+    }
+   ],
+   "onMap": true,
+   "overlap": [],
+   "reqs": [],
+   "unlockList": [],
+   "stepsUI": [
+    {
+     "name": "Carry",
+     "text": "献上水晶后，\n似乎就能进入破魔神庙。\n\n跟随光线指示的方向，\n将水晶献给神庙吧。"
+    }
+   ],
+   "nStepsUI": 1,
+   "hasStepText": true
+  },
+  {
+   "key": "CarryToShrine19",
+   "name": "北海拉鲁天空诸岛的神庙与水晶",
+   "nameSrc": "rom",
+   "cat": "Sub",
+   "kind": "side",
+   "layer": 20,
+   "layers": [
+    20
+   ],
+   "gx": 436,
+   "gy": 1768,
+   "gz": -2471,
+   "hasHeight": true,
+   "mapX": -2471.841,
+   "mapY": 444.042,
+   "posSrc": "rom",
+   "posValid": true,
+   "romLayer": 20,
+   "romPt": {
+    "gx": 444.042,
+    "gy": 1767.13,
+    "gz": -2471.841
+   },
+   "npc": "UnknownNPC_MysteryVoice",
+   "npcCn": null,
+   "loc": "SkyIslands_Hyrule04",
+   "locCn": null,
+   "sort": 3011,
+   "nSteps": 2,
+   "steps": [
+    {
+     "name": "Ready",
+     "text": "",
+     "pts": []
+    },
+    {
+     "name": "Carry",
+     "text": "献上水晶后，\n似乎就能进入破魔神庙。\n\n跟随光线指示的方向，\n将水晶献给神庙吧。",
+     "pts": [
+      {
+       "gx": 444.042,
+       "gy": 1767.13,
+       "gz": -2471.841
+      }
+     ]
+    }
+   ],
+   "requires": [],
+   "dependFlag": null,
+   "markerId": null,
+   "match": null,
+   "src": "rom",
+   "unlocks": [],
+   "guide": {
+    "start": "在马亚米伊神庙前触发，光线指示水晶所在，即可开始搬运。",
+    "note": "水晶在**击败方块魔像（初等），用浮游石运回水晶**。\n⚠ **搬运途中不能传送**，也不能放手——水晶会原地停留，人离开就掉落。",
+    "deliver": "把水晶搬到马亚米伊神庙底座凹槽处放下（神庙随之升起、可进入）。",
+    "reward": [
+     "神庙可进入",
+     "祝福之光"
+    ]
+   },
+   "group": "神庙挑战",
+   "no": 22,
+   "groupTotal": 31,
+   "tier": "L1",
+   "flowPts": [
+    {
+     "gx": 444.042,
+     "gy": 1767.13,
+     "gz": -2471.841
+    },
+    {
+     "gx": 339,
+     "gy": 1926,
+     "gz": -2815
+    }
+   ],
+   "onMap": true,
+   "overlap": [],
+   "reqs": [],
+   "unlockList": [],
+   "stepsUI": [
+    {
+     "name": "Carry",
+     "text": "献上水晶后，\n似乎就能进入破魔神庙。\n\n跟随光线指示的方向，\n将水晶献给神庙吧。"
+    }
+   ],
+   "nStepsUI": 1,
+   "hasStepText": true
+  },
+  {
+   "key": "CarryToShrine11",
+   "name": "南海拉鲁天空诸岛的神庙与水晶",
+   "nameSrc": "rom",
+   "cat": "Sub",
+   "kind": "side",
+   "layer": 20,
+   "layers": [
+    20
+   ],
+   "gx": -1333,
+   "gy": 1114,
+   "gz": 1385,
+   "hasHeight": true,
+   "mapX": 1383.088,
+   "mapY": -1344.304,
+   "posSrc": "rom",
+   "posValid": true,
+   "romLayer": 20,
+   "romPt": {
+    "gx": -1344.304,
+    "gy": 1114.83,
+    "gz": 1383.088
+   },
+   "npc": "UnknownNPC_MysteryVoice",
+   "npcCn": null,
+   "loc": "SkyIslands_Hyrule03",
+   "locCn": null,
+   "sort": 3012,
+   "nSteps": 2,
+   "steps": [
+    {
+     "name": "Ready",
+     "text": "",
+     "pts": []
+    },
+    {
+     "name": "Carry",
+     "text": "献上水晶后，\n似乎就能进入破魔神庙。\n\n跟随光线指示的方向，\n将水晶献给神庙吧。",
+     "pts": [
+      {
+       "gx": -1344.304,
+       "gy": 1114.83,
+       "gz": 1383.088
+      }
+     ]
+    }
+   ],
+   "requires": [],
+   "dependFlag": null,
+   "markerId": null,
+   "match": null,
+   "src": "rom",
+   "unlocks": [],
+   "guide": {
+    "start": "在吉诺多卡欧神庙前触发，光线指示水晶所在，即可开始搬运。",
+    "note": "⚠ **搬运途中不能传送**，也不能放手——水晶会原地停留，人离开就掉落。",
+    "deliver": "把水晶搬到吉诺多卡欧神庙底座凹槽处放下（神庙随之升起、可进入）。",
+    "reward": [
+     "神庙可进入",
+     "祝福之光"
+    ]
+   },
+   "group": "神庙挑战",
+   "no": 23,
+   "groupTotal": 31,
+   "tier": "L1",
+   "flowPts": [
+    {
+     "gx": -1344.304,
+     "gy": 1114.83,
+     "gz": 1383.088
+    },
+    {
+     "gx": -1257,
+     "gy": 1113,
+     "gz": 1486
+    }
+   ],
+   "onMap": true,
+   "overlap": [],
+   "reqs": [],
+   "unlockList": [],
+   "stepsUI": [
+    {
+     "name": "Carry",
+     "text": "献上水晶后，\n似乎就能进入破魔神庙。\n\n跟随光线指示的方向，\n将水晶献给神庙吧。"
+    }
+   ],
+   "nStepsUI": 1,
+   "hasStepText": true
+  },
+  {
+   "key": "CarryToShrine20",
+   "name": "塔邦挞天空诸岛的神庙与水晶",
+   "nameSrc": "rom",
+   "cat": "Sub",
+   "kind": "side",
+   "layer": 20,
+   "layers": [
+    20
+   ],
+   "gx": -3434,
+   "gy": 1541,
+   "gz": -660,
+   "hasHeight": true,
+   "mapX": -667.906,
+   "mapY": -3433.852,
+   "posSrc": "rom",
+   "posValid": true,
+   "romLayer": 20,
+   "romPt": {
+    "gx": -3433.852,
+    "gy": 1339.07,
+    "gz": -667.906
+   },
+   "npc": "UnknownNPC_MysteryVoice",
+   "npcCn": null,
+   "loc": "SkyIslands_Tabanta01",
+   "locCn": null,
+   "sort": 3021,
+   "nSteps": 2,
+   "steps": [
+    {
+     "name": "Ready",
+     "text": "",
+     "pts": []
+    },
+    {
+     "name": "Carry",
+     "text": "献上水晶后，\n似乎就能进入破魔神庙。\n\n跟随光线指示的方向，\n将水晶献给神庙吧。",
+     "pts": [
+      {
+       "gx": -3433.852,
+       "gy": 1339.07,
+       "gz": -667.906
+      }
+     ]
+    }
+   ],
+   "requires": [],
+   "dependFlag": null,
+   "markerId": null,
+   "match": null,
+   "src": "rom",
+   "unlocks": [],
+   "guide": {
+    "start": "在加诺萨神庙前触发，光线指示水晶所在，即可开始搬运。",
+    "note": "水晶在**击败方块魔像并搬运**。\n⚠ **搬运途中不能传送**，也不能放手——水晶会原地停留，人离开就掉落。",
+    "deliver": "把水晶搬到加诺萨神庙底座凹槽处放下（神庙随之升起、可进入）。",
+    "reward": [
+     "神庙可进入",
+     "祝福之光"
+    ]
+   },
+   "group": "神庙挑战",
+   "no": 24,
+   "groupTotal": 31,
+   "tier": "L1",
+   "flowPts": [
+    {
+     "gx": -3433.852,
+     "gy": 1339.07,
+     "gz": -667.906
+    },
+    {
+     "gx": -3369,
+     "gy": 1801,
+     "gz": -468
+    }
+   ],
+   "onMap": true,
+   "overlap": [],
+   "reqs": [],
+   "unlockList": [],
+   "stepsUI": [
+    {
+     "name": "Carry",
+     "text": "献上水晶后，\n似乎就能进入破魔神庙。\n\n跟随光线指示的方向，\n将水晶献给神庙吧。"
+    }
+   ],
+   "nStepsUI": 1,
+   "hasStepText": true
+  },
+  {
+   "key": "CarryToShrine21",
+   "name": "东海布拉天空诸岛的神庙与水晶",
+   "nameSrc": "rom",
+   "cat": "Sub",
+   "kind": "side",
+   "layer": 20,
+   "layers": [
+    20
+   ],
+   "gx": -1723,
+   "gy": 1051,
+   "gz": -3529,
+   "hasHeight": true,
+   "mapX": -3526.365,
+   "mapY": -1723.201,
+   "posSrc": "rom",
+   "posValid": true,
+   "romLayer": 20,
+   "romPt": {
+    "gx": -1723.201,
+    "gy": 1050.6,
+    "gz": -3526.365
+   },
+   "npc": "UnknownNPC_MysteryVoice",
+   "npcCn": null,
+   "loc": "SkyIslands_Hebra02",
+   "locCn": null,
+   "sort": 3022,
+   "nSteps": 2,
+   "steps": [
+    {
+     "name": "Ready",
+     "text": "",
+     "pts": []
+    },
+    {
+     "name": "Carry",
+     "text": "献上水晶后，\n似乎就能进入破魔神庙。\n\n跟随光线指示的方向，\n将水晶献给神庙吧。",
+     "pts": [
+      {
+       "gx": -1723.201,
+       "gy": 1050.6,
+       "gz": -3526.365
+      }
+     ]
+    }
+   ],
+   "requires": [],
+   "dependFlag": null,
+   "markerId": null,
+   "match": null,
+   "src": "rom",
+   "unlocks": [],
+   "guide": {
+    "start": "在塔尼诺乌达神庙前触发，光线指示水晶所在，即可开始搬运。",
+    "note": "水晶在**最高岛侧边隐蔽区，砍开树枝发现水晶**。\n⚠ **搬运途中不能传送**，也不能放手——水晶会原地停留，人离开就掉落。\n从茨茨齐齐雪原鸟望台升空，平台装火箭抵达神庙所在的岛，用弹射器射到最高的岛；砍开树枝发现水晶，用浮空台+控制杆+风扇+电池搭飞行器运到神庙。",
+    "deliver": "把水晶搬到塔尼诺乌达神庙底座凹槽处放下（神庙随之升起、可进入）。",
+    "reward": [
+     "神庙可进入",
+     "祝福之光"
+    ]
+   },
+   "group": "神庙挑战",
+   "no": 25,
+   "groupTotal": 31,
+   "tier": "L1",
+   "flowPts": [
+    {
+     "gx": -1723,
+     "gy": 1051,
+     "gz": -3529
+    },
+    {
+     "gx": -1803,
+     "gy": 1054,
+     "gz": -3407
+    }
+   ],
+   "onMap": true,
+   "overlap": [],
+   "reqs": [],
+   "unlockList": [],
+   "stepsUI": [
+    {
+     "name": "Carry",
+     "text": "献上水晶后，\n似乎就能进入破魔神庙。\n\n跟随光线指示的方向，\n将水晶献给神庙吧。"
+    }
+   ],
+   "nStepsUI": 1,
+   "hasStepText": true
+  },
+  {
+   "key": "CarryToShrine14",
+   "name": "采石之岛的神庙与水晶",
+   "nameSrc": "rom",
+   "cat": "Sub",
+   "kind": "side",
+   "layer": 20,
+   "layers": [
+    20
+   ],
+   "gx": 4522,
+   "gy": 1527,
+   "gz": -2104,
+   "hasHeight": true,
+   "mapX": -2100.649,
+   "mapY": 4522.389,
+   "posSrc": "rom",
+   "posValid": true,
+   "romLayer": 20,
+   "romPt": {
+    "gx": 4522.389,
+    "gy": 1525.4,
+    "gz": -2100.649
+   },
+   "npc": "UnknownNPC_MysteryVoice",
+   "npcCn": null,
+   "loc": "SkyIsland0004",
+   "locCn": null,
+   "sort": 3050,
+   "nSteps": 2,
+   "steps": [
+    {
+     "name": "Ready",
+     "text": "",
+     "pts": []
+    },
+    {
+     "name": "Carry",
+     "text": "献上水晶后，\n似乎就能进入破魔神庙。\n\n跟随光线指示的方向，\n将水晶献给神庙吧。",
+     "pts": [
+      {
+       "gx": 4522.389,
+       "gy": 1525.4,
+       "gz": -2100.649
+      }
+     ]
+    }
+   ],
+   "requires": [],
+   "dependFlag": null,
+   "markerId": null,
+   "match": null,
+   "src": "rom",
+   "unlocks": [],
+   "guide": {
+    "start": "在奇卡肯神庙前触发，光线指示水晶所在，即可开始搬运。",
+    "note": "水晶在**启动空岛弹射器运送**。\n⚠ **搬运途中不能传送**，也不能放手——水晶会原地停留，人离开就掉落。",
+    "deliver": "把水晶搬到奇卡肯神庙底座凹槽处放下（神庙随之升起、可进入）。",
+    "reward": [
+     "神庙可进入",
+     "祝福之光"
+    ]
+   },
+   "group": "神庙挑战",
+   "no": 26,
+   "groupTotal": 31,
+   "tier": "L1",
+   "flowPts": [
+    {
+     "gx": 4522,
+     "gy": 1527,
+     "gz": -2104
+    },
+    {
+     "gx": 4506,
+     "gy": 1260,
+     "gz": -2167
+    }
+   ],
+   "onMap": true,
+   "overlap": [],
+   "reqs": [],
+   "unlockList": [],
+   "stepsUI": [
+    {
+     "name": "Carry",
+     "text": "献上水晶后，\n似乎就能进入破魔神庙。\n\n跟随光线指示的方向，\n将水晶献给神庙吧。"
+    }
+   ],
+   "nStepsUI": 1,
+   "hasStepText": true
+  },
+  {
+   "key": "CarryToShrine17",
+   "name": "南阿卡莱天空诸岛的神庙与水晶",
+   "nameSrc": "rom",
+   "cat": "Sub",
+   "kind": "side",
+   "layer": 20,
+   "layers": [
+    20
+   ],
+   "gx": 3832,
+   "gy": 1272,
+   "gz": -1585,
+   "hasHeight": true,
+   "mapX": -1581.55,
+   "mapY": 3826.958,
+   "posSrc": "rom",
+   "posValid": true,
+   "romLayer": 20,
+   "romPt": {
+    "gx": 3826.958,
+    "gy": 1275.72,
+    "gz": -1581.55
+   },
+   "npc": "UnknownNPC_MysteryVoice",
+   "npcCn": null,
+   "loc": "SkyIslands_Tamul01",
+   "locCn": null,
+   "sort": 3051,
+   "nSteps": 2,
+   "steps": [
+    {
+     "name": "Ready",
+     "text": "",
+     "pts": []
+    },
+    {
+     "name": "Carry",
+     "text": "献上水晶后，\n似乎就能进入破魔神庙。\n\n跟随光线指示的方向，\n将水晶献给神庙吧。",
+     "pts": [
+      {
+       "gx": 3826.958,
+       "gy": 1275.72,
+       "gz": -1581.55
+      }
+     ]
+    }
+   ],
+   "requires": [],
+   "dependFlag": null,
+   "markerId": null,
+   "match": null,
+   "src": "rom",
+   "unlocks": [],
+   "guide": {
+    "start": "在纳塔卡卡神庙前触发，光线指示水晶所在，即可开始搬运。",
+    "note": "水晶在**调整球形空岛开口，用弹簧送出水晶**。\n⚠ **搬运途中不能传送**，也不能放手——水晶会原地停留，人离开就掉落。",
+    "deliver": "把水晶搬到纳塔卡卡神庙底座凹槽处放下（神庙随之升起、可进入）。",
+    "reward": [
+     "神庙可进入",
+     "祝福之光"
+    ]
+   },
+   "group": "神庙挑战",
+   "no": 27,
+   "groupTotal": 31,
+   "tier": "L1",
+   "flowPts": [
+    {
+     "gx": 3832,
+     "gy": 1272,
+     "gz": -1585
+    },
+    {
+     "gx": 3670,
+     "gy": 1263,
+     "gz": -1483
+    }
+   ],
+   "onMap": true,
+   "overlap": [],
+   "reqs": [],
+   "unlockList": [],
+   "stepsUI": [
+    {
+     "name": "Carry",
+     "text": "献上水晶后，\n似乎就能进入破魔神庙。\n\n跟随光线指示的方向，\n将水晶献给神庙吧。"
+    }
+   ],
+   "nStepsUI": 1,
+   "hasStepText": true
+  },
+  {
+   "key": "CarryToShrine23",
+   "name": "南拉聂尔天空诸岛的神庙与水晶",
+   "nameSrc": "rom",
+   "cat": "Sub",
+   "kind": "side",
+   "layer": 20,
+   "layers": [
+    20
+   ],
+   "gx": 4825,
+   "gy": 2001,
+   "gz": 799,
+   "hasHeight": true,
+   "mapX": 786.417,
+   "mapY": 4828.068,
+   "posSrc": "rom",
+   "posValid": true,
+   "romLayer": 20,
+   "romPt": {
+    "gx": 4828.068,
+    "gy": 2002.0,
+    "gz": 786.417
+   },
+   "npc": "UnknownNPC_MysteryVoice",
+   "npcCn": null,
+   "loc": "SkyIslands_Lanayru02",
+   "locCn": null,
+   "sort": 3061,
+   "nSteps": 2,
+   "steps": [
+    {
+     "name": "Ready",
+     "text": "",
+     "pts": []
+    },
+    {
+     "name": "Carry",
+     "text": "献上水晶后，\n似乎就能进入破魔神庙。\n\n跟随光线指示的方向，\n将水晶献给神庙吧。",
+     "pts": [
+      {
+       "gx": 4828.068,
+       "gy": 2002.0,
+       "gz": 786.417
+      }
+     ]
+    }
+   ],
+   "requires": [],
+   "dependFlag": null,
+   "markerId": null,
+   "match": null,
+   "src": "rom",
+   "unlocks": [],
+   "guide": {
+    "start": "在马亚纳希神庙前触发，光线指示水晶所在，即可开始搬运。",
+    "note": "⚠ **搬运途中不能传送**，也不能放手——水晶会原地停留，人离开就掉落。",
+    "deliver": "把水晶搬到马亚纳希神庙底座凹槽处放下（神庙随之升起、可进入）。",
+    "reward": [
+     "神庙可进入",
+     "祝福之光"
+    ]
+   },
+   "group": "神庙挑战",
+   "no": 28,
+   "groupTotal": 31,
+   "tier": "L1",
+   "flowPts": [
+    {
+     "gx": 4828.068,
+     "gy": 2002,
+     "gz": 786.417
+    },
+    {
+     "gx": 4613,
+     "gy": 1895,
+     "gz": 946
+    }
+   ],
+   "onMap": true,
+   "overlap": [],
+   "reqs": [],
+   "unlockList": [],
+   "stepsUI": [
+    {
+     "name": "Carry",
+     "text": "献上水晶后，\n似乎就能进入破魔神庙。\n\n跟随光线指示的方向，\n将水晶献给神庙吧。"
+    }
+   ],
+   "nStepsUI": 1,
+   "hasStepText": true
+  },
+  {
+   "key": "CarryToShrine12",
+   "name": "北哈特尔天空诸岛的神庙与水晶",
+   "nameSrc": "rom",
+   "cat": "Sub",
+   "kind": "side",
+   "layer": 20,
+   "layers": [
+    20
+   ],
+   "gx": 1820,
+   "gy": 1030,
+   "gz": 1354,
+   "hasHeight": true,
+   "mapX": 1370.485,
+   "mapY": 1827.25,
+   "posSrc": "rom",
+   "posValid": true,
+   "romLayer": 20,
+   "romPt": {
+    "gx": 1827.25,
+    "gy": 1030.16,
+    "gz": 1370.485
+   },
+   "npc": "UnknownNPC_MysteryVoice",
+   "npcCn": null,
+   "loc": "SkyIslands_Hyrule02",
+   "locCn": null,
+   "sort": 3071,
+   "nSteps": 2,
+   "steps": [
+    {
+     "name": "Ready",
+     "text": "",
+     "pts": []
+    },
+    {
+     "name": "Carry",
+     "text": "献上水晶后，\n似乎就能进入破魔神庙。\n\n跟随光线指示的方向，\n将水晶献给神庙吧。",
+     "pts": [
+      {
+       "gx": 1827.25,
+       "gy": 1030.16,
+       "gz": 1370.485
+      }
+     ]
+    }
+   ],
+   "requires": [],
+   "dependFlag": null,
+   "markerId": null,
+   "match": null,
+   "src": "rom",
+   "unlocks": [],
+   "guide": {
+    "start": "在乔希乌神庙前触发，光线指示水晶所在，即可开始搬运。",
+    "note": "⚠ **搬运途中不能传送**，也不能放手——水晶会原地停留，人离开就掉落。",
+    "deliver": "把水晶搬到乔希乌神庙底座凹槽处放下（神庙随之升起、可进入）。",
+    "reward": [
+     "神庙可进入",
+     "祝福之光"
+    ]
+   },
+   "group": "神庙挑战",
+   "no": 29,
+   "groupTotal": 31,
+   "tier": "L1",
+   "flowPts": [
+    {
+     "gx": 1827.25,
+     "gy": 1030.1599999999999,
+     "gz": 1370.485
+    },
+    {
+     "gx": 1758,
+     "gy": 1029,
+     "gz": 1208
+    }
+   ],
+   "onMap": true,
+   "overlap": [],
+   "reqs": [],
+   "unlockList": [],
+   "stepsUI": [
+    {
+     "name": "Carry",
+     "text": "献上水晶后，\n似乎就能进入破魔神庙。\n\n跟随光线指示的方向，\n将水晶献给神庙吧。"
+    }
+   ],
+   "nStepsUI": 1,
+   "hasStepText": true
+  },
+  {
+   "key": "CarryToShrine22",
+   "name": "西哈特尔天空诸岛的神庙与水晶",
+   "nameSrc": "rom",
+   "cat": "Sub",
+   "kind": "side",
+   "layer": 20,
+   "layers": [
+    20
+   ],
+   "gx": 1700,
+   "gy": 758,
+   "gz": 1842,
+   "hasHeight": true,
+   "mapX": 1840.175,
+   "mapY": 1699.899,
+   "posSrc": "rom",
+   "posValid": true,
+   "romLayer": 20,
+   "romPt": {
+    "gx": 1699.899,
+    "gy": 757.47,
+    "gz": 1840.175
+   },
+   "npc": "UnknownNPC_MysteryVoice",
+   "npcCn": null,
+   "loc": "SkyIslands_Firone02",
+   "locCn": null,
+   "sort": 3072,
+   "nSteps": 2,
+   "steps": [
+    {
+     "name": "Ready",
+     "text": "",
+     "pts": []
+    },
+    {
+     "name": "Carry",
+     "text": "献上水晶后，\n似乎就能进入破魔神庙。\n\n跟随光线指示的方向，\n将水晶献给神庙吧。",
+     "pts": [
+      {
+       "gx": 1699.899,
+       "gy": 757.47,
+       "gz": 1840.175
+      }
+     ]
+    }
+   ],
+   "requires": [],
+   "dependFlag": null,
+   "markerId": null,
+   "match": null,
+   "src": "rom",
+   "unlocks": [],
+   "guide": {
+    "start": "在乌可欧吉希神庙前触发，光线指示水晶所在，即可开始搬运。",
+    "note": "水晶在**西哈特尔天空诸岛**（Firone F-7 空岛），用飞行载具运送水晶回神庙。\n⚠ **搬运途中不能传送**，也不能放手——水晶会原地停留，人离开就掉落。",
+    "deliver": "把水晶搬到乌可欧吉希神庙底座凹槽处放下（神庙随之升起、可进入）。",
+    "reward": [
+     "神庙可进入",
+     "祝福之光"
+    ]
+   },
+   "group": "神庙挑战",
+   "no": 30,
+   "groupTotal": 31,
+   "tier": "L1",
+   "flowPts": [
+    {
+     "gx": 1700,
+     "gy": 758,
+     "gz": 1842
+    },
+    {
+     "gx": 2352,
+     "gy": 1581,
+     "gz": 1783
+    }
+   ],
+   "onMap": true,
+   "overlap": [],
+   "reqs": [],
+   "unlockList": [],
+   "stepsUI": [
+    {
+     "name": "Carry",
+     "text": "献上水晶后，\n似乎就能进入破魔神庙。\n\n跟随光线指示的方向，\n将水晶献给神庙吧。"
+    }
+   ],
+   "nStepsUI": 1,
+   "hasStepText": true
+  },
+  {
+   "key": "CarryToShrine05",
+   "name": "哈特尔天空诸岛的神庙与水晶",
+   "nameSrc": "rom",
+   "cat": "Sub",
+   "kind": "side",
+   "layer": 20,
+   "layers": [
+    20
+   ],
+   "gx": 3051,
+   "gy": 1308,
+   "gz": 2763,
+   "hasHeight": true,
+   "mapX": 2762.016,
+   "mapY": 3045.056,
+   "posSrc": "rom",
+   "posValid": true,
+   "romLayer": 20,
+   "romPt": {
+    "gx": 3045.056,
+    "gy": 1306.86,
+    "gz": 2762.016
+   },
+   "npc": "UnknownNPC_MysteryVoice",
+   "npcCn": null,
+   "loc": "SkyIslands_Hateru01",
+   "locCn": null,
+   "sort": 3073,
+   "nSteps": 2,
+   "steps": [
+    {
+     "name": "Ready",
+     "text": "",
+     "pts": []
+    },
+    {
+     "name": "Carry",
+     "text": "献上水晶后，\n似乎就能进入破魔神庙。\n\n跟随光线指示的方向，\n将水晶献给神庙吧。",
+     "pts": [
+      {
+       "gx": 3045.056,
+       "gy": 1306.86,
+       "gz": 2762.016
+      }
+     ]
+    }
+   ],
+   "requires": [],
+   "dependFlag": null,
+   "markerId": null,
+   "match": null,
+   "src": "rom",
+   "unlocks": [],
+   "guide": {
+    "start": "在克马马伊诺神庙前触发，光线指示水晶所在，即可开始搬运。",
+    "note": "水晶在**上等方块魔像身上取下水晶，用弹簧送回**。\n⚠ **搬运途中不能传送**，也不能放手——水晶会原地停留，人离开就掉落。",
+    "deliver": "把水晶搬到克马马伊诺神庙底座凹槽处放下（神庙随之升起、可进入）。",
+    "reward": [
+     "神庙可进入",
+     "祝福之光"
+    ]
+   },
+   "group": "神庙挑战",
+   "no": 31,
+   "groupTotal": 31,
+   "tier": "L1",
+   "flowPts": [
+    {
+     "gx": 3051,
+     "gy": 1308,
+     "gz": 2763
+    },
+    {
+     "gx": 2857,
+     "gy": 1317,
+     "gz": 2856
+    }
+   ],
+   "onMap": true,
+   "overlap": [],
+   "reqs": [],
+   "unlockList": [],
+   "stepsUI": [
+    {
+     "name": "Carry",
+     "text": "献上水晶后，\n似乎就能进入破魔神庙。\n\n跟随光线指示的方向，\n将水晶献给神庙吧。"
+    }
+   ],
+   "nStepsUI": 1,
+   "hasStepText": true
+  }
+ ]
+}

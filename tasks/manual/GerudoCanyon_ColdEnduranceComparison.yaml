@@ -1,0 +1,29 @@
+# 任务档案 · GerudoCanyon_ColdEnduranceComparison.yaml · 迷你挑战（V2.3 批量导入）
+# ★ 数据源：迷你挑战139条-整理数据.json（2026-10-08 V3，139/139 齐备）
+key: GerudoCanyon_ColdEnduranceComparison
+
+npc:
+  cn: 达空
+
+loc: 格鲁德峡谷
+
+start: 与达空对话
+
+note: |-
+  多准备些耐寒的食物
+
+reward:
+  - 卢比
+
+# 主坐标覆盖：统一用校对接取点（卡片坐标区/图标/图层都跟它走）
+place:
+  X: -1369
+  Z: -3373
+  H: 469
+
+flowPts:
+  - X: -1369
+    Z: -3373
+    H: 469
+
+_source: 2026-10-08 迷你挑战 139 条批量导入（迷你挑战139条-整理数据.json）

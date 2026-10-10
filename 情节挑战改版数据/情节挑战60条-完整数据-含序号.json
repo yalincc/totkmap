@@ -1,0 +1,8656 @@
+{
+ "meta": {
+  "name": "情节挑战 60 条 · 完整数据（含序号）",
+  "generated": "2026-10-08",
+  "source": "app/data/task-plan.js（build+merge 最终产物，与网页一致）",
+  "total": 60,
+  "noRule": "档内 no 按 ROM sort 升序 = 游戏内冒险笔记顺序",
+  "coordSystem": "X=gx, Z=-gz, H=gy-106（游戏 UI 口径）",
+  "layerMap": {
+   "18": "地表",
+   "19": "地底",
+   "20": "天空"
+  }
+ },
+ "tasks": [
+  {
+   "key": "FindWithSensors",
+   "name": "哈特诺村的研究所",
+   "nameSrc": "rom",
+   "cat": "ImportantMini",
+   "kind": "side",
+   "layer": 18,
+   "layers": [
+    18
+   ],
+   "gx": -231,
+   "gy": 131,
+   "gz": -135,
+   "hasHeight": true,
+   "mapX": -134.738,
+   "mapY": -230.751,
+   "posSrc": "marker",
+   "posValid": true,
+   "romLayer": 18,
+   "romPt": {
+    "gx": 3781.087,
+    "gy": 357.07,
+    "gz": 2124.247
+   },
+   "npc": "Npc_AncientDoctor_Hateno",
+   "npcCn": "洛贝利",
+   "loc": "City_BaseCamp",
+   "locCn": "监视堡垒",
+   "sort": 111,
+   "nSteps": 5,
+   "steps": [
+    {
+     "name": "Ready",
+     "text": "",
+     "pts": []
+    },
+    {
+     "name": "Search",
+     "text": "普尔亚平板似乎拥有\n侦测指定对象的“感应功能”。\n前往哈特诺村一角的“普尔亚平板研究所”，\n洛贝利便会为其安装上侦测　\u0003\u0002",
+     "pts": [
+      {
+       "gx": 3781.087,
+       "gy": 357.07,
+       "gz": 2124.247
+      }
+     ]
+    },
+    {
+     "name": "TestSensor",
+     "text": "",
+     "pts": [
+      {
+       "gx": 3781.087,
+       "gy": 357.07,
+       "gz": 2124.247
+      }
+     ]
+    },
+    {
+     "name": "Find",
+     "text": "",
+     "pts": [
+      {
+       "gx": 3781.087,
+       "gy": 357.07,
+       "gz": 2124.247
+      }
+     ]
+    },
+    {
+     "name": "Report",
+     "text": "在坡道下方的洞窟内\n发现了“神庙感应器”侦测到的神庙。\n\n去向洛贝利报告\n感应器运作正常吧。",
+     "pts": [
+      {
+       "gx": 3781.087,
+       "gy": 357.07,
+       "gz": 2124.247
+      }
+     ]
+    }
+   ],
+   "requires": [
+    {
+     "type": "quest",
+     "key": "GetCamera",
+     "resolved": true,
+     "flag": "GetCamera_IsCompleted_Exp"
+    }
+   ],
+   "dependFlag": "GetCamera_IsCompleted_Exp",
+   "markerId": 3544,
+   "match": "exact",
+   "src": "rom+guide",
+   "rawName": "哈特诺村的研究所",
+   "guide": {
+    "requires": [],
+    "start": "与洛贝利对话",
+    "note": "在研究所装载神庙感应器后找到一座神庙",
+    "reward": [
+     "神庙感应器"
+    ],
+    "unlocks": []
+   },
+   "raw": {
+    "前置任务": "无",
+    "开启任务": "与洛贝利对话",
+    "注意事项": "在研究所装载神庙感应器后找到一座神庙",
+    "任务奖励": "神庙感应器",
+    "解锁任务": "无"
+   },
+   "unlocks": [],
+   "group": "情节挑战",
+   "no": 1,
+   "groupTotal": 60,
+   "tier": "L1",
+   "flowPts": [
+    {
+     "gx": -231,
+     "gy": 131,
+     "gz": -135
+    },
+    {
+     "gx": 3781.087,
+     "gy": 357.07,
+     "gz": 2124.247
+    }
+   ],
+   "onMap": true,
+   "overlap": [],
+   "reqs": [
+    {
+     "type": "quest",
+     "key": "GetCamera",
+     "reqName": "给地底人拍照！",
+     "linkable": true
+    }
+   ],
+   "unlockList": [
+    {
+     "key": "GetSensorPlus",
+     "reqName": "重大发明！图鉴感应器！",
+     "linkable": true,
+     "src": "reverse"
+    },
+    {
+     "key": "GetWalker",
+     "reqName": "重大发明！足迹模式！",
+     "linkable": true,
+     "src": "reverse"
+    },
+    {
+     "key": "GetWarpMarker",
+     "reqName": "重大发明！传送标记器！",
+     "linkable": true,
+     "src": "reverse"
+    }
+   ],
+   "stepsUI": [
+    {
+     "name": "Search",
+     "text": "普尔亚平板似乎拥有\n侦测指定对象的“感应功能”。\n前往哈特诺村一角的“普尔亚平板研究所”，\n洛贝利便会为其安装上侦测"
+    },
+    {
+     "name": "Report",
+     "text": "在坡道下方的洞窟内\n发现了“神庙感应器”侦测到的神庙。\n\n去向洛贝利报告\n感应器运作正常吧。"
+    }
+   ],
+   "nStepsUI": 2,
+   "hasStepText": true
+  },
+  {
+   "key": "HatenoPurchasePicture",
+   "name": "自己专属的海拉鲁图鉴",
+   "nameSrc": "rom",
+   "cat": "ImportantMini",
+   "kind": "side",
+   "layer": 18,
+   "layers": [
+    18
+   ],
+   "gx": 3779,
+   "gy": 357,
+   "gz": 2125,
+   "hasHeight": true,
+   "mapX": 2124.671,
+   "mapY": 3779.242,
+   "posSrc": "marker",
+   "posValid": true,
+   "romLayer": 18,
+   "romPt": {
+    "gx": 3781.087,
+    "gy": 357.07,
+    "gz": 2124.247
+   },
+   "npc": "Npc_AncientDoctor_Hateno",
+   "npcCn": "洛贝利",
+   "loc": "HatenoLabo",
+   "locCn": "哈特诺古代研究所",
+   "sort": 112,
+   "nSteps": 2,
+   "steps": [
+    {
+     "name": "Ready",
+     "text": "",
+     "pts": []
+    },
+    {
+     "name": "Purchase",
+     "text": "普尔亚平板上搭载的海拉鲁图鉴\n是能够自动记录使用照相机所拍摄的\n“生物、怪物、材料、武器、宝物”的功能。\n也可以向洛贝利　\u0003\u0002",
+     "pts": [
+      {
+       "gx": 3781.087,
+       "gy": 357.07,
+       "gz": 2124.247
+      }
+     ]
+    }
+   ],
+   "requires": [
+    {
+     "type": "quest",
+     "key": "GetSensorPlus",
+     "resolved": true,
+     "flag": "GetSensorPlus_IsCompleted_Exp"
+    }
+   ],
+   "dependFlag": "GetSensorPlus_IsCompleted_Exp",
+   "markerId": 3546,
+   "match": "exact",
+   "src": "rom+guide",
+   "rawName": "自己专属的海拉鲁图鉴",
+   "guide": {
+    "requires": [],
+    "start": "与洛贝利对话",
+    "note": "可以自己拍摄也可直接购买",
+    "reward": [
+     "解锁图鉴"
+    ],
+    "unlocks": []
+   },
+   "raw": {
+    "前置任务": "无",
+    "开启任务": "与洛贝利对话",
+    "注意事项": "可以自己拍摄也可直接购买",
+    "任务奖励": "解锁图鉴",
+    "解锁任务": "无"
+   },
+   "unlocks": [],
+   "group": "情节挑战",
+   "no": 2,
+   "groupTotal": 60,
+   "tier": "L2",
+   "flowPts": [
+    {
+     "gx": 3779,
+     "gy": 357,
+     "gz": 2125
+    }
+   ],
+   "onMap": true,
+   "overlap": [],
+   "reqs": [
+    {
+     "type": "quest",
+     "key": "GetSensorPlus",
+     "reqName": "重大发明！图鉴感应器！",
+     "linkable": true
+    }
+   ],
+   "unlockList": [],
+   "stepsUI": [
+    {
+     "name": "Purchase",
+     "text": "普尔亚平板上搭载的海拉鲁图鉴\n是能够自动记录使用照相机所拍摄的\n“生物、怪物、材料、武器、宝物”的功能。\n也可以向洛贝利"
+    }
+   ],
+   "nStepsUI": 1,
+   "hasStepText": true
+  },
+  {
+   "key": "GetWarpMarker",
+   "name": "重大发明！传送标记器！",
+   "nameSrc": "rom",
+   "cat": "ImportantMini",
+   "kind": "side",
+   "layer": 18,
+   "layers": [
+    18
+   ],
+   "gx": 4507,
+   "gy": 351,
+   "gz": -3146,
+   "hasHeight": true,
+   "mapX": -3146.31,
+   "mapY": 4507.47,
+   "posSrc": "rom",
+   "posValid": true,
+   "romLayer": 18,
+   "romPt": {
+    "gx": 4507.47,
+    "gy": 351.41,
+    "gz": -3146.31
+   },
+   "npc": "Npc_AncientDoctor_Hateno",
+   "npcCn": "洛贝利",
+   "loc": "HatenoLabo",
+   "locCn": "哈特诺古代研究所",
+   "sort": 113,
+   "nSteps": 6,
+   "steps": [
+    {
+     "name": "Ready",
+     "text": "",
+     "pts": []
+    },
+    {
+     "name": "EventLightSpot",
+     "text": "",
+     "pts": [
+      {
+       "gx": 4507.47,
+       "gy": 351.41,
+       "gz": -3146.31
+      }
+     ]
+    },
+    {
+     "name": "Step01",
+     "text": "普尔亚平板似乎有个叫作“传送标记器”的功能，\n能够让使用者传送到标记的地方。\n不过，升级所需要的　\u0003\u0002",
+     "pts": [
+      {
+       "gx": 4523.445,
+       "gy": 352.99,
+       "gz": -3163.68
+      }
+     ]
+    },
+    {
+     "name": "Step02",
+     "text": "普尔亚平板似乎有个叫作“传送标记器”的功能，\n能够让使用者传送到标记的地方。\n顺利在阿卡莱古代研究所\n找到了升级所需的试制的传送标记器。\n回到哈特诺村，把它交给\n位于普尔亚平板研究所的洛贝利吧。",
+     "pts": [
+      {
+       "gx": 3781.087,
+       "gy": 357.07,
+       "gz": 2124.247
+      }
+     ]
+    },
+    {
+     "name": "Step03",
+     "text": "",
+     "pts": [
+      {
+       "gx": 3781.087,
+       "gy": 357.07,
+       "gz": 2124.247
+      }
+     ]
+    },
+    {
+     "name": "Step04",
+     "text": "能够使用2个让你传送到任意地方的\n传送标记器了。\n容量上似乎还可以再持有1个传送标记器，\n只要有　\u0003\u0002",
+     "pts": [
+      {
+       "gx": 3781.087,
+       "gy": 357.07,
+       "gz": 2124.247
+      }
+     ]
+    }
+   ],
+   "requires": [],
+   "dependFlag": null,
+   "markerId": 3545,
+   "match": "series",
+   "src": "rom+guide",
+   "rawName": "重大发明！传送标记器！足迹模式！图鉴感应",
+   "guide": {
+    "requires": [
+     "哈特诺村的研究所"
+    ],
+    "start": "与洛贝利对话",
+    "note": "跟随指引完成装置测试",
+    "reward": [
+     "传送标记器",
+     "足迹模式",
+     "图鉴感应器"
+    ],
+    "unlocks": []
+   },
+   "raw": {
+    "前置任务": "哈特诺村的研究所",
+    "开启任务": "与洛贝利对话",
+    "注意事项": "跟随指引完成装置测试",
+    "任务奖励": "传送标记器、足迹模式、图鉴感应器",
+    "解锁任务": "无"
+   },
+   "unlocks": [],
+   "group": "情节挑战",
+   "no": 3,
+   "groupTotal": 60,
+   "tier": "L1",
+   "flowPts": [
+    {
+     "gx": 4507,
+     "gy": 351,
+     "gz": -3146
+    },
+    {
+     "gx": 4523.445,
+     "gy": 352.99,
+     "gz": -3163.68
+    },
+    {
+     "gx": 3781.087,
+     "gy": 357.07,
+     "gz": 2124.247
+    }
+   ],
+   "onMap": true,
+   "overlap": [],
+   "reqs": [
+    {
+     "type": "quest",
+     "key": "FindWithSensors",
+     "reqName": "哈特诺村的研究所",
+     "linkable": true,
+     "src": "guide"
+    }
+   ],
+   "unlockList": [],
+   "stepsUI": [
+    {
+     "name": "Step01",
+     "text": "普尔亚平板似乎有个叫作“传送标记器”的功能，\n能够让使用者传送到标记的地方。\n不过，升级所需要的"
+    },
+    {
+     "name": "Step02",
+     "text": "普尔亚平板似乎有个叫作“传送标记器”的功能，\n能够让使用者传送到标记的地方。\n顺利在阿卡莱古代研究所\n找到了升级所需的试制的传送标记器。\n回到哈特诺村，把它交给\n位于普尔亚平板研究所的洛贝利吧。"
+    },
+    {
+     "name": "Step04",
+     "text": "能够使用2个让你传送到任意地方的\n传送标记器了。\n容量上似乎还可以再持有1个传送标记器，\n只要有"
+    }
+   ],
+   "nStepsUI": 3,
+   "hasStepText": true
+  },
+  {
+   "key": "GetWalker",
+   "name": "重大发明！足迹模式！",
+   "nameSrc": "rom",
+   "cat": "ImportantMini",
+   "kind": "side",
+   "layer": 18,
+   "layers": [
+    18
+   ],
+   "gx": 3781,
+   "gy": 357,
+   "gz": 2124,
+   "hasHeight": true,
+   "mapX": 2124.247,
+   "mapY": 3781.087,
+   "posSrc": "rom",
+   "posValid": true,
+   "romLayer": 18,
+   "romPt": {
+    "gx": 3781.087,
+    "gy": 357.07,
+    "gz": 2124.247
+   },
+   "npc": "Npc_AncientDoctor_Hateno",
+   "npcCn": "洛贝利",
+   "loc": "HatenoLabo",
+   "locCn": "哈特诺古代研究所",
+   "sort": 114,
+   "nSteps": 2,
+   "steps": [
+    {
+     "name": "Ready",
+     "text": "",
+     "pts": []
+    },
+    {
+     "name": "Step01",
+     "text": "普尔亚平板\n似乎有个叫作“足迹模式”的功能，\n能够确认自己的足迹。\n不过，升级需要\n　\u0003\u0002",
+     "pts": [
+      {
+       "gx": 3781.087,
+       "gy": 357.07,
+       "gz": 2124.247
+      }
+     ]
+    }
+   ],
+   "requires": [],
+   "dependFlag": null,
+   "markerId": 3545,
+   "match": "series",
+   "src": "rom+guide",
+   "rawName": "重大发明！传送标记器！足迹模式！图鉴感应",
+   "guide": {
+    "requires": [
+     "哈特诺村的研究所"
+    ],
+    "start": "与洛贝利对话",
+    "note": "跟随指引完成装置测试",
+    "reward": [
+     "传送标记器",
+     "足迹模式",
+     "图鉴感应器"
+    ],
+    "unlocks": []
+   },
+   "raw": {
+    "前置任务": "哈特诺村的研究所",
+    "开启任务": "与洛贝利对话",
+    "注意事项": "跟随指引完成装置测试",
+    "任务奖励": "传送标记器、足迹模式、图鉴感应器",
+    "解锁任务": "无"
+   },
+   "unlocks": [],
+   "group": "情节挑战",
+   "no": 4,
+   "groupTotal": 60,
+   "tier": "L2",
+   "flowPts": [
+    {
+     "gx": 3781,
+     "gy": 357,
+     "gz": 2124
+    }
+   ],
+   "onMap": true,
+   "overlap": [],
+   "reqs": [
+    {
+     "type": "quest",
+     "key": "FindWithSensors",
+     "reqName": "哈特诺村的研究所",
+     "linkable": true,
+     "src": "guide"
+    }
+   ],
+   "unlockList": [],
+   "stepsUI": [
+    {
+     "name": "Step01",
+     "text": "普尔亚平板\n似乎有个叫作“足迹模式”的功能，\n能够确认自己的足迹。\n不过，升级需要"
+    }
+   ],
+   "nStepsUI": 1,
+   "hasStepText": true
+  },
+  {
+   "key": "GetSensorPlus",
+   "name": "重大发明！图鉴感应器！",
+   "nameSrc": "rom",
+   "cat": "ImportantMini",
+   "kind": "side",
+   "layer": 18,
+   "layers": [
+    18
+   ],
+   "gx": 3781,
+   "gy": 357,
+   "gz": 2124,
+   "hasHeight": true,
+   "mapX": 2124.247,
+   "mapY": 3781.087,
+   "posSrc": "rom",
+   "posValid": true,
+   "romLayer": 18,
+   "romPt": {
+    "gx": 3781.087,
+    "gy": 357.07,
+    "gz": 2124.247
+   },
+   "npc": "Npc_AncientDoctor_Hateno",
+   "npcCn": "洛贝利",
+   "loc": "HatenoLabo",
+   "locCn": "哈特诺古代研究所",
+   "sort": 115,
+   "nSteps": 2,
+   "steps": [
+    {
+     "name": "Ready",
+     "text": "",
+     "pts": []
+    },
+    {
+     "name": "Step01",
+     "text": "普尔亚平板\n似乎有个叫作“图鉴感应器”的功能，\n能够精确地寻找指定的目标。\n不过，升级需要\n　\u0003\u0002",
+     "pts": [
+      {
+       "gx": 3781.087,
+       "gy": 357.07,
+       "gz": 2124.247
+      }
+     ]
+    }
+   ],
+   "requires": [],
+   "dependFlag": null,
+   "markerId": 3545,
+   "match": "series",
+   "src": "rom+guide",
+   "rawName": "重大发明！传送标记器！足迹模式！图鉴感应",
+   "guide": {
+    "requires": [
+     "哈特诺村的研究所"
+    ],
+    "start": "与洛贝利对话",
+    "note": "跟随指引完成装置测试",
+    "reward": [
+     "传送标记器",
+     "足迹模式",
+     "图鉴感应器"
+    ],
+    "unlocks": []
+   },
+   "raw": {
+    "前置任务": "哈特诺村的研究所",
+    "开启任务": "与洛贝利对话",
+    "注意事项": "跟随指引完成装置测试",
+    "任务奖励": "传送标记器、足迹模式、图鉴感应器",
+    "解锁任务": "无"
+   },
+   "unlocks": [
+    "HatenoPurchasePicture"
+   ],
+   "group": "情节挑战",
+   "no": 5,
+   "groupTotal": 60,
+   "tier": "L2",
+   "flowPts": [
+    {
+     "gx": 3781,
+     "gy": 357,
+     "gz": 2124
+    }
+   ],
+   "onMap": true,
+   "overlap": [],
+   "reqs": [
+    {
+     "type": "quest",
+     "key": "FindWithSensors",
+     "reqName": "哈特诺村的研究所",
+     "linkable": true,
+     "src": "guide"
+    }
+   ],
+   "unlockList": [
+    {
+     "key": "HatenoPurchasePicture",
+     "reqName": "自己专属的海拉鲁图鉴",
+     "linkable": true
+    }
+   ],
+   "stepsUI": [
+    {
+     "name": "Step01",
+     "text": "普尔亚平板\n似乎有个叫作“图鉴感应器”的功能，\n能够精确地寻找指定的目标。\n不过，升级需要"
+    }
+   ],
+   "nStepsUI": 1,
+   "hasStepText": true
+  },
+  {
+   "key": "IchikaraChallenge01",
+   "name": "微达的独立",
+   "nameSrc": "rom",
+   "cat": "ImportantMini",
+   "kind": "side",
+   "layer": 18,
+   "layers": [
+    18
+   ],
+   "gx": 3939,
+   "gy": 235,
+   "gz": -1594,
+   "hasHeight": true,
+   "mapX": -1594.092,
+   "mapY": 3939.393,
+   "posSrc": "marker",
+   "posValid": true,
+   "romLayer": 18,
+   "romPt": {
+    "gx": 3940.447,
+    "gy": 234.86,
+    "gz": -1599.52
+   },
+   "npc": "Npc_UMiiVillage031",
+   "npcCn": "帕伍达",
+   "loc": "UMiiVillage",
+   "locCn": "一始村",
+   "sort": 201,
+   "nSteps": 9,
+   "steps": [
+    {
+     "name": "Ready",
+     "text": "",
+     "pts": []
+    },
+    {
+     "name": "Research",
+     "text": "松达建筑店的松达和帕伍达\n在讨论关于微达离家的话题。\n与态度积极的帕伍达正相反，\n松达显得愁眉苦脸，\n看来是有什么烦心事。",
+     "pts": [
+      {
+       "gx": 3940.447,
+       "gy": 234.86,
+       "gz": -1599.52
+      }
+     ]
+    },
+    {
+     "name": "Child_Talk",
+     "text": "遵照格鲁德的规定，\n松达的独生女微达\n即将只身一人搬往格鲁德小镇。\n所剩时间已经不多，\n松达和帕伍达却都忙于工作，\n哀叹无法陪微达　\u0003\u0002",
+     "pts": [
+      {
+       "gx": 3935.962,
+       "gy": 236.18,
+       "gz": -1589.777
+      }
+     ]
+    },
+    {
+     "name": "Quiz2",
+     "text": "松达和帕伍达的女儿微达\n为了搬家一事，\n似乎正在学习格鲁德的语言。\n她正要去　\u0003\u0002",
+     "pts": [
+      {
+       "gx": 3935.962,
+       "gy": 236.18,
+       "gz": -1589.777
+      }
+     ]
+    },
+    {
+     "name": "Cooking",
+     "text": "为了让母亲帕伍达不会感到寂寞，\n微达似乎教授了一始村的人们\n格鲁德的语言。\n这次，她似乎为了帮助忙于工作的松达，\n前往了　\u0003\u0002",
+     "pts": [
+      {
+       "gx": 3935.962,
+       "gy": 236.18,
+       "gz": -1589.777
+      }
+     ]
+    },
+    {
+     "name": "GotoRopeway",
+     "text": "",
+     "pts": [
+      {
+       "gx": 3935.962,
+       "gy": 236.18,
+       "gz": -1589.777
+      }
+     ]
+    },
+    {
+     "name": "MammyReport",
+     "text": "",
+     "pts": [
+      {
+       "gx": 3773.148,
+       "gy": 195.57,
+       "gz": -1633.332
+      }
+     ]
+    },
+    {
+     "name": "PaPaTalk",
+     "text": "",
+     "pts": [
+      {
+       "gx": 3776.305,
+       "gy": 197.02,
+       "gz": -1630.26
+      }
+     ]
+    },
+    {
+     "name": "Memory",
+     "text": "",
+     "pts": []
+    }
+   ],
+   "requires": [],
+   "dependFlag": null,
+   "markerId": 2757,
+   "match": "exact",
+   "src": "rom+guide",
+   "rawName": "微达的独立",
+   "guide": {
+    "requires": [],
+    "start": "与帕伍达对话开启",
+    "note": "一路跟着微达帮她解决难题",
+    "reward": [
+     "卢比"
+    ],
+    "unlocks": []
+   },
+   "raw": {
+    "前置任务": "无",
+    "开启任务": "与帕伍达对话开启",
+    "注意事项": "一路跟着微达帮她解决难题",
+    "任务奖励": "卢比",
+    "解锁任务": "无"
+   },
+   "unlocks": [
+    "BuildHouse"
+   ],
+   "group": "情节挑战",
+   "no": 6,
+   "groupTotal": 60,
+   "tier": "L1",
+   "flowPts": [
+    {
+     "gx": 3939,
+     "gy": 235,
+     "gz": -1594
+    },
+    {
+     "gx": 3773.148,
+     "gy": 195.57,
+     "gz": -1633.332
+    },
+    {
+     "gx": 3776.305,
+     "gy": 197.02,
+     "gz": -1630.26
+    }
+   ],
+   "onMap": true,
+   "overlap": [],
+   "reqs": [],
+   "unlockList": [
+    {
+     "key": "BuildHouse",
+     "reqName": "建造私人住宅吧",
+     "linkable": true
+    }
+   ],
+   "stepsUI": [
+    {
+     "name": "Research",
+     "text": "松达建筑店的松达和帕伍达\n在讨论关于微达离家的话题。\n与态度积极的帕伍达正相反，\n松达显得愁眉苦脸，\n看来是有什么烦心事。"
+    },
+    {
+     "name": "Child_Talk",
+     "text": "遵照格鲁德的规定，\n松达的独生女微达\n即将只身一人搬往格鲁德小镇。\n所剩时间已经不多，\n松达和帕伍达却都忙于工作，\n哀叹无法陪微达"
+    },
+    {
+     "name": "Quiz2",
+     "text": "松达和帕伍达的女儿微达\n为了搬家一事，\n似乎正在学习格鲁德的语言。\n她正要去"
+    },
+    {
+     "name": "Cooking",
+     "text": "为了让母亲帕伍达不会感到寂寞，\n微达似乎教授了一始村的人们\n格鲁德的语言。\n这次，她似乎为了帮助忙于工作的松达，\n前往了"
+    }
+   ],
+   "nStepsUI": 4,
+   "hasStepText": true
+  },
+  {
+   "key": "Hateno_Cheese",
+   "name": "托可优的重要信件",
+   "nameSrc": "rom",
+   "cat": "ImportantMini",
+   "kind": "side",
+   "layer": 18,
+   "layers": [
+    18
+   ],
+   "gx": 3635,
+   "gy": 282,
+   "gz": 2051,
+   "hasHeight": true,
+   "mapX": 2051.135,
+   "mapY": 3634.901,
+   "posSrc": "marker",
+   "posValid": true,
+   "romLayer": 18,
+   "romPt": {
+    "gx": 3630.884,
+    "gy": 281.72,
+    "gz": 2046.97
+   },
+   "npc": "Npc_HatenoVillage025",
+   "npcCn": "托可优",
+   "loc": "Hateno",
+   "locCn": "哈特诺村",
+   "sort": 211,
+   "nSteps": 3,
+   "steps": [
+    {
+     "name": "Ready",
+     "text": "",
+     "pts": []
+    },
+    {
+     "name": "Step01",
+     "text": "住在哈特诺村牧场里的托可优\n一不小心把　\u0003\u0002",
+     "pts": [
+      {
+       "gx": 3630.884,
+       "gy": 281.72,
+       "gz": 2046.97
+      }
+     ]
+    },
+    {
+     "name": "Step02",
+     "text": "帮托可优捡回了\n装有她曾祖父写的信的信息瓶。\n托可优读完信，似乎想到了些什么。\n她说有东西要送给你，\n希望你去她　\u0003\u0002",
+     "pts": [
+      {
+       "gx": 3630.884,
+       "gy": 281.72,
+       "gz": 2046.97
+      }
+     ]
+    }
+   ],
+   "requires": [],
+   "dependFlag": null,
+   "markerId": 2738,
+   "match": "exact",
+   "src": "rom+guide",
+   "rawName": "托可优的重要信件",
+   "guide": {
+    "requires": [],
+    "start": "与托可优对话开启",
+    "note": "用原木搭桥将信吸出来",
+    "reward": [
+     "哈特诺起司"
+    ],
+    "unlocks": []
+   },
+   "raw": {
+    "前置任务": "无",
+    "开启任务": "与托可优对话开启",
+    "注意事项": "用原木搭桥将信吸出来",
+    "任务奖励": "哈特诺起司",
+    "解锁任务": "无"
+   },
+   "unlocks": [],
+   "group": "情节挑战",
+   "no": 7,
+   "groupTotal": 60,
+   "tier": "L2",
+   "flowPts": [
+    {
+     "gx": 3635,
+     "gy": 282,
+     "gz": 2051
+    }
+   ],
+   "onMap": true,
+   "overlap": [],
+   "reqs": [],
+   "unlockList": [
+    {
+     "key": "Hateno_RevitalizeByNewSpeciality",
+     "reqName": "用新名产振兴村子！",
+     "linkable": true,
+     "src": "reverse"
+    }
+   ],
+   "stepsUI": [
+    {
+     "name": "Step01",
+     "text": "住在哈特诺村牧场里的托可优\n一不小心把"
+    },
+    {
+     "name": "Step02",
+     "text": "帮托可优捡回了\n装有她曾祖父写的信的信息瓶。\n托可优读完信，似乎想到了些什么。\n她说有东西要送给你，\n希望你去她"
+    }
+   ],
+   "nStepsUI": 2,
+   "hasStepText": true
+  },
+  {
+   "key": "Hateno_RevitalizeByNewSpeciality",
+   "name": "用新名产振兴村子！",
+   "nameSrc": "rom",
+   "cat": "ImportantMini",
+   "kind": "side",
+   "layer": 18,
+   "layers": [
+    18
+   ],
+   "gx": 3430,
+   "gy": 238,
+   "gz": 2083,
+   "hasHeight": true,
+   "mapX": 2082.632,
+   "mapY": 3430.4,
+   "posSrc": "marker",
+   "posValid": true,
+   "romLayer": 18,
+   "romPt": {
+    "gx": 3432.132,
+    "gy": 238.03,
+    "gz": 2088.181
+   },
+   "npc": "Npc_HatenoVillage",
+   "npcCn": "科沙尤西",
+   "loc": "Hateno",
+   "locCn": "哈特诺村",
+   "sort": 212,
+   "nSteps": 2,
+   "steps": [
+    {
+     "name": "Ready",
+     "text": "",
+     "pts": []
+    },
+    {
+     "name": "Step01",
+     "text": "科沙尤西正在考虑将祖父生前与村民们\n共同制作的食物推为村子的新名产。\n但他只记得那　\u0003\u0002",
+     "pts": [
+      {
+       "gx": 3432.132,
+       "gy": 238.03,
+       "gz": 2088.181
+      }
+     ]
+    }
+   ],
+   "requires": [
+    {
+     "type": "flag",
+     "key": null,
+     "resolved": false,
+     "flag": "Hateno_FirstEvent_Inside"
+    }
+   ],
+   "dependFlag": "Hateno_FirstEvent_Inside",
+   "markerId": 2739,
+   "match": "norm",
+   "src": "rom+guide",
+   "rawName": "用新名产振兴村子",
+   "guide": {
+    "requires": [
+     "托可优的重要信件"
+    ],
+    "start": "在房子中与科沙尤西对话开启",
+    "note": "需要先获取【托可优的重要信件】的任务奖励",
+    "reward": [
+     "卢比"
+    ],
+    "unlocks": []
+   },
+   "raw": {
+    "前置任务": "托可优的重要信件",
+    "开启任务": "在房子中与科沙尤西对话开启",
+    "注意事项": "需要先获取【托可优的重要信件】的任务奖励",
+    "任务奖励": "卢比",
+    "解锁任务": "无"
+   },
+   "unlocks": [],
+   "group": "情节挑战",
+   "no": 8,
+   "groupTotal": 60,
+   "tier": "L2",
+   "flowPts": [
+    {
+     "gx": 3430,
+     "gy": 238,
+     "gz": 2083
+    }
+   ],
+   "onMap": true,
+   "overlap": [],
+   "reqs": [
+    {
+     "type": "flag",
+     "flag": "Hateno_FirstEvent_Inside",
+     "reqName": "哈特诺村的初次事件（村长选举）",
+     "linkable": false
+    },
+    {
+     "type": "quest",
+     "key": "Hateno_Cheese",
+     "reqName": "托可优的重要信件",
+     "linkable": true,
+     "src": "guide"
+    }
+   ],
+   "unlockList": [],
+   "stepsUI": [
+    {
+     "name": "Step01",
+     "text": "科沙尤西正在考虑将祖父生前与村民们\n共同制作的食物推为村子的新名产。\n但他只记得那"
+    }
+   ],
+   "nStepsUI": 1,
+   "hasStepText": true
+  },
+  {
+   "key": "Hateno_SecretLifeOfKusayoshi",
+   "name": "科沙尤西的秘密",
+   "nameSrc": "rom",
+   "cat": "ImportantMini",
+   "kind": "side",
+   "layer": 18,
+   "layers": [
+    18
+   ],
+   "gx": 3423,
+   "gy": 239,
+   "gz": 2093,
+   "hasHeight": true,
+   "mapX": 2093.33,
+   "mapY": 3422.522,
+   "posSrc": "marker",
+   "posValid": true,
+   "romLayer": 18,
+   "romPt": {
+    "gx": 3414.499,
+    "gy": 238.72,
+    "gz": 2084.072
+   },
+   "npc": "Npc_HatenoVillage018",
+   "npcCn": "可莱维亚",
+   "loc": "Hateno",
+   "locCn": "哈特诺村",
+   "sort": 213,
+   "nSteps": 3,
+   "steps": [
+    {
+     "name": "Ready",
+     "text": "",
+     "pts": []
+    },
+    {
+     "name": "Step01",
+     "text": "科沙尤西每晚都会待在　\u0003\u0002",
+     "pts": [
+      {
+       "gx": 3414.499,
+       "gy": 238.72,
+       "gz": 2084.072
+      }
+     ]
+    },
+    {
+     "name": "Step02",
+     "text": "库房中存有日记，\n上面写着各种内容，诸如：\n科沙尤西和纳茨宇基一起开发了新的蔬菜；\n打算吸纳SAGONO要素加入其中；\n蔬菜尚未达到产品化地步等等。\n去向担忧的可莱维亚报告吧。",
+     "pts": [
+      {
+       "gx": 3436.403,
+       "gy": 237.39,
+       "gz": 2082.511
+      }
+     ]
+    }
+   ],
+   "requires": [
+    {
+     "type": "flag",
+     "key": null,
+     "resolved": false,
+     "flag": "Hateno_FirstEvent_Inside"
+    }
+   ],
+   "dependFlag": "Hateno_FirstEvent_Inside",
+   "markerId": 2740,
+   "match": "exact",
+   "src": "rom+guide",
+   "rawName": "科沙尤西的秘密",
+   "guide": {
+    "requires": [],
+    "start": "与房子外的可莱维亚对话开启",
+    "note": "通过【哈特诺村西边的井】中使用通天术进入房子",
+    "reward": [
+     "海拉鲁番茄*10"
+    ],
+    "unlocks": []
+   },
+   "raw": {
+    "前置任务": "无",
+    "开启任务": "与房子外的可莱维亚对话开启",
+    "注意事项": "通过【哈特诺村西边的井】中使用通天术进入房子",
+    "任务奖励": "海拉鲁番茄*10",
+    "解锁任务": "无"
+   },
+   "unlocks": [],
+   "group": "情节挑战",
+   "no": 9,
+   "groupTotal": 60,
+   "tier": "L1",
+   "flowPts": [
+    {
+     "gx": 3423,
+     "gy": 239,
+     "gz": 2093
+    },
+    {
+     "gx": 3414.499,
+     "gy": 238.72,
+     "gz": 2084.072
+    },
+    {
+     "gx": 3436.403,
+     "gy": 237.39,
+     "gz": 2082.511
+    }
+   ],
+   "onMap": true,
+   "overlap": [],
+   "reqs": [
+    {
+     "type": "flag",
+     "flag": "Hateno_FirstEvent_Inside",
+     "reqName": "哈特诺村的初次事件（村长选举）",
+     "linkable": false
+    }
+   ],
+   "unlockList": [
+    {
+     "key": "Hateno_LetUsElection",
+     "reqName": "村长选举开始！",
+     "linkable": true,
+     "src": "reverse"
+    }
+   ],
+   "stepsUI": [
+    {
+     "name": "Step01",
+     "text": "科沙尤西每晚都会待在"
+    },
+    {
+     "name": "Step02",
+     "text": "库房中存有日记，\n上面写着各种内容，诸如：\n科沙尤西和纳茨宇基一起开发了新的蔬菜；\n打算吸纳SAGONO要素加入其中；\n蔬菜尚未达到产品化地步等等。\n去向担忧的可莱维亚报告吧。"
+    }
+   ],
+   "nStepsUI": 2,
+   "hasStepText": true
+  },
+  {
+   "key": "Hateno_SecretLifeOfSagono",
+   "name": "萨格诺的秘密",
+   "nameSrc": "rom",
+   "cat": "ImportantMini",
+   "kind": "side",
+   "layer": 18,
+   "layers": [
+    18
+   ],
+   "gx": 3344,
+   "gy": 226,
+   "gz": 2147,
+   "hasHeight": true,
+   "mapX": 2146.843,
+   "mapY": 3344.217,
+   "posSrc": "marker",
+   "posValid": true,
+   "romLayer": 18,
+   "romPt": {
+    "gx": 3358.33,
+    "gy": 225.54,
+    "gz": 2138.629
+   },
+   "npc": "Npc_HatenoVillage019",
+   "npcCn": "索芙拉",
+   "loc": "Hateno",
+   "locCn": "哈特诺村",
+   "sort": 214,
+   "nSteps": 3,
+   "steps": [
+    {
+     "name": "Ready",
+     "text": "",
+     "pts": []
+    },
+    {
+     "name": "Step01",
+     "text": "萨格诺似乎　\u0003\u0002",
+     "pts": [
+      {
+       "gx": 3358.33,
+       "gy": 225.54,
+       "gz": 2138.629
+      }
+     ]
+    },
+    {
+     "name": "Step02",
+     "text": "深夜尾随萨格诺之后，\n目击到她在筒仓中吃蔬菜，\n也听到了她对哈特诺村蔬菜的强烈热爱。\n去向索芙拉报告吧。",
+     "pts": [
+      {
+       "gx": 3358.33,
+       "gy": 225.54,
+       "gz": 2138.629
+      }
+     ]
+    }
+   ],
+   "requires": [
+    {
+     "type": "flag",
+     "key": null,
+     "resolved": false,
+     "flag": "Hateno_FirstEvent_Inside"
+    }
+   ],
+   "dependFlag": "Hateno_FirstEvent_Inside",
+   "markerId": 2741,
+   "match": "exact",
+   "src": "rom+guide",
+   "rawName": "萨格诺的秘密",
+   "guide": {
+    "requires": [
+     "你是萨格诺派？还是科莎尤西派？"
+    ],
+    "start": "与索芙拉对话开启",
+    "note": "任务需在晚上进行",
+    "reward": [
+     "铠甲蘑菇*10"
+    ],
+    "unlocks": []
+   },
+   "raw": {
+    "前置任务": "你是萨格诺派？还是科莎尤西派？",
+    "开启任务": "与索芙拉对话开启",
+    "注意事项": "任务需在晚上进行",
+    "任务奖励": "铠甲蘑菇*10",
+    "解锁任务": "无"
+   },
+   "unlocks": [],
+   "group": "情节挑战",
+   "no": 10,
+   "groupTotal": 60,
+   "tier": "L1",
+   "flowPts": [
+    {
+     "gx": 3344,
+     "gy": 226,
+     "gz": 2147
+    },
+    {
+     "gx": 3358.33,
+     "gy": 225.54,
+     "gz": 2138.629
+    }
+   ],
+   "onMap": true,
+   "overlap": [],
+   "reqs": [
+    {
+     "type": "flag",
+     "flag": "Hateno_FirstEvent_Inside",
+     "reqName": "哈特诺村的初次事件（村长选举）",
+     "linkable": false
+    },
+    {
+     "type": "flag",
+     "reqName": "你是萨格诺派？还是科莎尤西派？",
+     "linkable": false
+    }
+   ],
+   "unlockList": [
+    {
+     "key": "Hateno_LetUsElection",
+     "reqName": "村长选举开始！",
+     "linkable": true,
+     "src": "reverse"
+    }
+   ],
+   "stepsUI": [
+    {
+     "name": "Step01",
+     "text": "萨格诺似乎"
+    },
+    {
+     "name": "Step02",
+     "text": "深夜尾随萨格诺之后，\n目击到她在筒仓中吃蔬菜，\n也听到了她对哈特诺村蔬菜的强烈热爱。\n去向索芙拉报告吧。"
+    }
+   ],
+   "nStepsUI": 2,
+   "hasStepText": true
+  },
+  {
+   "key": "Hateno_VillageMayorElection",
+   "name": "你是萨格诺派？还是科沙尤西派？",
+   "nameSrc": "rom",
+   "cat": "ImportantMini",
+   "kind": "side",
+   "layer": 18,
+   "layers": [
+    18
+   ],
+   "gx": 3362,
+   "gy": 227,
+   "gz": 2141,
+   "hasHeight": true,
+   "mapX": 2141.429,
+   "mapY": 3362.488,
+   "posSrc": "marker",
+   "posValid": true,
+   "romLayer": 18,
+   "romPt": {
+    "gx": 3351.806,
+    "gy": 226.55,
+    "gz": 2128.016
+   },
+   "npc": "Npc_HatenoVillage019_SisterA",
+   "npcCn": "索芙拉",
+   "loc": "Hateno",
+   "locCn": "哈特诺村",
+   "sort": 215,
+   "nSteps": 10,
+   "steps": [
+    {
+     "name": "Ready",
+     "text": "",
+     "pts": []
+    },
+    {
+     "name": "Step01",
+     "text": "萨格诺拜托你去给拘泥于古旧思想的科沙尤西派\n吃蘑菇，让他们醒悟过来。\n看衣服就能分辨出毫不时尚的科沙尤西派。\n排除“旅行者”、“暂住在村里的希卡族”、\n“村长候补的家人”、“孩子”，\n不穿SAGONO的村民似乎共有　\u0003\u0002",
+     "pts": [
+      {
+       "gx": 3351.806,
+       "gy": 226.55,
+       "gz": 2128.016
+      }
+     ]
+    },
+    {
+     "name": "Step02",
+     "text": "",
+     "pts": [
+      {
+       "gx": 3351.806,
+       "gy": 226.55,
+       "gz": 2128.016
+      }
+     ]
+    },
+    {
+     "name": "Step03",
+     "text": "",
+     "pts": [
+      {
+       "gx": 3351.806,
+       "gy": 226.55,
+       "gz": 2128.016
+      }
+     ]
+    },
+    {
+     "name": "Step04",
+     "text": "萨格诺拜托你去给拘泥于古旧思想的科沙尤西派\n吃蘑菇，让他们醒悟过来。\n看衣服就能分辨出毫不时尚的科沙尤西派。\n排除“旅行者”、“暂住在村里的希卡族”、\n“村长候补的家人”、“孩子”，\n把蘑菇送给了其中3人，还剩下　\u0003\u0002",
+     "pts": [
+      {
+       "gx": 3351.806,
+       "gy": 226.55,
+       "gz": 2128.016
+      }
+     ]
+    },
+    {
+     "name": "Step05",
+     "text": "萨格诺拜托你去给拘泥于古旧思想的科沙尤西派\n吃蘑菇，让他们醒悟过来。\n看衣服就能分辨出毫不时尚的科沙尤西派。\n排除“旅行者”、“暂住在村里的希卡族”、\n“村长候补的家人”、“孩子”，\n把蘑菇送给了其中4人，还剩下　\u0003\u0002",
+     "pts": [
+      {
+       "gx": 3351.806,
+       "gy": 226.55,
+       "gz": 2128.016
+      }
+     ]
+    },
+    {
+     "name": "Step06",
+     "text": "萨格诺拜托你去给拘泥于古旧思想的科沙尤西派\n吃蘑菇，让他们醒悟过来。\n看衣服就能分辨出毫不时尚的科沙尤西派。\n排除“旅行者”、“暂住在村里的希卡族”、\n“村长候补的家人”、“孩子”，\n把蘑菇送给了其中5人，还剩下　\u0003\u0002",
+     "pts": [
+      {
+       "gx": 3351.806,
+       "gy": 226.55,
+       "gz": 2128.016
+      }
+     ]
+    },
+    {
+     "name": "Step07",
+     "text": "萨格诺拜托你去给拘泥于古旧思想的科沙尤西派\n吃蘑菇，让他们醒悟过来。\n看衣服就能分辨出毫不时尚的科沙尤西派。\n排除“旅行者”、“暂住在村里的希卡族”、\n“村长候补的家人”、“孩子”，\n把蘑菇送给了其中6人，还剩下　\u0003\u0002",
+     "pts": [
+      {
+       "gx": 3351.806,
+       "gy": 226.55,
+       "gz": 2128.016
+      }
+     ]
+    },
+    {
+     "name": "Step08",
+     "text": "",
+     "pts": [
+      {
+       "gx": 3351.806,
+       "gy": 226.55,
+       "gz": 2128.016
+      }
+     ]
+    },
+    {
+     "name": "Step09",
+     "text": "",
+     "pts": [
+      {
+       "gx": 3351.806,
+       "gy": 226.55,
+       "gz": 2128.016
+      }
+     ]
+    }
+   ],
+   "requires": [
+    {
+     "type": "flag",
+     "key": null,
+     "resolved": false,
+     "flag": "Hateno_FirstEvent_Inside"
+    }
+   ],
+   "dependFlag": "Hateno_FirstEvent_Inside",
+   "markerId": 2736,
+   "match": "exact",
+   "src": "rom+guide",
+   "rawName": "你是萨格诺派？还是科沙尤西派？",
+   "guide": {
+    "requires": [],
+    "start": "在哈特诺村与索芙拉对话，随后进入店铺与萨格诺对话开启",
+    "note": "帮萨格诺送出八份礼物",
+    "reward": [
+     "大生命松露"
+    ],
+    "unlocks": []
+   },
+   "raw": {
+    "前置任务": "无",
+    "开启任务": "在哈特诺村与索芙拉对话，随后进入店铺与萨格诺对话开启",
+    "注意事项": "帮萨格诺送出八份礼物",
+    "任务奖励": "大生命松露",
+    "解锁任务": "无"
+   },
+   "unlocks": [],
+   "group": "情节挑战",
+   "no": 11,
+   "groupTotal": 60,
+   "tier": "L1",
+   "flowPts": [
+    {
+     "gx": 3362,
+     "gy": 227,
+     "gz": 2141
+    },
+    {
+     "gx": 3351.806,
+     "gy": 226.55,
+     "gz": 2128.016
+    }
+   ],
+   "onMap": true,
+   "overlap": [],
+   "reqs": [
+    {
+     "type": "flag",
+     "flag": "Hateno_FirstEvent_Inside",
+     "reqName": "哈特诺村的初次事件（村长选举）",
+     "linkable": false
+    }
+   ],
+   "unlockList": [],
+   "stepsUI": [
+    {
+     "name": "Step01",
+     "text": "萨格诺拜托你去给拘泥于古旧思想的科沙尤西派\n吃蘑菇，让他们醒悟过来。\n看衣服就能分辨出毫不时尚的科沙尤西派。\n排除“旅行者”、“暂住在村里的希卡族”、\n“村长候补的家人”、“孩子”，\n不穿SAGONO的村民似乎共有"
+    },
+    {
+     "name": "Step04",
+     "text": "萨格诺拜托你去给拘泥于古旧思想的科沙尤西派\n吃蘑菇，让他们醒悟过来。\n看衣服就能分辨出毫不时尚的科沙尤西派。\n排除“旅行者”、“暂住在村里的希卡族”、\n“村长候补的家人”、“孩子”，\n把蘑菇送给了其中3人，还剩下"
+    },
+    {
+     "name": "Step05",
+     "text": "萨格诺拜托你去给拘泥于古旧思想的科沙尤西派\n吃蘑菇，让他们醒悟过来。\n看衣服就能分辨出毫不时尚的科沙尤西派。\n排除“旅行者”、“暂住在村里的希卡族”、\n“村长候补的家人”、“孩子”，\n把蘑菇送给了其中4人，还剩下"
+    },
+    {
+     "name": "Step06",
+     "text": "萨格诺拜托你去给拘泥于古旧思想的科沙尤西派\n吃蘑菇，让他们醒悟过来。\n看衣服就能分辨出毫不时尚的科沙尤西派。\n排除“旅行者”、“暂住在村里的希卡族”、\n“村长候补的家人”、“孩子”，\n把蘑菇送给了其中5人，还剩下"
+    },
+    {
+     "name": "Step07",
+     "text": "萨格诺拜托你去给拘泥于古旧思想的科沙尤西派\n吃蘑菇，让他们醒悟过来。\n看衣服就能分辨出毫不时尚的科沙尤西派。\n排除“旅行者”、“暂住在村里的希卡族”、\n“村长候补的家人”、“孩子”，\n把蘑菇送给了其中6人，还剩下"
+    }
+   ],
+   "nStepsUI": 5,
+   "hasStepText": true
+  },
+  {
+   "key": "Hateno_LetUsElection",
+   "name": "村长选举开始！",
+   "nameSrc": "rom",
+   "cat": "ImportantMini",
+   "kind": "side",
+   "layer": 18,
+   "layers": [
+    18
+   ],
+   "gx": 3356,
+   "gy": 226,
+   "gz": 2145,
+   "hasHeight": true,
+   "mapX": 2145.202,
+   "mapY": 3355.564,
+   "posSrc": "marker",
+   "posValid": true,
+   "romLayer": 18,
+   "romPt": {
+    "gx": 3357.636,
+    "gy": 225.55,
+    "gz": 2138.666
+   },
+   "npc": null,
+   "npcCn": "索芙拉",
+   "loc": "Hateno",
+   "locCn": "哈特诺村",
+   "sort": 216,
+   "nSteps": 4,
+   "steps": [
+    {
+     "name": "Ready",
+     "text": "",
+     "pts": []
+    },
+    {
+     "name": "Ready1",
+     "text": "各位候选人似乎都做好了准备。\n\n去找位于奔托·艾斯特\n前面的索芙拉打听一下\n哈特诺村的村长选举的情报吧。",
+     "pts": [
+      {
+       "gx": 3357.636,
+       "gy": 225.55,
+       "gz": 2138.666
+      }
+     ]
+    },
+    {
+     "name": "Ready2",
+     "text": "各位候选人都做好了准备，\n哈特诺村的村长选举即将拉开序幕。\n挑一个　\u0003\u0002",
+     "pts": [
+      {
+       "gx": 3357.636,
+       "gy": 225.55,
+       "gz": 2138.666
+      }
+     ]
+    },
+    {
+     "name": "Step01",
+     "text": "",
+     "pts": [
+      {
+       "gx": 3354.946,
+       "gy": 227.62,
+       "gz": 2125.488
+      }
+     ]
+    }
+   ],
+   "requires": [
+    {
+     "type": "flag",
+     "key": null,
+     "resolved": false,
+     "flag": "Hateno_ChallengeComplete_04"
+    }
+   ],
+   "dependFlag": "Hateno_ChallengeComplete_04",
+   "markerId": 2742,
+   "match": "norm",
+   "src": "rom+guide",
+   "rawName": "村长选举开始",
+   "guide": {
+    "requires": [
+     "萨格诺的秘密",
+     "科沙尤西的秘密"
+    ],
+    "start": "与索芙拉对话开启",
+    "note": "过过场动画即可",
+    "reward": [
+     "萨格诺帽子"
+    ],
+    "unlocks": []
+   },
+   "raw": {
+    "前置任务": "萨格诺的秘密、科沙尤西的秘密",
+    "开启任务": "与索芙拉对话开启",
+    "注意事项": "过过场动画即可",
+    "任务奖励": "萨格诺帽子",
+    "解锁任务": "无"
+   },
+   "unlocks": [],
+   "group": "情节挑战",
+   "no": 12,
+   "groupTotal": 60,
+   "tier": "L1",
+   "flowPts": [
+    {
+     "gx": 3356,
+     "gy": 226,
+     "gz": 2145
+    },
+    {
+     "gx": 3357.636,
+     "gy": 225.55,
+     "gz": 2138.666
+    },
+    {
+     "gx": 3354.946,
+     "gy": 227.62,
+     "gz": 2125.488
+    }
+   ],
+   "onMap": true,
+   "overlap": [],
+   "reqs": [
+    {
+     "type": "flag",
+     "flag": "Hateno_ChallengeComplete_04",
+     "reqName": "完成哈特诺村全部情节挑战后",
+     "linkable": false
+    },
+    {
+     "type": "quest",
+     "key": "Hateno_SecretLifeOfSagono",
+     "reqName": "萨格诺的秘密",
+     "linkable": true,
+     "src": "guide"
+    },
+    {
+     "type": "quest",
+     "key": "Hateno_SecretLifeOfKusayoshi",
+     "reqName": "科沙尤西的秘密",
+     "linkable": true,
+     "src": "guide"
+    },
+    {
+     "type": "flag",
+     "reqName": "你是萨格诺派？还是科沙尤西派？",
+     "linkable": false
+    },
+    {
+     "type": "flag",
+     "reqName": "用新名产振兴村子！",
+     "linkable": false
+    }
+   ],
+   "unlockList": [],
+   "stepsUI": [
+    {
+     "name": "Ready1",
+     "text": "各位候选人似乎都做好了准备。\n\n去找位于奔托·艾斯特\n前面的索芙拉打听一下\n哈特诺村的村长选举的情报吧。"
+    },
+    {
+     "name": "Ready2",
+     "text": "各位候选人都做好了准备，\n哈特诺村的村长选举即将拉开序幕。\n挑一个"
+    }
+   ],
+   "nStepsUI": 2,
+   "hasStepText": true
+  },
+  {
+   "key": "TauraChallenge001",
+   "name": "横暴之徒盘踞的村子",
+   "nameSrc": "rom",
+   "cat": "ImportantMini",
+   "kind": "side",
+   "layer": 18,
+   "layers": [
+    18
+   ],
+   "gx": 2780,
+   "gy": 189,
+   "gz": 3275,
+   "hasHeight": true,
+   "mapX": 3274.837,
+   "mapY": 2780.373,
+   "posSrc": "marker",
+   "posValid": true,
+   "romLayer": 18,
+   "romPt": {
+    "gx": 2782.11,
+    "gy": 188.87,
+    "gz": 3271.46
+   },
+   "npc": "Npc_SouthernVillage013",
+   "npcCn": "悉伊达",
+   "loc": "Taura",
+   "locCn": "沃托里村",
+   "sort": 221,
+   "nSteps": 3,
+   "steps": [
+    {
+     "name": "Ready",
+     "text": "",
+     "pts": []
+    },
+    {
+     "name": "Step01",
+     "text": "沃托里村被怪物占领了，\n居民们好不容易才逃出来。\n但　\u0003\u0002",
+     "pts": [
+      {
+       "gx": 2782.11,
+       "gy": 188.87,
+       "gz": 3271.46
+      }
+     ]
+    },
+    {
+     "name": "Finale",
+     "text": "",
+     "pts": []
+    }
+   ],
+   "requires": [],
+   "dependFlag": null,
+   "markerId": 2696,
+   "match": "exact",
+   "src": "rom+guide",
+   "rawName": "横暴之徒盘踞的村子",
+   "guide": {
+    "requires": [],
+    "start": "与洛泽尔对话开启",
+    "note": "前往沃托利村消灭所有怪物（井下还有一只）",
+    "reward": [
+     "无（完成后续任务后发放）"
+    ],
+    "unlocks": [
+     "沃托利村重建计划"
+    ]
+   },
+   "raw": {
+    "前置任务": "无",
+    "开启任务": "与洛泽尔对话开启",
+    "注意事项": "前往沃托利村消灭所有怪物（井下还有一只）",
+    "任务奖励": "无（完成后续任务后发放）",
+    "解锁任务": "沃托利村重建计划"
+   },
+   "unlocks": [
+    "Uotori_RevivePlan"
+   ],
+   "group": "情节挑战",
+   "no": 13,
+   "groupTotal": 60,
+   "tier": "L2",
+   "flowPts": [
+    {
+     "gx": 2780,
+     "gy": 189,
+     "gz": 3275
+    }
+   ],
+   "onMap": true,
+   "overlap": [],
+   "reqs": [],
+   "unlockList": [
+    {
+     "key": "Uotori_RevivePlan",
+     "reqName": "沃托里村重建计划",
+     "linkable": true
+    },
+    {
+     "key": "Uotori_ResortPlan",
+     "reqName": "沃托里度假胜地计划",
+     "linkable": true,
+     "src": "reverse"
+    }
+   ],
+   "stepsUI": [
+    {
+     "name": "Step01",
+     "text": "沃托里村被怪物占领了，\n居民们好不容易才逃出来。\n但"
+    }
+   ],
+   "nStepsUI": 1,
+   "hasStepText": true
+  },
+  {
+   "key": "Uotori_RevivePlan",
+   "name": "沃托里村重建计划",
+   "nameSrc": "rom",
+   "cat": "ImportantMini",
+   "kind": "side",
+   "layer": 18,
+   "layers": [
+    18
+   ],
+   "gx": 2873,
+   "gy": 107,
+   "gz": 3442,
+   "hasHeight": true,
+   "mapX": 3441.574,
+   "mapY": 2872.939,
+   "posSrc": "marker",
+   "posValid": true,
+   "romLayer": 18,
+   "romPt": {
+    "gx": 2876.067,
+    "gy": 107.41,
+    "gz": 3443.48
+   },
+   "npc": "Npc_HatenoVillage032",
+   "npcCn": "樱达",
+   "loc": "Taura",
+   "locCn": "沃托里村",
+   "sort": 222,
+   "nSteps": 4,
+   "steps": [
+    {
+     "name": "Ready",
+     "text": "",
+     "pts": []
+    },
+    {
+     "name": "CollectWood",
+     "text": "怪物们离去之后，徒留众多遭到破坏的房屋。\n为了让村民们重返沃托里村，\n必须修复损毁的建筑物，\n因此似乎需要海量的　\u0003\u0002",
+     "pts": [
+      {
+       "gx": 2876.067,
+       "gy": 107.41,
+       "gz": 3443.48
+      }
+     ]
+    },
+    {
+     "name": "Revive",
+     "text": "收集到所需的材料，并交给了樱达！\n下一步终于要展开建筑物的修复工作了。\n\n遵照　\u0003\u0002",
+     "pts": [
+      {
+       "gx": 2876.067,
+       "gy": 107.41,
+       "gz": 3443.48
+      }
+     ]
+    },
+    {
+     "name": "Finale",
+     "text": "",
+     "pts": []
+    }
+   ],
+   "requires": [
+    {
+     "type": "quest",
+     "key": "TauraChallenge001",
+     "resolved": true,
+     "flag": "TauraChallenge001_IsCompleted_Exp"
+    }
+   ],
+   "dependFlag": "TauraChallenge001_IsCompleted_Exp",
+   "markerId": 2697,
+   "match": "fuzzy",
+   "src": "rom+guide",
+   "rawName": "沃托利村重建计划",
+   "guide": {
+    "requires": [
+     "横暴之徒盘踞的村子"
+    ],
+    "start": "与樱达对话开启",
+    "note": "跟随任务指引完成即可",
+    "reward": [
+     "坚硬海鲜炒饭",
+     "50卢比",
+     "炸弹花*5",
+     "铠甲鲷鱼*3",
+     "酥麻水果*5",
+     "村子中住宿料理等免费提供"
+    ],
+    "unlocks": []
+   },
+   "raw": {
+    "前置任务": "横暴之徒盘踞的村子",
+    "开启任务": "与樱达对话开启",
+    "注意事项": "跟随任务指引完成即可",
+    "任务奖励": "坚硬海鲜炒饭、50卢比、炸弹花*5、铠甲鲷鱼*3、酥麻水果*5、村子中住宿料理等免费提供",
+    "解锁任务": "无"
+   },
+   "unlocks": [],
+   "group": "情节挑战",
+   "no": 14,
+   "groupTotal": 60,
+   "tier": "L2",
+   "flowPts": [
+    {
+     "gx": 2873,
+     "gy": 107,
+     "gz": 3442
+    }
+   ],
+   "onMap": true,
+   "overlap": [],
+   "reqs": [
+    {
+     "type": "quest",
+     "key": "TauraChallenge001",
+     "reqName": "横暴之徒盘踞的村子",
+     "linkable": true
+    }
+   ],
+   "unlockList": [],
+   "stepsUI": [
+    {
+     "name": "CollectWood",
+     "text": "怪物们离去之后，徒留众多遭到破坏的房屋。\n为了让村民们重返沃托里村，\n必须修复损毁的建筑物，\n因此似乎需要海量的"
+    },
+    {
+     "name": "Revive",
+     "text": "收集到所需的材料，并交给了樱达！\n下一步终于要展开建筑物的修复工作了。\n\n遵照"
+    }
+   ],
+   "nStepsUI": 2,
+   "hasStepText": true
+  },
+  {
+   "key": "NewsPaper_Mitsuba",
+   "name": "调查真相！传言中的塞尔达公主！！",
+   "nameSrc": "rom",
+   "cat": "ImportantMini",
+   "kind": "side",
+   "layer": 18,
+   "layers": [
+    18
+   ],
+   "gx": -3259,
+   "gy": 226,
+   "gz": -1763,
+   "hasHeight": true,
+   "mapX": -1762.706,
+   "mapY": -3258.528,
+   "posSrc": "rom",
+   "posValid": true,
+   "romLayer": 18,
+   "romPt": {
+    "gx": -3258.528,
+    "gy": 226.05,
+    "gz": -1762.706
+   },
+   "npc": "Npc_oasis037",
+   "npcCn": "三叶",
+   "loc": "NewspaperCompany",
+   "locCn": "白诘报社",
+   "sort": 301,
+   "nSteps": 3,
+   "steps": [
+    {
+     "name": "Ready",
+     "text": "",
+     "pts": []
+    },
+    {
+     "name": "Tribune01",
+     "text": "据三叶主编所言，\n报社收到的消息中有\n关于疑似塞尔达公主之人的内容。\n消息通常在驿站汇集，\n为求探明真相，\n和沛恩一起前往　\u0003\u0002",
+     "pts": [
+      {
+       "gx": -3258.528,
+       "gy": 226.05,
+       "gz": -1762.706
+      }
+     ]
+    },
+    {
+     "name": "Finish",
+     "text": "与沛恩合作，前往各地的驿站调查过后，\n所有关于疑似塞尔达公主之人的\n传言背后的真相都已查明！\n\n返回白诘报社，向三叶报告吧。",
+     "pts": [
+      {
+       "gx": -3258.528,
+       "gy": 226.05,
+       "gz": -1762.706
+      }
+     ]
+    }
+   ],
+   "requires": [],
+   "dependFlag": null,
+   "markerId": null,
+   "match": null,
+   "src": "rom",
+   "unlocks": [
+    "Tribune04",
+    "Tribune09",
+    "Tribune10",
+    "Tribune11"
+   ],
+   "guide": {
+    "start": "到白诘报社（利特村东边、跨断裂大桥前，由旧利特驿站改建）与主编三叶对话开启。",
+    "note": "这是总任务：开启后开放各地驿站的 12 项子调查，与记者沛恩合作。 每完成一项得卢比，累计完成数决定奖励（见奖励列）。 ★ 本线是解放大妖精之泉的必要前置；忘了沛恩在哪座驿站，回报社问三叶即可。",
+    "reward": [
+     "白诘报社的布料",
+     "蛙之头巾",
+     "蛙之手甲",
+     "蛙之足袋",
+     "累计1410卢比（12篇报道分次发放）"
+    ]
+   },
+   "group": "情节挑战",
+   "no": 15,
+   "groupTotal": 60,
+   "tier": "L2",
+   "flowPts": [
+    {
+     "gx": -3259,
+     "gy": 226,
+     "gz": -1763
+    }
+   ],
+   "onMap": true,
+   "overlap": [],
+   "reqs": [],
+   "unlockList": [
+    {
+     "key": "Tribune04",
+     "reqName": "未抵达的美食家",
+     "linkable": true
+    },
+    {
+     "key": "Tribune09",
+     "reqName": "塞尔达所爱的金色的马",
+     "linkable": true
+    },
+    {
+     "key": "Tribune10",
+     "reqName": "遵从咕咕鸡大人的指示",
+     "linkable": true
+    },
+    {
+     "key": "Tribune11",
+     "reqName": "我亲爱的公主",
+     "linkable": true
+    }
+   ],
+   "stepsUI": [
+    {
+     "name": "Tribune01",
+     "text": "据三叶主编所言，\n报社收到的消息中有\n关于疑似塞尔达公主之人的内容。\n消息通常在驿站汇集，\n为求探明真相，\n和沛恩一起前往"
+    },
+    {
+     "name": "Finish",
+     "text": "与沛恩合作，前往各地的驿站调查过后，\n所有关于疑似塞尔达公主之人的\n传言背后的真相都已查明！\n\n返回白诘报社，向三叶报告吧。"
+    }
+   ],
+   "nStepsUI": 2,
+   "hasStepText": true
+  },
+  {
+   "key": "Tribune07",
+   "name": "递出邀请的女性",
+   "nameSrc": "rom",
+   "cat": "ImportantMini",
+   "kind": "side",
+   "layer": 18,
+   "layers": [
+    18
+   ],
+   "gx": -1418,
+   "gy": 122,
+   "gz": 1293,
+   "hasHeight": true,
+   "mapX": 1292.998,
+   "mapY": -1417.929,
+   "posSrc": "marker",
+   "posValid": true,
+   "romLayer": 18,
+   "romPt": {
+    "gx": -1356.027,
+    "gy": 122.14,
+    "gz": 1439.934
+   },
+   "npc": "Npc_Rito_Postman_0013",
+   "npcCn": "沛恩",
+   "loc": "HyruleDepthHatago",
+   "locCn": "平原外围的驿站",
+   "sort": 311,
+   "nSteps": 6,
+   "steps": [
+    {
+     "name": "Ready",
+     "text": "",
+     "pts": []
+    },
+    {
+     "name": "step1",
+     "text": "一名金发男性在平原外围的驿站\n邻近的三岔路附近被一名女性搭话。\n那名女性恳求他帮忙拯救“　\u0003\u0002",
+     "pts": [
+      {
+       "gx": -1356.027,
+       "gy": 122.14,
+       "gz": 1439.934
+      }
+     ]
+    },
+    {
+     "name": "step2",
+     "text": "",
+     "pts": [
+      {
+       "gx": -1041.075,
+       "gy": 127.51,
+       "gz": 1459.459
+      }
+     ]
+    },
+    {
+     "name": "step4",
+     "text": "在平原外围的驿站邻近的三岔路附近，\n一名女性恳求你去拯救“那位大人”。\n性命受到威胁、无法透露身份的“那位大人”\n似乎被困在某个地方，不能自由行动。\n领路的女性表示自己会在　\u0003\u0002",
+     "pts": [
+      {
+       "gx": -1123.65,
+       "gy": 259.77,
+       "gz": 1411.847
+      }
+     ]
+    },
+    {
+     "name": "step5",
+     "text": "在平原外围的驿站邻近的三岔路附近，\n一名女性恳求你去拯救“那位大人”。\n性命受到威胁、无法透露身份的“那位大人”\n似乎被困在某个地方，不能自由行动。\n领路的女性表示自己会在　\u0003\u0002",
+     "pts": [
+      {
+       "gx": -989.797,
+       "gy": 190.71,
+       "gz": 1527.696
+      }
+     ]
+    },
+    {
+     "name": "step6",
+     "text": "女性的真身是乔装后的依盖队。\n向金发男性搭话，\n让他们通过不成道路的地方，\n都是为了排查出\n守护塞尔达公主的林克。\n击倒袭来的依盖队吧。",
+     "pts": [
+      {
+       "gx": -1422.777,
+       "gy": 137.74,
+       "gz": 1283.809
+      }
+     ]
+    }
+   ],
+   "requires": [],
+   "dependFlag": null,
+   "markerId": 2726,
+   "match": "exact",
+   "src": "rom+guide",
+   "rawName": "递出邀请的女性",
+   "guide": {
+    "requires": [
+     "调查真相！传言中的塞尔达公主"
+    ],
+    "start": "与沛恩对话开启",
+    "note": "一路跟随萝莱尔的指引即可",
+    "reward": [
+     "50卢比"
+    ],
+    "unlocks": []
+   },
+   "raw": {
+    "前置任务": "调查真相！传言中的塞尔达公主",
+    "开启任务": "与沛恩对话开启",
+    "注意事项": "一路跟随萝莱尔的指引即可",
+    "任务奖励": "50卢比",
+    "解锁任务": "无"
+   },
+   "unlocks": [],
+   "group": "情节挑战",
+   "no": 16,
+   "groupTotal": 60,
+   "tier": "L1",
+   "flowPts": [
+    {
+     "gx": -1418,
+     "gy": 122,
+     "gz": 1293
+    },
+    {
+     "gx": -1356.027,
+     "gy": 122.14,
+     "gz": 1439.934
+    },
+    {
+     "gx": -1041.075,
+     "gy": 127.51,
+     "gz": 1459.459
+    },
+    {
+     "gx": -1123.65,
+     "gy": 259.77,
+     "gz": 1411.847
+    },
+    {
+     "gx": -989.797,
+     "gy": 190.71,
+     "gz": 1527.696
+    },
+    {
+     "gx": -1422.777,
+     "gy": 137.74,
+     "gz": 1283.809
+    }
+   ],
+   "onMap": true,
+   "overlap": [],
+   "reqs": [
+    {
+     "type": "flag",
+     "reqName": "调查真相！传言中的塞尔达公主",
+     "linkable": false
+    }
+   ],
+   "unlockList": [],
+   "stepsUI": [
+    {
+     "name": "step1",
+     "text": "一名金发男性在平原外围的驿站\n邻近的三岔路附近被一名女性搭话。\n那名女性恳求他帮忙拯救“"
+    },
+    {
+     "name": "step4",
+     "text": "在平原外围的驿站邻近的三岔路附近，\n一名女性恳求你去拯救“那位大人”。\n性命受到威胁、无法透露身份的“那位大人”\n似乎被困在某个地方，不能自由行动。\n领路的女性表示自己会在"
+    },
+    {
+     "name": "step6",
+     "text": "女性的真身是乔装后的依盖队。\n向金发男性搭话，\n让他们通过不成道路的地方，\n都是为了排查出\n守护塞尔达公主的林克。\n击倒袭来的依盖队吧。"
+    }
+   ],
+   "nStepsUI": 3,
+   "hasStepText": true
+  },
+  {
+   "key": "Tribune04",
+   "name": "未抵达的美食家",
+   "nameSrc": "rom",
+   "cat": "ImportantMini",
+   "kind": "side",
+   "layer": 18,
+   "layers": [
+    18
+   ],
+   "gx": 377,
+   "gy": 123,
+   "gz": 1049,
+   "hasHeight": true,
+   "mapX": 1049.249,
+   "mapY": 377.256,
+   "posSrc": "marker",
+   "posValid": true,
+   "romLayer": 18,
+   "romPt": {
+    "gx": 388.483,
+    "gy": 122.9,
+    "gz": 1044.727
+   },
+   "npc": "Npc_Rito_Postman_010",
+   "npcCn": "沛恩",
+   "loc": "RiverSideHatago",
+   "locCn": "河畔驿站",
+   "sort": 312,
+   "nSteps": 2,
+   "steps": [
+    {
+     "name": "Ready",
+     "text": "",
+     "pts": []
+    },
+    {
+     "name": "Search",
+     "text": "一位常客到了约定时间却不见踪影，\n这让负责做饭的戈艾塔弗不禁感到担忧。\n\n据说这位常客答应，\n要将　\u0003\u0002",
+     "pts": [
+      {
+       "gx": 388.483,
+       "gy": 122.9,
+       "gz": 1044.727
+      }
+     ]
+    }
+   ],
+   "requires": [
+    {
+     "type": "quest",
+     "key": "NewsPaper_Mitsuba",
+     "resolved": true,
+     "flag": "NewsPaper_Mitsuba_IsAfter_Ready_Exp"
+    }
+   ],
+   "dependFlag": "NewsPaper_Mitsuba_IsAfter_Ready_Exp",
+   "markerId": 2734,
+   "match": "exact",
+   "src": "rom+guide",
+   "rawName": "未抵达的美食家",
+   "guide": {
+    "requires": [
+     "调查真相！传言中的塞尔达公主"
+    ],
+    "start": "与驿站外的沛恩对话开启",
+    "note": "准备一份兽肉盖饭",
+    "reward": [
+     "海拉鲁米",
+     "岩盐",
+     "顶级兽肉",
+     "卢比"
+    ],
+    "unlocks": []
+   },
+   "raw": {
+    "前置任务": "调查真相！传言中的塞尔达公主",
+    "开启任务": "与驿站外的沛恩对话开启",
+    "注意事项": "准备一份兽肉盖饭",
+    "任务奖励": "海拉鲁米、岩盐、顶级兽肉、卢比",
+    "解锁任务": "无"
+   },
+   "unlocks": [],
+   "group": "情节挑战",
+   "no": 17,
+   "groupTotal": 60,
+   "tier": "L1",
+   "flowPts": [
+    {
+     "gx": 377,
+     "gy": 123,
+     "gz": 1049
+    },
+    {
+     "gx": 388.483,
+     "gy": 122.9,
+     "gz": 1044.727
+    }
+   ],
+   "onMap": true,
+   "overlap": [],
+   "reqs": [
+    {
+     "type": "quest",
+     "key": "NewsPaper_Mitsuba",
+     "reqName": "调查真相！传言中的塞尔达公主！！",
+     "linkable": true
+    },
+    {
+     "type": "flag",
+     "reqName": "调查真相！传言中的塞尔达公主",
+     "linkable": false
+    }
+   ],
+   "unlockList": [
+    {
+     "key": "HorseInnChallenge005",
+     "reqName": "捕捉咕咕鸡大作战",
+     "linkable": true,
+     "src": "reverse"
+    }
+   ],
+   "stepsUI": [
+    {
+     "name": "Search",
+     "text": "一位常客到了约定时间却不见踪影，\n这让负责做饭的戈艾塔弗不禁感到担忧。\n\n据说这位常客答应，\n要将"
+    }
+   ],
+   "nStepsUI": 1,
+   "hasStepText": true
+  },
+  {
+   "key": "Tribune06",
+   "name": "乘在妖兽上的公主",
+   "nameSrc": "rom",
+   "cat": "ImportantMini",
+   "kind": "side",
+   "layer": 18,
+   "layers": [
+    18
+   ],
+   "gx": -1351,
+   "gy": 192,
+   "gz": -734,
+   "hasHeight": true,
+   "mapX": -733.884,
+   "mapY": -1350.818,
+   "posSrc": "marker",
+   "posValid": true,
+   "romLayer": 18,
+   "romPt": {
+    "gx": -1349.533,
+    "gy": 192.18,
+    "gz": -730.089
+   },
+   "npc": "Npc_Rito_Postman_002",
+   "npcCn": "沛恩",
+   "loc": "NewHyruleWestHatago",
+   "locCn": "新玛丽塔驿站",
+   "sort": 313,
+   "nSteps": 3,
+   "steps": [
+    {
+     "name": "Ready",
+     "text": "",
+     "pts": []
+    },
+    {
+     "name": "Search",
+     "text": "沛恩收到目击情报称，\n塞尔达公主乘坐在一只妖兽的背上。\n据说那只妖兽拥有锋利的牙齿，\n身体像山一样巨大，可能是一种未知生物。\n据说　\u0003\u0002",
+     "pts": [
+      {
+       "gx": -1349.533,
+       "gy": 192.18,
+       "gz": -730.089
+      }
+     ]
+    },
+    {
+     "name": "Report",
+     "text": "沛恩收到目击情报称，\n塞尔达公主乘坐在一只妖兽的背上。\n从湖畔驿站的饲养员西米纳口中\n得知了咚构的情况并告诉给了沛恩后，\n他表示也想去亲眼看看。\n回去再找一次　\u0003\u0002",
+     "pts": [
+      {
+       "gx": 1550.694,
+       "gy": 165.32,
+       "gz": 3368.388
+      }
+     ]
+    }
+   ],
+   "requires": [],
+   "dependFlag": null,
+   "markerId": 2729,
+   "match": "exact",
+   "src": "rom+guide",
+   "rawName": "乘在妖兽上的公主",
+   "guide": {
+    "requires": [
+     "需要先完成“调查真相！传言中的塞尔达公主！！”"
+    ],
+    "start": "与新玛丽塔驿站外的沛恩交谈",
+    "note": "路上会打雷，建议带上防雷头盔",
+    "reward": [
+     "卢比"
+    ],
+    "unlocks": []
+   },
+   "raw": {
+    "前置任务": "需要先完成“调查真相！传言中的塞尔达公主！！”",
+    "开启任务": "与新玛丽塔驿站外的沛恩交谈",
+    "注意事项": "路上会打雷，建议带上防雷头盔",
+    "任务奖励": "卢比"
+   },
+   "unlocks": [],
+   "group": "情节挑战",
+   "no": 18,
+   "groupTotal": 60,
+   "tier": "L1",
+   "flowPts": [
+    {
+     "gx": -1351,
+     "gy": 192,
+     "gz": -734
+    },
+    {
+     "gx": 1550.694,
+     "gy": 165.32,
+     "gz": 3368.388
+    }
+   ],
+   "onMap": true,
+   "overlap": [],
+   "reqs": [
+    {
+     "type": "flag",
+     "reqName": "需要先完成“调查真相！传言中的塞尔达公主！！”",
+     "linkable": false
+    }
+   ],
+   "unlockList": [],
+   "stepsUI": [
+    {
+     "name": "Search",
+     "text": "沛恩收到目击情报称，\n塞尔达公主乘坐在一只妖兽的背上。\n据说那只妖兽拥有锋利的牙齿，\n身体像山一样巨大，可能是一种未知生物。\n据说"
+    },
+    {
+     "name": "Report",
+     "text": "沛恩收到目击情报称，\n塞尔达公主乘坐在一只妖兽的背上。\n从湖畔驿站的饲养员西米纳口中\n得知了咚构的情况并告诉给了沛恩后，\n他表示也想去亲眼看看。\n回去再找一次"
+    }
+   ],
+   "nStepsUI": 2,
+   "hasStepText": true
+  },
+  {
+   "key": "Tribune09",
+   "name": "塞尔达所爱的金色的马",
+   "nameSrc": "rom",
+   "cat": "ImportantMini",
+   "kind": "side",
+   "layer": 18,
+   "layers": [
+    18
+   ],
+   "gx": -1643,
+   "gy": 341,
+   "gz": -2585,
+   "hasHeight": true,
+   "mapX": -2585.121,
+   "mapY": -1643.23,
+   "posSrc": "marker",
+   "posValid": true,
+   "romLayer": 18,
+   "romPt": {
+    "gx": -1644.66,
+    "gy": 341.09,
+    "gz": -2583.137
+   },
+   "npc": "Npc_Rito_Postman_003",
+   "npcCn": "沛恩",
+   "loc": "TabantaHatago",
+   "locCn": "雪原驿站",
+   "sort": 321,
+   "nSteps": 2,
+   "steps": [
+    {
+     "name": "Ready",
+     "text": "",
+     "pts": []
+    },
+    {
+     "name": "HorseTake",
+     "text": "据雪原驿站的沛恩听取的情况，\n塞尔达公主保护并寄养的金色的马\n逃出了马厩，\n　\u0003\u0002",
+     "pts": [
+      {
+       "gx": -1644.66,
+       "gy": 341.09,
+       "gz": -2583.137
+      }
+     ]
+    }
+   ],
+   "requires": [
+    {
+     "type": "quest",
+     "key": "NewsPaper_Mitsuba",
+     "resolved": true,
+     "flag": "NewsPaper_Mitsuba_IsAfter_Ready_Exp"
+    }
+   ],
+   "dependFlag": "NewsPaper_Mitsuba_IsAfter_Ready_Exp",
+   "markerId": 2724,
+   "match": "fuzzy",
+   "src": "rom+guide",
+   "rawName": "塞尔达所爱的金马",
+   "guide": {
+    "requires": [
+     "调查真相！传言中的塞尔达公主"
+    ],
+    "start": "在驿站外与沛恩对话开启",
+    "note": "金马位于北塔邦挞雪原（图示），安抚好后骑回雪原驿站即可",
+    "reward": [
+     "王族缰绳",
+     "王族马鞍",
+     "精力药",
+     "50卢比",
+     "白诘报社的布料"
+    ],
+    "unlocks": []
+   },
+   "raw": {
+    "前置任务": "调查真相！传言中的塞尔达公主",
+    "开启任务": "在驿站外与沛恩对话开启",
+    "注意事项": "金马位于北塔邦挞雪原（图示），安抚好后骑回雪原驿站即可",
+    "任务奖励": "王族缰绳、王族马鞍、精力药、50卢比、白诘报社的布料",
+    "解锁任务": "无"
+   },
+   "unlocks": [],
+   "group": "情节挑战",
+   "no": 19,
+   "groupTotal": 60,
+   "tier": "L2",
+   "flowPts": [
+    {
+     "gx": -1643,
+     "gy": 341,
+     "gz": -2585
+    }
+   ],
+   "onMap": true,
+   "overlap": [],
+   "reqs": [
+    {
+     "type": "quest",
+     "key": "NewsPaper_Mitsuba",
+     "reqName": "调查真相！传言中的塞尔达公主！！",
+     "linkable": true
+    },
+    {
+     "type": "flag",
+     "reqName": "调查真相！传言中的塞尔达公主",
+     "linkable": false
+    }
+   ],
+   "unlockList": [],
+   "stepsUI": [
+    {
+     "name": "HorseTake",
+     "text": "据雪原驿站的沛恩听取的情况，\n塞尔达公主保护并寄养的金色的马\n逃出了马厩，"
+    }
+   ],
+   "nStepsUI": 1,
+   "hasStepText": true
+  },
+  {
+   "key": "Tribune03",
+   "name": "受难的迷途白山羊",
+   "nameSrc": "rom",
+   "cat": "ImportantMini",
+   "kind": "side",
+   "layer": 18,
+   "layers": [
+    18
+   ],
+   "gx": -2911,
+   "gy": 275,
+   "gz": -528,
+   "hasHeight": true,
+   "mapX": -527.633,
+   "mapY": -2911.168,
+   "posSrc": "marker",
+   "posValid": true,
+   "romLayer": 18,
+   "romPt": {
+    "gx": -2912.36,
+    "gy": 275.08,
+    "gz": -530.44
+   },
+   "npc": "Npc_Rito_Postman_011",
+   "npcCn": "沛恩",
+   "loc": "TabantaBridgeHatago",
+   "locCn": "塔邦挞大桥驿站",
+   "sort": 323,
+   "nSteps": 3,
+   "steps": [
+    {
+     "name": "Ready",
+     "text": "",
+     "pts": []
+    },
+    {
+     "name": "Hearing",
+     "text": "听说塔邦挞大桥驿站饲养的白山羊们\n全都逃跑了。\n据沛恩所说，这起事件背后，\n隐约与塞尔达公主有所牵连。\n详细情况可以从负责照顾白山羊的\n　\u0003\u0002",
+     "pts": [
+      {
+       "gx": -2912.36,
+       "gy": 275.08,
+       "gz": -530.44
+      }
+     ]
+    },
+    {
+     "name": "Search",
+     "text": "据恰克所说，白山羊们之所以会逃跑，\n是因为他喂了用塞尔达公主教授的配方配制的饲料。\n它们将混有整颗　\u0003\u0002",
+     "pts": [
+      {
+       "gx": -2912.36,
+       "gy": 275.08,
+       "gz": -530.44
+      }
+     ]
+    }
+   ],
+   "requires": [],
+   "dependFlag": null,
+   "markerId": 2730,
+   "match": "fuzzy",
+   "src": "rom+guide",
+   "rawName": "受难的迷途山羊",
+   "guide": {
+    "requires": [
+     "调查真相！传言中的塞尔达公主"
+    ],
+    "start": "与沛恩对话开启",
+    "note": "一路跟着海拉鲁球果即可找到山羊",
+    "reward": [
+     "卢比"
+    ],
+    "unlocks": []
+   },
+   "raw": {
+    "前置任务": "调查真相！传言中的塞尔达公主",
+    "开启任务": "与沛恩对话开启",
+    "注意事项": "一路跟着海拉鲁球果即可找到山羊",
+    "任务奖励": "卢比",
+    "解锁任务": "无"
+   },
+   "unlocks": [],
+   "group": "情节挑战",
+   "no": 20,
+   "groupTotal": 60,
+   "tier": "L2",
+   "flowPts": [
+    {
+     "gx": -2911,
+     "gy": 275,
+     "gz": -528
+    }
+   ],
+   "onMap": true,
+   "overlap": [],
+   "reqs": [
+    {
+     "type": "flag",
+     "reqName": "调查真相！传言中的塞尔达公主",
+     "linkable": false
+    }
+   ],
+   "unlockList": [],
+   "stepsUI": [
+    {
+     "name": "Hearing",
+     "text": "听说塔邦挞大桥驿站饲养的白山羊们\n全都逃跑了。\n据沛恩所说，这起事件背后，\n隐约与塞尔达公主有所牵连。\n详细情况可以从负责照顾白山羊的"
+    },
+    {
+     "name": "Search",
+     "text": "据恰克所说，白山羊们之所以会逃跑，\n是因为他喂了用塞尔达公主教授的配方配制的饲料。\n它们将混有整颗"
+    }
+   ],
+   "nStepsUI": 2,
+   "hasStepText": true
+  },
+  {
+   "key": "Tribune11",
+   "name": "我亲爱的公主",
+   "nameSrc": "rom",
+   "cat": "ImportantMini",
+   "kind": "side",
+   "layer": 18,
+   "layers": [
+    18
+   ],
+   "gx": 2582,
+   "gy": 268,
+   "gz": -1154,
+   "hasHeight": true,
+   "mapX": -1154.073,
+   "mapY": 2581.585,
+   "posSrc": "marker",
+   "posValid": true,
+   "romLayer": 18,
+   "romPt": {
+    "gx": 2286.136,
+    "gy": 267.98,
+    "gz": -1505.638
+   },
+   "npc": "Npc_Rito_Postman_013",
+   "npcCn": "沛恩",
+   "loc": "DeathMountainHatago",
+   "locCn": "山麓驿站",
+   "sort": 331,
+   "nSteps": 7,
+   "steps": [
+    {
+     "name": "Ready",
+     "text": "",
+     "pts": []
+    },
+    {
+     "name": "Step1",
+     "text": "赖在山麓驿站不走，只穿了半长裤的男人们\n是左纳乌调查队的人。他们似乎是\n在塞尔达公主的指示下，才改为只穿半长裤的。\n这种异常的景象让沛恩倍感可疑。\n而一部分人前往调查山路上的　\u0003\u0002",
+     "pts": [
+      {
+       "gx": 2286.136,
+       "gy": 267.98,
+       "gz": -1505.638
+      }
+     ]
+    },
+    {
+     "name": "Step2",
+     "text": "",
+     "pts": [
+      {
+       "gx": 2286.136,
+       "gy": 267.98,
+       "gz": -1505.638
+      }
+     ]
+    },
+    {
+     "name": "Step3",
+     "text": "",
+     "pts": [
+      {
+       "gx": 2286.136,
+       "gy": 267.98,
+       "gz": -1505.638
+      }
+     ]
+    },
+    {
+     "name": "Step4",
+     "text": "来到山麓的魔窟之后，\n发现只穿了半长裤的左纳乌调查队正在入口处。\n他们因无法打倒里面的怪物而倍感烦恼。\n你和他们约好，自己也只穿一条半长裤，\n　\u0003\u0002",
+     "pts": [
+      {
+       "gx": 2191.251,
+       "gy": 247.53,
+       "gz": -1608.553
+      }
+     ]
+    },
+    {
+     "name": "Step5",
+     "text": "和在山麓的魔窟烦恼的左纳乌调查队约好了，\n自己也只穿一条半长裤，去打倒洞窟中的怪物。\n现在已经成功打倒了怪物，\n去向在入口处等待的调查队报告吧。",
+     "pts": [
+      {
+       "gx": 2286.136,
+       "gy": 267.98,
+       "gz": -1505.638
+      }
+     ]
+    },
+    {
+     "name": "Step6",
+     "text": "",
+     "pts": [
+      {
+       "gx": 2592.709,
+       "gy": 253.62,
+       "gz": -1163.468
+      }
+     ]
+    }
+   ],
+   "requires": [
+    {
+     "type": "quest",
+     "key": "NewsPaper_Mitsuba",
+     "resolved": true,
+     "flag": "NewsPaper_Mitsuba_IsAfter_Ready_Exp"
+    }
+   ],
+   "dependFlag": "NewsPaper_Mitsuba_IsAfter_Ready_Exp",
+   "markerId": 2727,
+   "match": "exact",
+   "src": "rom+guide",
+   "rawName": "我亲爱的公主",
+   "guide": {
+    "requires": [],
+    "start": "与驿站外的沛恩交谈",
+    "note": "类似孑然一身神庙挑战，任务中会强制下掉所有装备，通过捡地上的武器来打败怪物大军即可",
+    "reward": [
+     "卢比"
+    ],
+    "unlocks": []
+   },
+   "raw": {
+    "前置任务": "无",
+    "开启任务": "与驿站外的沛恩交谈",
+    "注意事项": "类似孑然一身神庙挑战，任务中会强制下掉所有装备，通过捡地上的武器来打败怪物大军即可",
+    "任务奖励": "卢比"
+   },
+   "unlocks": [],
+   "group": "情节挑战",
+   "no": 21,
+   "groupTotal": 60,
+   "tier": "L1",
+   "flowPts": [
+    {
+     "gx": 2582,
+     "gy": 268,
+     "gz": -1154
+    },
+    {
+     "gx": 2286.136,
+     "gy": 267.98,
+     "gz": -1505.638
+    },
+    {
+     "gx": 2191.251,
+     "gy": 247.53,
+     "gz": -1608.553
+    },
+    {
+     "gx": 2592.709,
+     "gy": 253.62,
+     "gz": -1163.468
+    }
+   ],
+   "onMap": true,
+   "overlap": [],
+   "reqs": [
+    {
+     "type": "quest",
+     "key": "NewsPaper_Mitsuba",
+     "reqName": "调查真相！传言中的塞尔达公主！！",
+     "linkable": true
+    }
+   ],
+   "unlockList": [],
+   "stepsUI": [
+    {
+     "name": "Step1",
+     "text": "赖在山麓驿站不走，只穿了半长裤的男人们\n是左纳乌调查队的人。他们似乎是\n在塞尔达公主的指示下，才改为只穿半长裤的。\n这种异常的景象让沛恩倍感可疑。\n而一部分人前往调查山路上的"
+    },
+    {
+     "name": "Step4",
+     "text": "来到山麓的魔窟之后，\n发现只穿了半长裤的左纳乌调查队正在入口处。\n他们因无法打倒里面的怪物而倍感烦恼。\n你和他们约好，自己也只穿一条半长裤，"
+    },
+    {
+     "name": "Step5",
+     "text": "和在山麓的魔窟烦恼的左纳乌调查队约好了，\n自己也只穿一条半长裤，去打倒洞窟中的怪物。\n现在已经成功打倒了怪物，\n去向在入口处等待的调查队报告吧。"
+    }
+   ],
+   "nStepsUI": 3,
+   "hasStepText": true
+  },
+  {
+   "key": "Tribune10",
+   "name": "遵从咕咕鸡大人的指示",
+   "nameSrc": "rom",
+   "cat": "ImportantMini",
+   "kind": "side",
+   "layer": 18,
+   "layers": [
+    18
+   ],
+   "gx": 3168,
+   "gy": 325,
+   "gz": -1715,
+   "hasHeight": true,
+   "mapX": -1715.327,
+   "mapY": 3167.658,
+   "posSrc": "marker",
+   "posValid": true,
+   "romLayer": 18,
+   "romPt": {
+    "gx": 3228.0,
+    "gy": 325.0,
+    "gz": -1785.0
+   },
+   "npc": "Npc_Rito_Postman_006",
+   "npcCn": "沛恩",
+   "loc": "TamurulHatago_02",
+   "locCn": "南阿卡莱驿站",
+   "sort": 341,
+   "nSteps": 11,
+   "steps": [
+    {
+     "name": "Ready",
+     "text": "",
+     "pts": []
+    },
+    {
+     "name": "TalkKokkko",
+     "text": "沛恩在南阿卡莱驿站附近进行调查，\n却未能打探到有用情报，正不知该如何是好。\n听闻驿站后面山坡的大树下\n有一只　\u0003\u0002",
+     "pts": [
+      {
+       "gx": 3228.0,
+       "gy": 325.0,
+       "gz": -1785.0
+      }
+     ]
+    },
+    {
+     "name": "FirstOracle",
+     "text": "来到南阿卡莱驿站附近的山丘后，\n发现传达神谕的咕咕鸡是真实存在的。\n根据神谕，只要　\u0003\u0002",
+     "pts": [
+      {
+       "gx": 3228.0,
+       "gy": 325.0,
+       "gz": -1785.0
+      }
+     ]
+    },
+    {
+     "name": "TimeOverFirst",
+     "text": "",
+     "pts": []
+    },
+    {
+     "name": "ClearFirst",
+     "text": "",
+     "pts": []
+    },
+    {
+     "name": "FinishFirstTrial",
+     "text": "遵照咕咕鸡传达的神谕，\n接受并通过了第1个试练，\n但要获得塞尔达公主的线索，\n还需要接受　\u0003\u0002",
+     "pts": [
+      {
+       "gx": 3228.0,
+       "gy": 325.0,
+       "gz": -1785.0
+      }
+     ]
+    },
+    {
+     "name": "SecondOracle",
+     "text": "遵照咕咕鸡传达的神谕，\n接受并通过了第1个试练，\n但要获得塞尔达公主的线索，\n还需要接受　\u0003\u0002",
+     "pts": [
+      {
+       "gx": 3228.0,
+       "gy": 325.0,
+       "gz": -1785.0
+      }
+     ]
+    },
+    {
+     "name": "TimeOverSecond",
+     "text": "",
+     "pts": []
+    },
+    {
+     "name": "ClearSecond",
+     "text": "",
+     "pts": []
+    },
+    {
+     "name": "Battle",
+     "text": "",
+     "pts": [
+      {
+       "gx": 3228.0,
+       "gy": 325.0,
+       "gz": -1785.0
+      }
+     ]
+    },
+    {
+     "name": "Report",
+     "text": "",
+     "pts": []
+    }
+   ],
+   "requires": [
+    {
+     "type": "quest",
+     "key": "NewsPaper_Mitsuba",
+     "resolved": true,
+     "flag": "NewsPaper_Mitsuba_IsAfter_Ready_Exp"
+    }
+   ],
+   "dependFlag": "NewsPaper_Mitsuba_IsAfter_Ready_Exp",
+   "markerId": 2732,
+   "match": "fuzzy",
+   "src": "rom+guide",
+   "rawName": "遵从咕咕鸡大人的提示",
+   "guide": {
+    "requires": [
+     "调查真相！传言中的塞尔达公主"
+    ],
+    "start": "与沛恩对话开启",
+    "note": "限时任务，注意时间",
+    "reward": [
+     "卢比"
+    ],
+    "unlocks": []
+   },
+   "raw": {
+    "前置任务": "调查真相！传言中的塞尔达公主",
+    "开启任务": "与沛恩对话开启",
+    "注意事项": "限时任务，注意时间",
+    "任务奖励": "卢比",
+    "解锁任务": "无"
+   },
+   "unlocks": [],
+   "group": "情节挑战",
+   "no": 22,
+   "groupTotal": 60,
+   "tier": "L1",
+   "flowPts": [
+    {
+     "gx": 3168,
+     "gy": 325,
+     "gz": -1715
+    },
+    {
+     "gx": 3228.0,
+     "gy": 325.0,
+     "gz": -1785.0
+    }
+   ],
+   "onMap": true,
+   "overlap": [],
+   "reqs": [
+    {
+     "type": "quest",
+     "key": "NewsPaper_Mitsuba",
+     "reqName": "调查真相！传言中的塞尔达公主！！",
+     "linkable": true
+    },
+    {
+     "type": "flag",
+     "reqName": "调查真相！传言中的塞尔达公主",
+     "linkable": false
+    }
+   ],
+   "unlockList": [],
+   "stepsUI": [
+    {
+     "name": "TalkKokkko",
+     "text": "沛恩在南阿卡莱驿站附近进行调查，\n却未能打探到有用情报，正不知该如何是好。\n听闻驿站后面山坡的大树下\n有一只"
+    },
+    {
+     "name": "FirstOracle",
+     "text": "来到南阿卡莱驿站附近的山丘后，\n发现传达神谕的咕咕鸡是真实存在的。\n根据神谕，只要"
+    },
+    {
+     "name": "FinishFirstTrial",
+     "text": "遵照咕咕鸡传达的神谕，\n接受并通过了第1个试练，\n但要获得塞尔达公主的线索，\n还需要接受"
+    }
+   ],
+   "nStepsUI": 3,
+   "hasStepText": true
+  },
+  {
+   "key": "Tribune05",
+   "name": "消失的农具",
+   "nameSrc": "rom",
+   "cat": "ImportantMini",
+   "kind": "side",
+   "layer": 18,
+   "layers": [
+    18
+   ],
+   "gx": 878,
+   "gy": 117,
+   "gz": 158,
+   "hasHeight": true,
+   "mapX": 157.887,
+   "mapY": 877.635,
+   "posSrc": "marker",
+   "posValid": true,
+   "romLayer": 18,
+   "romPt": {
+    "gx": 836.826,
+    "gy": 117.24,
+    "gz": 125.197
+   },
+   "npc": "Npc_Rito_Postman_007",
+   "npcCn": "沛恩",
+   "loc": "NorthHatelHatago",
+   "locCn": "湿地驿站",
+   "sort": 351,
+   "nSteps": 4,
+   "steps": [
+    {
+     "name": "Ready",
+     "text": "",
+     "pts": []
+    },
+    {
+     "name": "Step1",
+     "text": "塞尔达公主借走的农具\n至今还未归还。\n她究竟为什么要借走农具……\n又为什么不归还农具……沛恩对此抱有疑问。\n木筏负责人伊琐\n似乎知道详细情报。",
+     "pts": [
+      {
+       "gx": 836.826,
+       "gy": 117.24,
+       "gz": 125.197
+      }
+     ]
+    },
+    {
+     "name": "Carry",
+     "text": "塞尔达公主从驿站借走农具后，\n似乎前往了河流下游的花之中州。\n伊琐想前往河流下游，奈何途中到处都是遗迹，\n只得叹息地表示，仅凭自己的能力无法做到。\n他似乎正在寻找能用　\u0003\u0002",
+     "pts": [
+      {
+       "gx": 836.826,
+       "gy": 117.24,
+       "gz": 125.197
+      }
+     ]
+    },
+    {
+     "name": "Carry2",
+     "text": "",
+     "pts": [
+      {
+       "gx": 858.966,
+       "gy": 115.54,
+       "gz": 785.969
+      }
+     ]
+    }
+   ],
+   "requires": [],
+   "dependFlag": null,
+   "markerId": 2731,
+   "match": "exact",
+   "src": "rom+guide",
+   "rawName": "消失的农具",
+   "guide": {
+    "requires": [
+     "调查真相！传言中的塞尔达公主"
+    ],
+    "start": "与沛恩对话开启",
+    "note": "用究极手造船",
+    "reward": [
+     "卢比"
+    ],
+    "unlocks": []
+   },
+   "raw": {
+    "前置任务": "调查真相！传言中的塞尔达公主",
+    "开启任务": "与沛恩对话开启",
+    "注意事项": "用究极手造船",
+    "任务奖励": "卢比",
+    "解锁任务": "无"
+   },
+   "unlocks": [],
+   "group": "情节挑战",
+   "no": 23,
+   "groupTotal": 60,
+   "tier": "L1",
+   "flowPts": [
+    {
+     "gx": 878,
+     "gy": 117,
+     "gz": 158
+    },
+    {
+     "gx": 836.826,
+     "gy": 117.24,
+     "gz": 125.197
+    },
+    {
+     "gx": 858.966,
+     "gy": 115.54,
+     "gz": 785.969
+    }
+   ],
+   "onMap": true,
+   "overlap": [],
+   "reqs": [
+    {
+     "type": "flag",
+     "reqName": "调查真相！传言中的塞尔达公主",
+     "linkable": false
+    }
+   ],
+   "unlockList": [],
+   "stepsUI": [
+    {
+     "name": "Step1",
+     "text": "塞尔达公主借走的农具\n至今还未归还。\n她究竟为什么要借走农具……\n又为什么不归还农具……沛恩对此抱有疑问。\n木筏负责人伊琐\n似乎知道详细情报。"
+    },
+    {
+     "name": "Carry",
+     "text": "塞尔达公主从驿站借走农具后，\n似乎前往了河流下游的花之中州。\n伊琐想前往河流下游，奈何途中到处都是遗迹，\n只得叹息地表示，仅凭自己的能力无法做到。\n他似乎正在寻找能用"
+    }
+   ],
+   "nStepsUI": 2,
+   "hasStepText": true
+  },
+  {
+   "key": "Tribune02",
+   "name": "塞尔达公主绑架事件！？",
+   "nameSrc": "rom",
+   "cat": "ImportantMini",
+   "kind": "side",
+   "layer": 18,
+   "layers": [
+    18
+   ],
+   "gx": 1756,
+   "gy": 145,
+   "gz": 1925,
+   "hasHeight": true,
+   "mapX": 1925.324,
+   "mapY": 1755.715,
+   "posSrc": "marker",
+   "posValid": true,
+   "romLayer": 18,
+   "romPt": {
+    "gx": 1757.13,
+    "gy": 144.62,
+    "gz": 1924.48
+   },
+   "npc": "Npc_Rito_Postman_001",
+   "npcCn": "沛恩",
+   "loc": "FaronHatago000",
+   "locCn": "双子驿站",
+   "sort": 361,
+   "nSteps": 4,
+   "steps": [
+    {
+     "name": "Ready",
+     "text": "",
+     "pts": []
+    },
+    {
+     "name": "Search",
+     "text": "依盖队似乎绑架了塞尔达公主。\n线索只有他们留下的一段声明——\n“塞尔达在我们手上。想救人，\n就来屹立双子崖壁间的深邃峡谷。”\n沛恩将着眼点放在了\n“　\u0003\u0002",
+     "pts": [
+      {
+       "gx": 1757.13,
+       "gy": 144.62,
+       "gz": 1924.48
+      }
+     ]
+    },
+    {
+     "name": "Escape",
+     "text": "依盖队留下了一段声明——\n“塞尔达在我们手上。想救人，\n就来屹立双子崖壁间的深邃峡谷。”\n以此为线索，在目标地点\n发现了被关在牢笼中的塞尔达公主。\n但那其实是依盖队乔装而成的。",
+     "pts": [
+      {
+       "gx": 1757.13,
+       "gy": 144.62,
+       "gz": 1924.48
+      }
+     ]
+    },
+    {
+     "name": "Report",
+     "text": "",
+     "pts": [
+      {
+       "gx": 1757.13,
+       "gy": 144.62,
+       "gz": 1924.48
+      }
+     ]
+    }
+   ],
+   "requires": [],
+   "dependFlag": null,
+   "markerId": 2733,
+   "match": "exact",
+   "src": "rom+guide",
+   "rawName": "塞尔达公主绑架事件！？",
+   "guide": {
+    "requires": [
+     "调查真相！传言中的塞尔达公主"
+    ],
+    "start": "与驿站顶上的沛恩对话开启",
+    "note": "到达双子山图示处",
+    "reward": [
+     "卢比"
+    ],
+    "unlocks": []
+   },
+   "raw": {
+    "前置任务": "调查真相！传言中的塞尔达公主",
+    "开启任务": "与驿站顶上的沛恩对话开启",
+    "注意事项": "到达双子山图示处",
+    "任务奖励": "卢比",
+    "解锁任务": "无"
+   },
+   "unlocks": [],
+   "group": "情节挑战",
+   "no": 24,
+   "groupTotal": 60,
+   "tier": "L2",
+   "flowPts": [
+    {
+     "gx": 1756,
+     "gy": 145,
+     "gz": 1925
+    }
+   ],
+   "onMap": true,
+   "overlap": [],
+   "reqs": [
+    {
+     "type": "flag",
+     "reqName": "调查真相！传言中的塞尔达公主",
+     "linkable": false
+    }
+   ],
+   "unlockList": [],
+   "stepsUI": [
+    {
+     "name": "Search",
+     "text": "依盖队似乎绑架了塞尔达公主。\n线索只有他们留下的一段声明——\n“塞尔达在我们手上。想救人，\n就来屹立双子崖壁间的深邃峡谷。”\n沛恩将着眼点放在了\n“"
+    },
+    {
+     "name": "Escape",
+     "text": "依盖队留下了一段声明——\n“塞尔达在我们手上。想救人，\n就来屹立双子崖壁间的深邃峡谷。”\n以此为线索，在目标地点\n发现了被关在牢笼中的塞尔达公主。\n但那其实是依盖队乔装而成的。"
+    }
+   ],
+   "nStepsUI": 2,
+   "hasStepText": true
+  },
+  {
+   "key": "Tribune13",
+   "name": "诡异之声",
+   "nameSrc": "rom",
+   "cat": "ImportantMini",
+   "kind": "side",
+   "layer": 18,
+   "layers": [
+    18
+   ],
+   "gx": 505,
+   "gy": 153,
+   "gz": 3446,
+   "hasHeight": true,
+   "mapX": 3445.645,
+   "mapY": 504.851,
+   "posSrc": "marker",
+   "posValid": true,
+   "romLayer": 18,
+   "romPt": {
+    "gx": 522.826,
+    "gy": 152.82,
+    "gz": 3439.663
+   },
+   "npc": "Npc_Rito_Postman_014",
+   "npcCn": "沛恩",
+   "loc": "FaronHatago002",
+   "locCn": "高原驿站",
+   "sort": 371,
+   "nSteps": 5,
+   "steps": [
+    {
+     "name": "Ready",
+     "text": "",
+     "pts": []
+    },
+    {
+     "name": "Search",
+     "text": "“放下……武器……放下……武器……” \n根据沛恩收集到的情报，夜夜都有这样的声音\n从西北方的阿拉弗拉平原传到高原驿站。\n据说那是塞尔达公主的声音……\n有必要确认一下那声音是否真的来自塞尔达公主。\n　\u0003\u0002",
+     "pts": [
+      {
+       "gx": 522.826,
+       "gy": 152.82,
+       "gz": 3439.663
+      }
+     ]
+    },
+    {
+     "name": "Chase",
+     "text": "",
+     "pts": [
+      {
+       "gx": 430.756,
+       "gy": 155.34,
+       "gz": 3417.063
+      }
+     ]
+    },
+    {
+     "name": "Discovery",
+     "text": "",
+     "pts": []
+    },
+    {
+     "name": "Report",
+     "text": "",
+     "pts": [
+      {
+       "gx": 399.848,
+       "gy": 155.55,
+       "gz": 3385.957
+      }
+     ]
+    }
+   ],
+   "requires": [],
+   "dependFlag": null,
+   "markerId": 2728,
+   "match": "exact",
+   "src": "rom+guide",
+   "rawName": "诡异之声",
+   "guide": {
+    "requires": [
+     "调查真相！传言中的塞尔达公主"
+    ],
+    "start": "与沛恩互动开启",
+    "note": "任务需在夜晚进行",
+    "reward": [
+     "100卢比"
+    ],
+    "unlocks": []
+   },
+   "raw": {
+    "前置任务": "调查真相！传言中的塞尔达公主",
+    "开启任务": "与沛恩互动开启",
+    "注意事项": "任务需在夜晚进行",
+    "任务奖励": "100卢比",
+    "解锁任务": "无"
+   },
+   "unlocks": [],
+   "group": "情节挑战",
+   "no": 25,
+   "groupTotal": 60,
+   "tier": "L1",
+   "flowPts": [
+    {
+     "gx": 505,
+     "gy": 153,
+     "gz": 3446
+    },
+    {
+     "gx": 522.826,
+     "gy": 152.82,
+     "gz": 3439.663
+    },
+    {
+     "gx": 430.756,
+     "gy": 155.34,
+     "gz": 3417.063
+    },
+    {
+     "gx": 399.848,
+     "gy": 155.55,
+     "gz": 3385.957
+    }
+   ],
+   "onMap": true,
+   "overlap": [],
+   "reqs": [
+    {
+     "type": "flag",
+     "reqName": "调查真相！传言中的塞尔达公主",
+     "linkable": false
+    }
+   ],
+   "unlockList": [],
+   "stepsUI": [
+    {
+     "name": "Search",
+     "text": "“放下……武器……放下……武器……”\n根据沛恩收集到的情报，夜夜都有这样的声音\n从西北方的阿拉弗拉平原传到高原驿站。\n据说那是塞尔达公主的声音……\n有必要确认一下那声音是否真的来自塞尔达公主。"
+    }
+   ],
+   "nStepsUI": 1,
+   "hasStepText": true
+  },
+  {
+   "key": "Tribune14",
+   "name": "被封住的井",
+   "nameSrc": "rom",
+   "cat": "ImportantMini",
+   "kind": "side",
+   "layer": 18,
+   "layers": [
+    18
+   ],
+   "gx": -2819,
+   "gy": 135,
+   "gz": 2237,
+   "hasHeight": true,
+   "mapX": 2236.707,
+   "mapY": -2819.049,
+   "posSrc": "marker",
+   "posValid": true,
+   "romLayer": 18,
+   "romPt": {
+    "gx": -2817.0,
+    "gy": 134.87,
+    "gz": 2236.5
+   },
+   "npc": "Npc_Rito_Postman_008",
+   "npcCn": "沛恩",
+   "loc": "GerudoHatago",
+   "locCn": "格鲁德峡谷驿站",
+   "sort": 381,
+   "nSteps": 4,
+   "steps": [
+    {
+     "name": "Ready",
+     "text": "",
+     "pts": []
+    },
+    {
+     "name": "Step1",
+     "text": "根据沛恩得到的情报，\n在塞尔达公主的指示下，\n驿站的井遭到了禁用。\n并且，掩埋的原因不明。\n沛恩想要调查井内，\n但由于翅膀碍事，无法进入。",
+     "pts": [
+      {
+       "gx": -2817.0,
+       "gy": 134.87,
+       "gz": 2236.5
+      }
+     ]
+    },
+    {
+     "name": "Step2",
+     "text": "破坏井中的岩盘后，\n发现了怪物盘踞的洞窟。\n为避免危及驿站，\n看来还是把怪物打倒比较好……",
+     "pts": [
+      {
+       "gx": -2817.0,
+       "gy": 134.87,
+       "gz": 2236.5
+      }
+     ]
+    },
+    {
+     "name": "Step3",
+     "text": "",
+     "pts": [
+      {
+       "gx": -2817.0,
+       "gy": 134.87,
+       "gz": 2236.5
+      }
+     ]
+    }
+   ],
+   "requires": [],
+   "dependFlag": null,
+   "markerId": 2725,
+   "match": "exact",
+   "src": "rom+guide",
+   "rawName": "被封住的井",
+   "guide": {
+    "requires": [
+     "调查真相！传言中的塞尔达公主"
+    ],
+    "start": "与沛恩对话开启",
+    "note": "打开井下的洞窟，消灭所有怪物即可",
+    "reward": [
+     "70卢比"
+    ],
+    "unlocks": []
+   },
+   "raw": {
+    "前置任务": "调查真相！传言中的塞尔达公主",
+    "开启任务": "与沛恩对话开启",
+    "注意事项": "打开井下的洞窟，消灭所有怪物即可",
+    "任务奖励": "70卢比",
+    "解锁任务": "无"
+   },
+   "unlocks": [],
+   "group": "情节挑战",
+   "no": 26,
+   "groupTotal": 60,
+   "tier": "L2",
+   "flowPts": [
+    {
+     "gx": -2819,
+     "gy": 135,
+     "gz": 2237
+    }
+   ],
+   "onMap": true,
+   "overlap": [],
+   "reqs": [
+    {
+     "type": "flag",
+     "reqName": "调查真相！传言中的塞尔达公主",
+     "linkable": false
+    }
+   ],
+   "unlockList": [],
+   "stepsUI": [
+    {
+     "name": "Step1",
+     "text": "根据沛恩得到的情报，\n在塞尔达公主的指示下，\n驿站的井遭到了禁用。\n并且，掩埋的原因不明。\n沛恩想要调查井内，\n但由于翅膀碍事，无法进入。"
+    },
+    {
+     "name": "Step2",
+     "text": "破坏井中的岩盘后，\n发现了怪物盘踞的洞窟。\n为避免危及驿站，\n看来还是把怪物打倒比较好……"
+    }
+   ],
+   "nStepsUI": 2,
+   "hasStepText": true
+  },
+  {
+   "key": "Orchestra03",
+   "name": "吹笛少年寻找之物",
+   "nameSrc": "rom",
+   "cat": "ImportantMini",
+   "kind": "side",
+   "layer": 18,
+   "layers": [
+    18
+   ],
+   "gx": 531,
+   "gy": 155,
+   "gz": 3405,
+   "hasHeight": true,
+   "mapX": 3404.77,
+   "mapY": 531.056,
+   "posSrc": "marker",
+   "posValid": true,
+   "romLayer": 18,
+   "romPt": {
+    "gx": 526.96,
+    "gy": 154.59,
+    "gz": 3392.202
+   },
+   "npc": "Npc_Orchestra_BT_F_Road",
+   "npcCn": "菲依",
+   "loc": "FaronHatago002",
+   "locCn": "高原驿站",
+   "sort": 401,
+   "nSteps": 5,
+   "steps": [
+    {
+     "name": "Ready",
+     "text": "",
+     "pts": []
+    },
+    {
+     "name": "step1",
+     "text": "菲伊想利用火让哈依特\n看一看“发光树”，却以失败告终。\n不过他干劲十足，准备下次用萤火虫的光\n制作“发光树”给哈依特看。\n为了制作“发光树”，\n还需要　\u0003\u0002",
+     "pts": [
+      {
+       "gx": 526.96,
+       "gy": 154.59,
+       "gz": 3392.202
+      }
+     ]
+    },
+    {
+     "name": "step2",
+     "text": "",
+     "pts": [
+      {
+       "gx": 527.73,
+       "gy": 162.52,
+       "gz": 3395.55
+      }
+     ]
+    },
+    {
+     "name": "step3",
+     "text": "",
+     "pts": [
+      {
+       "gx": 527.608,
+       "gy": 161.87,
+       "gz": 3395.32
+      }
+     ]
+    },
+    {
+     "name": "step4",
+     "text": "伴随着笛声，聚集的萤火虫发出光亮，\n美丽的“发光树”浮现在黑暗的夜色之中。\n哈依特深受感动，露出了发自内心的笑容。\n菲伊发誓，今后也要为让哈依特露出笑容而努力，\n准备回到乌玛纳利乐团，成为一名出色的横笛手。\n去收下菲伊的谢礼吧。",
+     "pts": [
+      {
+       "gx": 526.96,
+       "gy": 154.59,
+       "gz": 3392.202
+      }
+     ]
+    }
+   ],
+   "requires": [],
+   "dependFlag": null,
+   "markerId": 2713,
+   "match": "exact",
+   "src": "rom+guide",
+   "rawName": "吹笛少年寻找之物",
+   "guide": {
+    "requires": [],
+    "start": "与驿站外树上吹笛的少年菲依对话开启",
+    "note": "要在晚上抓10只静静萤火虫，建议换上依盖套并吃能提高安静性的食物",
+    "reward": [
+     "大生命松露*1"
+    ],
+    "unlocks": []
+   },
+   "raw": {
+    "前置任务": "无",
+    "开启任务": "与驿站外树上吹笛的少年菲依对话开启",
+    "注意事项": "要在晚上抓10只静静萤火虫，建议换上依盖套并吃能提高安静性的食物",
+    "任务奖励": "大生命松露*1",
+    "解锁任务": "无"
+   },
+   "unlocks": [],
+   "group": "情节挑战",
+   "no": 27,
+   "groupTotal": 60,
+   "tier": "L1",
+   "flowPts": [
+    {
+     "gx": 531,
+     "gy": 155,
+     "gz": 3405
+    },
+    {
+     "gx": 526.96,
+     "gy": 154.59,
+     "gz": 3392.202
+    },
+    {
+     "gx": 527.73,
+     "gy": 162.52,
+     "gz": 3395.55
+    },
+    {
+     "gx": 527.608,
+     "gy": 161.87,
+     "gz": 3395.32
+    }
+   ],
+   "onMap": true,
+   "overlap": [],
+   "reqs": [],
+   "unlockList": [
+    {
+     "key": "Orchestra02",
+     "reqName": "传递！甜蜜节奏！！",
+     "linkable": true,
+     "src": "reverse"
+    }
+   ],
+   "stepsUI": [
+    {
+     "name": "step1",
+     "text": "菲伊想利用火让哈依特\n看一看“发光树”，却以失败告终。\n不过他干劲十足，准备下次用萤火虫的光\n制作“发光树”给哈依特看。\n为了制作“发光树”，\n还需要"
+    },
+    {
+     "name": "step4",
+     "text": "伴随着笛声，聚集的萤火虫发出光亮，\n美丽的“发光树”浮现在黑暗的夜色之中。\n哈依特深受感动，露出了发自内心的笑容。\n菲伊发誓，今后也要为让哈依特露出笑容而努力，\n准备回到乌玛纳利乐团，成为一名出色的横笛手。\n去收下菲伊的谢礼吧。"
+    }
+   ],
+   "nStepsUI": 2,
+   "hasStepText": true
+  },
+  {
+   "key": "Orchestra02",
+   "name": "传递！甜蜜节奏！！",
+   "nameSrc": "rom",
+   "cat": "ImportantMini",
+   "kind": "side",
+   "layer": 18,
+   "layers": [
+    18
+   ],
+   "gx": 2157,
+   "gy": 214,
+   "gz": 1383,
+   "hasHeight": true,
+   "mapX": 1382.767,
+   "mapY": 2156.568,
+   "posSrc": "marker",
+   "posValid": true,
+   "romLayer": 18,
+   "romPt": {
+    "gx": 2165.63,
+    "gy": 214.43,
+    "gz": 1383.92
+   },
+   "npc": "Npc_Orchestra_M_P_Road",
+   "npcCn": "毕兹",
+   "loc": "MapArea_WestHateru",
+   "locCn": "西哈特尔",
+   "sort": 402,
+   "nSteps": 2,
+   "steps": [
+    {
+     "name": "Ready",
+     "text": "",
+     "pts": []
+    },
+    {
+     "name": "Search",
+     "text": "毕兹想制作蜂蜜可丽饼\n送给对自己多加照顾的米洛央团长。\n但料理所需的精力蜂的蜂蜜无从获得，\n他正为此发愁。\n他需要　\u0003\u0002",
+     "pts": [
+      {
+       "gx": 2165.63,
+       "gy": 214.43,
+       "gz": 1383.92
+      }
+     ]
+    }
+   ],
+   "requires": [],
+   "dependFlag": null,
+   "markerId": 3606,
+   "match": "norm",
+   "src": "rom+guide",
+   "rawName": "传递！甜蜜节奏！",
+   "guide": {
+    "requires": [
+     "吹笛少年寻找之物"
+    ],
+    "start": "与毕兹对话",
+    "note": "准备蜂蜜",
+    "reward": [
+     "卢比"
+    ],
+    "unlocks": []
+   },
+   "raw": {
+    "前置任务": "吹笛少年寻找之物",
+    "开启任务": "与毕兹对话",
+    "注意事项": "准备蜂蜜",
+    "任务奖励": "卢比",
+    "解锁任务": "无"
+   },
+   "unlocks": [],
+   "group": "情节挑战",
+   "no": 28,
+   "groupTotal": 60,
+   "tier": "L1",
+   "flowPts": [
+    {
+     "gx": 2157,
+     "gy": 214,
+     "gz": 1383
+    },
+    {
+     "gx": 2165.63,
+     "gy": 214.43,
+     "gz": 1383.92
+    }
+   ],
+   "onMap": true,
+   "overlap": [],
+   "reqs": [
+    {
+     "type": "quest",
+     "key": "Orchestra03",
+     "reqName": "吹笛少年寻找之物",
+     "linkable": true,
+     "src": "guide"
+    }
+   ],
+   "unlockList": [],
+   "stepsUI": [
+    {
+     "name": "Search",
+     "text": "毕兹想制作蜂蜜可丽饼\n送给对自己多加照顾的米洛央团长。\n但料理所需的精力蜂的蜂蜜无从获得，\n他正为此发愁。\n他需要"
+    }
+   ],
+   "nStepsUI": 1,
+   "hasStepText": true
+  },
+  {
+   "key": "Orchestra04",
+   "name": "圆号乐手的脱逃剧",
+   "nameSrc": "rom",
+   "cat": "ImportantMini",
+   "kind": "side",
+   "layer": 18,
+   "layers": [
+    18
+   ],
+   "gx": -3666,
+   "gy": 226,
+   "gz": -757,
+   "hasHeight": true,
+   "mapX": -757.475,
+   "mapY": -3665.843,
+   "posSrc": "marker",
+   "posValid": true,
+   "romLayer": 18,
+   "romPt": {
+    "gx": -3651.38,
+    "gy": 225.87,
+    "gz": -756.0
+   },
+   "npc": "Npc_Orchestra_M_H_Road",
+   "npcCn": "余福尔",
+   "loc": "MapArea_TabantaFrontier",
+   "locCn": "塔邦挞边境",
+   "sort": 403,
+   "nSteps": 3,
+   "steps": [
+    {
+     "name": "Ready",
+     "text": "",
+     "pts": []
+    },
+    {
+     "name": "Carry",
+     "text": "在塔邦挞边境处的大洞中，\n遇到了受困的圆号手余福尔。\n他连人带搬运车一同掉进洞里，无法脱身。\n有没有什么办法能按照他的意愿，\n从洞中　\u0003\u0002",
+     "pts": [
+      {
+       "gx": -3651.38,
+       "gy": 225.87,
+       "gz": -756.0
+      }
+     ]
+    },
+    {
+     "name": "GetPrize",
+     "text": "成功将余福尔连同搬运车一起，\n从塔邦挞边境处的大洞中救出来了。\n为了感谢你的帮助，\n他打算送你3份精力蜂的蜂蜜。\n　\u0003\u0002",
+     "pts": [
+      {
+       "gx": -3654.94,
+       "gy": 233.14,
+       "gz": -791.87
+      }
+     ]
+    }
+   ],
+   "requires": [],
+   "dependFlag": null,
+   "markerId": 3155,
+   "match": "exact",
+   "src": "rom+guide",
+   "rawName": "圆号乐手的脱逃剧",
+   "guide": {
+    "requires": [
+     "献给弥佳的小夜曲"
+    ],
+    "start": "先通过【献给弥佳的小夜曲】找到余福尔，对话开启",
+    "note": "利用热气球将其带出",
+    "reward": [
+     "精力蜂的蜂蜜*3"
+    ],
+    "unlocks": []
+   },
+   "raw": {
+    "前置任务": "献给弥佳的小夜曲",
+    "开启任务": "先通过【献给弥佳的小夜曲】找到余福尔，对话开启",
+    "注意事项": "利用热气球将其带出",
+    "任务奖励": "精力蜂的蜂蜜*3",
+    "解锁任务": "无"
+   },
+   "unlocks": [],
+   "group": "情节挑战",
+   "no": 29,
+   "groupTotal": 60,
+   "tier": "L1",
+   "flowPts": [
+    {
+     "gx": -3666,
+     "gy": 226,
+     "gz": -757
+    },
+    {
+     "gx": -3651.38,
+     "gy": 225.87,
+     "gz": -756.0
+    },
+    {
+     "gx": -3654.94,
+     "gy": 233.14,
+     "gz": -791.87
+    }
+   ],
+   "onMap": true,
+   "overlap": [],
+   "reqs": [
+    {
+     "type": "quest",
+     "key": "Fairy2",
+     "reqName": "献给弥佳的小夜曲",
+     "linkable": true,
+     "src": "guide"
+    }
+   ],
+   "unlockList": [
+    {
+     "key": "Fairy2",
+     "reqName": "献给弥佳的小夜曲",
+     "linkable": true,
+     "src": "reverse"
+    }
+   ],
+   "stepsUI": [
+    {
+     "name": "Carry",
+     "text": "在塔邦挞边境处的大洞中，\n遇到了受困的圆号手余福尔。\n他连人带搬运车一同掉进洞里，无法脱身。\n有没有什么办法能按照他的意愿，\n从洞中"
+    },
+    {
+     "name": "GetPrize",
+     "text": "成功将余福尔连同搬运车一起，\n从塔邦挞边境处的大洞中救出来了。\n为了感谢你的帮助，\n他打算送你3份精力蜂的蜂蜜。"
+    }
+   ],
+   "nStepsUI": 2,
+   "hasStepText": true
+  },
+  {
+   "key": "Tribune16",
+   "name": "献给大妖精的小夜曲",
+   "nameSrc": "rom",
+   "cat": "ImportantMini",
+   "kind": "side",
+   "layer": 18,
+   "layers": [
+    18
+   ],
+   "gx": 1051,
+   "gy": 128,
+   "gz": -1148,
+   "hasHeight": true,
+   "mapX": -1147.541,
+   "mapY": 1051.08,
+   "posSrc": "marker",
+   "posValid": true,
+   "romLayer": 18,
+   "romPt": {
+    "gx": 1050.766,
+    "gy": 128.07,
+    "gz": -1146.162
+   },
+   "npc": "Npc_Rito_Postman_012",
+   "npcCn": "碧欧兰",
+   "loc": "ForestHatago",
+   "locCn": "森林驿站",
+   "sort": 404,
+   "nSteps": 3,
+   "steps": [
+    {
+     "name": "Ready",
+     "text": "",
+     "pts": []
+    },
+    {
+     "name": "Carry",
+     "text": "赐予旅行者祝福的大妖精\n突然把自己紧闭在花蕾中。\n沛恩推测，乐团成员们看见的\n那名金发女性或许是塞尔达公主。\n看来只好将　\u0003\u0002",
+     "pts": [
+      {
+       "gx": 1050.766,
+       "gy": 128.07,
+       "gz": -1146.162
+      },
+      {
+       "gx": 919.505,
+       "gy": 199.51,
+       "gz": -1381.922
+      }
+     ]
+    },
+    {
+     "name": "Arrival",
+     "text": "",
+     "pts": []
+    }
+   ],
+   "requires": [],
+   "dependFlag": null,
+   "markerId": 2720,
+   "match": "exact",
+   "src": "rom+guide",
+   "rawName": "献给大妖精的小夜曲",
+   "guide": {
+    "requires": [
+     "调查真相！传言中的塞尔达公主"
+    ],
+    "start": "与驿站外的碧欧兰对话开启",
+    "note": "可运用马车将碧欧兰两人带到大妖精处",
+    "reward": [
+     "50卢比",
+     "解锁装备强化"
+    ],
+    "unlocks": []
+   },
+   "raw": {
+    "前置任务": "调查真相！传言中的塞尔达公主",
+    "开启任务": "与驿站外的碧欧兰对话开启",
+    "注意事项": "可运用马车将碧欧兰两人带到大妖精处",
+    "任务奖励": "50卢比、解锁装备强化",
+    "解锁任务": "无"
+   },
+   "unlocks": [],
+   "group": "情节挑战",
+   "no": 30,
+   "groupTotal": 60,
+   "tier": "L1",
+   "flowPts": [
+    {
+     "gx": 1051,
+     "gy": 128,
+     "gz": -1148
+    },
+    {
+     "gx": 919.505,
+     "gy": 199.51,
+     "gz": -1381.922
+    }
+   ],
+   "onMap": true,
+   "overlap": [],
+   "reqs": [
+    {
+     "type": "flag",
+     "reqName": "调查真相！传言中的塞尔达公主",
+     "linkable": false
+    }
+   ],
+   "unlockList": [],
+   "stepsUI": [
+    {
+     "name": "Carry",
+     "text": "赐予旅行者祝福的大妖精\n突然把自己紧闭在花蕾中。\n沛恩推测，乐团成员们看见的\n那名金发女性或许是塞尔达公主。\n看来只好将"
+    }
+   ],
+   "nStepsUI": 1,
+   "hasStepText": true
+  },
+  {
+   "key": "Fairy4",
+   "name": "献给西莎的小夜曲",
+   "nameSrc": "rom",
+   "cat": "ImportantMini",
+   "kind": "side",
+   "layer": 18,
+   "layers": [
+    18
+   ],
+   "gx": -1406,
+   "gy": 122,
+   "gz": 1261,
+   "hasHeight": true,
+   "mapX": 1261.488,
+   "mapY": -1405.604,
+   "posSrc": "marker",
+   "posValid": true,
+   "romLayer": 18,
+   "romPt": {
+    "gx": 529.6,
+    "gy": 152.93,
+    "gz": 3450.883
+   },
+   "npc": "Npc_Orchestra_M_00_FairySiza",
+   "npcCn": "米洛央",
+   "loc": "HyruleDepthHatago",
+   "locCn": "平原外围的驿站",
+   "sort": 405,
+   "nSteps": 4,
+   "steps": [
+    {
+     "name": "Ready",
+     "text": "",
+     "pts": []
+    },
+    {
+     "name": "Search",
+     "text": "住在平原外围的驿站附近的大妖精西莎\n似乎正躲在花蕾中紧闭不出。\n这位大妖精大人特别喜欢笛声，\n如果她能听到乐团的演奏，或许就会现身了。\n但负责吹笛的菲伊目前不在乐团。\n据说有人在　\u0003\u0002",
+     "pts": [
+      {
+       "gx": 529.6,
+       "gy": 152.93,
+       "gz": 3450.883
+      }
+     ]
+    },
+    {
+     "name": "GoToOrchestra",
+     "text": "",
+     "pts": [
+      {
+       "gx": -1399.012,
+       "gy": 137.77,
+       "gz": 1260.799
+      }
+     ]
+    },
+    {
+     "name": "CarryNPC",
+     "text": "住在平原外围的驿站附近的大妖精西莎\n似乎在花蕾中紧闭不出。\n这位大妖精大人特别喜欢笛声，\n如果她能听到乐团的演奏，或许就会现身了。\n前往大妖精大人处的道路被瓦砾阻挡，\n　\u0003\u0002",
+     "pts": [
+      {
+       "gx": -1399.012,
+       "gy": 137.77,
+       "gz": 1260.799
+      },
+      {
+       "gx": -1555.218,
+       "gy": 188.5,
+       "gz": 1230.45
+      }
+     ]
+    }
+   ],
+   "requires": [],
+   "dependFlag": null,
+   "markerId": 2722,
+   "match": "exact",
+   "src": "rom+guide",
+   "rawName": "献给西莎的小夜曲",
+   "guide": {
+    "requires": [
+     "调查真相！传言中的塞尔达公主"
+    ],
+    "start": "与驿站外的米洛央对话开启",
+    "note": "用究极手制作一辆越野车抵达",
+    "reward": [
+     "100卢比",
+     "解锁装备强化"
+    ],
+    "unlocks": []
+   },
+   "raw": {
+    "前置任务": "调查真相！传言中的塞尔达公主",
+    "开启任务": "与驿站外的米洛央对话开启",
+    "注意事项": "用究极手制作一辆越野车抵达",
+    "任务奖励": "100卢比、解锁装备强化",
+    "解锁任务": "无"
+   },
+   "unlocks": [],
+   "group": "情节挑战",
+   "no": 31,
+   "groupTotal": 60,
+   "tier": "L1",
+   "flowPts": [
+    {
+     "gx": -1406,
+     "gy": 122,
+     "gz": 1261
+    },
+    {
+     "gx": 529.6,
+     "gy": 152.93,
+     "gz": 3450.883
+    },
+    {
+     "gx": -1399.012,
+     "gy": 137.77,
+     "gz": 1260.799
+    },
+    {
+     "gx": -1555.218,
+     "gy": 188.5,
+     "gz": 1230.45
+    }
+   ],
+   "onMap": true,
+   "overlap": [],
+   "reqs": [
+    {
+     "type": "flag",
+     "reqName": "调查真相！传言中的塞尔达公主",
+     "linkable": false
+    }
+   ],
+   "unlockList": [],
+   "stepsUI": [
+    {
+     "name": "Search",
+     "text": "住在平原外围的驿站附近的大妖精西莎\n似乎正躲在花蕾中紧闭不出。\n这位大妖精大人特别喜欢笛声，\n如果她能听到乐团的演奏，或许就会现身了。\n但负责吹笛的菲伊目前不在乐团。\n据说有人在"
+    },
+    {
+     "name": "CarryNPC",
+     "text": "住在平原外围的驿站附近的大妖精西莎\n似乎在花蕾中紧闭不出。\n这位大妖精大人特别喜欢笛声，\n如果她能听到乐团的演奏，或许就会现身了。\n前往大妖精大人处的道路被瓦砾阻挡，"
+    }
+   ],
+   "nStepsUI": 2,
+   "hasStepText": true
+  },
+  {
+   "key": "Fairy3",
+   "name": "献给可秋拉的小夜曲",
+   "nameSrc": "rom",
+   "cat": "ImportantMini",
+   "kind": "side",
+   "layer": 18,
+   "layers": [
+    18
+   ],
+   "gx": 1756,
+   "gy": 116,
+   "gz": 1957,
+   "hasHeight": true,
+   "mapX": 1958.539,
+   "mapY": 1755.944,
+   "posSrc": "marker",
+   "posValid": true,
+   "romLayer": 18,
+   "romPt": {
+    "gx": 2165.63,
+    "gy": 214.43,
+    "gz": 1383.92
+   },
+   "npc": "Npc_Orchestra_M_00_FairyCotera",
+   "npcCn": "米洛央",
+   "loc": "FaronHatago000",
+   "locCn": "双子驿站",
+   "sort": 406,
+   "nSteps": 5,
+   "steps": [
+    {
+     "name": "Ready",
+     "text": "",
+     "pts": []
+    },
+    {
+     "name": "Search",
+     "text": "大妖精可秋拉躲在了花蕾中。\n可秋拉似乎喜欢太鼓的音色，\n但太鼓乐手毕兹目前不在乐团中。\n据从卡卡利科村而来的旅行者所言，\n他在穿过波努鲁山地的道路附近时，\n听到了　\u0003\u0002",
+     "pts": [
+      {
+       "gx": 2165.63,
+       "gy": 214.43,
+       "gz": 1383.92
+      }
+     ]
+    },
+    {
+     "name": "GoToOrchestra",
+     "text": "找到了太鼓乐手毕兹。\n他想制作料理，\n来让消沉的米洛央打起精神。\n获得材料之后，\n毕兹返回了乌玛纳利乐团。\n去找身在　\u0003\u0002",
+     "pts": [
+      {
+       "gx": 1756.12,
+       "gy": 115.87,
+       "gz": 1958.842
+      }
+     ]
+    },
+    {
+     "name": "Craft",
+     "text": "",
+     "pts": [
+      {
+       "gx": 1716.035,
+       "gy": 115.41,
+       "gz": 2012.991
+      },
+      {
+       "gx": 1767.719,
+       "gy": 115.67,
+       "gz": 2187.373
+      }
+     ]
+    },
+    {
+     "name": "Reach",
+     "text": "",
+     "pts": [
+      {
+       "gx": 0.0,
+       "gy": 0.0,
+       "gz": 0.0
+      }
+     ]
+    }
+   ],
+   "requires": [],
+   "dependFlag": null,
+   "markerId": 2721,
+   "match": "exact",
+   "src": "rom+guide",
+   "rawName": "献给可秋拉的小夜曲",
+   "guide": {
+    "requires": [
+     "调查真相！传言中的塞尔达公主"
+    ],
+    "start": "与驿站外的米洛央对话开启",
+    "note": "用究极手做船前往",
+    "reward": [
+     "100卢比",
+     "解锁装备强化"
+    ],
+    "unlocks": []
+   },
+   "raw": {
+    "前置任务": "调查真相！传言中的塞尔达公主",
+    "开启任务": "与驿站外的米洛央对话开启",
+    "注意事项": "用究极手做船前往",
+    "任务奖励": "100卢比、解锁装备强化",
+    "解锁任务": "无"
+   },
+   "unlocks": [],
+   "group": "情节挑战",
+   "no": 32,
+   "groupTotal": 60,
+   "tier": "L1",
+   "flowPts": [
+    {
+     "gx": 1756,
+     "gy": 116,
+     "gz": 1957
+    },
+    {
+     "gx": 2165.63,
+     "gy": 214.43,
+     "gz": 1383.92
+    },
+    {
+     "gx": 1716.035,
+     "gy": 115.41,
+     "gz": 2012.991
+    },
+    {
+     "gx": 1767.719,
+     "gy": 115.67,
+     "gz": 2187.373
+    }
+   ],
+   "onMap": true,
+   "overlap": [],
+   "reqs": [
+    {
+     "type": "flag",
+     "reqName": "调查真相！传言中的塞尔达公主",
+     "linkable": false
+    }
+   ],
+   "unlockList": [],
+   "stepsUI": [
+    {
+     "name": "Search",
+     "text": "大妖精可秋拉躲在了花蕾中。\n可秋拉似乎喜欢太鼓的音色，\n但太鼓乐手毕兹目前不在乐团中。\n据从卡卡利科村而来的旅行者所言，\n他在穿过波努鲁山地的道路附近时，\n听到了"
+    },
+    {
+     "name": "GoToOrchestra",
+     "text": "找到了太鼓乐手毕兹。\n他想制作料理，\n来让消沉的米洛央打起精神。\n获得材料之后，\n毕兹返回了乌玛纳利乐团。\n去找身在"
+    }
+   ],
+   "nStepsUI": 2,
+   "hasStepText": true
+  },
+  {
+   "key": "Fairy2",
+   "name": "献给弥佳的小夜曲",
+   "nameSrc": "rom",
+   "cat": "ImportantMini",
+   "kind": "side",
+   "layer": 18,
+   "layers": [
+    18
+   ],
+   "gx": -1634,
+   "gy": 222,
+   "gz": -2590,
+   "hasHeight": true,
+   "mapX": -2589.707,
+   "mapY": -1633.615,
+   "posSrc": "marker",
+   "posValid": true,
+   "romLayer": 18,
+   "romPt": {
+    "gx": -3651.38,
+    "gy": 225.87,
+    "gz": -756.0
+   },
+   "npc": "Npc_Orchestra_M_00_FairyMisure",
+   "npcCn": "弥佳",
+   "loc": "TabantaHatago",
+   "locCn": "雪原驿站",
+   "sort": 407,
+   "nSteps": 6,
+   "steps": [
+    {
+     "name": "Ready",
+     "text": "",
+     "pts": []
+    },
+    {
+     "name": "Search",
+     "text": "住在雪原驿站附近山脚处的大妖精弥佳\n在花蕾中紧闭不出。\n弥佳似乎很喜欢圆号的音色，\n但乐手余福尔现在下落不明。\n据南边来的旅行者说，在塔邦挞大桥对面\n沿着道路往前一点的地方，听到过　\u0003\u0002",
+     "pts": [
+      {
+       "gx": -3651.38,
+       "gy": 225.87,
+       "gz": -756.0
+      }
+     ]
+    },
+    {
+     "name": "ReturnUmayado",
+     "text": "",
+     "pts": [
+      {
+       "gx": -1626.34,
+       "gy": 339.43,
+       "gz": -2572.21
+      }
+     ]
+    },
+    {
+     "name": "CarryNPC",
+     "text": "住在雪原驿站附近山脚处的大妖精弥佳\n在花蕾中紧闭不出。\n乐团团长米洛央认为\n为她演奏圆号就能让她现身，\n但是由于　\u0003\u0002",
+     "pts": [
+      {
+       "gx": -1626.34,
+       "gy": 339.43,
+       "gz": -2572.21
+      }
+     ]
+    },
+    {
+     "name": "CarryNPC2",
+     "text": "",
+     "pts": [
+      {
+       "gx": -1457.69,
+       "gy": 407.51,
+       "gz": -2989.19
+      }
+     ]
+    },
+    {
+     "name": "Report",
+     "text": "",
+     "pts": [
+      {
+       "gx": -1626.34,
+       "gy": 339.43,
+       "gz": -2572.21
+      }
+     ]
+    }
+   ],
+   "requires": [],
+   "dependFlag": null,
+   "markerId": 2723,
+   "match": "exact",
+   "src": "rom+guide",
+   "rawName": "献给弥佳的小夜曲",
+   "guide": {
+    "requires": [
+     "调查真相！传言中的塞尔达公主",
+     "圆号乐手的脱逃剧"
+    ],
+    "start": "与驿站外的米洛央对话开启",
+    "note": "需先前往吉希山丘完成任务【圆号乐手的脱逃剧】、随后使用马车抵达大妖精处\n⚠ 没有马车/马车损坏会白跑，先确认驿站马车可用再出发。",
+    "reward": [
+     "100卢比",
+     "解锁装备强化"
+    ],
+    "unlocks": [],
+    "deliver": "用马车把圆号乐手余福尔送到弥佳的花蕾前（送达后弥佳现身，小夜曲完成）。"
+   },
+   "raw": {
+    "前置任务": "调查真相！传言中的塞尔达公主、圆号乐手的脱逃剧",
+    "开启任务": "与驿站外的米洛央对话开启",
+    "注意事项": "需先前往吉希山丘完成任务【圆号乐手的脱逃剧】、随后使用马车抵达大妖精处",
+    "任务奖励": "100卢比、解锁装备强化",
+    "解锁任务": "无"
+   },
+   "unlocks": [],
+   "group": "情节挑战",
+   "no": 33,
+   "groupTotal": 60,
+   "tier": "L1",
+   "flowPts": [
+    {
+     "gx": -1634,
+     "gy": 222,
+     "gz": -2590
+    },
+    {
+     "gx": -3651.38,
+     "gy": 225.87,
+     "gz": -756.0
+    },
+    {
+     "gx": -1626.34,
+     "gy": 339.43,
+     "gz": -2572.21
+    },
+    {
+     "gx": -1457.69,
+     "gy": 407.51,
+     "gz": -2989.19
+    }
+   ],
+   "onMap": true,
+   "overlap": [],
+   "reqs": [
+    {
+     "type": "quest",
+     "key": "Orchestra04",
+     "reqName": "圆号乐手的脱逃剧",
+     "linkable": true,
+     "src": "guide"
+    },
+    {
+     "type": "flag",
+     "reqName": "调查真相！传言中的塞尔达公主",
+     "linkable": false
+    }
+   ],
+   "unlockList": [
+    {
+     "key": "Orchestra04",
+     "reqName": "圆号乐手的脱逃剧",
+     "linkable": true,
+     "src": "reverse"
+    }
+   ],
+   "stepsUI": [
+    {
+     "name": "Search",
+     "text": "住在雪原驿站附近山脚处的大妖精弥佳\n在花蕾中紧闭不出。\n弥佳似乎很喜欢圆号的音色，\n但乐手余福尔现在下落不明。\n据南边来的旅行者说，在塔邦挞大桥对面\n沿着道路往前一点的地方，听到过"
+    },
+    {
+     "name": "CarryNPC",
+     "text": "住在雪原驿站附近山脚处的大妖精弥佳\n在花蕾中紧闭不出。\n乐团团长米洛央认为\n为她演奏圆号就能让她现身，\n但是由于"
+    }
+   ],
+   "nStepsUI": 2,
+   "hasStepText": true
+  },
+  {
+   "key": "MercenaryChallenge_HyrulePlain",
+   "name": "为海拉鲁平原带来和平！",
+   "nameSrc": "rom",
+   "cat": "ImportantMini",
+   "kind": "side",
+   "layer": 18,
+   "layers": [
+    18
+   ],
+   "gx": -396,
+   "gy": 133,
+   "gz": 457,
+   "hasHeight": true,
+   "mapX": 456.937,
+   "mapY": -395.81,
+   "posSrc": "marker",
+   "posValid": true,
+   "romLayer": 18,
+   "romPt": {
+    "gx": -412.62,
+    "gy": 133.01,
+    "gz": 550.987
+   },
+   "npc": "Npc_TamourHatago004",
+   "npcCn": "霍司塔",
+   "loc": "MapRegion_HyrulePrairie",
+   "locCn": "海拉鲁平原",
+   "sort": 451,
+   "nSteps": 4,
+   "steps": [
+    {
+     "name": "Ready",
+     "text": "",
+     "pts": []
+    },
+    {
+     "name": "Move",
+     "text": "霍司塔率领的讨伐队正在进攻\n盘踞于海拉鲁平原的怪物据点。\n\n讨伐队打算等接近据点后，看准时机发起突袭。\n和讨伐队一起　\u0003\u0002",
+     "pts": [
+      {
+       "gx": -412.62,
+       "gy": 133.01,
+       "gz": 550.987
+      }
+     ]
+    },
+    {
+     "name": "Exterminate",
+     "text": "霍司塔率领的讨伐队\n正为了击败海拉鲁平原的怪物而战斗。\n\n和讨伐队一起战斗，\n　\u0003\u0002",
+     "pts": [
+      {
+       "gx": -412.62,
+       "gy": 133.01,
+       "gz": 550.987
+      }
+     ]
+    },
+    {
+     "name": "Report",
+     "text": "",
+     "pts": []
+    }
+   ],
+   "requires": [
+    {
+     "type": "quest",
+     "key": "HyruleCastleIncident",
+     "resolved": true,
+     "flag": "HyruleCastleIncident_IsAfter_ReturnBCAfterDefeatMonster_Exp"
+    }
+   ],
+   "dependFlag": "HyruleCastleIncident_IsAfter_ReturnBCAfterDefeatMonster_Exp",
+   "markerId": 3622,
+   "match": "norm",
+   "src": "rom+guide",
+   "rawName": "为海拉鲁平原带来和平",
+   "guide": {
+    "requires": [
+     "为阿卡莱带来和平"
+    ],
+    "start": "与霍司塔对话",
+    "note": "将前方的怪物营地清除",
+    "reward": [
+     "卢比"
+    ],
+    "unlocks": [
+     "为哈特尔带来和平"
+    ]
+   },
+   "raw": {
+    "前置任务": "为阿卡莱带来和平",
+    "开启任务": "与霍司塔对话",
+    "注意事项": "将前方的怪物营地清除",
+    "任务奖励": "卢比",
+    "解锁任务": "为哈特尔带来和平"
+   },
+   "unlocks": [],
+   "group": "情节挑战",
+   "no": 34,
+   "groupTotal": 60,
+   "tier": "L1",
+   "flowPts": [
+    {
+     "gx": -396,
+     "gy": 133,
+     "gz": 457
+    },
+    {
+     "gx": -412.62,
+     "gy": 133.01,
+     "gz": 550.987
+    }
+   ],
+   "onMap": true,
+   "overlap": [],
+   "reqs": [
+    {
+     "type": "quest",
+     "key": "HyruleCastleIncident",
+     "reqName": "海拉鲁城堡的异变",
+     "linkable": true
+    },
+    {
+     "type": "flag",
+     "reqName": "为阿卡莱带来和平",
+     "linkable": false
+    }
+   ],
+   "unlockList": [],
+   "stepsUI": [
+    {
+     "name": "Move",
+     "text": "霍司塔率领的讨伐队正在进攻\n盘踞于海拉鲁平原的怪物据点。\n\n讨伐队打算等接近据点后，看准时机发起突袭。\n和讨伐队一起"
+    },
+    {
+     "name": "Exterminate",
+     "text": "霍司塔率领的讨伐队\n正为了击败海拉鲁平原的怪物而战斗。\n\n和讨伐队一起战斗，"
+    }
+   ],
+   "nStepsUI": 2,
+   "hasStepText": true
+  },
+  {
+   "key": "MercenaryChallenge_Hebra",
+   "name": "为哈特尔带来和平！",
+   "nameSrc": "rom",
+   "cat": "ImportantMini",
+   "kind": "side",
+   "layer": 18,
+   "layers": [
+    18
+   ],
+   "gx": 2227,
+   "gy": 120,
+   "gz": 1810,
+   "hasHeight": true,
+   "mapX": 1809.729,
+   "mapY": 2226.921,
+   "posSrc": "marker",
+   "posValid": true,
+   "romLayer": 18,
+   "romPt": {
+    "gx": 2247.492,
+    "gy": 120.27,
+    "gz": 1793.304
+   },
+   "npc": "Npc_TamourHatago004",
+   "npcCn": "霍司塔",
+   "loc": "MapRegion_HyrulePrairie",
+   "locCn": "海拉鲁平原",
+   "sort": 452,
+   "nSteps": 5,
+   "steps": [
+    {
+     "name": "Ready",
+     "text": "",
+     "pts": []
+    },
+    {
+     "name": "MeetAgain",
+     "text": "霍司塔率领的讨伐队为了讨伐怪物，\n接下来准备前往位于海拉鲁东南方\n哈特尔地区的　\u0003\u0002",
+     "pts": [
+      {
+       "gx": 2247.492,
+       "gy": 120.27,
+       "gz": 1793.304
+      }
+     ]
+    },
+    {
+     "name": "Move",
+     "text": "霍司塔率领的讨伐队正在进攻\n盘踞于哈特诺堡垒的怪物据点。\n\n讨伐队打算等接近据点后，一鼓作气发动攻击。\n和讨伐队一起　\u0003\u0002",
+     "pts": [
+      {
+       "gx": 2247.492,
+       "gy": 120.27,
+       "gz": 1793.304
+      }
+     ]
+    },
+    {
+     "name": "Exterminate",
+     "text": "",
+     "pts": [
+      {
+       "gx": 2247.492,
+       "gy": 120.27,
+       "gz": 1793.304
+      }
+     ]
+    },
+    {
+     "name": "Report",
+     "text": "",
+     "pts": []
+    }
+   ],
+   "requires": [],
+   "dependFlag": null,
+   "markerId": 3620,
+   "match": "norm",
+   "src": "rom+guide",
+   "rawName": "为哈特尔带来和平",
+   "guide": {
+    "requires": [
+     "为海拉鲁平原带来和平"
+    ],
+    "start": "与霍司塔对话",
+    "note": "将所有怪物清除",
+    "reward": [
+     "卢比"
+    ],
+    "unlocks": []
+   },
+   "raw": {
+    "前置任务": "为海拉鲁平原带来和平",
+    "开启任务": "与霍司塔对话",
+    "注意事项": "将所有怪物清除",
+    "任务奖励": "卢比",
+    "解锁任务": "无"
+   },
+   "unlocks": [
+    "Mercenary_Hebra_Bloody",
+    "Mercenary_HyrulePlain_Bloody"
+   ],
+   "group": "情节挑战",
+   "no": 35,
+   "groupTotal": 60,
+   "tier": "L1",
+   "flowPts": [
+    {
+     "gx": 2227,
+     "gy": 120,
+     "gz": 1810
+    },
+    {
+     "gx": 2247.492,
+     "gy": 120.27,
+     "gz": 1793.304
+    }
+   ],
+   "onMap": true,
+   "overlap": [],
+   "reqs": [
+    {
+     "type": "flag",
+     "reqName": "为海拉鲁平原带来和平",
+     "linkable": false
+    }
+   ],
+   "unlockList": [
+    {
+     "key": "Mercenary_Hebra_Bloody",
+     "reqName": null,
+     "linkable": false
+    },
+    {
+     "key": "Mercenary_HyrulePlain_Bloody",
+     "reqName": null,
+     "linkable": false
+    }
+   ],
+   "stepsUI": [
+    {
+     "name": "MeetAgain",
+     "text": "霍司塔率领的讨伐队为了讨伐怪物，\n接下来准备前往位于海拉鲁东南方\n哈特尔地区的"
+    },
+    {
+     "name": "Move",
+     "text": "霍司塔率领的讨伐队正在进攻\n盘踞于哈特诺堡垒的怪物据点。\n\n讨伐队打算等接近据点后，一鼓作气发动攻击。\n和讨伐队一起"
+    }
+   ],
+   "nStepsUI": 2,
+   "hasStepText": true
+  },
+  {
+   "key": "MercenaryChallenge_Eldin",
+   "name": "为奥尔汀带来和平！",
+   "nameSrc": "rom",
+   "cat": "ImportantMini",
+   "kind": "side",
+   "layer": 18,
+   "layers": [
+    18
+   ],
+   "gx": 2370,
+   "gy": 557,
+   "gz": -3058,
+   "hasHeight": true,
+   "mapX": -2937.152,
+   "mapY": 1761.033,
+   "posSrc": "marker",
+   "posValid": true,
+   "romLayer": 18,
+   "romPt": {
+    "gx": 2370.278,
+    "gy": 557.14,
+    "gz": -3057.978
+   },
+   "npc": "Npc_TabantaBridgeHatago005",
+   "npcCn": "陀鲁",
+   "loc": "MapArea_EldinCanyon",
+   "locCn": "奥尔汀峡谷",
+   "sort": 453,
+   "nSteps": 4,
+   "steps": [
+    {
+     "name": "Ready",
+     "text": "",
+     "pts": []
+    },
+    {
+     "name": "Move",
+     "text": "陀鲁率领的讨伐队正在进攻\n盘踞于奥尔汀地区的怪物据点。\n\n讨伐队打算等接近据点后，一鼓作气发动攻击。\n和讨伐队一起　\u0003\u0002",
+     "pts": [
+      {
+       "gx": 2370.278,
+       "gy": 557.14,
+       "gz": -3057.978
+      }
+     ]
+    },
+    {
+     "name": "Exterminate",
+     "text": "陀鲁率领的讨伐队\n似乎正为了击败奥尔汀地区的怪物而战斗。\n\n和讨伐队一起战斗，\n　\u0003\u0002",
+     "pts": [
+      {
+       "gx": 2370.278,
+       "gy": 557.14,
+       "gz": -3057.978
+      }
+     ]
+    },
+    {
+     "name": "Report",
+     "text": "",
+     "pts": []
+    }
+   ],
+   "requires": [],
+   "dependFlag": null,
+   "markerId": 2689,
+   "match": "norm",
+   "src": "rom+guide",
+   "rawName": "为奥尔汀带来和平",
+   "guide": {
+    "requires": [],
+    "start": "标点位置与玛埃斯特对话了解情况，随后上山找到陀鲁对话开启",
+    "note": "跟随士兵进入【达鲁马湖的魔窟】，消灭所有怪物即可",
+    "reward": [
+     "100卢比"
+    ],
+    "unlocks": [
+     "为阿卡莱带来和平"
+    ]
+   },
+   "raw": {
+    "前置任务": "无",
+    "开启任务": "标点位置与玛埃斯特对话了解情况，随后上山找到陀鲁对话开启",
+    "注意事项": "跟随士兵进入【达鲁马湖的魔窟】，消灭所有怪物即可",
+    "任务奖励": "100卢比",
+    "解锁任务": "为阿卡莱带来和平"
+   },
+   "unlocks": [
+    "MercenaryChallenge_Akkare"
+   ],
+   "group": "情节挑战",
+   "no": 36,
+   "groupTotal": 60,
+   "tier": "L2",
+   "flowPts": [
+    {
+     "gx": 2370,
+     "gy": 557,
+     "gz": -3058
+    }
+   ],
+   "onMap": true,
+   "overlap": [],
+   "reqs": [],
+   "unlockList": [
+    {
+     "key": "MercenaryChallenge_Akkare",
+     "reqName": "为阿卡莱带来和平！",
+     "linkable": true
+    }
+   ],
+   "stepsUI": [
+    {
+     "name": "Move",
+     "text": "陀鲁率领的讨伐队正在进攻\n盘踞于奥尔汀地区的怪物据点。\n\n讨伐队打算等接近据点后，一鼓作气发动攻击。\n和讨伐队一起"
+    },
+    {
+     "name": "Exterminate",
+     "text": "陀鲁率领的讨伐队\n似乎正为了击败奥尔汀地区的怪物而战斗。\n\n和讨伐队一起战斗，"
+    }
+   ],
+   "nStepsUI": 2,
+   "hasStepText": true
+  },
+  {
+   "key": "MercenaryChallenge_Akkare",
+   "name": "为阿卡莱带来和平！",
+   "nameSrc": "rom",
+   "cat": "ImportantMini",
+   "kind": "side",
+   "layer": 18,
+   "layers": [
+    18
+   ],
+   "gx": 3007,
+   "gy": 388,
+   "gz": -1071,
+   "hasHeight": true,
+   "mapX": -1071.141,
+   "mapY": 3007.202,
+   "posSrc": "marker",
+   "posValid": true,
+   "romLayer": 18,
+   "romPt": {
+    "gx": 3003.886,
+    "gy": 387.81,
+    "gz": -1056.891
+   },
+   "npc": "Npc_TabantaBridgeHatago005",
+   "npcCn": "陀鲁",
+   "loc": "MapArea_EldinCanyon",
+   "locCn": "奥尔汀峡谷",
+   "sort": 454,
+   "nSteps": 5,
+   "steps": [
+    {
+     "name": "Ready",
+     "text": "",
+     "pts": []
+    },
+    {
+     "name": "MeetAgain",
+     "text": "陀鲁率领的讨伐队为了讨伐怪物，\n接下来准备前往位于海拉鲁东北方\n阿卡莱地区的　\u0003\u0002",
+     "pts": [
+      {
+       "gx": 3003.886,
+       "gy": 387.81,
+       "gz": -1056.891
+      }
+     ]
+    },
+    {
+     "name": "Move",
+     "text": "陀鲁率领的讨伐队正在进攻\n盘踞于阿卡莱大桥的怪物据点。\n\n讨伐队打算接近据点后一口气发动攻击，\n和讨伐队一起　\u0003\u0002",
+     "pts": [
+      {
+       "gx": 3003.886,
+       "gy": 387.81,
+       "gz": -1056.891
+      }
+     ]
+    },
+    {
+     "name": "Exterminate",
+     "text": "",
+     "pts": [
+      {
+       "gx": 3003.886,
+       "gy": 387.81,
+       "gz": -1056.891
+      }
+     ]
+    },
+    {
+     "name": "Report",
+     "text": "",
+     "pts": []
+    }
+   ],
+   "requires": [
+    {
+     "type": "quest",
+     "key": "MercenaryChallenge_Eldin",
+     "resolved": true,
+     "flag": "MercenaryChallenge_Eldin_IsCompleted_Exp"
+    }
+   ],
+   "dependFlag": "MercenaryChallenge_Eldin_IsCompleted_Exp",
+   "markerId": 2693,
+   "match": "norm",
+   "src": "rom+guide",
+   "rawName": "为阿卡莱带来和平",
+   "guide": {
+    "requires": [
+     "为奥尔汀带来和平"
+    ],
+    "start": "跟随任务指引与陀鲁对话",
+    "note": "跟随士兵前往【阿卡莱大桥】，消灭全部怪物即可",
+    "reward": [
+     "100卢比"
+    ],
+    "unlocks": [
+     "为海拉鲁平原带来和平"
+    ]
+   },
+   "raw": {
+    "前置任务": "为奥尔汀带来和平",
+    "开启任务": "跟随任务指引与陀鲁对话",
+    "注意事项": "跟随士兵前往【阿卡莱大桥】，消灭全部怪物即可",
+    "任务奖励": "100卢比",
+    "解锁任务": "为海拉鲁平原带来和平"
+   },
+   "unlocks": [
+    "Mercenary_Akkare_Bloody",
+    "Mercenary_Eldin_Bloody"
+   ],
+   "group": "情节挑战",
+   "no": 37,
+   "groupTotal": 60,
+   "tier": "L1",
+   "flowPts": [
+    {
+     "gx": 3007,
+     "gy": 388,
+     "gz": -1071
+    },
+    {
+     "gx": 3003.886,
+     "gy": 387.81,
+     "gz": -1056.891
+    }
+   ],
+   "onMap": true,
+   "overlap": [],
+   "reqs": [
+    {
+     "type": "quest",
+     "key": "MercenaryChallenge_Eldin",
+     "reqName": "为奥尔汀带来和平！",
+     "linkable": true
+    },
+    {
+     "type": "flag",
+     "reqName": "为奥尔汀带来和平",
+     "linkable": false
+    }
+   ],
+   "unlockList": [
+    {
+     "key": "Mercenary_Akkare_Bloody",
+     "reqName": null,
+     "linkable": false
+    },
+    {
+     "key": "Mercenary_Eldin_Bloody",
+     "reqName": null,
+     "linkable": false
+    }
+   ],
+   "stepsUI": [
+    {
+     "name": "MeetAgain",
+     "text": "陀鲁率领的讨伐队为了讨伐怪物，\n接下来准备前往位于海拉鲁东北方\n阿卡莱地区的"
+    },
+    {
+     "name": "Move",
+     "text": "陀鲁率领的讨伐队正在进攻\n盘踞于阿卡莱大桥的怪物据点。\n\n讨伐队打算接近据点后一口气发动攻击，\n和讨伐队一起"
+    }
+   ],
+   "nStepsUI": 2,
+   "hasStepText": true
+  },
+  {
+   "key": "MercenaryChallenge_Firone",
+   "name": "为费罗尼带来和平！",
+   "nameSrc": "rom",
+   "cat": "ImportantMini",
+   "kind": "side",
+   "layer": 18,
+   "layers": [
+    18
+   ],
+   "gx": -10,
+   "gy": 114,
+   "gz": 3419,
+   "hasHeight": true,
+   "mapX": 3419.275,
+   "mapY": -10.3,
+   "posSrc": "marker",
+   "posValid": true,
+   "romLayer": 18,
+   "romPt": {
+    "gx": -21.235,
+    "gy": 114.44,
+    "gz": 3419.009
+   },
+   "npc": "NPC_oasis004_fr02",
+   "npcCn": "阿迈尼",
+   "loc": "MapArea_FironeGrassland",
+   "locCn": "费罗尼草原",
+   "sort": 455,
+   "nSteps": 4,
+   "steps": [
+    {
+     "name": "Ready",
+     "text": "",
+     "pts": []
+    },
+    {
+     "name": "Craft",
+     "text": "阿迈尼率领的讨伐队\n正对怪物束手无策。\n\n通往怪物船唯一的桥梁崩塌了，\n如果　\u0003\u0002",
+     "pts": [
+      {
+       "gx": -21.235,
+       "gy": 114.44,
+       "gz": 3419.009
+      }
+     ]
+    },
+    {
+     "name": "Exterminate",
+     "text": "修好连接船只的桥后，\n讨伐队向怪物发起了攻击。\n\n和讨伐队一起战斗，\n　\u0003\u0002",
+     "pts": [
+      {
+       "gx": -21.235,
+       "gy": 114.44,
+       "gz": 3419.009
+      }
+     ]
+    },
+    {
+     "name": "Report",
+     "text": "",
+     "pts": []
+    }
+   ],
+   "requires": [
+    {
+     "type": "quest",
+     "key": "HyruleCastleIncident",
+     "resolved": true,
+     "flag": "HyruleCastleIncident_IsAfter_ReturnBCAfterDefeatMonster_Exp"
+    }
+   ],
+   "dependFlag": "HyruleCastleIncident_IsAfter_ReturnBCAfterDefeatMonster_Exp",
+   "markerId": 3618,
+   "match": "norm",
+   "src": "rom+guide",
+   "rawName": "为费罗尼带来和平",
+   "guide": {
+    "requires": [],
+    "start": "与阿迈尼对话",
+    "note": "使用究极手修好桥，随后消灭所有怪物",
+    "reward": [
+     "卢比"
+    ],
+    "unlocks": [
+     "为海布拉带来和平"
+    ]
+   },
+   "raw": {
+    "前置任务": "无",
+    "开启任务": "与阿迈尼对话",
+    "注意事项": "使用究极手修好桥，随后消灭所有怪物",
+    "任务奖励": "卢比",
+    "解锁任务": "为海布拉带来和平"
+   },
+   "unlocks": [],
+   "group": "情节挑战",
+   "no": 38,
+   "groupTotal": 60,
+   "tier": "L1",
+   "flowPts": [
+    {
+     "gx": -10,
+     "gy": 114,
+     "gz": 3419
+    },
+    {
+     "gx": -21.235,
+     "gy": 114.44,
+     "gz": 3419.009
+    }
+   ],
+   "onMap": true,
+   "overlap": [],
+   "reqs": [
+    {
+     "type": "quest",
+     "key": "HyruleCastleIncident",
+     "reqName": "海拉鲁城堡的异变",
+     "linkable": true
+    }
+   ],
+   "unlockList": [],
+   "stepsUI": [
+    {
+     "name": "Craft",
+     "text": "阿迈尼率领的讨伐队\n正对怪物束手无策。\n\n通往怪物船唯一的桥梁崩塌了，\n如果"
+    },
+    {
+     "name": "Exterminate",
+     "text": "修好连接船只的桥后，\n讨伐队向怪物发起了攻击。\n\n和讨伐队一起战斗，"
+    }
+   ],
+   "nStepsUI": 2,
+   "hasStepText": true
+  },
+  {
+   "key": "MercenaryChallenge_Hateru",
+   "name": "为海布拉带来和平！",
+   "nameSrc": "rom",
+   "cat": "ImportantMini",
+   "kind": "side",
+   "layer": 18,
+   "layers": [
+    18
+   ],
+   "gx": -1796,
+   "gy": 344,
+   "gz": -2301,
+   "hasHeight": true,
+   "mapX": -2301.012,
+   "mapY": -1796.243,
+   "posSrc": "marker",
+   "posValid": true,
+   "romLayer": 18,
+   "romPt": {
+    "gx": -1757.622,
+    "gy": 343.89,
+    "gz": -2316.878
+   },
+   "npc": "NPC_oasis004_fr02",
+   "npcCn": "阿迈尼",
+   "loc": "MapArea_FironeGrassland",
+   "locCn": "费罗尼草原",
+   "sort": 456,
+   "nSteps": 5,
+   "steps": [
+    {
+     "name": "Ready",
+     "text": "",
+     "pts": []
+    },
+    {
+     "name": "MeetAgain",
+     "text": "阿迈尼率领的讨伐队为了进一步讨伐怪物，\n接下来准备前往海拉鲁西北方\n海布拉地区辽阔的　\u0003\u0002",
+     "pts": [
+      {
+       "gx": -1757.622,
+       "gy": 343.89,
+       "gz": -2316.878
+      }
+     ]
+    },
+    {
+     "name": "Craft",
+     "text": "阿迈尼率领的讨伐队\n正在怪物的要塞前束手无策。\n看来是要塞入口的铁球\n阻挡了讨伐队的脚步。\n如果不　\u0003\u0002",
+     "pts": [
+      {
+       "gx": -1757.622,
+       "gy": 343.89,
+       "gz": -2316.878
+      }
+     ]
+    },
+    {
+     "name": "Exterminate",
+     "text": "",
+     "pts": [
+      {
+       "gx": -1757.622,
+       "gy": 343.89,
+       "gz": -2316.878
+      }
+     ]
+    },
+    {
+     "name": "Report",
+     "text": "",
+     "pts": []
+    }
+   ],
+   "requires": [],
+   "dependFlag": null,
+   "markerId": 3615,
+   "match": "norm",
+   "src": "rom+guide",
+   "rawName": "为海布拉带来和平",
+   "guide": {
+    "requires": [
+     "为费罗尼带来和平"
+    ],
+    "start": "与阿迈尼对话",
+    "note": "消灭所有怪物",
+    "reward": [
+     "卢比",
+     "讨伐队的布料"
+    ],
+    "unlocks": []
+   },
+   "raw": {
+    "前置任务": "为费罗尼带来和平",
+    "开启任务": "与阿迈尼对话",
+    "注意事项": "消灭所有怪物",
+    "任务奖励": "卢比、讨伐队的布料",
+    "解锁任务": "无"
+   },
+   "unlocks": [
+    "Mercenary_Firone_Bloody",
+    "Mercenary_Hateru_Bloody"
+   ],
+   "group": "情节挑战",
+   "no": 39,
+   "groupTotal": 60,
+   "tier": "L1",
+   "flowPts": [
+    {
+     "gx": -1796,
+     "gy": 344,
+     "gz": -2301
+    },
+    {
+     "gx": -1757.622,
+     "gy": 343.89,
+     "gz": -2316.878
+    }
+   ],
+   "onMap": true,
+   "overlap": [],
+   "reqs": [
+    {
+     "type": "flag",
+     "reqName": "为费罗尼带来和平",
+     "linkable": false
+    }
+   ],
+   "unlockList": [
+    {
+     "key": "Mercenary_Firone_Bloody",
+     "reqName": null,
+     "linkable": false
+    },
+    {
+     "key": "Mercenary_Hateru_Bloody",
+     "reqName": null,
+     "linkable": false
+    }
+   ],
+   "stepsUI": [
+    {
+     "name": "MeetAgain",
+     "text": "阿迈尼率领的讨伐队为了进一步讨伐怪物，\n接下来准备前往海拉鲁西北方\n海布拉地区辽阔的"
+    },
+    {
+     "name": "Craft",
+     "text": "阿迈尼率领的讨伐队\n正在怪物的要塞前束手无策。\n看来是要塞入口的铁球\n阻挡了讨伐队的脚步。\n如果不"
+    }
+   ],
+   "nStepsUI": 2,
+   "hasStepText": true
+  },
+  {
+   "key": "OldKorokHelp",
+   "name": "伯库林的烦恼",
+   "nameSrc": "rom",
+   "cat": "ImportantMini",
+   "kind": "side",
+   "layer": 18,
+   "layers": [
+    18
+   ],
+   "gx": -1694,
+   "gy": 304,
+   "gz": -1075,
+   "hasHeight": true,
+   "mapX": -1075.434,
+   "mapY": -1694.04,
+   "posSrc": "marker",
+   "posValid": true,
+   "romLayer": 18,
+   "romPt": {
+    "gx": -1699.968,
+    "gy": 304.35,
+    "gz": -1072.614
+   },
+   "npc": "Npc_OldKorok",
+   "npcCn": "伯库林",
+   "loc": null,
+   "locCn": "拉布拉山山脚",
+   "sort": 491,
+   "nSteps": 7,
+   "steps": [
+    {
+     "name": "Ready",
+     "text": "",
+     "pts": []
+    },
+    {
+     "name": "STEP1",
+     "text": "在拉布拉山山脚遇到了克洛格族的伯库林。\n伯库林似乎在畏惧着什么，\n在原地进退两难。\n他指的方向　\u0003\u0002",
+     "pts": [
+      {
+       "gx": -1699.968,
+       "gy": 304.35,
+       "gz": -1072.614
+      }
+     ]
+    },
+    {
+     "name": "STEP1_Basecamp",
+     "text": "",
+     "pts": []
+    },
+    {
+     "name": "STEP1_Final",
+     "text": "",
+     "pts": []
+    },
+    {
+     "name": "STEP2",
+     "text": "伯库林似乎把装在沙锤中的\n克洛格的果实弄丢了。\n好像是森林的孩子们拿走的……\n收集　\u0003\u0002",
+     "pts": [
+      {
+       "gx": -1676.42,
+       "gy": 313.99,
+       "gz": -1115.291
+      }
+     ]
+    },
+    {
+     "name": "STEP2_BaseCamp",
+     "text": "",
+     "pts": [
+      {
+       "gx": -223.937,
+       "gy": 124.19,
+       "gz": -56.08
+      }
+     ]
+    },
+    {
+     "name": "STEP2_Final",
+     "text": "",
+     "pts": [
+      {
+       "gx": 419.431,
+       "gy": 248.67,
+       "gz": -2119.078
+      }
+     ]
+    }
+   ],
+   "requires": [],
+   "dependFlag": null,
+   "markerId": 3605,
+   "match": "exact",
+   "src": "rom+guide",
+   "rawName": "伯库林的烦恼",
+   "guide": {
+    "requires": [],
+    "start": "与伯库林对话",
+    "note": "将前方的树妖消灭",
+    "reward": [
+     "解锁扩充背包"
+    ],
+    "unlocks": []
+   },
+   "raw": {
+    "前置任务": "无",
+    "开启任务": "与伯库林对话",
+    "注意事项": "将前方的树妖消灭",
+    "任务奖励": "解锁扩充背包",
+    "解锁任务": "无"
+   },
+   "unlocks": [],
+   "group": "情节挑战",
+   "no": 40,
+   "groupTotal": 60,
+   "tier": "L1",
+   "flowPts": [
+    {
+     "gx": -1694,
+     "gy": 304,
+     "gz": -1075
+    },
+    {
+     "gx": -1676.42,
+     "gy": 313.99,
+     "gz": -1115.291
+    },
+    {
+     "gx": -223.937,
+     "gy": 124.19,
+     "gz": -56.08
+    },
+    {
+     "gx": 419.431,
+     "gy": 248.67,
+     "gz": -2119.078
+    }
+   ],
+   "onMap": true,
+   "overlap": [],
+   "reqs": [],
+   "unlockList": [],
+   "stepsUI": [
+    {
+     "name": "STEP1",
+     "text": "在拉布拉山山脚遇到了克洛格族的伯库林。\n伯库林似乎在畏惧着什么，\n在原地进退两难。\n他指的方向"
+    },
+    {
+     "name": "STEP2",
+     "text": "伯库林似乎把装在沙锤中的\n克洛格的果实弄丢了。\n好像是森林的孩子们拿走的……\n收集"
+    }
+   ],
+   "nStepsUI": 2,
+   "hasStepText": true
+  },
+  {
+   "key": "NushiShop_Tutorial",
+   "name": "寻找！魔犹伊的遗失物",
+   "nameSrc": "rom",
+   "cat": "ImportantMini",
+   "kind": "side",
+   "layer": 18,
+   "layers": [
+    18
+   ],
+   "gx": 1217,
+   "gy": 128,
+   "gz": -1201,
+   "hasHeight": true,
+   "mapX": -1200.587,
+   "mapY": 1217.475,
+   "posSrc": "marker",
+   "posValid": true,
+   "romLayer": 18,
+   "romPt": {
+    "gx": 1230.003,
+    "gy": 128.2,
+    "gz": -1217.493
+   },
+   "npc": "Npc_NushiShop",
+   "npcCn": "吉尔顿",
+   "loc": "MapArea_EldinCanyon",
+   "locCn": "奥尔汀峡谷",
+   "sort": 511,
+   "nSteps": 2,
+   "steps": [
+    {
+     "name": "Ready",
+     "text": "",
+     "pts": []
+    },
+    {
+     "name": "BringCaveMasterMedal",
+     "text": "柯尔天想变成传说中的生物——萨托利。\n为了实现梦想，他在寻求　\u0003\u0002",
+     "pts": [
+      {
+       "gx": 1230.003,
+       "gy": 128.2,
+       "gz": -1217.493
+      }
+     ]
+    }
+   ],
+   "requires": [],
+   "dependFlag": null,
+   "markerId": 2694,
+   "match": "exact",
+   "src": "rom+guide",
+   "rawName": "寻找！魔犹伊的遗失物",
+   "guide": {
+    "requires": [],
+    "start": "在洞窟前与吉尔顿对话开启",
+    "note": "只要有魔犹伊的遗失物就可以直接和柯尔天对话完成任务",
+    "reward": [
+     "波克布林面罩"
+    ],
+    "unlocks": [
+     "科尔天的下落"
+    ]
+   },
+   "raw": {
+    "前置任务": "无",
+    "开启任务": "在洞窟前与吉尔顿对话开启",
+    "注意事项": "只要有魔犹伊的遗失物就可以直接和柯尔天对话完成任务",
+    "任务奖励": "波克布林面罩",
+    "解锁任务": "科尔天的下落"
+   },
+   "unlocks": [
+    "MonsterFigures01",
+    "NushiShop_Challenge00"
+   ],
+   "group": "情节挑战",
+   "no": 41,
+   "groupTotal": 60,
+   "tier": "L1",
+   "flowPts": [
+    {
+     "gx": 1217,
+     "gy": 128,
+     "gz": -1201
+    },
+    {
+     "gx": 1230.003,
+     "gy": 128.2,
+     "gz": -1217.493
+    }
+   ],
+   "onMap": true,
+   "overlap": [],
+   "reqs": [],
+   "unlockList": [
+    {
+     "key": "MonsterFigures01",
+     "reqName": "只属于我的怪物收藏品",
+     "linkable": true
+    },
+    {
+     "key": "NushiShop_Challenge00",
+     "reqName": "柯尔天的下落",
+     "linkable": true
+    }
+   ],
+   "stepsUI": [
+    {
+     "name": "BringCaveMasterMedal",
+     "text": "柯尔天想变成传说中的生物——萨托利。\n为了实现梦想，他在寻求"
+    }
+   ],
+   "nStepsUI": 1,
+   "hasStepText": true
+  },
+  {
+   "key": "NushiShop_Challenge00",
+   "name": "柯尔天的下落",
+   "nameSrc": "rom",
+   "cat": "ImportantMini",
+   "kind": "side",
+   "layer": 18,
+   "layers": [
+    18
+   ],
+   "gx": 3968,
+   "gy": 234,
+   "gz": -1640,
+   "hasHeight": true,
+   "mapX": -1640.134,
+   "mapY": 3968.377,
+   "posSrc": "marker",
+   "posValid": true,
+   "romLayer": 18,
+   "romPt": {
+    "gx": 3960.529,
+    "gy": 233.5,
+    "gz": -1640.5
+   },
+   "npc": "Npc_NushiShop",
+   "npcCn": "吉尔顿",
+   "loc": "MapArea_EldinCanyon",
+   "locCn": "奥尔汀峡谷",
+   "sort": 512,
+   "nSteps": 3,
+   "steps": [
+    {
+     "name": "Ready",
+     "text": "",
+     "pts": []
+    },
+    {
+     "name": "FindNushiShop",
+     "text": "为了收集魔犹伊的遗失物，\n柯尔天拉着售货摊踏上了旅途。\n试着在海拉鲁各地　\u0003\u0002",
+     "pts": [
+      {
+       "gx": 3960.529,
+       "gy": 233.5,
+       "gz": -1640.5
+      }
+     ]
+    },
+    {
+     "name": "HeardSpot",
+     "text": "为了收集魔犹伊的遗失物，\n柯尔天拉着售货摊踏上了旅途。\n试着在海拉鲁各地寻找柯尔天吧。\n\n其兄长吉尔顿表示，\n曾在　\u0003\u0002",
+     "pts": [
+      {
+       "gx": 3960.529,
+       "gy": 233.5,
+       "gz": -1640.5
+      }
+     ]
+    }
+   ],
+   "requires": [
+    {
+     "type": "quest",
+     "key": "NushiShop_Tutorial",
+     "resolved": true,
+     "flag": "NushiShop_Tutorial_IsCompleted_Exp"
+    }
+   ],
+   "dependFlag": "NushiShop_Tutorial_IsCompleted_Exp",
+   "markerId": 2695,
+   "match": "fuzzy",
+   "src": "rom+guide",
+   "rawName": "科尔天的下落",
+   "guide": {
+    "requires": [
+     "寻找！魔犹伊的遗失物"
+    ],
+    "start": "无",
+    "note": "在一始村与吉尔顿对话了解科尔天的位置，去那个方向找到一个热气球，上前对话",
+    "reward": [
+     "无（开启魔犹伊的遗失物兑换商店）"
+    ],
+    "unlocks": []
+   },
+   "raw": {
+    "前置任务": "寻找！魔犹伊的遗失物",
+    "开启任务": "无",
+    "注意事项": "在一始村与吉尔顿对话了解科尔天的位置，去那个方向找到一个热气球，上前对话",
+    "任务奖励": "无（开启魔犹伊的遗失物兑换商店）",
+    "解锁任务": "无"
+   },
+   "unlocks": [],
+   "group": "情节挑战",
+   "no": 42,
+   "groupTotal": 60,
+   "tier": "L1",
+   "flowPts": [
+    {
+     "gx": 3968,
+     "gy": 234,
+     "gz": -1640
+    },
+    {
+     "gx": 3960.529,
+     "gy": 233.5,
+     "gz": -1640.5
+    }
+   ],
+   "onMap": true,
+   "overlap": [],
+   "reqs": [
+    {
+     "type": "quest",
+     "key": "NushiShop_Tutorial",
+     "reqName": "寻找！魔犹伊的遗失物",
+     "linkable": true
+    }
+   ],
+   "unlockList": [],
+   "stepsUI": [
+    {
+     "name": "FindNushiShop",
+     "text": "为了收集魔犹伊的遗失物，\n柯尔天拉着售货摊踏上了旅途。\n试着在海拉鲁各地"
+    },
+    {
+     "name": "HeardSpot",
+     "text": "为了收集魔犹伊的遗失物，\n柯尔天拉着售货摊踏上了旅途。\n试着在海拉鲁各地寻找柯尔天吧。\n\n其兄长吉尔顿表示，\n曾在"
+    }
+   ],
+   "nStepsUI": 2,
+   "hasStepText": true
+  },
+  {
+   "key": "MonsterFigures01",
+   "name": "只属于我的怪物收藏品",
+   "nameSrc": "rom",
+   "cat": "ImportantMini",
+   "kind": "side",
+   "layer": 18,
+   "layers": [
+    18
+   ],
+   "gx": 3961,
+   "gy": 234,
+   "gz": -1640,
+   "hasHeight": true,
+   "mapX": -1640.5,
+   "mapY": 3960.529,
+   "posSrc": "rom",
+   "posValid": true,
+   "romLayer": 18,
+   "romPt": {
+    "gx": 3960.529,
+    "gy": 233.5,
+    "gz": -1640.5
+   },
+   "npc": "Npc_MamonoShop",
+   "npcCn": "吉尔顿",
+   "loc": "UMiiVillage",
+   "locCn": "一始村",
+   "sort": 521,
+   "nSteps": 5,
+   "steps": [
+    {
+     "name": "Ready",
+     "text": "",
+     "pts": []
+    },
+    {
+     "name": "Photo",
+     "text": "吉尔顿希望松达能帮忙\n制作一个波克布林人偶。\n但是波克布林的样貌似乎很难描述，\n导致松达完全没有理解。\n如果有一幅波克布林的　\u0003\u0002",
+     "pts": [
+      {
+       "gx": 3960.529,
+       "gy": 233.5,
+       "gz": -1640.5
+      }
+     ]
+    },
+    {
+     "name": "Display",
+     "text": "",
+     "pts": [
+      {
+       "gx": 3960.529,
+       "gy": 233.5,
+       "gz": -1640.5
+      }
+     ]
+    },
+    {
+     "name": "Exhibition",
+     "text": "",
+     "pts": [
+      {
+       "gx": 3960.529,
+       "gy": 233.5,
+       "gz": -1640.5
+      }
+     ]
+    },
+    {
+     "name": "Reward",
+     "text": "把波克布林人偶装饰在了舞台上。\n吉尔顿叫来村民们，\n并向大家展示了波克布林人偶。\n他打算为你送上谢礼，\n整理好行李之后去找他吧。",
+     "pts": [
+      {
+       "gx": 3960.529,
+       "gy": 233.5,
+       "gz": -1640.5
+      }
+     ]
+    }
+   ],
+   "requires": [
+    {
+     "type": "quest",
+     "key": "NushiShop_Tutorial",
+     "resolved": true,
+     "flag": "NushiShop_Tutorial_IsCompleted_Exp"
+    }
+   ],
+   "dependFlag": "NushiShop_Tutorial_IsCompleted_Exp",
+   "markerId": 2758,
+   "match": "series",
+   "src": "rom+guide",
+   "rawName": "只属于我的怪物收藏品1~5",
+   "guide": {
+    "requires": [],
+    "start": "与吉尔顿对话开启",
+    "note": "按要求去拍摄各类怪物",
+    "reward": [
+     "怪物精华"
+    ],
+    "unlocks": []
+   },
+   "raw": {
+    "前置任务": "无",
+    "开启任务": "与吉尔顿对话开启",
+    "注意事项": "按要求去拍摄各类怪物",
+    "任务奖励": "怪物精华、潜行怪物汤、怪物缰绳、怪物马鞍、钻石",
+    "解锁任务": "无"
+   },
+   "unlocks": [
+    "MonsterFigures02"
+   ],
+   "group": "情节挑战",
+   "no": 43,
+   "groupTotal": 60,
+   "tier": "L2",
+   "flowPts": [
+    {
+     "gx": 3961,
+     "gy": 234,
+     "gz": -1640
+    }
+   ],
+   "onMap": true,
+   "overlap": [],
+   "reqs": [
+    {
+     "type": "quest",
+     "key": "NushiShop_Tutorial",
+     "reqName": "寻找！魔犹伊的遗失物",
+     "linkable": true
+    }
+   ],
+   "unlockList": [
+    {
+     "key": "MonsterFigures02",
+     "reqName": "只属于我的怪物收藏品2",
+     "linkable": true
+    }
+   ],
+   "stepsUI": [
+    {
+     "name": "Photo",
+     "text": "吉尔顿希望松达能帮忙\n制作一个波克布林人偶。\n但是波克布林的样貌似乎很难描述，\n导致松达完全没有理解。\n如果有一幅波克布林的"
+    },
+    {
+     "name": "Reward",
+     "text": "把波克布林人偶装饰在了舞台上。\n吉尔顿叫来村民们，\n并向大家展示了波克布林人偶。\n他打算为你送上谢礼，\n整理好行李之后去找他吧。"
+    }
+   ],
+   "nStepsUI": 2,
+   "hasStepText": true
+  },
+  {
+   "key": "MonsterFigures02",
+   "name": "只属于我的怪物收藏品2",
+   "nameSrc": "rom",
+   "cat": "ImportantMini",
+   "kind": "side",
+   "layer": 18,
+   "layers": [
+    18
+   ],
+   "gx": 3961,
+   "gy": 234,
+   "gz": -1640,
+   "hasHeight": true,
+   "mapX": -1640.5,
+   "mapY": 3960.529,
+   "posSrc": "rom",
+   "posValid": true,
+   "romLayer": 18,
+   "romPt": {
+    "gx": 3960.529,
+    "gy": 233.5,
+    "gz": -1640.5
+   },
+   "npc": "Npc_MamonoShop",
+   "npcCn": "吉尔顿",
+   "loc": "UMiiVillage",
+   "locCn": "一始村",
+   "sort": 522,
+   "nSteps": 5,
+   "steps": [
+    {
+     "name": "Ready",
+     "text": "",
+     "pts": []
+    },
+    {
+     "name": "Photo",
+     "text": "吉尔顿希望松达能帮忙\n制作一个霍拉布林人偶。\n但是霍拉布林的样貌似乎很难描述，\n导致松达完全没有理解。\n如果有一幅霍拉布林的　\u0003\u0002",
+     "pts": [
+      {
+       "gx": 3960.529,
+       "gy": 233.5,
+       "gz": -1640.5
+      }
+     ]
+    },
+    {
+     "name": "Display",
+     "text": "",
+     "pts": [
+      {
+       "gx": 3960.529,
+       "gy": 233.5,
+       "gz": -1640.5
+      }
+     ]
+    },
+    {
+     "name": "Exhibition",
+     "text": "",
+     "pts": [
+      {
+       "gx": 3960.529,
+       "gy": 233.5,
+       "gz": -1640.5
+      }
+     ]
+    },
+    {
+     "name": "Reward",
+     "text": "吉尔顿叫来村民们，\n并向大家展示了霍拉布林人偶。\n他打算为你送上谢礼，\n整理好行李之后去找他吧。",
+     "pts": [
+      {
+       "gx": 3960.529,
+       "gy": 233.5,
+       "gz": -1640.5
+      }
+     ]
+    }
+   ],
+   "requires": [
+    {
+     "type": "quest",
+     "key": "MonsterFigures01",
+     "resolved": true,
+     "flag": "MonsterFigures01_IsCompleted_Exp"
+    }
+   ],
+   "dependFlag": "MonsterFigures01_IsCompleted_Exp",
+   "markerId": null,
+   "match": null,
+   "src": "rom",
+   "unlocks": [
+    "MonsterFigures03"
+   ],
+   "guide": {
+    "start": "与一始村的吉尔顿对话开启（需先完成：森林驿站湖畔相遇 + 一始村「微达的独立」）。",
+    "note": "① 去洞窟拍下霍拉布林的照片（初始台地北边的山洞 / 堡垒遗迹的洞窟）； ② 回一始村把照片给松达，做出霍拉布林人偶； ③ 用究极手把人偶搬到旁边的展示台； ④ 召集村民参观 → 完成，可接下一条。 ★ 怪物颜色无所谓，只要能登录图鉴即可。",
+    "reward": [
+     "潜行怪物汤",
+     "怪物精华"
+    ]
+   },
+   "group": "情节挑战",
+   "no": 44,
+   "groupTotal": 60,
+   "tier": "L2",
+   "flowPts": [
+    {
+     "gx": 3961,
+     "gy": 234,
+     "gz": -1640
+    }
+   ],
+   "onMap": true,
+   "overlap": [],
+   "reqs": [
+    {
+     "type": "quest",
+     "key": "MonsterFigures01",
+     "reqName": "只属于我的怪物收藏品",
+     "linkable": true
+    }
+   ],
+   "unlockList": [
+    {
+     "key": "MonsterFigures03",
+     "reqName": "只属于我的怪物收藏品3",
+     "linkable": true
+    }
+   ],
+   "stepsUI": [
+    {
+     "name": "Photo",
+     "text": "吉尔顿希望松达能帮忙\n制作一个霍拉布林人偶。\n但是霍拉布林的样貌似乎很难描述，\n导致松达完全没有理解。\n如果有一幅霍拉布林的"
+    },
+    {
+     "name": "Reward",
+     "text": "吉尔顿叫来村民们，\n并向大家展示了霍拉布林人偶。\n他打算为你送上谢礼，\n整理好行李之后去找他吧。"
+    }
+   ],
+   "nStepsUI": 2,
+   "hasStepText": true
+  },
+  {
+   "key": "MonsterFigures03",
+   "name": "只属于我的怪物收藏品3",
+   "nameSrc": "rom",
+   "cat": "ImportantMini",
+   "kind": "side",
+   "layer": 18,
+   "layers": [
+    18
+   ],
+   "gx": 3961,
+   "gy": 234,
+   "gz": -1640,
+   "hasHeight": true,
+   "mapX": -1640.5,
+   "mapY": 3960.529,
+   "posSrc": "rom",
+   "posValid": true,
+   "romLayer": 18,
+   "romPt": {
+    "gx": 3960.529,
+    "gy": 233.5,
+    "gz": -1640.5
+   },
+   "npc": "Npc_MamonoShop",
+   "npcCn": "吉尔顿",
+   "loc": "UMiiVillage",
+   "locCn": "一始村",
+   "sort": 523,
+   "nSteps": 5,
+   "steps": [
+    {
+     "name": "Ready",
+     "text": "",
+     "pts": []
+    },
+    {
+     "name": "Photo",
+     "text": "在松达表示愿意制作\n更多怪物人偶后，\n吉尔顿便想拥有一个　\u0003\u0002",
+     "pts": [
+      {
+       "gx": 3960.529,
+       "gy": 233.5,
+       "gz": -1640.5
+      }
+     ]
+    },
+    {
+     "name": "Display",
+     "text": "",
+     "pts": [
+      {
+       "gx": 3960.529,
+       "gy": 233.5,
+       "gz": -1640.5
+      }
+     ]
+    },
+    {
+     "name": "Exhibition",
+     "text": "",
+     "pts": [
+      {
+       "gx": 3960.529,
+       "gy": 233.5,
+       "gz": -1640.5
+      }
+     ]
+    },
+    {
+     "name": "Reward",
+     "text": "把岩家巨人人偶装饰在了舞台上。\n吉尔顿叫来村民们，\n并向大家展示了岩家巨人人偶。\n他打算为你送上谢礼，\n整理好行李之后去找他吧。",
+     "pts": [
+      {
+       "gx": 3960.529,
+       "gy": 233.5,
+       "gz": -1640.5
+      }
+     ]
+    }
+   ],
+   "requires": [
+    {
+     "type": "quest",
+     "key": "MonsterFigures02",
+     "resolved": true,
+     "flag": "MonsterFigures02_IsCompleted_Exp"
+    }
+   ],
+   "dependFlag": "MonsterFigures02_IsCompleted_Exp",
+   "markerId": null,
+   "match": null,
+   "src": "rom",
+   "unlocks": [
+    "MonsterFigures04"
+   ],
+   "guide": {
+    "start": "与一始村的吉尔顿对话开启。",
+    "note": "① 去中央广场东侧城墙边（或中央海拉鲁樱花树附近）拍下岩家巨人； ② 回一始村给松达看照片，做出人偶；③ 用究极手搬到展示台；④ 召集村民参观。",
+    "reward": [
+     "怪物缰绳",
+     "怪物精华"
+    ]
+   },
+   "group": "情节挑战",
+   "no": 45,
+   "groupTotal": 60,
+   "tier": "L2",
+   "flowPts": [
+    {
+     "gx": 3961,
+     "gy": 234,
+     "gz": -1640
+    }
+   ],
+   "onMap": true,
+   "overlap": [],
+   "reqs": [
+    {
+     "type": "quest",
+     "key": "MonsterFigures02",
+     "reqName": "只属于我的怪物收藏品2",
+     "linkable": true
+    }
+   ],
+   "unlockList": [
+    {
+     "key": "MonsterFigures04",
+     "reqName": "只属于我的怪物收藏品4",
+     "linkable": true
+    }
+   ],
+   "stepsUI": [
+    {
+     "name": "Photo",
+     "text": "在松达表示愿意制作\n更多怪物人偶后，\n吉尔顿便想拥有一个"
+    },
+    {
+     "name": "Reward",
+     "text": "把岩家巨人人偶装饰在了舞台上。\n吉尔顿叫来村民们，\n并向大家展示了岩家巨人人偶。\n他打算为你送上谢礼，\n整理好行李之后去找他吧。"
+    }
+   ],
+   "nStepsUI": 2,
+   "hasStepText": true
+  },
+  {
+   "key": "MonsterFigures04",
+   "name": "只属于我的怪物收藏品4",
+   "nameSrc": "rom",
+   "cat": "ImportantMini",
+   "kind": "side",
+   "layer": 18,
+   "layers": [
+    18
+   ],
+   "gx": 3961,
+   "gy": 234,
+   "gz": -1640,
+   "hasHeight": true,
+   "mapX": -1640.5,
+   "mapY": 3960.529,
+   "posSrc": "rom",
+   "posValid": true,
+   "romLayer": 18,
+   "romPt": {
+    "gx": 3960.529,
+    "gy": 233.5,
+    "gz": -1640.5
+   },
+   "npc": "Npc_MamonoShop",
+   "npcCn": "吉尔顿",
+   "loc": "UMiiVillage",
+   "locCn": "一始村",
+   "sort": 524,
+   "nSteps": 5,
+   "steps": [
+    {
+     "name": "Ready",
+     "text": "",
+     "pts": []
+    },
+    {
+     "name": "Photo",
+     "text": "在松达表示愿意制作\n更多怪物人偶后，\n吉尔顿便想拥有一个　\u0003\u0002",
+     "pts": [
+      {
+       "gx": 3960.529,
+       "gy": 233.5,
+       "gz": -1640.5
+      }
+     ]
+    },
+    {
+     "name": "Display",
+     "text": "",
+     "pts": [
+      {
+       "gx": 3960.529,
+       "gy": 233.5,
+       "gz": -1640.5
+      }
+     ]
+    },
+    {
+     "name": "Exhibition",
+     "text": "",
+     "pts": [
+      {
+       "gx": 3960.529,
+       "gy": 233.5,
+       "gz": -1640.5
+      }
+     ]
+    },
+    {
+     "name": "Reward",
+     "text": "把巨霸迦马人偶装饰在了舞台上。\n吉尔顿叫来村民们，\n并向大家展示了巨霸迦马人偶。\n他打算为你送上谢礼，\n整理好行李之后去找他吧。",
+     "pts": [
+      {
+       "gx": 3960.529,
+       "gy": 233.5,
+       "gz": -1640.5
+      }
+     ]
+    }
+   ],
+   "requires": [
+    {
+     "type": "quest",
+     "key": "MonsterFigures03",
+     "resolved": true,
+     "flag": "MonsterFigures03_IsCompleted_Exp"
+    }
+   ],
+   "dependFlag": "MonsterFigures03_IsCompleted_Exp",
+   "markerId": null,
+   "match": null,
+   "src": "rom",
+   "unlocks": [
+    "MonsterFigures05"
+   ],
+   "guide": {
+    "start": "与一始村的吉尔顿对话开启。",
+    "note": "① 下到地底（中央大废矿东侧 / 东阿卡莱平原深穴）拍下巨霸迦马； ② 回一始村给松达看照片；③ 用究极手搬到展示台；④ 召集村民参观。",
+    "reward": [
+     "怪物马鞍",
+     "怪物精华"
+    ]
+   },
+   "group": "情节挑战",
+   "no": 46,
+   "groupTotal": 60,
+   "tier": "L2",
+   "flowPts": [
+    {
+     "gx": 3961,
+     "gy": 234,
+     "gz": -1640
+    }
+   ],
+   "onMap": true,
+   "overlap": [],
+   "reqs": [
+    {
+     "type": "quest",
+     "key": "MonsterFigures03",
+     "reqName": "只属于我的怪物收藏品3",
+     "linkable": true
+    }
+   ],
+   "unlockList": [
+    {
+     "key": "MonsterFigures05",
+     "reqName": "只属于我的怪物收藏品5",
+     "linkable": true
+    }
+   ],
+   "stepsUI": [
+    {
+     "name": "Photo",
+     "text": "在松达表示愿意制作\n更多怪物人偶后，\n吉尔顿便想拥有一个"
+    },
+    {
+     "name": "Reward",
+     "text": "把巨霸迦马人偶装饰在了舞台上。\n吉尔顿叫来村民们，\n并向大家展示了巨霸迦马人偶。\n他打算为你送上谢礼，\n整理好行李之后去找他吧。"
+    }
+   ],
+   "nStepsUI": 2,
+   "hasStepText": true
+  },
+  {
+   "key": "MonsterFigures05",
+   "name": "只属于我的怪物收藏品5",
+   "nameSrc": "rom",
+   "cat": "ImportantMini",
+   "kind": "side",
+   "layer": 18,
+   "layers": [
+    18
+   ],
+   "gx": 3961,
+   "gy": 234,
+   "gz": -1640,
+   "hasHeight": true,
+   "mapX": -1640.5,
+   "mapY": 3960.529,
+   "posSrc": "rom",
+   "posValid": true,
+   "romLayer": 18,
+   "romPt": {
+    "gx": 3960.529,
+    "gy": 233.5,
+    "gz": -1640.5
+   },
+   "npc": "Npc_MamonoShop",
+   "npcCn": "吉尔顿",
+   "loc": "UMiiVillage",
+   "locCn": "一始村",
+   "sort": 525,
+   "nSteps": 5,
+   "steps": [
+    {
+     "name": "Ready",
+     "text": "",
+     "pts": []
+    },
+    {
+     "name": "Photo",
+     "text": "在松达表示愿意制作\n更多怪物人偶后，\n吉尔顿便想拥有一个　\u0003\u0002",
+     "pts": [
+      {
+       "gx": 3960.529,
+       "gy": 233.5,
+       "gz": -1640.5
+      }
+     ]
+    },
+    {
+     "name": "Display",
+     "text": "",
+     "pts": [
+      {
+       "gx": 3960.529,
+       "gy": 233.5,
+       "gz": -1640.5
+      }
+     ]
+    },
+    {
+     "name": "Exhibition",
+     "text": "",
+     "pts": [
+      {
+       "gx": 3960.529,
+       "gy": 233.5,
+       "gz": -1640.5
+      }
+     ]
+    },
+    {
+     "name": "Reward",
+     "text": "把古栗欧克王人偶装饰在了舞台上。\n吉尔顿叫来村民们，\n并向大家展示了古栗欧克王人偶。\n他打算为你送上谢礼，\n整理好行李之后去找他吧。",
+     "pts": [
+      {
+       "gx": 3960.529,
+       "gy": 233.5,
+       "gz": -1640.5
+      }
+     ]
+    }
+   ],
+   "requires": [
+    {
+     "type": "quest",
+     "key": "MonsterFigures04",
+     "resolved": true,
+     "flag": "MonsterFigures04_IsCompleted_Exp"
+    }
+   ],
+   "dependFlag": "MonsterFigures04_IsCompleted_Exp",
+   "markerId": null,
+   "match": null,
+   "src": "rom",
+   "unlocks": [],
+   "guide": {
+    "start": "与一始村的吉尔顿对话开启。",
+    "note": "① 前往地图最东南角的空岛（需搭飞行装置）拍下古栗欧克王； ② 回一始村给松达看照片；③ 用究极手搬到展示台；④ 召集村民参观。 ★ 三头龙王全游戏仅 4 只（天上 3 只 + 地下 1 只）。",
+    "reward": [
+     "钻石",
+     "怪物精华"
+    ]
+   },
+   "group": "情节挑战",
+   "no": 47,
+   "groupTotal": 60,
+   "tier": "L2",
+   "flowPts": [
+    {
+     "gx": 3961,
+     "gy": 234,
+     "gz": -1640
+    }
+   ],
+   "onMap": true,
+   "overlap": [],
+   "reqs": [
+    {
+     "type": "quest",
+     "key": "MonsterFigures04",
+     "reqName": "只属于我的怪物收藏品4",
+     "linkable": true
+    }
+   ],
+   "unlockList": [],
+   "stepsUI": [
+    {
+     "name": "Photo",
+     "text": "在松达表示愿意制作\n更多怪物人偶后，\n吉尔顿便想拥有一个"
+    },
+    {
+     "name": "Reward",
+     "text": "把古栗欧克王人偶装饰在了舞台上。\n吉尔顿叫来村民们，\n并向大家展示了古栗欧克王人偶。\n他打算为你送上谢礼，\n整理好行李之后去找他吧。"
+    }
+   ],
+   "nStepsUI": 2,
+   "hasStepText": true
+  },
+  {
+   "key": "BlindRuinsTreasure",
+   "name": "调查德依布朗遗迹吧",
+   "nameSrc": "rom",
+   "cat": "ImportantMini",
+   "kind": "side",
+   "layer": 18,
+   "layers": [
+    18
+   ],
+   "gx": 372,
+   "gy": 280,
+   "gz": -3107,
+   "hasHeight": true,
+   "mapX": -3106.605,
+   "mapY": 372.324,
+   "posSrc": "marker",
+   "posValid": true,
+   "romLayer": 18,
+   "romPt": {
+    "gx": 366.553,
+    "gy": 280.01,
+    "gz": -3097.333
+   },
+   "npc": "Npc_Road_023",
+   "npcCn": "卡兹纳比",
+   "loc": "BlindForest",
+   "locCn": "德依布朗遗迹（迷途之森林）",
+   "sort": 601,
+   "nSteps": 5,
+   "steps": [
+    {
+     "name": "Ready",
+     "text": "",
+     "pts": []
+    },
+    {
+     "name": "LookAtBoard_1",
+     "text": "据说左纳乌调查员卡兹纳比\n在德依布朗遗迹发现了一块石板。\n\n确认一下　\u0003\u0002",
+     "pts": [
+      {
+       "gx": 366.553,
+       "gy": 280.01,
+       "gz": -3097.333
+      }
+     ]
+    },
+    {
+     "name": "Search_1",
+     "text": "左纳乌调查员卡兹纳比发现的石板上\n记载着神秘的密文。\n\n在德依布朗遗迹中探索\n密文所指的位置吧。",
+     "pts": [
+      {
+       "gx": 366.553,
+       "gy": 280.01,
+       "gz": -3097.333
+      }
+     ]
+    },
+    {
+     "name": "GoToCave",
+     "text": "找到隐藏在德依布朗遗迹的\n4个石室后，\n从某处传来了巨大的声响。\n\n遗迹内部究竟发生了什么呢？",
+     "pts": [
+      {
+       "gx": 374.253,
+       "gy": 280.01,
+       "gz": -3112.525
+      }
+     ]
+    },
+    {
+     "name": "RewardNotReceived",
+     "text": "",
+     "pts": [
+      {
+       "gx": 368.677,
+       "gy": 266.8,
+       "gz": -3158.883
+      }
+     ]
+    }
+   ],
+   "requires": [],
+   "dependFlag": null,
+   "markerId": 2763,
+   "match": "exact",
+   "src": "rom+guide",
+   "rawName": "调查德依布朗遗迹吧",
+   "guide": {
+    "requires": [
+     "需要解锁四个贤者",
+     "不然不出现石碑"
+    ],
+    "start": "与卡兹纳比对话开启",
+    "note": "调查四座石碑开启后续任务",
+    "reward": [
+     "大型左纳乌能源",
+     "大电池",
+     "钻石"
+    ],
+    "unlocks": [
+     "被众龙所守望的枭",
+     "两龙之间的夹缝",
+     "六龙御前",
+     "身体纤长的守护龙"
+    ]
+   },
+   "raw": {
+    "前置任务": "需要解锁四个贤者，不然不出现石碑",
+    "开启任务": "与卡兹纳比对话开启",
+    "注意事项": "调查四座石碑开启后续任务",
+    "任务奖励": "无",
+    "解锁任务": "被众龙所守望的枭、两龙之间的夹缝、六龙御前、身体纤长的守护龙"
+   },
+   "unlocks": [],
+   "group": "情节挑战",
+   "no": 48,
+   "groupTotal": 60,
+   "tier": "L1",
+   "flowPts": [
+    {
+     "gx": 372,
+     "gy": 280,
+     "gz": -3107
+    },
+    {
+     "gx": 366.553,
+     "gy": 280.01,
+     "gz": -3097.333
+    },
+    {
+     "gx": 368.677,
+     "gy": 266.8,
+     "gz": -3158.883
+    }
+   ],
+   "onMap": true,
+   "overlap": [],
+   "reqs": [
+    {
+     "type": "flag",
+     "reqName": "需要解锁四个贤者",
+     "linkable": false
+    },
+    {
+     "type": "flag",
+     "reqName": "不然不出现石碑",
+     "linkable": false
+    }
+   ],
+   "unlockList": [
+    {
+     "key": "BlindRuinsTreasure_Gerudo",
+     "reqName": "身体纤长的守护龙",
+     "linkable": true,
+     "src": "reverse"
+    }
+   ],
+   "stepsUI": [
+    {
+     "name": "LookAtBoard_1",
+     "text": "据说左纳乌调查员卡兹纳比\n在德依布朗遗迹发现了一块石板。\n\n确认一下"
+    },
+    {
+     "name": "Search_1",
+     "text": "左纳乌调查员卡兹纳比发现的石板上\n记载着神秘的密文。\n\n在德依布朗遗迹中探索\n密文所指的位置吧。"
+    },
+    {
+     "name": "GoToCave",
+     "text": "找到隐藏在德依布朗遗迹的\n4个石室后，\n从某处传来了巨大的声响。\n\n遗迹内部究竟发生了什么呢？"
+    }
+   ],
+   "nStepsUI": 3,
+   "hasStepText": true
+  },
+  {
+   "key": "BlindRuinsTreasure_Rito",
+   "name": "被众龙所守望的枭",
+   "nameSrc": "rom",
+   "cat": "ImportantMini",
+   "kind": "side",
+   "layer": 18,
+   "layers": [
+    18
+   ],
+   "gx": 362,
+   "gy": 280,
+   "gz": -3104,
+   "hasHeight": true,
+   "mapX": -3103.937,
+   "mapY": 361.986,
+   "posSrc": "marker",
+   "posValid": true,
+   "romLayer": 18,
+   "romPt": {
+    "gx": 366.553,
+    "gy": 280.01,
+    "gz": -3097.333
+   },
+   "npc": "Npc_Road_023",
+   "npcCn": "卡兹纳比",
+   "loc": "BlindForest",
+   "locCn": "德依布朗遗迹（迷途之森林）",
+   "sort": 602,
+   "nSteps": 2,
+   "steps": [
+    {
+     "name": "Ready",
+     "text": "",
+     "pts": []
+    },
+    {
+     "name": "Search",
+     "text": "左纳乌调查员卡兹纳比发现的石板上\n刻着一段文字……\n　\u0003\u0002",
+     "pts": [
+      {
+       "gx": 366.553,
+       "gy": 280.01,
+       "gz": -3097.333
+      }
+     ]
+    }
+   ],
+   "requires": [],
+   "dependFlag": null,
+   "markerId": 2764,
+   "match": "exact",
+   "src": "rom+guide",
+   "rawName": "被众龙所守望的枭",
+   "guide": {
+    "requires": [
+     "调查德伊布朗遗迹吧"
+    ],
+    "start": "无",
+    "note": "在图示位置吹风",
+    "reward": [
+     "蓝宝石*3"
+    ],
+    "unlocks": []
+   },
+   "raw": {
+    "前置任务": "调查德伊布朗遗迹吧",
+    "开启任务": "无",
+    "注意事项": "在图示位置吹风",
+    "任务奖励": "蓝宝石*3",
+    "解锁任务": "无"
+   },
+   "unlocks": [],
+   "group": "情节挑战",
+   "no": 49,
+   "groupTotal": 60,
+   "tier": "L1",
+   "flowPts": [
+    {
+     "gx": 362,
+     "gy": 280,
+     "gz": -3104
+    },
+    {
+     "gx": 366.553,
+     "gy": 280.01,
+     "gz": -3097.333
+    }
+   ],
+   "onMap": true,
+   "overlap": [],
+   "reqs": [
+    {
+     "type": "flag",
+     "reqName": "调查德伊布朗遗迹吧",
+     "linkable": false
+    }
+   ],
+   "unlockList": [],
+   "stepsUI": [
+    {
+     "name": "Search",
+     "text": "左纳乌调查员卡兹纳比发现的石板上\n刻着一段文字……"
+    }
+   ],
+   "nStepsUI": 1,
+   "hasStepText": true
+  },
+  {
+   "key": "BlindRuinsTreasure_Goron",
+   "name": "两龙之间的夹缝",
+   "nameSrc": "rom",
+   "cat": "ImportantMini",
+   "kind": "side",
+   "layer": 18,
+   "layers": [
+    18
+   ],
+   "gx": 363,
+   "gy": 280,
+   "gz": -3096,
+   "hasHeight": true,
+   "mapX": -3096.088,
+   "mapY": 363.056,
+   "posSrc": "marker",
+   "posValid": true,
+   "romLayer": 18,
+   "romPt": {
+    "gx": 366.553,
+    "gy": 280.01,
+    "gz": -3097.333
+   },
+   "npc": "Npc_Road_023",
+   "npcCn": "卡兹纳比",
+   "loc": "BlindForest",
+   "locCn": "德依布朗遗迹（迷途之森林）",
+   "sort": 603,
+   "nSteps": 2,
+   "steps": [
+    {
+     "name": "Ready",
+     "text": "",
+     "pts": []
+    },
+    {
+     "name": "Search",
+     "text": "左纳乌调查员卡兹纳比发现的石板上\n刻着一段文字……\n　\u0003\u0002",
+     "pts": [
+      {
+       "gx": 366.553,
+       "gy": 280.01,
+       "gz": -3097.333
+      }
+     ]
+    }
+   ],
+   "requires": [],
+   "dependFlag": null,
+   "markerId": 2765,
+   "match": "exact",
+   "src": "rom+guide",
+   "rawName": "两龙之间的夹缝",
+   "guide": {
+    "requires": [
+     "调查德伊布朗遗迹吧"
+    ],
+    "start": "无",
+    "note": "点燃图示位置",
+    "reward": [
+     "红宝石*3"
+    ],
+    "unlocks": []
+   },
+   "raw": {
+    "前置任务": "调查德伊布朗遗迹吧",
+    "开启任务": "无",
+    "注意事项": "点燃图示位置",
+    "任务奖励": "红宝石*3",
+    "解锁任务": "无"
+   },
+   "unlocks": [],
+   "group": "情节挑战",
+   "no": 50,
+   "groupTotal": 60,
+   "tier": "L2",
+   "flowPts": [
+    {
+     "gx": 363,
+     "gy": 280,
+     "gz": -3096
+    }
+   ],
+   "onMap": true,
+   "overlap": [],
+   "reqs": [
+    {
+     "type": "flag",
+     "reqName": "调查德伊布朗遗迹吧",
+     "linkable": false
+    }
+   ],
+   "unlockList": [],
+   "stepsUI": [
+    {
+     "name": "Search",
+     "text": "左纳乌调查员卡兹纳比发现的石板上\n刻着一段文字……"
+    }
+   ],
+   "nStepsUI": 1,
+   "hasStepText": true
+  },
+  {
+   "key": "BlindRuinsTreasure_Zora",
+   "name": "六龙御前",
+   "nameSrc": "rom",
+   "cat": "ImportantMini",
+   "kind": "side",
+   "layer": 18,
+   "layers": [
+    18
+   ],
+   "gx": 186,
+   "gy": 280,
+   "gz": -3186,
+   "hasHeight": true,
+   "mapX": -3185.965,
+   "mapY": 185.549,
+   "posSrc": "marker",
+   "posValid": true,
+   "romLayer": 18,
+   "romPt": {
+    "gx": 366.553,
+    "gy": 280.01,
+    "gz": -3097.333
+   },
+   "npc": "Npc_Road_023",
+   "npcCn": "卡兹纳比",
+   "loc": "BlindForest",
+   "locCn": "德依布朗遗迹（迷途之森林）",
+   "sort": 604,
+   "nSteps": 2,
+   "steps": [
+    {
+     "name": "Ready",
+     "text": "",
+     "pts": []
+    },
+    {
+     "name": "Search",
+     "text": "左纳乌调查员卡兹纳比发现的石板上\n刻着一段文字……\n　\u0003\u0002",
+     "pts": [
+      {
+       "gx": 366.553,
+       "gy": 280.01,
+       "gz": -3097.333
+      }
+     ]
+    }
+   ],
+   "requires": [],
+   "dependFlag": null,
+   "markerId": 2766,
+   "match": "exact",
+   "src": "rom+guide",
+   "rawName": "六龙御前",
+   "guide": {
+    "requires": [
+     "调查德伊布朗遗迹吧"
+    ],
+    "start": "无",
+    "note": "星标所在位置斩击（水技能）",
+    "reward": [
+     "蛋白石*5"
+    ],
+    "unlocks": []
+   },
+   "raw": {
+    "前置任务": "调查德伊布朗遗迹吧",
+    "开启任务": "无",
+    "注意事项": "星标所在位置斩击（水技能）",
+    "任务奖励": "蛋白石*5",
+    "解锁任务": "无"
+   },
+   "unlocks": [],
+   "group": "情节挑战",
+   "no": 51,
+   "groupTotal": 60,
+   "tier": "L1",
+   "flowPts": [
+    {
+     "gx": 186,
+     "gy": 280,
+     "gz": -3186
+    },
+    {
+     "gx": 366.553,
+     "gy": 280.01,
+     "gz": -3097.333
+    }
+   ],
+   "onMap": true,
+   "overlap": [],
+   "reqs": [
+    {
+     "type": "flag",
+     "reqName": "调查德伊布朗遗迹吧",
+     "linkable": false
+    }
+   ],
+   "unlockList": [],
+   "stepsUI": [
+    {
+     "name": "Search",
+     "text": "左纳乌调查员卡兹纳比发现的石板上\n刻着一段文字……"
+    }
+   ],
+   "nStepsUI": 1,
+   "hasStepText": true
+  },
+  {
+   "key": "BlindRuinsTreasure_Gerudo",
+   "name": "身体纤长的守护龙",
+   "nameSrc": "rom",
+   "cat": "ImportantMini",
+   "kind": "side",
+   "layer": 18,
+   "layers": [
+    18
+   ],
+   "gx": 353,
+   "gy": 280,
+   "gz": -3089,
+   "hasHeight": true,
+   "mapX": -3088.932,
+   "mapY": 352.982,
+   "posSrc": "marker",
+   "posValid": true,
+   "romLayer": 18,
+   "romPt": {
+    "gx": 366.553,
+    "gy": 280.01,
+    "gz": -3097.333
+   },
+   "npc": "Npc_Road_023",
+   "npcCn": "卡兹纳比",
+   "loc": "BlindForest",
+   "locCn": "德依布朗遗迹（迷途之森林）",
+   "sort": 605,
+   "nSteps": 2,
+   "steps": [
+    {
+     "name": "Ready",
+     "text": "",
+     "pts": []
+    },
+    {
+     "name": "Search",
+     "text": "左纳乌调查员卡兹纳比发现的石板上\n刻着一段文字……\n　\u0003\u0002",
+     "pts": [
+      {
+       "gx": 366.553,
+       "gy": 280.01,
+       "gz": -3097.333
+      }
+     ]
+    }
+   ],
+   "requires": [],
+   "dependFlag": null,
+   "markerId": 2767,
+   "match": "exact",
+   "src": "rom+guide",
+   "rawName": "身体纤长的守护龙",
+   "guide": {
+    "requires": [
+     "调查德依布朗遗迹吧"
+    ],
+    "start": "无",
+    "note": "使用电击击打图示标记石块",
+    "reward": [
+     "黄玉*3"
+    ],
+    "unlocks": []
+   },
+   "raw": {
+    "前置任务": "调查德依布朗遗迹吧",
+    "开启任务": "无",
+    "注意事项": "使用电击击打图示标记石块",
+    "任务奖励": "黄玉*3",
+    "解锁任务": "无"
+   },
+   "unlocks": [],
+   "group": "情节挑战",
+   "no": 52,
+   "groupTotal": 60,
+   "tier": "L1",
+   "flowPts": [
+    {
+     "gx": 353,
+     "gy": 280,
+     "gz": -3089
+    },
+    {
+     "gx": 366.553,
+     "gy": 280.01,
+     "gz": -3097.333
+    }
+   ],
+   "onMap": true,
+   "overlap": [],
+   "reqs": [
+    {
+     "type": "quest",
+     "key": "BlindRuinsTreasure",
+     "reqName": "调查德依布朗遗迹吧",
+     "linkable": true,
+     "src": "guide"
+    }
+   ],
+   "unlockList": [],
+   "stepsUI": [
+    {
+     "name": "Search",
+     "text": "左纳乌调查员卡兹纳比发现的石板上\n刻着一段文字……"
+    }
+   ],
+   "nStepsUI": 1,
+   "hasStepText": true
+  },
+  {
+   "key": "FirstskyislandReturns",
+   "name": "初始空岛的渊源",
+   "nameSrc": "rom",
+   "cat": "ImportantMini",
+   "kind": "side",
+   "layer": 20,
+   "layers": [
+    20
+   ],
+   "gx": 453,
+   "gy": 1646,
+   "gz": 808,
+   "hasHeight": true,
+   "mapX": 807.778,
+   "mapY": 453.19,
+   "posSrc": "marker",
+   "posValid": true,
+   "romLayer": 20,
+   "romPt": {
+    "gx": 453.666,
+    "gy": 1645.84,
+    "gz": 800.438
+   },
+   "npc": "Npc_Zonau_Golem_Servant_FirstIsland_20",
+   "npcCn": "管家魔像",
+   "loc": "BeginningIsland",
+   "locCn": "初始空岛",
+   "sort": 701,
+   "nSteps": 7,
+   "steps": [
+    {
+     "name": "Ready",
+     "text": "",
+     "pts": []
+    },
+    {
+     "name": "BeforeGame",
+     "text": "向光柱的位置前进，最终来到时之神殿的屋顶，\n在这里遇见了一个管家魔像。\n魔像为了鉴定来访之人是否拥有合适的资格，\n会举行一场仪式。\n\n做好了准备，就去　\u0003\u0002",
+     "pts": [
+      {
+       "gx": 453.666,
+       "gy": 1645.84,
+       "gz": 800.438
+      }
+     ]
+    },
+    {
+     "name": "ReturnReady",
+     "text": "在魔像的试练中失败了。\n再去向魔像搭话，准备再次挑战吧。",
+     "pts": [
+      {
+       "gx": 453.666,
+       "gy": 1645.84,
+       "gz": 800.438
+      }
+     ]
+    },
+    {
+     "name": "InGameWhenActiveTorchNumIs0",
+     "text": "魔像所说的试练开始了。\n在19点的钟声响起之前，\n　\u0003\u0002",
+     "pts": [
+      {
+       "gx": 670.098,
+       "gy": 1576.7,
+       "gz": 1236.553
+      },
+      {
+       "gx": 407.996,
+       "gy": 1598.01,
+       "gz": 1536.726
+      }
+     ]
+    },
+    {
+     "name": "InGameWhenActiveTorchNumIs1",
+     "text": "",
+     "pts": [
+      {
+       "gx": 670.098,
+       "gy": 1576.7,
+       "gz": 1236.553
+      },
+      {
+       "gx": 407.996,
+       "gy": 1598.01,
+       "gz": 1536.726
+      }
+     ]
+    },
+    {
+     "name": "InGameWhenActiveTorchNumIs2",
+     "text": "",
+     "pts": [
+      {
+       "gx": 670.098,
+       "gy": 1576.7,
+       "gz": 1236.553
+      },
+      {
+       "gx": 407.996,
+       "gy": 1598.01,
+       "gz": 1536.726
+      }
+     ]
+    },
+    {
+     "name": "GameClear",
+     "text": "",
+     "pts": [
+      {
+       "gx": 447.658,
+       "gy": 1659.81,
+       "gz": 876.573
+      }
+     ]
+    }
+   ],
+   "requires": [],
+   "dependFlag": null,
+   "markerId": 2737,
+   "match": "exact",
+   "src": "rom+guide",
+   "rawName": "初始空岛的渊源",
+   "guide": {
+    "requires": [],
+    "start": "与管家魔像对话开启",
+    "note": "在时限内点燃3处篝火，建议使用弓箭引燃，可以穿卓拉铠甲攀瀑保持不落地",
+    "reward": [
+     "左纳乌的布料"
+    ],
+    "unlocks": []
+   },
+   "raw": {
+    "前置任务": "无",
+    "开启任务": "与管家魔像对话开启",
+    "注意事项": "在时限内点燃3处篝火，建议使用弓箭引燃，可以穿卓拉铠甲攀瀑保持不落地",
+    "任务奖励": "左纳乌的布料",
+    "解锁任务": "无"
+   },
+   "unlocks": [],
+   "group": "情节挑战",
+   "no": 53,
+   "groupTotal": 60,
+   "tier": "L1",
+   "flowPts": [
+    {
+     "gx": 453,
+     "gy": 1646,
+     "gz": 808
+    },
+    {
+     "gx": 453.666,
+     "gy": 1645.84,
+     "gz": 800.438
+    },
+    {
+     "gx": 670.098,
+     "gy": 1576.7,
+     "gz": 1236.553
+    },
+    {
+     "gx": 407.996,
+     "gy": 1598.01,
+     "gz": 1536.726
+    },
+    {
+     "gx": 447.658,
+     "gy": 1659.81,
+     "gz": 876.573
+    }
+   ],
+   "onMap": true,
+   "overlap": [],
+   "reqs": [],
+   "unlockList": [],
+   "stepsUI": [
+    {
+     "name": "BeforeGame",
+     "text": "向光柱的位置前进，最终来到时之神殿的屋顶，\n在这里遇见了一个管家魔像。\n魔像为了鉴定来访之人是否拥有合适的资格，\n会举行一场仪式。\n\n做好了准备，就去"
+    },
+    {
+     "name": "ReturnReady",
+     "text": "在魔像的试练中失败了。\n再去向魔像搭话，准备再次挑战吧。"
+    },
+    {
+     "name": "InGameWhenActiveTorchNumIs0",
+     "text": "魔像所说的试练开始了。\n在19点的钟声响起之前，"
+    }
+   ],
+   "nStepsUI": 3,
+   "hasStepText": true
+  },
+  {
+   "key": "ZonauReliefSearch",
+   "name": "来自古代的信息",
+   "nameSrc": "rom",
+   "cat": "ImportantMini",
+   "kind": "side",
+   "layer": 18,
+   "layers": [
+    18
+   ],
+   "gx": -271,
+   "gy": 124,
+   "gz": -71,
+   "hasHeight": true,
+   "mapX": -71.072,
+   "mapY": -271.093,
+   "posSrc": "marker",
+   "posValid": true,
+   "romLayer": 18,
+   "romPt": {
+    "gx": 1836.744,
+    "gy": 221.94,
+    "gz": 955.7
+   },
+   "npc": "Npc_AncientAssistant005",
+   "npcCn": "里德乌",
+   "loc": "City_BaseCamp",
+   "locCn": "监视堡垒",
+   "sort": 751,
+   "nSteps": 3,
+   "steps": [
+    {
+     "name": "Ready",
+     "text": "",
+     "pts": []
+    },
+    {
+     "name": "Reach_KakarikoVillage",
+     "text": "刻有旧海拉鲁文字的珍贵石碑从天而降，\n掉落在监视堡垒。\n旧海拉鲁文字研究学者——里德乌表示，\n要对照卡卡利科村的研究所中保存着的\n旧文字资料，来对石碑进行解读。\n随即便出发去东南方的村子了。",
+     "pts": [
+      {
+       "gx": 1836.744,
+       "gy": 221.94,
+       "gz": 955.7
+      }
+     ]
+    },
+    {
+     "name": "Step1",
+     "text": "得知了一共存在着13座\n记录神话时代内容的石碑。\n若能解读所有的石碑，就能了解当时那些\n历史文献上不曾提及的王族生活。\n拍下石碑的　\u0003\u0002",
+     "pts": [
+      {
+       "gx": 1836.744,
+       "gy": 221.94,
+       "gz": 955.7
+      }
+     ]
+    }
+   ],
+   "requires": [
+    {
+     "type": "flag",
+     "key": "ZonauReliefSearch",
+     "resolved": true,
+     "flag": "ZonauReliefSearch_Ready",
+     "selfRef": true
+    }
+   ],
+   "dependFlag": "ZonauReliefSearch_Ready",
+   "markerId": 3543,
+   "match": "exact",
+   "src": "rom+guide",
+   "rawName": "来自古代的信息",
+   "guide": {
+    "requires": [],
+    "start": "与里德乌对话",
+    "note": "尽量准备备用能源、电池套和升级电池 在天空与地面地图中寻找雪花片一样的小岛，上面有石碑，拍照",
+    "reward": [
+     "卢比",
+     "左纳乌调查队的布料"
+    ],
+    "unlocks": []
+   },
+   "raw": {
+    "前置任务": "无",
+    "开启任务": "与里德乌对话",
+    "注意事项": "尽量准备备用能源、电池套和升级电池\n在天空与地面地图中寻找雪花片一样的小岛，上面有石碑，拍照",
+    "任务奖励": "卢比、左纳乌调查队的布料",
+    "解锁任务": "无"
+   },
+   "unlocks": [],
+   "group": "情节挑战",
+   "no": 54,
+   "groupTotal": 60,
+   "tier": "L1",
+   "flowPts": [
+    {
+     "gx": -271,
+     "gy": 124,
+     "gz": -71
+    },
+    {
+     "gx": 1836.744,
+     "gy": 221.94,
+     "gz": 955.7
+    }
+   ],
+   "onMap": true,
+   "overlap": [],
+   "reqs": [
+    {
+     "type": "flag",
+     "flag": "ZonauReliefSearch_Ready",
+     "reqName": "与监视堡垒的里德乌对话后",
+     "linkable": false
+    }
+   ],
+   "unlockList": [],
+   "stepsUI": [
+    {
+     "name": "Reach_KakarikoVillage",
+     "text": "刻有旧海拉鲁文字的珍贵石碑从天而降，\n掉落在监视堡垒。\n旧海拉鲁文字研究学者——里德乌表示，\n要对照卡卡利科村的研究所中保存着的\n旧文字资料，来对石碑进行解读。\n随即便出发去东南方的村子了。"
+    },
+    {
+     "name": "Step1",
+     "text": "得知了一共存在着13座\n记录神话时代内容的石碑。\n若能解读所有的石碑，就能了解当时那些\n历史文献上不曾提及的王族生活。\n拍下石碑的"
+    }
+   ],
+   "nStepsUI": 2,
+   "hasStepText": true
+  },
+  {
+   "key": "StatueDevilTutorial",
+   "name": "与恶魔的契约",
+   "nameSrc": "rom",
+   "cat": "ImportantMini",
+   "kind": "side",
+   "layer": 18,
+   "layers": [
+    18
+   ],
+   "gx": -256,
+   "gy": 111,
+   "gz": -102,
+   "hasHeight": true,
+   "mapX": -102.489,
+   "mapY": -255.533,
+   "posSrc": "marker",
+   "posValid": true,
+   "romLayer": 18,
+   "romPt": {
+    "gx": -233.762,
+    "gy": 111.16,
+    "gz": -156.471
+   },
+   "npc": "TwnObj_DemonStatue_A_01",
+   "npcCn": "恶魔像",
+   "loc": "Cave_CentralHyrule_0018",
+   "locCn": "中央海拉鲁的洞窟",
+   "sort": 790,
+   "nSteps": 2,
+   "steps": [
+    {
+     "name": "Ready",
+     "text": "",
+     "pts": []
+    },
+    {
+     "name": "GetBackContainer",
+     "text": "心之容器被王族的密道里\n遇到的恶魔像夺走了。\n恶魔像说那是一场交易，\n　\u0003\u0002",
+     "pts": [
+      {
+       "gx": -233.762,
+       "gy": 111.16,
+       "gz": -156.471
+      }
+     ]
+    }
+   ],
+   "requires": [],
+   "dependFlag": null,
+   "markerId": 2744,
+   "match": "exact",
+   "src": "rom+guide",
+   "rawName": "与恶魔的契约",
+   "guide": {
+    "requires": [
+     "寻找声音的主人"
+    ],
+    "start": "进行【寻找声音的主人】任务即可",
+    "note": "无",
+    "reward": [
+     "可使用生命上限或精力上限换取卢比"
+    ],
+    "unlocks": []
+   },
+   "raw": {
+    "前置任务": "寻找声音的主人",
+    "开启任务": "进行【寻找声音的主人】任务即可",
+    "注意事项": "无",
+    "任务奖励": "可使用生命上限或精力上限换取卢比",
+    "解锁任务": "无"
+   },
+   "unlocks": [],
+   "group": "情节挑战",
+   "no": 55,
+   "groupTotal": 60,
+   "tier": "L1",
+   "flowPts": [
+    {
+     "gx": -256,
+     "gy": 111,
+     "gz": -102
+    },
+    {
+     "gx": -233.762,
+     "gy": 111.16,
+     "gz": -156.471
+    }
+   ],
+   "onMap": true,
+   "overlap": [],
+   "reqs": [
+    {
+     "type": "quest",
+     "key": "LookingForTheVoiceLord",
+     "reqName": "寻找声音的主人",
+     "linkable": true,
+     "src": "guide"
+    }
+   ],
+   "unlockList": [],
+   "stepsUI": [
+    {
+     "name": "GetBackContainer",
+     "text": "心之容器被王族的密道里\n遇到的恶魔像夺走了。\n恶魔像说那是一场交易，"
+    }
+   ],
+   "nStepsUI": 1,
+   "hasStepText": true
+  },
+  {
+   "key": "LookingForTheVoiceLord",
+   "name": "寻找声音的主人",
+   "nameSrc": "rom",
+   "cat": "ImportantMini",
+   "kind": "side",
+   "layer": 18,
+   "layers": [
+    18
+   ],
+   "gx": -258,
+   "gy": 114,
+   "gz": -102,
+   "hasHeight": true,
+   "mapX": -102.378,
+   "mapY": -257.617,
+   "posSrc": "marker",
+   "posValid": true,
+   "romLayer": 18,
+   "romPt": {
+    "gx": -255.566,
+    "gy": 114.4,
+    "gz": -107.815
+   },
+   "npc": "Npc_AncientAssistant004",
+   "npcCn": "洁琳",
+   "loc": "City_BaseCamp",
+   "locCn": "监视堡垒",
+   "sort": 791,
+   "nSteps": 3,
+   "steps": [
+    {
+     "name": "Ready",
+     "text": "",
+     "pts": []
+    },
+    {
+     "name": "Step01",
+     "text": "开在墙壁上的洞里时常会传出\n　\u0003\u0002",
+     "pts": [
+      {
+       "gx": -255.566,
+       "gy": 114.4,
+       "gz": -107.815
+      }
+     ]
+    },
+    {
+     "name": "Step02",
+     "text": "开在墙壁上的洞连接着\n像是通道一样的空间。\n跟随着声音挖掘岩石前进，\n发现了一尊　\u0003\u0002",
+     "pts": [
+      {
+       "gx": -255.566,
+       "gy": 114.4,
+       "gz": -107.815
+      }
+     ]
+    }
+   ],
+   "requires": [
+    {
+     "type": "flag",
+     "key": null,
+     "resolved": false,
+     "flag": "BaseCamp_UndergroundPassage_Exp"
+    }
+   ],
+   "dependFlag": "BaseCamp_UndergroundPassage_Exp",
+   "markerId": 2743,
+   "match": "exact",
+   "src": "rom+guide",
+   "rawName": "寻找声音的主人",
+   "guide": {
+    "requires": [],
+    "start": "与洁琳对话开启",
+    "note": "跟着声音方向前进即可",
+    "reward": [
+     "卢比"
+    ],
+    "unlocks": [
+     "与恶魔的契约"
+    ]
+   },
+   "raw": {
+    "前置任务": "无",
+    "开启任务": "与洁琳对话开启",
+    "注意事项": "跟着声音方向前进即可",
+    "任务奖励": "卢比",
+    "解锁任务": "与恶魔的契约"
+   },
+   "unlocks": [],
+   "group": "情节挑战",
+   "no": 56,
+   "groupTotal": 60,
+   "tier": "L2",
+   "flowPts": [
+    {
+     "gx": -258,
+     "gy": 114,
+     "gz": -102
+    }
+   ],
+   "onMap": true,
+   "overlap": [],
+   "reqs": [
+    {
+     "type": "flag",
+     "flag": "BaseCamp_UndergroundPassage_Exp",
+     "reqName": null,
+     "linkable": false
+    }
+   ],
+   "unlockList": [
+    {
+     "key": "StatueDevilTutorial",
+     "reqName": "与恶魔的契约",
+     "linkable": true,
+     "src": "reverse"
+    }
+   ],
+   "stepsUI": [
+    {
+     "name": "Step01",
+     "text": "开在墙壁上的洞里时常会传出"
+    },
+    {
+     "name": "Step02",
+     "text": "开在墙壁上的洞连接着\n像是通道一样的空间。\n跟随着声音挖掘岩石前进，\n发现了一尊"
+    }
+   ],
+   "nStepsUI": 2,
+   "hasStepText": true
+  },
+  {
+   "key": "Connect_FirstIsland",
+   "name": "来自地底的呼唤",
+   "nameSrc": "rom",
+   "cat": "ImportantMini",
+   "kind": "side",
+   "layer": 18,
+   "layers": [
+    18
+   ],
+   "gx": -578,
+   "gy": 167,
+   "gz": 1522,
+   "hasHeight": true,
+   "mapX": 1521.965,
+   "mapY": -577.544,
+   "posSrc": "marker",
+   "posValid": true,
+   "romLayer": 18,
+   "romPt": {
+    "gx": -662.111,
+    "gy": 167.04,
+    "gz": 1508.48
+   },
+   "npc": "UnknownNPC_MysteryVoice",
+   "npcCn": "神秘之声",
+   "loc": "TimesShrine",
+   "locCn": "时之神殿",
+   "sort": 792,
+   "nSteps": 13,
+   "steps": [
+    {
+     "name": "Ready",
+     "text": "",
+     "pts": []
+    },
+    {
+     "name": "Sky",
+     "text": "受在初始台地城门处发现的石像指引，\n你踏入了时之神殿遗迹。\n接着，一个声音为你指明了4处深穴的位置，\n要求你把散落在深穴周围的眼睛投入其中，\n并运到声音主人所在的时之神殿遗迹正下方。\n这声音的主人到底是谁呢……",
+     "pts": [
+      {
+       "gx": -662.111,
+       "gy": 167.04,
+       "gz": 1508.48
+      },
+      {
+       "gx": -455.028,
+       "gy": 179.11,
+       "gz": 1992.549
+      }
+     ]
+    },
+    {
+     "name": "Collect1st",
+     "text": "一个声音要求你把散落在4处深穴\n周围的眼睛投入其中，\n并运到声音主人所在的时之神殿遗迹正下方。\n\n先把1只眼睛投入了深穴。",
+     "pts": [
+      {
+       "gx": -662.111,
+       "gy": 167.04,
+       "gz": 1508.48
+      },
+      {
+       "gx": -455.028,
+       "gy": 179.11,
+       "gz": 1992.549
+      }
+     ]
+    },
+    {
+     "name": "Collect2nd",
+     "text": "",
+     "pts": [
+      {
+       "gx": -662.111,
+       "gy": 167.04,
+       "gz": 1508.48
+      },
+      {
+       "gx": -455.028,
+       "gy": 179.11,
+       "gz": 1992.549
+      }
+     ]
+    },
+    {
+     "name": "Collect3rd",
+     "text": "一个声音要求你把散落在4处深穴\n周围的眼睛投入其中，\n并运到声音主人所在的时之神殿遗迹正下方。\n\n已把　:Connect_FirstIsland_TotalPart￿촀只眼睛投入了深穴。",
+     "pts": [
+      {
+       "gx": -662.111,
+       "gy": 167.04,
+       "gz": 1508.48
+      },
+      {
+       "gx": -455.028,
+       "gy": 179.11,
+       "gz": 1992.549
+      }
+     ]
+    },
+    {
+     "name": "SkyGather",
+     "text": "",
+     "pts": [
+      {
+       "gx": -662.111,
+       "gy": 167.04,
+       "gz": 1508.48
+      },
+      {
+       "gx": -455.028,
+       "gy": 179.11,
+       "gz": 1992.549
+      }
+     ]
+    },
+    {
+     "name": "Minus1st",
+     "text": "一个声音要求你把散落在4处深穴\n周围的眼睛投入其中，\n并运到声音主人所在的时之神殿遗迹正下方。\n\n现在已把　:Connect_FirstIsland_TotalPart￿촀只眼睛投入了深穴，\n并把　DConnect_FirstIsland_TotalPartMinus￿촀只眼睛运到了声音主人的所在之处。",
+     "pts": [
+      {
+       "gx": -662.111,
+       "gy": 167.04,
+       "gz": 1508.48
+      },
+      {
+       "gx": -455.028,
+       "gy": 179.11,
+       "gz": 1992.549
+      }
+     ]
+    },
+    {
+     "name": "Minus2nd",
+     "text": "",
+     "pts": [
+      {
+       "gx": -662.111,
+       "gy": 167.04,
+       "gz": 1508.48
+      },
+      {
+       "gx": -455.028,
+       "gy": 179.11,
+       "gz": 1992.549
+      }
+     ]
+    },
+    {
+     "name": "Minus3rd",
+     "text": "一个声音要求你把散落在4处深穴\n周围的眼睛投入其中，\n并运到声音主人所在的时之神殿遗迹正下方。\n\n现在已把　:Connect_FirstIsland_TotalPart￿촀只眼睛投入了深穴，\n并把　DConnect_FirstIsland_TotalPartMinus￿촀只眼睛运到了声音主人的所在之处。",
+     "pts": [
+      {
+       "gx": -662.111,
+       "gy": 167.04,
+       "gz": 1508.48
+      },
+      {
+       "gx": -455.028,
+       "gy": 179.11,
+       "gz": 1992.549
+      }
+     ]
+    },
+    {
+     "name": "Minus4th",
+     "text": "一个声音要求你把散落在4处深穴\n周围的眼睛投入其中，\n并运到声音主人所在的时之神殿遗迹正下方。\n\n现在已把　:Connect_FirstIsland_TotalPart￿촀只眼睛投入了深穴，\n并把　DConnect_FirstIsland_TotalPartMinus￿촀只眼睛运到了声音主人的所在之处。",
+     "pts": [
+      {
+       "gx": -662.111,
+       "gy": 167.04,
+       "gz": 1508.48
+      },
+      {
+       "gx": -455.028,
+       "gy": 179.11,
+       "gz": 1992.549
+      }
+     ]
+    },
+    {
+     "name": "Minus5th",
+     "text": "一个声音要求你把散落在4处深穴\n周围的眼睛投入其中，\n并运到声音主人所在的时之神殿遗迹正下方。\n\n现在已把　:Connect_FirstIsland_TotalPart￿촀只眼睛投入了深穴，\n并把　DConnect_FirstIsland_TotalPartMinus￿촀只眼睛运到了声音主人的所在之处。",
+     "pts": [
+      {
+       "gx": -662.111,
+       "gy": 167.04,
+       "gz": 1508.48
+      },
+      {
+       "gx": -455.028,
+       "gy": 179.11,
+       "gz": 1992.549
+      }
+     ]
+    },
+    {
+     "name": "Minus6th",
+     "text": "一个声音要求你把散落在4处深穴\n周围的眼睛投入其中，\n并运到声音主人所在的时之神殿遗迹正下方。\n\n现在已把　:Connect_FirstIsland_TotalPart￿촀只眼睛投入了深穴，\n并把　DConnect_FirstIsland_TotalPartMinus￿촀只眼睛运到了声音主人的所在之处。",
+     "pts": [
+      {
+       "gx": -662.111,
+       "gy": 167.04,
+       "gz": 1508.48
+      },
+      {
+       "gx": -455.028,
+       "gy": 179.11,
+       "gz": 1992.549
+      }
+     ]
+    },
+    {
+     "name": "MinusGather",
+     "text": "一个声音要求你把散落在4处深穴\n周围的眼睛投入其中，\n并运到声音主人所在的时之神殿遗迹正下方。\n\n现在已把4只眼睛投入了深穴，\n并把　DConnect_FirstIsland_TotalPartMinus￿촀只眼睛运到了声音主人的所在之处。",
+     "pts": [
+      {
+       "gx": -662.111,
+       "gy": 167.04,
+       "gz": 1508.48
+      },
+      {
+       "gx": -455.028,
+       "gy": 179.11,
+       "gz": 1992.549
+      }
+     ]
+    }
+   ],
+   "requires": [],
+   "dependFlag": null,
+   "markerId": 3516,
+   "match": "exact",
+   "src": "rom+guide",
+   "rawName": "来自地底的呼唤",
+   "guide": {
+    "requires": [],
+    "start": "将此处的石堆摧毁，随后到时之神殿与女神像对话",
+    "note": "将遗失的四个眼睛找回",
+    "reward": [
+     "心之容器或精力容器"
+    ],
+    "unlocks": []
+   },
+   "raw": {
+    "前置任务": "无",
+    "开启任务": "将此处的石堆摧毁，随后到时之神殿与女神像对话",
+    "注意事项": "将遗失的四个眼睛找回",
+    "任务奖励": "心之容器或精力容器",
+    "解锁任务": "无"
+   },
+   "unlocks": [],
+   "group": "情节挑战",
+   "no": 57,
+   "groupTotal": 60,
+   "tier": "L1",
+   "flowPts": [
+    {
+     "gx": -578,
+     "gy": 167,
+     "gz": 1522
+    },
+    {
+     "gx": -662.111,
+     "gy": 167.04,
+     "gz": 1508.48
+    },
+    {
+     "gx": -455.028,
+     "gy": 179.11,
+     "gz": 1992.549
+    }
+   ],
+   "onMap": true,
+   "overlap": [],
+   "reqs": [],
+   "unlockList": [],
+   "stepsUI": [
+    {
+     "name": "Sky",
+     "text": "受在初始台地城门处发现的石像指引，\n你踏入了时之神殿遗迹。\n接着，一个声音为你指明了4处深穴的位置，\n要求你把散落在深穴周围的眼睛投入其中，\n并运到声音主人所在的时之神殿遗迹正下方。\n这声音的主人到底是谁呢……"
+    },
+    {
+     "name": "Collect1st",
+     "text": "一个声音要求你把散落在4处深穴\n周围的眼睛投入其中，\n并运到声音主人所在的时之神殿遗迹正下方。\n\n先把1只眼睛投入了深穴。"
+    },
+    {
+     "name": "Collect3rd",
+     "text": "一个声音要求你把散落在4处深穴\n周围的眼睛投入其中，\n并运到声音主人所在的时之神殿遗迹正下方。\n\n已把（数量）只眼睛投入了深穴。"
+    },
+    {
+     "name": "Minus1st",
+     "text": "一个声音要求你把散落在4处深穴\n周围的眼睛投入其中，\n并运到声音主人所在的时之神殿遗迹正下方。\n\n现在已把（数量）只眼睛投入了深穴，\n并把（数量）只眼睛运到了声音主人的所在之处。"
+    },
+    {
+     "name": "MinusGather",
+     "text": "一个声音要求你把散落在4处深穴\n周围的眼睛投入其中，\n并运到声音主人所在的时之神殿遗迹正下方。\n\n现在已把4只眼睛投入了深穴，\n并把（数量）只眼睛运到了声音主人的所在之处。"
+    }
+   ],
+   "nStepsUI": 5,
+   "hasStepText": true
+  },
+  {
+   "key": "AssassinGerudoBase",
+   "name": "潜入依盖队",
+   "nameSrc": "rom",
+   "cat": "ImportantMini",
+   "kind": "side",
+   "layer": 18,
+   "layers": [
+    18
+   ],
+   "gx": -3687,
+   "gy": 437,
+   "gz": 1365,
+   "hasHeight": true,
+   "mapX": 1814.342,
+   "mapY": -2437.586,
+   "posSrc": "marker",
+   "posValid": true,
+   "romLayer": 18,
+   "romPt": {
+    "gx": -3687.06,
+    "gy": 437.07,
+    "gz": 1364.677
+   },
+   "npc": "Npc_HatenoGate002",
+   "npcCn": "瓦图卢",
+   "loc": "Assassin",
+   "locCn": "依盖队干部执勤室",
+   "sort": 801,
+   "nSteps": 3,
+   "steps": [
+    {
+     "name": "Ready",
+     "text": "",
+     "pts": []
+    },
+    {
+     "name": "Enlist",
+     "text": "“依盖队基地”似乎必须是依盖队的成员\n才能够进入，如果想要入队，\n必须巡回　\u0003\u0002",
+     "pts": [
+      {
+       "gx": -3687.06,
+       "gy": 437.07,
+       "gz": 1364.677
+      }
+     ]
+    },
+    {
+     "name": "Equip",
+     "text": "顺利巡回了3个支部，\n并且集齐了　\u0003\u0002",
+     "pts": [
+      {
+       "gx": -3687.06,
+       "gy": 437.07,
+       "gz": 1364.677
+      }
+     ]
+    }
+   ],
+   "requires": [],
+   "dependFlag": null,
+   "markerId": 2699,
+   "match": "exact",
+   "src": "rom+guide",
+   "rawName": "潜入依盖队",
+   "guide": {
+    "requires": [
+     "依盖队的考试"
+    ],
+    "start": "在格鲁德高地中的【依盖队基地】与瓦图卢对话开启",
+    "note": "进入基地就算完成",
+    "reward": [
+     "可使用基地内训练场等",
+     "完成挑战获取奖励"
+    ],
+    "unlocks": []
+   },
+   "raw": {
+    "前置任务": "依盖队的考试",
+    "开启任务": "在格鲁德高地中的【依盖队基地】与瓦图卢对话开启",
+    "注意事项": "进入基地就算完成",
+    "任务奖励": "可使用基地内训练场等，完成挑战获取奖励",
+    "解锁任务": "无"
+   },
+   "unlocks": [],
+   "group": "情节挑战",
+   "no": 58,
+   "groupTotal": 60,
+   "tier": "L2",
+   "flowPts": [
+    {
+     "gx": -3687,
+     "gy": 437,
+     "gz": 1365
+    }
+   ],
+   "onMap": true,
+   "overlap": [],
+   "reqs": [
+    {
+     "type": "flag",
+     "reqName": "依盖队的考试",
+     "linkable": false
+    }
+   ],
+   "unlockList": [],
+   "stepsUI": [
+    {
+     "name": "Enlist",
+     "text": "“依盖队基地”似乎必须是依盖队的成员\n才能够进入，如果想要入队，\n必须巡回"
+    },
+    {
+     "name": "Equip",
+     "text": "顺利巡回了3个支部，\n并且集齐了"
+    }
+   ],
+   "nStepsUI": 2,
+   "hasStepText": true
+  },
+  {
+   "key": "GerudoCanyon_Adventure",
+   "name": "依盖队的干部考试",
+   "nameSrc": "rom",
+   "cat": "ImportantMini",
+   "kind": "side",
+   "layer": 18,
+   "layers": [
+    18
+   ],
+   "gx": -2436,
+   "gy": 252,
+   "gz": 1812,
+   "hasHeight": true,
+   "mapX": 1811.618,
+   "mapY": -2435.585,
+   "posSrc": "marker",
+   "posValid": true,
+   "romLayer": 18,
+   "romPt": {
+    "gx": -2355.984,
+    "gy": 251.95,
+    "gz": 1813.96
+   },
+   "npc": "Npc_Assassin_Middle_004",
+   "npcCn": "依盖队干部",
+   "loc": "Cave_GerudoDesert_0050",
+   "locCn": "格鲁德沙漠的洞窟",
+   "sort": 802,
+   "nSteps": 3,
+   "steps": [
+    {
+     "name": "Ready",
+     "text": "",
+     "pts": []
+    },
+    {
+     "name": "Step1",
+     "text": "参加了依盖队的干部考试。\n格鲁德峡谷里共有5处\n与依盖队有关的青蛙雕像，\n似乎只要向所有青蛙雕像献上大剑香蕉即可。\n目前还剩　JCountDown_Frog_GerudoCanyon_Adventure￿处。",
+     "pts": [
+      {
+       "gx": -2355.984,
+       "gy": 251.95,
+       "gz": 1813.96
+      },
+      {
+       "gx": -2432.764,
+       "gy": 277.26,
+       "gz": 2035.259
+      }
+     ]
+    },
+    {
+     "name": "Step2",
+     "text": "向格鲁德峡谷里的5处青蛙雕像\n都献上了大剑香蕉，\n满足了合格条件。\n\n返回依盖队干部值勤室吧。",
+     "pts": [
+      {
+       "gx": -2465.76,
+       "gy": 242.59,
+       "gz": 1802.135
+      }
+     ]
+    }
+   ],
+   "requires": [],
+   "dependFlag": null,
+   "markerId": 2698,
+   "match": "fuzzy",
+   "src": "rom+guide",
+   "rawName": "依盖队的考试",
+   "guide": {
+    "requires": [],
+    "start": "与依盖队 干部对话开启",
+    "note": "需提前装备依盖套装",
+    "reward": [
+     "红宝石*1",
+     "戒心长刀*1"
+    ],
+    "unlocks": [
+     "潜入依盖队"
+    ]
+   },
+   "raw": {
+    "前置任务": "无",
+    "开启任务": "与依盖队 干部对话开启",
+    "注意事项": "需提前装备依盖套装",
+    "任务奖励": "红宝石*1、戒心长刀*1",
+    "解锁任务": "潜入依盖队"
+   },
+   "unlocks": [],
+   "group": "情节挑战",
+   "no": 59,
+   "groupTotal": 60,
+   "tier": "L1",
+   "flowPts": [
+    {
+     "gx": -2436,
+     "gy": 252,
+     "gz": 1812
+    },
+    {
+     "gx": -2355.984,
+     "gy": 251.95,
+     "gz": 1813.96
+    },
+    {
+     "gx": -2432.764,
+     "gy": 277.26,
+     "gz": 2035.259
+    },
+    {
+     "gx": -2465.76,
+     "gy": 242.59,
+     "gz": 1802.135
+    }
+   ],
+   "onMap": true,
+   "overlap": [],
+   "reqs": [],
+   "unlockList": [],
+   "stepsUI": [
+    {
+     "name": "Step1",
+     "text": "参加了依盖队的干部考试。\n格鲁德峡谷里共有5处\n与依盖队有关的青蛙雕像，\n似乎只要向所有青蛙雕像献上大剑香蕉即可。\n目前还剩处。"
+    },
+    {
+     "name": "Step2",
+     "text": "向格鲁德峡谷里的5处青蛙雕像\n都献上了大剑香蕉，\n满足了合格条件。\n\n返回依盖队干部值勤室吧。"
+    }
+   ],
+   "nStepsUI": 2,
+   "hasStepText": true
+  },
+  {
+   "key": "MinusYiga",
+   "name": "依盖队队长——可盖大人的阴谋！",
+   "nameSrc": "rom",
+   "cat": "ImportantMini",
+   "kind": "side",
+   "layer": 19,
+   "layers": [
+    19
+   ],
+   "gx": -3830,
+   "gy": -382,
+   "gz": 2911,
+   "hasHeight": true,
+   "mapX": 1962.988,
+   "mapY": -841.655,
+   "posSrc": "marker",
+   "posValid": true,
+   "romLayer": 19,
+   "romPt": {
+    "gx": -3830.177,
+    "gy": -382.36,
+    "gz": 2911.467
+   },
+   "npc": "KohgaNoTitle",
+   "npcCn": "可盖大人",
+   "loc": "MinusField_BluePrintShrine",
+   "locCn": "地底·中央大废矿",
+   "sort": 803,
+   "nSteps": 5,
+   "steps": [
+    {
+     "name": "Ready",
+     "text": "",
+     "pts": []
+    },
+    {
+     "name": "BeginBeforeHint",
+     "text": "在地底中央大废矿遭遇了依盖队队长——　\u0003\u0002",
+     "pts": []
+    },
+    {
+     "name": "Begin",
+     "text": "在地底中央大废矿遭遇了依盖队队长——　\u0003\u0002",
+     "pts": [
+      {
+       "gx": -3830.177,
+       "gy": -382.36,
+       "gz": 2911.467
+      }
+     ]
+    },
+    {
+     "name": "Again",
+     "text": "在格鲁德废矿再次击退了可盖大人，\n并得知了可盖大人真正的目的——\n将复活的兵器献给“　\u0003\u0002",
+     "pts": [
+      {
+       "gx": 3296.993,
+       "gy": -644.89,
+       "gz": -562.491
+      }
+     ]
+    },
+    {
+     "name": "Continue",
+     "text": "",
+     "pts": [
+      {
+       "gx": -3459.559,
+       "gy": -311.49,
+       "gz": -1861.132
+      }
+     ]
+    }
+   ],
+   "requires": [],
+   "dependFlag": null,
+   "markerId": 3547,
+   "match": "norm",
+   "src": "rom+guide",
+   "rawName": "依盖队队长——可盖大人的阴谋",
+   "guide": {
+    "requires": [],
+    "start": "与管家魔像对话，随后展示究极手",
+    "note": "一路追击可盖大人",
+    "reward": [
+     "左纳乌能源特大结晶",
+     "设计图",
+     "钻石"
+    ],
+    "unlocks": []
+   },
+   "raw": {
+    "前置任务": "无",
+    "开启任务": "与管家魔像对话，随后展示究极手",
+    "注意事项": "一路追击可盖大人",
+    "任务奖励": "左纳乌能源特大结晶、设计图、钻石",
+    "解锁任务": "无"
+   },
+   "unlocks": [],
+   "group": "情节挑战",
+   "no": 60,
+   "groupTotal": 60,
+   "tier": "L1",
+   "flowPts": [
+    {
+     "gx": -3830,
+     "gy": -382,
+     "gz": 2911
+    },
+    {
+     "gx": 3296.993,
+     "gy": -644.89,
+     "gz": -562.491
+    },
+    {
+     "gx": -3459.559,
+     "gy": -311.49,
+     "gz": -1861.132
+    }
+   ],
+   "onMap": true,
+   "overlap": [],
+   "reqs": [],
+   "unlockList": [],
+   "stepsUI": [
+    {
+     "name": "BeginBeforeHint",
+     "text": "在地底中央大废矿遭遇了依盖队队长——"
+    },
+    {
+     "name": "Again",
+     "text": "在格鲁德废矿再次击退了可盖大人，\n并得知了可盖大人真正的目的——\n将复活的兵器献给“"
+    }
+   ],
+   "nStepsUI": 2,
+   "hasStepText": true
+  }
+ ]
+}

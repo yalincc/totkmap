@@ -1,0 +1,29 @@
+# 任务档案 · Hebra_SkyRingChallenge.yaml · 迷你挑战（V2.3 批量导入）
+# ★ 数据源：迷你挑战139条-整理数据.json（2026-10-08 V3，139/139 齐备）
+key: Hebra_SkyRingChallenge
+
+npc:
+  cn: 卡昂
+
+loc: 利特村
+
+start: 与卡昂对话
+
+note: |-
+  飞就完事了
+
+reward:
+  - 卢比
+
+# 主坐标覆盖：统一用校对接取点（卡片坐标区/图标/图层都跟它走）
+place:
+  X: -3794
+  Z: 2321
+  H: 163
+
+flowPts:
+  - X: -3794
+    Z: 2321
+    H: 163
+
+_source: 2026-10-08 迷你挑战 139 条批量导入（迷你挑战139条-整理数据.json）

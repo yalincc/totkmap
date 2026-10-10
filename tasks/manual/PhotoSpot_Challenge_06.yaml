@@ -1,0 +1,16 @@
+# 任务档案 · PhotoSpot_Challenge_06.yaml（task_batch 导入生成）
+# ★ 2026-10-10 P0 补导：start/note/reward 来自 迷你挑战139条-整理数据.json（V3，zd+ROM 双源）
+#   requires/npc/loc/place 保持档案原状（FindWhiteHorse 的 flag requires=老大确认口径，未覆盖）
+key: PhotoSpot_Challenge_06
+npc:
+  cn: 塔撒兰
+loc: 双子驿站
+start: 在双子驿站中调查空画框进入对话
+note: |-
+  清晨在卡尔山山顶拍摄“海拉鲁最美朝阳”
+reward:
+  - 1点驿站点数
+  - 一份速速苹果派
+
+requires:
+  - 给地底人拍照！

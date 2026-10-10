@@ -1,0 +1,20 @@
+# 任务档案 · DefeatHugeEnemy_5.yaml（task_batch 导入生成）
+key: DefeatHugeEnemy_5
+npc:
+  cn: 谷拉廉斯
+loc: 监视堡垒（避难所）
+requires:
+  - type: quest
+    reqName: 岩石巨人WANTED
+    key: DefeatHugeEnemy_1
+  - type: quest
+    reqName: 西诺克斯WANTED
+    key: DefeatHugeEnemy_3
+  - type: quest
+    reqName: 莫尔德拉吉克WANTED
+    key: DefeatHugeEnemy_2
+guide:
+  start: 第一梯队全完成后，与谷拉廉斯对话选「未知怪物的情报」。
+  note: 三个头属性不同，备好防火/防寒/防电药；先射眼睛让它倒地。
+  reward:
+    - 100 卢比

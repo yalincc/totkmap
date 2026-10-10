@@ -1,0 +1,29 @@
+# 任务档案 · GerudoCanyon_GleeokLiver.yaml · 迷你挑战（V2.3 批量导入）
+# ★ 数据源：迷你挑战139条-整理数据.json（2026-10-08 V3，139/139 齐备）
+key: GerudoCanyon_GleeokLiver
+
+npc:
+  cn: 梅尔埃娜
+
+loc: 格鲁德峡谷
+
+start: 与梅尔埃娜对话
+
+note: |-
+  准备好古栗欧克的肝脏
+
+reward:
+  - 卢比
+
+# 主坐标覆盖：统一用校对接取点（卡片坐标区/图标/图层都跟它走）
+place:
+  X: -2747
+  Z: -2341
+  H: 63
+
+flowPts:
+  - X: -2747
+    Z: -2341
+    H: 63
+
+_source: 2026-10-08 迷你挑战 139 条批量导入（迷你挑战139条-整理数据.json）
