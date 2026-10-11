@@ -15,7 +15,7 @@
 
 ## 项目结构
 
-> **app/data/ 下各数据文件的用途、来源、复现方式，见 [`数据文件说明.md`](数据文件说明.md)；任务数据的详细口径见 [`docs/TOTK任务数据参考指南.md`](docs/TOTK任务数据参考指南.md)。**
+> **入库边界**：仓库只保留**网页源码与数据产物**、**定位服务源码**、**人工任务档案**。数据流水线工具、过程数据、备份、发布包一律不入库（见下方"不入库"清单），可复现产物已打进 `app/`。
 
 ```
 TOTKmap/
@@ -23,18 +23,25 @@ TOTKmap/
 │   ├── index.html                  ← 入口页面
 │   ├── sw.js                       ← 离线缓存（Service Worker）
 │   ├── assets/                     ← 图标、材料图片
-│   ├── css/  js/  data/            ← 样式、逻辑、地图数据
+│   ├── css/  js/  data/            ← 样式、逻辑、地图数据（含任务卡片/流程/数据产物）
 │   ├── vendor/                     ← 第三方库（Leaflet 等）
 │   └── tiles_obj/                  ← 三层地图瓦片（天空 / 地上 / 地下）
-├── live-go/                        ← 实时定位引擎（TOTKNavi 核心）
-├── live-eden/                      ← 定位引擎（Eden 版）
-├── live-python/                    ← 定位服务 Python 原型
+├── tasks/manual/                   ← 任务人工档案（YAML，任务卡片数据源，build 时并入 app/data/task-plan.js）
+├── live-go/                        ← 实时定位引擎（TOTKNavi 核心，连接 Ryujinx/Switch 内存）
+├── live-eden/                      ← 实时定位引擎（Eden 模拟器版）
+├── xnavi/                          ← 定位核心工程（known 秒锁 / 指针链 / 自愈）
 ├── xnavi-gui/                      ← 桌面导航程序 TOTKNavi-GUI（Wails 工程）
-├── release/                        ← TOTKNavi 桌面端发布包（exe / zip）
-├── tools/                          ← 瓦片 / 数据构建工具（开发用）
-├── 归档/                           ← 历史文档、旧备份、已弃用瓦片
-└── *.md                            ← 开发计划、调研文档
+├── README.md                       ← 本说明
+├── CHANGELOG.md                    ← 版本变更记录
+└── .gitignore                      ← 入库边界定义
 ```
+
+**不入库**（本地保留，均为过程产物或可重建）：
+- `tools/` — 数据流水线 / 瓦片与任务构建工具脚本（生成产物已打进 `app/`）
+- `主线/情节/神庙/迷你挑战改版数据/`、`数据校对/` — 任务校对过程数据（卡片数据已合入 `app/data/task-plan.js`）
+- `归档/`、`tasks/manual-备份-*/`、`report/` — 历史文档、导入前备份、临时报告
+- `live-python/` — 定位服务 Python 原型（已被 live-go 取代）
+- `release/`、`certs/` — TOTKNavi 桌面发布包与证书（发布时单独分发）
 
 **下载指引**：
 - 只要地图 → 下载 **`app/`** 文件夹即可
