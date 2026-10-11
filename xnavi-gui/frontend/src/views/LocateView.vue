@@ -6,7 +6,7 @@
       <div class="flex items-center gap-2.5 shrink-0">
         <span class="w-2.5 h-2.5 rounded-full" :class="syncDot"></span>
         <span class="text-white text-sm font-bold tracking-wide">TOTKNavi 定位导航</span>
-        <span class="text-[10px] font-mono text-sky-300 bg-blue-500/10 border border-blue-500/40 rounded px-1.5 py-0.5">v{{ ver.replace('v','') }}</span>
+        <span v-if="ver" class="text-[10px] font-mono text-sky-300 bg-blue-500/10 border border-blue-500/40 rounded px-1.5 py-0.5">v{{ ver.replace('v','') }}</span>
         <span class="text-[11px] text-slate-500 ml-1.5 pl-2.5 border-l border-slate-800">{{ emuLabel }} ➔ totk.yalin.site</span>
       </div>
       <div class="flex items-center gap-1 ml-auto shrink-0" style="--wails-draggable:no-drag;">
@@ -103,7 +103,7 @@
               </button>
             </div>
           </div>
-          <div class="text-[10px] text-slate-500 mb-2.5 leading-relaxed">填写右下角地图坐标后提交校准，角色保持站桩</div>
+          <div class="text-[10px] text-slate-500 mb-2.5 leading-relaxed">填写游戏内角色坐标，校准扫描内存约 5-20s</div>
           <div class="flex items-center gap-2">
             <label class="flex-1 bg-[#0d1117] rounded-lg border border-slate-800 px-2 py-1.5 flex items-center gap-1.5">
               <span class="text-[10px] text-slate-500 shrink-0">X</span>
@@ -146,6 +146,27 @@
 
     <!-- ④ 实时日志 -->
     <LogPanel />
+
+    <!-- ⑤ 坐标校准预检弹窗（v2.1.2 B-1：>50m 警告，可强制继续） -->
+    <div v-if="showPrecheck && precheckData" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50" style="--wails-draggable:no-drag;" @click.self="showPrecheck = false">
+      <div class="bg-[#161b22] border border-amber-500/50 rounded-xl p-4 shadow-2xl text-xs space-y-3 w-[400px]">
+        <div class="text-[11px] font-semibold text-amber-400 uppercase tracking-wider">⚠ 坐标差异较大</div>
+        <div class="text-slate-300">你填的坐标与当前锁定位置相差 <span class="font-mono text-amber-400">{{ precheckData.d.toFixed(0) }}m</span></div>
+        <div class="font-mono text-[11px] space-y-1">
+          <div class="text-slate-500">当前锁定：<span class="text-slate-300">({{ precheckData.cx.toFixed(1) }}, {{ precheckData.cy.toFixed(1) }}, {{ precheckData.cz.toFixed(1) }})</span></div>
+          <div class="text-slate-500">你填的：<span class="text-white">({{ precheckData.x }}, {{ precheckData.y }}, {{ precheckData.z }})</span></div>
+        </div>
+        <div class="text-[10px] text-slate-500 leading-relaxed">
+          · 确认读的是游戏右下角实时坐标（不打开地图），三位数字按 X / Y / Z 顺序<br>
+          · 红点位置明显不对（锁定可能不准）→ 点"确认继续"<br>
+          · 只是打错字 → 点"取消"回去改
+        </div>
+        <div class="flex justify-end gap-2 pt-1">
+          <button class="bg-slate-700 hover:bg-slate-600 px-3 py-1.5 rounded text-xs text-slate-200" @click="showPrecheck = false">取消</button>
+          <button class="bg-amber-600 hover:bg-amber-500 px-3 py-1.5 rounded text-xs text-white font-semibold" @click="realSubmit(precheckData.x, precheckData.y, precheckData.z)">确认继续</button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -229,16 +250,34 @@ function pushCalLog(text, ok) {
     : { time: t, text, level: 'error', color: 'text-red-400', levelColor: 'text-red-500' })
   if (logs.value.length > 2000) logs.value = logs.value.slice(logs.value.length - 2000)
 }
+// v2.1.2 B-1 预检：填入坐标与当前锁定位置差 >50m 时弹 Vue 悬浮卡警告
+//（Wails WebView2 禁用原生 confirm/alert，必须用组件；AboutPop 同款样式）。
+// 可强制继续——当前锁定位置本身可能锁错（Bug C 场景），基准不可信。
+const showPrecheck = ref(false)
+const precheckData = ref(null)
 async function doCalibrate() {
   const x = Number(calX.value), y = Number(calY.value), z = Number(calZ.value)
   if (isNaN(x) || isNaN(y) || isNaN(z) || (x === 0 && y === 0 && z === 0)) {
     pushCalLog('✗ 坐标校准：请填写游戏内坐标（X Y Z）', false)
     return
   }
+  if (pos.ok && pos.gx != null) {
+    const d = Math.sqrt((x - pos.gx) ** 2 + (y - pos.gy) ** 2 + (z - pos.gz) ** 2)
+    if (d > 50) {
+      precheckData.value = { x, y, z, cx: pos.gx, cy: pos.gy, cz: pos.gz, d }
+      showPrecheck.value = true
+      return // 停在这里等用户选择
+    }
+  }
+  await realSubmit(x, y, z)
+}
+async function realSubmit(x, y, z) {
+  showPrecheck.value = false
+  precheckData.value = null
   calBusy.value = true
-  pushCalLog('↻ 坐标校准：提交中…（全内存匹配约 10-15s）', false)
+  pushCalLog('↻ 坐标校准：提交中…（扫描内存约 5-20s）', false)
   await submitCoords(x, y, z)
-  // 轮询结果：coordsState.result 由 pollCoordsResult 更新（搜索约 10-15s）
+  // 轮询结果：coordsState.result 由 pollCoordsResult 更新（搜索约 20-30s）
   const iv = setInterval(() => {
     if (!coordsState.busy) {
       clearInterval(iv)

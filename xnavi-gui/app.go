@@ -28,7 +28,11 @@ import (
 //         （自动/Ryujinx/Eden），存档设置保留，坐标校准文件通道适配新核心。
 // V2.1.1：新增「手机防息屏（Https）」开关 —— 核心启动时带 --tls，
 //         手机镜像页走 HTTPS（secure context，wakeLock 防息屏生效）。
-const guiVersion = "v2.1.1"
+// V2.1.2：GUI 状态栏显示手机镜像地址（三色就绪点 + 一键复制）；坐标校准
+//         预检弹窗（>50m 警告可强制继续，Vue 悬浮卡）。
+// V2.2.0：核心新增第 6 条锁定途径「指针链快路径」（跑动掉锁后毫秒级重锁）；
+//         GUI 侧无 UI 改动，仅版本号对齐核心。
+const guiVersion = "v2.2.0"
 
 // App Wails 后端：管理核心子进程 + 读 status.json / xnavi-gui-core.log + 网页端端口探测。
 // 与核心的通信完全走文件（status.json、xnavi-gui-core.log），不依赖 8766 HTTP——

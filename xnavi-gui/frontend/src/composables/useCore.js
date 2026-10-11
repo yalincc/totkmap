@@ -9,7 +9,10 @@ const rt = window.runtime
 export { api, rt }
 
 // ---- 版本 / 运行 ----
-export const ver = ref('v1.2.0')
+// 初值留空：真实版本由 initCore() 调 api.Version()（= app.go guiVersion）异步填入。
+// 不要在这里硬编码版本号——那是 xnavi/version.go CoreVersion 的唯一职责，
+// 两处各写一份必然漂移（历史遗留：此处曾写死 v1.2.0）。
+export const ver = ref('')
 export const coreRunning = ref(false)
 export const isLocating = ref(false)
 export const updateInfo = ref(null)
@@ -38,6 +41,17 @@ export const cfg = reactive({ saveDirRyujinx: '', saveDirEden: '', emu: 'auto', 
 export const envDetect = reactive({ save: false, saveRyu: false, saveEden: false })
 export const statusMapUrl = ref('')
 
+// ---- 手机镜像（v2.1.2 A-fix：core status.json 补 lanUrl/appReady 后可用）----
+export const lanUrl = ref('')
+export const appReady = reactive({ ok: false, root: '', reason: '' })
+export const appReadyText = computed(() => {
+  if (!lanUrl.value) return '未检测到镜像地址'
+  if (appReady.ok) return '镜像已就绪'
+  if (appReady.reason === 'no_index') return '目录存在但缺 index.html'
+  if (appReady.reason === 'not_found') return '未找到 app/ 目录'
+  return '状态未知'
+})
+
 // ---- 日志 ----
 export const logs = ref([])
 export const logFilter = ref('')
@@ -49,6 +63,7 @@ export const sourceLabel = computed(() => {
   const s = pos.source
   if (!s || s === '-') return '-'
   if (s === 'known') return '⚡ 秒锁'
+  if (s === 'chain') return '🔗 指针链'
   if (s === 'scan') return '扫描'
   if (s === 'probe') return '探针换组'
   if (s === 'consensus') return '共识恢复'
@@ -211,11 +226,20 @@ function applyStatus(st) {
   if (st.target !== undefined) target.value = st.target
   if (st.progress && st.progress.counts) progressData.value = st.progress
   if (st.map_url) statusMapUrl.value = st.map_url
+  if (st.lanUrl) lanUrl.value = st.lanUrl
+  if (st.appReady) {
+    appReady.ok = !!st.appReady.ok
+    appReady.root = st.appReady.root || ''
+    appReady.reason = st.appReady.reason || ''
+  }
   // core 未运行：不展示残留坐标/锁定态（status.json 残留上次会话数据）
   if (!st.running) {
     pos.ok = false
     pos.verified = false
     pos.pid = 0
+    lanUrl.value = ''
+    appReady.ok = false
+    appReady.reason = ''
   }
   setStepState()
   updateSync()
