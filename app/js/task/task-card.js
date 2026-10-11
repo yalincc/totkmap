@@ -525,14 +525,12 @@
     h += '<button type="button" class="tk-close" id="tkClose" title="关闭">×</button>';
     h += '</span>';
     h += '</div>';
-    /* 标题行（★ V2.5.0 v4 定稿，老大确认）：金底序号徽标 + 任务名 + 复制。
-       上/下一个已移到分类徽章区；完成勾不再放标题区。 */
+    /* 标题行（★ V2.5.0 v4 定稿；老大 2026-10-11：复制按钮**紧跟任务名后面**，
+       内联在名字行内，文字小、暗金色与「前置条件」小标题一致） */
     h += '<div class="tk-title-row">';
     h += '<span class="tk-no-badge">' + (t.no ? '#' + esc(t.no) : '') + '</span>';
-    h += '<h3 class="tk-name">' + esc(t.name) + '</h3>';
-    h += '<div class="tk-title-acts">';
-    h += '<button type="button" class="tk-icon-btn tk-nav" id="tkCopy" title="复制任务名">[复制]</button>';
-    h += '</div>';
+    h += '<h3 class="tk-name">' + esc(t.name) +
+      '<button type="button" class="tk-copy" id="tkCopy" title="复制任务名">[复制]</button></h3>';
     h += '</div>';
 
     /* 关键信息行：NPC / 坐标 / 进度
@@ -1503,6 +1501,11 @@
     '.tk-title-row {',
     '  display:flex; align-items:flex-start; gap:8px; margin-bottom:10px; }',
     '.tk-title-row .tk-name { flex:1; margin-bottom:0; min-width:0; }',
+    '/* 复制按钮（★ V2.5.0 老大 2026-10-11：内联在任务名后，小字暗金同小标题色）*/',
+    '.tk-copy { display:inline-block; border:none; background:none; padding:0 2px;',
+    '  margin-left:6px; color:#9a8a6c; font-size:11px; font-weight:normal;',
+    '  line-height:1; cursor:pointer; vertical-align:baseline; }',
+    '.tk-copy:hover { color:#eac27e; }',
     '.tk-title-acts {',
     '  display:flex; align-items:center; gap:6px; flex:0 0 auto; }',
     '/* 右上角复制：小按钮，不抢正文注意力 */',

@@ -1180,7 +1180,21 @@
        *   TaskPanel.locate() 会把真实 marker 通过 m.marker 传进来。
        *   没有这一步，任务卡片点定位只会移动地图、**没有光圈**。 */
       var mk2 = m.marker || state.markers[m.id];
-      if (!mk2) { toast('已定位到「' + (m.name || m.full || '目标') + '」'); return; }
+      if (!mk2) {
+        /* ★ V2.5.0（老大 2026-10-11）：任务卡片定位（坐标链接/流程点）传的是
+         * 纯坐标、没有真实 marker（任务点是独立图层，不在 state.markers 里），
+         * 原来直接 toast return —— 于是 moveCardAside 永不执行，
+         * 卡片固定盖住定位点，红点/光圈全被挡（用户多次反馈看不到红点）。
+         * 这里没有 marker 也用目标坐标算一个屏幕矩形，把卡片挪开。 */
+        try {
+          var p0 = map.latLngToContainerPoint(ll);
+          var host0 = map.getContainer().getBoundingClientRect();
+          moveCardAside({ left: host0.left + p0.x - 12, top: host0.top + p0.y - 12,
+            width: 24, height: 24 });
+        } catch (e) { /* 地图尚未就绪时跳过避让 */ }
+        toast('已定位到「' + (m.name || m.full || '目标') + '」');
+        return;
+      }
       var el = mk2.getElement && mk2.getElement();
       if (!el) { toast('已定位到「' + (m.name || m.full || '目标') + '」'); return; }
 
