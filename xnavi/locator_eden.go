@@ -31,6 +31,13 @@ const (
 	edenChunkSize  = 8 << 20  // 每次读取 8MB（内存受限环境防 OOM）
 	edenMinBlockMB = 0.0625   // 64KB（edenGuestBlocks 内部 floor）
 	edenHitCap     = 3000000  // 命中上限
+	// edenPickTol 候选锁定位置容差（v2.1.2 Bug C 判据"值距组代表"）。
+	// 初值 5m 被真机证伪（20:07 现场：玩家跑动中 9116 副本真组 64 地址全
+	// miss——扫描窗口 10s，组代表是快照均值、组内地址是实时值，移动偏差
+	// 轻松超 5m → 移动场景真组全灭）。垃圾组错位是数百~1300m 量级，40m
+	// 容差在"容纳移动偏差"与"拒垃圾组"之间留足安全边距。v2.1.3 看诊断
+	// 日志分布再调。
+	edenPickTol = 40.0
 )
 
 // isShrinePos 判定神庙/洞穴本地场景：TOTK 神庙为独立场景，玩家坐标切到以神庙
@@ -601,6 +608,13 @@ func (p *edenPlatform) locate(window float64, onlyBlocks []MemBlock, logf func(s
 			logf(s)
 		}
 	}
+	// v2.1.2 Bug F：全量扫描互斥（与 coordsLocate 并发保护，16:56 现场两路
+	// 重叠 2.4s）。TryLock 先到先得，后到方跳过本轮，状态机下轮再试。
+	if !globalScanMu.TryLock() {
+		log("another full-RAM scan in progress - skip this pass")
+		return nil
+	}
+	defer globalScanMu.Unlock()
 	anchors := edenReadAnchorsCached()
 	if len(anchors) == 0 {
 		log("no usable save anchor found")
@@ -637,6 +651,7 @@ func (p *edenPlatform) locate(window float64, onlyBlocks []MemBlock, logf func(s
 	}
 
 	var best *Group
+	var pickedAddr uintptr
 	var shortlist []ShortlistEntry
 	for attempt, win := range []float32{float32(math.Max(window, 120.0)), 400.0} {
 		var hits []Hit
@@ -654,34 +669,80 @@ func (p *edenPlatform) locate(window float64, onlyBlocks []MemBlock, logf func(s
 		}
 		best = ranked[0]
 		if best.Struct > 0 {
-			// 锁定前 decode 校验：占位池/垃圾组可能排第一（坐标近零被窗口放过时），
-			// 从 ranked 依次取第一个 decode 非 nil 的组作候选。
+			// v2.1.2 Bug C：锁定判据收紧为"两个 if"——decode 非 nil 且值距组代表
+			// <5m。旧判据"decode 非 nil"放行组内错位副本（16:55 现场锁定
+			// mem=(7.8,726.6,-97.2) 而组代表 (-705,139,862)）；只试 Addrs[0] 又会
+			// 一票否决真组（Eden 副本轮换：组首地址常为过时副本，10:32 现场 4 万
+			// 副本真组被跳过）。组代表 (g.X,g.Y,g.Z) 为内存顺序 (X, Z_stored,
+			// Y_north)，转 hud 序 = (X, -Y_north, Z_stored-elevBias)。
+			// 命中/未命中日志留痕，v2.1.3 按分布调 64 上限与 5m 容差。
+			found := false
 			for _, g := range ranked {
-				if d := p.decode(h, g.Addrs[0]); d != nil {
-					if g != best {
-						log(fmt.Sprintf("    candidate #1 (copies=%d struct=%d) invalid pos - fallback to 0x%012X (copies=%d)",
-							best.Copies, best.Struct, g.Addrs[0], g.Copies))
+				groupHud := [3]float32{g.X, -g.Z, g.Y - elevBias}
+				limit := len(g.Addrs)
+				if limit > 64 {
+					limit = 64
+				}
+				for i := 0; i < limit; i++ {
+					d := p.decode(h, g.Addrs[i])
+					if d == nil {
+						continue
 					}
-					best = g
+					if dist3f([3]float32{d[0], d[1], d[2]}, groupHud) < edenPickTol {
+						if g != best {
+							log(fmt.Sprintf("    candidate #1 (copies=%d struct=%d) no consistent addr - fallback to 0x%012X (copies=%d)",
+								best.Copies, best.Struct, g.Addrs[i], g.Copies))
+						}
+						best = g
+						pickedAddr = g.Addrs[i]
+						log(fmt.Sprintf("    [sm] pick: hit at index %d/%d (group copies=%d struct=%d)",
+							i, limit, g.Copies, g.Struct))
+						found = true
+						break
+					}
+				}
+				if found {
 					break
 				}
+			}
+			if !found {
+				// 全部组 64 地址内无一贴近组代表：Eden 内存活跃期整体漂移，
+				// 保底旧行为（decode 非 nil 即用）+ 日志留痕，probe/invalid 兜底
+				for _, g := range ranked {
+					if d := p.decode(h, g.Addrs[0]); d != nil {
+						best = g
+						pickedAddr = g.Addrs[0]
+						log(fmt.Sprintf("    [sm] pick: no consistent addr in 64 (ranked[0] copies=%d struct=%d - fallback)",
+							ranked[0].Copies, ranked[0].Struct))
+						found = true
+						break
+					}
+				}
+			}
+			if !found {
+				best = nil
 			}
 			break
 		}
 	}
 	if best == nil {
-		log("FAILED: no confident candidate")
+		log("FAILED: no candidate at all")
 		return nil
 	}
-	addr := best.Addrs[0]
+	// v2.1.2 Bug H：struct=0 空组（场景切换期占位池，16:57 现场全部 struct=0）
+	// 不再锁定，返回 nil 走扫描失败路径，等场景稳定后重扫。
+	if best.Struct == 0 {
+		log(fmt.Sprintf("FAILED: all groups struct=0 (ranked[0] copies=%d) - scene switching?", best.Copies))
+		return nil
+	}
+	addr := pickedAddr
 	log(fmt.Sprintf("candidate 0x%012X  copies=%d struct=%d  [pending liveness]", addr, best.Copies, best.Struct))
 	log(fmt.Sprintf("shortlist: %d groups, %d addresses", len(shortlist), shortlistAddrs(shortlist)))
 	log(fmt.Sprintf("total %.1fs", time.Since(t0).Seconds()))
 
-	var hud [3]float32
-	if d := p.decode(h, addr); d != nil {
-		hud = [3]float32{d[0], d[1], d[2]}
-	}
+	// v2.1.2 Bug G：Hud 返回组代表位置——decode(addr) 是实时快照，地址错位时
+	// 基准全错（16:55 现场）；scanRescue / probeRefPos 需要稳定的组共识基准。
+	hud := [3]float32{best.X, -best.Z, best.Y - elevBias}
 	return &LocateResult{
 		Addr:      addr,
 		Copies:    best.Copies,
@@ -755,13 +816,22 @@ func (p *edenPlatform) afterScan(res *LocateResult) {
 // （02AEC 区域实测 copies=18652 的组锁定瞬间读全零），锁定前必须即时重读候选；
 // 无效则按 shortlist 顺序找下一个可读地址。全部失效返回 false（状态机重试）。
 func (p *edenPlatform) scanRescue(h uintptr, res *LocateResult) bool {
-	if p.decode(h, res.Addr) != nil {
+	// v2.1.2 Bug C/G：候选判据收紧——decode 非 nil 且值距组代表 <5m。
+	// res.Hud 现为组代表位置（Bug G），旧逻辑"decode 非 nil 即真"会放行
+	// 错位副本（16:55 现场锁定 mem=(7.8,726.6,-97.2)）。
+	if d := p.decode(h, res.Addr); d != nil &&
+		dist3f([3]float32{d[0], d[1], d[2]}, res.Hud) < edenPickTol {
 		return true
 	}
 	for _, g := range res.Shortlist {
 		for _, ad := range g.Addrs {
-			if p.decode(h, ad) != nil {
+			dd := p.decode(h, ad)
+			if dd == nil {
+				continue
+			}
+			if dist3f([3]float32{dd[0], dd[1], dd[2]}, g.Hud) < edenPickTol {
 				res.Addr = ad
+				res.Hud = g.Hud // 同步切换组代表（基准跟随所选组）
 				return true
 			}
 		}
@@ -847,10 +917,12 @@ func (p *edenPlatform) stationaryConfirm(h uintptr, a uintptr, cur [3]float32) b
 
 // onUnlocked 解锁后重扫冷却：Eden 下场景切换垃圾期（占位池/未初始化槽）反复
 // scan 会锁垃圾 → invalid → 解锁 → 立即重扫 → 风暴（实测 ws 飙 2.6GB、一直
-// locating）。冷却 20s：垃圾期跳过重扫（场景加载完成后已知地址/候选恢复），
-// 真迁移靠 frozen → reLocate 重锚兜底（该路径 bypassKnown 强制重扫不受此冷却影响）。
+// locating）。原冷却 20s——v2.1.2 起 UNLOCK 主因变为副本轮换失效（跑动场景
+// 锁定存活仅 2~5s），20s 冷却 + 11s 扫描 = 70% 时间裸奔；场景垃圾风暴的入口
+// 已由 struct=0 拒绝 + edenPickTol 一致性判据挡住，冷却收敛 20s → 5s。
+// 真迁移靠 frozen → reLocate 重锚兜底（bypassKnown 不受此冷却影响）。
 func (p *edenPlatform) onUnlocked() {
-	lastScanAt = time.Now().Add(20*time.Second - scanCooldown)
+	lastScanAt = time.Now().Add(5*time.Second - scanCooldown)
 }
 
 func (p *edenPlatform) onRescan() { p.bypassKnown = true }
@@ -917,6 +989,13 @@ func (p *edenPlatform) coordsLocate(gx, gy, gz float32) coordsResp {
 		p.coordsOn = false
 		p.coordsMu.Unlock()
 	}()
+
+	// v2.1.2 Bug F：与状态机 locate 互斥（见 scan_mutex.go）。校准是用户主动
+	// 操作通常先发起，TryLock 先到先得；被占用时提示稍后重试。
+	if !globalScanMu.TryLock() {
+		return coordsResp{Error: "定位扫描进行中，请 10 秒后重试", DurMs: elapsed()}
+	}
+	defer globalScanMu.Unlock()
 
 	h := p.Handle()
 	if h == 0 {

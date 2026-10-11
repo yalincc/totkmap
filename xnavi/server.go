@@ -13,6 +13,7 @@
 package main
 
 import (
+	_ "embed"
 	"encoding/json"
 	"net/http"
 	"os"
@@ -63,6 +64,28 @@ func writeJSON(w http.ResponseWriter, obj any) {
 var botwFS http.Handler
 var botwRoot string
 
+// mirrorFallbackHTML 手机镜像引导页（go:embed 编译进 exe，v2.1.2 Bug A）。
+//
+//go:embed mirror_fallback.html
+var mirrorFallbackHTML string
+
+// appStatus app/ 就绪三态（v2.1.2 A-fix：GUI 据此显示红/黄/绿提示）。
+type appStatus struct {
+	Ok     bool   `json:"ok"`
+	Root   string `json:"root,omitempty"`
+	Reason string `json:"reason"` // "ready" | "not_found" | "no_index"
+}
+
+func currentAppStatus() appStatus {
+	if botwRoot == "" {
+		return appStatus{Ok: false, Reason: "not_found"}
+	}
+	if _, err := os.Stat(filepath.Join(botwRoot, "index.html")); err != nil {
+		return appStatus{Ok: false, Root: botwRoot, Reason: "no_index"}
+	}
+	return appStatus{Ok: true, Root: botwRoot, Reason: "ready"}
+}
+
 func initBotwFS() {
 	roots := []string{}
 	exe, err := os.Executable()
@@ -111,13 +134,27 @@ func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// 手机镜像静态页（/botw/ 前缀）；未配置目录时落入 API 路由。
+	// 手机镜像静态页（/botw/ 前缀）；未配置目录时返回 embed 引导页（v2.1.2
+	// Bug A：替换黑 JSON，告知用户可开在线站跟随 / 如何补装 app/）。
 	if strings.HasPrefix(path, "/botw/") {
 		if botwFS != nil {
 			botwFS.ServeHTTP(w, r)
 			return
 		}
-		writeJSON(w, map[string]any{"ok": false, "error": "app dir not found"})
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		_, _ = w.Write([]byte(mirrorFallbackHTML))
+		return
+	}
+
+	// v2.1.2 Bug A：根路径处理——手机只输 IP:端口时不再看到 unknown endpoint
+	// JSON：有 app/ 跳镜像页，无 app/ 回引导页。
+	if path == "/" {
+		if botwFS != nil {
+			http.Redirect(w, r, "/botw/?follow=1&game=totk", http.StatusFound)
+			return
+		}
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		_, _ = w.Write([]byte(mirrorFallbackHTML))
 		return
 	}
 
@@ -199,6 +236,7 @@ func (s *server) handlePos(w http.ResponseWriter, r *http.Request) {
 	if lanURL != "" {
 		payload["lanUrl"] = lanURL // 手机镜像入口（BOTW V1.5.0 协议）
 	}
+	payload["appReady"] = currentAppStatus() // v2.1.2 A-fix：app/ 就绪三态（GUI 三色提示）
 	targetMu.Lock()
 	payload["target"] = target
 	targetMu.Unlock()

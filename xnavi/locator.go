@@ -110,6 +110,14 @@ type locator interface {
 	// coordsBusy = 后台全 RAM 搜索进行中；coordsPeek 取到结果返回 (addr, pos, copies, true)。
 	coordsBusy() bool
 	coordsPeek() (uintptr, [3]float32, int, bool)
+
+	// chainTry 指针链快路径（Eden 特有，2026-10-11 三关验证通过后落地，见 chain_eden.go）：
+	// 解析主模块宿主基址 H + 反解换算常数 K（host = K + guest_va），沿固定偏移链读坐标。
+	// 完全不碰会轮换的裸地址 → 跑动掉锁后毫秒级重锁（模型级解 §5.1 副本轮换）。
+	// refPos = nil（无参考位置）时不启用（避免多槽歧义误锁）。
+	// 返回 (坐标宿主地址, 坐标, 是否成功)；任何失败一律 false → 状态机走 known/扫描/校准。
+	// Ryujinx = 恒 false（未实现）。
+	chainTry(h uintptr, refPos *[3]float32) (uintptr, [3]float32, bool)
 }
 
 // currentLocator 返回当前平台的定位策略；平台未实现 locator 时返回 nil。

@@ -96,6 +96,11 @@ func (p *ryujinxPlatform) tryLock(h uintptr) (uintptr, [3]float32, bool) {
 	return 0, [3]float32{}, false
 }
 
+// chainTry 指针链快路径：Ryujinx 未实现（恒 false → 状态机走 known/扫描/校准）。
+func (p *ryujinxPlatform) chainTry(h uintptr, refPos *[3]float32) (uintptr, [3]float32, bool) {
+	return 0, [3]float32{}, false
+}
+
 // knownWatchAddrs known 列表里除当前锁外、rebase 到当前块的全部偏移地址。
 func (p *ryujinxPlatform) knownWatchAddrs(cur uintptr) []uintptr {
 	base := currentSessionBase

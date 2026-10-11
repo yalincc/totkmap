@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>TOTKnavi · 手机跟随</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #0d1117; color: #c9d1d9; min-height: 100vh;
+    display: flex; align-items: center; justify-content: center;
+    font-family: -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif;
+    padding: 24px;
+  }
+  .card {
+    background: #161b22; border: 1px solid #30363d; border-radius: 12px;
+    padding: 28px 24px; max-width: 420px; width: 100%; text-align: center;
+  }
+  .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 8px; vertical-align: middle; }
+  .ok   { background: #3fb950; }
+  .bad  { background: #f85149; }
+  h1 { font-size: 16px; color: #e6edf3; margin-bottom: 6px; }
+  .sub { font-size: 12px; color: #8b949e; margin-bottom: 20px; }
+  .status { font-size: 13px; background: #0d1117; border: 1px solid #30363d; border-radius: 8px; padding: 12px; margin-bottom: 20px; text-align: left; line-height: 1.8; }
+  .status b { color: #e6edf3; font-weight: 600; }
+  .warn { font-size: 12px; color: #d29922; text-align: left; line-height: 1.8; margin-bottom: 20px; }
+  a.btn {
+    display: block; background: #238636; color: #fff; text-decoration: none;
+    padding: 10px 16px; border-radius: 8px; font-size: 14px; font-weight: 600;
+  }
+  a.btn:active { background: #2ea043; }
+  .hint { font-size: 11px; color: #8b949e; margin-top: 14px; line-height: 1.7; text-align: left; }
+  code { font-family: Consolas, monospace; color: #79c0ff; font-size: 11px; }
+</style>
+</head>
+<body>
+<div class="card">
+  <h1><span id="dot" class="dot bad"></span><span id="posText">正在连接电脑定位服务…</span></h1>
+  <div class="sub">TOTKnavi 手机跟随</div>
+  <div class="status">
+    <div>定位状态：<b id="posDetail">连接中</b></div>
+    <div>游戏内坐标：<b id="posCoord">-</b></div>
+  </div>
+  <div class="warn">
+    ⚠ 手机镜像地图文件（app/）未安装，无法显示本地地图。<br>
+    不影响电脑端使用，也不需要下载地图包。
+  </div>
+  <a class="btn" href="https://totk.yalin.site/?follow=1&game=totk">打开在线地图跟随 →</a>
+  <div class="hint">
+    · 在线地图会自动连接本页同一台电脑的定位服务，红点实时跟随<br>
+    · 需要本地地图镜像时：把 <code>app/</code> 文件夹解压到 xnavi 程序同目录后刷新本页
+  </div>
+</div>
+<script>
+  var POLL = 600, fail = 0;
+  function poll() {
+    fetch('/pos', { cache: 'no-store' })
+      .then(function (r) { return r.json(); })
+      .then(function (p) {
+        fail = 0;
+        document.getElementById('dot').className = 'dot ok';
+        if (p && p.ok) {
+          document.getElementById('posText').textContent = '定位已连接，红点跟随中';
+          document.getElementById('posDetail').textContent = p.verified ? '已验证跟随' : '已锁定（验证中）';
+          document.getElementById('posCoord').textContent =
+            Math.round(p.gx) + ' , ' + Math.round(p.gy) + ' , ' + Math.round(p.gz);
+        } else {
+          document.getElementById('posText').textContent = '定位服务已连接，尚未锁定角色';
+          document.getElementById('posDetail').textContent = '未定位';
+        }
+      })
+      .catch(function () {
+        fail++;
+        document.getElementById('dot').className = 'dot bad';
+        document.getElementById('posText').textContent = fail > 3 ? '电脑定位服务未运行' : '正在连接电脑定位服务…';
+        document.getElementById('posDetail').textContent = '离线';
+      })
+      .finally(function () { setTimeout(poll, fail > 3 ? 3000 : POLL); });
+  }
+  poll();
+</script>
+</body>
+</html>

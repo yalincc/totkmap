@@ -236,6 +236,7 @@ func stateMachine() {
 	lastConsensusAt := time.Time{}
 	consensusCand := uintptr(0) // 冻结共识候选（需"动了"才换锁）
 	var consensusCandPos [3]float32
+	consensusLogAt := map[uintptr]time.Time{} // "watching" 打印限频：站桩时 knownPool 多簇轮流被选中 → 刷屏
 	lastConfirmAt := time.Time{} // 静止确认检查节流（frozenConfirmEvery）
 	var lastGarbageLogAt time.Time // 场景切换垃圾跳变日志限频（2s 一行）
 	dirHist := []float32{} // 最近 3 次位移方向（归一化，3 分量/组）；连续同向
@@ -273,6 +274,8 @@ func stateMachine() {
 		knownWatchBase = map[uintptr][3]float32{}
 		knownWatchMoved = []int{}
 		dirHist = dirHist[:0]
+		knownLockAt = time.Now() // Bug D（v2.1.2）：重置确认窗口起点，否则 coords/consensus
+		                         // 新锁继承旧 knownLockAt，0.2s 内即触发 30s watching（16:56:13 现场）
 	}
 
 	tick := time.NewTicker(smTick)
@@ -301,6 +304,11 @@ func stateMachine() {
 		p := currentPlatform()
 		h := p.Handle()
 		procPID = p.PID()
+
+		// 0.5) 指针链预热（Eden；Ryujinx 恒 false）：异步初始化 H/K，不阻塞本拍。
+		// 锁定期间也调用，确保"掉锁那一刻"链已就绪 —— 否则 UNLOCKED 首拍只来得及
+		// 启动初始化就落入全量扫描（同步 10s），链再无机会（2026-10-11 实战缺陷 1）。
+		loc.chainTry(h, nil)
 
 		// 1) 游戏重启检测（每 ~3s，仅 Ryujinx 语义）：出现从未见过的新块 →
 		// 只扫新块 + 回 UNLOCKED。Eden 恒 nil（内存区域动态分配，见
@@ -360,6 +368,24 @@ func stateMachine() {
 		if !inLocked {
 			if loc.coordsBusy() {
 				continue // 坐标搜索进行中，等结果（双扫描竞争浪费 10s+）
+			}
+			// ★ 指针链快路径（Eden；Ryujinx 恒 false）：有上次读数作参考时，走固定
+			// 偏移链零扫描重锁（跑动掉锁后毫秒级恢复）。失败静默回退 known/扫描。
+			// 不受 knownBypassed 约束：链是可靠基准，/rescan 也不该屏蔽它。
+			var refPos *[3]float32
+			if hasPrev {
+				refPos = &prev
+			}
+			if a, v, ok := loc.chainTry(h, refPos); ok {
+				setLock(a, false, 0, "chain")
+				inLocked = true
+				resetFollow()
+				knownLockAt = time.Now()
+				probing = false
+				probeGroups = nil
+				fmt.Printf("  [sm] chain -> lock 0x%X mem=(%.1f, %.1f, %.1f) [pending move confirm]\n",
+					a, v[0], v[1], v[2])
+				continue
 			}
 			if !loc.knownBypassed() && time.Since(lastKnownAt) >= knownRetry {
 				lastKnownAt = time.Now()
@@ -467,36 +493,54 @@ func stateMachine() {
 						bestGi, bestMv = gi, mv
 					}
 				}
-				if bestGi >= 0 {
-					adr := probeGroups[bestGi].Addrs[0]
-					// 换锁两道闸门（live-go 原样）：位置校验（候选必须在本锁附近）
-					// + 丰裕度校验（copies 是主导维度；Eden 阈值 0.1：存档镜像簇
-					// copies 可大于真槽，0.7 会锁死真槽）。
-					lock.mu.RLock()
-					curCopies := lock.copies
-					lock.mu.RUnlock()
-					if d := loc.decode(h, adr); d != nil &&
-						dist3([3]float32{d[0], d[1], d[2]}, probeRefPos) < probeNearDist &&
-						float32(probeGroups[bestGi].Copies) >= float32(curCopies)*loc.probeCopyKeep() {
-						setLock(adr, false, probeGroups[bestGi].Copies, "probe")
-						loc.saveKnown([]uintptr{adr}, sessionBaseForKnown())
-						probing = false
-						resetFollow()
-						a = adr
-						probeRefPos = [3]float32{d[0], d[1], d[2]}
-						fmt.Printf("  [sm] probe -> switched to moving group #%d copies=%d addr=0x%X\n",
-							bestGi, probeGroups[bestGi].Copies, adr)
-					} else if bestGi != lastProbeIgnoreGi || time.Since(lastProbeIgnoreAt) > 30*time.Second {
-						lastProbeIgnoreGi = bestGi
-						lastProbeIgnoreAt = time.Now()
-						dist := float32(-1)
-						if d := loc.decode(h, adr); d != nil {
-							dist = dist3([3]float32{d[0], d[1], d[2]}, probeRefPos)
-						}
-						fmt.Printf("  [sm] probe: group #%d moving but rejected (%.0fm away, copies %d vs current %d) - ignore\n",
-							bestGi, dist, probeGroups[bestGi].Copies, curCopies)
+			if bestGi >= 0 {
+				// v2.1.2 Bug C 同源修复：换锁地址在候选组内找活地址（上限
+				// probeAddrCap，与上方移动检测同口径）。Eden 副本轮换下组首
+				// 地址常已被游戏回收——旧逻辑只试 Addrs[0]，decode nil 即放弃
+				// 换锁（20:20:12 现场：1353 副本 moving 组 "-1m away" rejected，
+				// -1 即 decode nil 哨兵值），跑动场景永远追不上副本轮换。
+				g := probeGroups[bestGi]
+				n := len(g.Addrs)
+				if n > probeAddrCap {
+					n = probeAddrCap
+				}
+				adr := uintptr(0)
+				var d []float32
+				for i := 0; i < n; i++ {
+					if dd := loc.decode(h, g.Addrs[i]); dd != nil {
+						adr = g.Addrs[i]
+						d = dd
+						break
 					}
 				}
+				// 换锁两道闸门（live-go 原样）：位置校验（候选必须在本锁附近）
+				// + 丰裕度校验（copies 是主导维度；Eden 阈值 0.1：存档镜像簇
+				// copies 可大于真槽，0.7 会锁死真槽）。
+				lock.mu.RLock()
+				curCopies := lock.copies
+				lock.mu.RUnlock()
+				if d != nil &&
+					dist3([3]float32{d[0], d[1], d[2]}, probeRefPos) < probeNearDist &&
+					float32(g.Copies) >= float32(curCopies)*loc.probeCopyKeep() {
+					setLock(adr, false, g.Copies, "probe")
+					loc.saveKnown([]uintptr{adr}, sessionBaseForKnown())
+					probing = false
+					resetFollow()
+					a = adr
+					probeRefPos = [3]float32{d[0], d[1], d[2]}
+					fmt.Printf("  [sm] probe -> switched to moving group #%d copies=%d addr=0x%X\n",
+						bestGi, g.Copies, adr)
+				} else if bestGi != lastProbeIgnoreGi || time.Since(lastProbeIgnoreAt) > 30*time.Second {
+					lastProbeIgnoreGi = bestGi
+					lastProbeIgnoreAt = time.Now()
+					dist := float32(-1)
+					if d != nil {
+						dist = dist3([3]float32{d[0], d[1], d[2]}, probeRefPos)
+					}
+					fmt.Printf("  [sm] probe: group #%d moving but rejected (%.0fm away, copies %d vs current %d) - ignore\n",
+						bestGi, dist, g.Copies, curCopies)
+				}
+			}
 			}
 			if probing && time.Since(probeStart) > probeLife {
 				probing = false
@@ -576,11 +620,16 @@ func stateMachine() {
 					invalidN++
 					if !loc.poolAlive(h) {
 						inLocked = false
+						// 传送/场景切换后 prev 已过时：若仍带着它挑链候选，会"取最近"选中
+						// 旧场景容器的槽（2026-10-11 实测：1232m 传送后锁到 73m 外的旧槽）。
+						// 置 false → 链改用"存档锚点 + 30m 严门限"，对不上即回退扫描。
+						hasPrev = false
 						goUnlocked("garbage jump + pool dead (scene switch) - immediate reanchor")
 						continue
 					}
 					if invalidN >= invalidMax {
 						inLocked = false
+						hasPrev = false // 同上：垃圾跳变后 prev 不可作为链的参考
 						goUnlocked(fmt.Sprintf("readings invalid x%d (scene switch garbage)", invalidMax))
 					}
 					continue // 跳过 state 更新 → /pos 保持上次有效坐标
@@ -602,7 +651,10 @@ func stateMachine() {
 		if hasPrev && delta > moveDist {
 			moveN++
 			frozenN = 0
-			if lockSrc == "known" {
+			// Bug E（v2.1.2）：coords/consensus 锁的移动采样同样计入 knownSeenMove，
+			// 否则校准命中后仍被"known lock stale (no move 30s)"误判换锁 + 误记
+			// known fail（16:56:15 现场：confirmed live (moving) 后 2s 被 fallback）
+			if lockSrc == "known" || lockSrc == "coords" || lockSrc == "consensus" {
 				knownSeenMove = true
 			}
 			if moveN >= moveConfirmN {
@@ -617,7 +669,11 @@ func stateMachine() {
 					savedKnown = true
 					// Fix 6：block 用兜底函数，不能用 currentSessionBase
 					// （启动常态恒为 0，会把 known 文件 block 写成 0x0）。
-					loc.saveKnown([]uintptr{a}, sessionBaseForKnown())
+					// 链锁（source="chain"）地址每会话变（堆地址）+ 链随时可达 →
+					// 不写 known：写进去下次必然失效，只会污染列表。
+					if lockSrc != "chain" {
+						loc.saveKnown([]uintptr{a}, sessionBaseForKnown())
+					}
 				}
 			}
 		} else {
@@ -769,6 +825,8 @@ func stateMachine() {
 		// 相对 watching 起点净位移 >moveNet 才换锁（玩家走动=活副本跟随；站桩/
 		// 抖动净位移≈0 → 永不误换）。候选不动就安静 watching（无 dead 分支、
 		// 无重扫——站桩锁住就信；玩家动后 1~2s 内自愈）。
+		// 注意：**不要**跳过链锁（source="chain"）的冻结共识 —— 2026-10-11 曾试过，是错的：
+		// 链锁一旦锁错（典型是"传送后误锁到旧场景容器的槽"），正需要冻结共识把它自愈到活副本。
 		if frozenN >= frozenTicks && time.Since(lastConsensusAt) >= consensusEvery {
 			lastConsensusAt = time.Now()
 			a2, v2, ok := loc.consensusCopy(h, a)
@@ -776,8 +834,12 @@ func stateMachine() {
 				consensusCand = 0
 			} else if a2 != consensusCand {
 				consensusCand, consensusCandPos = a2, v2
-				fmt.Printf("  [sm] lock frozen %.0fs, consensus candidate 0x%X (%.0fm away) - watching\n",
-					frozenTicks*smTick.Seconds(), a2, dist3(v2, cur))
+				// 打印限频：同一候选 30s 内只打一行（站桩时 knownPool 多簇轮流被选中 → 刷屏）
+				if time.Since(consensusLogAt[a2]) >= 30*time.Second {
+					consensusLogAt[a2] = time.Now()
+					fmt.Printf("  [sm] lock frozen %.0fs, consensus candidate 0x%X (%.0fm away) - watching\n",
+						frozenTicks*smTick.Seconds(), a2, dist3(v2, cur))
+				}
 			} else if dist3(v2, consensusCandPos) > loc.consensusMoveNet() {
 				// 候选净位移 >moveNet = 活副本在跟随玩家 → 换锁
 				fmt.Printf("  [sm] frozen lock 0x%X -> relock to live consensus copy 0x%X\n", a, a2)

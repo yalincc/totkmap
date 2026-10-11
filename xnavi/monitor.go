@@ -179,6 +179,9 @@ func statusLoop() {
 		}
 		obj["map_url"] = mapURL
 		obj["mode"] = src
+		// v2.1.2 A-fix：GUI 状态栏显示手机镜像地址 + app/ 就绪三态
+		obj["lanUrl"] = lanURL
+		obj["appReady"] = currentAppStatus()
 		if ok2, body, _ := progress.snapshot(); ok2 && len(body) > 0 {
 			var raw struct {
 				Save   string `json:"save"`
