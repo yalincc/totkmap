@@ -568,40 +568,11 @@
     /* 任务图标挂光环：告诉玩家「这条线属于这个图标」，也是回卡片的指引。
      * 放在 draw 之后 —— draw() 内部会调 clear() 摘旧光环，先挂会被自己摘掉。 */
     markTracked(t.key, true);
-    /* ★★ 飞到「干活的那个点」（本层最后一个流程点）。
-     *
-     * 为什么：任务流程的叙事顺序是「接任务 → 干活 → 交任务」，
-     * 第一个点通常是接任务的地方（驿站/村庄），
-     * **真正要动手的位置是后面那个**（女神像、野马、遗迹…）。
-     * 只画线不飞过去的话，玩家看到的只是一条伸出屏幕的虚线
-     * （实测「装点河畔驿站的画作」目标点在屏幕外 -460,1451），
-     * 等于没告诉他目标在哪。
-     *
-     * 走gotoMarker 而不是直接 setView：它带光圈高亮，
-     * 玩家能明确看到「就是这里」（和「任务点」按钮的观感一致）。
-     * 复用它还顺带拿到卡片避让（moveCardAside）。
-     */
-    if (target && global.TOTK && global.TOTK.gotoMarker) {
-      global.TOTK.gotoMarker({
-        x: target[0], y: target[1],       /* ★ latlng = (gz, gx) */
-        cat: null, name: t.name, marker: null,
-        /* keepZoom：framePoints 刚按点分布算好倍率（跨度大的会拉到 z3/z4），
-         * 不让 gotoMarker 用 `max(zoom,6)` 又拉回来——那样起点会被推出屏外。 */
-        keepZoom: true
-      });
-      /* ★★ 飞行**之后**再补一次视野自适应。
-       * 为什么必须补：draw() 里那次拉远是围绕「飞行前的地图中心」算的
-       * （那时中心在驿站）。飞行后中心移到目标点，两点就分居屏幕两侧，
-       * 实测「装点河畔驿站的画作」两点相距 2128 米，飞完只有 1 个点可见。
-       * moveend 里再跑一次 framePoints，这次是围绕「装下全部点」重算。
-       * （REFRAMING 锁在这里不会死循环：flyTo 已结束，锁已释放。） */
-      if (global.TOTK.map) {
-        var _mf = function () { framePoints(hereL); };
-        global.TOTK.map.once('moveend', _mf);
-        setTimeout(_mf, 1300);   /* 兜底：缩放级别没变时 Leaflet 会跳过 moveend */
-      }
-    }
-    toast('已追踪：' + t.name + '（关掉卡片流程线也会留着）');
+    /* ★ V2.5.0（老大 2026-10-11）：【任务连线】只画流程线，**不再自动导航**。
+     * 去掉原来的 gotoMarker 飞行 + moveend once + 1300ms 兜底补拉远——
+     * 那些会让地图强制飞到目标点（伯库林的烦恼 4 点分散时体验灾难）。
+     * draw() 内部的 framePoints 已按流程线分布做一次缩放，够用了。 */
+    toast('已显示流程线：' + t.name + '（关掉卡片流程线也会留着）');
   }
 
   function isTracking(key) {
@@ -679,9 +650,17 @@
      *   → draw() 末尾又调 framePoints() → 又 setView → **无限递归爆栈**
      *   （实测报 Uncaught RangeError: Maximum call stack size exceeded）。
      *   锁的语义：「正在由framePoints 主动调整视野」时，本次 zoomend 不重画——
-     *   因为 setView 之后 Leaflet 自己会重画 marker 位置，不需要我们再画一遍。 */
+     *   因为 setView 之后 Leaflet 自己会重画 marker 位置，不需要我们再画一遍。
+     *
+     * ★ V2.5.0（老大 2026-10-11）：**追踪中用户拖动/缩放不重画、不拉视野**。
+     *   原来用户一拖地图 → moveend → 这里 clear()+draw() → draw 尾部 framePoints
+     *   又把视野强制拉回流程线范围 → 再拖再拉 → 用户根本没法自由看图
+     *   （伯库林的烦恼 4 点分散时尤其灾难，还和 totknavi 抢地图）。
+     *   追踪中的线 marker 由 Leaflet 自动跟随平移/缩放，不需要重画；
+     *   只有非追踪的临时线才保留 clear+draw 的重算。 */
     map.on('zoomend moveend', function () {
       if (REFRAMING) return;
+      if (tracking && trackKey === (cur && cur.key)) return;   /* 追踪中：线钉住，不拉回 */
       if (lineLayer && cur) {
         var k = cur.key; clear(); cur = null; draw(D.byKey(k));
       }

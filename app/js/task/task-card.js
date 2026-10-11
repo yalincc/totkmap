@@ -549,14 +549,14 @@
        统一格式 (X，Z，高) 全角括号+中文逗号，无文字前缀；无高度省略第三位。
        NPC 名不再单独显示（已并入「任务要点 · 接取」的对话模板）。 */
     if (t.gx != null && t.gz != null) {
-      var co = '(' + gameRound(t.gx) + '，' + gameRound(-t.gz);
+      /* ★ V2.5.0（老大 2026-10-11）：去掉坐标外括号，直接「位置  坐标」 */
+      var co = '' + gameRound(t.gx) + '，' + gameRound(-t.gz);
       if (t.hasHeight && t.gy != null) co += '，' + gameRound(t.gy - ELEV_UI_OFFSET);
-      co += ')';
       h += '<span class="tk-plabel">位置</span>' +
         '<span class="co-link"' + (t.onMap ? ' data-tk-locate="1"' : '') +
         ' title="点击定位到该坐标">' + esc(co) + '</span>';
     } else {
-      h += '<span class="tk-plabel">位置</span><span class="co-none">(—)</span>';
+      h += '<span class="tk-plabel">位置</span><span class="co-none">无</span>';
     }
     h += '</div>';
     /* 完成进度：阶段名 + 「第 n/total 步」，让存档进度可见 */
@@ -607,20 +607,8 @@
        无坐标时导航按钮置灰而不是隐藏：
        隐藏会让玩家以为卡片缺功能；置灰 + 说明原因才讲得通
        「这个任务本来就没有固定地点」不是 bug。 */
-    var noNav = (t.gx == null || t.gz == null || !t.onMap);
-    h += '<div class="tk-actions">';
-    h += '<button type="button" class="btn act' + (noNav ? ' is-off' : '') + '" id="tkNav"' +
-      (noNav ? ' disabled' : '') +
-      (noNav && t.noPlaceReason ? ' title="' + esc(t.noPlaceReason) + '"' : '') +
-      '>任务点</button>';
-    /* 追踪按钮文案跟随实际状态：追踪中显示「取消追踪」 */
-    var tracking = global.TaskFlow && global.TaskFlow.isTracking(t.key);
-    h += '<button type="button" class="btn act' + (tracking ? ' is-on' : '') +
-      '" id="tkTrack">' + (tracking ? '取消追踪' : '目标地点') + '</button>';
-    h += doneBtnHtml(t);
-    h += '</div>';
-
-    /* 流程地点（★ V2.5.0 v4 定稿）：有 flowPts 就渲染可点击的流程点网格——
+    /* ---------- 流程地点（★ V2.5.0 v4 定稿；老大 2026-10-11 要求移到奖励下、按钮上）----------
+       有 flowPts 就渲染可点击的流程点网格——
        纯黄数字 ①②③ 无底色 + 地点名 + hover 浮出坐标，点击定位到该点；
        无流程点时才回退文字提示。 */
     var flow = '';
@@ -631,8 +619,8 @@
       var num = ['①','②','③','④','⑤','⑥','⑦','⑧','⑨','⑩','⑪','⑫','⑬','⑭','⑮','⑯','⑰','⑱','⑲','⑳'];
       var ptsHtml = fpts.map(function (q, i) {
         var nm = q.note || (i + 1) + ' 号点';
-        var tip = '(' + gameRound(q.gx) + '，' + gameRound(-q.gz) +
-          (q.gy != null ? '，' + gameRound(q.gy - ELEV_UI_OFFSET) : '') + ')';
+        var tip = '' + gameRound(q.gx) + '，' + gameRound(-q.gz) +
+          (q.gy != null ? '，' + gameRound(q.gy - ELEV_UI_OFFSET) : '');
         return '<span class="fp" data-tk-pt="' + i + '" title="点击定位">' +
           '<span class="num">' + (num[i] || (i + 1)) + '</span>' +
           '<span class="txt">' + esc(nm) + '</span>' +
@@ -651,6 +639,27 @@
       flow = '<span class="tk-flow-hint">这个任务没有可定位的地点</span>';
     }
     h += '<div class="tk-flow-row">' + flow + '</div>';
+
+    /* ---------- 底部操作：任务点 / 任务连线 / 标记完成 ----------
+       ★ V2.5.0（老大 2026-10-11）：按钮功能重定义——
+         - **任务点**（id=tkNav，功能=导航到任务点，点击后文案变「停止导航」）
+         - **任务连线**（id=tkTrack，功能=显示流程线，不再自动导航/强制缩放）
+         - **标记完成**（id=tkDone，不改）
+       无坐标时导航按钮置灰而不是隐藏：
+       隐藏会让玩家以为卡片缺功能；置灰 + 说明原因才讲得通
+       「这个任务本来就没有固定地点」不是 bug。 */
+    var noNav = (t.gx == null || t.gz == null || !t.onMap);
+    h += '<div class="tk-actions">';
+    h += '<button type="button" class="btn act' + (noNav ? ' is-off' : '') + '" id="tkNav"' +
+      (noNav ? ' disabled' : '') +
+      (noNav && t.noPlaceReason ? ' title="' + esc(t.noPlaceReason) + '"' : '') +
+      '>任务点</button>';
+    /* 连线按钮文案跟随实际状态：连线中显示「取消连线」 */
+    var tracking = global.TaskFlow && global.TaskFlow.isTracking(t.key);
+    h += '<button type="button" class="btn act' + (tracking ? ' is-on' : '') +
+      '" id="tkTrack">' + (tracking ? '取消连线' : '任务连线') + '</button>';
+    h += doneBtnHtml(t);
+    h += '</div>';
 
     return h;
   }
@@ -804,7 +813,7 @@
          原本卡片总是落在点击点右下，正好压住刚点的那张任务点图标，
          想看被挡的地图位置必须先关卡片。现在卡片尽量甩到点的另一侧，
          刚点的点始终露在外面（配合拖动，玩家可以自己挪）。 */
-    var W = 350, H = 420;
+    var W = 350, H = card.offsetHeight || 420;
     var x, y;
     var fromCard = !!(evt && evt.target &&
       typeof evt.target.nodeType === 'number' && card.contains(evt.target));
@@ -823,7 +832,10 @@
       }
     }
     card.style.left = Math.min(Math.max(14, x), Math.max(14, global.innerWidth - W - 14)) + 'px';
-    card.style.top = Math.min(Math.max(14, y), Math.max(14, global.innerHeight - H)) + 'px';
+    /* ★ V2.5.0（老大 2026-10-11）：H 用卡片**实际高度**而不是写死的 420——
+       卡片内容长（任务要点+流程点+任务链）时原来按 420 夹取，
+       底部照常溢出到地图下面/屏幕外，卡片内链接跳转（保持原位）时下半全被挡住。 */
+    card.style.top = Math.min(Math.max(14, y), Math.max(14, global.innerHeight - H - 14)) + 'px';
 
     makeDraggable(card);
     bind(t);
@@ -851,31 +863,67 @@
     cur = null;
   }
 
+  /* V2.5.0：坐标定位的临时红点 + 脉冲特效（老大 2026-10-11）
+   * 点坐标链接 / 流程点后，卡片可能挡住目标位置、地图上又没有任何标识。
+   * 在地图对应坐标放一个会脉冲的红点；点地图其他位置就消失（只注册一次监听）。 */
+  function spotMark(lat, lng) {
+    var m = global.TOTK && global.TOTK.map;
+    var L = global.L || window.L;
+    if (!m || !L) return;
+    if (global._tkSpot) { m.removeLayer(global._tkSpot); global._tkSpot = null; }
+    try {
+      global._tkSpot = L.marker([lat, lng], {
+        icon: L.divIcon({
+          className: 'tk-spot-wrap',
+          html: '<div class="tk-spot-dot"></div><div class="tk-spot-ring"></div>',
+          iconSize: [12, 12],
+          iconAnchor: [6, 6]
+        }),
+        zIndexOffset: 2500,
+        interactive: false
+      }).addTo(m);
+      if (!global._tkSpotHooked) {
+        global._tkSpotHooked = true;
+        m.on('click', function () {
+          if (global._tkSpot) { m.removeLayer(global._tkSpot); global._tkSpot = null; }
+        });
+      }
+    } catch (err) {
+      /* 定位服务未就绪时红点可缺省，不影响定位本身；但保留错误信息便于排查 */
+      if (window.console && console.warn) console.warn('[任务卡片] spotMark 失败：', err);
+    }
+  }
+
   function bind(t) {
     var card = $('taskCard');
 
     var x = $('tkClose');
     if (x) x.addEventListener('click', function (e) { e.stopPropagation(); close(); });
 
-    /* 导航：交给 app.js 的实时导航/自动导航 */
+    /* 导航：交给 app.js 的实时导航/自动导航。
+       ★ V2.5.0（老大 2026-10-11）：改用 liveToggleNav —— 同一目标再点一次 =
+       停止导航，按钮文案随之在「任务点 / 停止导航」间切换。 */
     var nav = $('tkNav');
     if (nav) nav.addEventListener('click', function (e) {
       stopAll(e);
       var A = global.TOTK_APP;
-      if (A && A.liveNav && t.gx != null && t.gz != null) {
-        A.liveNav({
+      if (A && A.liveToggleNav && t.gx != null && t.gz != null) {
+        var r = A.liveToggleNav({
           name: t.name, x: t.gz, y: t.gx, layer: t.layer,
           type: t.group
         });
+        nav.textContent = (r === 'navigating') ? '停止导航' : '任务点';
+        nav.classList.toggle('is-on', r === 'navigating');
+      } else if (A && A.liveNav && t.gx != null && t.gz != null) {
+        A.liveNav({ name: t.name, x: t.gz, y: t.gx, layer: t.layer, type: t.group });
       } else {
         toast('导航功能需要本地定位服务');
       }
     });
 
-    /* 追踪：流程线的持久化开关（关卡片后线仍留在地图上）
-       ★ 2026-10-07 老大把这个入口改名叫「任务点」（原「追踪」）——
-         它干的事就是在地图上标出任务涉及的各个点，「追踪」太含糊。
-         原来还有一个「显示流程」按钮，职责与它重复，已删（见 buildHtml）。 */
+    /* 任务连线：流程线的持久化开关（关卡片后线仍留在地图上）
+       ★ V2.5.0（老大 2026-10-11）：功能从「追踪/自动导航」改为
+       **只显示流程线**（toggleTrack 已去掉飞行+强制缩放），文案同步改名。 */
     var tr = $('tkTrack');
     if (tr) tr.addEventListener('click', function (e) {
       stopAll(e);
@@ -883,7 +931,7 @@
       global.TaskFlow.toggleTrack();
       /* 只改文案，不整卡重绘 —— 重绘会让用户滚动位置丢失 */
       var on = global.TaskFlow.isTracking(t.key);
-      tr.textContent = on ? '取消追踪' : '目标地点';
+      tr.textContent = on ? '取消连线' : '任务连线';
       tr.classList.toggle('is-on', !!on);
     });
 
@@ -925,8 +973,10 @@
         if (t.gx == null || t.gz == null) { toast('该任务没有坐标'); return; }
         if (global.TOTK && global.TOTK.gotoMarker) {
           global.TOTK.gotoMarker({ x: t.gz, y: t.gx, cat: null, name: t.name + ' · 位置' });
+          spotMark(t.gz, t.gx);            /* V2.5.0：定位后加临时红点标识 */
         } else if (global.TOTK && global.TOTK.map) {
           global.TOTK.map.setView([t.gz, t.gx], Math.max(global.TOTK.map.getZoom(), 6));
+          spotMark(t.gz, t.gx);
         } else {
           toast('地图尚未就绪');
         }
@@ -945,8 +995,10 @@
           /* Leaflet 坐标 (latlng=Z, lng=X)：x=q.gz、y=q.gx，同现有定位逻辑 */
           global.TOTK.gotoMarker({ x: q.gz, y: q.gx, cat: null,
             name: t.name + ' · 点' + (i + 1) });
+          spotMark(q.gz, q.gx);            /* V2.5.0：定位后加临时红点标识 */
         } else if (global.TOTK && global.TOTK.map) {
           global.TOTK.map.setView([q.gz, q.gx], Math.max(global.TOTK.map.getZoom(), 6));
+          spotMark(q.gz, q.gx);
         } else {
           toast('地图尚未就绪');
         }
@@ -1211,9 +1263,9 @@
     '.co-link { color:#eac27e; font-weight:600; font-size:13px; cursor:pointer;',
     '  text-decoration:none; letter-spacing:.3px; }',
     '.co-link:hover { text-decoration:underline; }',
-    '/* ★ V2.5.0（老大 2026-10-11）：标签「位置」颜色字号与坐标数字一致 */',
+    '/* ★ V2.5.0（老大 2026-10-11）：标签「位置」颜色字号与坐标数字一致，后空 2 格 */',
     '.tk-plabel { color:#eac27e; font-weight:600; font-size:13px;',
-    '  letter-spacing:.3px; flex:0 0 auto; }',
+    '  letter-spacing:.3px; flex:0 0 auto; margin-right:8px; }',
     '.co-none { color:rgba(255,255,255,.45); font-weight:600; }',
     '/* 无前置/无后续的「—」 */',
     '.tk-dash { color:rgba(255,255,255,.5); font-weight:bold; }',
@@ -1516,10 +1568,10 @@
     '  flex-wrap:wrap; }',
     '.tk-flow-hint { font-size:12px; color:rgba(255,255,255,.55); flex:1; line-height:1.55; }',
     '.tk-flow-btn { flex:0 0 auto; }',
-    '/* 流程地点（★ V2.5.0 v4 定稿）：小标题 + 1-3 列自适应网格 */',
+    '/* 流程地点（★ V2.5.0 v4 定稿；老大 2026-10-11 要求最多 3 列自动缩放）*/',
     '.tk-flow-t { font-size:11.5px; color:#9a8a6c; font-weight:bold;',
     '  letter-spacing:1px; margin-bottom:2px; flex:1 1 100%; display:block; }',
-    '.flow-pts { display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr));',
+    '.flow-pts { display:grid; grid-template-columns:repeat(auto-fill,minmax(120px,1fr));',
     '  gap:8px; flex:1 1 100%; }',
     '.fp { display:flex; align-items:center; gap:6px; background:#232b33;',
     '  border:1px solid #333d47; border-radius:8px; padding:6px 9px; cursor:pointer;',
@@ -1533,5 +1585,17 @@
     '  font-size:11px; color:#eac27e; white-space:nowrap; z-index:9; }',
     '.fp:hover .tip { display:block; }',
     '.fp .tip .xy { color:#b8b2a6; }',
+
+    '/* V2.5.0：坐标定位的临时红点 + 脉冲光圈（老大 2026-10-11）*/',
+    '.tk-spot-wrap { pointer-events:none; }',
+    '.tk-spot-dot { width:10px; height:10px; border-radius:50%;',
+    '  background:#e8695a; border:2px solid rgba(20,22,28,.95);',
+    '  box-shadow:0 1px 6px rgba(0,0,0,.6); }',
+    '.tk-spot-ring { position:absolute; left:-5px; top:-5px; width:10px; height:10px;',
+    '  border-radius:50%; border:2px solid rgba(232,105,90,.75);',
+    '  animation:tk-spot-pulse 1.1s ease-out infinite; }',
+    '@keyframes tk-spot-pulse {',
+    '  0% { transform:scale(.5); opacity:.95; }',
+    '  100% { transform:scale(2.6); opacity:0; } }',
   ].join('\n'));
 })(window);

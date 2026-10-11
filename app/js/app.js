@@ -1921,6 +1921,8 @@
     /* V2.1 M6.6：跳到某件防具的地图标点（任务卡片的防具图标点它） */
     gotoArmor: gotoArmor,
     liveNav: function (o) { if (window.LIVENAV) return window.LIVENAV.navigate(o); return false; },
+    /* V2.5.0：任务卡片「任务点」按钮用的导航 toggle（再点一次 = 停止导航） */
+    liveToggleNav: liveToggleNav,
     toast: toast,
     esc: esc,
     showCard: function (m) {
