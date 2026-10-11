@@ -74,17 +74,18 @@
    *   指向不在库内的解锁目标（那种更没法用进度格表达）。
    */
   function reqsHtml(t) {
-    if (!t.reqs || !t.reqs.length) return '';
+    /* V2.5.0（老大 2026-10-11）：无前置显示「无」——前置条件区块恒定存在 */
+    if (!t.reqs || !t.reqs.length) {
+      return section('前置条件', '<ul class="tk-list"><li class="tk-dash">无</li></ul>');
+    }
     var D = global.TaskData;
-    var chain = D && D.chainOf ? D.chainOf(t.key) : null;
-    var inChain = {};
-    if (chain) chain.list.forEach(function (x) { inChain[x.key] = 1; });
-
-    var items = t.reqs.filter(function (r) {
-      /* 同链前驱 → 已由进度格表达，跳过 */
-      if (r.type === 'quest' && inChain[r.key]) return false;
-      return true;
-    }).map(function (r) {
+    /* ★ V2.5.0（老大 2026-10-11）：不再按任务链过滤前置。
+     *   任务链板块已从卡片去掉渲染（chainHtml 保留待复用），
+     *   M6「同链前驱由进度格表达、前置区不重复」的前提失效——
+     *   否则链上前置（如拉姆达财宝系列「寻找拉姆达的宝物」）被滤掉，
+     *   卡片显示「前置条件 · 无」（用户实测 #57 等报缺失）。
+     *   前置区现在完整列出全部 reqs：quest 型给链接、flag 型给条件。 */
+    var items = t.reqs.map(function (r) {
       if (r.linkable && r.reqName) {
         /* V2.5.0：链接文本带档内序号 →【#N 任务名】（老大定的） */
         var bk = r.key ? (D.byKey(r.key) || null) : null;
@@ -268,18 +269,11 @@
       /* V2.5.0（老大 2026-10-11）：无后续显示「无」，不再用「—」 */
       return section('后续解锁', '<ul class="tk-list"><li class="tk-dash">无</li></ul>');
     }
-    var chain = D && D.chainOf ? D.chainOf(t.key) : null;
-    var inChain = {};
-    if (chain) chain.list.forEach(function (x) { inChain[x.key] = 1; });
-    /* 分两类处理，避免 map 里返回 null 留下空洞：
-     *   ① 能跳转的任务 → 正常列，链内后继已在进度格显示、不重复
-     *   ② 指向不在库内的目标（小游戏/赛事等已剔除的条目）→ **收成一句话**。
-     *      ★ 这些条目的 key只是内部名（Circuit_Desert_MiniGame…），
-     *        玩家完全看不懂，逐个列出来就是一串英文噪音。
-     *      原本还有个 bug：reqName 为 null 时会渲染成空白行。 */
     var links = [], extraCnt = 0;
     t.unlockList.forEach(function (r) {
-      if (r.key && inChain[r.key]) return;          /* 同链后继，链格已显示 */
+      /* ★ V2.5.0（老大 2026-10-11）：任务链板块已去掉渲染，
+       *   不再按 inChain 过滤同链后继（与 reqsHtml 同理）——
+       *   后续解锁区完整列出全部 unlockList。 */
       if (r.linkable && r.reqName) {
         /* V2.5.0：链接文本带档内序号 →【#N 任务名】（老大定的） */
         var bk = r.key ? (D.byKey(r.key) || null) : null;
