@@ -531,7 +531,7 @@
     h += '<span class="tk-no-badge">' + (t.no ? '#' + esc(t.no) : '') + '</span>';
     h += '<h3 class="tk-name">' + esc(t.name) + '</h3>';
     h += '<div class="tk-title-acts">';
-    h += '<button type="button" class="tk-icon-btn tk-nav" id="tkCopy" title="复制任务名">⧉</button>';
+    h += '<button type="button" class="tk-icon-btn tk-nav" id="tkCopy" title="复制任务名">[复制]</button>';
     h += '</div>';
     h += '</div>';
 
@@ -570,13 +570,12 @@
     }
     h += '</div>';
 
-    /* ---------- M6：任务链 / 系列（放在 meta 之后、分区之前）----------
-     * 为什么放这个位置：这是卡片里唯一的「结构性信息」。
-     *   「这是系列第 3/6 环」必须**先看到**，玩家才知道
-     *   下面那些前置/解锁列表不是一堆无关任务名。
+    /* ---------- M6：任务链 / 系列 ----------
+     * ★ V2.5.0（老大 2026-10-11）：任务链板块与「前置条件/后续解锁」内容重复，
+     * 暂时从卡片里去掉渲染（chainHtml 函数保留，后续可放到其他卡片复用）。
      * 数据来源 task-data.js 的 chainOf / seriesOf（离线推导，不是 ROM 字段）。
      */
-    h += chainHtml(t);
+    /* h += chainHtml(t); */
 
     /* 各分区。
        顺序刻意调整为「攻略在前、任务原文在后」：
@@ -1586,12 +1585,14 @@
     '.fp:hover .tip { display:block; }',
     '.fp .tip .xy { color:#b8b2a6; }',
 
-    '/* V2.5.0：坐标定位的临时红点 + 脉冲光圈（老大 2026-10-11）*/',
-    '.tk-spot-wrap { pointer-events:none; }',
-    '.tk-spot-dot { width:10px; height:10px; border-radius:50%;',
-    '  background:#e8695a; border:2px solid rgba(20,22,28,.95);',
-    '  box-shadow:0 1px 6px rgba(0,0,0,.6); }',
-    '.tk-spot-ring { position:absolute; left:-5px; top:-5px; width:10px; height:10px;',
+    '/* V2.5.0：坐标定位的临时红点 + 脉冲光圈（老大 2026-10-11）',
+    ' * 红点与脉冲同中心：wrap 12x12 iconAnchor [6,6]，dot/ring 10x10 需 left:1px; top:1px',
+    ' * （left:-5px 时 ring 中心偏到 wrap 左上角，脉冲会偏移红点） */',
+    '.tk-spot-wrap { pointer-events:none; position:relative; }',
+    '.tk-spot-dot { position:absolute; left:1px; top:1px; width:10px; height:10px;',
+    '  border-radius:50%; background:#e8695a;',
+    '  border:2px solid rgba(20,22,28,.95); box-shadow:0 1px 6px rgba(0,0,0,.6); }',
+    '.tk-spot-ring { position:absolute; left:1px; top:1px; width:10px; height:10px;',
     '  border-radius:50%; border:2px solid rgba(232,105,90,.75);',
     '  animation:tk-spot-pulse 1.1s ease-out infinite; }',
     '@keyframes tk-spot-pulse {',
