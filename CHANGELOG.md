@@ -2,6 +2,58 @@
 
 > 本项目遵循语义化版本（SemVer）。详细技术备忘与踩坑见 Obsidian 知识库《TOTKmap-技术踩坑与实现方案》。
 
+## TOTKMAP V2.4.5 — 整合版离线包瘦身（2026-10-11）
+
+> 目标：手机镜像整合版发布包体积优化。app/ 从 123.5MB / 31168 文件 → **33.3MB / 7905 文件**，
+> 含后端总包约 53MB（zip 约 50MB），对比 V1.0 整合版 85MB zip 减半。
+> 被删素材全量备份在 `归档/totkmap-v2.4.5-20261011-备份/`（不入库）。
+
+### 瓦片（−41.6MB）
+- 删除三层 z7 瓦片（ground/depths/sky，22278 文件）：`maxNativeZoom=6`，放大到 z7 时 Leaflet
+  自动请求 z6 瓦片 2× 缩放，z7 目录网页端从未被请求，删除后显示效果不变。
+- 保留三层原生瓦片 z3–z6（21.3MB，z≤4 用 webp / z≥5 用 png）。
+
+### 图标（−42.5MB）
+- 全代码引用扫描（js / js-task / js-armor / data / css / index.html）：仅 `icons`（标点/任务卡片）、
+  `materials`（材料卡片）、`armor`（防具面板）、`markers` 被引用（合计 7.4MB），
+  其余 14 个目录（cook/misc/weapon/enemy/zonai 等）全代码零引用，删除。
+- 素材去向：与 totk-site 资料站 `public/icons` 同名重复率 90.8%（1116/1229），由资料站承接。
+
+### 其他
+- 5 张开发验证截图（verify-*.png，6.2MB）移出 app/，不再进发布包。
+
+### 验证
+- 代码引用的 137 个资产路径全部存在，缺失 0。
+- 浏览器实测：地面/地下/天空三层瓦片请求全部 200，标点图标渲染正常；材料卡片图标按需加载（文件在位）。
+
+## TOTKNAVI v2.1.2 — 定位引擎修复 + 手机镜像可用性（2026-10-10）
+
+> Bug A~H 全量修复，全部为判据/赋值级修正（无新机制）。决策与现场证据见
+> `TOTKnavi-V2.1.2-bug修复-决策ADR-完成.md`；技术细节见 `TOTKnavi-V2.1.2-bug修复-技术方案-完成.md`。
+
+### 定位引擎（Eden）
+- **Bug C 锁错地址**：候选锁定判据收紧为"decode 非 nil 且值距组代表 <40m"（遍历组内地址上限 64），修复 Addrs[0] 一票否决真组 + 组内错位副本被放行（16:55 现场 mem=(7.8,726.6,-97.2) 错位 1300m）。命中/未命中诊断日志留痕（`[sm] pick: ...`），v2.1.3 按分布调优。
+  - 真机热修（20:07 现场）：初版 5m 容差在**玩家跑动场景**把真组全灭——扫描窗口 10s，组代表是快照均值、组内地址是实时值，移动偏差超 5m（9116 副本真组 64 地址全 miss）。垃圾组错位为数百~1300m 量级，容差放宽到 40m 后两者兼得（`edenPickTol` 常量）。
+- **probe 换锁 Addrs[0] 死穴（20:21 现场定位，Bug C 同源）**：`probe -> switched` 逻辑只试候选组 Addrs[0]——Eden 副本轮换下组首地址常已被游戏回收，decode nil 即放弃换锁（日志 "-1m away" 即 decode nil 哨兵值；20:20:12 现场 1353 副本 moving 真组被拒）。修复：换锁地址在候选组内找活地址（上限 probeAddrCap，与移动检测同口径）。此修复让"谁在动锁谁"在跑动场景真正生效，锁定存活期从 2~5s 延长到整段跑动。
+- **UNLOCK 重扫冷却 20s → 5s**：副本轮换失效成为 UNLOCK 主因后，20s 冷却 + 11s 扫描 = 70% 时间无定位。场景垃圾风暴的入口已由 struct=0 拒绝 + edenPickTol 判据挡住，冷却安全收敛。
+- **Bug G**：`LocateResult.Hud` 改返回组代表位置（原为 decode(addr) 实时快照，地址错位时 scanRescue/probe 基准全错）。
+- **Bug H**：struct=0 空组（场景切换期占位池，16:57 现场）不再锁定，返回 nil 走扫描失败路径。
+- **Bug D**：resetFollow 补重置 knownLockAt——修复 coords 校准锁 0.2s 内误触发"not confirmed 30s"。
+- **Bug E**：coords/consensus 锁的移动采样计入 knownSeenMove——修复校准命中后 2s 被误判 stale 换锁 + known fail 误记（16:56:15 现场）。
+- **Bug F**：新增 `scan_mutex.go`（globalScanMu TryLock），locate 与 coordsLocate 全量扫描互斥（16:56 现场两路重叠 2.4s）。
+
+### 手机镜像（Bug A）
+- 无 app/ 时 `/botw/` 与根路径 `/` 返回内置引导页（`//go:embed`，fetch /pos 实时定位状态 + 在线地图跟随入口），替换黑 JSON。
+- 根路径 `/` 有 app/ 时 302 跳转 `/botw/?follow=1&game=totk`。
+- `/pos` 与 status 新增 `appReady` 三态（ready/not_found/no_index）+ `lanUrl`。
+
+### GUI
+- 状态栏新增手机镜像指示：三色就绪点 + 地址一键复制。
+- 坐标校准预检：填入坐标与当前锁定位置差 >50m 弹警告卡（Vue 悬浮卡，可强制继续）；文案纠正"不打开地图读右下角实时坐标 · 扫描约 20-30s"。
+
+### 版本
+- `xnavi/version.go` CoreVersion = v2.1.2；`xnavi-gui/app.go` guiVersion = v2.1.2。地图网页（app.js/index.html）本次未动不 bump。
+
 ## TOTKMAP V2.1 — 任务板块（2026-10-06）
 
 > 独立可插拔模块。要下线只需删 `app/index.html` 里 5 行 `<script>`，界面完全回到 V2.0。
