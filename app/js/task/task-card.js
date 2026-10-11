@@ -113,8 +113,8 @@
         '">' + esc(r.reqName || r.key || '未命名条件') + '</li>';
     });
     if (!items.length) {
-      /* V2.5.0：无前置也显示该栏，用「—」（老大定的，不再整栏隐藏） */
-      return section('前置条件', '<ul class="tk-list"><li class="tk-dash">—</li></ul>');
+      /* V2.5.0（老大 2026-10-11）：无前置显示「无」，不再用「—」 */
+      return section('前置条件', '<ul class="tk-list"><li class="tk-dash">无</li></ul>');
     }
     return section('前置条件', '<ul class="tk-list">' + items.join('') + '</ul>');
   }
@@ -265,8 +265,8 @@
   function unlockHtml(t) {
     var D = global.TaskData;
     if (!t.unlockList || !t.unlockList.length) {
-      /* V2.5.0：无后续也显示该栏，用「—」（老大定的，不再整栏隐藏） */
-      return section('后续解锁', '<ul class="tk-list"><li class="tk-dash">—</li></ul>');
+      /* V2.5.0（老大 2026-10-11）：无后续显示「无」，不再用「—」 */
+      return section('后续解锁', '<ul class="tk-list"><li class="tk-dash">无</li></ul>');
     }
     var chain = D && D.chainOf ? D.chainOf(t.key) : null;
     var inChain = {};
@@ -298,7 +298,7 @@
     }
     var items = links;
     if (!items.length) {
-      return section('后续解锁', '<ul class="tk-list"><li class="tk-dash">—</li></ul>');
+      return section('后续解锁', '<ul class="tk-list"><li class="tk-dash">无</li></ul>');
     }
     return section('后续解锁', '<ul class="tk-list">' + items.join('') + '</ul>');
   }
@@ -518,17 +518,20 @@
     if (!t.hasName) {
       h += '<span class="tk-chip tk-noname" title="游戏内这个任务没有官方标题，用内部编号显示">暂无官方名</span>';
     }
+    /* ★ V2.5.0（老大 2026-10-11）：‹ › 上/下一个移到分类徽章区（× 左侧） */
+    h += '<span class="tk-grip-acts">';
+    h += '<button type="button" class="tk-icon-btn tk-nav" id="tkPrev" title="上一个（本档序号前一个）">‹</button>';
+    h += '<button type="button" class="tk-icon-btn tk-nav" id="tkNext" title="下一个（本档序号后一个）">›</button>';
     h += '<button type="button" class="tk-close" id="tkClose" title="关闭">×</button>';
+    h += '</span>';
     h += '</div>';
-    /* 标题行（★ V2.5.0 v4 定稿，老大确认）：金底序号徽标 + 任务名 + 复制 + 上一个/下一个。
-       完成勾不再放标题区（完成状态由底部「标记完成/已完成」按钮表达）。 */
+    /* 标题行（★ V2.5.0 v4 定稿，老大确认）：金底序号徽标 + 任务名 + 复制。
+       上/下一个已移到分类徽章区；完成勾不再放标题区。 */
     h += '<div class="tk-title-row">';
     h += '<span class="tk-no-badge">' + (t.no ? '#' + esc(t.no) : '') + '</span>';
     h += '<h3 class="tk-name">' + esc(t.name) + '</h3>';
     h += '<div class="tk-title-acts">';
     h += '<button type="button" class="tk-icon-btn tk-nav" id="tkCopy" title="复制任务名">⧉</button>';
-    h += '<button type="button" class="tk-icon-btn tk-nav" id="tkPrev" title="上一个（本档序号前一个）">‹</button>';
-    h += '<button type="button" class="tk-icon-btn tk-nav" id="tkNext" title="下一个（本档序号后一个）">›</button>';
     h += '</div>';
     h += '</div>';
 
@@ -549,11 +552,11 @@
       var co = '(' + gameRound(t.gx) + '，' + gameRound(-t.gz);
       if (t.hasHeight && t.gy != null) co += '，' + gameRound(t.gy - ELEV_UI_OFFSET);
       co += ')';
-      h += '<span class="tk-mk">坐标</span>' +
+      h += '<span class="tk-plabel">位置</span>' +
         '<span class="co-link"' + (t.onMap ? ' data-tk-locate="1"' : '') +
         ' title="点击定位到该坐标">' + esc(co) + '</span>';
     } else {
-      h += '<span class="tk-mk">坐标</span><span class="co-none">(—)</span>';
+      h += '<span class="tk-plabel">位置</span><span class="co-none">(—)</span>';
     }
     h += '</div>';
     /* 完成进度：阶段名 + 「第 n/total 步」，让存档进度可见 */
@@ -612,7 +615,7 @@
       '>任务点</button>';
     /* 追踪按钮文案跟随实际状态：追踪中显示「取消追踪」 */
     var tracking = global.TaskFlow && global.TaskFlow.isTracking(t.key);
-    h += '<button type="button" class="btn act tk-ghost' + (tracking ? ' is-on' : '') +
+    h += '<button type="button" class="btn act' + (tracking ? ' is-on' : '') +
       '" id="tkTrack">' + (tracking ? '取消追踪' : '目标地点') + '</button>';
     h += doneBtnHtml(t);
     h += '</div>';
@@ -701,9 +704,10 @@
       if (e.pointerType === 'mouse' && e.button !== 0) return;
       var el = e.target;
       /* 交互元素不启动拖动，否则点按钮会变成拖按钮。
-         ★ 坐标旁的定位按钮（data-tk-locate）是 <button>，已被这一行覆盖，
-           不需要像 data-go-armor 那样单独排除（那个是 <img>，button 规则抓不到）。*/
-      if (el.closest && el.closest('button, a, input, select, textarea')) return;
+         ★ V2.5.0：坐标链接（data-tk-locate）与流程点（data-tk-pt）都是 <span>，
+           必须显式列入排除；否则 releasePointerCapture 会吞掉它们的 click
+           （真实表现为：点坐标/流程点地图毫无反应）。 */
+      if (el.closest && el.closest('button, a, input, select, textarea, [data-tk-locate], [data-tk-pt]')) return;
       /* ★ 防具图标（data-go-armor）也必须排除，否则点了没反应。
          根因：end() 里的 card.releasePointerCapture(pointerId)
          会**重定向后续 click 的 target** —— 原本落在<img> 上的 click
@@ -911,6 +915,23 @@
     if (pv) pv.addEventListener('click', function (e) { stopAll(e); navBy(-1); });
     var nx = $('tkNext');
     if (nx) nx.addEventListener('click', function (e) { stopAll(e); navBy(1); });
+
+    /* 坐标链接定位（★ V2.5.0 修复：co-link 是 <span>，此前只有 HTML 没绑事件，
+       点击无反应——老大 2026-10-11 实测发现；拖动排除列表已加 [data-tk-locate]） */
+    Array.prototype.forEach.call(card.querySelectorAll('[data-tk-locate]'), function (el) {
+      el.addEventListener('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (t.gx == null || t.gz == null) { toast('该任务没有坐标'); return; }
+        if (global.TOTK && global.TOTK.gotoMarker) {
+          global.TOTK.gotoMarker({ x: t.gz, y: t.gx, cat: null, name: t.name + ' · 位置' });
+        } else if (global.TOTK && global.TOTK.map) {
+          global.TOTK.map.setView([t.gz, t.gx], Math.max(global.TOTK.map.getZoom(), 6));
+        } else {
+          toast('地图尚未就绪');
+        }
+      });
+    });
 
     /* 流程点定位（★ V2.5.0 v4：点击 ①②③ 数字定位到对应流程点坐标） */
     Array.prototype.forEach.call(card.querySelectorAll('[data-tk-pt]'), function (el) {
@@ -1167,6 +1188,10 @@
     '  margin-left:auto; width:22px; height:22px; line-height:1;',
     '  border:none; background:transparent; color:rgba(255,255,255,.45);',
     '  font-size:19px; cursor:pointer; border-radius:4px; flex:0 0 auto; }',
+    '/* ★ V2.5.0（老大 2026-10-11）：‹ › 移到分类徽章区，× 右侧收起 */',
+    '.tk-grip-acts { display:flex; align-items:center; gap:3px; margin-left:auto; }',
+    '.tk-grip-acts .tk-close { margin-left:0; }',
+    '.tk-grip-acts .tk-nav { width:22px; height:22px; font-size:13px; }',
     '.tk-close:hover { background:rgba(255,255,255,.1); color:#fff; }',
 
     '.tk-name {',
@@ -1186,6 +1211,9 @@
     '.co-link { color:#eac27e; font-weight:600; font-size:13px; cursor:pointer;',
     '  text-decoration:none; letter-spacing:.3px; }',
     '.co-link:hover { text-decoration:underline; }',
+    '/* ★ V2.5.0（老大 2026-10-11）：标签「位置」颜色字号与坐标数字一致 */',
+    '.tk-plabel { color:#eac27e; font-weight:600; font-size:13px;',
+    '  letter-spacing:.3px; flex:0 0 auto; }',
     '.co-none { color:rgba(255,255,255,.45); font-weight:600; }',
     '/* 无前置/无后续的「—」 */',
     '.tk-dash { color:rgba(255,255,255,.5); font-weight:bold; }',
