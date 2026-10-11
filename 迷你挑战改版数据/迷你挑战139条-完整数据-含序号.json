@@ -1523,9 +1523,11 @@
    "overlap": [],
    "reqs": [
     {
-     "type": "flag",
+     "type": "quest",
      "reqName": "给地底人拍照！",
-     "linkable": false
+     "linkable": true,
+     "key": "GetCamera",
+     "matchNorm": true
     }
    ],
    "unlockList": [],
@@ -1787,9 +1789,11 @@
    "overlap": [],
    "reqs": [
     {
-     "type": "flag",
+     "type": "quest",
      "reqName": "给地底人拍照！",
-     "linkable": false
+     "linkable": true,
+     "key": "GetCamera",
+     "matchNorm": true
     }
    ],
    "unlockList": [],
@@ -2009,9 +2013,11 @@
    "overlap": [],
    "reqs": [
     {
-     "type": "flag",
+     "type": "quest",
      "reqName": "给地底人拍照！",
-     "linkable": false
+     "linkable": true,
+     "key": "GetCamera",
+     "matchNorm": true
     }
    ],
    "unlockList": [],
@@ -2828,9 +2834,11 @@
    "overlap": [],
    "reqs": [
     {
-     "type": "flag",
+     "type": "quest",
      "reqName": "给地底人拍照！",
-     "linkable": false
+     "linkable": true,
+     "key": "GetCamera",
+     "matchNorm": true
     }
    ],
    "unlockList": [],
@@ -2945,9 +2953,11 @@
    "overlap": [],
    "reqs": [
     {
-     "type": "flag",
+     "type": "quest",
      "reqName": "给地底人拍照！",
-     "linkable": false
+     "linkable": true,
+     "key": "GetCamera",
+     "matchNorm": true
     }
    ],
    "unlockList": [],
@@ -3829,6 +3839,12 @@
      "key": "MushroomSisters_2",
      "reqName": "被夺走的帐篷",
      "linkable": true
+    },
+    {
+     "key": "MushroomSisters_3",
+     "reqName": "谁能找到圣地！",
+     "linkable": true,
+     "src": "reverse"
     }
    ],
    "stepsUI": [
@@ -4095,9 +4111,11 @@
      "linkable": true
     },
     {
-     "type": "flag",
+     "type": "quest",
      "reqName": "照亮洞窟的蘑菇",
-     "linkable": false
+     "linkable": true,
+     "key": "MushroomSisters_1",
+     "matchNorm": true
     }
    ],
    "unlockList": [],
@@ -4825,11 +4843,6 @@
      "key": "CarryGoronKid1",
      "reqName": "古代都市鼓隆提亚！",
      "linkable": true
-    },
-    {
-     "type": "flag",
-     "reqName": "古代都市鼓隆提亚",
-     "linkable": false
     }
    ],
    "unlockList": [],
@@ -6241,9 +6254,11 @@
    "overlap": [],
    "reqs": [
     {
-     "type": "flag",
+     "type": "quest",
      "reqName": "给地底人拍照！",
-     "linkable": false
+     "linkable": true,
+     "key": "GetCamera",
+     "matchNorm": true
     }
    ],
    "unlockList": [],
@@ -6358,9 +6373,11 @@
    "overlap": [],
    "reqs": [
     {
-     "type": "flag",
+     "type": "quest",
      "reqName": "给地底人拍照！",
-     "linkable": false
+     "linkable": true,
+     "key": "GetCamera",
+     "matchNorm": true
     }
    ],
    "unlockList": [],
@@ -6785,8 +6802,20 @@
    "reqs": [],
    "unlockList": [
     {
+     "key": "TreasureOfLamda_DuelPeak",
+     "reqName": "拉姆达的财宝 双子的古代文献",
+     "linkable": true,
+     "src": "reverse"
+    },
+    {
      "key": "TreasureOfLamda_FierceDeity",
      "reqName": "拉姆达的财宝 鬼神装备",
+     "linkable": true,
+     "src": "reverse"
+    },
+    {
+     "key": "TreasureOfLamda_Pirate",
+     "reqName": "拉姆达的财宝 海盗的古代文献",
      "linkable": true,
      "src": "reverse"
     }
@@ -7033,9 +7062,11 @@
    ],
    "reqs": [
     {
-     "type": "flag",
+     "type": "quest",
      "reqName": "寻找拉姆达的宝物",
-     "linkable": false
+     "linkable": true,
+     "key": "TreasureOfLambda",
+     "matchNorm": true
     }
    ],
    "unlockList": [],
@@ -7127,9 +7158,11 @@
    ],
    "reqs": [
     {
-     "type": "flag",
+     "type": "quest",
      "reqName": "寻找拉姆达的宝物",
-     "linkable": false
+     "linkable": true,
+     "key": "TreasureOfLambda",
+     "matchNorm": true
     }
    ],
    "unlockList": [],
@@ -8363,9 +8396,11 @@
    "overlap": [],
    "reqs": [
     {
-     "type": "flag",
+     "type": "quest",
      "reqName": "给地底人拍照！",
-     "linkable": false
+     "linkable": true,
+     "key": "GetCamera",
+     "matchNorm": true
     }
    ],
    "unlockList": [],
@@ -8501,7 +8536,14 @@
    "onMap": true,
    "overlap": [],
    "reqs": [],
-   "unlockList": [],
+   "unlockList": [
+    {
+     "key": "ExcavateFossil2",
+     "reqName": "海布拉大化石",
+     "linkable": true,
+     "src": "reverse"
+    }
+   ],
    "stepsUI": [
     {
      "name": "GoFossil",
@@ -8624,9 +8666,11 @@
    "overlap": [],
    "reqs": [
     {
-     "type": "flag",
+     "type": "quest",
      "reqName": "奥尔汀大化石",
-     "linkable": false
+     "linkable": true,
+     "key": "ExcavateFossil1",
+     "matchNorm": true
     }
    ],
    "unlockList": [],
@@ -8950,9 +8994,11 @@
      "linkable": false
     },
     {
-     "type": "flag",
+     "type": "quest",
      "reqName": "给地底人拍照！",
-     "linkable": false
+     "linkable": true,
+     "key": "GetCamera",
+     "matchNorm": true
     }
    ],
    "unlockList": [],
@@ -9352,9 +9398,11 @@
      "linkable": true
     },
     {
-     "type": "flag",
+     "type": "quest",
      "reqName": "友好之证",
-     "linkable": false
+     "linkable": true,
+     "key": "CreateArmor",
+     "matchNorm": true
     }
    ],
    "unlockList": [],
@@ -10102,7 +10150,14 @@
      "linkable": false
     }
    ],
-   "unlockList": [],
+   "unlockList": [
+    {
+     "key": "Createshinguard",
+     "reqName": "永无止境的说教",
+     "linkable": true,
+     "src": "reverse"
+    }
+   ],
    "stepsUI": [
     {
      "name": "Search",
@@ -10210,9 +10265,11 @@
    "overlap": [],
    "reqs": [
     {
-     "type": "flag",
+     "type": "quest",
      "reqName": "给地底人拍照！",
-     "linkable": false
+     "linkable": true,
+     "key": "GetCamera",
+     "matchNorm": true
     }
    ],
    "unlockList": [],
@@ -12809,9 +12866,11 @@
    "overlap": [],
    "reqs": [
     {
-     "type": "flag",
+     "type": "quest",
      "reqName": "给地底人拍照！",
-     "linkable": false
+     "linkable": true,
+     "key": "GetCamera",
+     "matchNorm": true
     }
    ],
    "unlockList": [],
@@ -13418,9 +13477,11 @@
    "overlap": [],
    "reqs": [
     {
-     "type": "flag",
+     "type": "quest",
      "reqName": "给地底人拍照！",
-     "linkable": false
+     "linkable": true,
+     "key": "GetCamera",
+     "matchNorm": true
     }
    ],
    "unlockList": [],
@@ -13535,9 +13596,11 @@
    "overlap": [],
    "reqs": [
     {
-     "type": "flag",
+     "type": "quest",
      "reqName": "给地底人拍照！",
-     "linkable": false
+     "linkable": true,
+     "key": "GetCamera",
+     "matchNorm": true
     }
    ],
    "unlockList": [],
@@ -14196,12 +14259,21 @@
      "linkable": false
     },
     {
-     "type": "flag",
+     "type": "quest",
      "reqName": "迷路的商队队员",
-     "linkable": false
+     "linkable": true,
+     "key": "SearchCaravan",
+     "matchNorm": true
     }
    ],
-   "unlockList": [],
+   "unlockList": [
+    {
+     "key": "Zonau_GeniusWeapon",
+     "reqName": "于地底发现的“古代之刃”",
+     "linkable": true,
+     "src": "reverse"
+    }
+   ],
    "stepsUI": [
     {
      "name": "Step1",
@@ -14729,7 +14801,14 @@
      "linkable": true
     }
    ],
-   "unlockList": [],
+   "unlockList": [
+    {
+     "key": "EightHeroStatues_After",
+     "reqName": "第八位英雄",
+     "linkable": true,
+     "src": "reverse"
+    }
+   ],
    "stepsUI": [
     {
      "name": "Step1",
@@ -14943,9 +15022,11 @@
    "overlap": [],
    "reqs": [
     {
-     "type": "flag",
+     "type": "quest",
      "reqName": "受困的皮阿斐",
-     "linkable": false
+     "linkable": true,
+     "key": "RescueHost",
+     "matchNorm": true
     }
    ],
    "unlockList": [],
@@ -15062,7 +15143,14 @@
    "onMap": true,
    "overlap": [],
    "reqs": [],
-   "unlockList": [],
+   "unlockList": [
+    {
+     "key": "PhotoSpot_Challenge_09_2",
+     "reqName": "装点封闭驿站的画作2",
+     "linkable": true,
+     "src": "reverse"
+    }
+   ],
    "stepsUI": [
     {
      "name": "Step1",
@@ -15537,9 +15625,11 @@
      "linkable": false
     },
     {
-     "type": "flag",
-     "reqName": "很冷哦！忍耐力大比拼",
-     "linkable": false
+     "type": "quest",
+     "reqName": "很冷哦！忍耐力大比拼！",
+     "linkable": true,
+     "key": "GerudoCanyon_ColdEnduranceComparison",
+     "matchNorm": true
     }
    ],
    "unlockList": [],
@@ -15653,7 +15743,14 @@
    "onMap": true,
    "overlap": [],
    "reqs": [],
-   "unlockList": [],
+   "unlockList": [
+    {
+     "key": "GerudoCanyon_24hEnduranceComparison",
+     "reqName": "火热非凡！忍耐力大比拼！",
+     "linkable": true,
+     "src": "reverse"
+    }
+   ],
    "stepsUI": [
     {
      "name": "Prepare",
@@ -15984,9 +16081,11 @@
      "linkable": true
     },
     {
-     "type": "flag",
+     "type": "quest",
      "reqName": "第八位英雄",
-     "linkable": false
+     "linkable": true,
+     "key": "EightHeroStatues_After",
+     "matchNorm": true
     }
    ],
    "unlockList": [],

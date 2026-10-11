@@ -1104,7 +1104,14 @@
      "src": "guide"
     }
    ],
-   "unlockList": [],
+   "unlockList": [
+    {
+     "key": "Hateno_LetUsElection",
+     "reqName": "村长选举开始！",
+     "linkable": true,
+     "src": "reverse"
+    }
+   ],
    "stepsUI": [
     {
      "name": "Step01",
@@ -1590,7 +1597,14 @@
      "linkable": false
     }
    ],
-   "unlockList": [],
+   "unlockList": [
+    {
+     "key": "Hateno_LetUsElection",
+     "reqName": "村长选举开始！",
+     "linkable": true,
+     "src": "reverse"
+    }
+   ],
    "stepsUI": [
     {
      "name": "Step01",
@@ -1764,14 +1778,18 @@
      "src": "guide"
     },
     {
-     "type": "flag",
+     "type": "quest",
      "reqName": "你是萨格诺派？还是科沙尤西派？",
-     "linkable": false
+     "linkable": true,
+     "key": "Hateno_VillageMayorElection",
+     "matchNorm": true
     },
     {
-     "type": "flag",
+     "type": "quest",
      "reqName": "用新名产振兴村子！",
-     "linkable": false
+     "linkable": true,
+     "key": "Hateno_RevitalizeByNewSpeciality",
+     "matchNorm": true
     }
    ],
    "unlockList": [],
@@ -2156,6 +2174,66 @@
      "key": "Tribune11",
      "reqName": "我亲爱的公主",
      "linkable": true
+    },
+    {
+     "key": "Fairy2",
+     "reqName": "献给弥佳的小夜曲",
+     "linkable": true,
+     "src": "reverse"
+    },
+    {
+     "key": "Fairy3",
+     "reqName": "献给可秋拉的小夜曲",
+     "linkable": true,
+     "src": "reverse"
+    },
+    {
+     "key": "Fairy4",
+     "reqName": "献给西莎的小夜曲",
+     "linkable": true,
+     "src": "reverse"
+    },
+    {
+     "key": "Tribune02",
+     "reqName": "塞尔达公主绑架事件！？",
+     "linkable": true,
+     "src": "reverse"
+    },
+    {
+     "key": "Tribune03",
+     "reqName": "受难的迷途白山羊",
+     "linkable": true,
+     "src": "reverse"
+    },
+    {
+     "key": "Tribune05",
+     "reqName": "消失的农具",
+     "linkable": true,
+     "src": "reverse"
+    },
+    {
+     "key": "Tribune07",
+     "reqName": "递出邀请的女性",
+     "linkable": true,
+     "src": "reverse"
+    },
+    {
+     "key": "Tribune13",
+     "reqName": "诡异之声",
+     "linkable": true,
+     "src": "reverse"
+    },
+    {
+     "key": "Tribune14",
+     "reqName": "被封住的井",
+     "linkable": true,
+     "src": "reverse"
+    },
+    {
+     "key": "Tribune16",
+     "reqName": "献给大妖精的小夜曲",
+     "linkable": true,
+     "src": "reverse"
     }
    ],
    "stepsUI": [
@@ -2328,9 +2406,11 @@
    "overlap": [],
    "reqs": [
     {
-     "type": "flag",
-     "reqName": "调查真相！传言中的塞尔达公主",
-     "linkable": false
+     "type": "quest",
+     "reqName": "调查真相！传言中的塞尔达公主！！",
+     "linkable": true,
+     "key": "NewsPaper_Mitsuba",
+     "matchNorm": true
     }
    ],
    "unlockList": [],
@@ -2458,11 +2538,6 @@
      "key": "NewsPaper_Mitsuba",
      "reqName": "调查真相！传言中的塞尔达公主！！",
      "linkable": true
-    },
-    {
-     "type": "flag",
-     "reqName": "调查真相！传言中的塞尔达公主",
-     "linkable": false
     }
    ],
    "unlockList": [
@@ -2707,11 +2782,6 @@
      "key": "NewsPaper_Mitsuba",
      "reqName": "调查真相！传言中的塞尔达公主！！",
      "linkable": true
-    },
-    {
-     "type": "flag",
-     "reqName": "调查真相！传言中的塞尔达公主",
-     "linkable": false
     }
    ],
    "unlockList": [],
@@ -2823,9 +2893,11 @@
    "overlap": [],
    "reqs": [
     {
-     "type": "flag",
-     "reqName": "调查真相！传言中的塞尔达公主",
-     "linkable": false
+     "type": "quest",
+     "reqName": "调查真相！传言中的塞尔达公主！！",
+     "linkable": true,
+     "key": "NewsPaper_Mitsuba",
+     "matchNorm": true
     }
    ],
    "unlockList": [],
@@ -3201,11 +3273,6 @@
      "key": "NewsPaper_Mitsuba",
      "reqName": "调查真相！传言中的塞尔达公主！！",
      "linkable": true
-    },
-    {
-     "type": "flag",
-     "reqName": "调查真相！传言中的塞尔达公主",
-     "linkable": false
     }
    ],
    "unlockList": [],
@@ -3346,9 +3413,11 @@
    "overlap": [],
    "reqs": [
     {
-     "type": "flag",
-     "reqName": "调查真相！传言中的塞尔达公主",
-     "linkable": false
+     "type": "quest",
+     "reqName": "调查真相！传言中的塞尔达公主！！",
+     "linkable": true,
+     "key": "NewsPaper_Mitsuba",
+     "matchNorm": true
     }
    ],
    "unlockList": [],
@@ -3475,9 +3544,11 @@
    "overlap": [],
    "reqs": [
     {
-     "type": "flag",
-     "reqName": "调查真相！传言中的塞尔达公主",
-     "linkable": false
+     "type": "quest",
+     "reqName": "调查真相！传言中的塞尔达公主！！",
+     "linkable": true,
+     "key": "NewsPaper_Mitsuba",
+     "matchNorm": true
     }
    ],
    "unlockList": [],
@@ -3624,9 +3695,11 @@
    "overlap": [],
    "reqs": [
     {
-     "type": "flag",
-     "reqName": "调查真相！传言中的塞尔达公主",
-     "linkable": false
+     "type": "quest",
+     "reqName": "调查真相！传言中的塞尔达公主！！",
+     "linkable": true,
+     "key": "NewsPaper_Mitsuba",
+     "matchNorm": true
     }
    ],
    "unlockList": [],
@@ -3749,9 +3822,11 @@
    "overlap": [],
    "reqs": [
     {
-     "type": "flag",
-     "reqName": "调查真相！传言中的塞尔达公主",
-     "linkable": false
+     "type": "quest",
+     "reqName": "调查真相！传言中的塞尔达公主！！",
+     "linkable": true,
+     "key": "NewsPaper_Mitsuba",
+     "matchNorm": true
     }
    ],
    "unlockList": [],
@@ -4273,9 +4348,11 @@
    "overlap": [],
    "reqs": [
     {
-     "type": "flag",
-     "reqName": "调查真相！传言中的塞尔达公主",
-     "linkable": false
+     "type": "quest",
+     "reqName": "调查真相！传言中的塞尔达公主！！",
+     "linkable": true,
+     "key": "NewsPaper_Mitsuba",
+     "matchNorm": true
     }
    ],
    "unlockList": [],
@@ -4419,9 +4496,11 @@
    "overlap": [],
    "reqs": [
     {
-     "type": "flag",
-     "reqName": "调查真相！传言中的塞尔达公主",
-     "linkable": false
+     "type": "quest",
+     "reqName": "调查真相！传言中的塞尔达公主！！",
+     "linkable": true,
+     "key": "NewsPaper_Mitsuba",
+     "matchNorm": true
     }
    ],
    "unlockList": [],
@@ -4580,9 +4659,11 @@
    "overlap": [],
    "reqs": [
     {
-     "type": "flag",
-     "reqName": "调查真相！传言中的塞尔达公主",
-     "linkable": false
+     "type": "quest",
+     "reqName": "调查真相！传言中的塞尔达公主！！",
+     "linkable": true,
+     "key": "NewsPaper_Mitsuba",
+     "matchNorm": true
     }
    ],
    "unlockList": [],
@@ -4756,9 +4837,11 @@
      "src": "guide"
     },
     {
-     "type": "flag",
-     "reqName": "调查真相！传言中的塞尔达公主",
-     "linkable": false
+     "type": "quest",
+     "reqName": "调查真相！传言中的塞尔达公主！！",
+     "linkable": true,
+     "key": "NewsPaper_Mitsuba",
+     "matchNorm": true
     }
    ],
    "unlockList": [
@@ -4906,12 +4989,21 @@
      "linkable": true
     },
     {
-     "type": "flag",
-     "reqName": "为阿卡莱带来和平",
-     "linkable": false
+     "type": "quest",
+     "reqName": "为阿卡莱带来和平！",
+     "linkable": true,
+     "key": "MercenaryChallenge_Akkare",
+     "matchNorm": true
     }
    ],
-   "unlockList": [],
+   "unlockList": [
+    {
+     "key": "MercenaryChallenge_Hebra",
+     "reqName": "为哈特尔带来和平！",
+     "linkable": true,
+     "src": "reverse"
+    }
+   ],
    "stepsUI": [
     {
      "name": "Move",
@@ -5048,9 +5140,11 @@
    "overlap": [],
    "reqs": [
     {
-     "type": "flag",
-     "reqName": "为海拉鲁平原带来和平",
-     "linkable": false
+     "type": "quest",
+     "reqName": "为海拉鲁平原带来和平！",
+     "linkable": true,
+     "key": "MercenaryChallenge_HyrulePlain",
+     "matchNorm": true
     }
    ],
    "unlockList": [
@@ -5339,11 +5433,6 @@
      "key": "MercenaryChallenge_Eldin",
      "reqName": "为奥尔汀带来和平！",
      "linkable": true
-    },
-    {
-     "type": "flag",
-     "reqName": "为奥尔汀带来和平",
-     "linkable": false
     }
    ],
    "unlockList": [
@@ -5356,6 +5445,12 @@
      "key": "Mercenary_Eldin_Bloody",
      "reqName": null,
      "linkable": false
+    },
+    {
+     "key": "MercenaryChallenge_HyrulePlain",
+     "reqName": "为海拉鲁平原带来和平！",
+     "linkable": true,
+     "src": "reverse"
     }
    ],
    "stepsUI": [
@@ -5493,7 +5588,14 @@
      "linkable": true
     }
    ],
-   "unlockList": [],
+   "unlockList": [
+    {
+     "key": "MercenaryChallenge_Hateru",
+     "reqName": "为海布拉带来和平！",
+     "linkable": true,
+     "src": "reverse"
+    }
+   ],
    "stepsUI": [
     {
      "name": "Craft",
@@ -5631,9 +5733,11 @@
    "overlap": [],
    "reqs": [
     {
-     "type": "flag",
-     "reqName": "为费罗尼带来和平",
-     "linkable": false
+     "type": "quest",
+     "reqName": "为费罗尼带来和平！",
+     "linkable": true,
+     "key": "MercenaryChallenge_Firone",
+     "matchNorm": true
     }
    ],
    "unlockList": [

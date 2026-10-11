@@ -105,7 +105,14 @@
    "onMap": true,
    "overlap": [],
    "reqs": [],
-   "unlockList": [],
+   "unlockList": [
+    {
+     "key": "GOToTheCastleOfHyrule",
+     "reqName": "前往海拉鲁大地",
+     "linkable": true,
+     "src": "reverse"
+    }
+   ],
    "stepsUI": [
     {
      "name": "GoToLightSpotOfPurahPad",
@@ -195,12 +202,21 @@
    "overlap": [],
    "reqs": [
     {
-     "type": "flag",
+     "type": "quest",
      "reqName": "紧闭之门",
-     "linkable": false
+     "linkable": true,
+     "key": "LookingForLightSpot",
+     "matchNorm": true
     }
    ],
-   "unlockList": [],
+   "unlockList": [
+    {
+     "key": "HyruleCastleIncident",
+     "reqName": "海拉鲁城堡的异变",
+     "linkable": true,
+     "src": "reverse"
+    }
+   ],
    "stepsUI": [
     {
      "name": "MeetPurah",
@@ -430,12 +446,45 @@
    "overlap": [],
    "reqs": [
     {
-     "type": "flag",
+     "type": "quest",
      "reqName": "海拉鲁城堡的异变",
-     "linkable": false
+     "linkable": true,
+     "key": "HyruleCastleIncident",
+     "matchNorm": true
     }
    ],
-   "unlockList": [],
+   "unlockList": [
+    {
+     "key": "CleanStatue",
+     "reqName": "被淤泥埋没的石像",
+     "linkable": true,
+     "src": "reverse"
+    },
+    {
+     "key": "SageOfFire",
+     "reqName": "鼓隆城的阿沅",
+     "linkable": true,
+     "src": "reverse"
+    },
+    {
+     "key": "SageOfGerudo",
+     "reqName": "格鲁德小镇的露珠",
+     "linkable": true,
+     "src": "reverse"
+    },
+    {
+     "key": "SageOfSoul",
+     "reqName": "来自太古的指引",
+     "linkable": true,
+     "src": "reverse"
+    },
+    {
+     "key": "SageOfWind",
+     "reqName": "利特村的丘栗",
+     "linkable": true,
+     "src": "reverse"
+    }
+   ],
    "stepsUI": [
     {
      "name": "3rdSageClear",
@@ -562,12 +611,21 @@
    "overlap": [],
    "reqs": [
     {
-     "type": "flag",
+     "type": "quest",
      "reqName": "海拉鲁城堡的异变",
-     "linkable": false
+     "linkable": true,
+     "key": "HyruleCastleIncident",
+     "matchNorm": true
     }
    ],
-   "unlockList": [],
+   "unlockList": [
+    {
+     "key": "GotoFironeZonauRemains",
+     "reqName": "环卡遗迹的秘密",
+     "linkable": true,
+     "src": "reverse"
+    }
+   ],
    "stepsUI": [
     {
      "name": "MeetTauro",
@@ -876,9 +934,11 @@
    "overlap": [],
    "reqs": [
     {
-     "type": "flag",
+     "type": "quest",
      "reqName": "前往海拉鲁大地",
-     "linkable": false
+     "linkable": true,
+     "key": "GOToTheCastleOfHyrule",
+     "matchNorm": true
     }
    ],
    "unlockList": [
@@ -908,8 +968,20 @@
      "linkable": true
     },
     {
+     "key": "ClueTotheSixthSage",
+     "reqName": "寻找第五位贤者",
+     "linkable": true,
+     "src": "reverse"
+    },
+    {
      "key": "CookAtBaseCamp",
      "reqName": "今天的菜单",
+     "linkable": true,
+     "src": "reverse"
+    },
+    {
+     "key": "SurveyOfFourVillages",
+     "reqName": "调查四地区的异变",
      "linkable": true,
      "src": "reverse"
     }
@@ -1012,12 +1084,21 @@
    "overlap": [],
    "reqs": [
     {
-     "type": "flag",
+     "type": "quest",
      "reqName": "来自太古的指引",
-     "linkable": false
+     "linkable": true,
+     "key": "SageOfSoul",
+     "matchNorm": true
     }
    ],
-   "unlockList": [],
+   "unlockList": [
+    {
+     "key": "GetMasterSword",
+     "reqName": "丢失的勇者之剑",
+     "linkable": true,
+     "src": "reverse"
+    }
+   ],
    "stepsUI": [
     {
      "name": "TalkOldKorok",
@@ -1115,9 +1196,11 @@
      "linkable": false
     },
     {
-     "type": "flag",
+     "type": "quest",
      "reqName": "大师之剑的线索",
-     "linkable": false
+     "linkable": true,
+     "key": "MasterSwordClues",
+     "matchNorm": true
     }
    ],
    "unlockList": [],
@@ -1400,9 +1483,11 @@
    "overlap": [],
    "reqs": [
     {
-     "type": "flag",
+     "type": "quest",
      "reqName": "调查四地区的异变",
-     "linkable": false
+     "linkable": true,
+     "key": "SurveyOfFourVillages",
+     "matchNorm": true
     }
    ],
    "unlockList": [
@@ -1719,9 +1804,11 @@
    "overlap": [],
    "reqs": [
     {
-     "type": "flag",
+     "type": "quest",
      "reqName": "调查四地区的异变",
-     "linkable": false
+     "linkable": true,
+     "key": "SurveyOfFourVillages",
+     "matchNorm": true
     }
    ],
    "unlockList": [
@@ -1842,12 +1929,21 @@
    "overlap": [],
    "reqs": [
     {
-     "type": "flag",
+     "type": "quest",
      "reqName": "调查四地区的异变",
-     "linkable": false
+     "linkable": true,
+     "key": "SurveyOfFourVillages",
+     "matchNorm": true
     }
    ],
-   "unlockList": [],
+   "unlockList": [
+    {
+     "key": "SageOfZora",
+     "reqName": "卓拉领地的希多",
+     "linkable": true,
+     "src": "reverse"
+    }
+   ],
    "stepsUI": [
     {
      "name": "CleanUp",
@@ -1933,12 +2029,21 @@
    "overlap": [],
    "reqs": [
     {
-     "type": "flag",
+     "type": "quest",
      "reqName": "卓拉领地的希多",
-     "linkable": false
+     "linkable": true,
+     "key": "SageOfZora",
+     "matchNorm": true
     }
    ],
-   "unlockList": [],
+   "unlockList": [
+    {
+     "key": "WaterBridgePlace",
+     "reqName": "前往天空的线索",
+     "linkable": true,
+     "src": "reverse"
+    }
+   ],
    "stepsUI": [
     {
      "name": "RepairSlate",
@@ -2034,9 +2139,11 @@
    "overlap": [],
    "reqs": [
     {
-     "type": "flag",
+     "type": "quest",
      "reqName": "卓拉领地的希多",
-     "linkable": false
+     "linkable": true,
+     "key": "SageOfZora",
+     "matchNorm": true
     }
    ],
    "unlockList": [],
@@ -2147,9 +2254,11 @@
    "overlap": [],
    "reqs": [
     {
-     "type": "flag",
+     "type": "quest",
      "reqName": "断裂的石碑",
-     "linkable": false
+     "linkable": true,
+     "key": "DividedSlate",
+     "matchNorm": true
     }
    ],
    "unlockList": [],
@@ -2487,9 +2596,11 @@
    "overlap": [],
    "reqs": [
     {
-     "type": "flag",
+     "type": "quest",
      "reqName": "被淤泥埋没的石像",
-     "linkable": false
+     "linkable": true,
+     "key": "CleanStatue",
+     "matchNorm": true
     }
    ],
    "unlockList": [
@@ -2542,6 +2653,18 @@
      "key": "gather_Insect_Z",
      "reqName": "不来交易螃蟹吗……？",
      "linkable": true
+    },
+    {
+     "key": "DividedSlate",
+     "reqName": "断裂的石碑",
+     "linkable": true,
+     "src": "reverse"
+    },
+    {
+     "key": "RepairArmor",
+     "reqName": "修复卓拉铠甲",
+     "linkable": true,
+     "src": "reverse"
     }
    ],
    "stepsUI": [
@@ -2822,9 +2945,11 @@
    "overlap": [],
    "reqs": [
     {
-     "type": "flag",
+     "type": "quest",
      "reqName": "调查四地区的异变",
-     "linkable": false
+     "linkable": true,
+     "key": "SurveyOfFourVillages",
+     "matchNorm": true
     }
    ],
    "unlockList": [
@@ -3081,9 +3206,11 @@
      "linkable": true
     },
     {
-     "type": "flag",
+     "type": "quest",
      "reqName": "寻找第五位贤者",
-     "linkable": false
+     "linkable": true,
+     "key": "ClueTotheSixthSage",
+     "matchNorm": true
     }
    ],
    "unlockList": [],
@@ -3298,9 +3425,11 @@
    "overlap": [],
    "reqs": [
     {
-     "type": "flag",
+     "type": "quest",
      "reqName": "调查四地区的异变",
-     "linkable": false
+     "linkable": true,
+     "key": "SurveyOfFourVillages",
+     "matchNorm": true
     }
    ],
    "unlockList": [
@@ -3308,6 +3437,12 @@
      "key": "Zonau_GeniusWeapon",
      "reqName": "于地底发现的“古代之刃”",
      "linkable": true
+    },
+    {
+     "key": "MasterSwordClues",
+     "reqName": "大师之剑的线索",
+     "linkable": true,
+     "src": "reverse"
     }
    ],
    "stepsUI": [
@@ -3460,6 +3595,90 @@
      "key": "FindWithSensors",
      "reqName": "哈特诺村的研究所",
      "linkable": true
+    },
+    {
+     "key": "DeepHoleSurvey2",
+     "reqName": "沉睡于地底神殿的谜团",
+     "linkable": true,
+     "src": "reverse"
+    },
+    {
+     "key": "PhotoSpot_Challenge_01",
+     "reqName": "装点新玛丽塔驿站的画作",
+     "linkable": true,
+     "src": "reverse"
+    },
+    {
+     "key": "PhotoSpot_Challenge_02",
+     "reqName": "装点森林驿站的画作",
+     "linkable": true,
+     "src": "reverse"
+    },
+    {
+     "key": "PhotoSpot_Challenge_03",
+     "reqName": "装点湿地驿站的画作",
+     "linkable": true,
+     "src": "reverse"
+    },
+    {
+     "key": "PhotoSpot_Challenge_04",
+     "reqName": "装点平原外围的驿站的画作",
+     "linkable": true,
+     "src": "reverse"
+    },
+    {
+     "key": "PhotoSpot_Challenge_05",
+     "reqName": "装点河畔驿站的画作",
+     "linkable": true,
+     "src": "reverse"
+    },
+    {
+     "key": "PhotoSpot_Challenge_06",
+     "reqName": "装点双子驿站的画作",
+     "linkable": true,
+     "src": "reverse"
+    },
+    {
+     "key": "PhotoSpot_Challenge_07",
+     "reqName": "装点塔邦挞大桥驿站的画作",
+     "linkable": true,
+     "src": "reverse"
+    },
+    {
+     "key": "PhotoSpot_Challenge_08",
+     "reqName": "装点山麓驿站的画作",
+     "linkable": true,
+     "src": "reverse"
+    },
+    {
+     "key": "PhotoSpot_Challenge_10",
+     "reqName": "装点湖畔驿站的画作",
+     "linkable": true,
+     "src": "reverse"
+    },
+    {
+     "key": "PhotoSpot_Challenge_11",
+     "reqName": "装点高原驿站的画作",
+     "linkable": true,
+     "src": "reverse"
+    },
+    {
+     "key": "PhotoSpot_Challenge_12",
+     "reqName": "装点东阿卡莱驿站的画作",
+     "linkable": true,
+     "src": "reverse"
+    },
+    {
+     "key": "PhotoSpot_Challenge_13",
+     "reqName": "装点南阿卡莱驿站的画作",
+     "linkable": true,
+     "src": "reverse"
+    },
+    {
+     "key": "PhotoSpot_Challenge_14",
+     "reqName": "装点雪原驿站的画作",
+     "linkable": true,
+     "src": "reverse"
     }
    ],
    "stepsUI": [
@@ -3604,9 +3823,11 @@
      "linkable": false
     },
     {
-     "type": "flag",
+     "type": "quest",
      "reqName": "给地底人拍照！",
-     "linkable": false
+     "linkable": true,
+     "key": "GetCamera",
+     "matchNorm": true
     }
    ],
    "unlockList": [],
@@ -3735,7 +3956,14 @@
    "onMap": true,
    "overlap": [],
    "reqs": [],
-   "unlockList": [],
+   "unlockList": [
+    {
+     "key": "MemoryOfTheDragon",
+     "reqName": "龙之泪",
+     "linkable": true,
+     "src": "reverse"
+    }
+   ],
    "stepsUI": [
     {
      "name": "GoToWandererB",
@@ -3861,9 +4089,11 @@
    "overlap": [],
    "reqs": [
     {
-     "type": "flag",
+     "type": "quest",
      "reqName": "英帕与地上图画",
-     "linkable": false
+     "linkable": true,
+     "key": "GroundPaintingAir01",
+     "matchNorm": true
     }
    ],
    "unlockList": [],
