@@ -242,6 +242,9 @@ func stateMachine() {
 	dirHist := []float32{} // 最近 3 次位移方向（归一化，3 分量/组）；连续同向
 	// 大位移（跳伞/滑翔下落）豁免场景切换垃圾判定用（2026-10-09 修复）
 
+	// 骑乘跟随状态（mount_totk.go；马 / 左纳乌摇杆挂载类载具）
+	mount := mountStateBox{}
+
 	// known 锁确认窗口状态（交替观察）
 	knownLockAt := time.Time{} // known 锁锁上时刻
 	knownSeenMove := false     // 本锁是否出现过移动采样（出现过=锁对，玩家在动）
@@ -276,6 +279,7 @@ func stateMachine() {
 		dirHist = dirHist[:0]
 		knownLockAt = time.Now() // Bug D（v2.1.2）：重置确认窗口起点，否则 coords/consensus
 		                         // 新锁继承旧 knownLockAt，0.2s 内即触发 30s watching（16:56:13 现场）
+		mount.reset()
 	}
 
 	tick := time.NewTicker(smTick)
@@ -555,6 +559,32 @@ func stateMachine() {
 			continue
 		}
 		v := loc.decode(h, a)
+
+		// ---- 骑乘跟随（mount_totk.go：马 / 左纳乌摇杆挂载类载具）----
+		// 主槽变骑乘标志时 decode 恒 nil（标志位过不了坐标校验），mount.step
+		// 在此接管坐标源：骑乘中 → 坐骑实体坐标流；下马 → 主槽秒切回。
+		// 返回 searching=true 时保持上一帧位置输出（不丢锁、不重扫）。
+		if mv, searching := mount.step(h, a, v, prev, hasPrev); mv != nil {
+			v = mv
+		} else if searching {
+			lock.mu.RLock()
+			ver := lock.verified
+			lock.mu.RUnlock()
+			out := prev
+			state.mu.Lock()
+			state.ok = true
+			state.gx, state.gy, state.gz = out[0], out[1], out[2]
+			state.mx, state.my = -out[1], out[0]
+			state.layer = layerOf(out[0], out[1], out[2])
+			state.age = float64(time.Now().UnixNano()) / 1e9
+			state.verified = ver
+			state.source = "mount (searching)"
+			state.mu.Unlock()
+			prev = out
+			hasPrev = true
+			continue
+		}
+
 		if v == nil {
 			invalidN++
 			state.mu.Lock()

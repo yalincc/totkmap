@@ -91,8 +91,72 @@
   var lastDrawKey = '';
   var offlineStreak = 0;              // 连续离线轮询数（≥2 才清实时图层，防抖动）
 
+  /* ---------------- 角色方向箭头（移植自 BOTWmap xnavi v3.1.1 现款） ----------------
+   * 纯前端位移推算（不读游戏内角度，避免历史定位失效问题）：
+   * heading = atan2(东向位移, 北向位移)，0°=北顺时针（罗盘角，箭头 SVG 基准朝北直接 rotate）。
+   * 位移 <0.8px 不算（防微抖）、>120px 不算（防传送跳变）；
+   * 每拍向目标角靠近 45%（最短弧）。
+   * ★ heading 保持连续累积（不做 %360 归零）：取模会让角度从 359.x 跳回 0.x，
+   *   CSS transition 插值走 358° 大圈 —— 表现为箭头"乱转"，2026-10-17 实测修复。
+   * 断线 ≥5 次清空回退圆点。静止保持上次方向（老大 2026-10-17 拍板）。 */
+  var heading = null;                 // 当前箭头角度（度，连续累积，0=北顺时针；null=无朝向画圆点）
+  var hdLastX = null, hdLastY = null; // 位移推算用的上一帧位置（与传送检测的 lastMX 分开）
+  var lastIconKey = null;             // 玩家标记形态 key（箭头/圆点 × verified），避免重复 setIcon
+
   var playerMark = null, trailLine = null;
   var guideLine = null, targetRing = null, distLabel = null;
+
+  /* 玩家标记图标：有朝向 = SVG 箭头（默认朝北，rotate 与 dragon-layer arrowIcon 同款
+   * 范式）；无朝向 = 圆点 div。角度旋转不经 setIcon（重建 DOM），由 redraw 直接改
+   * svg.style.transform（见 updatePlayerIcon）。 */
+  function playerIcon(hd, verified) {
+    /* V2.5.0：大小/颜色/透明度从显示设置读取（window.TOTK_SETTINGS，设置面板实时生效）。
+     * 圆点直径 = 定位点大小 × 0.58（箭头与圆点同一主尺寸参数）。 */
+    var C = window.TOTK_SETTINGS || {};
+    var color = C.dotColor || '#ff3b3b';
+    var alpha = (C.dotAlpha == null ? 0.7 : C.dotAlpha);
+    var size = clampPx(C.dotSize, 24);
+    var dot = Math.round(size * 0.58);
+    if (hd == null) {
+      return L.divIcon({
+        className: '', iconSize: [size, size], iconAnchor: [size / 2, size / 2],
+        html: '<div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);' +
+              'width:' + dot + 'px;height:' + dot + 'px;border-radius:50%;' +
+              'background:' + color + ';border:2px solid #fff;box-shadow:0 0 10px 2px rgba(255,60,60,.55);' +
+              'box-sizing:border-box;opacity:' + alpha + '"></div>'
+      });
+    }
+    return L.divIcon({
+      className: '', iconSize: [size, size], iconAnchor: [size / 2, size / 2],
+      html: '<svg class="lv-arrow" width="' + size + '" height="' + size +
+            '" viewBox="0 0 14 14" style="transform:rotate(' + (hd || 0) +
+            'deg);transition:transform .18s linear;filter:drop-shadow(0 0 4px rgba(255,60,60,.7));opacity:' + alpha + '">' +
+            '<path d="M7 0.5 L12 13 L7 10 L2 13 Z" fill="' + color + '" stroke="rgba(0,0,0,.8)"' +
+            ' stroke-width="1.2" stroke-linejoin="round"/></svg>'
+    });
+  }
+  function clampPx(v, def) {
+    v = parseInt(v, 10);
+    if (isNaN(v)) return def;
+    return Math.min(40, Math.max(16, v));
+  }
+
+  /* 更新玩家标记形态 + 旋转角。形态（箭头↔圆点、verified 尺寸）变化才 setIcon；
+   * 角度直接改 svg transform，5Hz 更新零重建。 */
+  function updatePlayerIcon() {
+    /* key 含设置修订号 _rev：面板改大小/颜色/透明度后无需刷新，下一帧自动重建图标 */
+    var rev = (window.TOTK_SETTINGS && window.TOTK_SETTINGS._rev) || 0;
+    var key = (heading == null ? 'dot' : 'arrow') + (pos.verified ? 'v' : '') + 'r' + rev;
+    if (key !== lastIconKey) {
+      lastIconKey = key;
+      playerMark.setIcon(playerIcon(heading, pos.verified));
+    }
+    if (heading != null) {
+      var el = playerMark.getElement();
+      var svg = el && el.querySelector('svg.lv-arrow');
+      if (svg) svg.style.transform = 'rotate(' + heading + 'deg)';
+    }
+  }
 
   /* ---------------- 面板元素 ---------------- */
   var $ = function (id) { return document.getElementById(id); };
@@ -104,10 +168,11 @@
   /* ---------------- 地图元素 ---------------- */
   function ensurePlayerMark() {
     if (playerMark) return;
-    playerMark = L.circleMarker([0, 0], {
-      pane: 'markerPane', radius: 5, color: '#fff', weight: 2,
-      fillColor: '#ff3b3b', fillOpacity: 0.95, interactive: false
+    playerMark = L.marker([0, 0], {
+      pane: 'markerPane', interactive: false, zIndexOffset: 1000,
+      icon: playerIcon(heading == null ? null : 0, pos.verified)
     });
+    lastIconKey = (heading == null ? 'dot' : 'arrow') + (pos.verified ? 'v' : '');
     playerMark.addTo(map);
   }
   function ensureTrail() {
@@ -274,6 +339,28 @@
       pos.layer = p.layer || 18;
       pos.verified = !!p.verified;
       pos.source = p.source || '-';
+
+      /* 方向箭头：位移推算（参数 = BOTWmap v3.1.1 已验证值，见文件头注释）。
+       * mx/my 口径：mx=北向、my=东向 → 东向位移=d(my)，北向位移=d(mx)。 */
+      if (hdLastX != null) {
+        /* ★ 轴向口径（实测 2026-10-17 + 坐标速查 §2 定案）：
+         * pos.mx = 游戏 Z_objmap，北为负（向北跑 mx 减小）→ 北向位移 = -(Δmx)；
+         * pos.my = X 东西，东为正 → 东向位移 = +(Δmy)。
+         * 此前把 Δmx 直接当北向增量 → 罗盘角南北镜像（北↔南、东北↔东南），已修。 */
+        var dE = pos.my - hdLastY, dN = hdLastX - pos.mx;
+        var hdLen = Math.sqrt(dE * dE + dN * dN);
+        if (hdLen >= 0.8 && hdLen <= 120) {
+          var tgt = Math.atan2(dE, dN) * 180 / Math.PI;
+          if (heading == null) {
+            heading = tgt;
+          } else {
+            /* 最短弧差（归一到 -180..180，兼容连续累积的大角度值） */
+            var hdiff = ((tgt - heading) % 360 + 540) % 360 - 180;
+            heading = heading + hdiff * 0.45;
+          }
+        }
+      }
+      hdLastX = pos.mx; hdLastY = pos.my;
       target = (p.target && typeof p.target.x === 'number') ? p.target : null;
       arrivedShown = arrivedShown && (target != null);
 
@@ -307,6 +394,11 @@
     } else {
       offlineStreak++;
       lastPosKey = null;
+      if (offlineStreak >= 5) {
+        /* 断线 ≥5 次：清朝向与推算基准，重连后重新起步（防箭头指着断线前旧方向） */
+        heading = null;
+        hdLastX = hdLastY = null;
+      }
     }
     /* V2.4.0 手机镜像：服务端 lanUrl 变化 → 更新面板；
        ★ 2026-10-09：面板开着时，服务不可达 / 未定位 → 降级提示「未检测到本地定位服务」
@@ -392,6 +484,7 @@
   function redraw() {
     var dk = (pos.online ? '1' : '0') + (pos.verified ? 'v' : '') +
              (pos.mx != null ? Math.round(pos.mx / 2) + ':' + Math.round(pos.my / 2) : '') +
+             (heading != null ? 'h' + Math.round(heading / 4) : '') +
              (target ? 't' : '') + (arrivedShown ? 'a' : '') +
              (pos.layer || '');
     if (dk === lastDrawKey) return;
@@ -412,11 +505,37 @@
     if (trail.length) trailLine.setLatLngs(trail);
 
     ensurePlayerMark();
-    playerMark.setLatLng([pos.mx, pos.my]);
-    var ok = pos.verified;
-    playerMark.setRadius(ok ? 7 : 5);
-    playerMark.setStyle({ fillOpacity: ok ? 0.95 : 0.55 });
+    animatePlayerTo(pos.mx, pos.my);
+    updatePlayerIcon();
     drawGuide();
+  }
+
+  /* ---------------- 红点位置插值（治"跟随顿挫"） ----------------
+   * /pos 600ms 一帧，红点若直接 setLatLng 会一步一跳。这里在两次采样之间
+   * 50ms 一小步线性插值挪过去，视觉变连续；传送/跳变 >200 游戏单位直接落点
+   * 不动画。只动 marker，不进 redraw 主流程（drawKey/轨迹逻辑不受影响）。 */
+  var animTimer = null, animFrom = null, animTo = null, animStart = 0;
+  function animatePlayerTo(mx, my) {
+    if (!playerMark) return;
+    var cur = playerMark.getLatLng();
+    if (animFrom == null || Math.abs(mx - cur.lat) + Math.abs(my - cur.lng) > 200) {
+      playerMark.setLatLng([mx, my]);
+      animFrom = null;
+      return;
+    }
+    animFrom = [cur.lat, cur.lng];
+    animTo = [mx, my];
+    animStart = performance.now();
+    if (animTimer) return;
+    animTimer = setInterval(function () {
+      if (!playerMark || animTo == null) { clearInterval(animTimer); animTimer = null; return; }
+      var t = Math.min(1, (performance.now() - animStart) / POLL_MS);
+      playerMark.setLatLng([
+        animFrom[0] + (animTo[0] - animFrom[0]) * t,
+        animFrom[1] + (animTo[1] - animFrom[1]) * t
+      ]);
+      if (t >= 1) { clearInterval(animTimer); animTimer = null; }
+    }, 50);
   }
 
   /* ---------------- 视图跟随（V1.8.3：范围跟随，防持续动画晕眩/卡顿） ---------------- */

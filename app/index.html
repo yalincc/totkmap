@@ -126,7 +126,7 @@
   </div>
 
   <footer class="side-foot">
-    <p class="foot-version">TOTKMAP V2.5.0 © 2026 yalincc</p>
+    <p class="foot-version">TOTKMAP V2.5.1 © 2026 yalincc</p>
     <p>GitHub <a href="https://github.com/yalincc/totkmap" target="_blank" rel="noopener">https://github.com/yalincc/totkmap</a></p>
   </footer>
 </aside>
@@ -229,8 +229,85 @@
 <div class="bottom-bar">
   <button id="addMarkerBtn" class="bar-btn">+ 新增标点</button>
   <button id="navBtn" class="bar-btn" title="实时定位导航（需本地 TOTKNavi 服务）">🧭 导航</button>
-  <button id="feedbackBtn" class="bar-btn">? 问题</button>
+  <button id="settingsBtn" class="bar-btn" title="显示设置（图标大小 / 定位点样式 / 完成标记）">⚙ 设置</button>
 </div>
+
+<!-- ============ 显示设置面板（V2.5.0 v4：锚定设置按钮上方 + 可拖动 + 纵向紧凑） ============ -->
+<div id="settingsModal" class="set-pop hidden">
+  <div class="card-head" id="setHead">
+    <span class="chip">显示设置</span>
+    <button id="setClose" class="detail-close" title="关闭（可按住标题栏拖动）">×</button>
+  </div>
+  <div class="set-divider"></div>
+
+  <div class="set-sec">
+    <div class="set-sec-title">图标大小</div>
+    <div class="set-field"><input type="number" id="setIconSize" min="22" max="30" step="2" value="24"> <i>px</i></div>
+    <div class="set-hint">范围 22 - 30</div>
+  </div>
+
+  <div class="set-sec">
+    <div class="set-sec-title">定位标记</div>
+    <div class="set-inline3">
+      <input type="number" id="setDotSize" min="16" max="40" step="2" value="24" title="大小"> <i>px</i>
+      <input type="color" id="setDotColorPick" value="#ff3b3b" title="颜色">
+      <input type="text" id="setDotColorHex" value="#ff3b3b" maxlength="7" spellcheck="false" title="颜色hex">
+      <input type="number" id="setDotAlpha" min="30" max="100" step="5" value="70" title="透明度"> <i>%</i>
+    </div>
+    <div class="set-hint">范围：大小 16 - 40 · 透明度 30 - 100%</div>
+  </div>
+
+  <div class="set-sec">
+    <div class="set-sec-title">完成标记图标</div>
+    <div class="set-opts" id="setDoneModeBtns">
+      <button class="set-opt" data-v="default">显示</button>
+      <button class="set-opt" data-v="hide">隐藏</button>
+    </div>
+    <div class="set-hint">隐藏后，已标记完成的点不再显示</div>
+  </div>
+
+  <div class="set-actions">
+    <button id="setReset" class="set-ghost">重置默认</button>
+  </div>
+</div>
+<style id="settings-css">
+  /* V2.5.0 v4：设置卡片（detail-card 同款），位置由 JS 锚定到「设置」按钮上方，标题栏可拖动 */
+  #settingsModal.set-pop {
+    position: fixed; z-index: 500; width: 320px;
+    background: rgba(20,22,26,.97); border: 1px solid rgba(255,255,255,.13);
+    border-radius: 12px; box-shadow: 0 10px 34px rgba(0,0,0,.55);
+    padding: 12px 14px; font-size: 13px;
+  }
+  #settingsModal .card-head { margin-bottom: 0; }
+  .set-divider { border-top: 1px solid rgba(255,255,255,.12); margin: 10px -14px 4px; }
+  .set-sec { margin: 10px 0; }
+  .set-sec-title {
+    font-size: 14px; color: #e8ecf1; margin-bottom: 6px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .set-sec-title .set-state { font-size: 12px; color: #eac27e; }
+  .set-field { display: flex; align-items: center; gap: 4px; color: #8a93a0; font-size: 12px; }
+  .set-sec input[type="number"], .set-sec input[type="text"] {
+    width: 70px; padding: 5px 6px; font-size: 13px; text-align: center;
+    background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.15);
+    border-radius: 8px; color: #e8ecf1; box-sizing: border-box;
+  }
+  .set-inline3 { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .set-inline3 input[type="number"] { width: 58px; }
+  .set-inline3 input[type="text"] { width: 72px; font-family: monospace; }
+  .set-inline3 input[type="color"] { width: 34px; height: 28px; padding: 1px; border: 1px solid rgba(255,255,255,.15); border-radius: 6px; background: none; cursor: pointer; }
+  .set-inline3 i { font-style: normal; color: #8a93a0; font-size: 12px; }
+  .set-hint { font-size: 10px; color: #6b7280; margin-top: 4px; }
+  .set-opts { display: flex; gap: 6px; margin-top: 4px; }
+  .set-opt {
+    padding: 4px 12px; border: 1px solid rgba(255,255,255,.15); border-radius: 8px;
+    background: rgba(255,255,255,.06); cursor: pointer; font-size: 12px; color: #c8cdd4;
+  }
+  .set-opt.on { border-color: #eac27e; background: rgba(234,194,126,.12); color: #eac27e; }
+  .set-actions { display: flex; justify-content: flex-end; margin-top: 12px; }
+  .set-ghost { padding: 5px 12px; border-radius: 8px; cursor: pointer; font-size: 12px; background: none; border: 1px solid rgba(255,255,255,.2); color: #c8cdd4; }
+  .set-ghost:hover { border-color: #eac27e; color: #eac27e; }
+</style>
 
 <!-- 自定义标点表单 -->
 <div id="addMarkerModal" class="modal hidden">
@@ -354,8 +431,8 @@
 <!-- 图鉴站地址（联动「查看图鉴」按钮 / 对站跳转）：正式图鉴站地址配置后填写，留空则按钮不显示 -->
 <script>window.TOTK_COMPENDIUM_URL = '';</script>
 <script src="js/save-parser.js"></script>
-<script src="js/app.js?v=274"></script>
-<script src="js/live.js?v=242"></script>
+<script src="js/app.js?v=280"></script>
+<script src="js/live.js?v=249"></script>
 <script src="js/explore-auto.js?v=193"></script>
 <script src="js/mat-auto.js?v=194"></script>
 <!-- 手机防息屏降级（V2.4.1）：wakeLock 不可用（局域网 http / iOS 旧版）时播放静音视频保持屏幕常亮；

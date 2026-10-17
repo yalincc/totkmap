@@ -10,11 +10,38 @@
   var CATALOGS = window.TOTK_CATALOGS || [];
   var AREAS = window.TOTK_AREAS || [];
   var MARKERS = window.TOTK_MARKERS || [];
+
+  /* ---------------- 显示设置（V2.5.0，localStorage 持久化） ----------------
+   * 设置面板：图标大小 / 定位点大小·颜色·透明度 / 已完成标记。实时生效。
+   * 重置默认（老大定）：图标 28、定位点 28、红色、不透明、完成标记显示。 */
+  var SETTINGS = (function () {
+    var DEF = { iconSize: 24, dotSize: 24, dotColor: '#ff3b3b', dotAlpha: 0.7, doneMode: 'default' };
+    var RESET = { iconSize: 28, dotSize: 28, dotColor: '#ff3b3b', dotAlpha: 1, doneMode: 'default' };
+    var s = DEF;
+    try {
+      var raw = localStorage.getItem('totkmap.settings.v1');
+      if (raw) s = Object.assign({}, DEF, JSON.parse(raw));
+    } catch (e) {}
+    s.reset = function () {
+      Object.assign(s, RESET);
+      try { localStorage.setItem('totkmap.settings.v1', JSON.stringify({
+        iconSize: s.iconSize, dotSize: s.dotSize, dotColor: s.dotColor, dotAlpha: s.dotAlpha, doneMode: s.doneMode
+      })); } catch (e) {}
+    };
+    s.save = function () {
+      s._rev = (s._rev || 0) + 1; // live.js 据此感知设置变化强制重建红点图标（修 F5 才生效问题）
+      try { localStorage.setItem('totkmap.settings.v1', JSON.stringify({
+        iconSize: s.iconSize, dotSize: s.dotSize, dotColor: s.dotColor, dotAlpha: s.dotAlpha, doneMode: s.doneMode
+      })); } catch (e) {}
+    };
+    return s;
+  })();
+  window.TOTK_SETTINGS = SETTINGS; // live.js 红点/箭头读取（颜色/大小/透明度）
   var AREA_CAVE = window.TOTK_AREA_CAVE || [];
   var AREA_SKY = window.TOTK_AREA_SKY || [];
   var AREA_DEPTHS = window.TOTK_AREA_DEPTHS || [];
 
-  var VERSION = 'TOTKMAP V2.5.0';
+  var VERSION = 'TOTKMAP V2.5.1';
   var LS_DONE = 'totkmap_done_v1';
   var LS_CUSTOM = 'totkmap_custom_v1';
   var LS_LAYER = 'totkmap_layer_v1';
@@ -288,43 +315,51 @@
     for (var i = 0; i < MARKERS.length; i++) {
       var m = MARKERS[i];
       if (m.layer !== state.layer || !state.selected[m.cat]) continue;
+      var isDone = !!state.done[m.id];
+      /* V2.5.0：已完成标记=隐藏 时，计数与实际显示一致（完成的点不计入已显示） */
+      if (isDone && SETTINGS.doneMode === 'hide') continue;
       total++;
-      if (state.done[m.id]) done++;
+      if (isDone) done++;
     }
     var cl = $('countLabel');
     if (cl) cl.textContent = '已显示 ' + total + ' 个标点 · 已完成 ' + done;
   }
 
   /* ---------------- 标记渲染 ---------------- */
+  /* V2.5.0：iconSize 可设置（22/24/28），缓存按 图标+尺寸 双 key */
   var iconCache = {};
   function iconFor(cat) {
     if (!cat || !cat.icon) return null;
-    if (!iconCache[cat.icon]) {
-      iconCache[cat.icon] = L.icon({
+    var key = cat.icon + '#' + SETTINGS.iconSize;
+    if (!iconCache[key]) {
+      iconCache[key] = L.icon({
         iconUrl: 'assets/icons/' + cat.icon,
-        iconSize: [22, 22],
-        iconAnchor: [11, 11],
+        iconSize: [SETTINGS.iconSize, SETTINGS.iconSize],
+        iconAnchor: [SETTINGS.iconSize / 2, SETTINGS.iconSize / 2],
         popupAnchor: [0, -10]
       });
     }
-    return iconCache[cat.icon];
+    return iconCache[key];
   }
   /* V1.9.3 完成标记：图标本体 100% 清晰 + 右上角绿色小勾（参考游戏内洞穴「已拿魔犹伊遗失物」打勾，
-   * 统一语义：已标记完成 = 右上角打勾）。divIcon 仅用于完成点，未完成仍用 L.icon，无性能负担 */
+   * 统一语义：已标记完成 = 右上角打勾）。divIcon 仅用于完成点，未完成仍用 L.icon，无性能负担
+   * V2.5.0：尺寸跟随设置 */
   var doneIconCache = {};
   function doneIconFor(cat) {
     if (!cat || !cat.icon) return null;
-    if (!doneIconCache[cat.icon]) {
-      doneIconCache[cat.icon] = L.divIcon({
+    var key = cat.icon + '#' + SETTINGS.iconSize;
+    if (!doneIconCache[key]) {
+      var sz = SETTINGS.iconSize;
+      doneIconCache[key] = L.divIcon({
         className: 'mk-done-icon',
-        html: '<img src="assets/icons/' + cat.icon + '" width="22" height="22" alt="">' +
+        html: '<img src="assets/icons/' + cat.icon + '" width="' + sz + '" height="' + sz + '" alt="">' +
               '<span class="mk-done-check">✓</span>',
-        iconSize: [22, 22],
-        iconAnchor: [11, 11],
+        iconSize: [sz, sz],
+        iconAnchor: [sz / 2, sz / 2],
         popupAnchor: [0, -10]
       });
     }
-    return doneIconCache[cat.icon];
+    return doneIconCache[key];
   }
 
   function renderMarkers() {
@@ -341,6 +376,8 @@
       if (m.layer !== state.layer) return;
       if (!state.selected[m.cat]) return;
       var isDone = !!state.done[m.id];
+      /* V2.5.0：已完成标记=隐藏 时，完成的点直接不绘制 */
+      if (isDone && SETTINGS.doneMode === 'hide') return;
       if (state.filter === 'done' && !isDone) return;
       if (state.filter === 'undone' && isDone) return;
 
@@ -1334,9 +1371,149 @@
   }
 
   /* ---------------- 问题反馈 ---------------- */
-  $('feedbackBtn').addEventListener('click', function () {
-    toast('本地离线版：发现数据错误可反馈给制作者修正');
-  });
+  /* V2.5.0：「? 问题」按钮已按老大要求移除（保留 新增标点/导航/设置） */
+
+  /* ---------------- 显示设置面板（V2.5.0 v4：锚定「设置」按钮上方，标题栏可拖动） ---------------- */
+  (function initSettingsPanel() {
+    var modal = $('settingsModal');
+    if (!modal) return;
+    var positioned = false; // 首次打开按按钮位置锚定；拖动后保留位置
+
+    function clamp(v, lo, hi, def) {
+      v = parseInt(v, 10);
+      if (isNaN(v)) return def;
+      return Math.min(hi, Math.max(lo, v));
+    }
+    function isHexColor(v) { return /^#[0-9a-fA-F]{6}$/.test(v); }
+
+    function anchorToButton() {
+      var btn = $('settingsBtn');
+      if (!btn) return;
+      var r = btn.getBoundingClientRect();
+      var left = Math.max(8, Math.min(r.left, window.innerWidth - modal.offsetWidth - 8));
+      var top = r.top - modal.offsetHeight - 8;
+      if (top < 8) top = Math.min(r.bottom + 8, window.innerHeight - modal.offsetHeight - 8);
+      modal.style.left = left + 'px';
+      modal.style.top = top + 'px';
+    }
+    function open() {
+      modal.classList.remove('hidden');
+      if (!positioned) { anchorToButton(); positioned = true; }
+      syncUI();
+    }
+    function close() { modal.classList.add('hidden'); }
+    function toggle() { modal.classList.contains('hidden') ? open() : close(); }
+    $('settingsBtn').addEventListener('click', function (e) { e.stopPropagation(); toggle(); });
+    $('setClose').addEventListener('click', close);
+    $('setReset').addEventListener('click', function () {
+      SETTINGS.reset();
+      syncUI();
+      renderMarkers();
+      updateCount();
+      toast('已重置为默认显示设置');
+    });
+    document.addEventListener('click', function (e) {
+      if (modal.classList.contains('hidden')) return;
+      if (modal.contains(e.target)) return;
+      if (e.target === $('settingsBtn') || $('settingsBtn').contains(e.target)) return;
+      close();
+    });
+
+    /* 标题栏拖动（initCardDrag 同款，参考 BOTWmap） */
+    (function initSetDrag() {
+      var head = $('setHead');
+      if (!head) return;
+      var dragging = false, sx = 0, sy = 0, ox = 0, oy = 0;
+      function down(e) {
+        if (e.target.closest && e.target.closest('.detail-close')) return;
+        dragging = true;
+        sx = e.clientX; sy = e.clientY;
+        ox = modal.offsetLeft; oy = modal.offsetTop;
+      }
+      function move(e) {
+        if (!dragging) return;
+        modal.style.left = Math.max(0, Math.min(ox + e.clientX - sx, window.innerWidth - modal.offsetWidth)) + 'px';
+        modal.style.top = Math.max(0, Math.min(oy + e.clientY - sy, window.innerHeight - 60)) + 'px';
+      }
+      function up() { dragging = false; }
+      head.addEventListener('mousedown', down);
+      head.addEventListener('touchstart', function (e) {
+        if (e.touches && e.touches[0]) down(e.touches[0]);
+      }, { passive: true });
+      document.addEventListener('mousemove', move);
+      document.addEventListener('touchmove', function (e) {
+        if (e.touches && e.touches[0]) move(e.touches[0]);
+      }, { passive: true });
+      document.addEventListener('mouseup', up);
+      document.addEventListener('touchend', up);
+    })();
+
+    function syncUI() {
+      var rs = $('setIconSize');
+      if (rs) rs.value = SETTINGS.iconSize;
+      var ds = $('setDotSize');
+      if (ds) ds.value = SETTINGS.dotSize;
+      var pk = $('setDotColorPick'), hx = $('setDotColorHex');
+      if (pk) pk.value = SETTINGS.dotColor;
+      if (hx && document.activeElement !== hx) hx.value = SETTINGS.dotColor;
+      var al = $('setDotAlpha');
+      if (al) al.value = Math.round(SETTINGS.dotAlpha * 100);
+      var wrap = $('setDoneModeBtns');
+      if (wrap) wrap.querySelectorAll('.set-opt').forEach(function (b) {
+        b.classList.toggle('on', b.dataset.v === SETTINGS.doneMode);
+      });
+    }
+
+    /* 图标大小：number 22~30（change 生效 + 重建标记） */
+    var iconSize = $('setIconSize');
+    if (iconSize) iconSize.addEventListener('change', function () {
+      SETTINGS.iconSize = clamp(iconSize.value, 22, 30, 24);
+      iconSize.value = SETTINGS.iconSize;
+      SETTINGS.save();
+      renderMarkers();
+    });
+
+    /* 定位标记：大小 / 颜色 / 透明度 */
+    var dotSize = $('setDotSize');
+    if (dotSize) dotSize.addEventListener('change', function () {
+      SETTINGS.dotSize = clamp(dotSize.value, 16, 40, 24);
+      dotSize.value = SETTINGS.dotSize;
+      SETTINGS.save();
+    });
+    var pick = $('setDotColorPick'), hex = $('setDotColorHex');
+    if (pick) pick.addEventListener('input', function () {
+      SETTINGS.dotColor = pick.value;
+      if (hex) hex.value = pick.value;
+      SETTINGS.save();
+    });
+    if (hex) hex.addEventListener('change', function () {
+      var v = hex.value.trim();
+      if (!isHexColor(v)) { hex.value = SETTINGS.dotColor; return; }
+      SETTINGS.dotColor = v;
+      if (pick) pick.value = v;
+      SETTINGS.save();
+    });
+    var alpha = $('setDotAlpha');
+    if (alpha) alpha.addEventListener('change', function () {
+      SETTINGS.dotAlpha = clamp(alpha.value, 30, 100, 70) / 100;
+      alpha.value = Math.round(SETTINGS.dotAlpha * 100);
+      SETTINGS.save();
+    });
+
+    /* 已完成标记：显示 / 隐藏 两按钮 */
+    var doneWrap = $('setDoneModeBtns');
+    if (doneWrap) doneWrap.querySelectorAll('.set-opt').forEach(function (b) {
+      b.addEventListener('click', function () {
+        SETTINGS.doneMode = b.dataset.v;
+        SETTINGS.save();
+        syncUI();
+        renderMarkers();
+        updateCount();
+      });
+    });
+
+    syncUI();
+  })();
 
   /* ---------------- 存档同步（《王国之泪》progress.sav） ---------------- */
   function loadSaveSync() {

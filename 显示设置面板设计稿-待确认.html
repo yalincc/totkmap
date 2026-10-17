@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>显示设置面板 · 设计稿（TOTKmap V2.5.1）</title>
+<style>
+  /* ============================================================
+     显示设置面板 · 设计稿（自包含，可直接改样式后发回）
+     对应实现：app/index.html 的 #settingsModal + #settings-css
+     改法：直接改本文件里的样式/结构，发回给 AI 同步进正式页面
+     ============================================================ */
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    font-family: "Segoe UI", "Microsoft YaHei", sans-serif;
+    background: #8a9a6a; /* 模拟地图底色（实际为地图瓦片） */
+    overflow: hidden;
+  }
+  /* 模拟地图上的假标点（仅设计稿氛围用） */
+  .fake-dot { position: absolute; width: 10px; height: 10px; border-radius: 50%; background: #3d5a80; border: 1px solid rgba(255,255,255,.7); }
+
+  /* ---------- 底部工具条（与正式页一致） ---------- */
+  .bottom-bar {
+    position: fixed; left: 0; right: 0; bottom: 0; height: 48px; z-index: 400;
+    display: flex; align-items: center; gap: 10px; padding: 0 16px;
+    background: rgba(15,17,20,.92); border-top: 1px solid rgba(255,255,255,.1);
+  }
+  .bar-btn {
+    padding: 7px 16px; border-radius: 8px; cursor: pointer; font-size: 13px;
+    background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.15); color: #e8ecf1;
+  }
+  .bar-btn:hover { border-color: #eac27e; }
+  .bar-btn.active { border-color: #eac27e; color: #eac27e; }
+
+  /* ============================================================
+     ★ 设置卡片本体（改这里）
+     ============================================================ */
+  #settingsModal {
+    position: fixed; z-index: 500; width: 320px;
+    left: 560px; bottom: 58px;               /* 锚定在「设置」按钮上方（正式页由 JS 按按钮位置计算） */
+    background: rgba(20,22,26,.97); border: 1px solid rgba(255,255,255,.13);
+    border-radius: 12px; box-shadow: 0 10px 34px rgba(0,0,0,.55);
+    padding: 12px 14px; font-size: 13px;
+  }
+  #settingsModal .card-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0; }
+  .chip {
+    display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px;
+    background: rgba(234,194,126,.10); color: #eac27e; border: 1px solid rgba(234,194,126,.35);
+  }
+  .detail-close { background: none; border: none; color: #8a93a0; font-size: 20px; cursor: pointer; line-height: 1; }
+  .detail-close:hover { color: #fff; }
+  .set-divider { border-top: 1px solid rgba(255,255,255,.12); margin: 10px -14px 4px; }
+
+  .set-sec { margin: 10px 0; }
+  .set-sec-title {
+    font-size: 14px; color: #e8ecf1; margin-bottom: 6px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .set-field { display: flex; align-items: center; gap: 4px; color: #8a93a0; font-size: 12px; }
+  .set-sec input[type="number"], .set-sec input[type="text"] {
+    width: 70px; padding: 5px 6px; font-size: 13px; text-align: center;
+    background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.15);
+    border-radius: 8px; color: #e8ecf1; box-sizing: border-box;
+  }
+  .set-inline3 { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .set-inline3 input[type="number"] { width: 58px; }
+  .set-inline3 input[type="text"] { width: 72px; font-family: monospace; }
+  .set-inline3 input[type="color"] { width: 34px; height: 28px; padding: 1px; border: 1px solid rgba(255,255,255,.15); border-radius: 6px; background: none; cursor: pointer; }
+  .set-inline3 i { font-style: normal; color: #8a93a0; font-size: 12px; }
+  .set-hint { font-size: 10px; color: #6b7280; margin-top: 4px; }
+
+  .set-opts { display: flex; gap: 6px; margin-top: 4px; }
+  .set-opt {
+    padding: 4px 12px; border: 1px solid rgba(255,255,255,.15); border-radius: 8px;
+    background: rgba(255,255,255,.06); cursor: pointer; font-size: 12px; color: #c8cdd4;
+  }
+  .set-opt.on { border-color: #eac27e; background: rgba(234,194,126,.12); color: #eac27e; }
+
+  .set-actions { display: flex; justify-content: flex-end; margin-top: 12px; }
+  .set-ghost {
+    padding: 5px 12px; border-radius: 8px; cursor: pointer; font-size: 12px;
+    background: none; border: 1px solid rgba(255,255,255,.2); color: #c8cdd4;
+  }
+  .set-ghost:hover { border-color: #eac27e; color: #eac27e; }
+
+  /* ---------- 顶部备注（仅设计稿有） ---------- */
+  .draft-note {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 600;
+    background: #1d232e; border-bottom: 1px solid #eac27e;
+    padding: 8px 16px; font-size: 12px; color: #c8cdd4;
+  }
+  .draft-note b { color: #eac27e; }
+</style>
+</head>
+<body>
+
+<div class="draft-note">
+  <b>设计稿说明：</b>这是「⚙ 设置」弹卡片的独立预览（可交互）。直接改本文件的样式/结构，发回给 AI 同步进正式页面。
+  对应实现：<b>app/index.html → #settingsModal + #settings-css</b>。
+</div>
+
+<!-- 模拟地图假标点 -->
+<div class="fake-dot" style="left:20%;top:30%"></div>
+<div class="fake-dot" style="left:45%;top:55%"></div>
+<div class="fake-dot" style="left:70%;top:25%"></div>
+<div class="fake-dot" style="left:30%;top:70%"></div>
+<div class="fake-dot" style="left:60%;top:40%"></div>
+
+<!-- ============ 设置卡片本体 ============ -->
+<div id="settingsModal">
+  <div class="card-head" id="setHead">
+    <span class="chip">显示设置</span>
+    <button class="detail-close" title="关闭（可按住标题栏拖动）">×</button>
+  </div>
+  <div class="set-divider"></div>
+
+  <div class="set-sec">
+    <div class="set-sec-title">图标大小</div>
+    <div class="set-field"><input type="number" id="dIconSize" min="22" max="30" step="2" value="24"> <i>px</i></div>
+    <div class="set-hint">范围 22 - 30</div>
+  </div>
+
+  <div class="set-sec">
+    <div class="set-sec-title">定位标记</div>
+    <div class="set-inline3">
+      <input type="number" id="dDotSize" min="16" max="40" step="2" value="24" title="大小"> <i>px</i>
+      <input type="color" id="dDotColorPick" value="#ff3b3b" title="颜色">
+      <input type="text" id="dDotColorHex" value="#ff3b3b" maxlength="7" spellcheck="false" title="颜色hex">
+      <input type="number" id="dDotAlpha" min="30" max="100" step="5" value="70" title="透明度"> <i>%</i>
+    </div>
+    <div class="set-hint">范围：大小 16 - 40 · 透明度 30 - 100%</div>
+  </div>
+
+  <div class="set-sec">
+    <div class="set-sec-title">完成标记图标
+      <span class="set-opts" id="dDoneMode">
+        <button class="set-opt on" data-v="default">显示</button>
+        <button class="set-opt" data-v="hide">隐藏</button>
+      </span>
+    </div>
+    <div class="set-hint">隐藏后，已标记完成的点不再显示</div>
+  </div>
+
+  <div class="set-actions">
+    <button class="set-ghost" id="dReset">重置默认</button>
+  </div>
+</div>
+
+<!-- ============ 底部工具条 ============ -->
+<div class="bottom-bar">
+  <button class="bar-btn">+ 新增标点</button>
+  <button class="bar-btn">🧭 导航</button>
+  <button class="bar-btn active" onclick="toggleCard()">⚙ 设置</button>
+</div>
+
+<script>
+  /* 设计稿交互：卡片显隐 + 拖动 + 假数据联动（改样式不碰这段也行） */
+  var card = document.getElementById('settingsModal');
+  function toggleCard() { card.style.display = card.style.display === 'none' ? 'block' : 'none'; }
+
+  /* 拖动（按住标题栏） */
+  (function () {
+    var head = document.getElementById('setHead'), dragging = false, sx = 0, sy = 0, ox = 0, oy = 0;
+    head.addEventListener('mousedown', function (e) {
+      if (e.target.closest('.detail-close')) return;
+      dragging = true; sx = e.clientX; sy = e.clientY;
+      ox = card.offsetLeft; oy = card.offsetTop;
+    });
+    document.addEventListener('mousemove', function (e) {
+      if (!dragging) return;
+      card.style.left = Math.max(0, Math.min(ox + e.clientX - sx, innerWidth - card.offsetWidth)) + 'px';
+      card.style.top = Math.max(0, Math.min(oy + e.clientY - sy, innerHeight - 60)) + 'px';
+    });
+    document.addEventListener('mouseup', function () { dragging = false; });
+  })();
+
+  /* 假数据联动演示（图标/定位点在"地图"上跟随变化） */
+  var demo = { icon: 24, dot: 24, color: '#ff3b3b', alpha: 0.7 };
+  function refreshDots() {
+    document.querySelectorAll('.fake-dot').forEach(function (d) {
+      d.style.width = d.style.height = demo.dot + 'px';
+      d.style.background = demo.color;
+      d.style.opacity = demo.alpha;
+    });
+  }
+  document.getElementById('dIconSize').addEventListener('change', function () { demo.icon = parseInt(this.value) || 24; });
+  document.getElementById('dDotSize').addEventListener('change', function () { demo.dot = parseInt(this.value) || 24; refreshDots(); });
+  document.getElementById('dDotColorPick').addEventListener('input', function () {
+    demo.color = this.value;
+    document.getElementById('dDotColorHex').value = this.value;
+    refreshDots();
+  });
+  document.getElementById('dDotColorHex').addEventListener('change', function () {
+    if (/^#[0-9a-fA-F]{6}$/.test(this.value)) { demo.color = this.value; refreshDots(); }
+  });
+  document.getElementById('dDotAlpha').addEventListener('change', function () { demo.alpha = (parseInt(this.value) || 70) / 100; refreshDots(); });
+  document.getElementById('dReset').addEventListener('click', function () {
+    demo = { icon: 28, dot: 28, color: '#ff3b3b', alpha: 1 };
+    document.getElementById('dIconSize').value = 28;
+    document.getElementById('dDotSize').value = 28;
+    document.getElementById('dDotColorPick').value = '#ff3b3b';
+    document.getElementById('dDotColorHex').value = '#ff3b3b';
+    document.getElementById('dDotAlpha').value = 100;
+    document.querySelectorAll('#dDoneMode .set-opt').forEach(function (b) { b.classList.toggle('on', b.dataset.v === 'default'); });
+    refreshDots();
+  });
+  document.querySelectorAll('#dDoneMode .set-opt').forEach(function (b) {
+    b.addEventListener('click', function () {
+      document.querySelectorAll('#dDoneMode .set-opt').forEach(function (x) { x.classList.remove('on'); });
+      b.classList.add('on');
+    });
+  });
+  refreshDots();
+</script>
+</body>
+</html>
