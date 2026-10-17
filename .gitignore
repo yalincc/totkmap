@@ -20,25 +20,8 @@ Thumbs.db
 .DS_Store
 desktop.ini
 *.bak-v*
-# 定位服务运行时数据（机器相关偏移，不入库）
-live-python/known_addrs.json
-live-go/known_addrs.json
+# 定位服务运行时数据与 z7 瓦片（不入库）
 app/tiles_obj/*/7/
-live-go/TOTKNavi.exe
-live-go/*.exe
-live-go/status.json
-live-go/run-*.log
-live-go/run-events.log*
-live-go/*.exe~
-live-go/run_*.log
-live-go/run_*.err
-
-# 定位服务 exe 备份（重构迭代留档，不入库）
-live-go/*-bak
-live-go/*-broken
-
-# GUI 部署目录（编译产物 + 运行时数据，不入库；源码在 xnavi-gui/）
-live-gui/
 
 # V2.1 任务板块归档的数据快照（tasks.js/task-plan.js/task-save.js/catalogs.js/task-panel.js）：
 # 与 app/data、app/js 下同名文件逐字节相同，git 里已有；快照只留本地做基线参照
@@ -78,10 +61,9 @@ xnavi/data-check.txt
 xnavi/build-check.txt
 
 # V2.5 治理（2026-10-09，对齐 BOTWmap 原则）：
-# 数据流水线/工具脚本、归档、已废弃定位实现、发布包、大压缩包——产物已打进 app/，不入库
+# 数据流水线/工具脚本、归档、发布包、大压缩包——产物已打进 app/，不入库
 归档/
 tools/
-live-python/
 release/
 app.rar
 
@@ -99,6 +81,8 @@ certs/
 *.md
 !README.md
 !**/README.md
+!README.en.md
+!**/README.en.md
 !CHANGELOG.md
 !**/CHANGELOG.md
 
@@ -111,13 +95,6 @@ xnavi-gui/frontend/package.json.md5
 xnavi/*.py
 xnavi/exe-scan.txt
 xnavi/icon-src.txt
-
-# live-eden 调试备份 / live-go 构建产物
-live-eden/backup/
-live-eden/engine/*planA-rewrite
-live-eden/engine/*.wip-*
-live-go/build-err.log
-live-go/dist/
 
 # 编辑器与验收截图（本地留底）
 .vscode/

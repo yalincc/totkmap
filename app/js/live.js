@@ -1,6 +1,6 @@
 /* ============ TOTKMAP · 实时定位 + 导航面板（V1.8.0 M2） ============
  *
- * 对接本地定位服务（live-python，端口 8766）：
+ * 对接本地定位服务（xnavi，端口 8766）：
  *   GET  /pos     玩家位置 + 目标（600ms 轮询）
  *   POST /target  设置 / 清除导航目标（含 layer，判断是否跨层）
  *
@@ -263,7 +263,7 @@
   var toastTimer = null;
 
   /* ---------------- 轮询 ----------------
-   * ★ 定位服务（live-python / xnavi）没启动时，浏览器会在控制台里
+   * ★ 定位服务（xnavi）没启动时，浏览器会在控制台里
    *   每 600ms 刷一条红色的 GET /pos  ERR_CONNECTION_REFUSED，
    *   刷一整天，人看着以为页面坏了。
    *
@@ -589,7 +589,7 @@
 
   /* ---------------- 导航目标 ---------------- */
   function navigate(opts) {
-    if (!pos.online) { toast('实时定位服务未连接（live-python 未启动）'); return false; }
+    if (!pos.online) { toast('实时定位服务未连接（TOTKNavi 未启动）'); return false; }
     if (!pos.located) { toast('尚未获取玩家位置（请先进入游戏可操作）'); return false; }
     var body = {
       name: opts.name || '目标', x: opts.x, y: opts.y,
@@ -670,7 +670,7 @@
 
   /* 导航按钮切换：同一目标再次点击 = 停止导航 */
   function toggleNav(opts) {
-    if (!pos.online) { toast('实时定位服务未连接（live-python 未启动）'); return 'offline'; }
+    if (!pos.online) { toast('实时定位服务未连接（TOTKNavi 未启动）'); return 'offline'; }
     if (!pos.located) { toast('尚未获取玩家位置（请先进入游戏可操作）'); return 'offline'; }
     var cur = target;
     if (cur && cur.name === (opts.name || '') && cur.x === opts.x && cur.y === opts.y) {

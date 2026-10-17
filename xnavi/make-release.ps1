@@ -65,13 +65,21 @@ if (Test-Path $certsSrc) {
   Write-Host "  [warn] certs/ not found - Https mode unavailable (run certs/gen-cert.ps1)"
 }
 
-# 4.5) package README (usage notes / cautions, e.g. non-ASCII extract path)
+# 4.5) package README (bilingual: Chinese + English usage notes / cautions,
+#     e.g. non-ASCII extract path; files cross-link for language switching)
 $readmeSrc = Join-Path $PSScriptRoot "README-package.md"
 if (Test-Path $readmeSrc) {
   Copy-Item $readmeSrc (Join-Path $rel "README.md") -Force
-  Write-Host "  README.md (package notes)"
+  Write-Host "  README.md (package notes, zh)"
 } else {
   Write-Host "  [warn] README-package.md not found - package ships without README"
+}
+$readmeEnSrc = Join-Path $PSScriptRoot "README-package.en.md"
+if (Test-Path $readmeEnSrc) {
+  Copy-Item $readmeEnSrc (Join-Path $rel "README.en.md") -Force
+  Write-Host "  README.en.md (package notes, en)"
+} else {
+  Write-Host "  [warn] README-package.en.md not found - package ships without English README"
 }
 
 # 5) verify

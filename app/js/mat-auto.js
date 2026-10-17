@@ -143,7 +143,7 @@
   function start(mid, idx, ll) {
     if (running) { A.toast('收集队列已在运行（卡片【停止收集】可停）'); return; }
     if (window.EXPLORE_AUTO && window.EXPLORE_AUTO.isRunning()) { A.toast('探索自动导航运行中，请先停止再开始材料收集'); return; }
-    if (!online()) { A.toast('实时定位服务未连接（live-python 未启动？）'); return; }
+    if (!online()) { A.toast('实时定位服务未连接（TOTKNavi 未启动？）'); return; }
     var p = pos();
     if (!p || !p.located) { A.toast('尚未获取玩家位置，请先在游戏内进入可操作状态'); return; }
     var st = A.state();
