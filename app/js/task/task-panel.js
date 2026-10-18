@@ -156,11 +156,17 @@
       if (el) el.classList.toggle('active', !!m[cat]);
     });
   }
+  function calcTaskSize() {
+    if (global.TOTK_GET_TIER_SIZE) return global.TOTK_GET_TIER_SIZE('T2');
+    return 28;
+  }
+
   function signature() {
     var m = userOn[curLayer] || {};
-    var s = curLayer + '|' + doneRev + '|';   /* doneRev：完成态一变就强制重绘，
-                                               不去遍历 259 个任务算哈希（那样每次
-                                               tick 都是 259 次查表，浪费） */
+    var settings = global.TOTK_SETTINGS || {};
+    var doneMode = settings.doneMode || 'default';
+    var hideTask = (settings.hideDoneTypes && settings.hideDoneTypes.task !== false) ? '1' : '0';
+    var s = curLayer + '|' + doneRev + '|' + doneMode + '|' + hideTask + '|';
     D.catOrder.forEach(function (cat) {
       s += m[cat] ? '1' : '0';
     });
@@ -245,10 +251,12 @@
     });
   }
 
-  /* 分类图标复用现有 assets/icons，不新增图片 */
+  /* 分类图标分配专属 96px 官方任务徽章 */
   function taskIcon(cat) {
-    /* 五档共用同一个图标（本来就没有分类专属图标）。
-       分类靠标题文字 + 右侧计数区分，不靠图标。 */
+    if (cat === '主剧情挑战') return 'origin_3845393_70484.png';
+    if (cat === '情节挑战') return 'origin_3845393_70486.png';
+    if (cat === '神庙挑战') return 'origin_3845393_70488.png';
+    if (cat === '迷你挑战') return 'origin_3845393_70490.png';
     return 'origin_3845393_70484.png';
   }
 
@@ -319,28 +327,27 @@
   }
 
   function taskIconDot(t) {
-    /* ★ 按 group 判色（2026-10-07 迷你挑战单列）。
-     * 原来按 t.cat（ROM 四档）判，迷你挑战会落到 'oth' 灰色里，
-     * 地图上跟「其他」分不开。现在迷你挑战有自己的紫蓝色。 */
-    /* ★ 按官方四档 group 判色（2026-10-07 分类改造）。
-     * 四档对应游戏「冒险笔记」：主剧情挑战（金）/ 情节挑战（绿）/
-     * 神庙挑战（蓝）/ 迷你挑战（紫）。原来有第五档「其他」的灰色，
-     * 随FindSunaNui2 删除后已无成员。 */
+    /* ★ 按官方四档 group 分配专属 96px 图标（2026-10-18）。
+     * 四档对应游戏「冒险笔记」：主剧情挑战 / 情节挑战 / 神庙挑战 / 迷你挑战。
+     * V2.5.2：跟随 T2 阶梯缩放（z5=28px），完成态保留 .mk-done-check 绿勾 + 降透明度去饱和。 */
     var gk = t.group || '迷你挑战';
     var cls = 'tk-dot tk-' + (gk === '主剧情挑战' ? 'main'
       : gk === '情节挑战' ? 'imp'
         : gk === '神庙挑战' ? 'sub'
           : 'mini');
     var isDone = !!(global.TaskDone && t.key && global.TaskDone.isDone(t.key));
-    var glyph = isDone ? '✓' : t.tier === 'L1' ? '◆' : t.tier === 'L2' ? '●' : '○';
     if (isDone) cls += ' is-done';
+    var iconFile = taskIcon(gk);
+    var checkHtml = isDone ? '<span class="mk-done-check">✓</span>' : '';
+    var sz = calcTaskSize();
+    var half = Math.round(sz / 2);
     return L.divIcon({
       className: 'tk-dot-wrap',
       /* data-tkkey 给验收脚本和流程线做稳定标识 */
       html: '<div class="' + cls + '" data-tkkey="' + esc(t.key || '') + '" title="' +
-            esc(t.name) + '">' + glyph + '</div>',
-      iconSize: [18, 18],
-      iconAnchor: [9, 9]
+            esc(t.name) + '" style="width:' + sz + 'px;height:' + sz + 'px;"><img src="assets/icons/' + iconFile + '" style="width:' + sz + 'px;height:' + sz + 'px;" alt="">' + checkHtml + '</div>',
+      iconSize: [sz, sz],
+      iconAnchor: [half, half]
     });
   }
 
@@ -365,6 +372,9 @@
        * 漏改这一处的教训：换了键命名要grep 全部读取点，别只改「看起来相关」的。 */
       if (!on[t.group]) return;
       var isDone = !!(global.TaskDone && t.key && global.TaskDone.isDone(t.key));
+      var settings = global.TOTK_SETTINGS || {};
+      var hideTask = (settings.doneMode === 'hide' && (!settings.hideDoneTypes || settings.hideDoneTypes.task !== false));
+      if (isDone && hideTask) return;
       /* ★★ 跨层任务要画在**当前层内的那个点**上（2026-10-07 老大定：所有涉及层都显示）
        *
        * 原来不管哪一层都画 `t.gz/t.gx`（主点= 第一个流程点），
@@ -390,6 +400,7 @@
          *   （节点缩小一点、给任务点留白也解决不了——它们中心重合。） */
         zIndexOffset: 900
       });
+      m._taskObj = t;
       /* 已完成加✓ 前缀，与探索侧 tooltip 口径一致。
          ★ V2.3.3：tooltip 简化为「#8 迷你挑战 未知的天空巨人」——
          档内序号 + 档名 + 任务名（不再显示序号/总数）。 */
@@ -456,6 +467,15 @@
     obs.observe(sw, { attributes: true, subtree: true, attributeFilter: ['class'] });
   }
 
+  function updateSizes() {
+    if (!ready || !group) return;
+    for (var k in mkIndex) {
+      var m = mkIndex[k];
+      if (!m || !m._taskObj) continue;
+      m.setIcon(taskIconDot(m._taskObj));
+    }
+  }
+
   /* ---------- 初始化 ---------- */
   function init() {
     map = (global.TOTK && global.TOTK.map) || null;
@@ -468,6 +488,7 @@
     injectPanel();
     observe();
     render();
+    map.on('zoomend', updateSizes);
     ready = true;
 
     global.TaskPanel = {
@@ -565,7 +586,16 @@
           }
         });
         el.textContent = done + '/' + total;
-      }
+      },
+      updateSizes: function () {
+        if (!ready || !group) return;
+        for (var k in mkIndex) {
+          var m = mkIndex[k];
+          if (!m || !m._taskObj) continue;
+          m.setIcon(taskIconDot(m._taskObj));
+        }
+      },
+      render: render
     };
 
     /* 订阅完成态变化：手动标记、或加载存档后，标题数字要跟着动。
@@ -606,37 +636,34 @@
        ◆=L1 有流程线可画 ●=L2 单点 ○=L3 仅列表（玩家看不到 L1/L2 术语，只看到形状不同） */
     '.tk-dot-wrap { background:none; border:none; }',
     '.tk-dot {',
-    '  width:18px; height:18px; border-radius:5px;',
+    '  position:relative;',
     '  display:flex; align-items:center; justify-content:center;',
-    '  font-size:10px; line-height:1; font-weight:700;',
-    '  border:2px solid rgba(20,22,28,.92);',
-    '  box-shadow:0 1px 5px rgba(0,0,0,.6), 0 0 0 1px rgba(255,255,255,.14);',
+    '  filter:drop-shadow(0 2px 4px rgba(0,0,0,.6));',
     '  transition:transform .12s; user-select:none; }',
-    '.tk-dot-wrap:hover .tk-dot { transform:scale(1.3); z-index:900; }',
+    '.tk-dot img { width:100%; height:100%; object-fit:contain; pointer-events:none; }',
+    '.tk-dot-wrap:hover .tk-dot { transform:scale(1.25); z-index:900; }',
+    '.tk-dot .mk-done-check {',
+    '  position:absolute; right:-4px; top:-5px;',
+    '  font-size:12px; line-height:1; font-weight:700;',
+    '  color:#4ade80; text-shadow:0 0 2px rgba(0,0,0,.95), 0 0 2px rgba(0,0,0,.6);',
+    '  pointer-events:none; }',
     /* 追踪中（task-flow.js 的「任务目标」按钮点亮后）：脉动光环。
      * 作用 = 告诉玩家「这条流程线属于这个图标」，也是回卡片的指引。
-     * ★ 动画放在 box-shadow 上而不是 transform —— Leaflet 用 transform
+     * ★ 动画放在 filter drop-shadow 上而不是 transform —— Leaflet 用 transform
      *   定位 marker，动画它会让图标位置漂移。 */
     '.tk-dot.is-tracked {',
-    '  box-shadow:0 0 0 3px rgba(234,194,126,.75), 0 1px 5px rgba(0,0,0,.6),',
-    '             0 0 0 1px rgba(255,255,255,.14);',
+    '  filter:drop-shadow(0 0 6px rgba(234,194,126,.9));',
     '  animation:tkTrackPulse 1.6s ease-in-out infinite; }',
     '@keyframes tkTrackPulse {',
-    '  0%,100% { box-shadow:0 0 0 3px rgba(234,194,126,.75), 0 1px 5px rgba(0,0,0,.6), 0 0 0 1px rgba(255,255,255,.14); }',
-    '  50%     { box-shadow:0 0 0 6px rgba(234,194,126,.28), 0 1px 5px rgba(0,0,0,.6), 0 0 0 1px rgba(255,255,255,.14); } }',
+    '  0%,100% { filter:drop-shadow(0 0 4px rgba(234,194,126,.7)); }',
+    '  50%     { filter:drop-shadow(0 0 9px rgba(234,194,126,1)); } }',
     '.tk-dot.is-tracked.is-done { opacity:.75; }',
-    /* 官方四档配色（2026-10-07）。分类名与游戏「冒险笔记」一致。 */
-    '.tk-main { background:#eac27e; color:#3a2f18; }',   /* 主剧情挑战：金（23 条） */
-    '.tk-imp  { background:#7ec8a9; color:#1d3b30; }',   /* 情节挑战：绿（60 条） */
-    '.tk-sub  { background:#6fb3e0; color:#16324a; }',   /* 神庙挑战：蓝（31 条） */
-    '.tk-mini { background:#b8a0e8; color:#2b1f45; }',   /* 迷你挑战：紫（139 条） */
     /* --- V2.1M5.1 完成态 ---
        语义与探索侧 .mk-done-check 一致：右上角绿勾= 已完成。
        额外压低不透明度 + 去饱和，让已完成任务在密集图标海里退到背景，
        未完成的自动跳出来 —— 这比只加个勾更省眼力。 */
     '.tk-dot.is-done {',
-    '  opacity:.42; filter:saturate(.45);',
-    '  box-shadow:0 1px 3px rgba(0,0,0,.5), 0 0 0 1px rgba(255,255,255,.08); }',
+    '  opacity:.42; filter:saturate(.45); }',
     '.tk-dot.is-done:hover { opacity:.9; filter:none; }',
     /* 悬停标签与现有 .mk-label 同风格 */
     '.tk-tip { white-space:nowrap; }'

@@ -38,6 +38,7 @@
      ============================================================ */
   #settingsModal {
     position: fixed; z-index: 500; width: 320px;
+    max-height: calc(100vh - 70px); overflow-y: auto;
     left: 560px; bottom: 58px;               /* 锚定在「设置」按钮上方（正式页由 JS 按按钮位置计算） */
     background: rgba(20,22,26,.97); border: 1px solid rgba(255,255,255,.13);
     border-radius: 12px; box-shadow: 0 10px 34px rgba(0,0,0,.55);
@@ -54,9 +55,10 @@
 
   .set-sec { margin: 10px 0; }
   .set-sec-title {
-    font-size: 14px; color: #e8ecf1; margin-bottom: 6px;
-    display: flex; align-items: center; gap: 8px;
+    font-size: 13px; color: #e8ecf1; margin-bottom: 6px;
+    display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px;
   }
+  .set-title-hint { font-size: 11px; font-weight: normal; color: #8a93a0; }
   .set-field { display: flex; align-items: center; gap: 4px; color: #8a93a0; font-size: 12px; }
   .set-sec input[type="number"], .set-sec input[type="text"] {
     width: 70px; padding: 5px 6px; font-size: 13px; text-align: center;
@@ -68,7 +70,6 @@
   .set-inline3 input[type="text"] { width: 72px; font-family: monospace; }
   .set-inline3 input[type="color"] { width: 34px; height: 28px; padding: 1px; border: 1px solid rgba(255,255,255,.15); border-radius: 6px; background: none; cursor: pointer; }
   .set-inline3 i { font-style: normal; color: #8a93a0; font-size: 12px; }
-  .set-hint { font-size: 10px; color: #6b7280; margin-top: 4px; }
 
   .set-opts { display: flex; gap: 6px; margin-top: 4px; }
   .set-opt {
@@ -76,6 +77,34 @@
     background: rgba(255,255,255,.06); cursor: pointer; font-size: 12px; color: #c8cdd4;
   }
   .set-opt.on { border-color: #eac27e; background: rgba(234,194,126,.12); color: #eac27e; }
+
+  .set-sub-types {
+    margin-top: 8px; padding: 8px 10px;
+    background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.08);
+    border-radius: 8px;
+  }
+  .set-sub-head {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 6px; font-size: 11px; color: #8a93a0;
+  }
+  .set-sub-actions { display: flex; align-items: center; gap: 4px; }
+  .set-link-btn {
+    background: none; border: none; color: #eac27e; font-size: 11px;
+    cursor: pointer; padding: 0 2px; text-decoration: underline;
+  }
+  .set-link-btn:hover { color: #fff; }
+  .set-sub-sep { color: #555; font-size: 10px; }
+  .set-pills { display: flex; flex-wrap: wrap; gap: 6px; }
+  .set-pill {
+    padding: 3px 8px; border-radius: 6px; font-size: 11px;
+    border: 1px solid rgba(255,255,255,.15); background: rgba(255,255,255,.05);
+    color: #8a93a0; cursor: pointer; transition: all .15s ease;
+  }
+  .set-pill:hover { border-color: rgba(255,255,255,.3); color: #e8ecf1; }
+  .set-pill.on {
+    border-color: #eac27e; background: rgba(234,194,126,.15);
+    color: #eac27e; font-weight: 500;
+  }
 
   .set-actions { display: flex; justify-content: flex-end; margin-top: 12px; }
   .set-ghost {
@@ -116,30 +145,47 @@
   <div class="set-divider"></div>
 
   <div class="set-sec">
-    <div class="set-sec-title">图标大小</div>
-    <div class="set-field"><input type="number" id="dIconSize" min="22" max="30" step="2" value="24"> <i>px</i></div>
-    <div class="set-hint">范围 22 - 30</div>
+    <div class="set-sec-title">图标大小 <span class="set-title-hint">（基准 20-32px，随缩放分级）</span></div>
+    <div class="set-field"><input type="number" id="dIconSize" min="20" max="32" step="2" value="26"> <i>px</i></div>
   </div>
 
   <div class="set-sec">
-    <div class="set-sec-title">定位标记</div>
+    <div class="set-sec-title">定位标记 <span class="set-title-hint">（大小 16-40 · 透明度 30-100%）</span></div>
     <div class="set-inline3">
       <input type="number" id="dDotSize" min="16" max="40" step="2" value="24" title="大小"> <i>px</i>
       <input type="color" id="dDotColorPick" value="#ff3b3b" title="颜色">
       <input type="text" id="dDotColorHex" value="#ff3b3b" maxlength="7" spellcheck="false" title="颜色hex">
       <input type="number" id="dDotAlpha" min="30" max="100" step="5" value="70" title="透明度"> <i>%</i>
     </div>
-    <div class="set-hint">范围：大小 16 - 40 · 透明度 30 - 100%</div>
   </div>
 
   <div class="set-sec">
-    <div class="set-sec-title">完成标记图标
-      <span class="set-opts" id="dDoneMode">
-        <button class="set-opt on" data-v="default">显示</button>
-        <button class="set-opt" data-v="hide">隐藏</button>
-      </span>
+    <div class="set-sec-title">完成标记图标 <span class="set-title-hint">（隐藏后不显示已标记标点）</span></div>
+    <div class="set-opts" id="dDoneMode">
+      <button class="set-opt on" data-v="default">显示</button>
+      <button class="set-opt" data-v="hide">隐藏</button>
     </div>
-    <div class="set-hint">隐藏后，已标记完成的点不再显示</div>
+    <div class="set-sub-types" id="dDoneSubWrap" style="display:none">
+      <div class="set-sub-head">
+        <span class="set-sub-title">隐藏以下分类：</span>
+        <span class="set-sub-actions">
+          <button type="button" class="set-link-btn" id="dDoneAll">全选</button>
+          <span class="set-sub-sep">·</span>
+          <button type="button" class="set-link-btn" id="dDoneNone">清空</button>
+        </span>
+      </div>
+      <div class="set-pills" id="dDonePills">
+        <button type="button" class="set-pill on" data-type="shrine">神庙</button>
+        <button type="button" class="set-pill on" data-type="tower">鸟望台</button>
+        <button type="button" class="set-pill on" data-type="root">树根</button>
+        <button type="button" class="set-pill on" data-type="korok">克洛格</button>
+        <button type="button" class="set-pill on" data-type="chest">宝箱</button>
+        <button type="button" class="set-pill on" data-type="equip">装备</button>
+        <button type="button" class="set-pill on" data-type="sign">立牌</button>
+        <button type="button" class="set-pill on" data-type="task">任务</button>
+        <button type="button" class="set-pill on" data-type="boss">讨伐</button>
+      </div>
+    </div>
   </div>
 
   <div class="set-actions">
@@ -196,20 +242,32 @@
   });
   document.getElementById('dDotAlpha').addEventListener('change', function () { demo.alpha = (parseInt(this.value) || 70) / 100; refreshDots(); });
   document.getElementById('dReset').addEventListener('click', function () {
-    demo = { icon: 28, dot: 28, color: '#ff3b3b', alpha: 1 };
-    document.getElementById('dIconSize').value = 28;
+    demo = { icon: 26, dot: 28, color: '#ff3b3b', alpha: 1 };
+    document.getElementById('dIconSize').value = 26;
     document.getElementById('dDotSize').value = 28;
     document.getElementById('dDotColorPick').value = '#ff3b3b';
     document.getElementById('dDotColorHex').value = '#ff3b3b';
     document.getElementById('dDotAlpha').value = 100;
     document.querySelectorAll('#dDoneMode .set-opt').forEach(function (b) { b.classList.toggle('on', b.dataset.v === 'default'); });
+    document.getElementById('dDoneSubWrap').style.display = 'none';
+    document.querySelectorAll('#dDonePills .set-pill').forEach(function (p) { p.classList.add('on'); });
     refreshDots();
   });
   document.querySelectorAll('#dDoneMode .set-opt').forEach(function (b) {
     b.addEventListener('click', function () {
       document.querySelectorAll('#dDoneMode .set-opt').forEach(function (x) { x.classList.remove('on'); });
       b.classList.add('on');
+      document.getElementById('dDoneSubWrap').style.display = (b.dataset.v === 'hide') ? 'block' : 'none';
     });
+  });
+  document.querySelectorAll('#dDonePills .set-pill').forEach(function (p) {
+    p.addEventListener('click', function () { p.classList.toggle('on'); });
+  });
+  document.getElementById('dDoneAll').addEventListener('click', function () {
+    document.querySelectorAll('#dDonePills .set-pill').forEach(function (p) { p.classList.add('on'); });
+  });
+  document.getElementById('dDoneNone').addEventListener('click', function () {
+    document.querySelectorAll('#dDonePills .set-pill').forEach(function (p) { p.classList.remove('on'); });
   });
   refreshDots();
 </script>

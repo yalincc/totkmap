@@ -62,7 +62,11 @@
      这里只补一点龙专属信息需要的样式。 */
   var CSS = '' +
     '.dlg-arrow{pointer-events:none;}' +
-    '.dlg-tip{font-variant-numeric:tabular-nums;}';
+    '.dlg-tip{font-variant-numeric:tabular-nums;}' +
+    '.dlg-head-wrap{background:none;border:none;}' +
+    '.dlg-head-marker{display:flex;align-items:center;justify-content:center;border-radius:50%;filter:drop-shadow(0 2px 5px rgba(0,0,0,0.7));transition:transform .15s ease;cursor:pointer;}' +
+    '.dlg-head-marker:hover{transform:scale(1.25);z-index:900;}' +
+    '.dlg-head-marker img{width:100%;height:100%;object-fit:contain;pointer-events:none;}';
   function injectCSS() {
     if (document.getElementById('dragon-layer-css')) return;
     var st = document.createElement('style');
@@ -103,6 +107,50 @@
         keyboard: false
       }).addTo(g);
     }
+  }
+
+  /* ---------- 龙头像标记 ---------- */
+  function dragonHeadIcon(d) {
+    var iconFile = d.icon || (d.name === '白龙' ? 'dragon_light.png'
+      : d.name === '奥尔龙' ? 'dragon_fire.png'
+        : d.name === '聂尔龙' ? 'dragon_ice.png'
+          : 'dragon_electric.png');
+    var sz = 28;
+    return L.divIcon({
+      className: 'dlg-head-wrap',
+      html: '<div class="dlg-head-marker" style="width:' + sz + 'px;height:' + sz + 'px;" title="' + esc(d.name) + '">' +
+            '<img src="assets/icons/' + iconFile + '" width="' + sz + '" height="' + sz + '" alt="' + esc(d.name) + '">' +
+            '</div>',
+      iconSize: [sz, sz],
+      iconAnchor: [sz / 2, sz / 2]
+    });
+  }
+
+  function addDragonHead(g, d, pts) {
+    if (!pts || pts.length < 2) return;
+    var indices = [];
+    if (d.layer === 20) {
+      /* 白龙全图 33km 大圈，在三等分点放 3 个头像，全图各区域均能一眼认出 */
+      indices = [0, Math.floor(pts.length * 0.35), Math.floor(pts.length * 0.7)];
+    } else {
+      /* 元素龙在起点（出穴口）和中途各放 1 个头像 */
+      indices = [0, Math.floor(pts.length / 2)];
+    }
+    var icon = dragonHeadIcon(d);
+    indices.forEach(function (idx) {
+      var p = pts[idx];
+      if (!p) return;
+      var mk = L.marker([p[1], p[0]], {
+        icon: icon,
+        riseOnHover: true
+      });
+      mk.bindTooltip(d.name, {
+        direction: 'top',
+        offset: [0, -14],
+        className: 'mk-label dlg-tip'
+      });
+      mk.addTo(g);
+    });
   }
 
   /* ---------- 折线 ---------- */
@@ -170,11 +218,12 @@
         });
       });
 
-      /* 实线（本层域内）+ 方向箭头 */
+      /* 实线（本层域内）+ 方向箭头 + 龙头像 */
       main.forEach(function (s) {
         if (!s.segs || s.segs.length < 2) return;
         drawLine(g, d, s.segs, { dash: null, weight: s.w, opacity: 1 });
         addArrows(g, d, s.segs, d.color);
+        addDragonHead(g, d, s.segs);
       });
     });
 

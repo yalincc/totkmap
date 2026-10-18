@@ -107,5 +107,10 @@ verify-*.png
 迷你挑战改版数据/
 数据校对/
 report/
+docs/
 tasks/manual-备份-*/
 TOTKmap-*-待确认.*
+任务卡片模板设计稿-待确认.html
+app/assets/icons/_bak_*/
+*.zip
+

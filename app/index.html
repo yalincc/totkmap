@@ -126,7 +126,7 @@
   </div>
 
   <footer class="side-foot">
-    <p class="foot-version">TOTKMAP V2.5.1 © 2026 yalincc</p>
+    <p class="foot-version">TOTKMAP V2.5.2 © 2026 yalincc</p>
     <p>GitHub <a href="https://github.com/yalincc/totkmap" target="_blank" rel="noopener">https://github.com/yalincc/totkmap</a></p>
   </footer>
 </aside>
@@ -241,29 +241,47 @@
   <div class="set-divider"></div>
 
   <div class="set-sec">
-    <div class="set-sec-title">图标大小</div>
-    <div class="set-field"><input type="number" id="setIconSize" min="22" max="30" step="2" value="24"> <i>px</i></div>
-    <div class="set-hint">范围 22 - 30</div>
+    <div class="set-sec-title">图标大小 <span class="set-title-hint">（基准 20-32px，随缩放分级）</span></div>
+    <div class="set-field"><input type="number" id="setIconSize" min="20" max="32" step="2" value="26"> <i>px</i></div>
   </div>
 
   <div class="set-sec">
-    <div class="set-sec-title">定位标记</div>
+    <div class="set-sec-title">定位标记 <span class="set-title-hint">（大小 16-40 · 透明度 30-100%）</span></div>
     <div class="set-inline3">
       <input type="number" id="setDotSize" min="16" max="40" step="2" value="24" title="大小"> <i>px</i>
       <input type="color" id="setDotColorPick" value="#ff3b3b" title="颜色">
       <input type="text" id="setDotColorHex" value="#ff3b3b" maxlength="7" spellcheck="false" title="颜色hex">
       <input type="number" id="setDotAlpha" min="30" max="100" step="5" value="70" title="透明度"> <i>%</i>
     </div>
-    <div class="set-hint">范围：大小 16 - 40 · 透明度 30 - 100%</div>
   </div>
 
   <div class="set-sec">
-    <div class="set-sec-title">完成标记图标</div>
+    <div class="set-sec-title">完成标记图标 <span class="set-title-hint">（隐藏后不显示已标记标点）</span></div>
     <div class="set-opts" id="setDoneModeBtns">
       <button class="set-opt" data-v="default">显示</button>
       <button class="set-opt" data-v="hide">隐藏</button>
     </div>
-    <div class="set-hint">隐藏后，已标记完成的点不再显示</div>
+    <div class="set-sub-types" id="setDoneSubWrap" style="display:none">
+      <div class="set-sub-head">
+        <span class="set-sub-title">隐藏以下分类：</span>
+        <span class="set-sub-actions">
+          <button type="button" class="set-link-btn" id="setDoneAll">全选</button>
+          <span class="set-sub-sep">·</span>
+          <button type="button" class="set-link-btn" id="setDoneNone">清空</button>
+        </span>
+      </div>
+      <div class="set-pills" id="setDonePills">
+        <button type="button" class="set-pill on" data-type="shrine">神庙</button>
+        <button type="button" class="set-pill on" data-type="tower">鸟望台</button>
+        <button type="button" class="set-pill on" data-type="root">树根</button>
+        <button type="button" class="set-pill on" data-type="korok">克洛格</button>
+        <button type="button" class="set-pill on" data-type="chest">宝箱</button>
+        <button type="button" class="set-pill on" data-type="equip">装备</button>
+        <button type="button" class="set-pill on" data-type="sign">立牌</button>
+        <button type="button" class="set-pill on" data-type="task">任务</button>
+        <button type="button" class="set-pill on" data-type="boss">讨伐</button>
+      </div>
+    </div>
   </div>
 
   <div class="set-actions">
@@ -274,6 +292,7 @@
   /* V2.5.0 v4：设置卡片（detail-card 同款），位置由 JS 锚定到「设置」按钮上方，标题栏可拖动 */
   #settingsModal.set-pop {
     position: fixed; z-index: 500; width: 320px;
+    max-height: calc(100vh - 70px); overflow-y: auto;
     background: rgba(20,22,26,.97); border: 1px solid rgba(255,255,255,.13);
     border-radius: 12px; box-shadow: 0 10px 34px rgba(0,0,0,.55);
     padding: 12px 14px; font-size: 13px;
@@ -282,9 +301,10 @@
   .set-divider { border-top: 1px solid rgba(255,255,255,.12); margin: 10px -14px 4px; }
   .set-sec { margin: 10px 0; }
   .set-sec-title {
-    font-size: 14px; color: #e8ecf1; margin-bottom: 6px;
-    display: flex; align-items: center; gap: 8px;
+    font-size: 13px; color: #e8ecf1; margin-bottom: 6px;
+    display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px;
   }
+  .set-title-hint { font-size: 11px; font-weight: normal; color: #8a93a0; }
   .set-sec-title .set-state { font-size: 12px; color: #eac27e; }
   .set-field { display: flex; align-items: center; gap: 4px; color: #8a93a0; font-size: 12px; }
   .set-sec input[type="number"], .set-sec input[type="text"] {
@@ -304,6 +324,33 @@
     background: rgba(255,255,255,.06); cursor: pointer; font-size: 12px; color: #c8cdd4;
   }
   .set-opt.on { border-color: #eac27e; background: rgba(234,194,126,.12); color: #eac27e; }
+  .set-sub-types {
+    margin-top: 8px; padding: 8px 10px;
+    background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.08);
+    border-radius: 8px;
+  }
+  .set-sub-head {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 6px; font-size: 11px; color: #8a93a0;
+  }
+  .set-sub-actions { display: flex; align-items: center; gap: 4px; }
+  .set-link-btn {
+    background: none; border: none; color: #eac27e; font-size: 11px;
+    cursor: pointer; padding: 0 2px; text-decoration: underline;
+  }
+  .set-link-btn:hover { color: #fff; }
+  .set-sub-sep { color: #555; font-size: 10px; }
+  .set-pills { display: flex; flex-wrap: wrap; gap: 6px; }
+  .set-pill {
+    padding: 3px 8px; border-radius: 6px; font-size: 11px;
+    border: 1px solid rgba(255,255,255,.15); background: rgba(255,255,255,.05);
+    color: #8a93a0; cursor: pointer; transition: all .15s ease;
+  }
+  .set-pill:hover { border-color: rgba(255,255,255,.3); color: #e8ecf1; }
+  .set-pill.on {
+    border-color: #eac27e; background: rgba(234,194,126,.15);
+    color: #eac27e; font-weight: 500;
+  }
   .set-actions { display: flex; justify-content: flex-end; margin-top: 12px; }
   .set-ghost { padding: 5px 12px; border-radius: 8px; cursor: pointer; font-size: 12px; background: none; border: 1px solid rgba(255,255,255,.2); color: #c8cdd4; }
   .set-ghost:hover { border-color: #eac27e; color: #eac27e; }
@@ -419,19 +466,21 @@
 <script src="data/totk_save_hashes.js"></script>
 <script src="data/explore_save_map.js?v=190"></script>
 <script src="data/layers.js"></script>
-<script src="data/catalogs.js?v=248"></script>
+<script src="data/catalogs.js?v=257"></script>
 <script src="data/areas.js"></script>
 <script src="data/area_cave.js"></script>
 <script src="data/area_sky.js"></script>
 <script src="data/area_depths.js"></script>
-<script src="data/markers.js?v=244"></script>
+<script src="data/markers.js?v=257"></script>
 <script src="data/materials.js?v=188"></script>
 <!-- 龙轨迹：ROM 官方轨道数据（Set_DragonRail_Static） -->
-<script src="data/dragon_paths_rom.js?v=200"></script>
+<script src="data/dragon_paths_rom.js?v=255"></script>
+<!-- 克洛格运输轨迹：ROM 官方起始点与目的地营地连接线 -->
+<script src="data/korok_paths.js?v=254"></script>
 <!-- 图鉴站地址（联动「查看图鉴」按钮 / 对站跳转）：正式图鉴站地址配置后填写，留空则按钮不显示 -->
 <script>window.TOTK_COMPENDIUM_URL = '';</script>
 <script src="js/save-parser.js"></script>
-<script src="js/app.js?v=280"></script>
+<script src="js/app.js?v=283"></script>
 <script src="js/live.js?v=249"></script>
 <script src="js/explore-auto.js?v=193"></script>
 <script src="js/mat-auto.js?v=194"></script>
@@ -442,7 +491,9 @@
 <video id="keepAwake" src="keep_awake.mp4" muted loop playsinline webkit-playsinline preload="auto" aria-hidden="true" style="position:fixed;right:0;bottom:0;width:1px;height:1px;opacity:0;pointer-events:none"></video>
 <!-- V2.0：龙轨迹图层（独立模块）。数据已改为 ROM 官方轨道 dragon_paths_rom.js，
      旧的社区近似数据 data/dragon_paths.js 不再加载（保留文件仅作对照） -->
-<script src="js/dragon-layer.js?v=200"></script>
+<script src="js/dragon-layer.js?v=255"></script>
+<!-- V2.5：克洛格运输轨迹图层（独立模块，参考 BOTWmap 轨迹设计） -->
+<script src="js/korok-layer.js?v=255"></script>
 <!-- V2.1：任务板块（独立模块）。data/task-plan.js 由 tools/build_task_plan.py 生成，
      依赖 app.js 暴露的 window.TOTK / TOTK_APP，必须排在app.js 之后。
      要下线任务板块：删掉下面 6 行即可，界面完全回到 V2.0 状态。
@@ -460,7 +511,7 @@
 <script src="data/armor-upgrade.js?v=233"></script>
 <script src="js/task/task-data.js?v=270"></script>
 <script src="js/task/task-done.js?v=233"></script>
-<script src="js/task/task-panel.js?v=252"></script>
+<script src="js/task/task-panel.js?v=257"></script>
 <script src="js/task/task-card.js?v=275"></script>
 <script src="js/task/task-flow.js?v=273"></script>
 <!-- M6.5：防具面板 + 数据合并层。必须在 data/armors.js / data/armor-upgrade.js

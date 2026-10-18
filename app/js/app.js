@@ -14,24 +14,41 @@
   /* ---------------- 显示设置（V2.5.0，localStorage 持久化） ----------------
    * 设置面板：图标大小 / 定位点大小·颜色·透明度 / 已完成标记。实时生效。
    * 重置默认（老大定）：图标 28、定位点 28、红色、不透明、完成标记显示。 */
+  var DEF_HIDE_TYPES = {
+    shrine: true, tower: true, root: true, korok: true, chest: true,
+    equip: true, sign: true, task: true, boss: true
+  };
   var SETTINGS = (function () {
-    var DEF = { iconSize: 24, dotSize: 24, dotColor: '#ff3b3b', dotAlpha: 0.7, doneMode: 'default' };
-    var RESET = { iconSize: 28, dotSize: 28, dotColor: '#ff3b3b', dotAlpha: 1, doneMode: 'default' };
-    var s = DEF;
+    var DEF = {
+      iconSize: 26, dotSize: 24, dotColor: '#ff3b3b', dotAlpha: 0.7,
+      doneMode: 'default', hideDoneTypes: Object.assign({}, DEF_HIDE_TYPES)
+    };
+    var RESET = {
+      iconSize: 26, dotSize: 28, dotColor: '#ff3b3b', dotAlpha: 1,
+      doneMode: 'default', hideDoneTypes: Object.assign({}, DEF_HIDE_TYPES)
+    };
+    var s = Object.assign({}, DEF);
     try {
       var raw = localStorage.getItem('totkmap.settings.v1');
-      if (raw) s = Object.assign({}, DEF, JSON.parse(raw));
+      if (raw) {
+        var parsed = JSON.parse(raw);
+        s = Object.assign({}, DEF, parsed);
+        if (parsed.hideDoneTypes) {
+          s.hideDoneTypes = Object.assign({}, DEF_HIDE_TYPES, parsed.hideDoneTypes);
+        } else {
+          s.hideDoneTypes = Object.assign({}, DEF_HIDE_TYPES);
+        }
+      }
     } catch (e) {}
     s.reset = function () {
-      Object.assign(s, RESET);
-      try { localStorage.setItem('totkmap.settings.v1', JSON.stringify({
-        iconSize: s.iconSize, dotSize: s.dotSize, dotColor: s.dotColor, dotAlpha: s.dotAlpha, doneMode: s.doneMode
-      })); } catch (e) {}
+      Object.assign(s, RESET, { hideDoneTypes: Object.assign({}, DEF_HIDE_TYPES) });
+      s.save();
     };
     s.save = function () {
       s._rev = (s._rev || 0) + 1; // live.js 据此感知设置变化强制重建红点图标（修 F5 才生效问题）
       try { localStorage.setItem('totkmap.settings.v1', JSON.stringify({
-        iconSize: s.iconSize, dotSize: s.dotSize, dotColor: s.dotColor, dotAlpha: s.dotAlpha, doneMode: s.doneMode
+        iconSize: s.iconSize, dotSize: s.dotSize, dotColor: s.dotColor, dotAlpha: s.dotAlpha,
+        doneMode: s.doneMode, hideDoneTypes: s.hideDoneTypes
       })); } catch (e) {}
     };
     return s;
@@ -41,7 +58,7 @@
   var AREA_SKY = window.TOTK_AREA_SKY || [];
   var AREA_DEPTHS = window.TOTK_AREA_DEPTHS || [];
 
-  var VERSION = 'TOTKMAP V2.5.1';
+  var VERSION = 'TOTKMAP V2.5.2';
   var LS_DONE = 'totkmap_done_v1';
   var LS_CUSTOM = 'totkmap_custom_v1';
   var LS_LAYER = 'totkmap_layer_v1';
@@ -310,14 +327,88 @@
     saveSelected();
   }
 
+  /* ---------------- 完成隐藏与尺寸分级规范（V2.5.2） ---------------- */
+  function getMarkerHideType(catName) {
+    if (!catName) return null;
+    if (catName === '神庙') return 'shrine';
+    if (catName === '鸟望台') return 'tower';
+    if (catName === '树根') return 'root';
+    if (catName === '克洛格' || catName === '双倍克洛格') return 'korok';
+    if (catName === '宝箱') return 'chest';
+    if (catName === '武器' || catName === '弓与箭' || catName === '盾牌' || catName === '防具') return 'equip';
+    if (catName === '卡邦达立牌') return 'sign';
+    if (catName === '任务') return 'task';
+    // 官方格廉斯勋章 6 类 BOSS（明确排除日常刷取的人马/莱尼尔）
+    if (catName === '独眼巨人' || catName === '岩石巨人' || catName === '方块魔像' ||
+        catName === '莫尔德拉吉克' || catName === '巨霸伽马' || catName === '古栗欧克') return 'boss';
+    return null;
+  }
+
+  function isDoneHidden(hideType) {
+    if (SETTINGS.doneMode !== 'hide') return false;
+    if (!hideType) return false;
+    if (!SETTINGS.hideDoneTypes) return true;
+    return !!SETTINGS.hideDoneTypes[hideType];
+  }
+
+  /* 3-Tier 视觉阶梯分级（T1地标 / T2任务与BOSS设施 / T3散点装备） */
+  function getMarkerTier(catName) {
+    if (!catName) return 'T3';
+    if (catName === '神庙' || catName === '鸟望台' || catName === '树根') {
+      return 'T1';
+    }
+    if (catName === '独眼巨人' || catName === '岩石巨人' || catName === '方块魔像' ||
+        catName === '莫尔德拉吉克' || catName === '巨霸伽马' || catName === '古栗欧克' ||
+        catName === '古代研究所' || catName === '神殿' || catName === '大妖精之泉' ||
+        catName === '左纳乌制造机' || catName === '村庄' || catName === '驿站' ||
+        catName === '任务') {
+      return 'T2';
+    }
+    return 'T3';
+  }
+
+  /* V2.5.2 标准尺寸矩阵（整体≤32px）：
+   * T1: z3=24, z4=26, z5=28, z6=30, z7=32
+   * T2: z3=22, z4=24, z5=26, z6=28, z7=32
+   * T3: z3=20, z4=22, z5=24, z6=26, z7=30 */
+  var TIER_MATRIX = {
+    T1: { 3: 24, 4: 26, 5: 28, 6: 30, 7: 32 },
+    T2: { 3: 22, 4: 24, 5: 26, 6: 28, 7: 32 },
+    T3: { 3: 20, 4: 22, 5: 24, 6: 26, 7: 30 }
+  };
+
+  function getTableSize(tier, z) {
+    var tbl = TIER_MATRIX[tier] || TIER_MATRIX.T3;
+    var cz = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, z));
+    var lo = Math.floor(cz);
+    var hi = Math.ceil(cz);
+    if (lo === hi) return tbl[lo];
+    var t = cz - lo;
+    return Math.round(tbl[lo] + (tbl[hi] - tbl[lo]) * t);
+  }
+
+  /* 动态计算图标尺寸：根据层级与当前地图缩放级别自适应缩放，叠加基准偏置（默认基准 26px，范围 20-32px） */
+  function calcIconSize(tier, zoom) {
+    var base = (SETTINGS && SETTINGS.iconSize) || 26;
+    var z = (typeof zoom === 'number') ? zoom : (map ? map.getZoom() : 5);
+    var stdSize = getTableSize(tier, z);
+    var offset = base - 26;
+    return Math.max(14, Math.min(36, stdSize + offset));
+  }
+  window.TOTK_GET_TIER_SIZE = calcIconSize;
+
   function updateCount() {
     var total = 0, done = 0;
+    var cats = {};
+    catsOfLayer(state.layer).forEach(function (c) { cats[c.id] = c; });
     for (var i = 0; i < MARKERS.length; i++) {
       var m = MARKERS[i];
       if (m.layer !== state.layer || !state.selected[m.cat]) continue;
       var isDone = !!state.done[m.id];
-      /* V2.5.0：已完成标记=隐藏 时，计数与实际显示一致（完成的点不计入已显示） */
-      if (isDone && SETTINGS.doneMode === 'hide') continue;
+      var cat = cats[m.cat];
+      var hideType = cat ? getMarkerHideType(cat.name) : null;
+      /* V2.5.2：支持 9 大分类细分选择性隐藏已完成标点 */
+      if (isDone && isDoneHidden(hideType)) continue;
       total++;
       if (isDone) done++;
     }
@@ -326,16 +417,19 @@
   }
 
   /* ---------------- 标记渲染 ---------------- */
-  /* V2.5.0：iconSize 可设置（22/24/28），缓存按 图标+尺寸 双 key */
+  /* V2.5.2：3-Tier 尺寸分级与缩放自适应，缓存按 图标+尺寸 双 key */
   var iconCache = {};
-  function iconFor(cat) {
-    if (!cat || !cat.icon) return null;
-    var key = cat.icon + '#' + SETTINGS.iconSize;
+  function iconFor(cat, m) {
+    var iconName = (m && m.icon) || (cat && cat.icon);
+    if (!iconName) return null;
+    var tier = getMarkerTier(cat ? cat.name : '');
+    var sz = calcIconSize(tier);
+    var key = iconName + '#' + sz;
     if (!iconCache[key]) {
       iconCache[key] = L.icon({
-        iconUrl: 'assets/icons/' + cat.icon,
-        iconSize: [SETTINGS.iconSize, SETTINGS.iconSize],
-        iconAnchor: [SETTINGS.iconSize / 2, SETTINGS.iconSize / 2],
+        iconUrl: 'assets/icons/' + iconName,
+        iconSize: [sz, sz],
+        iconAnchor: [sz / 2, sz / 2],
         popupAnchor: [0, -10]
       });
     }
@@ -343,16 +437,18 @@
   }
   /* V1.9.3 完成标记：图标本体 100% 清晰 + 右上角绿色小勾（参考游戏内洞穴「已拿魔犹伊遗失物」打勾，
    * 统一语义：已标记完成 = 右上角打勾）。divIcon 仅用于完成点，未完成仍用 L.icon，无性能负担
-   * V2.5.0：尺寸跟随设置 */
+   * V2.5.2：尺寸跟随分级与缩放设置 */
   var doneIconCache = {};
-  function doneIconFor(cat) {
-    if (!cat || !cat.icon) return null;
-    var key = cat.icon + '#' + SETTINGS.iconSize;
+  function doneIconFor(cat, m) {
+    var iconName = (m && m.icon) || (cat && cat.icon);
+    if (!iconName) return null;
+    var tier = getMarkerTier(cat ? cat.name : '');
+    var sz = calcIconSize(tier);
+    var key = iconName + '#' + sz;
     if (!doneIconCache[key]) {
-      var sz = SETTINGS.iconSize;
       doneIconCache[key] = L.divIcon({
         className: 'mk-done-icon',
-        html: '<img src="assets/icons/' + cat.icon + '" width="' + sz + '" height="' + sz + '" alt="">' +
+        html: '<img src="assets/icons/' + iconName + '" width="' + sz + '" height="' + sz + '" alt="">' +
               '<span class="mk-done-check">✓</span>',
         iconSize: [sz, sz],
         iconAnchor: [sz / 2, sz / 2],
@@ -376,17 +472,19 @@
       if (m.layer !== state.layer) return;
       if (!state.selected[m.cat]) return;
       var isDone = !!state.done[m.id];
-      /* V2.5.0：已完成标记=隐藏 时，完成的点直接不绘制 */
-      if (isDone && SETTINGS.doneMode === 'hide') return;
+      var cat = cats[m.cat];
+      var hideType = cat ? getMarkerHideType(cat.name) : null;
+      /* V2.5.2：已完成细分隐藏判断 */
+      if (isDone && isDoneHidden(hideType)) return;
       if (state.filter === 'done' && !isDone) return;
       if (state.filter === 'undone' && isDone) return;
 
-      var cat = cats[m.cat];
       /* V1.9.3 完成标记：完成点用带右上角绿勾的 divIcon，未完成保持原 L.icon */
-      var icon = isDone ? doneIconFor(cat) : iconFor(cat);
+      var icon = isDone ? doneIconFor(cat, m) : iconFor(cat, m);
       var opt = { riseOnHover: true };
       if (icon) opt.icon = icon;
       var mk = L.marker([m.x, m.y], opt);
+      mk._totkMarker = m;
       mk.bindTooltip((isDone ? '✓ ' : '') + (m.name || m.full), {
         direction: 'top',
         offset: [0, -12],
@@ -405,6 +503,29 @@
     renderCustomMarks();
     refreshLabels();
   }
+
+  /* 地图缩放时同步更新常规标点尺寸（O(1) setIcon，无需重建图层） */
+  var lastMarkerZoom = null;
+  function updateMarkerSizes() {
+    var z = map.getZoom();
+    if (z === lastMarkerZoom) return;
+    lastMarkerZoom = z;
+    var cats = {};
+    catsOfLayer(state.layer).forEach(function (c) { cats[c.id] = c; });
+    for (var id in state.markers) {
+      var mk = state.markers[id];
+      if (!mk || !mk._totkMarker) continue;
+      var m = mk._totkMarker;
+      var isDone = !!state.done[m.id];
+      var cat = cats[m.cat];
+      var icon = isDone ? doneIconFor(cat, m) : iconFor(cat, m);
+      if (icon) mk.setIcon(icon);
+    }
+    if (window.TaskPanel && window.TaskPanel.updateSizes) {
+      window.TaskPanel.updateSizes();
+    }
+  }
+  map.on('zoomend', updateMarkerSizes);
 
   // 视口内名称标签：缩放级别足够且开启名称时显示
   function refreshLabels() {
@@ -1390,9 +1511,11 @@
       var btn = $('settingsBtn');
       if (!btn) return;
       var r = btn.getBoundingClientRect();
-      var left = Math.max(8, Math.min(r.left, window.innerWidth - modal.offsetWidth - 8));
-      var top = r.top - modal.offsetHeight - 8;
-      if (top < 8) top = Math.min(r.bottom + 8, window.innerHeight - modal.offsetHeight - 8);
+      var modalW = modal.offsetWidth || 320;
+      var left = Math.max(8, Math.min(r.left, window.innerWidth - modalW - 8));
+      // 预留完整展开分类的高度（约 345px），弹出时往上一点，防止展开隐藏分类后被底栏遮挡截断
+      var neededH = 345;
+      var top = Math.max(12, r.top - neededH);
       modal.style.left = left + 'px';
       modal.style.top = top + 'px';
     }
@@ -1407,9 +1530,13 @@
     $('setClose').addEventListener('click', close);
     $('setReset').addEventListener('click', function () {
       SETTINGS.reset();
+      iconCache = {};
+      doneIconCache = {};
       syncUI();
       renderMarkers();
       updateCount();
+      if (window.TaskPanel && window.TaskPanel.render) window.TaskPanel.render();
+      if (window.KorokLayer && window.KorokLayer.render) window.KorokLayer.render();
       toast('已重置为默认显示设置');
     });
     document.addEventListener('click', function (e) {
@@ -1462,15 +1589,35 @@
       if (wrap) wrap.querySelectorAll('.set-opt').forEach(function (b) {
         b.classList.toggle('on', b.dataset.v === SETTINGS.doneMode);
       });
+      var subWrap = $('setDoneSubWrap');
+      if (subWrap) subWrap.style.display = (SETTINGS.doneMode === 'hide') ? 'block' : 'none';
+      var pills = $('setDonePills');
+      if (pills && SETTINGS.hideDoneTypes) {
+        pills.querySelectorAll('.set-pill').forEach(function (p) {
+          var t = p.dataset.type;
+          p.classList.toggle('on', !!SETTINGS.hideDoneTypes[t]);
+        });
+      }
+      // 动态防溢出：展开后若下边缘超出视口底栏，自动上移卡片预留可见空间
+      if (!modal.classList.contains('hidden')) {
+        var bottom = modal.offsetTop + modal.offsetHeight;
+        var maxBottom = window.innerHeight - 56;
+        if (bottom > maxBottom) {
+          modal.style.top = Math.max(8, maxBottom - modal.offsetHeight) + 'px';
+        }
+      }
     }
 
-    /* 图标大小：number 22~30（change 生效 + 重建标记） */
+    /* 图标大小：number 20~32（change 生效 + 重建标记） */
     var iconSize = $('setIconSize');
     if (iconSize) iconSize.addEventListener('change', function () {
-      SETTINGS.iconSize = clamp(iconSize.value, 22, 30, 24);
+      SETTINGS.iconSize = clamp(iconSize.value, 20, 32, 26);
       iconSize.value = SETTINGS.iconSize;
       SETTINGS.save();
+      iconCache = {};
+      doneIconCache = {};
       renderMarkers();
+      if (window.TaskPanel && window.TaskPanel.updateSizes) window.TaskPanel.updateSizes();
     });
 
     /* 定位标记：大小 / 颜色 / 透明度 */
@@ -1509,8 +1656,56 @@
         syncUI();
         renderMarkers();
         updateCount();
+        if (window.TaskPanel && window.TaskPanel.render) window.TaskPanel.render();
+        if (window.KorokLayer && window.KorokLayer.render) window.KorokLayer.render();
       });
     });
+
+    /* V2.5.2：9 大分类细分隐藏胶囊与快捷全选/清空 */
+    var pillsWrap = $('setDonePills');
+    if (pillsWrap) {
+      pillsWrap.querySelectorAll('.set-pill').forEach(function (p) {
+        p.addEventListener('click', function () {
+          var t = p.dataset.type;
+          if (!SETTINGS.hideDoneTypes) SETTINGS.hideDoneTypes = Object.assign({}, DEF_HIDE_TYPES);
+          SETTINGS.hideDoneTypes[t] = !SETTINGS.hideDoneTypes[t];
+          SETTINGS.save();
+          p.classList.toggle('on', !!SETTINGS.hideDoneTypes[t]);
+          renderMarkers();
+          updateCount();
+          if (window.TaskPanel && window.TaskPanel.render) window.TaskPanel.render();
+          if (window.KorokLayer && window.KorokLayer.render) window.KorokLayer.render();
+        });
+      });
+    }
+
+    var btnAll = $('setDoneAll');
+    if (btnAll) {
+      btnAll.addEventListener('click', function () {
+        if (!SETTINGS.hideDoneTypes) SETTINGS.hideDoneTypes = {};
+        for (var k in DEF_HIDE_TYPES) SETTINGS.hideDoneTypes[k] = true;
+        SETTINGS.save();
+        syncUI();
+        renderMarkers();
+        updateCount();
+        if (window.TaskPanel && window.TaskPanel.render) window.TaskPanel.render();
+        if (window.KorokLayer && window.KorokLayer.render) window.KorokLayer.render();
+      });
+    }
+
+    var btnNone = $('setDoneNone');
+    if (btnNone) {
+      btnNone.addEventListener('click', function () {
+        if (!SETTINGS.hideDoneTypes) SETTINGS.hideDoneTypes = {};
+        for (var k in DEF_HIDE_TYPES) SETTINGS.hideDoneTypes[k] = false;
+        SETTINGS.save();
+        syncUI();
+        renderMarkers();
+        updateCount();
+        if (window.TaskPanel && window.TaskPanel.render) window.TaskPanel.render();
+        if (window.KorokLayer && window.KorokLayer.render) window.KorokLayer.render();
+      });
+    }
 
     syncUI();
   })();
@@ -1810,7 +2005,7 @@
     /* V1.9.3 完成标记：setIcon 在「原图标」与「右上角绿勾 divIcon」间即时切换，图标本体不降透明度 */
     if (m) {
       var _c = catById(state.layer, m.cat);
-      mk.setIcon(state.done[mid] ? doneIconFor(_c) : iconFor(_c));
+      mk.setIcon(state.done[mid] ? doneIconFor(_c, m) : iconFor(_c, m));
     }
     mk.unbindTooltip();
     mk.bindTooltip((state.done[mid] ? '✓ ' : '') + (m ? (m.name || m.full) : ''), {
