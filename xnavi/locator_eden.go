@@ -947,7 +947,9 @@ type coordsResp struct {
 	Gz     float64 `json:"gz,omitempty"`
 	Copies int     `json:"copies,omitempty"`
 	Error  string  `json:"error,omitempty"`
-	DurMs  int64   `json:"durMs"`
+	// ErrorEn：同一错误的英文版（GUI 英文界面优先取此字段，空则回退 Error）
+	ErrorEn string `json:"errorEn,omitempty"`
+	DurMs   int64  `json:"durMs"`
 }
 
 func (p *edenPlatform) coordsBusy() bool {
@@ -979,7 +981,7 @@ func (p *edenPlatform) coordsLocate(gx, gy, gz float32) coordsResp {
 	p.coordsMu.Lock()
 	if p.coordsOn {
 		p.coordsMu.Unlock()
-		return coordsResp{Error: "另一路坐标搜索进行中，请稍候", DurMs: 0}
+		return coordsResp{Error: "另一路坐标搜索进行中，请稍候", ErrorEn: "Another coordinate search is in progress, please wait", DurMs: 0}
 	}
 	p.coordsOn = true
 	p.coordsDone = false
@@ -993,13 +995,13 @@ func (p *edenPlatform) coordsLocate(gx, gy, gz float32) coordsResp {
 	// v2.1.2 Bug F：与状态机 locate 互斥（见 scan_mutex.go）。校准是用户主动
 	// 操作通常先发起，TryLock 先到先得；被占用时提示稍后重试。
 	if !globalScanMu.TryLock() {
-		return coordsResp{Error: "定位扫描进行中，请 10 秒后重试", DurMs: elapsed()}
+		return coordsResp{Error: "定位扫描进行中，请 10 秒后重试", ErrorEn: "A locating scan is in progress, retry in 10 seconds", DurMs: elapsed()}
 	}
 	defer globalScanMu.Unlock()
 
 	h := p.Handle()
 	if h == 0 {
-		return coordsResp{Error: "Eden 进程未附加", DurMs: elapsed()}
+		return coordsResp{Error: "Eden 进程未附加", ErrorEn: "Eden process not attached", DurMs: elapsed()}
 	}
 	target := [3]float32{gx, gz + elevBias, -gy}
 	fmt.Printf("  [coords] HTTP calibration: game hud (%.1f, %.1f, %.1f) -> target mem (%.1f, %.1f, %.1f)\n",
@@ -1026,6 +1028,8 @@ func (p *edenPlatform) coordsLocate(gx, gy, gz float32) coordsResp {
 	if len(cands) == 0 {
 		return coordsResp{
 			Error: fmt.Sprintf("未命中：目标内存坐标 (%.1f, %.1f, %.1f)，扫描 %d 个区域 0 匹配。请保持角色站桩后重试（游戏内坐标需与角色实际位置一致）",
+				target[0], target[1], target[2], len(blocks)),
+			ErrorEn: fmt.Sprintf("No match: target memory coords (%.1f, %.1f, %.1f), scanned %d regions with 0 hits. Stay still in game and retry (in-game coords must match your actual position)",
 				target[0], target[1], target[2], len(blocks)),
 			DurMs: elapsed(),
 		}

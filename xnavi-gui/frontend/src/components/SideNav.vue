@@ -1,3 +1,5 @@
+<!-- ⚠ 死代码（2026-10-17 双语改造时确认）：早期多页结构遗留，App.vue 只挂载 LocateView，
+     本组件无人 import。不做 i18n，保持原样待后续清理；复活前先 grep 引用。 -->
 <template>
   <aside class="w-40 shrink-0 bg-[#161b22] border-r border-slate-800 flex flex-col">
     <div class="px-3 py-3 text-[11px] font-bold text-slate-500 uppercase tracking-wider border-b border-slate-800/60">TOTKNavi</div>

@@ -1,3 +1,5 @@
+<!-- ⚠ 死代码（2026-10-17 双语改造时确认）：早期多页结构遗留，App.vue 只挂载 LocateView，
+     本组件无人 import。不做 i18n，保持原样待后续清理；复活前先 grep 引用。 -->
 <template>
   <div class="flex-1 flex flex-col gap-3 min-h-0 p-3 overflow-y-auto">
     <!-- 总览 -->

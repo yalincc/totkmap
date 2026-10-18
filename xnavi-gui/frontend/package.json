@@ -6,7 +6,8 @@
     "build": "vite build"
   },
   "dependencies": {
-    "vue": "^3.5.13"
+    "vue": "^3.5.13",
+    "vue-i18n": "^11.4.14"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.2.1",

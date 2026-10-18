@@ -2,6 +2,10 @@
 // 单一数据源：status.json（core 400ms 写，eventBridge 300ms 推）+
 // xnavi-gui-core.log（增量读）。前端所有视图组件只从这里取状态/调方法。
 import { ref, reactive, computed, watch } from 'vue'
+import { i18n, isEnglish } from '../i18n'
+
+// 非组件上下文（composable）里的翻译入口：与模板 $t 同一实例，随语言切换实时生效
+const t = (...args) => i18n.global.t(...args)
 
 const api = window.go.main.App
 const rt = window.runtime
@@ -18,8 +22,19 @@ export const isLocating = ref(false)
 export const updateInfo = ref(null)
 
 // ---- 头部状态灯 ----
-export const syncText = ref('等待坐标流')
-export const syncDot = ref('bg-slate-600')
+// syncText/syncDot 由 computed 驱动（含语言切换实时刷新，不再靠 updateSync 赋值）
+export const syncText = computed(() => {
+  if (coreRunning.value && pos.ok) return t('sync.syncing')
+  if (coreRunning.value) {
+    return pos.pid > 0 ? t('sync.attached', { pid: pos.pid }) : t('sync.waitingProcess')
+  }
+  return t('sync.waiting')
+})
+export const syncDot = computed(() => {
+  if (coreRunning.value && pos.ok) return 'bg-emerald-400'
+  if (coreRunning.value) return 'bg-amber-400 animate-pulse'
+  return 'bg-slate-600'
+})
 // 状态文字颜色：未激活灰，激活（core 运行）琥珀黄
 export const syncClass = computed(() => coreRunning.value ? 'text-amber-400' : 'text-slate-500')
 
@@ -45,11 +60,11 @@ export const statusMapUrl = ref('')
 export const lanUrl = ref('')
 export const appReady = reactive({ ok: false, root: '', reason: '' })
 export const appReadyText = computed(() => {
-  if (!lanUrl.value) return '未检测到镜像地址'
-  if (appReady.ok) return '镜像已就绪'
-  if (appReady.reason === 'no_index') return '目录存在但缺 index.html'
-  if (appReady.reason === 'not_found') return '未找到 app/ 目录'
-  return '状态未知'
+  if (!lanUrl.value) return t('mirror.noUrl')
+  if (appReady.ok) return t('mirror.ready')
+  if (appReady.reason === 'no_index') return t('mirror.noIndex')
+  if (appReady.reason === 'not_found') return t('mirror.notFound')
+  return t('mirror.unknown')
 })
 
 // ---- 日志 ----
@@ -57,40 +72,43 @@ export const logs = ref([])
 export const logFilter = ref('')
 
 // ---- 层与来源展示 ----
-export const LAYER_NAME = { 18: '地上', 19: '地下', 20: '天空' }
-export const layerName = computed(() => LAYER_NAME[pos.layer] || String(pos.layer))
+const LAYER_KEYS = ['18', '19', '20']
+export const layerName = computed(() => {
+  const k = String(pos.layer)
+  return LAYER_KEYS.includes(k) ? t(`layer.${k}`) : k
+})
+const SOURCE_KEYS = ['known', 'chain', 'scan', 'probe', 'consensus', 'locating']
 export const sourceLabel = computed(() => {
   const s = pos.source
   if (!s || s === '-') return '-'
-  if (s === 'known') return '⚡ 秒锁'
-  if (s === 'chain') return '🔗 指针链'
-  if (s === 'scan') return '扫描'
-  if (s === 'probe') return '探针换组'
-  if (s === 'consensus') return '共识恢复'
-  if (s === 'locating') return '定位中'
-  return s
+  return SOURCE_KEYS.includes(s) ? t(`source.${s}`) : s
 })
 export const locked = computed(() => pos.ok && pos.verified)
 export const locating = computed(() => coreRunning.value && !pos.ok)
 
 // ---- 状态文本（M2：结构化驱动，不再解析日志文本）----
 export const stateText = computed(() => {
-  if (!coreRunning.value) return '就绪'
-  if (pos.pid === 0 && !pos.ok) return '等待模拟器进程...'
-  if (!pos.ok) return '定位中...'
-  if (!pos.verified) return pos.source === 'known' ? '⚡ 秒锁 · 待移动确认' : '已锁定 · 待移动确认'
-  return '已验证 · 跟随中'
+  if (!coreRunning.value) return t('state.ready')
+  if (pos.pid === 0 && !pos.ok) return t('state.waitingProcess')
+  if (!pos.ok) return t('state.locating')
+  if (!pos.verified) {
+    return pos.source === 'known' ? t('state.knownUnconfirmed') : t('state.lockedUnconfirmed')
+  }
+  return t('state.verified')
 })
+// 颜色按结构化状态判断（不能 includes 中文——英文界面会全掉成灰色）
 export const stateTextClass = computed(() => {
-  const t = stateText.value
-  if (t.includes('已验证')) return 'text-emerald-400 font-semibold'
-  if (t.includes('秒锁') || t.includes('定位') || t.includes('等待')) return 'text-amber-400 font-semibold'
-  return 'text-slate-300'
+  if (!coreRunning.value) return 'text-slate-300'
+  if (!pos.ok) return 'text-amber-400 font-semibold'
+  if (pos.verified) return 'text-emerald-400 font-semibold'
+  // 未确认：秒锁琥珀 / 普通锁定灰（与原中文匹配行为一致）
+  return pos.source === 'known' ? 'text-amber-400 font-semibold' : 'text-slate-300'
 })
 
 // ---- 步骤条（就绪→定位→验证→锁定）----
-const stepDefs = ['就绪', '定位中', '验证移动', '已锁定']
-export const steps = ref(stepDefs.map(name => ({ name, state: name === '就绪' ? 'done' : 'idle' })))
+// name 存 i18n key，模板里 t(`steps.${s.key}`) 实时取当前语言文案
+const STEP_KEYS = ['ready', 'locating', 'verifying', 'locked']
+export const steps = ref(STEP_KEYS.map(key => ({ key, state: key === 'ready' ? 'done' : 'idle' })))
 export function stepClass(s) { return { done: 'text-emerald-400', active: 'text-amber-400 font-semibold', idle: 'text-slate-600' }[s] }
 export function stepDot(s) { return { done: 'bg-emerald-400', active: 'bg-amber-400 animate-pulse', idle: 'bg-slate-700' }[s] }
 function setStepState() {
@@ -163,7 +181,8 @@ export async function submitCoords(x, y, z) {
   const r = await api.SubmitCoords(Number(x), Number(y), Number(z))
   if (!r || !r.submitted) {
     coordsState.busy = false
-    coordsState.result = { ok: false, error: (r && r.error) || '提交失败' }
+    // submitFailed 标记：前端按当前语言取「提交失败」文案（不在此烘死语言）
+    coordsState.result = { ok: false, error: (r && r.error) || '', submitFailed: true }
     return
   }
   pollCoordsResult(Date.now() + 60000) // 60s 超时兜底（含 core 启动时间，全内存扫描约 10-15s）
@@ -177,18 +196,26 @@ function pollCoordsResult(deadline) {
     }
     if (Date.now() > deadline) {
       coordsState.busy = false
-      coordsState.result = { ok: false, error: '校准超时：core 未响应（请确认已开始定位后重试）' }
+      coordsState.result = { ok: false, timeout: true }
       return
     }
     setTimeout(() => pollCoordsResult(deadline), 1000)
   })
 }
 export async function pickSave(which) {
-  const d = await api.PickDir('选择存档目录（可选，默认自动探测）')
+  const d = await api.PickDir(t('go.pickDirTitle'))
   if (d) {
     if (which === 'ryu') cfg.saveDirRyujinx = d
     else cfg.saveDirEden = d
   }
+}
+// 校准失败展示文本（实时日志用）：按当前语言取 Go 双语错误（errorEn 优先），
+// 前端兜底文案（提交失败/超时/未命中）走 i18n——切换语言后重试即生效
+export function coordsErrorText(r) {
+  if (r && r.timeout) return t('cal.timeout')
+  if (r && r.error) return isEnglish() ? (r.errorEn || r.error) : r.error
+  if (r && r.submitFailed) return t('cal.submitFailed')
+  return t('cal.missDefault')
 }
 export async function saveSettings() {
   await api.SaveConfig({ saveDirRyujinx: cfg.saveDirRyujinx, saveDirEden: cfg.saveDirEden, emu: cfg.emu, tls: cfg.tls })
@@ -242,7 +269,6 @@ function applyStatus(st) {
     appReady.reason = ''
   }
   setStepState()
-  updateSync()
 }
 // 锁定后才自动打开地图网页：仅本次会话用户点击「开始定位」(isLocating) 后、
 // 且 verified 从 false→true 真实锁定才打开（延迟 1.5s）。避免启动时读到残留 status.json 误开。
@@ -252,23 +278,10 @@ watch(locked, (val, old) => {
     setTimeout(() => rt.BrowserOpenURL(buildMapUrl()), 1500)
   }
 })
-function updateSync() {
-  if (coreRunning.value && pos.ok) {
-    syncText.value = '坐标流同步中'
-    syncDot.value = 'bg-emerald-400'
-  } else if (coreRunning.value) {
-    syncText.value = pos.pid > 0 ? `已附加 pid=${pos.pid}，定位中...` : '等待模拟器进程...'
-    syncDot.value = 'bg-amber-400 animate-pulse'
-  } else {
-    syncText.value = '等待坐标流'
-    syncDot.value = 'bg-slate-600'
-  }
-}
-
 export async function initCore() {
   mapAutoOpened = false // 每次启动重置，仅本次会话真实锁定后才自动开地图
   logs.value = []
-  steps.value.forEach(s => { s.state = s.name === '就绪' ? 'done' : 'idle' })
+  steps.value.forEach(s => { s.state = s.key === 'ready' ? 'done' : 'idle' })
   ver.value = await api.Version()
   const c = await api.LoadConfig()
   if (c.saveDirRyujinx) cfg.saveDirRyujinx = c.saveDirRyujinx

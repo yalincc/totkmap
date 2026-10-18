@@ -58,10 +58,10 @@ func coordsFileLoop() {
 				ensureAttach()
 				resp = cs.coordsLocate(float32(req.X), float32(req.Y), float32(req.Z))
 			} else {
-				resp = coordsResp{Error: "当前平台不支持坐标校准（仅 Eden）"}
+				resp = coordsResp{Error: "当前平台不支持坐标校准（仅 Eden）", ErrorEn: "Coordinate calibration is not supported on this platform (Eden only)"}
 			}
 		} else {
-			resp = coordsResp{Error: "平台未就绪，请先启动定位"}
+			resp = coordsResp{Error: "平台未就绪，请先启动定位", ErrorEn: "Platform not ready, start locating first"}
 		}
 		buf, _ := json.Marshal(resp)
 		os.WriteFile(coordsRespPath(), buf, 0644)
