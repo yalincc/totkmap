@@ -85,8 +85,12 @@ func (p *edenPlatform) Handle() uintptr     { return p.h }
 func (p *edenPlatform) PID() uint32        { return p.pid }
 func (p *edenPlatform) LittleEndian() bool { return true }
 
-// Blocks 全部已提交 RW 区域（MEM_MAPPED + MEM_PRIVATE，≥64KB 去噪）。
+// Blocks 优先返回 Switch User Heap 区间（2.65GB，对齐 BOTW xnavi v3.2.2 edenHeapBlocks，
+// 扫描从 33s 缩至 2~3s）；未找到 DRAM 大块时回退全 RW 区域。
 func (p *edenPlatform) Blocks(minMB float64) []MemBlock {
+	if blks := edenHeapBlocks(p.h, minMB); len(blks) > 0 {
+		return blks
+	}
 	return edenGuestBlocks(p.h, minMB)
 }
 
@@ -141,10 +145,98 @@ func edenProcessPath(h uintptr) string {
 	return string(utf16.Decode(buf[:size]))
 }
 
-// ---- 内存枚举 ----
+// ---- 内存枚举（对齐 BOTW xnavi v3.2.2 User Heap 快速枚举）----
 
-// edenGuestBlocks 返回全部已提交 RW 区域（MEM_MAPPED + MEM_PRIVATE，≥64KB 去噪）。
-// Eden 内存碎片化，玩家槽落在 0.44MB 微型区域——必须扫全部区域，不能只取最大块。
+const (
+	edenGuestHeapLo = uintptr(0x2000000000)
+	edenGuestHeapHi = uintptr(0x3000000000)
+)
+
+// findEdenDram 定位 Switch DRAM 大块（MEM_MAPPED ≥ 1GB），返回 arenaLow = maxBase + maxSize。
+func findEdenDram(h uintptr) (arenaLow uintptr, size uintptr, ok bool) {
+	if h == 0 {
+		return 0, 0, false
+	}
+	var maxBase, maxSize uintptr
+	addr := uintptr(0)
+	const limit = uintptr(0x7FFFFFFFFFFF)
+	for addr < limit {
+		var mbi MemoryBasicInformation
+		if virtualQueryEx(h, addr, &mbi) == 0 {
+			break
+		}
+		b, sz := mbi.BaseAddress, mbi.RegionSize
+		if mbi.State == memCommit && mbi.Type == memMapped && sz >= 1<<30 {
+			if sz > maxSize {
+				maxBase = b
+				maxSize = sz
+			}
+		}
+		nxt := b + sz
+		if nxt > addr {
+			addr = nxt
+		} else {
+			addr += 0x1000
+		}
+	}
+	if maxSize == 0 {
+		return 0, 0, false
+	}
+	return maxBase + maxSize, maxSize, true
+}
+
+// edenHeapBlocks 枚举 TOTK 主模块静态段窗口 [arenaLow+0x78000000, arenaLow+0x88000000)（96MB，
+// 含跨传送/跨神庙永不销毁的全局 0x48 步长 3x4 变换槽）与 Switch User Heap 区间（1.6GB）。
+// 总扫描量 ~1.7GB，耗时约 1.5s。
+func edenHeapBlocks(h uintptr, minMB float64) []MemBlock {
+	if h == 0 {
+		return nil
+	}
+	arenaLow, _, ok := findEdenDram(h)
+	if !ok {
+		return nil
+	}
+
+	minSize := uintptr(minMB * 1048576.0)
+	const floor = uintptr(64 * 1024)
+	if minSize < floor {
+		minSize = floor
+	}
+
+	ranges := [][2]uintptr{
+		{arenaLow + chainWinLo, arenaLow + chainWinHi},           // 主模块 .bss 全局持久段 (~96MB)
+		{arenaLow + edenGuestHeapLo, arenaLow + edenGuestHeapHi}, // User Heap (~1.6GB)
+	}
+
+	var blocks []MemBlock
+	for _, rg := range ranges {
+		addr := rg[0]
+		for addr < rg[1] {
+			var mbi MemoryBasicInformation
+			if virtualQueryEx(h, addr, &mbi) == 0 {
+				break
+			}
+			b, sz := mbi.BaseAddress, mbi.RegionSize
+			if b >= rg[1] {
+				break
+			}
+			prot := mbi.Protect & 0xFF
+			isRW := (prot == 0x02 || prot == 0x04 || prot == 0x40) && (mbi.Protect&pageGuard == 0)
+			if mbi.State == memCommit && isRW && sz >= minSize {
+				blocks = append(blocks, MemBlock{Base: b, Size: sz})
+			}
+			nxt := b + sz
+			if nxt > addr {
+				addr = nxt
+			} else {
+				addr += 0x1000
+			}
+		}
+	}
+	return blocks
+}
+
+// edenGuestBlocks 返回全部已提交 RW 区域（MEM_MAPPED + MEM_PRIVATE，≥64KB 去噪；兜底用）。
 func edenGuestBlocks(h uintptr, minMB float64) []MemBlock {
 	if h == 0 {
 		return nil

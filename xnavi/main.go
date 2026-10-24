@@ -46,10 +46,12 @@ func main() {
 	emuSel := "auto" // auto | ryujinx | eden
 	tlsMode := false // --tls：8766 起 HTTPS（V2.1.1）
 	certDir := "certs"
+	probeMode := false // --probe：动力学根扫描探针（验证 xnavi 方案在 TOTK 适用性）
 	for _, a := range os.Args[1:] {
 		switch {
+		case a == "--probe":
+			probeMode = true
 		case a == "--no-open":
-			autoOpen = false
 		case a == "--no-save":
 			useSaveScan = false
 		case a == "--tls":
@@ -109,36 +111,29 @@ func main() {
 		}
 	}
 
-	// 块世代检测（启动前置，仅 Ryujinx 语义）：参照块不在 → 游戏重启过 →
-	// 只扫当前会话块，避免锁到旧块残留槽（值可读但位置错误、永不更新）。
-	// Eden 内存区域动态分配，不可作重启判据（locator.detectNewBlocks 恒 nil），
-	// 且其全部块枚举走 edenMinBlockMB（64KB 区域，开销大），此处直接跳过。
-	if p := currentPlatform(); p != nil && p.Handle() != 0 {
-		if _, isRyu := p.(*ryujinxPlatform); isRyu {
-			blks := p.Blocks(minBlockMB)
-			if newOnes := detectNewBlocks(blks); newOnes != nil {
-				fmt.Printf("  [gen] game-restart detected at startup\n")
-				bestBase, bestSize := uintptr(0), uintptr(0)
-				for _, b := range blks {
-					for _, nb := range newOnes {
-						if b.Base == nb && b.Size > bestSize {
-							bestBase, bestSize = b.Base, b.Size
-						}
-					}
-				}
-				currentSessionBase = bestBase
-				fmt.Printf("  [gen] current session block 0x%X\n", currentSessionBase)
-			}
-		}
-	}
+	// M1 第二步：块世代检测（detectNewBlocks/currentSessionBase/knownBlocks）已随
+	// known 快路径一起退役——游戏重启后进程 PID 变化，调度器 Attach 重连、管道以
+	// 最新存档锚点重新扫描即可，无需启动前置重启检测。
 
 	// 手机镜像静态目录（/botw/ 托管网页）。
+	// --probe 探针模式：只跑动力学根扫描验证，不起 HTTP/状态机/进度服务。
+	// 注意：此处绝不能调用 flushLog() —— 它会把日志管道写端关闭并停掉转发
+	// 协程，探针后续所有输出将写进已关闭管道而全部丢失（2026-10-23 实测踩坑）。
+	if probeMode {
+		probeRun()
+		flushLog() // probeRun 正常返回（仅"无平台"等提前退出路径）时才兜底刷一次
+		os.Exit(0)
+	}
+
 	initBotwFS()
 	if botwRoot != "" {
 		fmt.Printf("  web root -> %s\n", botwRoot)
 	} else {
 		fmt.Println("  [warn] app dir not found - /botw/ mirror disabled (API only)")
 	}
+
+	// v3.4：神庙入口坐标表（进庙双条件判定 / 传送目的地命名）
+	loadShrineEntrances()
 
 	progress = newProgressWatcher()
 	go progress.loop()

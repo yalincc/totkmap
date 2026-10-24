@@ -32,7 +32,7 @@ import (
 //         预检弹窗（>50m 警告可强制继续，Vue 悬浮卡）。
 // V2.2.0：核心新增第 6 条锁定途径「指针链快路径」（跑动掉锁后毫秒级重锁）；
 //         GUI 侧无 UI 改动，仅版本号对齐核心。
-const guiVersion = "v2.2.0"
+const guiVersion = "v3.0.0"
 
 // App Wails 后端：管理核心子进程 + 读 status.json / xnavi-gui-core.log + 网页端端口探测。
 // 与核心的通信完全走文件（status.json、xnavi-gui-core.log），不依赖 8766 HTTP——

@@ -1,6 +1,35 @@
 # TOTKmap 更新日志
 
-> 本项目遵循语义化版本（SemVer）。详细技术备忘与踩坑见 Obsidian 知识库《TOTKmap-技术踩坑与实现方案》。
+> 本项目遵循语义化版本（SemVer）。详细技术备忘与踩坑见 Obsidian 知识库《TOTKmap-技术踩坑与实现方案》与《TOTKnavi-定位基本逻辑与技术手册》。
+
+## TOTKNAVI v3.0.0 — 全面对齐 BOTW xnavi 极简架构 + 发现主模块 `.bss` `0x48` 跨场景持久变换槽（2026-10-25）
+
+> 本版将 `TOTKnavi`（`xnavi/`）彻底对齐 `BOTWmap/xnavi` v3.2.2 的「做减法」设计哲学（`死守 lockedAddr` + `[hold]` + `[shrine]` + `[warp]`），并通过逆向发现 TOTK 全内存唯一的跨场景持久变换槽，实现**启动 1.5s 秒锁、远距离传送与进出神庙零重扫瞬间跟随**。完整逆向与架构报告见 `归档/开发计划/TOTKnavi-v3.0.0-跨场景持久槽发现与xnavi对齐总结-完成.md`。
+
+### 1. 重大逆向发现：TOTK 主模块 `.bss` 跨场景持久变换槽（`stride = 0x48`）
+- **厘清 `0x40` 临时槽与 `0x48` 持久槽的本质区别**：
+  - 此前锁定的 `0x40` 步长（64B，`+0x0C` 单位四元数，`Run = 2`，位于 `0x2297B2xxxxx`）实为 **Havok 场景碰撞体临时实例**，每次传送或进出神庙卸载场景都会被释放归零（`0, 0, 0`）。
+  - 逆向发现 TOTK 主模块 `main` 静态段 `.bss` 偏移 **`H + 0x53C9534`**（Eden 主模块虚拟映射 `0x208D2FDF534` / 物理 DRAM 镜像 `0x207EA70D534`，Eden 与 Ryujinx 均存在）存放着玩家的**双缓冲 `3x4` 矩阵变换结构（`stride = 0x48 = 72B`）**：`[-0x24..-0x01: 3x3 正交旋转矩阵] + [+0x00..+0x0B: (X, Z_stored, Y_north)]` 连续两条记录（`Run = 2`）。
+  - **跨场景永不销毁 & 全内存零误报**：该 `.bss` 槽位跨远距离传送、进出神庙永不释放，落地瞬间原地更新为新坐标；且全 6.3 GB Guest RAM 中满足 `0x48` 步长双缓冲 `Rot3OK(-0x24) + CoordOK(0)` 特征的仅有玩家真身 1 处（0 误报）。
+
+### 2. Eden 内存枚举收敛（扫描耗时从 32s 降至 1.5s）
+- `platform_eden.go` 新增 `findEdenDram` 与 `edenHeapBlocks`，不再遍历进程全部 17 GB RW 区域（排除约 15 GB 显存纹理与 JIT 页），精确枚举：
+  - **Switch 主模块静态段 `[arenaLow + 0x78000000, arenaLow + 0x88000000)`**（~96 MB 已提交内存，直接覆盖 `0x208D2FDF534` 持久槽）；
+  - **Switch User Heap `[arenaLow + 0x2000000000, arenaLow + 0x3000000000)`**（~1.55 GB）。
+- 全量扫描耗时稳定在 **1.5 ~ 1.6 秒**。
+
+### 3. 扫描门禁与分组排序（践行 xnavi 减法原则）
+- `probe_totk.go` 新增 `ptkValidRotRec` 与 `ptkRun48Length`（检测 `0x48` 步长正交旋转矩阵双缓冲记录）。
+- **`Run >= 2` 仅作二值门槛，取消按 `Run` 大小排序**：彻底解决城镇静态坐标数组（`Run = 10`）排序压过林克真身（`Run = 2`）导致站立死锁的问题。
+- **分组优先级 `Rot > Quat > Dist`**：`Rot=true`（`0x48` 主模块持久槽）恒排第 `#1` 候选，其次为 `Quat=true`（`0x40` 步长槽），同级按距存档锚点距离升序。
+
+### 4. 状态机 100% 对齐 xnavi（传送/神庙零重扫闭环）
+- **删除冗余补丁**：移除旧版 `known` 持久化、冻结共识、`probe` 监听、`lostState` 8 秒超时断连及旧版 `mount.step`。拆分为 `core_totk.go` + `watch_eden.go` + `watch_ryujinx.go` + `watch.go` 调度器。
+- **走动确认 `#1` 优先**：`!verified` 期间优先检查 `#1`（`lockedAddr`，即 `0x48` 持久槽）相对初始位置的累计位移 `>= 0.5m`，防止慢走时被 `#2` 临时 `0x40` 槽抢锁。
+- **神庙进出零重扫闭环**：
+  - 修复 `ptkCoordOK` 对 `X = 0.0` 的误拒（改为 `x != 0 && abs32(x) < 1e-6`），确保神庙内部中轴线 `X = 0.0` 正常读取；
+  - 进神庙自动识别局部坐标并钉住神庙入口 `shrineEntrance`（152 座 ROM 权威神庙入口表 `shrine_entrances.json`）；
+  - 修复中心海拉鲁（距 `(0,0)` `< 400m`，如巧诺尼希乌神庙 `(-240.5, -360.5, 29.6)`）出神庙判定：当 `!isShrine || dist3(cur, shrineEntrance) < 35.0 || curShrineName != ""` 时立即退出 `shrineMode` 恢复实时跟随。
 
 ## TOTKMAP V2.5.2 — 地图图标 3-Tier 缩放自适应 + 任务防漂移 + 完成标记 9 大分类细分隐藏（2026-10-19）
 
