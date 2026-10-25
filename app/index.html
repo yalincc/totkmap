@@ -15,24 +15,24 @@
 <!-- 右下角缩放控件（百分比 / 放大 / 缩小 / 全图 / 定位） -->
 <div id="zoomControls">
   <span id="zoomPct">100%</span>
-  <button id="zoomIn" type="button" title="放大">＋</button>
-  <button id="zoomOut" type="button" title="缩小">－</button>
-  <button id="zoomFit" type="button" title="回到全图">⌂</button>
-  <button id="zoomLocate" type="button" title="定位（实时服务在线→玩家，否则监视堡垒）">🎯</button>
-  <button id="btnMirror" type="button" title="手机镜像：同一 WiFi 下扫码，手机打开同一地图">📱</button>
+  <button id="zoomIn" type="button" title="放大" data-i18n-title="map.zoomIn">＋</button>
+  <button id="zoomOut" type="button" title="缩小" data-i18n-title="map.zoomOut">－</button>
+  <button id="zoomFit" type="button" title="回到全图" data-i18n-title="map.fit">⌂</button>
+  <button id="zoomLocate" type="button" title="定位（实时服务在线→玩家，否则监视堡垒）" data-i18n-title="map.locate">🎯</button>
+  <button id="btnMirror" type="button" title="手机镜像：同一 WiFi 下扫码，手机打开同一地图" data-i18n-title="map.mirror">📱</button>
 </div>
 
 <!-- 手机镜像面板（V2.4.0）：同一 WiFi 下扫码/复制链接，手机打开同源地图（BOTW V1.5.0 同款） -->
 <div id="mirrorPanel" class="hidden">
-  <button id="mirrorClose" type="button" class="mp-close" title="关闭">×</button>
-  <div class="mp-head">📱 手机镜像 · 同一 WiFi</div>
-  <div class="mp-qr"><img id="mirrorQr" alt="手机镜像二维码" src="" draggable="false"></div>
+  <button id="mirrorClose" type="button" class="mp-close" title="关闭" data-i18n-title="common.close">×</button>
+  <div class="mp-head" data-i18n="mirror.head">📱 手机镜像 · 同一 WiFi</div>
+  <div class="mp-qr"><img id="mirrorQr" alt="手机镜像二维码" data-i18n-alt="mirror.qrAlt" src="" draggable="false"></div>
   <div class="mp-url-wrap">
     <input id="mirrorUrl" type="text" readonly spellcheck="false">
-    <button id="mirrorCopy" type="button" title="复制链接">复制</button>
+    <button id="mirrorCopy" type="button" title="复制链接" data-i18n-title="mirror.copyTip" data-i18n="mirror.copy">复制</button>
   </div>
-  <p id="mirrorHint" class="mp-hint">手机打开后：红点跟随 / 点图标导航 / 收集进度与电脑一致</p>
-  <p class="mp-hint mp-hint-sub">屏幕仍会自动变暗？手机「设置→显示→自动锁屏」调长，或开启开发者选项「保持唤醒」（充电时屏幕不休眠）</p>
+  <p id="mirrorHint" class="mp-hint" data-i18n="mirror.hint">手机打开后：红点跟随 / 点图标导航 / 收集进度与电脑一致</p>
+  <p class="mp-hint mp-hint-sub" data-i18n="mirror.subHint">屏幕仍会自动变暗？手机「设置→显示→自动锁屏」调长，或开启开发者选项「保持唤醒」（充电时屏幕不休眠）</p>
 </div>
 
 <!-- ============ 左侧筛选面板 ============ -->
@@ -41,36 +41,36 @@
   <!-- 面板头部：图层切换 + 名称开关 -->
   <div class="panel-top">
     <div class="panel-head-row">
-      <h2 class="panel-title">王国之泪·全能地图</h2>
+      <h2 class="panel-title" data-i18n="app.title">王国之泪·全能地图</h2>
       <div class="top-switches">
         <div class="name-switch cur" id="toggleNames">
-          <span>显示名称</span>
+          <span data-i18n="app.showNames">显示名称</span>
           <input type="checkbox" id="nameSwitch" checked>
           <label class="switch" for="nameSwitch"><i></i></label>
         </div>
         <label class="name-switch" id="toggleArea">
-          <span>地区轮廓</span>
+          <span data-i18n="app.areaOutline">地区轮廓</span>
           <input type="checkbox" id="areaSwitch">
           <span class="switch"><i></i></span>
         </label>
       </div>
     </div>
     <div class="layer-switch" id="layerSwitch">
-      <button data-layer="20">天空</button>
-      <button data-layer="18" class="active">地上</button>
-      <button data-layer="19">地下</button>
+      <button data-layer="20" data-i18n="layer.sky">天空</button>
+      <button data-layer="18" class="active" data-i18n="layer.surface">地上</button>
+      <button data-layer="19" data-i18n="layer.depths">地下</button>
     </div>
   </div>
 
   <!-- 探索 / 材料 Tab 切换 -->
   <div class="side-tabs" id="sideTabs">
-    <button type="button" data-tab="explore" class="active">探索</button>
-    <button type="button" data-tab="material">材料</button>
+    <button type="button" data-tab="explore" class="active" data-i18n="tab.explore">探索</button>
+    <button type="button" data-tab="material" data-i18n="tab.material">材料</button>
   </div>
 
   <!-- 搜索 -->
   <div class="search-box">
-    <input id="searchInput" type="search" placeholder="搜索神庙/地名/任务/物品..." autocomplete="off">
+    <input id="searchInput" type="search" placeholder="搜索神庙/地名/任务/物品..." autocomplete="off" data-i18n-placeholder="search.placeholder">
     <div id="searchResult" class="search-result hidden"></div>
   </div>
 
@@ -78,8 +78,8 @@
   <div id="explorePane">
     <!-- 图层工具栏（全选/清空 + 图层计数） -->
     <div class="layer-toolbar">
-      <button id="ltAll" type="button" class="lt-btn">全选图层</button>
-      <button id="ltClear" type="button" class="lt-btn">清空图层</button>
+      <button id="ltAll" type="button" class="lt-btn" data-i18n="btn.selectAll">全选图层</button>
+      <button id="ltClear" type="button" class="lt-btn" data-i18n="btn.clearAll">清空图层</button>
       <span id="layerCount" class="lt-count">0/0 图层</span>
     </div>
 
@@ -91,12 +91,12 @@
   <div id="materialPane" class="hidden">
     <!-- 搜索框与探索页共用同一套 .search-box 式样（搜索栏在上） -->
     <div class="search-box">
-      <input id="matSearchInput" type="search" placeholder="搜索材料…" autocomplete="off">
+      <input id="matSearchInput" type="search" placeholder="搜索材料…" autocomplete="off" data-i18n-placeholder="matsearch.placeholder">
       <div id="matSearchResult" class="search-result hidden"></div>
     </div>
     <div class="layer-toolbar">
-      <button id="matAll" type="button" class="lt-btn">全选材料</button>
-      <button id="matClear" type="button" class="lt-btn">清空材料</button>
+      <button id="matAll" type="button" class="lt-btn" data-i18n="btn.matSelectAll">全选材料</button>
+      <button id="matClear" type="button" class="lt-btn" data-i18n="btn.matClearAll">清空材料</button>
       <span id="matCount" class="lt-count">0/0 材料</span>
     </div>
     <div class="catalog-body mat-list" id="matList"></div>
@@ -104,9 +104,9 @@
 
   <!-- ===== 探索度（加载存档后显示） ===== -->
   <div class="progress-section" id="progressSection">
-    <div class="progress-head" id="progressHead" title="点击展开/收起">
+    <div class="progress-head" id="progressHead" data-i18n-title="progress.toggleTip" title="点击展开/收起">
       <span class="progress-toggle" id="progressToggle">▾</span>
-      <span class="progress-title">探索度</span>
+      <span class="progress-title" data-i18n="progress.title">探索度</span>
     </div>
     <div id="progressList" class="progress-list"></div>
   </div>
@@ -114,8 +114,8 @@
   <!-- 加载存档 -->
   <div class="save-upload">
     <div class="su-row">
-      <button id="saveSyncBtn" type="button" class="su-load-btn" title="读取本机 Ryujinx 的 progress.sav，同步收集进度（文件仅在本机内存处理）">📂 从存档加载进度…</button>
-      <span class="su-help" id="suHelp" tabindex="0" role="button" aria-label="存档在哪里">?</span>
+      <button id="saveSyncBtn" data-i18n-title="save.syncBtnTip" type="button" class="su-load-btn" title="读取本机 Ryujinx 的 progress.sav，同步收集进度（文件仅在本机内存处理）" data-i18n="save.loadBtn">📂 从存档加载进度…</button>
+      <span class="su-help" id="suHelp" data-i18n-aria="save.helpAria" tabindex="0" role="button" aria-label="存档在哪里">?</span>
       <div class="su-tip hidden" id="suTip">
         <b>存档文件 = progress.sav（游戏存档）</b>
         <div>存档位置：<code>AppData\Roaming\Ryujinx\bis\user\save\0000000000000007\0\slot_00\progress.sav</code></div>
@@ -126,13 +126,13 @@
   </div>
 
   <footer class="side-foot">
-    <p class="foot-version">TOTKMAP V2.5.2 © 2026 yalincc</p>
+    <p class="foot-version">TOTKMAP V2.6.0 © 2026 yalincc</p>
     <p>GitHub <a href="https://github.com/yalincc/totkmap" target="_blank" rel="noopener">https://github.com/yalincc/totkmap</a></p>
   </footer>
 </aside>
 
 <!-- 面板收起把手 -->
-<button id="panelToggle" class="panel-toggle" title="收起/展开面板">«</button>
+<button id="panelToggle" data-i18n-title="common.toggleCollapse" class="panel-toggle" title="收起/展开面板">«</button>
 
 <!-- ============ 详情卡片（点击标点/材料弹出，参考 BOTWmap 信息卡） ============ -->
 <section id="detail" class="detail hidden">
@@ -143,20 +143,20 @@
     </div>
     <h3 class="card-name" id="detailName"></h3>
     <div class="card-meta" id="detailMeta">
-      <div class="meta-row"><span class="meta-label">区域</span><span class="meta-val" id="detailRegion"></span></div>
-      <div class="meta-row"><span class="meta-label">坐标</span><span class="meta-val" id="detailCoord"></span></div>
-      <div class="meta-row"><span class="meta-label">位置</span><span class="meta-val" id="detailPos"></span></div>
+      <div class="meta-row"><span class="meta-label" data-i18n="card.region">区域</span><span class="meta-val" id="detailRegion"></span></div>
+      <div class="meta-row"><span class="meta-label" data-i18n="card.coord">坐标</span><span class="meta-val" id="detailCoord"></span></div>
+      <div class="meta-row"><span class="meta-label" data-i18n="card.place">位置</span><span class="meta-val" id="detailPos"></span></div>
     </div>
     <img id="detailImg" class="card-img" src="" alt="">
-    <div class="card-usage" id="detailUsageRow"><span class="usage-label">用途</span><span id="detailUsage"></span></div>
+    <div class="card-usage" id="detailUsageRow"><span class="usage-label" data-i18n="card.usage">用途</span><span id="detailUsage"></span></div>
     <div class="card-body">
       <div class="row" id="detailDesc"></div>
     </div>
     <div class="card-actions">
-      <button id="detailNav" class="btn act">导航</button>
-      <button id="detailComp" class="btn act" style="display:none">查看图鉴</button>
-      <button id="detailCollect" class="btn act">收集</button>
-      <button id="detailDone" class="btn primary">标记完成</button>
+      <button id="detailNav" class="btn act" data-i18n="card.nav">导航</button>
+      <button id="detailComp" class="btn act" style="display:none" data-i18n="card.compendium">查看图鉴</button>
+      <button id="detailCollect" class="btn act" data-i18n="card.collect">收集</button>
+      <button id="detailDone" class="btn primary" data-i18n="card.markDone">标记完成</button>
     </div>
   </div>
 </section>
@@ -171,20 +171,19 @@
     <!-- V2.0.3 名字后挂复制按钮（查攻略用：复制名字去搜） -->
     <div class="ec-name-row">
       <h3 class="card-name" id="ecName"></h3>
-      <button type="button" class="ec-copy" id="ecCopy" title="复制名称，便于搜索攻略">复制</button>
+      <button type="button" class="ec-copy" id="ecCopy" data-i18n-title="card.copyNameTip" title="复制名称，便于搜索攻略" data-i18n="card.copy">复制</button>
     </div>
-    <div class="ec-row" id="ecRegionRow"><span class="ec-label">区域</span><span class="ec-value" id="ecRegion"></span></div>
-    <div class="ec-row" id="ecTowerRow"><span class="ec-label">塔域</span><span class="ec-value" id="ecTower"></span></div>
+    <div class="ec-row" id="ecRegionRow"><span class="ec-label" data-i18n="card.region">区域</span><span class="ec-value" id="ecRegion"></span></div>
+    <div class="ec-row" id="ecTowerRow"><span class="ec-label" data-i18n="card.tower">塔域</span><span class="ec-value" id="ecTower"></span></div>
     <div class="ec-row" id="ecCoordRow">
-      <span class="ec-label">坐标</span>
+      <span class="ec-label" data-i18n="card.coord">坐标</span>
       <span class="ec-value">
         <span id="ecCoord"></span>
         <!-- V2.1 M6.8：回到该图标在地图上的位置。
              有少数标点在地图上没有独立图标（防具店代表的 19 件商店防具、
              任务点挂在别的分类下），点跳转只会弹 toast 飞不过去。
              坐标是现成的，直接按坐标飞过去兜底。 -->
-        <button type="button" class="ec-locate" id="ecLocate"
-                title="回到该点在地图上的位置" aria-label="定位到地图">
+        <button type="button" class="ec-locate" id="ecLocate" data-i18n-title="card.locateTip" data-i18n-aria="card.locateAria" title="回到该点在地图上的位置" aria-label="定位到地图">
           <svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true">
             <path d="M8 1.6c-2.5 0-4.5 2-4.5 4.5 0 3.4 4.5 8.3 4.5 8.3s4.5-4.9 4.5-8.3c0-2.5-2-4.5-4.5-4.5z"
                   fill="none" stroke="currentColor" stroke-width="1.3"/>
@@ -193,24 +192,24 @@
         </button>
       </span>
     </div>
-    <div class="ec-row" id="ecTrialRow"><span class="ec-label">试炼</span><span class="ec-value" id="ecTrial"></span></div>
+    <div class="ec-row" id="ecTrialRow"><span class="ec-label" data-i18n="card.trial">试炼</span><span class="ec-value" id="ecTrial"></span></div>
     <!-- V2.0.2 神庙详情：desc 里的「位置 / 注意事项 / 宝箱」原先完全没显示，这里结构化补上 -->
-    <div class="ec-row" id="ecPlaceRow"><span class="ec-label">位置</span><span class="ec-value" id="ecPlace"></span></div>
+    <div class="ec-row" id="ecPlaceRow"><span class="ec-label" data-i18n="card.place">位置</span><span class="ec-value" id="ecPlace"></span></div>
     <div class="ec-row" id="ecNoteRow">
-      <span class="ec-label">注意</span>
+      <span class="ec-label" data-i18n="card.note">注意</span>
       <span class="ec-value">
         <span id="ecNoteText"></span>
         <button type="button" class="ec-more" id="ecNoteMore">展开</button>
       </span>
     </div>
-    <div class="ec-row" id="ecChestRow"><span class="ec-label">宝箱</span><span class="ec-value" id="ecChest"></span></div>
+    <div class="ec-row" id="ecChestRow"><span class="ec-label" data-i18n="card.chest">宝箱</span><span class="ec-value" id="ecChest"></span></div>
     <!-- V2.1 M6.6：防具专属区块。只在点的是防具标点时填充，
          非防具标点保持空（CSS :empty 隐藏），不影响其他卡片外观。 -->
     <div id="ecArmor"></div>
     <div class="card-actions">
-      <button id="ecNav" type="button" class="btn act">导航</button>
-      <button id="ecAuto" type="button" class="btn act">自动导航</button>
-      <button id="ecDone" type="button" class="btn primary">标记完成</button>
+      <button id="ecNav" type="button" class="btn act" data-i18n="card.nav">导航</button>
+      <button id="ecAuto" type="button" class="btn act" data-i18n="card.autoNav">自动导航</button>
+      <button id="ecDone" type="button" class="btn primary" data-i18n="card.markDone">标记完成</button>
     </div>
   </div>
 </section>
@@ -222,70 +221,87 @@
 <!-- ============ 材料原图预览（点击卡片图标查看 256px 原图） ============ -->
 <div id="imgPreview" class="img-preview hidden">
   <img id="imgPreviewImg" src="" alt="">
-  <span class="img-preview-hint">点击任意处关闭</span>
+  <span class="img-preview-hint" data-i18n="card.previewClose">点击任意处关闭</span>
 </div>
 
 <!-- ============ 底部工具条 ============ -->
 <div class="bottom-bar">
-  <button id="addMarkerBtn" class="bar-btn">+ 新增标点</button>
-  <button id="navBtn" class="bar-btn" title="实时定位导航（需本地 TOTKNavi 服务）">🧭 导航</button>
-  <button id="settingsBtn" class="bar-btn" title="显示设置（图标大小 / 定位点样式 / 完成标记）">⚙ 设置</button>
+  <button id="addMarkerBtn" class="bar-btn" data-i18n="bar.addPin">+ 新增标点</button>
+  <button id="navBtn" data-i18n-title="bar.navTip" class="bar-btn" title="实时定位导航（需本地 TOTKNavi 服务）" data-i18n="bar.nav">🧭 导航</button>
+  <button id="settingsBtn" data-i18n-title="bar.settingsTip" class="bar-btn" title="显示设置（图标大小 / 定位点样式 / 完成标记）" data-i18n="bar.settings">⚙ 设置</button>
 </div>
 
 <!-- ============ 显示设置面板（V2.5.0 v4：锚定设置按钮上方 + 可拖动 + 纵向紧凑） ============ -->
 <div id="settingsModal" class="set-pop hidden">
   <div class="card-head" id="setHead">
-    <span class="chip">显示设置</span>
-    <button id="setClose" class="detail-close" title="关闭（可按住标题栏拖动）">×</button>
+    <span class="chip" data-i18n="settings.title">显示设置</span>
+    <button id="setClose" data-i18n-title="settings.closeDragTip" class="detail-close" title="关闭（可按住标题栏拖动）">×</button>
   </div>
   <div class="set-divider"></div>
 
   <div class="set-sec">
-    <div class="set-sec-title">图标大小 <span class="set-title-hint">（基准 20-32px，随缩放分级）</span></div>
+    <div class="set-sec-title"><span data-i18n="settings.iconSize">图标大小</span> <span class="set-title-hint" data-i18n="settings.iconSizeHint">（基准 20-32px，随缩放分级）</span></div>
     <div class="set-field"><input type="number" id="setIconSize" min="20" max="32" step="2" value="26"> <i>px</i></div>
   </div>
 
   <div class="set-sec">
-    <div class="set-sec-title">定位标记 <span class="set-title-hint">（大小 16-40 · 透明度 30-100%）</span></div>
+    <div class="set-sec-title"><span data-i18n="settings.markerStyle">定位标记</span> <span class="set-title-hint" data-i18n="settings.markerStyleHint">（大小 16-40 · 透明度 30-100%）</span></div>
     <div class="set-inline3">
-      <input type="number" id="setDotSize" min="16" max="40" step="2" value="24" title="大小"> <i>px</i>
-      <input type="color" id="setDotColorPick" value="#ff3b3b" title="颜色">
-      <input type="text" id="setDotColorHex" value="#ff3b3b" maxlength="7" spellcheck="false" title="颜色hex">
-      <input type="number" id="setDotAlpha" min="30" max="100" step="5" value="70" title="透明度"> <i>%</i>
+      <input type="number" id="setDotSize" data-i18n-title="settings.dotSizeTip" min="16" max="40" step="2" value="24" title="大小"> <i>px</i>
+      <input type="color" id="setDotColorPick" data-i18n-title="settings.dotColorPickTip" value="#ff3b3b" title="颜色">
+      <input type="text" id="setDotColorHex" data-i18n-title="settings.dotColorHexTip" value="#ff3b3b" maxlength="7" spellcheck="false" title="颜色hex">
+      <input type="number" id="setDotAlpha" data-i18n-title="settings.dotAlphaTip" min="30" max="100" step="5" value="70" title="透明度"> <i>%</i>
     </div>
   </div>
 
   <div class="set-sec">
-    <div class="set-sec-title">完成标记图标 <span class="set-title-hint">（隐藏后不显示已标记标点）</span></div>
+    <div class="set-sec-title"><span data-i18n="settings.completedMarkers">完成标记图标</span> <span class="set-title-hint" data-i18n="settings.completedMarkersHint">（隐藏后不显示已标记标点）</span></div>
     <div class="set-opts" id="setDoneModeBtns">
-      <button class="set-opt" data-v="default">显示</button>
-      <button class="set-opt" data-v="hide">隐藏</button>
+      <button class="set-opt" data-v="default" data-i18n="settings.show">显示</button>
+      <button class="set-opt" data-v="hide" data-i18n="settings.hide">隐藏</button>
     </div>
     <div class="set-sub-types" id="setDoneSubWrap" style="display:none">
       <div class="set-sub-head">
-        <span class="set-sub-title">隐藏以下分类：</span>
+        <span class="set-sub-title" data-i18n="settings.hideSubTitle">隐藏以下分类：</span>
         <span class="set-sub-actions">
-          <button type="button" class="set-link-btn" id="setDoneAll">全选</button>
+          <button type="button" class="set-link-btn" id="setDoneAll" data-i18n="settings.selectAll">全选</button>
           <span class="set-sub-sep">·</span>
-          <button type="button" class="set-link-btn" id="setDoneNone">清空</button>
+          <button type="button" class="set-link-btn" id="setDoneNone" data-i18n="settings.clearAll">清空</button>
         </span>
       </div>
       <div class="set-pills" id="setDonePills">
-        <button type="button" class="set-pill on" data-type="shrine">神庙</button>
-        <button type="button" class="set-pill on" data-type="tower">鸟望台</button>
-        <button type="button" class="set-pill on" data-type="root">树根</button>
-        <button type="button" class="set-pill on" data-type="korok">克洛格</button>
-        <button type="button" class="set-pill on" data-type="chest">宝箱</button>
-        <button type="button" class="set-pill on" data-type="equip">装备</button>
-        <button type="button" class="set-pill on" data-type="sign">立牌</button>
-        <button type="button" class="set-pill on" data-type="task">任务</button>
-        <button type="button" class="set-pill on" data-type="boss">讨伐</button>
+        <button type="button" class="set-pill on" data-type="shrine" data-i18n="pill.shrine">神庙</button>
+        <button type="button" class="set-pill on" data-type="tower" data-i18n="pill.tower">鸟望台</button>
+        <button type="button" class="set-pill on" data-type="root" data-i18n="pill.root">树根</button>
+        <button type="button" class="set-pill on" data-type="korok" data-i18n="pill.korok">克洛格</button>
+        <button type="button" class="set-pill on" data-type="chest" data-i18n="pill.chest">宝箱</button>
+        <button type="button" class="set-pill on" data-type="equip" data-i18n="pill.equip">装备</button>
+        <button type="button" class="set-pill on" data-type="sign" data-i18n="pill.sign">立牌</button>
+        <button type="button" class="set-pill on" data-type="task" data-i18n="pill.task">任务</button>
+        <button type="button" class="set-pill on" data-type="boss" data-i18n="pill.boss">讨伐</button>
       </div>
     </div>
   </div>
 
+  <div class="set-sec">
+    <div class="set-sec-title"><span data-i18n="settings.trail">移动轨迹</span> <span class="set-title-hint" data-i18n="settings.trailHint">（玩家走过的路线，仅本次会话记录）</span></div>
+    <div class="set-opts" id="setTrailBtns">
+      <button type="button" class="set-opt active" data-v="show" data-i18n="settings.trailShow">显示</button>
+      <button type="button" class="set-opt" data-v="hide" data-i18n="settings.trailHide">隐藏</button>
+      <button type="button" class="set-opt" data-v="clear" data-i18n="settings.trailClear">清除</button>
+    </div>
+  </div>
+
+  <div class="set-sec">
+    <div class="set-sec-title" data-i18n="settings.language">界面语言</div>
+    <div class="set-opts" id="setLangBtns">
+      <button type="button" class="set-opt active" data-lang="zh" data-i18n="settings.langZh">中文</button>
+      <button type="button" class="set-opt" data-lang="en" data-i18n="settings.langEn">English</button>
+    </div>
+  </div>
+
   <div class="set-actions">
-    <button id="setReset" class="set-ghost">重置默认</button>
+    <button id="setReset" class="set-ghost" data-i18n="settings.reset">重置默认</button>
   </div>
 </div>
 <style id="settings-css">
@@ -359,21 +375,21 @@
 <!-- 自定义标点表单 -->
 <div id="addMarkerModal" class="modal hidden">
   <div class="modal-card">
-    <h3>新增标点</h3>
-    <input id="amName" type="text" placeholder="标点名称" maxlength="40">
-    <input id="amDesc" type="text" placeholder="备注（可选）" maxlength="100">
+    <h3 data-i18n="pin.addTitle">新增标点</h3>
+    <input id="amName" type="text" placeholder="标点名称" maxlength="40" data-i18n-placeholder="pin.namePlaceholder">
+    <input id="amDesc" type="text" placeholder="备注（可选）" maxlength="100" data-i18n-placeholder="pin.descPlaceholder">
     <div class="modal-actions">
-      <button id="amSave" class="btn primary">保存</button>
-      <button id="amCancel" class="btn ghost">取消</button>
+      <button id="amSave" class="btn primary" data-i18n="pin.save">保存</button>
+      <button id="amCancel" class="btn ghost" data-i18n="pin.cancel">取消</button>
     </div>
-    <p class="modal-tip">在地图上点击空白处即可放置标点</p>
+    <p class="modal-tip" data-i18n="pin.tip">在地图上点击空白处即可放置标点</p>
   </div>
 </div>
 
 <!-- ============ 帮助弹窗（同步存档 · 帮助） ============ -->
 <div id="helpBox" class="help-box hidden">
   <h3>同步存档 · 帮助
-    <button id="hbClose" class="help-close" title="关闭">×</button>
+    <button id="hbClose" data-i18n-title="common.close" class="help-close" title="关闭">×</button>
   </h3>
   <div class="hq">
     <h4>① 模拟器和游戏版本</h4>
@@ -435,31 +451,40 @@
 <!-- ============ 实时导航面板（V1.8.0） ============ -->
 <div id="navPanel" class="nav-panel hidden">
   <div class="np-head">
-    <span class="np-title">🧭 实时导航</span>
-    <span class="np-status off" id="npStatus">● 离线</span>
-    <button type="button" class="np-min" id="npToggle" title="收起/展开">－</button>
+    <span class="np-title" data-i18n="nav.title">🧭 实时导航</span>
+    <span class="np-status off" id="npStatus" data-i18n="nav.offline">● 离线</span>
+    <button type="button" class="np-min" id="npToggle" title="收起/展开" data-i18n-title="common.toggleCollapse">－</button>
   </div>
   <div class="np-body" id="npBody">
     <div class="np-row" id="npPos">位置 --（未连接定位服务）</div>
-    <div class="np-row" id="npTargetRow">目标：未设置</div>
-    <div class="np-row np-arrive hidden" id="npArrive">✓ 已到达目标（阈值内）</div>
+    <div class="np-row" id="npTargetRow" data-i18n="nav.targetNone">目标：未设置</div>
+    <div class="np-row np-arrive hidden" id="npArrive" data-i18n="nav.arrived">✓ 已到达目标（阈值内）</div>
     <div class="np-opts">
       <label class="np-opt">到达阈值 <input type="number" id="npArriveInput" value="30" min="1" max="500"> 游戏单位</label>
       <label class="np-opt">停留标记 <input type="number" id="npHold" value="2" min="0" max="10" step="1"> 秒（0=到达即标）</label>
-      <label class="np-chk"><input type="checkbox" id="npAutoLayer" checked> 跟随自动切层</label>
-      <label class="np-chk"><input type="checkbox" id="npFollow"> 视图跟随</label>
+      <label class="np-chk"><input type="checkbox" id="npAutoLayer" checked> <span data-i18n="nav.autoLayer">跟随自动切层</span></label>
+      <label class="np-chk"><input type="checkbox" id="npFollow"> <span data-i18n="nav.follow">视图跟随</span></label>
     </div>
     <div class="np-actions">
-      <button type="button" class="np-btn" id="npPause">暂停</button>
-      <button type="button" class="np-btn" id="npEnd">结束</button>
-      <button type="button" class="np-btn" id="npClear">清除目标</button>
-      <button type="button" class="np-btn" id="npLocate">定位我</button>
+      <button type="button" class="np-btn" id="npPause" data-i18n="nav.pause">暂停</button>
+      <button type="button" class="np-btn" id="npEnd" data-i18n="nav.end">结束</button>
+      <button type="button" class="np-btn" id="npClear" data-i18n="nav.clearTarget">清除目标</button>
+      <button type="button" class="np-btn" id="npLocate" data-i18n="nav.locateMe">定位我</button>
     </div>
   </div>
 </div>
 
 <div id="toast" class="toast hidden"></div>
 
+<script src="data/i18n/names_en.js"></script>
+<script src="data/i18n/markers_en.js"></script>
+<script src="data/i18n/armors_desc_en.js"></script>
+<script src="data/i18n/shrines_guide_en.js"></script>
+<script src="data/guides/shrines_guide.js"></script>
+<script src="data/guides/quests_guide.js"></script>
+<script src="data/i18n/zh.js"></script>
+<script src="data/i18n/en.js"></script>
+<script src="js/i18n.js"></script>
 <script src="vendor/leaflet.js"></script>
 <script src="vendor/murmurhash3js.min.js"></script>
 <script src="vendor/supercluster.min.js?v=188"></script>

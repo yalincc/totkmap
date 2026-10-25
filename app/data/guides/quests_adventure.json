@@ -1,0 +1,1585 @@
+{
+  "AssassinGerudoBase": {
+    "key": "AssassinGerudoBase",
+    "name_zh": "潜入依盖队",
+    "name_en": "Infiltrating the Yiga Clan",
+    "category": "ImportantMini",
+    "npc_zh": "瓦图卢",
+    "npc_en": "瓦图卢",
+    "start_zh": "在格鲁德高地中的【依盖队基地】与瓦图卢对话开启",
+    "start_en": "Speak with Mimos outside the main entrance of the Yiga Clan Main Hideout in the Gerudo Highlands.",
+    "note_zh": "进入基地就算完成",
+    "note_en": "Equip all three pieces of the Yiga Clan Armor Set (Yiga Mask, Yiga Armor, and Yiga Tights) and knock on the door to gain entry.",
+    "reward_zh": [
+      "可使用基地内训练场等",
+      "完成挑战获取奖励"
+    ],
+    "reward_en": [
+      "Access to Yiga Clan Main Hideout",
+      "Access to Blademaster Training"
+    ],
+    "requires": [],
+    "unlocks": []
+  },
+  "BlindRuinsTreasure": {
+    "key": "BlindRuinsTreasure",
+    "name_zh": "调查德依布朗遗迹吧",
+    "name_en": "Investigate the Thyphlo Ruins",
+    "category": "ImportantMini",
+    "npc_zh": "卡兹纳比",
+    "npc_en": "卡兹纳比",
+    "start_zh": "与卡兹纳比对话开启",
+    "start_en": "Speak with Kazunavi by the research camp near the Thyphlo Ruins Skyview Tower.",
+    "note_zh": "调查四座石碑开启后续任务",
+    "note_en": "Examine the four stone monoliths around the camp to unlock the four Thyphlo Ruins side adventures: The Long Dragon, The Corridor between Two Dragons, The Owl Protected by Dragons, and The Six Dragons.",
+    "reward_zh": [
+      "无"
+    ],
+    "reward_en": [
+      "None"
+    ],
+    "requires": [],
+    "unlocks": []
+  },
+  "BlindRuinsTreasure_Gerudo": {
+    "key": "BlindRuinsTreasure_Gerudo",
+    "name_zh": "身体纤长的守护龙",
+    "name_en": "The Long Dragon",
+    "category": "ImportantMini",
+    "npc_zh": "卡兹纳比",
+    "npc_en": "卡兹纳比",
+    "start_zh": "无",
+    "start_en": "Examine the lightning monolith during 'Investigate the Thyphlo Ruins'.",
+    "note_zh": "使用电击击打图示标记石块",
+    "note_en": "Follow the long stone dragon carved into the ruins to its tail at the southeast corner, then activate Riju's lightning ability (or shoot an electric weapon/arrow) at the stone platform behind the tail.",
+    "reward_zh": [
+      "黄玉*3"
+    ],
+    "reward_en": [
+      "Topaz x3"
+    ],
+    "requires": [],
+    "unlocks": []
+  },
+  "BlindRuinsTreasure_Goron": {
+    "key": "BlindRuinsTreasure_Goron",
+    "name_zh": "两龙之间的夹缝",
+    "name_en": "The Corridor between Two Dragons",
+    "category": "ImportantMini",
+    "npc_zh": "卡兹纳比",
+    "npc_en": "卡兹纳比",
+    "start_zh": "无",
+    "start_en": "Examine the fire monolith during 'Investigate the Thyphlo Ruins'.",
+    "note_zh": "点燃图示位置",
+    "note_en": "Find the two stone dragon statues facing each other on the west side of the ruins, stand behind one, and launch Yunobo's charge attack through the corridor between them.",
+    "reward_zh": [
+      "红宝石*3"
+    ],
+    "reward_en": [
+      "Ruby x3"
+    ],
+    "requires": [],
+    "unlocks": []
+  },
+  "BlindRuinsTreasure_Rito": {
+    "key": "BlindRuinsTreasure_Rito",
+    "name_zh": "被众龙所守望的枭",
+    "name_en": "The Owl Protected by Dragons",
+    "category": "ImportantMini",
+    "npc_zh": "卡兹纳比",
+    "npc_en": "卡兹纳比",
+    "start_zh": "无",
+    "start_en": "Examine the wind monolith during 'Investigate the Thyphlo Ruins'.",
+    "note_zh": "在图示位置吹风",
+    "note_en": "Locate the owl statue surrounded by dragon statues southwest of the tower, stand on the pedestal in front of it, and use Tulin's gust ability directly toward the owl.",
+    "reward_zh": [
+      "蓝宝石*3"
+    ],
+    "reward_en": [
+      "Sapphire x3"
+    ],
+    "requires": [],
+    "unlocks": []
+  },
+  "BlindRuinsTreasure_Zora": {
+    "key": "BlindRuinsTreasure_Zora",
+    "name_zh": "六龙御前",
+    "name_en": "The Six Dragons",
+    "category": "ImportantMini",
+    "npc_zh": "卡兹纳比",
+    "npc_en": "卡兹纳比",
+    "start_zh": "无",
+    "start_en": "Examine the water monolith during 'Investigate the Thyphlo Ruins'.",
+    "note_zh": "星标所在位置斩击（水技能）",
+    "note_en": "Head to the circle of six dragon statues northwest of the tower, activate Sidon's water shield ability, and perform a charged weapon slash in the center of the ring.",
+    "reward_zh": [
+      "蛋白石*5"
+    ],
+    "reward_en": [
+      "Opal x5"
+    ],
+    "requires": [],
+    "unlocks": []
+  },
+  "Connect_FirstIsland": {
+    "key": "Connect_FirstIsland",
+    "name_zh": "来自地底的呼唤",
+    "name_en": "A Call from the Depths",
+    "category": "ImportantMini",
+    "npc_zh": "UnknownNPC_MysteryVoice",
+    "npc_en": "UnknownNPC_MysteryVoice",
+    "start_zh": "将此处的石堆摧毁，随后到时之神殿与女神像对话",
+    "start_en": "Break the cracked stone blockage at the Great Plateau North Chasm gate to drain the water, then speak with the Goddess Statue inside the Temple of Time Ruins.",
+    "note_zh": "将遗失的四个眼睛找回",
+    "note_en": "Find the four stone eyes scattered around the Great Plateau chasms, drop each down into the Depths, and use Ultrahand to transport them to the Great Abandoned Central Mine and place them into the giant Bargainer Statue.",
+    "reward_zh": [
+      "心之容器或精力容器"
+    ],
+    "reward_en": [
+      "Heart Container or Stamina Vessel"
+    ],
+    "requires": [],
+    "unlocks": []
+  },
+  "Fairy2": {
+    "key": "Fairy2",
+    "name_zh": "献给弥佳的小夜曲",
+    "name_en": "Serenade to Mija",
+    "category": "ImportantMini",
+    "npc_zh": "弥佳",
+    "npc_en": "弥佳",
+    "start_zh": "与驿站外的米洛央对话开启",
+    "start_en": "Speak with Mastro at Snowfield Stable in the Hebra region.",
+    "note_zh": "需先前往吉希山丘完成任务【圆号乐手的脱逃剧】、随后使用马车抵达大妖精处",
+    "note_en": "First complete 'The Hornist's Dramatic Escape' south of Tabantha Bridge Stable to recruit Eustus. Then use Ultrahand to attach a roof to Breezer, hitch your horse using a Towing Harness, and carefully transport the troupe to Great Fairy Mija's bud.",
+    "reward_zh": [
+      "100卢比",
+      "解锁装备强化"
+    ],
+    "reward_en": [
+      "100 Rupees",
+      "Great Fairy Armor Upgrades Unlocked"
+    ],
+    "requires": [],
+    "unlocks": [],
+    "deliver_zh": "用马车把圆号乐手余福尔送到弥佳的花蕾前（送达后弥佳现身，小夜曲完成）。",
+    "deliver_en": "Transport hornist Eustace by carriage to Great Fairy Mija’s bud (Mija will emerge and the quest will be complete)."
+  },
+  "Fairy3": {
+    "key": "Fairy3",
+    "name_zh": "献给可秋拉的小夜曲",
+    "name_en": "Serenade to Cotera",
+    "category": "ImportantMini",
+    "npc_zh": "Npc_Orchestra_M_00_FairyCotera",
+    "npc_en": "Npc_Orchestra_M_00_FairyCotera",
+    "start_zh": "与驿站外的米洛央对话开启",
+    "start_en": "Speak with Mastro outside Dueling Peaks Stable in West Necluda.",
+    "note_zh": "用究极手做船前往",
+    "note_en": "First complete 'Honey, Bee Mine' near Kakariko Village to recruit the drummer Beetz. Then use Ultrahand to attach Breezer onto a raft with Fans and a Steering Stick to ferry the troupe across the river to Great Fairy Cotera's bud.",
+    "reward_zh": [
+      "100卢比",
+      "解锁装备强化"
+    ],
+    "reward_en": [
+      "100 Rupees",
+      "Great Fairy Armor Upgrades Unlocked"
+    ],
+    "requires": [],
+    "unlocks": []
+  },
+  "Fairy4": {
+    "key": "Fairy4",
+    "name_zh": "献给西莎的小夜曲",
+    "name_en": "Serenade to Kaysa",
+    "category": "ImportantMini",
+    "npc_zh": "Npc_Orchestra_M_00_FairySiza",
+    "npc_en": "Npc_Orchestra_M_00_FairySiza",
+    "start_zh": "与驿站外的米洛央对话开启",
+    "start_en": "Speak with Mastro outside Outskirt Stable southwest of Central Hyrule.",
+    "note_zh": "用究极手制作一辆越野车抵达",
+    "note_en": "First complete 'The Flute Player's Plan' at Highland Stable to recruit Pyper. Then use Ultrahand to assemble an all-terrain vehicle by attaching Big Wheels and a Steering Stick to Breezer, and drive the troupe up the steep rocky hill to Great Fairy Kaysa's bud.",
+    "reward_zh": [
+      "100卢比",
+      "解锁装备强化"
+    ],
+    "reward_en": [
+      "100 Rupees",
+      "Great Fairy Armor Upgrades Unlocked"
+    ],
+    "requires": [],
+    "unlocks": []
+  },
+  "FindWithSensors": {
+    "key": "FindWithSensors",
+    "name_zh": "哈特诺村的研究所",
+    "name_en": "Hateno Village Research Lab",
+    "category": "ImportantMini",
+    "npc_zh": "洛贝利",
+    "npc_en": "洛贝利",
+    "start_zh": "与洛贝利对话",
+    "start_en": "Speak with Robbie at Lookout Landing after completing 'A Mystery in the Depths', then meet him at the Hateno Ancient Tech Lab.",
+    "note_zh": "在研究所装载神庙感应器后找到一座神庙",
+    "note_en": "Robbie installs the Shrine Sensor onto your Purah Pad. Follow the sensor's radar pings down the hillside slope to find and enter Mayahisik Shrine inside the cave.",
+    "reward_zh": [
+      "神庙感应器"
+    ],
+    "reward_en": [
+      "Shrine Sensor"
+    ],
+    "requires": [
+      {
+        "type": "quest",
+        "key": "GetCamera",
+        "resolved": true,
+        "flag": "GetCamera_IsCompleted_Exp"
+      }
+    ],
+    "unlocks": []
+  },
+  "FirstskyislandReturns": {
+    "key": "FirstskyislandReturns",
+    "name_zh": "初始空岛的渊源",
+    "name_en": "Legend of the Great Sky Island",
+    "category": "ImportantMini",
+    "npc_zh": "Npc_Zonau_Golem_Servant_FirstIsland_20",
+    "npc_en": "Npc_Zonau_Golem_Servant_FirstIsland_20",
+    "start_zh": "与管家魔像对话开启",
+    "start_en": "Speak with the Steward Golem on the roof of the Temple of Time on the Great Sky Island.",
+    "note_zh": "在时限内点燃3处篝火，建议使用弓箭引燃，可以穿卓拉铠甲攀瀑保持不落地",
+    "note_en": "Light all three bonfires across the island within 12 in-game hours without touching the ground. Wear the Zora Armor to swim up waterfalls to regain altitude and shoot fire arrows or fire fruit arrows at each bonfire.",
+    "reward_zh": [
+      "左纳乌的布料"
+    ],
+    "reward_en": [
+      "Zonai Fabric"
+    ],
+    "requires": [],
+    "unlocks": []
+  },
+  "GerudoCanyon_Adventure": {
+    "key": "GerudoCanyon_Adventure",
+    "name_zh": "依盖队的干部考试",
+    "name_en": "The Yiga Clan Exam",
+    "category": "ImportantMini",
+    "npc_zh": "Npc_Assassin_Middle_004",
+    "npc_en": "Npc_Assassin_Middle_004",
+    "start_zh": "与依盖队 干部对话开启",
+    "start_en": "Wear the complete Yiga Clan set and speak with the Yiga Blademaster inside the Yiga Blademaster Station in Gerudo Canyon.",
+    "note_zh": "需提前装备依盖套装",
+    "note_en": "Equip the full Yiga Clan Armor Set and travel across Gerudo Canyon to place Mighty Bananas as offerings at five frog statues, then return to pass the exam and become a Yiga Blademaster.",
+    "reward_zh": [
+      "红宝石*1",
+      "戒心长刀*1"
+    ],
+    "reward_en": [
+      "Ruby x1",
+      "Eightfold Longblade x1"
+    ],
+    "requires": [],
+    "unlocks": [],
+    "deliver_zh": "穿上全套伊盖队服，向祭坛献上大剑香蕉。",
+    "deliver_en": "Put on the complete Yiga Clan outfit and offer a Mighty Banana at the altar."
+  },
+  "GetSensorPlus": {
+    "key": "GetSensorPlus",
+    "name_zh": "重大发明！图鉴感应器！",
+    "name_en": "Presenting: Sensor +!",
+    "category": "ImportantMini",
+    "npc_zh": "洛贝利",
+    "npc_en": "洛贝利",
+    "start_zh": "与洛贝利对话",
+    "start_en": "Speak with Robbie at the Hateno Ancient Tech Lab after unlocking the Shrine Sensor.",
+    "note_zh": "跟随指引完成装置测试",
+    "note_en": "Register at least 5 different monster entries into your Hyrule Compendium and show them to Robbie to upgrade the Purah Pad with Sensor +.",
+    "reward_zh": [
+      "传送标记器",
+      "足迹模式",
+      "图鉴感应器"
+    ],
+    "reward_en": [
+      "Travel Medallion",
+      "Hero's Path Mode",
+      "Sensor +"
+    ],
+    "requires": [],
+    "unlocks": [
+      "HatenoPurchasePicture"
+    ]
+  },
+  "GetWalker": {
+    "key": "GetWalker",
+    "name_zh": "重大发明！足迹模式！",
+    "name_en": "Presenting: Hero's Path Mode!",
+    "category": "ImportantMini",
+    "npc_zh": "洛贝利",
+    "npc_en": "洛贝利",
+    "start_zh": "与洛贝利对话",
+    "start_en": "Speak with Robbie at the Hateno Ancient Tech Lab after unlocking the Shrine Sensor.",
+    "note_zh": "跟随指引完成装置测试",
+    "note_en": "Complete at least 15 Shrines of Light and speak with Robbie to unlock Hero's Path Mode on your Purah Pad map.",
+    "reward_zh": [
+      "传送标记器",
+      "足迹模式",
+      "图鉴感应器"
+    ],
+    "reward_en": [
+      "Travel Medallion",
+      "Hero's Path Mode",
+      "Sensor +"
+    ],
+    "requires": [],
+    "unlocks": []
+  },
+  "GetWarpMarker": {
+    "key": "GetWarpMarker",
+    "name_zh": "重大发明！传送标记器！",
+    "name_en": "Presenting: The Travel Medallion!",
+    "category": "ImportantMini",
+    "npc_zh": "洛贝利",
+    "npc_en": "洛贝利",
+    "start_zh": "与洛贝利对话",
+    "start_en": "Speak with Robbie at the Hateno Ancient Tech Lab after unlocking the Shrine Sensor.",
+    "note_zh": "跟随指引完成装置测试",
+    "note_en": "Travel to the Akkala Ancient Tech Lab in northeast Hyrule, defeat the Yiga Clan intruders to retrieve the Travel Medallion Prototype from the chest, and return it to Robbie.",
+    "reward_zh": [
+      "传送标记器",
+      "足迹模式",
+      "图鉴感应器"
+    ],
+    "reward_en": [
+      "Travel Medallion",
+      "Hero's Path Mode",
+      "Sensor +"
+    ],
+    "requires": [],
+    "unlocks": []
+  },
+  "HatenoPurchasePicture": {
+    "key": "HatenoPurchasePicture",
+    "name_zh": "自己专属的海拉鲁图鉴",
+    "name_en": "Filling Out the Compendium",
+    "category": "ImportantMini",
+    "npc_zh": "洛贝利",
+    "npc_en": "洛贝利",
+    "start_zh": "与洛贝利对话",
+    "start_en": "Examine Robbie's database terminal inside the Hateno Ancient Tech Lab.",
+    "note_zh": "可以自己拍摄也可直接购买",
+    "note_en": "Interact with Robbie's database terminal to purchase missing pictures for your Hyrule Compendium using Rupees.",
+    "reward_zh": [
+      "解锁图鉴"
+    ],
+    "reward_en": [
+      "Hyrule Compendium Purchasing Unlocked"
+    ],
+    "requires": [
+      {
+        "type": "quest",
+        "key": "GetSensorPlus",
+        "resolved": true,
+        "flag": "GetSensorPlus_IsCompleted_Exp"
+      }
+    ],
+    "unlocks": []
+  },
+  "Hateno_Cheese": {
+    "key": "Hateno_Cheese",
+    "name_zh": "托可优的重要信件",
+    "name_en": "A Letter to Koyin",
+    "category": "ImportantMini",
+    "npc_zh": "Npc_HatenoVillage025",
+    "npc_en": "Npc_HatenoVillage025",
+    "start_zh": "与托可优对话开启",
+    "start_en": "Speak with Koyin by the pond at Hateno Pasture in Hateno Village.",
+    "note_zh": "用原木搭桥将信吸出来",
+    "note_en": "Use Ultrahand to build a bridge or raft of logs across the water to reach the message bottle floating in the pond, or attach items to pull it ashore and bring it to Koyin.",
+    "reward_zh": [
+      "哈特诺起司"
+    ],
+    "reward_en": [
+      "Hateno Cheese"
+    ],
+    "requires": [],
+    "unlocks": []
+  },
+  "Hateno_LetUsElection": {
+    "key": "Hateno_LetUsElection",
+    "name_zh": "村长选举开始！",
+    "name_en": "The Mayoral Election",
+    "category": "ImportantMini",
+    "npc_zh": "",
+    "npc_en": "",
+    "start_zh": "与索芙拉对话开启",
+    "start_en": "Speak with Sophie outside the Ventest Clothing boutique in Hateno Village after completing all prerequisite mayoral election quests.",
+    "note_zh": "过过场动画即可",
+    "note_en": "Watch the mayoral election cutscene in the village square to witness Cece and Reede resolve their differences and cooperate.",
+    "reward_zh": [
+      "萨格诺帽子"
+    ],
+    "reward_en": [
+      "Cece Hat"
+    ],
+    "requires": [
+      {
+        "type": "flag",
+        "key": null,
+        "resolved": false,
+        "flag": "Hateno_ChallengeComplete_04"
+      }
+    ],
+    "unlocks": []
+  },
+  "Hateno_RevitalizeByNewSpeciality": {
+    "key": "Hateno_RevitalizeByNewSpeciality",
+    "name_zh": "用新名产振兴村子！",
+    "name_en": "A New Signature Food",
+    "category": "ImportantMini",
+    "npc_zh": "Npc_HatenoVillage",
+    "npc_en": "Npc_HatenoVillage",
+    "start_zh": "在房子中与科沙尤西对话开启",
+    "start_en": "Speak with Mayor Reede inside his house in Hateno Village during the mayoral election questline.",
+    "note_zh": "需要先获取【托可优的重要信件】的任务奖励",
+    "note_en": "Complete 'A Letter to Koyin' to receive Hateno Cheese, then deliver the Hateno Cheese to Mayor Reede to help him revive his grandfather's signature food.",
+    "reward_zh": [
+      "卢比"
+    ],
+    "reward_en": [
+      "100 Rupees (Silver Rupee)"
+    ],
+    "requires": [
+      {
+        "type": "flag",
+        "key": null,
+        "resolved": false,
+        "flag": "Hateno_FirstEvent_Inside"
+      }
+    ],
+    "unlocks": []
+  },
+  "Hateno_SecretLifeOfKusayoshi": {
+    "key": "Hateno_SecretLifeOfKusayoshi",
+    "name_zh": "科沙尤西的秘密",
+    "name_en": "Reede's Secret",
+    "category": "ImportantMini",
+    "npc_zh": "Npc_HatenoVillage018",
+    "npc_en": "Npc_HatenoVillage018",
+    "start_zh": "与房子外的可莱维亚对话开启",
+    "start_en": "Speak with Clavia outside Reede's house in Hateno Village during the daytime.",
+    "note_zh": "通过【哈特诺村西边的井】中使用通天术进入房子",
+    "note_en": "Jump down into Hateno Village West Well, navigate through the underground passage directly underneath Reede's locked shed, and use Ascend to get inside and read his diary.",
+    "reward_zh": [
+      "海拉鲁番茄*10"
+    ],
+    "reward_en": [
+      "Hylian Tomato x10"
+    ],
+    "requires": [
+      {
+        "type": "flag",
+        "key": null,
+        "resolved": false,
+        "flag": "Hateno_FirstEvent_Inside"
+      }
+    ],
+    "unlocks": []
+  },
+  "Hateno_SecretLifeOfSagono": {
+    "key": "Hateno_SecretLifeOfSagono",
+    "name_zh": "萨格诺的秘密",
+    "name_en": "Cece's Secret",
+    "category": "ImportantMini",
+    "npc_zh": "索芙拉",
+    "npc_en": "索芙拉",
+    "start_zh": "与索芙拉对话开启",
+    "start_en": "Speak with Sophie outside the Ventest Clothing boutique in Hateno Village.",
+    "note_zh": "任务需在晚上进行",
+    "note_en": "Wait until night (around 10:00 PM), then stealthily tail Cece across the street without being spotted as she sneaks into the silo to uncover her secret.",
+    "reward_zh": [
+      "铠甲蘑菇*10"
+    ],
+    "reward_en": [
+      "Ironshroom x10"
+    ],
+    "requires": [
+      {
+        "type": "flag",
+        "key": null,
+        "resolved": false,
+        "flag": "Hateno_FirstEvent_Inside"
+      }
+    ],
+    "unlocks": []
+  },
+  "Hateno_VillageMayorElection": {
+    "key": "Hateno_VillageMayorElection",
+    "name_zh": "你是萨格诺派？还是科沙尤西派？",
+    "name_en": "Team Cece or Team Reede?",
+    "category": "ImportantMini",
+    "npc_zh": "索芙拉",
+    "npc_en": "索芙拉",
+    "start_zh": "在哈特诺村与索芙拉对话，随后进入店铺与萨格诺对话开启",
+    "start_en": "Speak with Sophie outside the Ventest Clothing boutique in Hateno Village, then head inside and speak with Cece.",
+    "note_zh": "帮萨格诺送出八份礼物",
+    "note_en": "Hand out 8 Hylian Shrooms to the designated undecided villagers throughout Hateno Village who do not wear Cece mushroom hats.",
+    "reward_zh": [
+      "大生命松露"
+    ],
+    "reward_en": [
+      "Big Hearty Truffle"
+    ],
+    "requires": [
+      {
+        "type": "flag",
+        "key": null,
+        "resolved": false,
+        "flag": "Hateno_FirstEvent_Inside"
+      }
+    ],
+    "unlocks": []
+  },
+  "IchikaraChallenge01": {
+    "key": "IchikaraChallenge01",
+    "name_zh": "微达的独立",
+    "name_en": "Mattison's Independence",
+    "category": "ImportantMini",
+    "npc_zh": "帕伍达",
+    "npc_en": "帕伍达",
+    "start_zh": "与帕伍达对话开启",
+    "start_en": "Speak with Hudson and Rhondson inside their house in Tarrey Town.",
+    "note_zh": "一路跟着微达帮她解决难题",
+    "note_en": "Assist Mattison around Tarrey Town: help her quiz the Gerudo teacher, blind Hagg at the railcar using a Puffshroom, gather 10 Sundelions for Hudson's hot-air balloon, and attend her farewell gathering.",
+    "reward_zh": [
+      "卢比"
+    ],
+    "reward_en": [
+      "200 Rupees"
+    ],
+    "requires": [],
+    "unlocks": [
+      "BuildHouse"
+    ]
+  },
+  "LookingForTheVoiceLord": {
+    "key": "LookingForTheVoiceLord",
+    "name_zh": "寻找声音的主人",
+    "name_en": "Who Goes There?",
+    "category": "ImportantMini",
+    "npc_zh": "洁琳",
+    "npc_en": "洁琳",
+    "start_zh": "与洁琳对话开启",
+    "start_en": "Speak with Jerrin in the Emergency Shelter beneath Lookout Landing after completing at least one Regional Phenomena temple.",
+    "note_zh": "跟着声音方向前进即可",
+    "note_en": "Crouch through the opening in the wall, break through the sediment boulders along the Royal Hidden Passage, and follow the eerie whispering voice to locate the Horned Statue.",
+    "reward_zh": [
+      "卢比"
+    ],
+    "reward_en": [
+      "20 Rupees"
+    ],
+    "requires": [
+      {
+        "type": "flag",
+        "key": null,
+        "resolved": false,
+        "flag": "BaseCamp_UndergroundPassage_Exp"
+      }
+    ],
+    "unlocks": []
+  },
+  "MercenaryChallenge_Akkare": {
+    "key": "MercenaryChallenge_Akkare",
+    "name_zh": "为阿卡莱带来和平！",
+    "name_en": "Bring Peace to Akkala!",
+    "category": "ImportantMini",
+    "npc_zh": "陀鲁",
+    "npc_en": "陀鲁",
+    "start_zh": "跟随任务指引与陀鲁对话",
+    "start_en": "Speak with Torfe near Akkala Span in southwestern Akkala.",
+    "note_zh": "跟随士兵前往【阿卡莱大桥】，消灭全部怪物即可",
+    "note_en": "Charge across the bridge alongside Torfe's Monster-Control Crew squad and defeat all monsters occupying the bridge stronghold.",
+    "reward_zh": [
+      "100卢比"
+    ],
+    "reward_en": [
+      "100 Rupees (Silver Rupee)"
+    ],
+    "requires": [
+      {
+        "type": "quest",
+        "key": "MercenaryChallenge_Eldin",
+        "resolved": true,
+        "flag": "MercenaryChallenge_Eldin_IsCompleted_Exp"
+      }
+    ],
+    "unlocks": [
+      "Mercenary_Akkare_Bloody",
+      "Mercenary_Eldin_Bloody"
+    ]
+  },
+  "MercenaryChallenge_Eldin": {
+    "key": "MercenaryChallenge_Eldin",
+    "name_zh": "为奥尔汀带来和平！",
+    "name_en": "Bring Peace to Eldin!",
+    "category": "ImportantMini",
+    "npc_zh": "陀鲁",
+    "npc_en": "陀鲁",
+    "start_zh": "标点位置与玛埃斯特对话了解情况，随后上山找到陀鲁对话开启",
+    "start_en": "Speak with Torfe's squad gathered near the entrance to Lake Darman Monster Den in Eldin.",
+    "note_zh": "跟随士兵进入【达鲁马湖的魔窟】，消灭所有怪物即可",
+    "note_en": "Follow Torfe's squad into the Lake Darman Monster Den cave and clear out all the monsters inside, avoiding the rolling spiked boulders.",
+    "reward_zh": [
+      "100卢比"
+    ],
+    "reward_en": [
+      "100 Rupees (Silver Rupee)"
+    ],
+    "requires": [],
+    "unlocks": [
+      "MercenaryChallenge_Akkare"
+    ]
+  },
+  "MercenaryChallenge_Firone": {
+    "key": "MercenaryChallenge_Firone",
+    "name_zh": "为费罗尼带来和平！",
+    "name_en": "Bring Peace to Faron!",
+    "category": "ImportantMini",
+    "npc_zh": "阿迈尼",
+    "npc_en": "阿迈尼",
+    "start_zh": "与阿迈尼对话",
+    "start_en": "Speak with Flaxen near the broken bridge leading to the pirate camp in Faron.",
+    "note_zh": "使用究极手修好桥，随后消灭所有怪物",
+    "note_en": "Use Ultrahand to repair the broken bridge with nearby wood planks, then charge across with Flaxen's squad and eliminate all monsters.",
+    "reward_zh": [
+      "卢比"
+    ],
+    "reward_en": [
+      "100 Rupees (Silver Rupee)"
+    ],
+    "requires": [
+      {
+        "type": "quest",
+        "key": "HyruleCastleIncident",
+        "resolved": true,
+        "flag": "HyruleCastleIncident_IsAfter_ReturnBCAfterDefeatMonster_Exp"
+      }
+    ],
+    "unlocks": []
+  },
+  "MercenaryChallenge_Hateru": {
+    "key": "MercenaryChallenge_Hateru",
+    "name_zh": "为海布拉带来和平！",
+    "name_en": "Bring Peace to Hebra!",
+    "category": "ImportantMini",
+    "npc_zh": "阿迈尼",
+    "npc_en": "阿迈尼",
+    "start_zh": "与阿迈尼对话",
+    "start_en": "Speak with Flaxen near the South Tabantha Snowfield monster camp in Hebra.",
+    "note_zh": "消灭所有怪物",
+    "note_en": "Storm the fortified snowfield monster camp alongside Flaxen's squad and eliminate all enemy forces.",
+    "reward_zh": [
+      "卢比",
+      "讨伐队的布料"
+    ],
+    "reward_en": [
+      "100 Rupees (Silver Rupee)",
+      "Monster-Control-Crew Fabric"
+    ],
+    "requires": [],
+    "unlocks": [
+      "Mercenary_Firone_Bloody",
+      "Mercenary_Hateru_Bloody"
+    ]
+  },
+  "MercenaryChallenge_Hebra": {
+    "key": "MercenaryChallenge_Hebra",
+    "name_zh": "为哈特尔带来和平！",
+    "name_en": "Bring Peace to Necluda!",
+    "category": "ImportantMini",
+    "npc_zh": "霍司塔",
+    "npc_en": "霍司塔",
+    "start_zh": "与霍司塔对话",
+    "start_en": "Speak with Captain Hoz near Fort Hateno in East Necluda.",
+    "note_zh": "将所有怪物清除",
+    "note_en": "Charge into Fort Hateno alongside Captain Hoz's squad and clear out the large host of Bokoblins and Moblins.",
+    "reward_zh": [
+      "卢比"
+    ],
+    "reward_en": [
+      "100 Rupees (Silver Rupee)"
+    ],
+    "requires": [],
+    "unlocks": [
+      "Mercenary_Hebra_Bloody",
+      "Mercenary_HyrulePlain_Bloody"
+    ]
+  },
+  "MercenaryChallenge_HyrulePlain": {
+    "key": "MercenaryChallenge_HyrulePlain",
+    "name_zh": "为海拉鲁平原带来和平！",
+    "name_en": "Bring Peace to Hyrule Field!",
+    "category": "ImportantMini",
+    "npc_zh": "霍司塔",
+    "npc_en": "霍司塔",
+    "start_zh": "与霍司塔对话",
+    "start_en": "Speak with Captain Hoz near Mabe Village Ruins in Hyrule Field.",
+    "note_zh": "将前方的怪物营地清除",
+    "note_en": "Assault the fortified monster camp with Captain Hoz's squad and wipe out all enemy forces.",
+    "reward_zh": [
+      "卢比"
+    ],
+    "reward_en": [
+      "100 Rupees (Silver Rupee)"
+    ],
+    "requires": [
+      {
+        "type": "quest",
+        "key": "HyruleCastleIncident",
+        "resolved": true,
+        "flag": "HyruleCastleIncident_IsAfter_ReturnBCAfterDefeatMonster_Exp"
+      }
+    ],
+    "unlocks": []
+  },
+  "Mercenary_Akkare_Bloody": {
+    "key": "Mercenary_Akkare_Bloody",
+    "name_zh": "Mercenary_Akkare_Bloody",
+    "name_en": "Mercenary_Akkare_Bloody",
+    "category": "ImportantMini",
+    "npc_zh": "陀鲁",
+    "npc_en": "陀鲁",
+    "start_zh": "",
+    "start_en": "Speak with Torfe at Akkala Span after a Blood Moon resets the stronghold.",
+    "note_zh": "",
+    "note_en": "Repeatable battle: assist Torfe's Monster-Control Crew squad in clearing out respawned monsters at Akkala Span.",
+    "reward_zh": [],
+    "reward_en": [],
+    "requires": [
+      {
+        "type": "quest",
+        "key": "MercenaryChallenge_Akkare",
+        "resolved": true,
+        "flag": "MercenaryChallenge_Akkare_IsCompleted_Exp"
+      }
+    ],
+    "unlocks": []
+  },
+  "Mercenary_Eldin_Bloody": {
+    "key": "Mercenary_Eldin_Bloody",
+    "name_zh": "Mercenary_Eldin_Bloody",
+    "name_en": "Mercenary_Eldin_Bloody",
+    "category": "ImportantMini",
+    "npc_zh": "陀鲁",
+    "npc_en": "陀鲁",
+    "start_zh": "",
+    "start_en": "Speak with Torfe at Lake Darman Monster Den after a Blood Moon resets the cave.",
+    "note_zh": "",
+    "note_en": "Repeatable battle: assist Torfe's Monster-Control Crew squad in clearing out respawned monsters inside Lake Darman Monster Den.",
+    "reward_zh": [],
+    "reward_en": [],
+    "requires": [
+      {
+        "type": "quest",
+        "key": "MercenaryChallenge_Akkare",
+        "resolved": true,
+        "flag": "MercenaryChallenge_Akkare_IsCompleted_Exp"
+      }
+    ],
+    "unlocks": []
+  },
+  "Mercenary_Firone_Bloody": {
+    "key": "Mercenary_Firone_Bloody",
+    "name_zh": "Mercenary_Firone_Bloody",
+    "name_en": "Mercenary_Firone_Bloody",
+    "category": "ImportantMini",
+    "npc_zh": "阿迈尼",
+    "npc_en": "阿迈尼",
+    "start_zh": "",
+    "start_en": "Speak with Flaxen in Faron after a Blood Moon resets the camp.",
+    "note_zh": "",
+    "note_en": "Repeatable battle: assist Flaxen's Monster-Control Crew squad in clearing out respawned monsters in Faron.",
+    "reward_zh": [],
+    "reward_en": [],
+    "requires": [
+      {
+        "type": "quest",
+        "key": "MercenaryChallenge_Hateru",
+        "resolved": true,
+        "flag": "MercenaryChallenge_Hateru_IsCompleted_Exp"
+      }
+    ],
+    "unlocks": []
+  },
+  "Mercenary_Hateru_Bloody": {
+    "key": "Mercenary_Hateru_Bloody",
+    "name_zh": "Mercenary_Hateru_Bloody",
+    "name_en": "Mercenary_Hateru_Bloody",
+    "category": "ImportantMini",
+    "npc_zh": "阿迈尼",
+    "npc_en": "阿迈尼",
+    "start_zh": "",
+    "start_en": "Speak with Flaxen in Hebra after a Blood Moon resets the camp.",
+    "note_zh": "",
+    "note_en": "Repeatable battle: assist Flaxen's Monster-Control Crew squad in clearing out respawned monsters in Hebra.",
+    "reward_zh": [],
+    "reward_en": [],
+    "requires": [
+      {
+        "type": "quest",
+        "key": "MercenaryChallenge_Hateru",
+        "resolved": true,
+        "flag": "MercenaryChallenge_Hateru_IsCompleted_Exp"
+      }
+    ],
+    "unlocks": []
+  },
+  "Mercenary_Hebra_Bloody": {
+    "key": "Mercenary_Hebra_Bloody",
+    "name_zh": "Mercenary_Hebra_Bloody",
+    "name_en": "Mercenary_Hebra_Bloody",
+    "category": "ImportantMini",
+    "npc_zh": "霍司塔",
+    "npc_en": "霍司塔",
+    "start_zh": "",
+    "start_en": "Speak with Captain Hoz at Fort Hateno after a Blood Moon resets the fortress.",
+    "note_zh": "",
+    "note_en": "Repeatable battle: assist Captain Hoz's Monster-Control Crew squad in clearing out respawned monsters at Fort Hateno.",
+    "reward_zh": [],
+    "reward_en": [],
+    "requires": [
+      {
+        "type": "quest",
+        "key": "MercenaryChallenge_Hebra",
+        "resolved": true,
+        "flag": "MercenaryChallenge_Hebra_IsCompleted_Exp"
+      }
+    ],
+    "unlocks": []
+  },
+  "Mercenary_HyrulePlain_Bloody": {
+    "key": "Mercenary_HyrulePlain_Bloody",
+    "name_zh": "Mercenary_HyrulePlain_Bloody",
+    "name_en": "Mercenary_HyrulePlain_Bloody",
+    "category": "ImportantMini",
+    "npc_zh": "霍司塔",
+    "npc_en": "霍司塔",
+    "start_zh": "",
+    "start_en": "Speak with Captain Hoz at Mabe Village Ruins after a Blood Moon resets the camp.",
+    "note_zh": "",
+    "note_en": "Repeatable battle: assist Captain Hoz's Monster-Control Crew squad in clearing out respawned monsters in Hyrule Field.",
+    "reward_zh": [],
+    "reward_en": [],
+    "requires": [
+      {
+        "type": "quest",
+        "key": "MercenaryChallenge_Hebra",
+        "resolved": true,
+        "flag": "MercenaryChallenge_Hebra_IsCompleted_Exp"
+      }
+    ],
+    "unlocks": []
+  },
+  "MinusYiga": {
+    "key": "MinusYiga",
+    "name_zh": "依盖队队长——可盖大人的阴谋！",
+    "name_en": "Master Kohga of the Yiga Clan",
+    "category": "ImportantMini",
+    "npc_zh": "KohgaNoTitle",
+    "npc_en": "KohgaNoTitle",
+    "start_zh": "与管家魔像对话，随后展示究极手",
+    "start_en": "Speak with the Steward Golem at the Great Abandoned Central Mine in the Depths and demonstrate Autobuild to trigger Master Kohga's ambush.",
+    "note_zh": "一路追击可盖大人",
+    "note_en": "Defeat Master Kohga across 4 successive battles throughout the Depths: Great Abandoned Central Mine, Abandoned Gerudo Mine, Abandoned Lanayru Mine, and Abandoned Hebra Mine.",
+    "reward_zh": [
+      "左纳乌能源特大结晶",
+      "设计图",
+      "钻石"
+    ],
+    "reward_en": [
+      "Huge Crystallized Charge x4",
+      "Schema Drafts",
+      "Diamond"
+    ],
+    "requires": [],
+    "unlocks": []
+  },
+  "MonsterFigures01": {
+    "key": "MonsterFigures01",
+    "name_zh": "只属于我的怪物收藏品",
+    "name_en": "A Monstrous Collection I",
+    "category": "ImportantMini",
+    "npc_zh": "Npc_MamonoShop",
+    "npc_en": "Npc_MamonoShop",
+    "start_zh": "与吉尔顿对话开启",
+    "start_en": "Speak with Kilton in Tarrey Town after completing 'Mattison's Independence'.",
+    "note_zh": "按要求去拍摄各类怪物",
+    "note_en": "Photograph a Bokoblin with the Camera and show the picture to Hudson, who will carve a realistic monster sculpture for Kilton's stage.",
+    "reward_zh": [
+      "怪物精华",
+      "潜行怪物汤",
+      "怪物缰绳",
+      "怪物马鞍",
+      "钻石"
+    ],
+    "reward_en": [
+      "Monster Extract",
+      "Sneaky Monster Soup",
+      "Monster Bridle",
+      "Monster Saddle",
+      "Diamond"
+    ],
+    "requires": [
+      {
+        "type": "quest",
+        "key": "NushiShop_Tutorial",
+        "resolved": true,
+        "flag": "NushiShop_Tutorial_IsCompleted_Exp"
+      }
+    ],
+    "unlocks": [
+      "MonsterFigures02"
+    ]
+  },
+  "MonsterFigures02": {
+    "key": "MonsterFigures02",
+    "name_zh": "只属于我的怪物收藏品2",
+    "name_en": "A Monstrous Collection II",
+    "category": "ImportantMini",
+    "npc_zh": "Npc_MamonoShop",
+    "npc_en": "Npc_MamonoShop",
+    "start_zh": "吉尔顿希望松达能帮忙制作一个霍拉布林人偶。但是霍拉布林的样貌似乎很难描述，导致松达完全没有理解。如果有一幅霍拉布林的",
+    "start_en": "Speak with Kilton in Tarrey Town after completing 'A Monstrous Collection I'.",
+    "note_zh": "",
+    "note_en": "Photograph a Horriblin (commonly found clinging to cave ceilings) and show the picture to Hudson to create the sculpture.",
+    "reward_zh": [],
+    "reward_en": [],
+    "requires": [
+      {
+        "type": "quest",
+        "key": "MonsterFigures01",
+        "resolved": true,
+        "flag": "MonsterFigures01_IsCompleted_Exp"
+      }
+    ],
+    "unlocks": [
+      "MonsterFigures03"
+    ]
+  },
+  "MonsterFigures03": {
+    "key": "MonsterFigures03",
+    "name_zh": "只属于我的怪物收藏品3",
+    "name_en": "A Monstrous Collection III",
+    "category": "ImportantMini",
+    "npc_zh": "Npc_MamonoShop",
+    "npc_en": "Npc_MamonoShop",
+    "start_zh": "在松达表示愿意制作更多怪物人偶后，吉尔顿便想拥有一个",
+    "start_en": "Speak with Kilton in Tarrey Town after completing 'A Monstrous Collection II'.",
+    "note_zh": "",
+    "note_en": "Photograph a Battle Talus (often carrying a Bokoblin fort on its back) and show the picture to Hudson to create the sculpture.",
+    "reward_zh": [],
+    "reward_en": [],
+    "requires": [
+      {
+        "type": "quest",
+        "key": "MonsterFigures02",
+        "resolved": true,
+        "flag": "MonsterFigures02_IsCompleted_Exp"
+      }
+    ],
+    "unlocks": [
+      "MonsterFigures04"
+    ]
+  },
+  "MonsterFigures04": {
+    "key": "MonsterFigures04",
+    "name_zh": "只属于我的怪物收藏品4",
+    "name_en": "A Monstrous Collection IV",
+    "category": "ImportantMini",
+    "npc_zh": "Npc_MamonoShop",
+    "npc_en": "Npc_MamonoShop",
+    "start_zh": "在松达表示愿意制作更多怪物人偶后，吉尔顿便想拥有一个",
+    "start_en": "Speak with Kilton in Tarrey Town after completing 'A Monstrous Collection III'.",
+    "note_zh": "",
+    "note_en": "Photograph a Frox in the Depths and show the picture to Hudson to create the sculpture.",
+    "reward_zh": [],
+    "reward_en": [],
+    "requires": [
+      {
+        "type": "quest",
+        "key": "MonsterFigures03",
+        "resolved": true,
+        "flag": "MonsterFigures03_IsCompleted_Exp"
+      }
+    ],
+    "unlocks": [
+      "MonsterFigures05"
+    ]
+  },
+  "MonsterFigures05": {
+    "key": "MonsterFigures05",
+    "name_zh": "只属于我的怪物收藏品5",
+    "name_en": "A Monstrous Collection V",
+    "category": "ImportantMini",
+    "npc_zh": "Npc_MamonoShop",
+    "npc_en": "Npc_MamonoShop",
+    "start_zh": "在松达表示愿意制作更多怪物人偶后，吉尔顿便想拥有一个",
+    "start_en": "Speak with Kilton in Tarrey Town after completing 'A Monstrous Collection IV'.",
+    "note_zh": "",
+    "note_en": "Photograph a King Gleeok (found on isolated high sky islands or the Gleeok Den in the Depths) and show the picture to Hudson to create the sculpture.",
+    "reward_zh": [],
+    "reward_en": [],
+    "requires": [
+      {
+        "type": "quest",
+        "key": "MonsterFigures04",
+        "resolved": true,
+        "flag": "MonsterFigures04_IsCompleted_Exp"
+      }
+    ],
+    "unlocks": []
+  },
+  "NewsPaper_Mitsuba": {
+    "key": "NewsPaper_Mitsuba",
+    "name_zh": "调查真相！传言中的塞尔达公主！！",
+    "name_en": "Potential Princess Sightings!",
+    "category": "ImportantMini",
+    "npc_zh": "Npc_oasis037",
+    "npc_en": "Npc_oasis037",
+    "start_zh": "据三叶主编所言，报社收到的消息中有关于疑似塞尔达公主之人的内容。消息通常在驿站汇集，为求探明真相，和沛恩一起前往",
+    "start_en": "Speak with Traysi at the Lucky Clover Gazette near Rito Village in Tabantha Frontier.",
+    "note_zh": "",
+    "note_en": "Partner with Penn and investigate Princess Zelda sightings across 12 stables across Hyrule. Return to Traysi at the Gazette upon completing all investigations.",
+    "reward_zh": [],
+    "reward_en": [],
+    "requires": [],
+    "unlocks": [
+      "Tribune04",
+      "Tribune09",
+      "Tribune10",
+      "Tribune11"
+    ]
+  },
+  "NushiShop_Challenge00": {
+    "key": "NushiShop_Challenge00",
+    "name_zh": "柯尔天的下落",
+    "name_en": "The Search for Koltin",
+    "category": "ImportantMini",
+    "npc_zh": "吉尔顿",
+    "npc_en": "Kilton",
+    "start_zh": "无",
+    "start_en": "Speak with Kilton in Tarrey Town after completing 'The Hunt for Bubbul Gems!'.",
+    "note_zh": "在一始村与吉尔顿对话了解科尔天的位置，去那个方向找到一个热气球，上前对话",
+    "note_en": "Kilton tells you Koltin travels around at night. Head near Ulri Mountain Skyview Tower between 9:00 PM and 5:00 AM, locate Koltin's colorful glowing hot-air balloon, and talk to him.",
+    "reward_zh": [
+      "无（开启魔犹伊的遗失物兑换商店）"
+    ],
+    "reward_en": [
+      "None (Unlocks Koltin's Bubbul Gem Shop)"
+    ],
+    "requires": [
+      {
+        "type": "quest",
+        "key": "NushiShop_Tutorial",
+        "resolved": true,
+        "flag": "NushiShop_Tutorial_IsCompleted_Exp"
+      }
+    ],
+    "unlocks": []
+  },
+  "NushiShop_Tutorial": {
+    "key": "NushiShop_Tutorial",
+    "name_zh": "寻找！魔犹伊的遗失物",
+    "name_en": "The Hunt for Bubbul Gems!",
+    "category": "ImportantMini",
+    "npc_zh": "吉尔顿",
+    "npc_en": "Kilton",
+    "start_zh": "在洞窟前与吉尔顿对话开启",
+    "start_en": "Speak with Kilton and Koltin outside Pico Pond Cave near Woodland Stable.",
+    "note_zh": "只要有魔犹伊的遗失物就可以直接和柯尔天对话完成任务",
+    "note_en": "Enter Pico Pond Cave, shoot down the Bubbulfrog on the cave wall or ceiling to collect a Bubbul Gem, and hand it to Koltin outside.",
+    "reward_zh": [
+      "波克布林面罩"
+    ],
+    "reward_en": [
+      "Bokoblin Mask"
+    ],
+    "requires": [],
+    "unlocks": [
+      "MonsterFigures01",
+      "NushiShop_Challenge00"
+    ]
+  },
+  "OldKorokHelp": {
+    "key": "OldKorokHelp",
+    "name_zh": "伯库林的烦恼",
+    "name_en": "Hestu's Concerns",
+    "category": "ImportantMini",
+    "npc_zh": "伯库林",
+    "npc_en": "Hestu",
+    "start_zh": "与伯库林对话",
+    "start_en": "Speak with Hestu along the road southeast of Lindor's Brow Skyview Tower (or later in Lookout Landing).",
+    "note_zh": "将前方的树妖消灭",
+    "note_en": "Defeat the two aggressive Evermeans (camouflaged walking trees) frightening Hestu using an axe or fire weapons.",
+    "reward_zh": [
+      "解锁扩充背包"
+    ],
+    "reward_en": [
+      "Inventory Stash Expansion Unlocked"
+    ],
+    "requires": [],
+    "unlocks": []
+  },
+  "Orchestra02": {
+    "key": "Orchestra02",
+    "name_zh": "传递！甜蜜节奏！！",
+    "name_en": "Honey, Bee Mine",
+    "category": "ImportantMini",
+    "npc_zh": "毕兹",
+    "npc_en": "毕兹",
+    "start_zh": "与毕兹对话",
+    "start_en": "Speak with the drummer Beetz tucked inside a small gully next to the road east of Kakariko Village.",
+    "note_zh": "准备蜂蜜",
+    "note_en": "Collect 3 Courser Bee Honeycombs (found in trees near East Hill / Kakariko Chasm) and deliver them to Beetz to lift his spirits.",
+    "reward_zh": [
+      "卢比"
+    ],
+    "reward_en": [
+      "100 Rupees (Silver Rupee)"
+    ],
+    "requires": [],
+    "unlocks": []
+  },
+  "Orchestra03": {
+    "key": "Orchestra03",
+    "name_zh": "吹笛少年寻找之物",
+    "name_en": "The Flute Player's Plan",
+    "category": "ImportantMini",
+    "npc_zh": "Npc_Orchestra_BT_F_Road",
+    "npc_en": "Npc_Orchestra_BT_F_Road",
+    "start_zh": "与驿站外树上吹笛的少年菲依对话开启",
+    "start_en": "Speak with Pyper sitting up in a tree just outside Highland Stable.",
+    "note_zh": "要在晚上抓10只静静萤火虫，建议换上依盖套并吃能提高安静性的食物",
+    "note_en": "Catch 10 Sunset Fireflies at night in Pagos Woods or Faron woods (wearing Stealth armor makes this easy), bring them to Pyper, then lead Haite to the glowing tree at night.",
+    "reward_zh": [
+      "大生命松露*1"
+    ],
+    "reward_en": [
+      "Big Hearty Truffle x1"
+    ],
+    "requires": [],
+    "unlocks": []
+  },
+  "Orchestra04": {
+    "key": "Orchestra04",
+    "name_zh": "圆号乐手的脱逃剧",
+    "name_en": "The Hornist's Dramatic Escape",
+    "category": "ImportantMini",
+    "npc_zh": "余福尔",
+    "npc_en": "余福尔",
+    "start_zh": "先通过【献给弥佳的小夜曲】找到余福尔，对话开启",
+    "start_en": "Speak with Eustus trapped with his wagon in a hole south of Tabantha Bridge Stable in Piper Ridge.",
+    "note_zh": "利用热气球将其带出",
+    "note_en": "Attach a Hot-Air Balloon and a Flame Emitter (or torch/campfire) to Eustus's wagon with Ultrahand, ask him to hop in, ignite the balloon to float the wagon out of the hole, and pull it to safety.",
+    "reward_zh": [
+      "精力蜂的蜂蜜*3"
+    ],
+    "reward_en": [
+      "Courser Bee Honey x3"
+    ],
+    "requires": [],
+    "unlocks": []
+  },
+  "StatueDevilTutorial": {
+    "key": "StatueDevilTutorial",
+    "name_zh": "与恶魔的契约",
+    "name_en": "A Deal With the Statue",
+    "category": "ImportantMini",
+    "npc_zh": "TwnObj_DemonStatue_A_01",
+    "npc_en": "TwnObj_DemonStatue_A_01",
+    "start_zh": "进行【寻找声音的主人】任务即可",
+    "start_en": "Interact with the Horned Statue in the Royal Hidden Passage beneath Lookout Landing during 'Who Goes There?'.",
+    "note_zh": "无",
+    "note_en": "The statue steals one of your Heart Containers or Stamina Vessels upon first interaction. Speak with it again to recover your essence for free and unlock the stat exchange service.",
+    "reward_zh": [
+      "可使用生命上限或精力上限换取卢比"
+    ],
+    "reward_en": [
+      "Essence Exchange Unlocked (Trade Hearts and Stamina for Rupees)"
+    ],
+    "requires": [],
+    "unlocks": []
+  },
+  "TauraChallenge001": {
+    "key": "TauraChallenge001",
+    "name_zh": "横暴之徒盘踞的村子",
+    "name_en": "Ruffian-Infested Village",
+    "category": "ImportantMini",
+    "npc_zh": "悉伊达",
+    "npc_en": "悉伊达",
+    "start_zh": "与洛泽尔对话开启",
+    "start_en": "Speak with Rozel and Bolson on the hill overlooking Lurelin Village.",
+    "note_zh": "前往沃托利村消灭所有怪物（井下还有一只）",
+    "note_en": "Defeat all monster pirates occupying Lurelin Village, including those on the pirate ship and the lone Bokoblin hiding down inside the village well.",
+    "reward_zh": [
+      "无（完成后续任务后发放）"
+    ],
+    "reward_en": [
+      "None (Rewarded upon completing Lurelin Village Restoration Project)"
+    ],
+    "requires": [],
+    "unlocks": [
+      "Uotori_RevivePlan"
+    ]
+  },
+  "Tribune02": {
+    "key": "Tribune02",
+    "name_zh": "塞尔达公主绑架事件！？",
+    "name_en": "Princess Zelda Kidnapped?!",
+    "category": "ImportantMini",
+    "npc_zh": "Npc_Rito_Postman_001",
+    "npc_en": "Npc_Rito_Postman_001",
+    "start_zh": "与驿站顶上的沛恩对话开启",
+    "start_en": "Speak with Penn atop the rooftop of Dueling Peaks Stable.",
+    "note_zh": "到达双子山图示处",
+    "note_en": "Travel up into the gorge between the twin peaks of Dueling Peaks, locate the cage holding 'Zelda', lift the cage with Ultrahand, and defeat the Yiga Clan assassins who ambush you.",
+    "reward_zh": [
+      "卢比"
+    ],
+    "reward_en": [
+      "Rupees"
+    ],
+    "requires": [],
+    "unlocks": []
+  },
+  "Tribune03": {
+    "key": "Tribune03",
+    "name_zh": "受难的迷途白山羊",
+    "name_en": "White Goats Gone Missing",
+    "category": "ImportantMini",
+    "npc_zh": "沛恩",
+    "npc_en": "沛恩",
+    "start_zh": "与沛恩对话开启",
+    "start_en": "Speak with Penn and the shepherd Chork outside Tabantha Bridge Stable.",
+    "note_zh": "一路跟着海拉鲁球果即可找到山羊",
+    "note_en": "Follow the trail of dropped Hylian Pinecones along the path leading southwest into the canyon until you find the flock of missing white goats and the recipe bottle.",
+    "reward_zh": [
+      "卢比"
+    ],
+    "reward_en": [
+      "Rupees"
+    ],
+    "requires": [],
+    "unlocks": []
+  },
+  "Tribune04": {
+    "key": "Tribune04",
+    "name_zh": "未抵达的美食家",
+    "name_en": "Gourmets Gone Missing",
+    "category": "ImportantMini",
+    "npc_zh": "Npc_Rito_Postman_010",
+    "npc_en": "Npc_Rito_Postman_010",
+    "start_zh": "与驿站外的沛恩对话开启",
+    "start_en": "Speak with Penn outside Riverside Stable.",
+    "note_zh": "准备一份兽肉盖饭",
+    "note_en": "Cross Owlan Bridge to the southwest and find the collapsed gourmet travelers resting under a tree by Batrea Lake. Cook a Meat and Rice Bowl (Raw Meat, Hylian Rice, Rock Salt) and feed it to Parcy to revive them.",
+    "reward_zh": [
+      "海拉鲁米",
+      "岩盐",
+      "顶级兽肉",
+      "卢比"
+    ],
+    "reward_en": [
+      "Hylian Rice",
+      "Rock Salt",
+      "Raw Prime Meat",
+      "Rupees"
+    ],
+    "requires": [
+      {
+        "type": "quest",
+        "key": "NewsPaper_Mitsuba",
+        "resolved": true,
+        "flag": "NewsPaper_Mitsuba_IsAfter_Ready_Exp"
+      }
+    ],
+    "unlocks": []
+  },
+  "Tribune05": {
+    "key": "Tribune05",
+    "name_zh": "消失的农具",
+    "name_en": "The Missing Farm Tools",
+    "category": "ImportantMini",
+    "npc_zh": "沛恩",
+    "npc_en": "沛恩",
+    "start_zh": "与沛恩对话开启",
+    "start_en": "Speak with Penn and Izra by the river pier near Wetland Stable.",
+    "note_zh": "用究极手造船",
+    "note_en": "Use Ultrahand to attach a Steering Stick and Fan (or sail) to the raft at the dock, have Izra get on board, and steer the boat downstream to Floret Sandbar.",
+    "reward_zh": [
+      "卢比"
+    ],
+    "reward_en": [
+      "Rupees"
+    ],
+    "requires": [],
+    "unlocks": []
+  },
+  "Tribune06": {
+    "key": "Tribune06",
+    "name_zh": "乘在妖兽上的公主",
+    "name_en": "The Beast and the Princess",
+    "category": "ImportantMini",
+    "npc_zh": "Npc_Rito_Postman_002",
+    "npc_en": "Npc_Rito_Postman_002",
+    "start_zh": "与新玛丽塔驿站外的沛恩交谈",
+    "start_en": "Speak with Penn outside New Serenne Stable.",
+    "note_zh": "路上会打雷，建议带上防雷头盔",
+    "note_en": "Travel to Bronas Forest in Faron, across the ravine north of Lakeside Stable. Talk to the Dondon caretaker Shimina to confirm that the rumored 'beasts' are actually peaceful Dondons.",
+    "reward_zh": [
+      "卢比"
+    ],
+    "reward_en": [
+      "Rupees"
+    ],
+    "requires": [],
+    "unlocks": []
+  },
+  "Tribune07": {
+    "key": "Tribune07",
+    "name_zh": "递出邀请的女性",
+    "name_en": "The Beckoning Woman",
+    "category": "ImportantMini",
+    "npc_zh": "沛恩",
+    "npc_en": "沛恩",
+    "start_zh": "与沛恩对话开启",
+    "start_en": "Speak with Penn at the crossroads outside Outskirt Stable, then talk to the crying woman Nell nearby.",
+    "note_zh": "一路跟随萝莱尔的指引即可",
+    "note_en": "Follow Nell from one rendezvous point to the next up into the cliffside until she reveals herself as a Yiga disguised trap, then defeat the Yiga Clan attackers.",
+    "reward_zh": [
+      "50卢比"
+    ],
+    "reward_en": [
+      "50 Rupees"
+    ],
+    "requires": [],
+    "unlocks": []
+  },
+  "Tribune09": {
+    "key": "Tribune09",
+    "name_zh": "塞尔达所爱的金色的马",
+    "name_en": "Zelda's Golden Horse",
+    "category": "ImportantMini",
+    "npc_zh": "沛恩",
+    "npc_en": "沛恩",
+    "start_zh": "在驿站外与沛恩对话开启",
+    "start_en": "Speak with Penn and Harlow outside Snowfield Stable.",
+    "note_zh": "金马位于北塔邦挞雪原（图示），安抚好后骑回雪原驿站即可",
+    "note_en": "Head north into North Tabantha Snowfield (sneaking past the Frost Gleeok) to find Zelda's Golden Horse. Crouch and soothe it with plenty of stamina (or stamina elixirs), then ride it back to Snowfield Stable.",
+    "reward_zh": [
+      "王族缰绳",
+      "王族马鞍",
+      "精力药",
+      "50卢比",
+      "白诘报社的布料"
+    ],
+    "reward_en": [
+      "Royal Bridle",
+      "Royal Saddle",
+      "Energizing Elixir",
+      "50 Rupees",
+      "Lucky Clover Gazette Fabric"
+    ],
+    "requires": [
+      {
+        "type": "quest",
+        "key": "NewsPaper_Mitsuba",
+        "resolved": true,
+        "flag": "NewsPaper_Mitsuba_IsAfter_Ready_Exp"
+      }
+    ],
+    "unlocks": []
+  },
+  "Tribune10": {
+    "key": "Tribune10",
+    "name_zh": "遵从咕咕鸡大人的指示",
+    "name_en": "The All-Clucking Cucco",
+    "category": "ImportantMini",
+    "npc_zh": "沛恩",
+    "npc_en": "沛恩",
+    "start_zh": "与沛恩对话开启",
+    "start_en": "Speak with Penn outside South Akkala Stable.",
+    "note_zh": "限时任务，注意时间",
+    "note_en": "Speak with the talking Cucco on the hill behind the stable and pass its two timed trials (reach the stable roof within 45 seconds, and carry 3 logs up the hill within 1 minute 30 seconds), then defeat the Yiga ambusher.",
+    "reward_zh": [
+      "卢比"
+    ],
+    "reward_en": [
+      "Rupees"
+    ],
+    "requires": [
+      {
+        "type": "quest",
+        "key": "NewsPaper_Mitsuba",
+        "resolved": true,
+        "flag": "NewsPaper_Mitsuba_IsAfter_Ready_Exp"
+      }
+    ],
+    "unlocks": []
+  },
+  "Tribune11": {
+    "key": "Tribune11",
+    "name_zh": "我亲爱的公主",
+    "name_en": "For Our Princess!",
+    "category": "ImportantMini",
+    "npc_zh": "Npc_Rito_Postman_013",
+    "npc_en": "Npc_Rito_Postman_013",
+    "start_zh": "与驿站外的沛恩交谈",
+    "start_en": "Speak with Penn outside Foothill Stable.",
+    "note_zh": "类似孑然一身神庙挑战，任务中会强制下掉所有装备，通过捡地上的武器来打败怪物大军即可",
+    "note_en": "Head to Maw of Death Mountain cave, unequip all armor and weapons as instructed, and clear out all the monsters inside using only the weapons found within the cave.",
+    "reward_zh": [
+      "卢比"
+    ],
+    "reward_en": [
+      "Rupees"
+    ],
+    "requires": [
+      {
+        "type": "quest",
+        "key": "NewsPaper_Mitsuba",
+        "resolved": true,
+        "flag": "NewsPaper_Mitsuba_IsAfter_Ready_Exp"
+      }
+    ],
+    "unlocks": []
+  },
+  "Tribune13": {
+    "key": "Tribune13",
+    "name_zh": "诡异之声",
+    "name_en": "An Eerie Voice",
+    "category": "ImportantMini",
+    "npc_zh": "Npc_Rito_Postman_014",
+    "npc_en": "Npc_Rito_Postman_014",
+    "start_zh": "与沛恩互动开启",
+    "start_en": "Speak with Penn outside Highland Stable at night.",
+    "note_zh": "任务需在夜晚进行",
+    "note_en": "Follow Penn northwest toward Hararan Spring at night to investigate the eerie singing voice. Drop into the well inside the ruins to discover Sagessa practicing her singing.",
+    "reward_zh": [
+      "100卢比"
+    ],
+    "reward_en": [
+      "100 Rupees"
+    ],
+    "requires": [],
+    "unlocks": []
+  },
+  "Tribune14": {
+    "key": "Tribune14",
+    "name_zh": "被封住的井",
+    "name_en": "The Blocked Well",
+    "category": "ImportantMini",
+    "npc_zh": "沛恩",
+    "npc_en": "沛恩",
+    "start_zh": "与沛恩对话开启",
+    "start_en": "Speak with Penn next to the well outside Gerudo Canyon Stable.",
+    "note_zh": "打开井下的洞窟，消灭所有怪物即可",
+    "note_en": "Jump down into Gerudo Canyon Stable Well, break through the rock blockage, and defeat all monsters infesting the underground cave.",
+    "reward_zh": [
+      "70卢比"
+    ],
+    "reward_en": [
+      "70 Rupees"
+    ],
+    "requires": [],
+    "unlocks": []
+  },
+  "Tribune16": {
+    "key": "Tribune16",
+    "name_zh": "献给大妖精的小夜曲",
+    "name_en": "Serenade to a Great Fairy",
+    "category": "ImportantMini",
+    "npc_zh": "Npc_Rito_Postman_012",
+    "npc_en": "Npc_Rito_Postman_012",
+    "start_zh": "与驿站外的碧欧兰对话开启",
+    "start_en": "Speak with Penn and Mastro outside Woodland Stable.",
+    "note_zh": "可运用马车将碧欧兰两人带到大妖精处",
+    "note_en": "Use Ultrahand to attach wheels to the troupe's wagon Breezer, hitch your horse to the wagon using a Towing Harness, and carefully drive Mastro and Violynne up the hill to Great Fairy Tera's bud.",
+    "reward_zh": [
+      "50卢比",
+      "解锁装备强化"
+    ],
+    "reward_en": [
+      "50 Rupees",
+      "Great Fairy Armor Upgrades Unlocked"
+    ],
+    "requires": [],
+    "unlocks": []
+  },
+  "Uotori_RevivePlan": {
+    "key": "Uotori_RevivePlan",
+    "name_zh": "沃托里村重建计划",
+    "name_en": "Lurelin Village Restoration Project",
+    "category": "ImportantMini",
+    "npc_zh": "樱达",
+    "npc_en": "樱达",
+    "start_zh": "与樱达对话开启",
+    "start_en": "Speak with Bolson in Lurelin Village after completing 'Ruffian-Infested Village'.",
+    "note_zh": "跟随任务指引完成即可",
+    "note_en": "Gather 15 logs and 20 Hylian Rice for Bolson. Then help him rebuild the 5 damaged buildings around the village by using Ultrahand to straighten and slot palm tree trunks into the roof structures.",
+    "reward_zh": [
+      "坚硬海鲜炒饭",
+      "50卢比",
+      "炸弹花*5",
+      "铠甲鲷鱼*3",
+      "酥麻水果*5",
+      "村子中住宿料理等免费提供"
+    ],
+    "reward_en": [
+      "Tough Seafood Fried Rice",
+      "50 Rupees",
+      "Bomb Flower x5",
+      "Armored Porgy x3",
+      "Shock Fruit x5",
+      "Free Village Services (Inn and Restaurant)"
+    ],
+    "requires": [
+      {
+        "type": "quest",
+        "key": "TauraChallenge001",
+        "resolved": true,
+        "flag": "TauraChallenge001_IsCompleted_Exp"
+      }
+    ],
+    "unlocks": [],
+    "deliver_zh": "向樱达交付重建所需的各类材料。",
+    "deliver_en": "Deliver logs and Hylian Rice to Bolson for the reconstruction of Lurelin Village."
+  },
+  "ZonauReliefSearch": {
+    "key": "ZonauReliefSearch",
+    "name_zh": "来自古代的信息",
+    "name_en": "Messages from an Ancient Era",
+    "category": "ImportantMini",
+    "npc_zh": "里德乌",
+    "npc_en": "里德乌",
+    "start_zh": "与里德乌对话",
+    "start_en": "Speak with Wortsworth in Lookout Landing after a sky island stone tablet falls into the village pond, then meet him at the Zonai Survey Team base in Kakariko Village.",
+    "note_zh": "尽量准备备用能源、电池套和升级电池\n在天空与地面地图中寻找雪花片一样的小岛，上面有石碑，拍照",
+    "note_en": "Locate all 12 flower-shaped sky islands scattered high across Hyrule's skies. Photograph the ancient Zonai stone tablets on each island with your Camera and show the pictures to Wortsworth in Kakariko Village.",
+    "reward_zh": [
+      "卢比",
+      "左纳乌调查队的布料"
+    ],
+    "reward_en": [
+      "Rupees",
+      "Zonai Survey Team Fabric"
+    ],
+    "requires": [
+      {
+        "type": "flag",
+        "key": "ZonauReliefSearch",
+        "resolved": true,
+        "flag": "ZonauReliefSearch_Ready",
+        "selfRef": true
+      }
+    ],
+    "unlocks": []
+  }
+}

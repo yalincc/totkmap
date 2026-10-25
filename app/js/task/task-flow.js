@@ -196,11 +196,12 @@
           iconSize: tiny ? [12, 12] : [20, 20],
           iconAnchor: tiny ? [6, 6] : [10, 10]
         }),
-        title: '第 ' + n + ' 个地点',
+        title: (window.I18N && window.I18N.getLang() === 'en') ? ('Point ' + n) : ('第 ' + n + ' 个地点'),
         zIndexOffset: 600,
         riseOnHover: true
       });
-      m.bindTooltip('第 ' + n + ' 个地点 · 点击打开任务卡片', {
+      var nodeTip = (window.I18N && window.I18N.getLang() === 'en') ? ('Point ' + n + ' · Click to open quest card') : ('第 ' + n + ' 个地点 · 点击打开任务卡片');
+      m.bindTooltip(nodeTip, {
         direction: 'top', offset: [0, -10], className: 'mk-label tkf-tip'
       });
       /* ★ 点节点 = 打开该任务卡片（2026-10-07老大提）
@@ -229,15 +230,16 @@
           /* 小跨度时「起」也会和别的点撞上，同样退化成红点 */
           html: tiny
             ? '<div class="tkf-dot" data-n="1"></div>'
-            : '<div class="tkf-start" title="第 1 个地点 · 起点">起</div>',
+            : '<div class="tkf-start" title="' + ((window.I18N && window.I18N.getLang() === 'en') ? 'Point 1 · Start' : '第 1 个地点 · 起点') + '">' + ((window.I18N && window.I18N.getLang() === 'en') ? 'S' : '起') + '</div>',
           iconSize: tiny ? [12, 12] : [16, 16],
           iconAnchor: tiny ? [6, 6] : [1, 17]
         }),
-        title: '第 1 个地点 · 起点',
+        title: (window.I18N && window.I18N.getLang() === 'en') ? 'Point 1 · Start' : '第 1 个地点 · 起点',
         zIndexOffset: 700,
         riseOnHover: true
       });
-      s0.bindTooltip('第 1 个地点 · 起点 · 点击打开任务卡片', {
+      var s0Tip = (window.I18N && window.I18N.getLang() === 'en') ? 'Point 1 · Start · Click to open quest card' : '第 1 个地点 · 起点 · 点击打开任务卡片';
+      s0.bindTooltip(s0Tip, {
         direction: 'top', offset: [0, -10], className: 'mk-label tkf-tip'
       });
       /* 起点同样可点开卡片（与其它节点一致的手感） */

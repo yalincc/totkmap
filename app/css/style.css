@@ -470,6 +470,26 @@ html, body {
   margin-bottom: 10px;
   margin-top: 6px;
 }
+/* V2.6.0：大分类一键全选 / 清空按钮（对齐 BOTWmap .lg-btn） */
+.group-title .gt-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.grp-btn {
+  flex: none;
+  background: none;
+  border: 1px solid rgba(255, 255, 255, .16);
+  border-radius: 3px;
+  color: #a7a7ad;
+  font-family: inherit;
+  font-size: 10.5px;
+  letter-spacing: 0;
+  padding: 1px 7px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.grp-btn:hover { color: #eac27e; border-color: rgba(234, 194, 126, .6); }
 
 .cat-grid {
   display: grid;
@@ -514,16 +534,12 @@ html, body {
 .cat-item.active img { opacity: 1; }
 
 /* 探索度（存档加载后显示） */
+/* V2.6.0：探索度改「一整块平铺」——去掉独立滚动容器与右侧拖条，
+   内容整体由侧栏滚动承载；行距/组距同步压紧 */
 .progress-section {
   border-top: 1px solid #45454d;
-  padding: 10px 16px 8px;
-  max-height: 224px;
-  overflow-y: auto;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(255,255,255,.14) transparent;
+  padding: 8px 16px 8px;
 }
-.progress-section::-webkit-scrollbar { width: 3px; }
-.progress-section::-webkit-scrollbar-thumb { background: rgba(255,255,255,.12); border-radius: 3px; }
 .progress-head {
   display: flex;
   align-items: center;
@@ -542,7 +558,7 @@ html, body {
 }
 .progress-section.collapsed .progress-toggle { transform: rotate(-90deg); }
 .progress-title { font-size: 14px; font-weight: 400; color: #fff; }
-.progress-list { display: flex; flex-direction: column; gap: 5px; }
+.progress-list { display: flex; flex-direction: column; gap: 2px; }
 .progress-section.collapsed .progress-list { display: none; }
 .progress-item {
   display: flex;
@@ -571,6 +587,46 @@ html, body {
 }
 .progress-item .pi-val { color: #eac27e; font-variant-numeric: tabular-nums; flex: 0 0 56px; text-align: right; }
 .progress-empty { font-size: 12px; color: #7c8591; padding: 3px 0; line-height: 1.6; }
+
+/* V2.6.0：探索度改版 —— 四大组 + 双列紧凑纯数字网格（对齐 BOTWmap stats 面板） */
+.prog-synced { font-size: 11px; color: #7fbf7f; padding: 0 0 2px; }
+.prog-group-title {
+  font-size: 12px;
+  font-weight: 500;
+  color: rgba(255,255,255,.9);
+  margin: 5px 0 2px;
+}
+.prog-group-title:first-of-type { margin-top: 1px; }
+.prog-grid {
+  display: grid;
+  grid-template-columns: minmax(0,1fr) minmax(0,1fr);
+  gap: 1px 0;
+}
+.prog-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  font-size: 11.5px;
+  line-height: 1.45;
+  min-width: 0;
+}
+.prog-row.col2 {
+  border-left: 1px solid rgba(255,255,255,.14);
+  padding-left: 10px;
+}
+.prog-row .pr-name {
+  color: rgba(255,255,255,.78);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.prog-row .pr-val {
+  flex: none;
+  font-size: 11px;
+  color: #eac27e;
+  font-variant-numeric: tabular-nums;
+}
 
 /* 加载存档 */
 .save-upload {
@@ -1515,18 +1571,26 @@ html, body {
 .ae-v.ae-dim { color: rgba(255,255,255,.48); font-size: 11px; }
 /* 满级防御的箭头：让人一眼看到强化收益 */
 .ae-arrow { color: #7ec8a9; font-weight: 600; }
-.ae-desc { color: rgba(255,255,255,.6); font-size: 11px; line-height: 1.6; }
+.ae-desc {
+  color: rgba(255,255,255,.6); font-size: 11px; line-height: 1.4;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  overflow: hidden; text-overflow: ellipsis; cursor: pointer;
+  transition: color .12s;
+}
+.ae-desc:hover { color: rgba(255,255,255,.85); }
+.ae-desc.expanded { display: block; -webkit-line-clamp: unset; }
 
-/* 关联任务 / 同套部件：可点的小按钮 */
-.ae-tasks, .ae-sibs { display: inline-flex; flex-wrap: wrap; gap: 5px; }
+/* 关联任务 / 同套部件：横向流式网格排版，紧凑胶囊标 */
+.ae-tasks, .ae-sibs { display: flex; flex-wrap: wrap; gap: 5px; width: 100%; }
 .ae-task, .ae-sib {
   display: inline-flex; align-items: center; gap: 4px;
-  padding: 3px 8px; border-radius: 20px; cursor:pointer;
-  font-size: 11px; text-align: left;
-  color: rgba(255,255,255,.72);
+  padding: 2px 7px; border-radius: 12px; cursor: pointer;
+  font-size: 10.5px; text-align: left; line-height: 1.25;
+  color: rgba(255,255,255,.75);
   background: rgba(255,255,255,.06);
   border: 1px solid rgba(255,255,255,.1);
   transition: all .12s;
+  max-width: 100%;
 }
 .ae-task:hover, .ae-sib:hover {
   background: rgba(234,194,126,.16); color: #eac27e;
@@ -1639,3 +1703,127 @@ html, body {
 }
 /* 图标是路径+圆，currentColor 跟随 hover 变色 */
 .ec-locate svg { display: block; }
+
+/* ============================================================
+   多语言国际化排版适配（i18n English Layout Rules）
+   对齐 BOTWmap 验证成熟方案，杜绝英文超长折行变形
+   ============================================================ */
+html[lang="en"] .ec-label,
+html[lang="en"] .meta-label,
+html[lang="en"] .usage-label {
+  flex: 0 0 68px !important;
+  letter-spacing: normal !important;
+}
+
+html[lang="en"] .ac-l {
+  flex: 0 0 68px !important;
+  min-width: 68px !important;
+  letter-spacing: normal !important;
+}
+
+html[lang="en"] .side-tabs button {
+  letter-spacing: normal !important;
+  font-size: 13px !important;
+}
+
+html[lang="en"] .layer-switch button {
+  font-size: 12px !important;
+  letter-spacing: normal !important;
+}
+
+html[lang="en"] .name-switch {
+  gap: 5px !important;
+  font-size: 11.5px !important;
+}
+
+html[lang="en"] .lt-btn {
+  padding: 4px 6px !important;
+  font-size: 11.5px !important;
+  white-space: nowrap !important;
+}
+
+html[lang="en"] .group-title {
+  letter-spacing: normal !important;
+}
+
+html[lang="en"] .catalog-item {
+  gap: 6px !important;
+}
+
+html[lang="en"] .catalog-item span:nth-child(2) {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+html[lang="en"] .bottom-bar .bar-btn {
+  padding: 8px 10px !important;
+  font-size: 12px !important;
+  letter-spacing: normal !important;
+}
+
+/* 设置面板中的语言切换单选按钮组 */
+.set-opts {
+  display: flex;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.set-opts .set-opt {
+  flex: 1;
+  padding: 5px 8px;
+  font-size: 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.15);
+  color: #8a93a0;
+  transition: all .15s ease;
+}
+
+.set-opts .set-opt:hover {
+  background: rgba(255,255,255,.12);
+  color: #e8ecf1;
+}
+
+.set-opts .set-opt.active {
+  background: #eac27e;
+  border-color: #eac27e;
+  color: #1a1c20;
+  font-weight: 600;
+}
+
+
+/* ============================================================
+ * TOTKmap i18n · Anti-Distortion & Typography Tuning (English)
+ * ============================================================ */
+html[lang="en"] .tk-plabel,
+html[lang="en"] .tk-mk {
+  letter-spacing: normal !important;
+  min-width: 58px !important;
+}
+
+html[lang="en"] .tk-sec-t {
+  letter-spacing: normal !important;
+}
+
+html[lang="en"] .tk-actions .btn {
+  font-size: 11.5px !important;
+  padding: 0 4px !important;
+  white-space: nowrap !important;
+  letter-spacing: normal !important;
+}
+
+html[lang="en"] .np-actions .np-btn {
+  padding: 4px 6px !important;
+  font-size: 11px !important;
+  letter-spacing: normal !important;
+  white-space: nowrap !important;
+}
+
+html[lang="en"] .ec-copy,
+html[lang="en"] .tk-copy {
+  letter-spacing: normal !important;
+}

@@ -76,7 +76,8 @@
   function reqsHtml(t) {
     /* V2.5.0（老大 2026-10-11）：无前置显示「无」——前置条件区块恒定存在 */
     if (!t.reqs || !t.reqs.length) {
-      return section('前置条件', '<ul class="tk-list"><li class="tk-dash">无</li></ul>');
+      var isEn = window.I18N && window.I18N.getLang() === 'en';
+      return section('前置条件', '<ul class="tk-list"><li class="tk-dash">' + (isEn ? 'None' : '无') + '</li></ul>');
     }
     var D = global.TaskData;
     /* ★ V2.5.0（老大 2026-10-11）：不再按任务链过滤前置。
@@ -89,7 +90,8 @@
       if (r.linkable && r.reqName) {
         /* V2.5.0：链接文本带档内序号 →【#N 任务名】（老大定的） */
         var bk = r.key ? (D.byKey(r.key) || null) : null;
-        var label = (bk && bk.no) ? '#' + bk.no + ' ' + esc(r.reqName) : esc(r.reqName);
+        var reqQuestName = window.I18N ? (window.I18N.nameOf(r.reqName) || r.reqName) : r.reqName;
+        var label = (bk && bk.no) ? '#' + bk.no + ' ' + esc(reqQuestName) : esc(reqQuestName);
         return '<li><a href="#" class="tk-link" data-tk-goto="' + esc(r.reqName) + '"' +
           (global.TaskDone && global.TaskDone.isDone(r.key)
             ? ' data-tk-done="1" title="（已完成）"' : '') +
@@ -105,17 +107,20 @@
        *   并标注这是条件而非任务。
        *   —— 真实前置缺失的情况已登记为台账 P2/P3（需并入攻略前置）。*/
       if (r.selfRef) {
-        return '<li class="tk-flag tk-flag-self tk-req">需满足特定条件才能接取（未收录具体条件）</li>';
+        return '<li class="tk-flag tk-flag-self tk-req">' + (window.I18N ? window.I18N.t('task.reqNone') : '需满足特定条件才能接取（未收录具体条件）') + '</li>';
       }
       /* tk-req = 前置条件专用醒目色（见样式区注释）。
          quest 型是可点击的 quest 前置，也一起上色——
          「要先做完这个」和「要满足某个条件」同属"限制"，用同一个颜色。 */
+      var isEn = window.I18N && window.I18N.getLang() === 'en';
+      var rText = window.I18N ? (window.I18N.nameOf(r.reqName) || r.reqName) : (r.reqName || r.key || (isEn ? 'Unknown Condition' : '未命名条件'));
       return '<li class="tk-flag tk-req' + (r.linkable && r.reqName ? ' tk-req-link' : '') +
-        '">' + esc(r.reqName || r.key || '未命名条件') + '</li>';
+        '">' + esc(rText) + '</li>';
     });
     if (!items.length) {
       /* V2.5.0（老大 2026-10-11）：无前置显示「无」，不再用「—」 */
-      return section('前置条件', '<ul class="tk-list"><li class="tk-dash">无</li></ul>');
+      var isEn = window.I18N && window.I18N.getLang() === 'en';
+      return section('前置条件', '<ul class="tk-list"><li class="tk-dash">' + (isEn ? 'None' : '无') + '</li></ul>');
     }
     return section('前置条件', '<ul class="tk-list">' + items.join('') + '</ul>');
   }
@@ -184,30 +189,44 @@
 
   /* 攻略段（社区整理，明确标注来源） */
   function guideHtml(t) {
+    var qg = (window.TOTK_QUESTS_GUIDE && window.TOTK_QUESTS_GUIDE[t.key]) || {};
     var g = t.guide || {};
     var out = '';
-    var npc = t.npcCn || '';
-    /* 接取（★ V2.5.0 v4 定稿：模板化，老大定的）：
-       对话型（有 NPC）→「对话+NPC名+（地点）」；自动触发（无 NPC）→ 保留档案原文 */
-    if (g.start || npc) {
-      var start = npc
-        ? '对话' + esc(npc) + (t.locCn ? '（' + esc(t.locCn) + '）' : '')
-        : esc(g.start);
-      out += kv('接取', start);
+    var isEn = window.I18N && window.I18N.getLang() === 'en';
+    var npc = isEn ? (qg.npc_en || t.npcCn || '') : (qg.npc_zh || t.npcCn || '');
+
+    var startVal = isEn ? (qg.start_en || g.start) : (qg.start_zh || g.start);
+    if (startVal || npc) {
+      var npcName = window.I18N ? (window.I18N.nameOf(npc) || npc) : npc;
+      var locName = t.locCn ? (window.I18N ? (window.I18N.regionOf(t.locCn) || t.locCn) : t.locCn) : '';
+      var start = startVal
+        ? esc(startVal)
+        : (npc ? (isEn ? ('Talk to ' + esc(npcName) + (locName ? ' (' + esc(locName) + ')' : '')) : ('对话' + esc(npc) + (t.locCn ? '（' + esc(t.locCn) + '）' : ''))) : '');
+      if (start) {
+        out += kv(window.I18N ? window.I18N.t('task.start') : '接取', start);
+      }
     }
-    /* 注意（V2.5.0：note 提到交付之前——老大定的「接取→注意→交付→奖励」顺序） */
-    if (g.note) {
+
+    var noteVal = isEn ? (qg.note_en || g.note) : (qg.note_zh || g.note);
+    if (noteVal) {
       var suspect = GUIDE_NOTE_SUSPECT[t.key];
-      out += kv('注意', mdBold(esc(g.note)).replace(/\n/g, '<br>') +
+      out += kv(window.I18N ? window.I18N.t('task.notice') : '注意', mdBold(esc(noteVal)).replace(/\n/g, '<br>') +
         (suspect
           ? '<div class="tk-guide-warn" title="游戏内实际校对发现这条攻略与官方步骤矛盾">' +
             '<b>⚠ 此条攻略可能有误</b>' + esc(suspect) +
             '<span class="tk-guide-fix">以官方步骤为准 →</span></div>'
           : ''));
     }
-    if (g.deliver) out += kv('交付', mdBold(esc(g.deliver)).replace(/\n/g, '<br>'));
-    if (g.reward && g.reward.length) {
-      out += kv('奖励', g.reward.map(function (r) { return esc(r); }).join('、'));
+    var deliverVal = isEn ? (qg.deliver_en || g.deliver) : (qg.deliver_zh || g.deliver);
+    if (deliverVal) out += kv(window.I18N ? window.I18N.t('task.deliver') : '交付', mdBold(esc(deliverVal)).replace(/\n/g, '<br>'));
+
+    var rewards = (isEn && qg.reward_en && qg.reward_en.length) ? qg.reward_en : (qg.reward_zh && qg.reward_zh.length ? qg.reward_zh : g.reward);
+    if (rewards && rewards.length) {
+      var rewardList = rewards.map(function (r) {
+        var rName = window.I18N ? (window.I18N.nameOf(r) || r) : r;
+        return esc(rName);
+      }).join(isEn ? ', ' : '、');
+      out += kv(window.I18N ? window.I18N.t('task.reward') : '奖励', rewardList);
     }
     if (!out) return '';
     return section('任务要点', out);
@@ -257,7 +276,8 @@
   function overlapHtml(t) {
     if (!t.overlap || !t.overlap.length) return '';
     var items = t.overlap.map(function (n) {
-      return '<li><a href="#" class="tk-link" data-tk-goto="' + esc(n) + '">' + esc(n) + '</a></li>';
+      var oName = window.I18N ? (window.I18N.nameOf(n) || n) : n;
+      return '<li><a href="#" class="tk-link" data-tk-goto="' + esc(n) + '">' + esc(oName) + '</a></li>';
     });
     return section('同位置还有', '<ul class="tk-list">' + items.join('') + '</ul>');
   }
@@ -267,7 +287,8 @@
     var D = global.TaskData;
     if (!t.unlockList || !t.unlockList.length) {
       /* V2.5.0（老大 2026-10-11）：无后续显示「无」，不再用「—」 */
-      return section('后续解锁', '<ul class="tk-list"><li class="tk-dash">无</li></ul>');
+      var isEn = window.I18N && window.I18N.getLang() === 'en';
+      return section('后续解锁', '<ul class="tk-list"><li class="tk-dash">' + (isEn ? 'None' : '无') + '</li></ul>');
     }
     var links = [], extraCnt = 0;
     t.unlockList.forEach(function (r) {
@@ -277,7 +298,8 @@
       if (r.linkable && r.reqName) {
         /* V2.5.0：链接文本带档内序号 →【#N 任务名】（老大定的） */
         var bk = r.key ? (D.byKey(r.key) || null) : null;
-        var label = (bk && bk.no) ? '#' + bk.no + ' ' + esc(r.reqName) : esc(r.reqName);
+        var reqQuestName = window.I18N ? (window.I18N.nameOf(r.reqName) || r.reqName) : r.reqName;
+        var label = (bk && bk.no) ? '#' + bk.no + ' ' + esc(reqQuestName) : esc(reqQuestName);
         links.push('<li><a href="#" class="tk-link" data-tk-goto="' + esc(r.reqName) + '"' +
           (global.TaskDone && global.TaskDone.isDone(r.key)
             ? ' data-tk-done="1" title="（已完成）"' : '') +
@@ -287,12 +309,14 @@
       }
     });
     if (extraCnt) {
-      links.push('<li class="tk-flag">另外解锁 ' + extraCnt + ' 个小游戏/赛事' +
-        '<span class="tk-none2">（不在任务板块）</span></li>');
+      var isEn = window.I18N && window.I18N.getLang() === 'en';
+      links.push('<li class="tk-flag">' + (isEn ? ('Also unlocks ' + extraCnt + ' minigames/events') : ('另外解锁 ' + extraCnt + ' 个小游戏/赛事')) +
+        '<span class="tk-none2">' + (isEn ? ' (Not in quest list)' : '（不在任务板块）') + '</span></li>');
     }
     var items = links;
     if (!items.length) {
-      return section('后续解锁', '<ul class="tk-list"><li class="tk-dash">无</li></ul>');
+      var isEn = window.I18N && window.I18N.getLang() === 'en';
+      return section('后续解锁', '<ul class="tk-list"><li class="tk-dash">' + (isEn ? 'None' : '无') + '</li></ul>');
     }
     return section('后续解锁', '<ul class="tk-list">' + items.join('') + '</ul>');
   }
@@ -395,7 +419,17 @@
   }
 
   function section(title, body) {
-    return '<div class="tk-sec"><div class="tk-sec-t">' + title + '</div>' +
+    var isEn = window.I18N && window.I18N.getLang() === 'en';
+    var tMap = {
+      '前置条件': isEn ? 'Prerequisites' : '前置条件',
+      '任务要点': isEn ? 'Guide & Walkthrough' : '任务要点',
+      '官方步骤': isEn ? 'Objectives' : '官方步骤',
+      '同位置还有': isEn ? 'Same Location Quests' : '同位置还有',
+      '后续解锁': isEn ? 'Unlocks' : '后续解锁',
+      '本任务可获得': isEn ? 'Armor Rewards' : '本任务可获得'
+    };
+    var displayTitle = tMap[title] || title;
+    return '<div class="tk-sec"><div class="tk-sec-t">' + displayTitle + '</div>' +
       '<div class="tk-sec-b">' + body + '</div></div>';
   }
 
@@ -441,14 +475,16 @@
       return '<div class="tk-ar-g">' +
         '<div class="tk-ar-icw">' + icons + '</div>' +
         '<div class="tk-ar-tx">' +
-        '<div class="tk-ar-n">' + esc(g.set) + setLink + '</div>' +
+        '<div class="tk-ar-n">' + esc(window.I18N ? (window.I18N.nameOf(g.set) || g.set) : g.set) + setLink + '</div>' +
         '<div class="tk-ar-s">' + esc(what) + (how ? ' · ' + esc(how) : '') + '</div>' +
         '</div></div>';
     }).join('');
 
-    return '<div class="tk-ar">' +
-      '<div class="tk-ar-h">本任务可获得<span class="tk-src">防具 ' + a.total + ' 件</span></div>' +
-      body + '</div>';
+    var isEn = window.I18N && window.I18N.getLang() === 'en';
+    var arHead = isEn
+      ? ('<div class="tk-ar-h">Obtainable in Quest<span class="tk-src">' + a.total + ' Piece(s)</span></div>')
+      : ('<div class="tk-ar-h">本任务可获得<span class="tk-src">防具 ' + a.total + ' 件</span></div>');
+    return '<div class="tk-ar">' + arHead + body + '</div>';
   }
 
   /* ---------- 完成态 ----------
@@ -484,10 +520,10 @@
       /* 存档里已完成：显示为不可取消的完成态 */
       return '<button type="button" class="btn done is-done" id="tkDone" disabled ' +
         'title="' + (st.stage ? '游戏内进度：' + esc(st.stage) : '存档记录已完成') +
-        '">已完成 ✓</button>';
+        '">'+(window.I18N ? window.I18N.t('task.btnDoneLocked') : '已完成 ✓')+'</button>';
     }
     return '<button type="button" class="btn done' + (st.done ? ' is-done' : '') +
-      '" id="tkDone">' + (st.done ? '取消完成' : '标记完成') + '</button>';
+      '" id="tkDone">' + (st.done ? (window.I18N ? window.I18N.t('task.btnUndone') : '取消完成') : (window.I18N ? window.I18N.t('task.btnDone') : '标记完成')) + '</button>';
   }
   function kv(k, v) {
     return '<div class="tk-kv"><span class="tk-k">' + k + '</span><span class="tk-v">' + v + '</span></div>';
@@ -501,6 +537,7 @@
        ★ 整块 tk-grip（把手）覆盖头部和标题行 —— 这是拖动的显式入口，
          光标变 grab，视觉上有六点抓手图案。
          点关闭按钮（.tk-close 在里面）不启动拖动，见 makeDraggable 的closest 排除。 */
+    var isEn = window.I18N && window.I18N.getLang() === 'en';
     h += '<div class="tk-grip">';
     /* ★ 按 group 判（2026-10-07 迷你挑战单列）。
      * 原来按 t.cat（ROM 四档）判，迷你挑战会落到 'oth'（灰），
@@ -508,23 +545,27 @@
     /* ★ 按官方四档 group 判（2026-10-07 分类改造，与地图点配色一致）。
      * 原来有第五档 'oth' 灰色，随 FindSunaNui2 删除后已无成员。 */
     h += '<span class="tk-chip tk-chip-' + (t.group === '主剧情挑战' ? 'main' : t.group === '情节挑战' ? 'imp' : t.group === '神庙挑战' ? 'sub' : 'mini') + '">' +
-      esc(t.group) + '</span>';
+      esc(window.I18N ? window.I18N.catOf(t.group) : t.group) + '</span>';
     if (!t.hasName) {
-      h += '<span class="tk-chip tk-noname" title="游戏内这个任务没有官方标题，用内部编号显示">暂无官方名</span>';
+      h += '<span class="tk-chip tk-noname" title="' + (isEn ? 'No official title in game, shown by internal ID' : '游戏内这个任务没有官方标题，用内部编号显示') + '">'+(window.I18N ? window.I18N.t('task.noName') : '暂无官方名')+'</span>';
     }
     /* ★ V2.5.0（老大 2026-10-11）：‹ › 上/下一个移到分类徽章区（× 左侧） */
     h += '<span class="tk-grip-acts">';
-    h += '<button type="button" class="tk-icon-btn tk-nav" id="tkPrev" title="上一个（本档序号前一个）">‹</button>';
-    h += '<button type="button" class="tk-icon-btn tk-nav" id="tkNext" title="下一个（本档序号后一个）">›</button>';
-    h += '<button type="button" class="tk-close" id="tkClose" title="关闭">×</button>';
+    h += '<button type="button" class="tk-icon-btn tk-nav" id="tkPrev" title="' + (isEn ? 'Previous quest' : '上一个（本档序号前一个）') + '">‹</button>';
+    h += '<button type="button" class="tk-icon-btn tk-nav" id="tkNext" title="' + (isEn ? 'Next quest' : '下一个（本档序号后一个）') + '">›</button>';
+    h += '<button type="button" class="tk-close" id="tkClose" title="' + (isEn ? 'Close' : '关闭') + '">×</button>';
     h += '</span>';
     h += '</div>';
     /* 标题行（★ V2.5.0 v4 定稿；老大 2026-10-11：复制按钮**紧跟任务名后面**，
        内联在名字行内，文字小、暗金色与「前置条件」小标题一致） */
+    var qg = (window.TOTK_QUESTS_GUIDE && window.TOTK_QUESTS_GUIDE[t.key]) || {};
+    var isEn = window.I18N && window.I18N.getLang() === 'en';
+    var qTitle = isEn ? (qg.name_en || (window.I18N ? window.I18N.nameOf(t.name) : t.name)) : (qg.name_zh || t.name);
+
     h += '<div class="tk-title-row">';
     h += '<span class="tk-no-badge">' + (t.no ? '#' + esc(t.no) : '') + '</span>';
-    h += '<h3 class="tk-name">' + esc(t.name) +
-      '<button type="button" class="tk-copy" id="tkCopy" title="复制任务名">[复制]</button></h3>';
+    h += '<h3 class="tk-name">' + esc(qTitle) +
+      '<button type="button" class="tk-copy" id="tkCopy" title="' + (isEn ? 'Copy quest title' : '复制任务名') + '">'+(window.I18N ? ('[' + window.I18N.t('card.copy') + ']') : '[复制]')+'</button></h3>';
     h += '</div>';
 
     /* 关键信息行：NPC / 坐标 / 进度
@@ -544,11 +585,11 @@
       /* ★ V2.5.0（老大 2026-10-11）：去掉坐标外括号，直接「位置  坐标」 */
       var co = '' + gameRound(t.gx) + '，' + gameRound(-t.gz);
       if (t.hasHeight && t.gy != null) co += '，' + gameRound(t.gy - ELEV_UI_OFFSET);
-      h += '<span class="tk-plabel">位置</span>' +
+      h += '<span class="tk-plabel">'+(window.I18N ? window.I18N.t('task.location') : '位置')+'</span>' +
         '<span class="co-link"' + (t.onMap ? ' data-tk-locate="1"' : '') +
-        ' title="点击定位到该坐标">' + esc(co) + '</span>';
+        ' title="' + (isEn ? 'Click to locate on map' : '点击定位到该坐标') + '">' + esc(co) + '</span>';
     } else {
-      h += '<span class="tk-plabel">位置</span><span class="co-none">无</span>';
+      h += '<span class="tk-plabel">'+(window.I18N ? window.I18N.t('task.location') : '位置')+'</span><span class="co-none">无</span>';
     }
     h += '</div>';
     /* 完成进度：阶段名 + 「第 n/total 步」，让存档进度可见 */
@@ -557,7 +598,7 @@
       var pg = dst.total > 1
         ? esc(dst.stage) + '<span class="tk-mv-sub">（第 ' + (dst.idx + 1) + '/' + dst.total + ' 步）</span>'
         : esc(dst.stage);
-      h += '<div class="tk-mrow"><span class="tk-mk">进度</span><span class="tk-mv' +
+      h += '<div class="tk-mrow"><span class="tk-mk">'+(window.I18N ? window.I18N.t('task.progress') : '进度')+'</span><span class="tk-mv' +
         (dst.done ? ' tk-mv-done' : '') + '">' + pg + '</span></div>';
     }
     h += '</div>';
@@ -609,25 +650,26 @@
     if (fpts.length) {
       var num = ['①','②','③','④','⑤','⑥','⑦','⑧','⑨','⑩','⑪','⑫','⑬','⑭','⑮','⑯','⑰','⑱','⑲','⑳'];
       var ptsHtml = fpts.map(function (q, i) {
-        var nm = q.note || (i + 1) + ' 号点';
+        var isEn = window.I18N && window.I18N.getLang() === 'en';
+        var nm = q.note ? (window.I18N ? (window.I18N.nameOf(q.note) || q.note) : q.note) : (window.I18N ? window.I18N.t('task.pointNum').replace('{0}', i + 1) : ((i + 1) + ' 号点'));
         var tip = '' + gameRound(q.gx) + '，' + gameRound(-q.gz) +
           (q.gy != null ? '，' + gameRound(q.gy - ELEV_UI_OFFSET) : '');
-        return '<span class="fp" data-tk-pt="' + i + '" title="点击定位">' +
+        return '<span class="fp" data-tk-pt="' + i + '" title="' + (window.I18N ? window.I18N.t('task.pointLocate') : '点击定位') + '">' +
           '<span class="num">' + (num[i] || (i + 1)) + '</span>' +
           '<span class="txt">' + esc(nm) + '</span>' +
           '<span class="tip"><span class="xy">' + esc(tip) + '</span></span></span>';
       }).join('');
-      flow = '<div class="tk-flow-t">流程地点' +
-        (fpts.length > 1 ? ' · ' + fpts.length + ' 处' : '') + '</div>' +
+      flow = '<div class="tk-flow-t">'+(window.I18N ? window.I18N.t('task.flow') : '流程地点')+'' +
+        (fpts.length > 1 ? (window.I18N && window.I18N.getLang() === 'en' ? (' · ' + fpts.length + ' spots') : (' · ' + fpts.length + ' 处')) : '') + '</div>' +
         '<div class="flow-pts">' + ptsHtml + '</div>';
     } else if (t.noPlaceReason) {
       /* 已知无地点：把原因说出来，玩家才不会反复找「接任务怎么用不了」 */
       flow = '<span class="tk-flow-hint">' + esc(t.noPlaceReason) + '</span>';
     } else if (t.gx != null && t.gz != null && t.onMap) {
       /* 有主坐标但没流程点的任务：有可定位地点，别误导说没有 */
-      flow = '<span class="tk-flow-hint">这个任务有 1 个地点（无流程线）</span>';
+      flow = '<span class="tk-flow-hint">' + (window.I18N ? window.I18N.t('task.oneLoc') : '这个任务有 1 个地点（无流程线）') + '</span>';
     } else {
-      flow = '<span class="tk-flow-hint">这个任务没有可定位的地点</span>';
+      flow = '<span class="tk-flow-hint">' + (window.I18N ? window.I18N.t('task.noLoc') : '这个任务没有可定位的地点') + '</span>';
     }
     h += '<div class="tk-flow-row">' + flow + '</div>';
 
@@ -639,16 +681,20 @@
        无坐标时导航按钮置灰而不是隐藏：
        隐藏会让玩家以为卡片缺功能；置灰 + 说明原因才讲得通
        「这个任务本来就没有固定地点」不是 bug。 */
+    var isEn = window.I18N && window.I18N.getLang() === 'en';
     var noNav = (t.gx == null || t.gz == null || !t.onMap);
     h += '<div class="tk-actions">';
     h += '<button type="button" class="btn act' + (noNav ? ' is-off' : '') + '" id="tkNav"' +
       (noNav ? ' disabled' : '') +
       (noNav && t.noPlaceReason ? ' title="' + esc(t.noPlaceReason) + '"' : '') +
-      '>任务点</button>';
+      '>' + (window.I18N ? window.I18N.t('task.btnNav') : '任务点') + '</button>';
     /* 连线按钮文案跟随实际状态：连线中显示「取消连线」 */
     var tracking = global.TaskFlow && global.TaskFlow.isTracking(t.key);
+    var flowBtnText = tracking
+      ? (window.I18N ? window.I18N.t('task.btnClearFlow') : '取消连线')
+      : (window.I18N ? window.I18N.t('task.btnFlow') : '任务连线');
     h += '<button type="button" class="btn act' + (tracking ? ' is-on' : '') +
-      '" id="tkTrack">' + (tracking ? '取消连线' : '任务连线') + '</button>';
+      '" id="tkTrack">' + flowBtnText + '</button>';
     h += doneBtnHtml(t);
     h += '</div>';
 

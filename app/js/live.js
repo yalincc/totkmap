@@ -175,6 +175,12 @@
     lastIconKey = (heading == null ? 'dot' : 'arrow') + (pos.verified ? 'v' : '');
     playerMark.addTo(map);
   }
+  /* V2.6.0：轨迹显示开关（设置面板三选项）；隐藏时不绘制轨迹线，采样仍在继续，
+     重新显示时可立刻看到已记录的路线 */
+  function trailShowOn() {
+    var s = window.TOTK_SETTINGS;
+    return !s || s.trailShow !== false;
+  }
   function ensureTrail() {
     if (trailLine) return;
     trailLine = L.polyline([], { pane: 'overlayPane', color: 'rgba(255,90,90,.5)',
@@ -217,33 +223,43 @@
     var rl = renderLayer();
     var el = $('npStatus');
     if (!el) return;
+    var isEn = window.I18N && window.I18N.getLang() === 'en';
     var txt, cls;
-    if (!pos.online) { txt = '● 离线'; cls = 'off'; }
-    else if (!pos.located) { txt = '◐ 定位中…（进入游戏后恢复）'; cls = 'warn'; }
-    else if (!pos.verified) { txt = '◐ 定位中… 移动角色确认'; cls = 'warn'; }
-    else { txt = '● 已定位'; cls = 'on'; }
-    if (paused) { txt = '⏸ 已暂停'; cls = 'paused'; }
+    if (!pos.online) { txt = isEn ? '● Offline' : '● 离线'; cls = 'off'; }
+    else if (!pos.located) { txt = isEn ? '◐ Locating… (enters game to resume)' : '◐ 定位中…（进入游戏后恢复）'; cls = 'warn'; }
+    else if (!pos.verified) { txt = isEn ? '◐ Locating… Move character to confirm' : '◐ 定位中… 移动角色确认'; cls = 'warn'; }
+    else { txt = isEn ? '● Located' : '● 已定位'; cls = 'on'; }
+    if (paused) { txt = isEn ? '⏸ Paused' : '⏸ 已暂停'; cls = 'paused'; }
     if (el.textContent !== txt || el.className.indexOf(cls) < 0) {
       el.textContent = txt;
       el.className = 'np-status ' + cls;
     }
     var posEl = $('npPos');
     if (posEl) {
+      var lName = isEn ? window.I18N.t('layer.' + (rl === 20 ? 'sky' : rl === 19 ? 'depths' : 'surface')) : LAYER_NAME[rl];
       var s = pos.located
-        ? '位置 (' + Math.round(pos.mx) + ', ' + Math.round(pos.my) + ') · ' +
-          LAYER_NAME[rl] + (layerLock != null ? ' 🔒' : '') + ' · 高 ' + Math.round(pos.gz)
-        : (pos.online ? '位置 --（等待玩家位置）' : '位置 --（未连接定位服务）');
+        ? (isEn ? ('Coords (' + Math.round(pos.mx) + ', ' + Math.round(pos.my) + ') · ' + lName + (layerLock != null ? ' 🔒' : '') + ' · Alt ' + Math.round(pos.gz))
+                : ('位置 (' + Math.round(pos.mx) + ', ' + Math.round(pos.my) + ') · ' + lName + (layerLock != null ? ' 🔒' : '') + ' · 高 ' + Math.round(pos.gz)))
+        : (pos.online ? (isEn ? 'Coords -- (waiting for player)' : '位置 --（等待玩家位置）')
+                      : (isEn ? 'Coords -- (service not connected)' : '位置 --（未连接定位服务）'));
       if (posEl.textContent !== s) posEl.textContent = s;
     }
     var tEl = $('npTargetRow');
     if (tEl) {
-      var ts = '目标：未设置';
+      var ts = isEn ? 'Target: Not set' : '目标：未设置';
       if (target && target.name) {
         var d = distToTarget();
         var cross = (target.layer && target.layer !== rl);
-        ts = '目标：' + target.name + (target.type ? '（' + target.type + '）' : '');
-        if (cross) ts += ' · 在' + LAYER_NAME[target.layer] + '层，点击左侧层按钮切换';
-        else if (d != null) ts += ' · 距离 ' + Math.round(d) + 'm';
+        var targetName = isEn ? (window.I18N.nameOf(target.name) || target.name) : target.name;
+        var targetType = target.type ? (isEn ? (window.I18N.catOf(target.type) || target.type) : target.type) : '';
+        ts = isEn ? ('Target: ' + targetName + (targetType ? ' (' + targetType + ')' : ''))
+                  : ('目标：' + target.name + (target.type ? '（' + target.type + '）' : ''));
+        if (cross) {
+          var tLayerName = isEn ? window.I18N.t('layer.' + (target.layer === 20 ? 'sky' : target.layer === 19 ? 'depths' : 'surface')) : LAYER_NAME[target.layer];
+          ts += isEn ? (' · On ' + tLayerName + ' layer, click layer button to switch') : (' · 在' + LAYER_NAME[target.layer] + '层，点击左侧层按钮切换');
+        } else if (d != null) {
+          ts += isEn ? (' · Dist ' + Math.round(d) + 'm') : (' · 距离 ' + Math.round(d) + 'm');
+        }
       }
       if (tEl.textContent !== ts) tEl.textContent = ts;
     }
@@ -501,8 +517,13 @@
       return;
     }
 
-    ensureTrail();
-    if (trail.length) trailLine.setLatLngs(trail);
+    if (trailShowOn()) {
+      ensureTrail();
+      if (trail.length) trailLine.setLatLngs(trail);
+    } else if (trailLine) {
+      map.removeLayer(trailLine);
+      trailLine = null;
+    }
 
     ensurePlayerMark();
     animatePlayerTo(pos.mx, pos.my);
@@ -896,7 +917,22 @@
       setLocateBtns: setLocateBtns,
       /* V1.8.1: 手动层级锁定 */
       setLayerLock: setLayerLock,
-      lockLayer: function () { return layerLock; }
+      lockLayer: function () { return layerLock; },
+      /* V2.6.0：移动轨迹（设置面板 显示 / 隐藏 / 清除） */
+      clearTrail: function () {
+        trail = [];
+        lastPosKey = null;
+        if (trailLine) trailLine.setLatLngs([]);
+      },
+      refreshTrail: function () {
+        if (trailShowOn()) {
+          ensureTrail();
+          trailLine.setLatLngs(trail);
+        } else if (trailLine) {
+          map.removeLayer(trailLine);
+          trailLine = null;
+        }
+      }
     };
   }
 

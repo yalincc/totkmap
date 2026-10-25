@@ -116,3 +116,6 @@ TOTKmap-*-待确认.*
 app/assets/icons/_bak_*/
 *.zip
 
+# 本次验收截图（screen/，本地留底不入库）
+screen/
+

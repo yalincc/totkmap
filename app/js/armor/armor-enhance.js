@@ -92,17 +92,25 @@
   function blockFor(ptName) {
     var hit = match(ptName);
     if (!hit) return '';
+    var slotMap = { '头部': 'Head', '上身': 'Body', '下身': 'Legs', '身体': 'Body', '腿部': 'Legs' };
 
     /* --- 情况 A：标点是「整套统称」→ 列同套几件 --- */
     if (!hit.armor) {
+      var isEnA = window.I18N && window.I18N.getLang() === 'en';
+      var setNameA = isEnA ? (window.I18N.nameOf(hit.set) || hit.set) : hit.set;
       var items = hit.items.map(function (a) {
-        return '<span class="ae-piece" title="' + esc(a.slot + ' · 防御 ' + (a.def != null ? a.def : '—')) + '">' +
+        var pSlot = isEnA ? (slotMap[a.slot] || a.slot) : a.slot;
+        var pName = isEnA ? (window.I18N.nameOf(a.name) || a.name) : a.name;
+        var pTitle = isEnA ? (pSlot + ' · Def ' + (a.def != null ? a.def : '—')) : (a.slot + ' · 防御 ' + (a.def != null ? a.def : '—'));
+        return '<span class="ae-piece" title="' + esc(pTitle) + '">' +
           '<img src="' + esc(a.icon || '') + '" alt="">' +
-          esc(a.name) + '</span>';
+          esc(pName) + '</span>';
       }).join('');
+      var headerText = isEnA
+        ? ('Set · ' + esc(setNameA) + '<span class="ae-src">' + hit.items.length + ' Pieces</span>')
+        : ('套装 · ' + esc(hit.set) + '<span class="ae-src">共 ' + hit.items.length + ' 件</span>');
       return '<div class="ae" data-mode="set" data-set="' + esc(hit.set) + '">' +
-        '<div class="ae-h">套装 · ' + esc(hit.set) + '<span class="ae-src">共 ' +
-        hit.items.length + ' 件</span></div>' +
+        '<div class="ae-h">' + headerText + '</div>' +
         '<div class="ae-pieces">' + items + '</div>' +
         '</div>';
     }
@@ -117,50 +125,65 @@
     if (a.icon) {
       h += '<img class="ae-ic" src="' + esc(a.icon) + '" alt="' + esc(a.name) + '">';
     }
+    var isEn = window.I18N && window.I18N.getLang() === 'en';
+    var aName = isEn ? (window.I18N.nameOf(a.name) || a.name) : a.name;
+    var aSet = isEn ? (window.I18N.nameOf(a.set) || a.set) : a.set;
+    var aSlot = isEn ? (slotMap[a.slot] || a.slot) : a.slot;
     h += '<div class="ae-id">' +
-      '<div class="ae-n">' + esc(a.name) + '</div>' +
-      '<div class="ae-s">' + esc(a.slot) + ' · ' + esc(a.set) + '</div>' +
+      '<div class="ae-n">' + esc(aName) + '</div>' +
+      '<div class="ae-s">' + esc(aSlot) + (aSet ? ' · ' + esc(aSet) : '') + '</div>' +
       '</div>';
     h += '</div>';
 
     /* 数值：防御 / 买价 */
     h += '<div class="ae-rows">';
     if (a.def != null) {
-      h += '<div class="ae-row"><span class="ae-l">防御</span><span class="ae-v">' +
+      h += '<div class="ae-row"><span class="ae-l">'+(window.I18N && window.I18N.getLang()==='en' ? 'Defense' : '防御')+'</span><span class="ae-v">' +
         a.def + (up.upgradeable ? '<span class="ae-arrow"> → ' +
           (up.steps[up.steps.length - 1].def != null ? up.steps[up.steps.length - 1].def : '—') +
-          '</span>（满级）' : '') + '</span></div>';
+          '</span>'+(window.I18N && window.I18N.getLang()==='en' ? ' (Max)' : '（满级）')+'' : '') + '</span></div>';
     }
     if (a.buy != null) {
-      h += '<div class="ae-row"><span class="ae-l">售价 / 回收</span><span class="ae-v">' +
+      h += '<div class="ae-row"><span class="ae-l">'+(window.I18N && window.I18N.getLang()==='en' ? 'Price / Sell' : '售价 / 回收')+'</span><span class="ae-v">' +
         a.buy + ' / ' + (a.sell != null ? a.sell : '—') + '</span></div>';
     }
     h += '</div>';
 
-    /* 强化摘要：只给「最高 N 级 + 最后一级材料」，不铺 5 行 */
+    /* 强化摘要：极简胶囊化，不铺多行 */
     if (up.upgradeable) {
       var top = up.steps[up.steps.length - 1];
-      var mats = (top.mats || []).map(function (m) { return m.zh + '×' + m.n; });
-      h += '<div class="ae-row"><span class="ae-l">强化</span><span class="ae-v">' +
-        '可升至 ' + up.maxLevel + ' 级（防御 ' +
-        (up.steps[0].def != null ? up.steps[0].def : '—') + ' → ' +
-        (top.def != null ? top.def : '—') + '）' +
-        (mats.length ? '<span class="ae-dim">满级需 ' + esc(mats.join('、')) + '</span>' : '') +
+      var mats = (top.mats || []).map(function (m) {
+        var mName = isEn ? (window.I18N.nameOf(m.zh) || m.zh) : m.zh;
+        return mName + '×' + m.n;
+      });
+      var maxLv = up.maxLevel > 1 ? (up.maxLevel - 1) : up.maxLevel;
+      var upgradeSummary = isEn
+        ? ('Max Lv ' + maxLv + ' · Def ' +
+            (up.steps[0].def != null ? up.steps[0].def : '—') + ' → ' +
+            (top.def != null ? top.def : '—') +
+            (mats.length ? '<span class="ae-dim">Req: ' + esc(mats.join(', ')) + '</span>' : ''))
+        : ('满级 ' + maxLv + ' 级 · 防御 ' +
+            (up.steps[0].def != null ? up.steps[0].def : '—') + ' → ' +
+            (top.def != null ? top.def : '—') +
+            (mats.length ? '<span class="ae-dim">需 ' + esc(mats.join('、')) + '</span>' : ''));
+      h += '<div class="ae-row"><span class="ae-l">'+(isEn ? 'Upgrades' : '强化')+'</span><span class="ae-v">' +
+        upgradeSummary +
         '</span></div>';
     } else {
-      h += '<div class="ae-row"><span class="ae-l">强化</span>' +
-        '<span class="ae-v ae-dim">不可强化</span></div>';
+      h += '<div class="ae-row"><span class="ae-l">'+(isEn ? 'Upgrades' : '强化')+'</span>' +
+        '<span class="ae-v ae-dim">'+(isEn ? 'Cannot Upgrade' : '不可强化')+'</span></div>';
     }
 
     /* 关联任务（armors.js 的 reqTasks，17 件有） */
     if (a.reqTasks && a.reqTasks.length) {
       var ts = a.reqTasks.filter(function (t) { return t && t.key; })
         .map(function (t) {
+          var tName = isEn ? (window.I18N.nameOf(t.name) || t.name) : t.name;
           return '<button type="button" class="ae-task" data-go-task="' + esc(t.key) + '">' +
-            esc(t.name) + '</button>';
+            esc(tName) + '</button>';
         }).join('');
       if (ts) {
-        h += '<div class="ae-row"><span class="ae-l">关联任务</span>' +
+        h += '<div class="ae-row"><span class="ae-l">'+(isEn ? 'Related Quests' : '关联任务')+'</span>' +
           '<span class="ae-v ae-tasks">' + ts + '</span></div>';
       }
     }
@@ -171,28 +194,31 @@
     });
     if (sib.length) {
       var ss = sib.map(function (x) {
+        var xName = isEn ? (window.I18N.nameOf(x.name) || x.name) : x.name;
         return '<button type="button" class="ae-sib" data-go-armor="' + esc(x.key) + '">' +
           (x.icon ? '<img src="' + esc(x.icon) + '" alt="">' : '') +
-          esc(x.name) + '</button>';
+          esc(xName) + '</button>';
       }).join('');
-      h += '<div class="ae-row"><span class="ae-l">同套部件</span>' +
+      h += '<div class="ae-row"><span class="ae-l">'+(isEn ? 'Set Pieces' : '同套部件')+'</span>' +
         '<span class="ae-v ae-sibs">' + ss + '</span></div>';
     }
 
-    /* 官方说明（短，通常一句） */
+    /* 官方说明（两行折叠，点击展开） */
     if (a.desc) {
-      h += '<div class="ae-row"><span class="ae-l">说明</span>' +
-        '<span class="ae-v ae-desc">' + esc(a.desc) + '</span></div>';
+      var aDesc = isEn ? ((window.TOTK_ARMORS_DESC_EN && window.TOTK_ARMORS_DESC_EN[a.key]) || a.desc) : a.desc;
+      h += '<div class="ae-row"><span class="ae-l">'+(isEn ? 'Description' : '说明')+'</span>' +
+        '<span class="ae-v ae-desc" onclick="this.classList.toggle(\'expanded\')" title="Click to expand / collapse">' + esc(aDesc) + '</span></div>';
     }
 
     /* 商店防具：告诉玩家去哪家店买（地图上没有逐件标点的那些） */
     if (a.how === '商店购买') {
       var sh = shopOf(a.key);
-      h += '<div class="ae-row"><span class="ae-l">去哪买</span>' +
+      var shName = sh ? (isEn ? (window.I18N.nameOf(sh.name) || 'Armor Shop') : (sh.name || '防具店')) : '';
+      h += '<div class="ae-row"><span class="ae-l">'+(isEn ? 'Where to Buy' : '去哪买')+'</span>' +
         '<span class="ae-v">' + (sh
           ? '<button type="button" class="ae-sib" data-goto-pt="' + esc(sh.id) + '">' +
-            esc(sh.name || '防具店') + ' ›</button>'
-          : '<span class="ae-dim">地图上没有单独标点，可在地图搜「防具店」</span>') +
+            esc(shName) + ' ›</button>'
+          : '<span class="ae-dim">'+(isEn ? 'Search "Armor Shop" on map' : '地图上没有单独标点，可在地图搜「防具店」')+'</span>') +
         '</span></div>';
     }
 

@@ -144,7 +144,7 @@
         icon: icon,
         riseOnHover: true
       });
-      mk.bindTooltip(d.name, {
+      mk.bindTooltip(window.I18N ? (window.I18N.nameOf(d.name) || d.name) : d.name, {
         direction: 'top',
         offset: [0, -14],
         className: 'mk-label dlg-tip'
@@ -174,7 +174,7 @@
       lineCap: 'round', lineJoin: 'round'
     }).addTo(g);
     /* 与其他地图图标一致：横向短标签，hover 轨迹即显示 */
-    line.bindTooltip(opt.tip || d.name, {
+    line.bindTooltip(window.I18N ? (window.I18N.nameOf(opt.tip || d.name) || (opt.tip || d.name)) : (opt.tip || d.name), {
       sticky: true, direction: 'top', className: 'mk-label dlg-tip'
     });
     return line;

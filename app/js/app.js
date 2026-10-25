@@ -21,11 +21,13 @@
   var SETTINGS = (function () {
     var DEF = {
       iconSize: 26, dotSize: 24, dotColor: '#ff3b3b', dotAlpha: 0.7,
-      doneMode: 'default', hideDoneTypes: Object.assign({}, DEF_HIDE_TYPES)
+      doneMode: 'default', hideDoneTypes: Object.assign({}, DEF_HIDE_TYPES),
+      trailShow: true          /* V2.6.0：玩家移动轨迹（显示 / 隐藏 / 清除，对齐 BOTWmap v1.7.2） */
     };
     var RESET = {
       iconSize: 26, dotSize: 28, dotColor: '#ff3b3b', dotAlpha: 1,
-      doneMode: 'default', hideDoneTypes: Object.assign({}, DEF_HIDE_TYPES)
+      doneMode: 'default', hideDoneTypes: Object.assign({}, DEF_HIDE_TYPES),
+      trailShow: true
     };
     var s = Object.assign({}, DEF);
     try {
@@ -48,7 +50,7 @@
       s._rev = (s._rev || 0) + 1; // live.js 据此感知设置变化强制重建红点图标（修 F5 才生效问题）
       try { localStorage.setItem('totkmap.settings.v1', JSON.stringify({
         iconSize: s.iconSize, dotSize: s.dotSize, dotColor: s.dotColor, dotAlpha: s.dotAlpha,
-        doneMode: s.doneMode, hideDoneTypes: s.hideDoneTypes
+        doneMode: s.doneMode, hideDoneTypes: s.hideDoneTypes, trailShow: s.trailShow !== false
       })); } catch (e) {}
     };
     return s;
@@ -58,7 +60,7 @@
   var AREA_SKY = window.TOTK_AREA_SKY || [];
   var AREA_DEPTHS = window.TOTK_AREA_DEPTHS || [];
 
-  var VERSION = 'TOTKMAP V2.5.2';
+  var VERSION = 'TOTKMAP V2.6.0';
   var LS_DONE = 'totkmap_done_v1';
   var LS_CUSTOM = 'totkmap_custom_v1';
   var LS_LAYER = 'totkmap_layer_v1';
@@ -215,6 +217,27 @@
   function saveDone() { saveJson(LS_DONE, state.done); }
 
   /* ---------------- 分类面板 ---------------- */
+  /* 大分类组按钮（V2.6.0）：lastGroupCats = { 组key: [该组分类 id...] }，
+     由 buildCatalogPanel() 每次重建时刷新，供组按钮统计与批量勾选使用 */
+  var lastGroupCats = {};
+  function grpBtnText(on, total, isEn) {
+    if (!total) return '';
+    if (isEn) return on === total ? 'Clear' : (on === 0 ? 'Select' : 'Select (' + on + '/' + total + ')');
+    return on === total ? '清空本组' : (on === 0 ? '全选本组' : '全选（' + on + '/' + total + '）');
+  }
+  /* 刷新所有组按钮文案与透明度：勾选分类、切语言、重建面板后都要调 */
+  function syncGroupBtns() {
+    var list = $('catalogList');
+    if (!list) return;
+    var isEn = window.I18N && window.I18N.getLang() === 'en';
+    Array.prototype.forEach.call(list.querySelectorAll('.grp-btn'), function (btn) {
+      var ids = lastGroupCats[btn.getAttribute('data-grp')] || [];
+      var on = ids.filter(function (id) { return !!state.selected[id]; }).length;
+      btn.textContent = grpBtnText(on, ids.length, isEn);
+      btn.style.opacity = (ids.length && on === ids.length) ? '1' : '0.75';
+    });
+  }
+
   function buildCatalogPanel() {
     var list = $('catalogList');
     var cats = catsOfLayer(state.layer);
@@ -256,10 +279,17 @@
     });
 
     var html = '';
+    lastGroupCats = {};
     relIdx.forEach(function (g) {
       var cs = groups[g];
       if (!cs || !cs.length) return;
-      html += '<div class="group-title">' + esc(groupName[g]) + '</div>';
+      lastGroupCats[g] = cs.map(function (c) { return c.id; });
+      /* V2.6.0：大分类一键全选 / 清空（对齐 BOTWmap ui.js 的 .lg-btn 组按钮）
+         ★ title 直接按当前语言取值，不能写死中文：切英文时 onChange 会重建本面板，
+           写死值会让 I18N.updateDOM() 之后又变回中文（端到端扫描会报残留）。 */
+      var grpTip = window.I18N ? window.I18N.t('cat.groupToggleTip', '一键勾选 / 取消本组全部分类') : '一键勾选 / 取消本组全部分类';
+      html += '<div class="group-title"><span class="gt-name">' + esc(window.I18N ? window.I18N.groupOf(groupName[g]) : groupName[g]) + '</span>' +
+        '<button type="button" class="grp-btn" data-grp="' + g + '" data-i18n-title="cat.groupToggleTip" title="' + esc(grpTip) + '"></button></div>';
       html += '<div class="cat-grid">';
       cs.forEach(function (c) {
         var on = state.selected[c.id] ? ' active' : '';
@@ -268,7 +298,7 @@
         var countText = String(c.count);
         html += '<div class="cat-item' + on + '" data-cat="' + c.id + '">' +
           (c.icon ? '<img src="assets/icons/' + esc(c.icon) + '" alt="">' : '<img src="assets/icons/origin_3845393_70484.png" alt="">') +
-          '<span class="cat-name">' + esc(c.name) + '</span>' +
+          '<span class="cat-name">' + esc(window.I18N ? window.I18N.catOf(c.name) : c.name) + '</span>' +
           '<span class="cat-count">' + esc(countText) + '</span>' +
           '</div>';
       });
@@ -286,8 +316,34 @@
         saveSelected();          // 按层落盘，切层/刷新后仍保持
         renderMarkers();
         updateCount();
+        syncGroupBtns();         // 组内勾选变化 → 组按钮文案跟着变（全选（2/10））
       });
     });
+
+    /* 组按钮：全开时点=清空本组，否则=全选本组（BOTWmap 同款行为） */
+    Array.prototype.forEach.call(list.querySelectorAll('.grp-btn'), function (btn) {
+      btn.addEventListener('click', function (ev) {
+        ev.stopPropagation();
+        var ids = lastGroupCats[btn.getAttribute('data-grp')] || [];
+        if (!ids.length) return;
+        var on = ids.filter(function (id) { return !!state.selected[id]; }).length;
+        var turnOn = on < ids.length;
+        ids.forEach(function (id) {
+          if (turnOn) state.selected[id] = true;
+          else delete state.selected[id];
+        });
+        Array.prototype.forEach.call(list.querySelectorAll('.cat-item'), function (el) {
+          var cid = Number(el.getAttribute('data-cat'));
+          if (ids.indexOf(cid) >= 0) el.classList.toggle('active', turnOn);
+        });
+        saveSelected();
+        renderMarkers();
+        updateCount();
+        syncGroupBtns();
+      });
+    });
+
+    syncGroupBtns();
   }
 
   /* ---------------- 分类选择（按层保持） ----------------
@@ -404,6 +460,7 @@
     for (var i = 0; i < MARKERS.length; i++) {
       var m = MARKERS[i];
       if (m.layer !== state.layer || !state.selected[m.cat]) continue;
+      if (m.korokStartId) continue;   // 营地图标由 korok-layer 画，不重复计数
       var isDone = !!state.done[m.id];
       var cat = cats[m.cat];
       var hideType = cat ? getMarkerHideType(cat.name) : null;
@@ -413,7 +470,13 @@
       if (isDone) done++;
     }
     var cl = $('countLabel');
-    if (cl) cl.textContent = '已显示 ' + total + ' 个标点 · 已完成 ' + done;
+    if (cl) {
+      if (window.I18N) {
+        cl.textContent = window.I18N.t('count.markers').replace('{0}', total).replace('{1}', done);
+      } else {
+        cl.textContent = '已显示 ' + total + ' 个标点 · 已完成 ' + done;
+      }
+    }
   }
 
   /* ---------------- 标记渲染 ---------------- */
@@ -471,6 +534,10 @@
     MARKERS.forEach(function (m) {
       if (m.layer !== state.layer) return;
       if (!state.selected[m.cat]) return;
+      /* V2.6.0：朋友的营地（运送终点）只是「给卡片用的正式标点」，
+         地图上的营地图标由 korok-layer 用官方 p.goal 单独绘制（带连线），
+         这里跳过，否则同一位置会叠两个图标。 */
+      if (m.korokStartId) return;
       var isDone = !!state.done[m.id];
       var cat = cats[m.cat];
       var hideType = cat ? getMarkerHideType(cat.name) : null;
@@ -485,7 +552,8 @@
       if (icon) opt.icon = icon;
       var mk = L.marker([m.x, m.y], opt);
       mk._totkMarker = m;
-      mk.bindTooltip((isDone ? '✓ ' : '') + (m.name || m.full), {
+      var dispName = window.I18N ? window.I18N.nameOf(m) : (m.name || m.full);
+      mk.bindTooltip((isDone ? '✓ ' : '') + dispName, {
         direction: 'top',
         offset: [0, -12],
         className: 'mk-label' + (isDone ? ' done-label' : '')
@@ -584,11 +652,12 @@
       var a = AREAS[i];
       if (a.layer !== state.layer || !a.name) continue;
       var vis = a.visible ? String(a.visible).split(',').map(Number) : null;
+      var aName = window.I18N ? (window.I18N.nameOf(a.name) || a.name) : a.name;
       var mk = L.marker([a.x, a.y], {
         interactive: false,
         icon: L.divIcon({
           className: 'area-label',
-          html: '<div class="area-label-wrap"><div class="area-label-inner" data-prio="' + (a.prio || 5) + '">' + esc(a.name) + '</div></div>',
+          html: '<div class="area-label-wrap"><div class="area-label-inner" data-prio="' + (a.prio || 5) + '">' + esc(aName) + '</div></div>',
           iconSize: [0, 0]
         })
       });
@@ -721,14 +790,14 @@
      材料卡片带 img/region/coord/posText/usage/导航/收集；探索标点只有 name/cat/desc/标记完成 */
   function showDetail(opts) {
     $('detailName').textContent = opts.name;
-    $('detailChip').textContent = opts.cat || '';
-    $('detailDesc').textContent = stripHtml(opts.desc || '') || '暂无说明。';
+    $('detailChip').textContent = window.I18N ? window.I18N.catOf(opts.cat) : (opts.cat || '');
+    $('detailDesc').textContent = stripHtml(opts.desc || '') || (window.I18N ? window.I18N.t('card.noDesc') : '暂无说明。');
     var isMat = !!(opts.img || opts.onNav);
     var meta = $('detailMeta'), img = $('detailImg'), uRow = $('detailUsageRow');
     var nav = $('detailNav'), col = $('detailCollect'), body = $('detailDesc');
     if (isMat) {
       img.src = opts.img; img.style.display = '';
-      $('detailRegion').textContent = opts.region || '';
+      $('detailRegion').textContent = (window.I18N ? window.I18N.regionOf(opts.region) : opts.region) || '';
       $('detailCoord').textContent = opts.coord || '';
       $('detailPos').textContent = opts.posText || '';
       $('detailUsage').textContent = opts.usage || '';
@@ -736,25 +805,25 @@
       nav.style.display = ''; col.style.display = '';
       nav.onclick = opts.onNav || null;
       col.onclick = opts.onCollect || null;
-      col.textContent = opts.colBtn || (opts.collected ? '已收集' : '收集');
+      var isEn = window.I18N && window.I18N.getLang() === 'en';
+      col.textContent = opts.colBtn || (opts.collected ? (isEn ? 'Collected' : '已收集') : (isEn ? 'Collect' : '收集'));
       body.parentElement.style.display = 'none';
     } else {
       meta.style.display = 'none'; img.style.display = 'none'; uRow.style.display = 'none';
-      // V1.8.0: 探索标点/自定义标点也显示「导航」按钮
       nav.style.display = ''; col.style.display = 'none';
       nav.onclick = opts.onNav || null;
       body.parentElement.style.display = '';
     }
-    /* V1.8.0: 导航按钮初始文案（该目标导航中 → 停止导航） */
-    nav.textContent = '导航';
+    var isEn = window.I18N && window.I18N.getLang() === 'en';
+    nav.textContent = isEn ? 'Navigate' : '导航';
     if (opts.navTarget && window.LIVENAV && LIVENAV.currentTarget) {
       var _cur = LIVENAV.currentTarget();
-      if (_cur && _cur.x === opts.navTarget.x && _cur.y === opts.navTarget.y) nav.textContent = '停止导航';
+      if (_cur && _cur.x === opts.navTarget.x && _cur.y === opts.navTarget.y) nav.textContent = isEn ? 'Stop Nav' : '停止导航';
     }
     var btn = $('detailDone');
     if (opts.onDone) {
       btn.style.display = '';
-      btn.textContent = opts.isDone ? '取消完成' : '标记完成';
+      btn.textContent = opts.isDone ? (isEn ? 'Mark Undone' : '取消完成') : (isEn ? 'Mark Done' : '标记完成');
       btn.className = 'btn primary' + (opts.isDone ? ' done' : '');
       btn.onclick = opts.onDone;
     } else {
@@ -781,12 +850,14 @@
   function openDetail(m, evt) {
     state.current = m;
     var cat = catById(state.layer, m.cat);
+    /* V2.6.0：营地标点的完成态挂在起点呀哈哈上（korokStartId） */
+    var doneId = m.korokStartId || m.id;
     showExploreCard({
       name: m.name || m.full,
       cat: cat ? cat.name : '未知分类',
       desc: m.desc || '',
       m: m,
-      isDone: !!state.done[m.id],
+      isDone: !!state.done[doneId],
       evt: evt
     });
   }
@@ -795,8 +866,8 @@
     state.current = c;
     showExploreCard({
       name: c.name,
-      cat: '自定义标点 · ' + LAYER_NAME[state.layer],
-      desc: c.desc || '暂无说明。',
+      cat: window.I18N ? window.I18N.t('pin.customCat').replace('{0}', window.I18N.t('layer.' + state.layer)) : ('自定义标点 · ' + LAYER_NAME[state.layer]),
+      desc: c.desc || (window.I18N ? window.I18N.t('card.noDesc') : '暂无说明。'),
       m: { id: c.id, x: c.x, y: c.y, layer: c.layer, name: c.name },
       isDone: false,
       custom: true,
@@ -835,7 +906,8 @@
     for (var i = 0; i < MARKERS.length; i++) {
       var m = MARKERS[i];
       if (m.layer !== state.layer) continue;
-      var hay = ((m.name || '') + ' ' + (m.full || '')).toLowerCase();
+      var enName = window.I18N ? window.I18N.nameOf(m) : '';
+      var hay = ((m.name || '') + ' ' + (m.full || '') + ' ' + enName).toLowerCase();
       if (hay.indexOf(ql) >= 0) {
         hits.push(m);
         if (hits.length >= 30) break;
@@ -868,7 +940,7 @@
     }
     var box = $('searchResult');
     if (!hits.length && !taskHits.length) {
-      box.innerHTML = '<div class="sr-empty">未找到相关标点或任务</div>';
+      box.innerHTML = '<div class="sr-empty">' + (window.I18N ? window.I18N.t('search.empty') : '未找到相关标点或任务') + '</div>';
       box.classList.remove('hidden');
       return;
     }
@@ -877,17 +949,17 @@
       var cat = catById(state.layer, m.cat);
       html += '<div class="sr-item" data-id="' + m.id + '">' +
         (cat && cat.icon ? '<img src="assets/icons/' + esc(cat.icon) + '" alt="">' : '') +
-        '<span class="sr-name">' + esc(m.name || m.full) + '</span>' +
-        '<span class="sr-cat">' + esc(cat ? cat.name : '') + '</span>' +
+        '<span class="sr-name">' + esc(window.I18N ? window.I18N.nameOf(m) : (m.name || m.full)) + '</span>' +
+        '<span class="sr-cat">' + esc(cat ? (window.I18N ? window.I18N.catOf(cat.name) : cat.name) : '') + '</span>' +
         '</div>';
     });
     taskHits.forEach(function (t) {
-      var tag = TD.layerName ? TD.layerName(t.layer) : '';
+      var tag = TD.layerName ? (window.I18N ? window.I18N.t('layer.' + (t.layer === 20 ? 'sky' : t.layer === 19 ? 'depths' : 'surface')) : TD.layerName(t.layer)) : '';
       /* V2.3.1：结果带档内序号（「#8 马儿去向何方」），#N 搜索多档命中时可区分 */
       var noPre = t.no ? '#' + t.no + ' ' : '';
       html += '<div class="sr-item" data-tk-search="' + esc(t.key || t.name) + '">' +
-        '<span class="sr-name">' + esc(noPre + t.name) + '</span>' +
-        '<span class="sr-cat sr-cat-task">' + esc(t.group || '任务') +
+        '<span class="sr-name">' + esc(noPre + (window.I18N ? (window.I18N.nameOf(t.name) || t.name) : t.name)) + '</span>' +
+        '<span class="sr-cat sr-cat-task">' + esc(window.I18N ? window.I18N.catOf(t.group || '任务') : (t.group || '任务')) +
         (tag ? ' · ' + esc(tag) : '') + '</span>' +
         '</div>';
     });
@@ -995,7 +1067,7 @@
         item.polys.forEach(function (poly) { grp.addLayer(L.polygon(poly, style)); });
       } else {
         var p = L.polygon(item.rings, style);
-        if (key === 'cave' && item.name) p.bindTooltip(item.name, { sticky: true, direction: 'top' });
+        if (key === 'cave' && item.name) { var cName = window.I18N ? (window.I18N.nameOf(item.name) || item.name) : item.name; p.bindTooltip(cName, { sticky: true, direction: 'top' }); }
         grp.addLayer(p);
       }
     });
@@ -1084,14 +1156,14 @@
   $('addMarkerBtn').addEventListener('click', function () {
     if (state.adding) { cancelAdding(); return; }
     state.adding = true;
-    this.textContent = '× 取消放置';
+    this.textContent = window.I18N && window.I18N.getLang() === 'en' ? '× Cancel' : '× 取消放置';
     map.getContainer().style.cursor = 'crosshair';
     toast('请在地图上点击要放置标点的位置');
   });
 
   function cancelAdding() {
     state.adding = false;
-    $('addMarkerBtn').textContent = '+ 新增标点';
+    $('addMarkerBtn').textContent = window.I18N ? window.I18N.t('bar.addPin') : '+ 新增标点';
     map.getContainer().style.cursor = '';
   }
 
@@ -1598,6 +1670,22 @@
           p.classList.toggle('on', !!SETTINGS.hideDoneTypes[t]);
         });
       }
+      var langWrap = $('setLangBtns');
+      if (langWrap && window.I18N) {
+        var curLang = window.I18N.getLang();
+        langWrap.querySelectorAll('.set-opt').forEach(function (b) {
+          b.classList.toggle('active', b.dataset.lang === curLang);
+        });
+      }
+      /* V2.6.0：移动轨迹三选项（「清除」是一次性动作，不保持选中态） */
+      var trailWrap = $('setTrailBtns');
+      if (trailWrap) {
+        var trailShow = SETTINGS.trailShow !== false;
+        trailWrap.querySelectorAll('.set-opt').forEach(function (b) {
+          if (b.dataset.v === 'clear') return;
+          b.classList.toggle('active', (b.dataset.v === 'show') === trailShow);
+        });
+      }
       // 动态防溢出：展开后若下边缘超出视口底栏，自动上移卡片预留可见空间
       if (!modal.classList.contains('hidden')) {
         var bottom = modal.offsetTop + modal.offsetHeight;
@@ -1646,6 +1734,43 @@
       alpha.value = Math.round(SETTINGS.dotAlpha * 100);
       SETTINGS.save();
     });
+
+    /* 界面语言切换按钮 */
+    var langWrap = $('setLangBtns');
+    if (langWrap) {
+      langWrap.querySelectorAll('.set-opt').forEach(function (b) {
+        b.addEventListener('click', function () {
+          var lang = b.dataset.lang;
+          if (window.I18N) {
+            window.I18N.setLang(lang);
+            syncUI();
+          }
+        });
+      });
+    }
+
+    /* V2.6.0：玩家移动轨迹 —— 显示 / 隐藏 / 清除（对齐 BOTWmap v1.7.2）
+       「清除」是一次性动作：清空已记录的轨迹点，并把显示状态复位为「显示」 */
+    var trailWrap = $('setTrailBtns');
+    if (trailWrap) {
+      trailWrap.querySelectorAll('.set-opt').forEach(function (b) {
+        b.addEventListener('click', function () {
+          var v = b.dataset.v;
+          if (v === 'clear') {
+            if (window.LIVENAV && window.LIVENAV.clearTrail) window.LIVENAV.clearTrail();
+            SETTINGS.trailShow = true;
+            SETTINGS.save();
+            syncUI();
+            toast(window.I18N && window.I18N.getLang() === 'en' ? 'Trail cleared' : '轨迹已清除');
+            return;
+          }
+          SETTINGS.trailShow = (v === 'show');
+          SETTINGS.save();
+          syncUI();
+          if (window.LIVENAV && window.LIVENAV.refreshTrail) window.LIVENAV.refreshTrail();
+        });
+      });
+    }
 
     /* 已完成标记：显示 / 隐藏 两按钮 */
     var doneWrap = $('setDoneModeBtns');
@@ -1722,32 +1847,73 @@
       state.saveVersion = saved.version || null;
     }
   }
-  /* 探索度：按存档同步结果显示各收集项完成百分比 */
-  var PROGRESS_ORDER = ['神庙', '鸟望台', '树根', '龙之泪', '克洛格', '双倍克洛格',
-    '魔犹伊遗失物', '贤者的遗志', '卡邦达立牌'];
+  /* ---------------- 探索度（V2.6.0 改版） ----------------
+   * 对齐 BOTWmap stats 面板：四大组 + 双列紧凑纯数字网格（去掉单薄进度条）。
+   * ★ 存档解析器 collect() 实际产出 20 类，旧版 PROGRESS_ORDER 只列了 9 类，
+   *   白白丢掉 6 类 Boss 讨伐 + 地洞/洞穴/井 + 残旧地图 + 设计图石板。
+   *   现在按「探索 / 任务 / 收集 / 讨伐」四组全部呈现，数据源不用新增。
+   */
+  var PROGRESS_GROUPS = [
+    { key: 'explore', cn: '探索', items: ['神庙', '树根', '鸟望台', '龙之泪', '地洞入口', '洞穴入口', '井'] },
+    { key: 'quest', cn: '任务', items: null },  // 四档由 TaskData 实时统计
+    { key: 'collect', cn: '收集', items: ['克洛格', '双倍克洛格', '魔犹伊遗失物', '贤者的遗志', '卡邦达立牌', '残旧的地图', '设计图石板'] },
+    { key: 'hunt', cn: '讨伐', items: ['独眼巨人', '岩石巨人', '莫尔德拉吉克', '方块魔像', '巨霸伽马', '古栗欧克'] }
+  ];
+
+  /* 任务四档完成数：全库统计（不分图层），完成态走 TaskDone（存档 + 手动都算） */
+  function questProgressPairs() {
+    var TD = window.TaskData, TDN = window.TaskDone;
+    if (!TD || !TD.tasks) return [];
+    var order = TD.catOrder || ['主剧情挑战', '情节挑战', '神庙挑战', '迷你挑战'];
+    return order.map(function (cat) {
+      var list = TD.tasks.filter(function (t) { return (t.group || '迷你挑战') === cat; });
+      var done = list.filter(function (t) { return TDN && TDN.isDone(t.key); }).length;
+      return [window.I18N ? window.I18N.groupOf(cat) : cat, done, list.length];
+    }).filter(function (r) { return r[2] > 0; });
+  }
+
+  function progressGrid(pairs) {
+    var rows = '';
+    pairs.forEach(function (r, i) {
+      rows += '<div class="prog-row' + (i % 2 === 1 ? ' col2' : '') + '">' +
+        '<span class="pr-name">' + esc(r[0]) + '</span>' +
+        '<span class="pr-val">' + r[1] + '/' + r[2] + '</span></div>';
+    });
+    return '<div class="prog-grid">' + rows + '</div>';
+  }
+
   function renderProgress() {
     var list = $('progressList');
     if (!list) return;
     if (!state.save) {
-      list.innerHTML = '<div class="progress-empty">加载存档后显示探索进度（神庙 / 树根 / 克洛格等收集百分比）</div>';
+      list.innerHTML = '<div class="progress-empty" data-i18n="progress.empty">' + (window.I18N ? window.I18N.t("progress.empty") : "加载存档后显示探索进度（神庙 / 树根 / 克洛格等收集百分比）") + '</div>';
       return;
     }
-    var html = '';
-    PROGRESS_ORDER.forEach(function (k) {
-      var s = state.save[k];
-      if (!s) return;
-      var pct = Math.round(s.done / s.total * 100);
-      html += '<div class="progress-item"><span class="pi-name">' + esc(k) + '</span>' +
-        '<span class="pi-bar"><i style="width:' + pct + '%"></i></span>' +
-        '<span class="pi-val">' + s.done + '/' + s.total + '</span></div>';
+    var html = '<div class="prog-synced">' + (window.I18N ? window.I18N.t('progress.synced', '存档已同步 ✓') : '存档已同步 ✓') + '</div>';
+    var any = false;
+    PROGRESS_GROUPS.forEach(function (g) {
+      var pairs = [];
+      if (g.items) {
+        g.items.forEach(function (k) {
+          var s = state.save[k];
+          if (!s || !s.total) return;
+          pairs.push([window.I18N ? window.I18N.catOf(k) : k, s.done, s.total]);
+        });
+      } else {
+        pairs = questProgressPairs();
+      }
+      if (!pairs.length) return;
+      any = true;
+      var title = window.I18N ? window.I18N.t('progress.group.' + g.key, g.cn) : g.cn;
+      html += '<div class="prog-group-title">' + esc(title) + '</div>' + progressGrid(pairs);
     });
-    list.innerHTML = html || '<div class="progress-empty">存档中无可同步类别</div>';
+    list.innerHTML = any ? html : ('<div class="progress-empty" data-i18n="progress.noData">' + (window.I18N ? window.I18N.t('progress.noData') : '存档中无可同步类别') + '</div>');
   }
 
   function applySaveSync(silent) {
     var btn = $('saveSyncBtn');
     serverSaveSlot = '';
-    btn.textContent = state.save ? '已同步 ✓ 重新加载' : '📂 从存档加载进度…';
+    btn.textContent = state.save ? (window.I18N ? window.I18N.t('save.synced') : '已同步 ✓ 重新加载') : (window.I18N ? window.I18N.t('save.loadBtn') : '📂 从存档加载进度…');
     btn.classList.toggle('busy', false);
     buildCatalogPanel();
     updateCount();
@@ -1885,6 +2051,36 @@
     $('panel').classList.add('collapsed');
   }
 
+  // 多语言 I18N 联动监听
+  if (window.I18N) {
+    window.I18N.onChange(function () {
+      buildCatalogPanel();
+      updateCount();
+      updateLayerCount();
+      renderProgress();
+      if (typeof buildMatPanel === 'function') buildMatPanel();
+      if (typeof renderAreas === 'function') renderAreas();
+      if (typeof renderMarkers === 'function') renderMarkers();
+      if (window.TaskPanel && typeof window.TaskPanel.refresh === 'function') {
+        window.TaskPanel.refresh();
+      }
+      if (window.TaskCard && window.TaskCard.current && window.TaskCard.current()) {
+        window.TaskCard.open(window.TaskCard.current());
+      }
+      if (state.current && state.current.cat) {
+        var cat = catById(state.layer, state.current.cat);
+        showExploreCard({
+          name: state.current.name || state.current.full,
+          cat: cat ? cat.name : '未知分类',
+          desc: state.current.desc,
+          m: state.current,
+          isDone: !!state.done[state.current.id]
+        });
+      }
+    });
+    window.I18N.updateDOM();
+  }
+
   setTileLayer(state.layer);
   selectDefault();
   buildCatalogPanel();
@@ -1896,6 +2092,18 @@
 
   // 存档同步按钮初始状态
   applySaveSync(true);
+
+  /* V2.6.0：探索度「任务」组依赖 task-data.js —— 它在 app.js 之后才加载，
+     所以初始化那次 renderProgress() 拿不到任务数据，任务组会整组缺失。
+     这里等任务数据就绪后补渲染一次（轮询上限 3s：任务板块若被下线也不会空转）。 */
+  (function waitTaskData(n) {
+    if (window.TaskData && window.TaskData.tasks && window.TaskData.tasks.length) {
+      renderProgress();
+      return;
+    }
+    if (n <= 0) return;
+    setTimeout(function () { waitTaskData(n - 1); }, 100);
+  })(30);
 
   /* ============================================================
      V1.8.0 M3：独立探索卡片 + 探索队列桥接（材料卡片体系保持原样）
@@ -2008,7 +2216,8 @@
       mk.setIcon(state.done[mid] ? doneIconFor(_c, m) : iconFor(_c, m));
     }
     mk.unbindTooltip();
-    mk.bindTooltip((state.done[mid] ? '✓ ' : '') + (m ? (m.name || m.full) : ''), {
+    var dispName = window.I18N ? window.I18N.nameOf(m) : (m ? (m.name || m.full) : '');
+    mk.bindTooltip((state.done[mid] ? '✓ ' : '') + dispName, {
       direction: 'top', offset: [0, -12],
       className: 'mk-label' + (state.done[mid] ? ' done-label' : '')
     });
@@ -2148,11 +2357,13 @@
     var m = opts.m || {};
     var ea = window.EXPLORE_AUTO;
     var autoOn = !!(ea && ea.isRunning() && ea.current() && ea.current().id === m.id);
-    $('ecChip').textContent = opts.cat || '';
-    $('ecName').textContent = opts.name;
+    $('ecChip').textContent = window.I18N ? window.I18N.catOf(opts.cat) : (opts.cat || '');
+    $('ecName').textContent = window.I18N ? window.I18N.nameOf(m.name ? m : opts.name) : opts.name;
     var ll = [m.x, m.y];
-    $('ecRegion').textContent = nearestRegion(ll) || '未知';
-    $('ecTower').textContent = nearestTower(ll) || '未知';
+    var rawReg = nearestRegion(ll) || '未知';
+    $('ecRegion').textContent = window.I18N ? window.I18N.regionOf(rawReg) : rawReg;
+    var rawTow = nearestTower(ll) || '未知';
+    $('ecTower').textContent = window.I18N ? window.I18N.towerOf(rawTow) : rawTow;
     /* ---------- 坐标：换算成游戏 UI 口径（2026-10-07，台账 P9.5）----------
      * 地图标点的 m.x / m.y 语义：m.y = X 东西（东为正）、m.x = Z 南北（北为负）。
      * 游戏 UI 显示的是「北为正」，所以第二位的符号要取反。
@@ -2189,11 +2400,36 @@
      * 非神庙（该字段为空）对应行自动隐藏，卡片保持原来的紧凑外观。 */
     var sec = parseDescSections(m.desc || '');
     $('ecTrialRow').style.display = sec.trial ? '' : 'none';
-    $('ecTrial').textContent = sec.trial;
-    $('ecPlaceRow').style.display = sec.place ? '' : 'none';
-    $('ecPlace').textContent = sec.place;
-    $('ecChestRow').style.display = sec.chest ? '' : 'none';
-    $('ecChest').textContent = sec.chest;
+    $('ecTrial').textContent = window.I18N ? window.I18N.trialOf(sec.trial) : sec.trial;
+    var isTower = m.name && m.name.indexOf('鸟望台') >= 0;
+    var isEn = window.I18N && window.I18N.getLang() === 'en';
+    var sg = (window.TOTK_SHRINES_GUIDE && (window.TOTK_SHRINES_GUIDE[m.id] || window.TOTK_SHRINES_GUIDE[m.name])) || null;
+    var sGuide = sg
+      ? {
+          trial: isEn ? (sg.trial_en || sg.trial_zh) : (sg.trial_zh || sec.trial),
+          place: isEn ? (sg.place_en || sg.place_zh) : (sg.place_zh || sec.place),
+          note: isEn ? (sg.note_en || sg.note_zh) : (sg.note_zh || sec.note),
+          chest: isEn ? (sg.chest_en || sg.chest_zh) : (sg.chest_zh || sec.chest)
+        }
+      : ((isEn && window.TOTK_SHRINES_GUIDE_EN)
+          ? (window.TOTK_SHRINES_GUIDE_EN[m.name] || window.TOTK_SHRINES_GUIDE_EN[m.id])
+          : null);
+
+    var noteRaw = (isTower && window.I18N)
+      ? window.I18N.towerNoteOf(m.name, sec.note)
+      : (sGuide && sGuide.note ? sGuide.note : sec.note);
+
+    var placeRaw = sGuide && sGuide.place
+      ? sGuide.place
+      : (window.I18N ? window.I18N.placeOf(sec.place) : sec.place);
+    $('ecPlaceRow').style.display = placeRaw ? '' : 'none';
+    $('ecPlace').textContent = placeRaw;
+
+    var chestRaw = sGuide && sGuide.chest
+      ? sGuide.chest
+      : (window.I18N ? (window.I18N.nameOf(sec.chest) || sec.chest) : sec.chest);
+    $('ecChestRow').style.display = chestRaw ? '' : 'none';
+    $('ecChest').textContent = chestRaw;
 
     /* ---------- V2.1 M6.6：防具专属区块 ----------
      * 只在点的是「防具」分类的标点时填充，其余情况置空（CSS :empty 隐藏）。
@@ -2218,50 +2454,57 @@
     }
     /* 「注意」较长，默认折叠 + 展开按钮（不足一屏时按钮不出现） */
     var noteRow = $('ecNoteRow'), noteText = $('ecNoteText'), noteMore = $('ecNoteMore');
-    noteRow.style.display = sec.note ? '' : 'none';
-    if (sec.note) {
-      var long = sec.note.length > NOTE_LIMIT;
-      noteText.textContent = long ? sec.note.slice(0, NOTE_LIMIT) + '…' : sec.note;
+    noteRow.style.display = noteRaw ? '' : 'none';
+    if (noteRaw) {
+      noteText._fullText = noteRaw;
+      var long = noteRaw.length > NOTE_LIMIT;
+      noteText.textContent = long ? noteRaw.slice(0, NOTE_LIMIT) + '…' : noteRaw;
       noteRow.classList.remove('expanded');
       noteMore.style.display = long ? '' : 'none';
       noteText.classList.toggle('clamped', long);
-      noteMore.textContent = '展开';
+      noteMore.textContent = window.I18N ? window.I18N.t('card.expand') : '展开';
     }
+    var isEn = window.I18N && window.I18N.getLang() === 'en';
     var btnNav = $('ecNav'), btnAuto = $('ecAuto'), btnDone = $('ecDone');
-    btnNav.textContent = '导航';
+    btnNav.textContent = window.I18N ? window.I18N.t('card.nav') : '导航';
     if (window.LIVENAV && window.LIVENAV.currentTarget) {
       var _cur = window.LIVENAV.currentTarget();
-      if (_cur && _cur.x === m.x && _cur.y === m.y) btnNav.textContent = '停止导航';
+      if (_cur && _cur.x === m.x && _cur.y === m.y) btnNav.textContent = window.I18N ? window.I18N.t('card.stopNav') : '停止导航';
     }
     btnNav.onclick = function () {
       liveToggleNav({ name: m.name || '目标', x: m.x, y: m.y, layer: m.layer, type: opts.cat });
     };
-    btnAuto.textContent = autoOn ? '停止自动导航' : '自动导航';
+    btnAuto.textContent = autoOn ? (window.I18N ? window.I18N.t('card.stopAuto') : '停止自动导航') : (window.I18N ? window.I18N.t('card.autoNav') : '自动导航');
     btnAuto.onclick = function () {
       if (autoOn) { if (ea) ea.stop(); }
       else if (ea) { ea.start(m); }
       showExploreCard({
         name: opts.name, cat: opts.cat, desc: opts.desc, m: m,
-        isDone: !!state.done[m.id], custom: opts.custom, evt: null
+        isDone: !!state.done[m.korokStartId || m.id], custom: opts.custom, evt: null
       });
     };
     if (opts.custom) {
       btnDone.style.display = 'none';
     } else {
       btnDone.style.display = '';
-      btnDone.textContent = opts.isDone ? '取消完成' : '标记完成';
+      var isEn = window.I18N && window.I18N.getLang() === 'en';
+    btnDone.textContent = opts.isDone ? (isEn ? 'Mark Undone' : '取消完成') : (isEn ? 'Mark Done' : '标记完成');
       btnDone.className = 'btn primary' + (opts.isDone ? ' done' : '');
       btnDone.onclick = function () {
         if (ea && ea.isRunning() && ea.current() && ea.current().id === m.id) { ea.completeCurrent(); return; }
-        if (state.done[m.id]) delete state.done[m.id]; else state.done[m.id] = true;
+        /* V2.6.0：营地（朋友帐篷）不是收集品，它的完成态挂在起点呀哈哈上
+           （markers.js 里营地条目带 korokStartId），否则勾营地不会让运送轨迹变灰 */
+        var doneId = m.korokStartId || m.id;
+        if (state.done[doneId]) delete state.done[doneId]; else state.done[doneId] = true;
         saveDone();
-        applyDoneToMarker(m.id);
+        applyDoneToMarker(doneId);
         buildCatalogPanel();
         updateCount();
         if (state.filter !== 'all') renderMarkers();
+        if (window.KorokLayer && window.KorokLayer.render) window.KorokLayer.render();
         showExploreCard({
           name: opts.name, cat: opts.cat, desc: opts.desc, m: m,
-          isDone: !!state.done[m.id], custom: opts.custom, evt: null
+          isDone: !!state.done[doneId], custom: opts.custom, evt: null
         });
       };
     }
@@ -2281,7 +2524,11 @@
     var open = !row.classList.contains('expanded');
     row.classList.toggle('expanded', open);
     txt.classList.toggle('clamped', !open);
-    this.textContent = open ? '收起' : '展开';
+    var isEn = window.I18N && window.I18N.getLang() === 'en';
+    this.textContent = open ? (isEn ? 'Collapse' : '收起') : (isEn ? 'Expand' : '展开');
+    if (txt._fullText) {
+      txt.textContent = open ? txt._fullText : (txt._fullText.slice(0, NOTE_LIMIT) + '…');
+    }
   });
   /* V2.0.3 复制标点名称（查攻略用）。名称取 full（含「神庙-」前缀）优先，
      避免与地图上其他分类重名；自定义标点无 full 时用 name。 */
@@ -2317,7 +2564,7 @@
         cat: (catById(state.layer, m.cat) || {}).name || '未知分类',
         desc: m.desc || '',
         m: m,
-        isDone: !!state.done[m.id]
+        isDone: !!state.done[m.korokStartId || m.id]
       });
     },
     applyProgressDone: applyProgressDone,
@@ -2440,10 +2687,11 @@
     '精力独角仙','潜行田螺','静静萤火虫','金苹果','苹果','精力鲈鱼','大剑鲤鱼','铠甲鲤鱼',
     '大剑香蕉','宁静公主','远昔骨舌鱼'];
   function usageFor(m) {
+    var isEn = window.I18N && window.I18N.getLang() === 'en';
     var tags = [];
-    if (UPGRADE_NAMES.indexOf(m.cn) >= 0) tags.push('升级素材');
-    if (m.cat === '矿岩') tags.push('强化材料');
-    else tags.push('料理材料');
+    if (UPGRADE_NAMES.indexOf(m.cn) >= 0) tags.push(isEn ? 'Upgrade Material' : '升级素材');
+    if (m.cat === '矿岩') tags.push(isEn ? 'Enhancement' : '强化材料');
+    else tags.push(isEn ? 'Cooking Ingredient' : '料理材料');
     return tags.join(' · ');
   }
   /* 区域：最近地区标注点（无官方边界，近似归属，够用） */
@@ -2483,19 +2731,19 @@
     var MA = window.MAT_AUTO;
     if (MA && MA.isRunning() && MA.isCurrent(m.id, idx)) colBtn = MA.isArrived() ? '已收集，继续' : '停止收集';
     showDetail({
-      name: m.cn,
-      cat: m.cat + ' · ' + LAYER_NAME[state.layer],
+      name: window.I18N ? (window.I18N.nameOf(m.cn) || m.cn) : m.cn,
+      cat: window.I18N ? (window.I18N.catOf(m.cat) + ' · ' + window.I18N.t('layer.' + state.layer)) : (m.cat + ' · ' + LAYER_NAME[state.layer]),
       desc: '',
       img: 'assets/materials/' + m.entry + '.png',
       region: nearestRegion(ll),
       coord: 'X ' + gx + ' · Z ' + gz,
-      posText: '第 ' + (idx + 1) + ' / ' + total + ' 个位置',
+      posText: window.I18N ? window.I18N.t('card.spotNum').replace('{0}', idx + 1).replace('{1}', total) : ('第 ' + (idx + 1) + ' / ' + total + ' 个位置'),
       usage: usageFor(m),
       isDone: isMatDone(m.id, idx),
       collected: isCollected(m.id, idx),
       onDone: function () { toggleMatDone(m.id, idx); showMatDetail(m, ll, idx, evt); },
       onNav: function () {
-        liveToggleNav({ name: m.cn, x: ll[0], y: ll[1], layer: state.layer, type: m.cat });
+        liveToggleNav({ name: window.I18N ? (window.I18N.nameOf(m.cn) || m.cn) : m.cn, x: ll[0], y: ll[1], layer: state.layer, type: m.cat });
         toast('第 ' + (idx + 1) + '/' + total + ' 个位置');
       },
       navTarget: { x: ll[0], y: ll[1] },
@@ -2562,7 +2810,8 @@
           (function (ll3, mid2, id2) {
             var mk = L.marker(ll3, { icon: icon2, riseOnHover: true, bubblingMouseEvents: false });
             if (isCollected(mid2, id2) || isMatDone(mid2, id2)) mk.setOpacity(0.38);
-            mk.bindTooltip(m.cn, { direction: 'top', offset: [0, -lsize / 2 - 4], className: 'mk-label' });
+            var mCn = window.I18N ? (window.I18N.nameOf(m.cn) || m.cn) : m.cn;
+            mk.bindTooltip(mCn, { direction: 'top', offset: [0, -lsize / 2 - 4], className: 'mk-label' });
             mk.on('click', function (e) { showMatDetail(m, ll3, id2, e); });
             grp.addLayer(mk);
           })(ll2, mid, pi3);
@@ -2608,7 +2857,8 @@
             (function (ll3, mid2, id2) {
               var mk2 = L.marker(ll3, { icon: licon, riseOnHover: true, bubblingMouseEvents: false });
               if (isCollected(mid2, id2) || isMatDone(mid2, id2)) mk2.setOpacity(0.38);
-              mk2.bindTooltip(m.cn, { direction: 'top', offset: [0, -lsize / 2 - 4], className: 'mk-label' });
+              var mCn = window.I18N ? (window.I18N.nameOf(m.cn) || m.cn) : m.cn;
+              mk2.bindTooltip(mCn, { direction: 'top', offset: [0, -lsize / 2 - 4], className: 'mk-label' });
               mk2.on('click', function (e) { showMatDetail(m, ll3, id2, e); });
               grp.addLayer(mk2);
             })(llf, mid, lf.id);
@@ -2623,7 +2873,9 @@
         });
         (function (ll, sz) {
           var mk = L.marker(ll, { icon: icon, riseOnHover: true, bubblingMouseEvents: false });
-          mk.bindTooltip(m.cn + ' · ' + props.point_count + '点', { direction: 'top', offset: [0, -sz / 2 - 4] });
+          var mCn = window.I18N ? (window.I18N.nameOf(m.cn) || m.cn) : m.cn;
+          var isEn = window.I18N && window.I18N.getLang() === 'en';
+          mk.bindTooltip(mCn + ' · ' + props.point_count + (isEn ? ' pts' : '点'), { direction: 'top', offset: [0, -sz / 2 - 4] });
           mk.on('click', function () {
             /* V1.9.0: z7 已无法再放大 → 展开聚合为单点；z<7 仍逐级放大 */
             if (map.getZoom() >= 7) expandMatCluster(mid, c.id);
@@ -2641,7 +2893,8 @@
         (function (ll, mid, idx) {
           var mk = L.marker(ll, { icon: icon2, riseOnHover: true, bubblingMouseEvents: false });
           if (isCollected(mid, idx) || isMatDone(mid, idx)) mk.setOpacity(0.38);
-          mk.bindTooltip(m.cn, { direction: 'top', offset: [0, -lsize / 2 - 4], className: 'mk-label' });
+          var mCn = window.I18N ? (window.I18N.nameOf(m.cn) || m.cn) : m.cn;
+          mk.bindTooltip(mCn, { direction: 'top', offset: [0, -lsize / 2 - 4], className: 'mk-label' });
           mk.on('click', function (e) {
             showMatDetail(m, ll, idx, e);
             // Sidebar linkage: expand cat, scroll to item, flash
@@ -2702,7 +2955,7 @@
     });
     html += '<div class="mat-fav-filter' + (state.matFavOnly ? ' on' : '') + '" id="matFavFilter">';
     html += '<span class="mat-fav-star">' + (state.matFavOnly ? '\u2605' : '\u2606') + '</span>';
-    html += '<span>只看收藏 (' + favCount + ')</span>';
+    html += '<span>' + (window.I18N ? window.I18N.t('mat.favOnly').replace('{0}', favCount) : ('只看收藏 (' + favCount + ')')) + '</span>';
     html += '</div>';
 
     MAT_CAT_ORDER.forEach(function (cat) {
@@ -2713,8 +2966,8 @@
       html += '<div class="mat-cat' + collapsed + '" data-cat="' + esc(cat) + '">';
       html += '<div class="mat-cat-head">';
       html += '<span class="mat-cat-arrow">▼</span>';
-      html += '<span class="mat-cat-name">' + esc(cat) + '</span>';
-      html += '<span class="mat-cat-count">' + items.length + '种 · ' + layerTotal + '点</span>';
+      html += '<span class="mat-cat-name">' + esc(window.I18N ? window.I18N.catOf(cat) : cat) + '</span>';
+      html += '<span class="mat-cat-count">' + (window.I18N ? window.I18N.t('mat.countStat').replace('{0}', items.length).replace('{1}', layerTotal) : (items.length + '种 · ' + layerTotal + '点')) + '</span>';
       html += '</div><div class="mat-cat-body mat-grid">';
       items.forEach(function (it) {
         var m = it.m;
@@ -2722,13 +2975,13 @@
         var fav = state.matFav[m.id] ? ' fav' : '';
         html += '<div class="mat-item' + on + fav + '" data-mat="' + m.id + '">';
         html += '<span class="mat-star" data-fav="' + m.id + '">' + (state.matFav[m.id] ? '\u2605' : '\u2606') + '</span>';
-        html += '<span class="mat-item-name">' + esc(m.cn) + '</span>';
+        html += '<span class="mat-item-name">' + esc(window.I18N ? (window.I18N.nameOf(m.cn) || m.cn) : m.cn) + '</span>';
         html += '<span class="mat-item-count">' + it.n + '</span>';
         html += '</div>';
       });
       html += '</div></div>';
     });
-    list.innerHTML = html || '<div class="sr-empty">当前图层暂无材料</div>';
+    list.innerHTML = html || ('<div class="sr-empty">' + (window.I18N ? window.I18N.t('mat.empty') : '当前图层暂无材料') + '</div>');
 
     var ff = $('matFavFilter');
     if (ff) ff.addEventListener('click', function () {
@@ -2782,7 +3035,11 @@
       total++;
       if (state.matSelected[m.id]) n++;
     });
-    el.textContent = n + '/' + total + ' 材料';
+    if (window.I18N) {
+      el.textContent = window.I18N.t('count.materials').replace('{0}', n).replace('{1}', total);
+    } else {
+      el.textContent = n + '/' + total + ' 材料';
+    }
   }
 
   function setTab(tab) {
@@ -2895,7 +3152,11 @@
     var cats = catsOfLayer(state.layer);
     var n = 0;
     cats.forEach(function (c) { if (state.selected[c.id]) n++; });
-    el.textContent = n + '/' + cats.length + ' 图层';
+    if (window.I18N) {
+      el.textContent = window.I18N.t('count.layers').replace('{0}', n).replace('{1}', cats.length);
+    } else {
+      el.textContent = n + '/' + cats.length + ' 图层';
+    }
   }
   var ltAll = $('ltAll');
   var ltClear = $('ltClear');

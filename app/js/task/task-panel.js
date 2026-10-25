@@ -208,23 +208,29 @@
      * ★ 全库数是**去重后的任务总数**（253），不是各层相加——
      *   跨层任务（2026-10-07 起11 条）在两层都出现，相加会得到 263。
      */
-    var layerCn = { 18: '地表', 19: '地底', 20: '天空' }[curLayer] || '';
+    var isEn = window.I18N && window.I18N.getLang() === 'en';
+    var layerCn = isEn
+      ? ({ 18: 'Surface', 19: 'Depths', 20: 'Sky' }[curLayer] || '')
+      : ({ 18: '地表', 19: '地底', 20: '天空' }[curLayer] || '');
     var allTotal = 0;
     for (var li = 18; li <= 20; li++) {
       allTotal += D.totalByLayer ? D.totalByLayer(li) : 0;
     }
-    var html = '<div class="group-title tk-group">任务·' + esc(layerCn) +
+    var groupHeader = isEn ? ('Quests · ' + layerCn) : ('任务·' + layerCn);
+    var allText = isEn ? ('All ' + D.totalAllLayers()) : ('全库 ' + D.totalAllLayers());
+    var html = '<div class="group-title tk-group">' + esc(groupHeader) +
       '<span class="tk-count">' + totalDone + '/' + total +
       (allTotal && allTotal !== total
-        ? '<span class="tk-count-all">全库 ' + D.totalAllLayers() + '</span>' : '') +
+        ? '<span class="tk-count-all">' + esc(allText) + '</span>' : '') +
       '</span></div>';
     html += '<div class="cat-grid tk-grid">';
     stats.forEach(function (s) {
       if (s.count <= 0) return;
       var on = isOn(s.cat) ? ' active' : '';
+      var catName = isEn ? (window.I18N.catOf(s.name) || s.name) : s.name;
       html += '<div class="cat-item tk-cat' + on + '" data-tkcat="' + esc(s.cat) + '">' +
         '<img src="assets/icons/' + taskIcon(s.cat) + '" alt="">' +
-        '<span class="cat-name">' + esc(s.name) + '</span>' +
+        '<span class="cat-name">' + esc(catName) + '</span>' +
         '<span class="cat-count">' + s.count + '</span>' +
         '</div>';
     });
@@ -341,11 +347,14 @@
     var checkHtml = isDone ? '<span class="mk-done-check">✓</span>' : '';
     var sz = calcTaskSize();
     var half = Math.round(sz / 2);
+    var isEn = window.I18N && window.I18N.getLang() === 'en';
+    var qg = (window.TOTK_QUESTS_GUIDE && window.TOTK_QUESTS_GUIDE[t.key]) || {};
+    var tName = isEn ? (qg.name_en || (window.I18N ? window.I18N.nameOf(t.name) : t.name)) : (qg.name_zh || t.name);
     return L.divIcon({
       className: 'tk-dot-wrap',
       /* data-tkkey 给验收脚本和流程线做稳定标识 */
       html: '<div class="' + cls + '" data-tkkey="' + esc(t.key || '') + '" title="' +
-            esc(t.name) + '" style="width:' + sz + 'px;height:' + sz + 'px;"><img src="assets/icons/' + iconFile + '" style="width:' + sz + 'px;height:' + sz + 'px;" alt="">' + checkHtml + '</div>',
+            esc(tName) + '" style="width:' + sz + 'px;height:' + sz + 'px;"><img src="assets/icons/' + iconFile + '" style="width:' + sz + 'px;height:' + sz + 'px;" alt="">' + checkHtml + '</div>',
       iconSize: [sz, sz],
       iconAnchor: [half, half]
     });
@@ -385,9 +394,14 @@
        * ★ Leaflet latlng = (gz, gx)，见 app.js 坐标系注释。 */
       var pt = pointInLayer(t, curLayer);
       if (!pt) { pt = { gz: t.gz, gx: t.gx }; }
+      var isEn = window.I18N && window.I18N.getLang() === 'en';
+      var qg = (window.TOTK_QUESTS_GUIDE && window.TOTK_QUESTS_GUIDE[t.key]) || {};
+      var tName = isEn ? (qg.name_en || (window.I18N ? window.I18N.nameOf(t.name) : t.name)) : (qg.name_zh || t.name);
+      var gName = isEn ? (window.I18N ? window.I18N.catOf(t.group) : t.group) : (t.group || '');
+      var tipTitle = (isDone ? '✓ ' : '') + (t.no ? '#' + t.no + ' ' + gName + ' ' : '') + tName;
       var m = L.marker([pt.gz, pt.gx], {
         icon: taskIconDot(t),
-        title: t.name,
+        title: tipTitle,
         riseOnHover: true,
         /* ★★ zIndexOffset 900：必须压过流程线节点（task-flow.js 用 600/700）。
          *
@@ -404,9 +418,12 @@
       /* 已完成加✓ 前缀，与探索侧 tooltip 口径一致。
          ★ V2.3.3：tooltip 简化为「#8 迷你挑战 未知的天空巨人」——
          档内序号 + 档名 + 任务名（不再显示序号/总数）。 */
+      var isEn = window.I18N && window.I18N.getLang() === 'en';
+      var tName = isEn ? (window.I18N.nameOf(t.name) || t.name) : t.name;
+      var gName = isEn ? (window.I18N.catOf(t.group) || t.group) : (t.group || '');
       var tip = (isDone ? '✓ ' : '') +
-        (t.no ? '#' + t.no + ' ' + esc(t.group || '') + ' ' : '') +
-        t.name;
+        (t.no ? '#' + t.no + ' ' + esc(gName) + ' ' : '') +
+        tName;
       m.bindTooltip(tip, {
         direction: 'top', offset: [0, -8],
         className: 'mk-label tk-tip' + (isDone ? ' done-label' : '')
@@ -494,7 +511,10 @@
     global.TaskPanel = {
       render: render,
       isOn: isOn,
-      refresh: tick,
+      refresh: function () {
+        tick();
+        if (ready) render();
+      },
       stats: function () { return D.statsByLayer(curLayer); },
       /* ---------- 给task-flow.js 的追踪光环用 ----------
        * 需求：追踪某任务时，给它的地图图标加一个脉动光环 class。

@@ -20,6 +20,8 @@
   var curLayer = 18;
   var ready = false;
   var lastSig = '';
+  /* 营地图标句柄（V2.6.0）：供 zoomend 就地更新尺寸，避免缩放期间重建图层导致连线脱节 */
+  var campMks = [];
 
   /* ---------- 工具函数 ---------- */
   function currentLayer() {
@@ -74,6 +76,7 @@
   function render() {
     if (!map) return;
     if (group) { map.removeLayer(group); group = null; }
+    campMks.length = 0;
     if (!isOn() || !PATHS.length) return;
 
     var g = L.layerGroup();
@@ -119,7 +122,8 @@
         interactive: true
       }).addTo(g);
 
-      line.bindTooltip((isDone ? '✓ ' : '') + '运送呀哈哈 · 直线距离约 ' + p.dist + 'm', {
+      var isEn = window.I18N && window.I18N.getLang() === 'en';
+      line.bindTooltip((isDone ? '✓ ' : '') + (isEn ? ('Carry Korok · Distance ~' + p.dist + 'm') : ('运送呀哈哈 · 直线距离约 ' + p.dist + 'm')), {
         direction: 'top',
         className: 'mk-label' + (isDone ? ' done-label' : '')
       });
@@ -135,26 +139,35 @@
 
       // 3. 终点：朋友营地标记
       var goalPt = [p.goal[0], p.goal[1]];
+      /* zIndexOffset：营地常与神庙/树根等地标紧邻（如卡米诸纳神庙旁仅 38m），
+         默认按纬度排序会被更大的地标图标压住看不见 —— 抬高层级保证可点 */
       var camp = L.marker(goalPt, {
         icon: campIcon(isDone),
         interactive: true,
-        riseOnHover: true
+        riseOnHover: true,
+        zIndexOffset: 800
       }).addTo(g);
 
-      camp.bindTooltip((isDone ? '✓ ' : '') + '朋友的营地（运送终点）', {
+      var isEn = window.I18N && window.I18N.getLang() === 'en';
+      camp.bindTooltip((isDone ? '✓ ' : '') + (isEn ? "Friend's Camp (Destination)" : '朋友的营地（运送终点）'), {
         direction: 'top',
         offset: [0, -12],
         className: 'mk-label' + (isDone ? ' done-label' : '')
       });
 
-      (function (pid) {
+      campMks.push({ mk: camp, done: isDone });
+
+      /* V2.6.0 甲方案：营地有自己的正式标点（markers.js 里 cat 131/161，由
+         tools/build_korok_camps.py 生成），点击直接开营地卡片 —— 不再借用起点 id
+         （旧行为会把起点坐标显示在营地卡片上，与实际落点矛盾）。 */
+      (function (campId) {
         camp.on('click', function (e) {
-          var m = findMarkerById(pid);
+          var m = findMarkerById(campId);
           if (m && window.TOTK && window.TOTK.openDetail) {
             window.TOTK.openDetail(m, e);
           }
         });
-      })(p.id);
+      })(p.campId || p.id);
     });
 
     g.addTo(map);
@@ -169,8 +182,15 @@
     var settings = window.TOTK_SETTINGS || {};
     var doneMode = settings.doneMode || 'default';
     var hideKorok = (settings.hideDoneTypes && settings.hideDoneTypes.korok !== false) ? '1' : '0';
-    var z = map ? map.getZoom() : 5;
-    return curLayer + '|' + (isOn() ? '1' : '0') + '|' + filter + '|' + doneCount + '|' + doneMode + '|' + hideKorok + '|' + z;
+    /* V2.6.0：zoom 不再进 signature —— 缩放动画期间 150ms 轮询会判定"变了"而销毁重建图层，
+       连线因此在动画途中断开、与端点脱节。尺寸改由 zoomend 就地更新（见 updateSizes）。 */
+    return curLayer + '|' + (isOn() ? '1' : '0') + '|' + filter + '|' + doneCount + '|' + doneMode + '|' + hideKorok;
+  }
+
+  /* 缩放结束后就地换图标（尺寸随 3-Tier 分级变化），不重建图层 */
+  function updateSizes() {
+    if (!ready || !group) return;
+    campMks.forEach(function (o) { o.mk.setIcon(campIcon(o.done)); });
   }
 
   function tick() {
@@ -206,6 +226,7 @@
     observeLayer();
     setInterval(tick, 150);
     render();
+    map.on('zoomend', updateSizes);
     ready = true;
 
     window.KorokPathLayer = {
