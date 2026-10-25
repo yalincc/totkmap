@@ -85,6 +85,8 @@ certs/
 !**/README.en.md
 !CHANGELOG.md
 !**/CHANGELOG.md
+!xnavi/GUIDE.md
+!xnavi/TROUBLESHOOTING.md
 
 # GUI 编译产物与临时文件
 xnavi-gui/xnavi-gui.exe
