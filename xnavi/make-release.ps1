@@ -45,7 +45,7 @@ Get-ChildItem $rel -Filter *.log -File -ErrorAction SilentlyContinue | ForEach-O
 }
 
 # 3) exes
-Copy-Item (Join-Path $root "xnavi\xnavi.exe")                  $rel -Force
+Copy-Item (Join-Path $root "xnavi\totknavi-core.exe")                  $rel -Force
 Copy-Item (Join-Path $root "xnavi-gui\build\bin\TOTKnavi.exe") $rel -Force
 
 # 4) certs (V2.1.1 phone anti-sleep Https): ship rootCA.pem + gen-cert.ps1 + README.md

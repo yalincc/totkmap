@@ -146,6 +146,9 @@ func formatDestName(pos [3]float32) string {
 	if name, _ := nearestShrine(pos); name != "" {
 		return "神庙: " + name
 	}
+	if name, _ := nearestTower(pos); name != "" {
+		return "鸟望台: " + name
+	}
 	switch layerOf(pos[0], pos[1], pos[2]) {
 	case 20:
 		return "天空"

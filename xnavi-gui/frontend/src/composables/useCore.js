@@ -52,7 +52,7 @@ export const target = ref(null)
 export const progressData = ref({})
 
 // ---- 配置 / 环境 ----
-export const cfg = reactive({ saveDirRyujinx: '', saveDirEden: '', emu: 'auto', tls: false })
+export const cfg = reactive({ saveDirRyujinx: '', saveDirEden: '', emu: 'auto', tls: false, autoOpenMap: true })
 export const envDetect = reactive({ save: false, saveRyu: false, saveEden: false })
 export const statusMapUrl = ref('')
 
@@ -138,6 +138,31 @@ export function openMap() { rt.BrowserOpenURL(buildMapUrl()) }
 // 在系统默认浏览器打开外部链接（wails runtime，避免 webview 内导航）
 export function openExternal(url) { rt.BrowserOpenURL(url) }
 
+// ---- 存档时间戳与相对时间 ----
+export const saveMtime = ref(0)
+export const nowSec = ref(Math.floor(Date.now() / 1000))
+setInterval(() => {
+  nowSec.value = Math.floor(Date.now() / 1000)
+}, 1000)
+
+export const saveTimeAgoText = computed(() => {
+  if (!saveMtime.value || saveMtime.value <= 0) return ''
+  const diff = Math.max(0, nowSec.value - saveMtime.value)
+  if (diff < 60) return t('locate.justNow')
+  const mins = Math.floor(diff / 60)
+  if (mins < 60) return t('locate.minsAgo', { m: mins })
+  const hours = Math.floor(mins / 60)
+  return t('locate.hoursAgo', { h: hours })
+})
+
+export const saveTimeAgoClass = computed(() => {
+  if (!saveMtime.value || saveMtime.value <= 0) return 'text-slate-400'
+  const diff = Math.max(0, nowSec.value - saveMtime.value)
+  if (diff < 120) return 'text-emerald-400 font-semibold'
+  if (diff < 3600) return 'text-slate-300'
+  return 'text-amber-400'
+})
+
 // ---- 日志 ----
 export const filteredLogs = computed(() => {
   const kw = logFilter.value.trim().toLowerCase()
@@ -150,12 +175,77 @@ function pushLogs(lines) {
     const m = l.match(/^(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3}) ?(.*)$/)
     const time = m ? m[1].slice(11) : new Date().toTimeString().slice(0, 8)
     let text = m ? m[2] : l
-    let level = 'info', color = 'text-slate-400', levelColor = 'text-sky-500'
-    if (/ERROR|FAILED|panic/i.test(text)) { level = 'error'; color = 'text-red-400'; levelColor = 'text-red-500' }
-    else if (/!!|占用/i.test(text)) { level = 'warn'; color = 'text-amber-400'; levelColor = 'text-amber-500' }
-    else if (/confirmed live|confirmed\]/.test(text)) { level = 'ok'; color = 'text-emerald-400'; levelColor = 'text-emerald-500' }
-    else if (/\[sm\]/i.test(text)) { level = 'info'; color = 'text-sky-400' }
-    text = text.replace(/^\[sm\]\s*/, '')
+
+    // 提取行首的 [tag] 真实标签
+    const tagMatch = text.match(/^\s*\[([a-zA-Z0-9_\-]+)\]\s*(.*)$/)
+    let rawTag = ''
+    if (tagMatch) {
+      rawTag = tagMatch[1].toLowerCase()
+      text = tagMatch[2]
+    }
+
+    let level = rawTag ? rawTag.toUpperCase() : 'INFO'
+    let color = 'text-slate-400'
+    let levelColor = 'text-slate-400'
+
+    if (rawTag === 'lock' || /confirmed live|confirmed!|fully locked/i.test(text)) {
+      level = 'LOCK'
+      color = 'text-emerald-300'
+      levelColor = 'text-emerald-400 font-semibold'
+    } else if (rawTag === 'shrine') {
+      level = 'SHRINE'
+      color = 'text-teal-300'
+      levelColor = 'text-teal-400 font-semibold'
+    } else if (rawTag === 'warp') {
+      level = 'WARP'
+      color = 'text-cyan-300'
+      levelColor = 'text-cyan-400 font-semibold'
+    } else if (rawTag === 'scan') {
+      level = 'SCAN'
+      color = 'text-sky-300'
+      levelColor = 'text-sky-400'
+    } else if (rawTag === 'verify') {
+      level = 'VERIFY'
+      color = 'text-amber-300'
+      levelColor = 'text-amber-400 font-semibold'
+    } else if (rawTag === 'hold') {
+      level = 'HOLD'
+      color = 'text-slate-300'
+      levelColor = 'text-blue-400'
+    } else if (rawTag === 'pipeline') {
+      level = 'PIPELINE'
+      color = 'text-slate-300'
+      levelColor = 'text-purple-400'
+    } else if (rawTag === 'platform') {
+      level = 'PLATFORM'
+      color = 'text-slate-300'
+      levelColor = 'text-indigo-400'
+    } else if (rawTag === 'progress') {
+      level = 'PROGRESS'
+      color = 'text-slate-300'
+      levelColor = 'text-emerald-500'
+    } else if (rawTag === 'coords') {
+      level = 'COORDS'
+      color = 'text-teal-300'
+      levelColor = 'text-teal-400'
+    } else if (rawTag === 'mount') {
+      level = 'MOUNT'
+      color = 'text-amber-300'
+      levelColor = 'text-amber-400'
+    } else if (rawTag === 'lost' || /ERROR|FAILED|panic/i.test(text)) {
+      level = rawTag ? rawTag.toUpperCase() : 'ERROR'
+      color = 'text-rose-400'
+      levelColor = 'text-rose-400 font-bold'
+    } else if (/!!|占用/i.test(text)) {
+      level = rawTag ? rawTag.toUpperCase() : 'WARN'
+      color = 'text-amber-400'
+      levelColor = 'text-amber-400 font-semibold'
+    } else if (rawTag === 'sm') {
+      level = 'SM'
+      color = 'text-slate-400'
+      levelColor = 'text-slate-500'
+    }
+
     return { time, text, level, color, levelColor }
   })
   logs.value = logs.value.concat(items)
@@ -218,11 +308,41 @@ export function coordsErrorText(r) {
   return t('cal.missDefault')
 }
 export async function saveSettings() {
-  await api.SaveConfig({ saveDirRyujinx: cfg.saveDirRyujinx, saveDirEden: cfg.saveDirEden, emu: cfg.emu, tls: cfg.tls })
+  await api.SaveConfig({ saveDirRyujinx: cfg.saveDirRyujinx, saveDirEden: cfg.saveDirEden, emu: cfg.emu, tls: cfg.tls, autoOpenMap: cfg.autoOpenMap !== false })
+  await detectSave()
+}
+export async function pickSaveFile() {
+  const f = await api.PickSaveFile()
+  if (f) {
+    await api.ApplySavePath(f)
+    await detectSave()
+  }
+}
+
+export async function pickSaveDir() {
+  const d = await api.PickDir("选择存档所在目录")
+  if (d) {
+    await api.ApplySavePath(d)
+    await detectSave()
+  }
+}
+
+export async function doOpenSave() {
+  return await api.OpenSaveDir()
+}
+
+export async function resetSaveDetection() {
+  const msg = await api.ResetSaveDetection()
+  await detectSave()
+  return msg
+}
+
+export async function detectSave() {
   const det = await api.EnvDetect()
   envDetect.save = !!det.save
   envDetect.saveRyu = !!det.saveRyu
   envDetect.saveEden = !!det.saveEden
+  return det
 }
 export async function openLogDir() { await api.OpenLogDir() }
 export async function exportDiag() { await api.ExportDiagnostics() }
@@ -251,7 +371,19 @@ function applyStatus(st) {
   pos.ageSec = st.ageSec || 0
   pos.pid = st.pid || 0
   if (st.target !== undefined) target.value = st.target
+  if (st.saveMtime) {
+    saveMtime.value = st.saveMtime
+  } else if (st.progress && st.progress.mtime) {
+    saveMtime.value = st.progress.mtime
+  }
   if (st.progress && st.progress.counts) progressData.value = st.progress
+  if (st.save) {
+    if (!progressData.value) progressData.value = {}
+    progressData.value.save = st.save
+  } else if (st.progress && st.progress.save) {
+    if (!progressData.value) progressData.value = {}
+    progressData.value.save = st.progress.save
+  }
   if (st.map_url) statusMapUrl.value = st.map_url
   if (st.lanUrl) lanUrl.value = st.lanUrl
   if (st.appReady) {
@@ -267,13 +399,14 @@ function applyStatus(st) {
     lanUrl.value = ''
     appReady.ok = false
     appReady.reason = ''
+    saveMtime.value = 0
   }
   setStepState()
 }
 // 锁定后才自动打开地图网页：仅本次会话用户点击「开始定位」(isLocating) 后、
 // 且 verified 从 false→true 真实锁定才打开（延迟 1.5s）。避免启动时读到残留 status.json 误开。
 watch(locked, (val, old) => {
-  if (val && !old && isLocating.value && !mapAutoOpened) {
+  if (val && !old && isLocating.value && !mapAutoOpened && (cfg.autoOpenMap !== false)) {
     mapAutoOpened = true
     setTimeout(() => rt.BrowserOpenURL(buildMapUrl()), 1500)
   }
@@ -288,6 +421,7 @@ export async function initCore() {
   if (c.saveDirEden) cfg.saveDirEden = c.saveDirEden
   if (c.emu) cfg.emu = c.emu
   cfg.tls = !!c.tls
+  if (c.autoOpenMap !== undefined) cfg.autoOpenMap = !!c.autoOpenMap
   const det = await api.EnvDetect()
   envDetect.save = !!det.save
   envDetect.saveRyu = !!det.saveRyu

@@ -11,7 +11,7 @@ const MSG_EN = {
   '已保存': 'Saved',
   '无法连接 GitHub，请检查网络': 'Cannot connect to GitHub, please check your network',
   '已请求清除目标（地图同步取消）': 'Target clear requested (map sync cancelled)',
-  '找不到核心程序 xnavi.exe（应放在本程序同目录）': 'Core program xnavi.exe not found (should sit next to this program)',
+  '找不到核心程序 totknavi-core.exe（应放在本程序同目录）': 'Core program totknavi-core.exe not found (should sit next to this program)',
   '当前平台不支持坐标校准（仅 Eden）': 'Coordinate calibration is not supported on this platform (Eden only)',
   '平台未就绪，请先启动定位': 'Platform not ready, start locating first',
   '另一路坐标搜索进行中，请稍候': 'Another coordinate search is in progress, please wait',

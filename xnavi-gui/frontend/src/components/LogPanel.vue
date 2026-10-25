@@ -6,7 +6,7 @@
     <div ref="logBox" class="flex-1 overflow-y-auto px-2.5 py-1.5 space-y-0.5 leading-relaxed text-slate-400 min-h-0 select-text font-mono">
       <div v-for="(log, idx) in filteredLogs" :key="idx" :class="log.color">
         <span class="text-slate-600">[{{ log.time }}]</span>
-        <span class="mr-1" :class="log.levelColor">{{ log.level }}</span>{{ log.text }}
+        <span class="mr-1.5 font-mono text-[10px]" :class="log.levelColor">[{{ log.level }}]</span>{{ log.text }}
       </div>
       <div v-if="!filteredLogs.length" class="text-slate-600 py-4 text-center">{{ t('log.none') }}</div>
     </div>

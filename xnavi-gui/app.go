@@ -57,6 +57,7 @@ type Config struct {
 	SaveDirEden    string `json:"saveDirEden,omitempty"`
 	Emu            string `json:"emu,omitempty"` // "auto"（默认）/ "ryujinx" / "eden"
 	TLS            bool   `json:"tls,omitempty"` // 手机防息屏（Https）
+	AutoOpenMap    *bool  `json:"autoOpenMap,omitempty"` // 锁定后自动打开网页地图（默认 true）
 }
 
 func (a *App) configPath() string { return filepath.Join(a.workDir, "xnavi-gui-config.json") }
@@ -75,6 +76,10 @@ func (a *App) loadConfig() *Config {
 		if cfg.SaveDirEden == "" && lg.SaveDir != "" {
 			cfg.SaveDirEden = lg.SaveDir
 		}
+	}
+		if cfg.AutoOpenMap == nil {
+		t := true
+		cfg.AutoOpenMap = &t
 	}
 	return cfg
 }
@@ -264,6 +269,114 @@ func (a *App) PickDir(title string) string {
 	return dir
 }
 
+// PickSaveFile 通过文件选择对话框挑选 progress.sav 或任意 .sav 存档文件。
+func (a *App) PickSaveFile() string {
+	file, err := runtime.OpenFileDialog(a.ctx, runtime.OpenDialogOptions{
+		Title: "选择 TOTK 存档文件 (progress.sav)",
+		Filters: []runtime.FileFilter{
+			{DisplayName: "TOTK 存档文件 (*.sav)", Pattern: "*.sav;progress.sav"},
+			{DisplayName: "所有文件 (*.*)", Pattern: "*.*"},
+		},
+	})
+	if err != nil || file == "" {
+		return ""
+	}
+	return file
+}
+
+// OpenSaveDir 在资源管理器中直接高亮当前正在生效的存档文件；若文件不存在则打开目录。
+func (a *App) OpenSaveDir() string {
+	st := a.CoreStatus()
+	savePath := ""
+	if prog, ok := st["progress"].(map[string]any); ok {
+		if s, ok := prog["save"].(string); ok {
+			savePath = s
+		}
+	}
+	if savePath == "" {
+		if s, ok := st["save"].(string); ok {
+			savePath = s
+		}
+	}
+	if savePath == "" && a.cfg != nil {
+		for _, d := range []string{a.cfg.SaveDirRyujinx, a.cfg.SaveDirEden} {
+			if d != "" && pathExists(d) {
+				savePath = d
+				break
+			}
+		}
+	}
+	if savePath == "" {
+		return "暂无正在生效的存档路径"
+	}
+	if err := openSaveLocation(savePath); err != nil {
+		return "打开失败: " + err.Error()
+	}
+	return "已在资源管理器中定位存档"
+}
+
+// ApplySavePath 手动指定存档路径（支持 .sav 文件或目录），即时生效并持久化。
+func (a *App) ApplySavePath(path string) string {
+	path = strings.TrimSpace(path)
+	if path == "" {
+		return a.ResetSaveDetection()
+	}
+	fi, err := os.Stat(path)
+	if err != nil {
+		return "路径不存在: " + path
+	}
+	cleanPath := filepath.Clean(path)
+	if !fi.IsDir() {
+		base := strings.ToLower(filepath.Base(cleanPath))
+		if !strings.HasSuffix(base, ".sav") {
+			return "请选择以 .sav 结尾的存档文件（如 progress.sav）"
+		}
+	}
+
+	if a.cfg == nil {
+		a.cfg = a.loadConfig()
+	}
+
+	lower := strings.ToLower(cleanPath)
+	emu := a.cfg.Emu
+	if emu == "ryujinx" || strings.Contains(lower, "bis") || strings.Contains(lower, "ryujinx") {
+		a.cfg.SaveDirRyujinx = cleanPath
+	} else if emu == "eden" || strings.Contains(lower, "nand") || strings.Contains(lower, "eden") || strings.Contains(lower, "yuzu") {
+		a.cfg.SaveDirEden = cleanPath
+	} else {
+		a.cfg.SaveDirRyujinx = cleanPath
+		a.cfg.SaveDirEden = cleanPath
+	}
+	a.SaveConfig(*a.cfg)
+	return "已应用存档路径: " + cleanPath
+}
+
+// ResetSaveDetection 清除手动指定存档路径，恢复全自动探测。
+func (a *App) ResetSaveDetection() string {
+	if a.cfg == nil {
+		a.cfg = a.loadConfig()
+	}
+	a.cfg.SaveDirRyujinx = ""
+	a.cfg.SaveDirEden = ""
+	a.SaveConfig(*a.cfg)
+	return "已恢复自动检测"
+}
+
+func openSaveLocation(savePath string) error {
+	if savePath == "" {
+		return fmt.Errorf("无有效存档路径")
+	}
+	savePath = filepath.Clean(savePath)
+	fi, err := os.Stat(savePath)
+	if err != nil {
+		return err
+	}
+	if fi.IsDir() {
+		return exec.Command("explorer", savePath).Start()
+	}
+	return exec.Command("explorer", "/select,", savePath).Start()
+}
+
 func (a *App) onShutdown(ctx context.Context) {
 	a.stopCoreLocked()
 }
@@ -336,7 +449,7 @@ func (a *App) ClearTarget() string {
 // corePath 核心子进程 exe 路径：与 GUI 同目录的 xnavi.exe（V2.0.0 起双平台统一核心）。
 // 命名不以模拟器为前缀：避免 findPid 的 HasPrefix 匹配误认核心进程。
 func (a *App) corePath() string {
-	return filepath.Join(a.workDir, "xnavi.exe")
+	return filepath.Join(a.workDir, "totknavi-core.exe")
 }
 
 // StartCore 启动核心子进程（xnavi.exe --no-open --emu=<auto|ryujinx|eden>）。
@@ -348,7 +461,7 @@ func (a *App) StartCore() string {
 	a.stopCoreLocked()
 	exe := a.corePath()
 	if _, err := os.Stat(exe); err != nil {
-		return "找不到核心程序 xnavi.exe（应放在本程序同目录）"
+		return "找不到核心程序 totknavi-core.exe（应放在本程序同目录）"
 	}
 	emu := "auto"
 	if a.cfg != nil && a.cfg.Emu != "" {

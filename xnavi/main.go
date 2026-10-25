@@ -52,6 +52,7 @@ func main() {
 		case a == "--probe":
 			probeMode = true
 		case a == "--no-open":
+			autoOpen = false
 		case a == "--no-save":
 			useSaveScan = false
 		case a == "--tls":

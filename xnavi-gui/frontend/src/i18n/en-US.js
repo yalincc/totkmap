@@ -75,7 +75,11 @@ export default {
     download: 'Download',
     clear: 'Clear',
     checkUpdate: 'Check for updates',
-    exportDiag: 'Export diagnostics'
+    exportDiag: 'Export diagnostics',
+    chooseFile: 'Choose File',
+    chooseDir: 'Choose Dir',
+    locateFile: 'Locate File',
+    detectSave: 'Auto Detect'
   },
   locate: {
     liveCoords: 'Live coordinates',
@@ -90,7 +94,19 @@ export default {
     localProgress: 'Local save parsing',
     categoryCount: '{n} / 20 categories',
     waitingProgress: 'Waiting for save data... (start locating first)',
-    noneProgress: 'No save data yet'
+    noneProgress: 'No save data yet',
+    preset: 'Presets',
+    tower: 'Landing Tower',
+    landing: 'Lookout Landing',
+    northShrine: 'North Shrine',
+    awakeningRoom: 'Awakening Room',
+    saveInfo: 'Active save',
+    latestSaveTime: 'Latest save',
+    resetAutoDetectTip: '✓ Save detection: manual path cleared, restored auto-detection',
+    justNow: 'Just now',
+    minsAgo: '{m}m ago',
+    hoursAgo: '{h}h ago',
+    noSave: 'No save detected (auto-detected after start)'
   },
   precheck: {
     title: '⚠ Large coordinate difference',
@@ -122,8 +138,8 @@ export default {
     title: 'Settings',
     ryuPath: 'Ryujinx save path:',
     edenPath: 'Eden save path:',
-    workDir: 'Working directory (xnavi.exe logs / known / status.json):',
-    exeDir: 'Same folder as exe (next to xnavi.exe)',
+    workDir: 'Working directory (totknavi-core.exe logs / status.json):',
+    exeDir: 'Same folder as exe (next to totknavi-core.exe)',
     pathAuto: 'Leave blank to auto-detect',
     tls: 'Keep phone awake (Https)',
     tlsWarn: '[Do NOT enable without installing the CA certificate on your phone!]',

@@ -74,7 +74,11 @@ export default {
     download: '下载',
     clear: '清屏',
     checkUpdate: '检查更新',
-    exportDiag: '导出诊断包'
+    exportDiag: '导出诊断包',
+    chooseFile: '选择存档',
+    chooseDir: '选择目录',
+    locateFile: '定位文件',
+    detectSave: '重新检测'
   },
   locate: {
     liveCoords: '实时同步坐标',
@@ -89,7 +93,19 @@ export default {
     localProgress: '本地解析进度',
     categoryCount: '{n} / 20 类',
     waitingProgress: '等待读取存档...（需先开始定位）',
-    noneProgress: '暂无存档数据'
+    noneProgress: '暂无存档数据',
+    preset: '预设',
+    tower: '堡垒鸟望台',
+    landing: '监视堡垒',
+    northShrine: '堡垒北神庙',
+    awakeningRoom: '觉醒室',
+    saveInfo: '生效存档',
+    latestSaveTime: '最新存档',
+    resetAutoDetectTip: '✓ 存档检测：已清除手动路径，恢复全自动探测最新存档',
+    justNow: '刚刚',
+    minsAgo: '{m}分钟前',
+    hoursAgo: '{h}小时前',
+    noSave: '未检测到存档（开始定位后自动探测）'
   },
   precheck: {
     title: '⚠ 坐标差异较大',
@@ -121,11 +137,12 @@ export default {
     title: '设置',
     ryuPath: 'Ryujinx 存档路径：',
     edenPath: 'Eden 存档路径：',
-    workDir: '工作目录（xnavi.exe 的日志 / known / status.json 所在）：',
-    exeDir: 'exe 同目录（与 xnavi.exe 一起）',
+    workDir: '工作目录（totknavi-core.exe 的日志 / status.json 所在）：',
+    exeDir: 'exe 同目录（与 totknavi-core.exe 一起）',
     pathAuto: '留空自动探测',
     tls: '手机防息屏（Https）',
     tlsWarn: '【手机没装 CA 证书，不要勾选！】',
+    autoOpenMap: '定位成功后自动打开网页地图',
     saved: '已保存',
     pathOk: '✓ 路径有效',
     pathBad: '路径不存在（core 将回退自动探测）',

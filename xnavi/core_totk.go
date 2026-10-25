@@ -382,8 +382,9 @@ func runTotkPipeline(p Platform, opts trackerOpts, rescanCh chan *RescanRequest,
 			// 神庙内部试炼场本地尺度挂起（对齐 BOTW xnavi watch_eden.go / watch_ryujinx.go）
 			if shrineMode {
 				curShrineName, _ := nearestShrine(cur)
-				if !isShrine || dist3(cur, shrineEntrance) < 35.0 || curShrineName != "" {
-					// 出庙：脱离神庙本地尺度，或回到神庙大世界门口（含地图中心 400m 内的神庙如克יו诺尼希乌神庙），恢复大世界跟踪
+				curTowerName, _ := nearestTower(cur)
+				if !isShrine || dist3(cur, shrineEntrance) < 35.0 || curShrineName != "" || curTowerName != "" {
+					// 出庙：脱离神庙本地尺度，或回到神庙大世界门口（含地图中心 400m 内的神庙如巧诺尼希乌神庙），或传送到鸟望台，恢复大世界跟踪
 					shrineMode = false
 					destName := formatDestName(cur)
 					fmt.Printf("  [shrine] %s 角色离开试炼场 -> 恢复大世界追踪 (%.1f, %.1f, %.1f) [%s] / Left shrine -> Resumed world tracking\n",
@@ -398,8 +399,10 @@ func runTotkPipeline(p Platform, opts trackerOpts, rescanCh chan *RescanRequest,
 				continue
 			} else if isShrine && hasPrev && dist3(cur, prev) > 100.0 {
 				if shrineName, _ := nearestShrine(prev); shrineName != "" {
-					if curShrine, _ := nearestShrine(cur); curShrine == "" {
-						// 进庙：进入前 prev 在神庙入口（<30m）且当前跳入神庙内部本地坐标，红点钉在门口 prev
+					curShrine, _ := nearestShrine(cur)
+					curTower, _ := nearestTower(cur)
+					if curShrine == "" && curTower == "" {
+						// 进庙：进入前 prev 在神庙入口（<30m）且当前跳入神庙内部本地坐标，且当前未跳到鸟望台等大世界地标，红点钉在门口 prev
 						shrineMode = true
 						shrineEntrance = prev
 						destName := "神庙: " + shrineName
@@ -445,21 +448,15 @@ func runTotkPipeline(p Platform, opts trackerOpts, rescanCh chan *RescanRequest,
 
 			delta := dist3(cur, prev)
 
-			// 传送判定（>300m，对齐 BOTW xnavi v3.2.2：保持 addr 直读更新并输出地标日志）
-			if hasPrev && delta > 300.0 {
+			// 传送判定（>=50m，覆盖大传送与近距离传送如鸟望台/神庙相邻点，保持 addr 直读更新并输出地标日志）
+			if hasPrev && delta >= 50.0 {
 				shrineMode = false
 				cands = nil
 				destName := formatDestName(cur)
-				fmt.Printf("  [warp] %s 角色大传送 (距离=%.1fm) -> %s (%.1f, %.1f, %.1f) [零重扫接管] / Fast travel (dist=%.1fm) -> %s [Direct takeover]\n",
+				fmt.Printf("  [warp] %s 角色传送 (距离=%.1fm) -> %s (%.1f, %.1f, %.1f) [零重扫接管] / Fast travel (dist=%.1fm) -> %s [Direct takeover]\n",
 					opts.name, delta, destName, cur[0], cur[1], cur[2], delta, destName)
 				publishState(true, cur[0], cur[1], cur[2], verified, 1, "player")
 				prev = cur
-				continue
-			}
-
-			// 单帧位移异常过大（>150m 非传送跳变）
-			if hasPrev && delta > 150.0 {
-				publishState(true, prev[0], prev[1], prev[2], verified, len(cands), "hold")
 				continue
 			}
 

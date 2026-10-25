@@ -23,9 +23,9 @@
           <div class="text-[10px] text-slate-600 mt-1" :class="saveEdenOk ? 'text-emerald-400' : ''">{{ saveEdenHint }}</div>
         </div>
         <div>
-          <label class="block text-slate-400 mb-1">工作目录（xnavi.exe 的日志 / known / status.json 所在）：</label>
+          <label class="block text-slate-400 mb-1">{{ t('settings.workDir') }}</label>
           <div class="flex gap-1 items-center">
-            <span class="flex-1 bg-[#0d1117] border border-slate-700 rounded px-2 py-1.5 text-slate-300 font-mono text-[11px] truncate">exe 同目录（与 xnavi.exe 一起）</span>
+            <span class="flex-1 bg-[#0d1117] border border-slate-700 rounded px-2 py-1.5 text-slate-300 font-mono text-[11px] truncate">{{ t('settings.exeDir') }}</span>
             <button @click="openLogDir" class="bg-slate-700 hover:bg-slate-600 px-3 py-1.5 rounded text-xs">打开目录</button>
           </div>
         </div>

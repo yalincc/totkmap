@@ -184,14 +184,17 @@ func statusLoop() {
 		obj["appReady"] = currentAppStatus()
 		if ok2, body, _ := progress.snapshot(); ok2 && len(body) > 0 {
 			var raw struct {
-				Save   string `json:"save"`
+				Save   string  `json:"save"`
+				Mtime  float64 `json:"mtime"`
 				Counts map[string]struct {
 					Done  int `json:"done"`
 					Total int `json:"total"`
 				} `json:"counts"`
 			}
 			if json.Unmarshal(body, &raw) == nil && raw.Counts != nil {
-				obj["progress"] = map[string]any{"save": raw.Save, "counts": raw.Counts}
+				obj["progress"] = map[string]any{"save": raw.Save, "counts": raw.Counts, "mtime": raw.Mtime}
+				obj["save"] = raw.Save
+				obj["saveMtime"] = raw.Mtime
 			}
 		}
 

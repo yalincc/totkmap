@@ -31,6 +31,12 @@
         <span class="text-[10px] text-amber-500/90">{{ t('settings.tlsWarn') }}</span>
       </label>
     </div>
+    <div>
+      <label class="flex items-center gap-2 cursor-pointer select-none py-1">
+        <input v-model="cfg.autoOpenMap" type="checkbox" class="accent-blue-600 w-3.5 h-3.5" />
+        <span class="text-slate-300">{{ t("settings.autoOpenMap") }}</span>
+      </label>
+    </div>
     <!-- 界面语言（跟随系统 / 中文 / English，即时切换） -->
     <LangSelect />
     <div class="flex items-center gap-2 pt-1">

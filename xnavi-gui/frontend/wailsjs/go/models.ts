@@ -5,6 +5,7 @@ export namespace main {
 	    saveDirEden?: string;
 	    emu?: string;
 	    tls?: boolean;
+	    autoOpenMap?: boolean;
 	
 	    static createFrom(source: any = {}) {
 	        return new Config(source);
@@ -16,6 +17,7 @@ export namespace main {
 	        this.saveDirEden = source["saveDirEden"];
 	        this.emu = source["emu"];
 	        this.tls = source["tls"];
+	        this.autoOpenMap = source["autoOpenMap"];
 	    }
 	}
 

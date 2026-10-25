@@ -107,39 +107,84 @@
           <div class="flex items-center gap-2">
             <label class="flex-1 bg-[#0d1117] rounded-lg border border-slate-800 px-2 py-1.5 flex items-center gap-1.5">
               <span class="text-[10px] text-slate-500 shrink-0">X</span>
-              <input v-model="calX" type="number" step="0.1" :placeholder="t('locate.placeholder', { v: '-206.0' })"
+              <input v-model="calX" type="number" step="0.1" :placeholder="t('locate.placeholder', { v: '-298.8' })"
                 class="bg-transparent outline-none text-white font-mono text-xs w-full placeholder:text-slate-600" />
             </label>
             <label class="flex-1 bg-[#0d1117] rounded-lg border border-slate-800 px-2 py-1.5 flex items-center gap-1.5">
               <span class="text-[10px] text-slate-500 shrink-0">Y</span>
-              <input v-model="calY" type="number" step="0.1" :placeholder="t('locate.placeholder', { v: '451.9' })"
+              <input v-model="calY" type="number" step="0.1" :placeholder="t('locate.placeholder', { v: '142.8' })"
                 class="bg-transparent outline-none text-white font-mono text-xs w-full placeholder:text-slate-600" />
             </label>
             <label class="flex-1 bg-[#0d1117] rounded-lg border border-slate-800 px-2 py-1.5 flex items-center gap-1.5">
               <span class="text-[10px] text-slate-500 shrink-0">Z</span>
-              <input v-model="calZ" type="number" step="0.1" :placeholder="t('locate.placeholder', { v: '21.6' })"
+              <input v-model="calZ" type="number" step="0.1" :placeholder="t('locate.placeholder', { v: '25.0' })"
                 class="bg-transparent outline-none text-white font-mono text-xs w-full placeholder:text-slate-600" />
             </label>
+          </div>
+          <!-- 预设常用地标 -->
+          <div class="flex items-center gap-1.5 mt-2.5 text-[10px] flex-wrap">
+            <span class="text-slate-500 shrink-0">{{ t('locate.preset') }}:</span>
+            <button @click="fillPreset(-298.8, 142.8, 25.0)" class="px-1.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 transition" :title="t('locate.tower') + ' (-298.8, 142.8, 25.0)'">{{ t('locate.tower') }}</button>
+            <button @click="fillPreset(-257.5, 105.0, 20.0)" class="px-1.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 transition" :title="t('locate.landing') + ' (-257.5, 105.0, 20.0)'">{{ t('locate.landing') }}</button>
+            <button @click="fillPreset(-204.3, 451.0, 21.0)" class="px-1.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 transition" :title="t('locate.northShrine') + ' (巧诺尼希乌神庙: -204.3, 451.0, 21.0)'">{{ t('locate.northShrine') }}</button>
+            <button @click="fillPreset(453.0, -774.0, 1466.0)" class="px-1.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 transition" :title="t('locate.awakeningRoom') + ' (初始空岛: 453.0, -774.0, 1466.0)'">{{ t('locate.awakeningRoom') }}</button>
           </div>
         </section>
       </div>
 
-      <!-- 右 6 列：本地解析进度（全量 20 类 + 滚动） -->
-      <div class="col-span-6 flex flex-col min-h-0">        <section class="bg-[#161b22] border border-slate-800 rounded-xl p-3.5 flex-1 flex flex-col min-h-0">
-          <div class="flex items-center justify-between text-xs pb-2 border-b border-slate-800/80 shrink-0">
-            <span class="font-bold text-emerald-400">{{ t('locate.localProgress') }}</span>
-            <span class="text-[10px] text-slate-500">{{ t('locate.categoryCount', { n: progressCount }) }}</span>
-          </div>
-          <div v-if="progressData.counts" class="overflow-y-auto min-h-0 flex-1 pr-0.5">
-            <div class="grid grid-cols-3 gap-1.5 py-2.5">
-              <div v-for="c in allCategories" :key="c.key"
-                class="bg-[#0d1117] p-1.5 px-2 rounded border border-slate-800 flex justify-between text-[11px]">
-                <span class="text-slate-400 truncate">{{ c.label }}</span>
-                <span class="font-mono text-white font-semibold shrink-0 ml-1">{{ n(c.key) }}</span>
+      <!-- 右 6 列：本地解析进度（全量 20 类 + 紧凑） -->
+      <div class="col-span-6 flex flex-col min-h-0">
+        <section class="bg-[#161b22] border border-slate-800 rounded-xl p-3 flex-1 flex flex-col min-h-0 justify-between">
+          <div>
+            <div class="flex items-center justify-between text-xs pb-1.5 border-b border-slate-800/80 shrink-0">
+              <span class="font-bold text-emerald-400">{{ t('locate.localProgress') }}</span>
+              <span class="text-[10px] text-slate-500">{{ t('locate.categoryCount', { n: progressCount }) }}</span>
+            </div>
+            <div v-if="progressData.counts" class="mt-1.5">
+              <div class="grid grid-cols-3 gap-x-1.5 gap-y-1">
+                <div v-for="c in allCategories" :key="c.key"
+                  class="bg-[#0d1117] py-1 px-2 rounded border border-slate-800 flex justify-between items-center text-[12px]">
+                  <span class="text-slate-400 truncate">{{ c.label }}</span>
+                  <span class="font-mono text-white font-semibold shrink-0 ml-1">{{ n(c.key) }}</span>
+                </div>
               </div>
             </div>
+            <div v-else class="flex items-center justify-center text-[11px] text-slate-500 my-4">{{ t('locate.waitingProgress') }}</div>
           </div>
-          <div v-else class="flex-1 flex items-center justify-center text-[11px] text-slate-500 my-2">{{ t('locate.waitingProgress') }}</div>
+
+          <!-- 生效存档管理条：紧凑布局 -->
+          <div class="mt-2 pt-1.5 border-t border-slate-800/80 text-xs shrink-0">
+            <div class="flex items-center justify-between gap-1.5 flex-wrap">
+              <!-- 四个动作按钮 -->
+              <div class="flex items-center gap-1.5">
+                <button @click="pickSaveFile" class="bg-blue-600 hover:bg-blue-500 text-white px-2 py-1 rounded text-[11px] font-medium transition active:scale-95">
+                  {{ t('buttons.chooseFile') }}
+                </button>
+                <button @click="pickSaveDir" class="bg-slate-700 hover:bg-slate-600 text-slate-200 px-2 py-1 rounded text-[11px] transition active:scale-95">
+                  {{ t('buttons.chooseDir') }}
+                </button>
+                <button v-if="progressData.save" @click="doOpenSave" class="bg-slate-700 hover:bg-slate-600 text-slate-200 px-2 py-1 rounded text-[11px] transition active:scale-95">
+                  {{ t('buttons.locateFile') }}
+                </button>
+                <button @click="doResetDetection" :class="resetSuccess ? 'bg-emerald-600 text-white font-semibold' : 'bg-amber-600/80 hover:bg-amber-600 text-white'" class="px-2 py-1 rounded text-[11px] transition active:scale-95">
+                  {{ resetSuccess ? '✓ 已重置' : t('buttons.detectSave') }}
+                </button>
+              </div>
+
+              <!-- 右侧：最新存档相对时间提醒 -->
+              <div class="flex items-center gap-2 ml-auto text-[11px]">
+                <div v-if="saveTimeAgoText" class="font-mono text-[11px] shrink-0" :class="saveTimeAgoClass">
+                  {{ t('locate.latestSaveTime') }}: {{ saveTimeAgoText }}
+                </div>
+              </div>
+            </div>
+            <div class="flex items-center gap-2 mt-2">
+              <span class="text-[11px] text-slate-400 font-medium shrink-0">{{ t('locate.saveInfo') }}:</span>
+              <span class="text-[10px] font-mono text-slate-300 truncate flex-1" :title="progressData.save || t('locate.noSave')">
+                {{ progressData.save || t('locate.noSave') }}
+              </span>
+            </div>
+          </div>
         </section>
       </div>
     </div>
@@ -182,7 +227,8 @@ import {
   pos, steps, stepClass, stepDot, isLocating, toggleLocating, progressData,
   layerName, sourceLabel, openMap, logs,
   ver, syncText, syncClass, syncDot, rt, submitCoords, coordsState, cfg, saveSettings,
-  coordsErrorText
+  coordsErrorText, saveTimeAgoText, saveTimeAgoClass, detectSave,
+  pickSaveFile, pickSaveDir, doOpenSave, resetSaveDetection
 } from '../composables/useCore'
 
 const { t } = useI18n()
@@ -220,6 +266,18 @@ const progressCount = computed(() => {
   return counts ? Object.keys(counts).filter(k => counts[k] && counts[k].total).length : 0
 })
 
+
+
+const resetSuccess = ref(false)
+async function doResetDetection() {
+  await resetSaveDetection()
+  resetSuccess.value = true
+  const tNow = new Date().toTimeString().slice(0, 8)
+  logs.value.push({ time: tNow, text: t("locate.resetAutoDetectTip"), level: "PROGRESS", color: "text-emerald-300", levelColor: "text-emerald-400 font-semibold" })
+  if (logs.value.length > 2000) logs.value = logs.value.slice(logs.value.length - 2000)
+  setTimeout(() => { resetSuccess.value = false }, 1500)
+}
+
 const lockAddrText = computed(() => (pos.lockAddr && pos.lockAddr !== '0x0' ? pos.lockAddr : '—'))
 
 // ---- 坐标校准状态 ----
@@ -227,6 +285,12 @@ const calX = ref('')
 const calY = ref('')
 const calZ = ref('')
 const calBusy = ref(false)
+
+function fillPreset(x, y, z) {
+  calX.value = x
+  calY.value = y
+  calZ.value = z
+}
 // 校准结果写入实时日志（复用 logs 共享 ref）：失败红色 / 成功绿色，不占按钮行空间
 function pushCalLog(text, ok) {
   const t = new Date().toTimeString().slice(0, 8)
