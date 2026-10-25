@@ -4,14 +4,16 @@ A Simplified Chinese interactive map for *The Legend of Zelda: Tears of the King
 
 [中文](README.md) | **English**
 
+> **Two independent product lines, released separately**:
+> the **map** (this line, `totkmap-vX.Y.Z`) and the **navigator TOTKNavi** (`totknavi-vX.Y.Z`) are distinguished by prefix in Releases and can be combined freely.
+
 ## Quick Start
 
-The web map lives in the **`app/`** directory — two ways to use it:
-
-- **Local**: open `app/index.html` directly, no server needed. A static server (e.g. VS Code Live Server, `python -m http.server`) is recommended for faster tile loading.
-- **Self-hosted**: download the whole `app/` folder and drop it at the root of any static server (Nginx / EdgeOne Pages / GitHub Pages, etc.), pointing the site root at the contents of `app/`.
-
-Online version: **https://totk.yalin.site/**
+| Way | How |
+|---|---|
+| **Online** | Open <https://totk.yalin.site/> |
+| **Local / offline** | Download the map package `TOTKmap-vX.Y.Z.zip` ([Releases](https://github.com/yalincc/totkmap/releases), `totkmap-` prefix), extract, then open `app/index.html`. Tiles / icons / data are all local — works offline |
+| **Self-hosted** | Drop the whole `app/` folder at the root of any static server (Nginx / EdgeOne Pages / GitHub Pages, etc.), pointing the site root at the contents of `app/`. A static server (e.g. VS Code Live Server, `python -m http.server`) is recommended for faster tile loading |
 
 > Progress, custom markers, and layer selections are auto-saved in browser local storage — nothing is lost when you close the page.
 
@@ -43,9 +45,10 @@ TOTKmap/
 - `archive/`, `tasks/manual-backup-*/`, `report/` — historical docs (including the retired live-series engines), pre-import backups, temporary reports
 - `release/`, `certs/` — TOTKNavi desktop release packages & certificates (distributed separately at release time)
 
-**Download guide**:
-- Map only → download the **`app/`** folder
-- Desktop real-time navigation → grab the TOTKNavi package from **`release/`** as well (works with the `app/` web map)
+**Download guide** (two separate lines, combine as needed):
+- Map only → download **`totkmap-vX.Y.Z.zip`** from Releases (or just use the online version)
+- Desktop real-time navigation → also download **`totknavi-vX.Y.Z.zip`**, then place the map package's `app/` next to `TOTKnavi.exe`
+- Version-independent: a new map with an old navigator, or an old map with a new navigator, both work fine
 
 ## Real-Time Player Navigation (Optional)
 
@@ -58,6 +61,8 @@ Pair it with the local positioning service `TOTKNavi.exe` (built from `xnavi/`, 
 - Start the emulator and enter the game (standing on the overworld map) before clicking "Start Positioning"
 - The program only reads emulator memory: no injection, no game modification. If your antivirus flags it, add an exception.
 
+> The navigator is a **separate product line** (`totknavi-vX.Y.Z` prefix in Releases); its version does not follow the map's. Phone mirroring needs the local offline map package (`totkmap-vX.Y.Z.zip`) extracted next to `TOTKnavi.exe`.
+
 ## Core Features
 
 | Feature | Description |
@@ -67,7 +72,9 @@ Pair it with the local positioning service `TOTKNavi.exe` (built from `xnavi/`, 
 | Multi-layer overlay | Position / collectibles / equipment / places / monsters — five categories freely combinable, select-all / clear-all in one tap |
 | Official location names | 1,312 official Chinese location names printed directly on the map (objmap Location coordinates), layered show/hide by zoom, automatic anti-overlap |
 | Save sync | Upload TOTK `progress.sav` to read real collection progress (Skyview Towers, shrines, Lightroots, Dragon Tears, Koroks, Bubbuls, etc.); parsing is fully local; built-in save-sync help (emulator / game version, save location, loading tech) |
-| Completion panel | Key collection progress + golden progress bars after loading a save; click to expand / collapse |
+| Completion panel | After loading a save, completion counts are shown in four groups — Exploration / Quests / Collection / Subjugation — in a compact two-column layout, including 6 boss subjugation categories; click to expand / collapse |
+| Bilingual UI | Switch interface language in the settings panel; shrines / Skyview Towers / Lightroots / Koroks show official English names, while long guides stay Chinese |
+| Group select-all | Each category group title on the left has a one-tap "select / clear" button for all categories in that group, remembered per layer |
 | Material collection | 110 materials, 44,279 farming spots (Surface / Depths / Sky full coverage); check to show on the map; supercluster aggregation + count badges, per-point display at z7 zoom, each material spot is clickable |
 | Material detail card | 256×256 HD icon + usage tags (upgrade material / cooking ingredient / strengthening material) + navigate / collect / mark-done buttons; auto-targets the next uncollected spot after collecting |
 | Material performance | Aggregation radius adjusts dynamically with zoom (100% = 96px → 800% = 128px) + move debounce; 12,000+ Depths spots stay smooth while dragging |
@@ -93,5 +100,11 @@ Pair it with the local positioning service `TOTKNavi.exe` (built from `xnavi/`, 
 
 ## Versions
 
-- Map: V2.5.1 (task module complete: card upgrade / notes write-back / prerequisite link fixes + real-time positioning direction arrow & follow smoothing + display settings panel + shrine coordinates fixed at the source)
-- TOTKNavi: v2.2.0 (Eden pointer-chain fast path: millisecond re-lock when losing lock while running; four-page GUI; two-way navigation target sync)
+The two product lines are **released independently**, distinguished by prefix in [Releases](https://github.com/yalincc/totkmap/releases):
+
+| Product line | Releases prefix | Current | Notes |
+|---|---|---|---|
+| **Web map** (main product) | `totkmap-vX.Y.Z` | **v2.6.0** | Bilingual UI + five map interaction upgrades; online version <https://totk.yalin.site> follows along |
+| **Navigator TOTKNavi** | `totknavi-vX.Y.Z` | **v3.0.0** | Cross-scene persistent slot positioning, zero re-scan on warp / shrine, 1.5s lock |
+
+See [CHANGELOG.md](CHANGELOG.md) for details.
