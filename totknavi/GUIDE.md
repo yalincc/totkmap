@@ -87,5 +87,13 @@ A: 请确认模拟器已启动并且已经载入游戏大地图。程序通过�
 A: 确认 GUI 顶栏已进入「已锁定」状态。在浏览器打开 `http://127.0.0.1:8766/pos`，若能看到 JSON 数据说明服务正常，多半是电脑开启了代理软件（梯子），请在代理软件的「绕过设置」中将 `127.0.0.1` 和 `localhost` 加入白名单。
 
 **Q: 详细报错如何自检？**
-A: 请参阅本目录下的 **`TROUBLESHOOTING.md`** 进行 30 秒三步自检。
+A: 在线查看 **TROUBLESHOOTING.md** 进行 30 秒三步自检：<https://github.com/yalincc/TOTKmap/blob/master/totknavi/TROUBLESHOOTING.md>
+
+---
+
+## GitHub 仓库
+
+<https://github.com/yalincc/TOTKmap>
+
+最新版本下载、更新记录与完整文档都在这里；遇到问题也可以在 Issues 里反馈。
 

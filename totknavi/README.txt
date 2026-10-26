@@ -33,8 +33,12 @@
   能看到一串 JSON 数据 = 定位服务正常，多为浏览器代理冲突（把 127.0.0.1 加入代理白名单）；
   打不开 = 核心未启动或端口被占，在 GUI 实时日志查看报错。
 · 详细使用教程与问答 —— 请看 GUIDE.md（记事本或 VSCode 均可打开）。
-· 进阶排查自检步骤 —— 请看 TROUBLESHOOTING.md。
+· 进阶排查自检步骤 —— 在线查看：https://github.com/yalincc/TOTKmap/blob/master/totknavi/TROUBLESHOOTING.md
 
 【安全声明】
 只读模拟器内存，不注入、不修改游戏、不联网上传任何隐私数据。
+
+【GitHub 仓库】
+https://github.com/yalincc/TOTKmap
+最新版本下载、完整教程与问题排查都在这里。
 

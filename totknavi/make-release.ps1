@@ -74,8 +74,11 @@ if (Test-Path $certsSrc) {
   Write-Host "  [warn] certs/ not found - Https mode unavailable (run certs/gen-cert.ps1)"
 }
 
-# 4.5) Release Documents: README.txt, GUIDE.md, TROUBLESHOOTING.md
-foreach ($doc in @('README.txt', 'GUIDE.md', 'TROUBLESHOOTING.md')) {
+# 4.5) Release Documents: README.txt + GUIDE.md only
+#      (TROUBLESHOOTING stays online-only; both docs link to the GitHub repo)
+$docDst = Join-Path $rel "TROUBLESHOOTING.md"
+if (Test-Path $docDst) { Remove-Item $docDst -Force; Write-Host "  [clean] removed TROUBLESHOOTING.md (online only)" }
+foreach ($doc in @('README.txt', 'GUIDE.md')) {
   $docPath = Join-Path $PSScriptRoot $doc
   if (Test-Path $docPath) {
     Copy-Item $docPath $rel -Force

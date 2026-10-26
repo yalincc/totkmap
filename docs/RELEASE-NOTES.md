@@ -83,5 +83,8 @@ TOTKNavi vX.Y.Z —— 王国之泪实时定位导航（支持 Ryujinx / Eden）
    改过 js/css/data 必须 bump `app/sw.js` 的 `SW_VER`（否则线上「老页面配新资源」）
 3. 导航线同步：`totknavi/version.go` CoreVersion 与 `totknavi-gui/app.go` guiVersion 同号
 4. 打包 → 本地 `release/notes-map-vX.Y.Z.md` / `notes-nav-vX.Y.Z.md` 按本规范写正文
+   - **包内文档只留两份**：`README.txt`（快速开始 + 仓库链接）、`GUIDE.md`（完整教程）。
+     低频文档（`TROUBLESHOOTING.md` 等）只放 GitHub，包内用链接引导，避免每个版本塞一堆 md
+   - 两份 README 末尾都必须带仓库地址：<https://github.com/yalincc/TOTKmap>
 5. push 双端 → 打 tag → 用 notes 文件内容建 GitHub Release
 6. Gitee Pages 需到仓库 Pages 页面手动点「更新」才会部署
