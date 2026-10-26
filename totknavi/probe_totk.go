@@ -292,20 +292,20 @@ func ptkGroupHits(hits []ptkHit) []ptkHit {
 		out = append(out, h)
 	}
 	sort.SliceStable(out, func(i, j int) bool {
-		// ① 有连续 Run 的优先
-		if (out[i].Run > 0) != (out[j].Run > 0) {
-			return out[i].Run > 0
-		}
-		// ② 0x48 步长 3x3 旋转矩阵持久槽最优先（跨传送/跨神庙永不销毁）
+		// ① 0x48 步长 3x3 旋转矩阵持久槽最优先（主模块 .bss 视场槽，跨传送/跨神庙永不销毁，全内存仅主角具备）
 		if out[i].Rot != out[j].Rot {
 			return out[i].Rot
 		}
-		// ③ 四元数指纹次之
+		// ② 距存档锚点越近越优先（用户读档后在原地 Dist≈0，直接选距离最近真身）
+		if math.Abs(float64(out[i].Dist-out[j].Dist)) > 1.0 {
+			return out[i].Dist < out[j].Dist
+		}
+		// ③ 距离极其接近时（<=1m），四元数动力学指纹优先
 		if out[i].Quat != out[j].Quat {
 			return out[i].Quat
 		}
-		// ④ 距锚点越近越优先
-		return out[i].Dist < out[j].Dist
+		// ④ 连续 Run 越长越优先
+		return out[i].Run > out[j].Run
 	})
 	return out
 }

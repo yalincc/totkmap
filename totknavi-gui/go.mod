@@ -1,4 +1,4 @@
-module xnavi-gui
+module totknavi-gui
 
 go 1.25.0
 

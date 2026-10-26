@@ -532,6 +532,11 @@ html, body {
 .cat-item:hover { color: rgba(255,255,255,.85); }
 .cat-item.active { color: #eac27e; }
 .cat-item.active img { opacity: 1; }
+/* V2.6.1: 分类全达成状态 */
+.cat-item.cat-done { color: #2ecc71; }
+.cat-item.cat-done .cat-count { color: #2ecc71; font-weight: 600; }
+.cat-item.cat-done.active { color: #2ecc71; text-shadow: 0 0 6px rgba(46, 204, 113, 0.4); }
+.cat-item.cat-done img { opacity: 1; filter: drop-shadow(0 0 2px rgba(46, 204, 113, 0.6)); }
 
 /* 探索度（存档加载后显示） */
 /* V2.6.0：探索度改「一整块平铺」——去掉独立滚动容器与右侧拖条，
@@ -1678,7 +1683,7 @@ html, body {
    需求：「点击左边可以定位回地图上的图标位置即可。因为有时候点击套装和
    任务切换的时候，需要切换一下地图位置而已。」
    跟底部「导航」按钮的区别（别混淆）：
-     · 导航 = 交给 xnavi 引导玩家在**游戏里**走过去（要服务在跑）
+     · 导航 = 交给 totknavi 引导玩家在**游戏里**走过去（要服务在跑）
      · 这个 = 只把**网页地图视角**移回该点，服务不开也能用
    所以它不依赖任何后端，纯前端 flyTo。
    ============================================================ */
@@ -1826,4 +1831,16 @@ html[lang="en"] .np-actions .np-btn {
 html[lang="en"] .ec-copy,
 html[lang="en"] .tk-copy {
   letter-spacing: normal !important;
+}
+
+/* 探索看板与已完成标点样式增强 */
+.mk-done-icon img {
+  opacity: 0.65;
+  filter: grayscale(35%);
+  transition: opacity 0.15s ease;
+}
+.prog-row .pr-pct {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.55);
+  margin-left: 3px;
 }

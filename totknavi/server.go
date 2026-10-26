@@ -56,8 +56,8 @@ func writeJSON(w http.ResponseWriter, obj any) {
 }
 
 // ---- /botw/ 静态托管 ----
-// 网页目录探测顺序：exe 上一级 app/（发布布局：xnavi/ + ../app）→
-// 工作目录上级 app/（开发布局：cwd=TOTKmap/xnavi，../app）→
+// 网页目录探测顺序：exe 上一级 app/（发布布局：totknavi/ + ../app）→
+// 工作目录上级 app/（开发布局：cwd=TOTKmap/totknavi，../app）→
 // TOTKmap 开发目录绝对路径 + 相对兜底（BOTW xnavi 同款，release 包也能挂开发目录）。
 // 全部缺失时仅 API 可用（核心导航不受影响）。
 
@@ -241,8 +241,10 @@ func (s *server) handlePos(w http.ResponseWriter, r *http.Request) {
 	payload["target"] = target
 	targetMu.Unlock()
 	if progress != nil {
-		_, _, gen := progress.snapshot()
+		_, gen, mt, updated := progress.snapshotPos()
 		payload["progressGen"] = gen
+		payload["save_mtime"] = mt
+		payload["save_updated"] = updated
 	}
 	writeJSON(w, payload)
 }
@@ -254,6 +256,7 @@ func (s *server) handleProgress(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	ok, body, _ := progress.snapshot()
+	progress.clearUpdated()
 	if !ok || len(body) == 0 {
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		corsHeaders(w)

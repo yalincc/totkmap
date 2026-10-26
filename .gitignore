@@ -49,7 +49,22 @@ __pycache__/
 # 任务内容体检清单（由 tools/task_check.py 生成，可重跑刷新）
 待补作业清单.md
 
-# xnavi 运行产物（源码入库，V2.4.0 起；产物不入库：exe/日志/检查/截图/机器相关数据）
+# totknavi / xnavi 运行产物（源码入库，V2.4.0 起；产物不入库：exe/日志/检查/截图/机器相关数据）
+totknavi/*.exe
+totknavi/*.log
+totknavi/*-check.txt
+totknavi/gui-shot*.png
+totknavi/known_*.json
+totknavi/status.json
+totknavi/coords-*.json
+totknavi/data-check.txt
+totknavi/build-check.txt
+totknavi/dir-check.txt
+totknavi/exe-check.txt
+totknavi/gui-check.txt
+totknavi/prog-check.txt
+totknavi/smoke6-check.txt
+totknavi/user-test-check.txt
 xnavi/*.exe
 xnavi/*.log
 xnavi/*-check.txt
@@ -87,13 +102,24 @@ certs/
 !**/CHANGELOG.md
 !xnavi/GUIDE.md
 !xnavi/TROUBLESHOOTING.md
+!totknavi/GUIDE.md
+!totknavi/TROUBLESHOOTING.md
 
 # GUI 编译产物与临时文件
-xnavi-gui/xnavi-gui.exe
+totknavi-gui/*.exe
+totknavi-gui/test/
+totknavi-gui/frontend/package.json.md5
+totknavi-gui/build/bin/
+totknavi-gui/frontend/dist/
+totknavi-gui/frontend/node_modules/
+xnavi-gui/*.exe
 xnavi-gui/test/
 xnavi-gui/frontend/package.json.md5
 
-# xnavi 一次性脚本与调试残留
+# totknavi / xnavi 一次性脚本与调试残留
+totknavi/*.py
+totknavi/exe-scan.txt
+totknavi/icon-src.txt
 xnavi/*.py
 xnavi/exe-scan.txt
 xnavi/icon-src.txt

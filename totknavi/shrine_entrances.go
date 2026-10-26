@@ -1,6 +1,6 @@
 // shrine_entrances.go — TOTK 神庙入口坐标表（v3.4）。
 //
-// 数据：xnavi/data/shrine_entrances.json（app 地图数据 + romfs 交叉验证，152 神庙：
+// 数据：totknavi/data/shrine_entrances.json（app 地图数据 + romfs 交叉验证，152 神庙：
 // cat=63 地表 120 + cat=109 天空 32；90 座与 romfs 入口 0.0m 级互证）。
 // 用途（2026-10-24 用户拍板方案）：
 //   - 进庙双条件判定：①入口匹配（进庙前一帧距入口 <30m，必要判据）

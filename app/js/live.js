@@ -1,6 +1,6 @@
 /* ============ TOTKMAP · 实时定位 + 导航面板（V1.8.0 M2） ============
  *
- * 对接本地定位服务（xnavi，端口 8766）：
+ * 对接本地定位服务（totknavi，端口 8766）：
  *   GET  /pos     玩家位置 + 目标（600ms 轮询）
  *   POST /target  设置 / 清除导航目标（含 layer，判断是否跨层）
  *
@@ -55,12 +55,12 @@
 
   /* V2.4.0 手机镜像：/botw/ 镜像页（手机/iPad 同 WiFi 访问，host=PC 局域网 IP，或 V2.4.1 https 隧道）
    * → 同源 location.origin；其余（PC 本机打开、在线站导航跳转 https://totk.yalin.site/?follow=1）→
-   * 保持旧版写死 http://127.0.0.1:8766 跨域连本机 xnavi。
+   * 保持旧版写死 http://127.0.0.1:8766 跨域连本机 totknavi。
    * ★ 2026-10-09 真机实测回退：不能用「非本机即同源」判定 —— 导航跳转打开的是在线站，
    *   同源判定会把 API 指到在线站自身（无 /pos）→ 定位失效（红点错/不跟随）。
    *   回归最初逻辑：只有 /botw/ 镜像页走同源，其余一律 127.0.0.1:8766。
-   * ★ V2.4.1：放开 protocol 限制（去掉了 === 'http:'）—— /botw/ 前缀只有 xnavi 静态托管会挂
-   *   （在线站部署在根路径，不会命中），https 隧道（cloudflared）同样由 xnavi 托管 /botw/，
+   * ★ V2.4.1：放开 protocol 限制（去掉了 === 'http:'）—— /botw/ 前缀只有 totknavi 静态托管会挂
+   *   （在线站部署在根路径，不会命中），https 隧道（cloudflared）同样由 totknavi 托管 /botw/，
    *   必须同源，否则隧道页定位连到 127.0.0.1 失效。 */
   var LIVE_API = (location.pathname.indexOf('/botw/') === 0)
     ? location.origin : 'http://127.0.0.1:8766';
@@ -78,6 +78,7 @@
   var target = null;                  // {x,y,name,type,layer} 服务端目标
   var follow = false, autoLayer = true, arriveM = ARRIVE_DEF, holdSec = HOLD_DEF, paused = false;
   var lastProgGen = null, lastProgFetch = 0;   // 存档进度代次（服务端 /pos.progressGen）
+  var lastSaveMtime = null;                    // 存档变动时间戳（/pos.save_mtime）
   var mirrorShown = false, lastLanUrl = '';      // V2.4.0 手机镜像面板状态 / 服务端 lanUrl
   var arrivedShown = false;
   var layerLock = null;                        // 手动层级锁定：null=自动，18/19/20=锁定该层（传送后恢复自动）
@@ -279,7 +280,7 @@
   var toastTimer = null;
 
   /* ---------------- 轮询 ----------------
-   * ★ 定位服务（xnavi）没启动时，浏览器会在控制台里
+   * ★ 定位服务（totknavi）没启动时，浏览器会在控制台里
    *   每 600ms 刷一条红色的 GET /pos  ERR_CONNECTION_REFUSED，
    *   刷一整天，人看着以为页面坏了。
    *
@@ -342,7 +343,7 @@
     } else {
       /* 服务不可达：退避，别再高频刷 */
       probeFail++;
-      /* sawOnline 不复位 —— xnavi 关掉后重新打开要能自动接回去，
+      /* sawOnline 不复位 —— totknavi 关掉后重新打开要能自动接回去，
          所以不做「一旦离线就永久降级」的判断。 */
     }
 
@@ -418,7 +419,7 @@
     }
     /* V2.4.0 手机镜像：服务端 lanUrl 变化 → 更新面板；
        ★ 2026-10-09：面板开着时，服务不可达 / 未定位 → 降级提示「未检测到本地定位服务」
-       （原逻辑只在 URL 变化时更新，xnavi 关闭后面板仍挂旧链接，用户无感知） */
+       （原逻辑只在 URL 变化时更新，totknavi 关闭后面板仍挂旧链接，用户无感知） */
     if (mirrorShown) {
       var lanOk = !!(p && p.ok && typeof p.lanUrl === 'string' && p.lanUrl);
       if (lanOk) {
@@ -428,14 +429,42 @@
         renderMirror('', true);
       }
     }
-    /* 存档进度代次：游戏内保存 → 存档 mtime 变化 → progressGen 变化 → 自动重新拉取进度
-       （BOTWmap 同机制：服务自动定位存档，网页无需上传；服务可达即检测，不依赖定位成功） */
+    /* 存档进度代次与实时变动推送：游戏内保存 → 存档 mtime 变化（或 save_updated === true / progressGen 变化） → 自动重新拉取进度 */
+    var saveChanged = false;
+    if (p && p.save_mtime != null) {
+      if (lastSaveMtime !== null && p.save_mtime !== lastSaveMtime) {
+        saveChanged = true;
+      }
+      lastSaveMtime = p.save_mtime;
+    }
+    if (p && p.save_updated === true) {
+      saveChanged = true;
+    }
     if (p && typeof p.progressGen === 'string' && p.progressGen && p.progressGen !== lastProgGen) {
       lastProgGen = p.progressGen;
+      saveChanged = true;
+    }
+
+    if (saveChanged) {
       var _n = Date.now();
-      if (_n - lastProgFetch > 3000 && window.TOTK_APP && window.TOTK_APP.syncProgressFromServer) {
+      if (_n - lastProgFetch > 800) {
         lastProgFetch = _n;
-        window.TOTK_APP.syncProgressFromServer();
+        fetch(LIVE_API + '/progress?t=' + _n, { cache: 'no-store' })
+          .then(function (r) { return r.json(); })
+          .then(function (res) {
+            if (!res || !res.ok || !Array.isArray(res.doneIds)) return;
+            if (window.TOTK_APP) {
+              if (typeof window.TOTK_APP.applyProgressDone === 'function') {
+                window.TOTK_APP.applyProgressDone(res.doneIds, null, res.newlyDone);
+              }
+              if (res.counts && typeof window.TOTK_APP.applyCounts === 'function') {
+                window.TOTK_APP.applyCounts(res);
+              } else if (typeof window.TOTK_APP.syncProgressFromServer === 'function') {
+                window.TOTK_APP.syncProgressFromServer();
+              }
+            }
+          })
+          .catch(function () {});
       }
     }
     tickArrival();
@@ -840,7 +869,7 @@
     map = window.TOTK.map;
     T = window.TOTK;
     try { follow = lsGet(LS_FOLLOW, '0') !== '0'; } catch (e) {}
-    /* V1.9.2 URL 上下文（xnavi 导航程序打开地图时带参，见《BOTWmap导航配合接口协议 v1》）：
+    /* V1.9.2 URL 上下文（totknavi 导航程序打开地图时带参，见《BOTWmap导航配合接口协议 v1》）：
      *   ?follow=1 → 导航启动，强制开启视图跟随并持久化（用户手动设置让位于导航启动意图）
      *   无 follow 参数 → 完全尊重本地持久化设置（手动打开行为不变） */
     try {
@@ -880,12 +909,12 @@
     setLocateBtns();
     bindFollowDrag();
     /* 自调度轮询（取代 setInterval）：离线时自动退避到 5s，
-   ★ 这样 xnavi 没启动也不会一直高频打 8766 端口。
+   ★ 这样 totknavi 没启动也不会一直高频打 8766 端口。
    用 setInterval 的话离线期间永远是 600ms，节流无从谈起。
    poll 内部即使抛错也不能断链，所以 catch 后仍继续排下一次。 */
     function scheduleNext() {
       var delay = probeFail > 0 ? OFFLINE_MAX_MS : POLL_MS;
-      /* 有连续失败时再往后推一点，避免刚关 xnavi 时的抖动 */
+      /* 有连续失败时再往后推一点，避免刚关 totknavi 时的抖动 */
       if (probeFail > 3) delay = Math.min(OFFLINE_MAX_MS * 2, 10000);
       setTimeout(function () {
         var pr;

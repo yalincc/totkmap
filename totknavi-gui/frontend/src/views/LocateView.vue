@@ -132,7 +132,7 @@
         </section>
       </div>
 
-      <!-- 右 6 列：本地解析进度（全量 20 类 + 紧凑） -->
+      <!-- 右 6 列：本地解析进度（全量 21 类 + 紧凑） -->
       <div class="col-span-6 flex flex-col min-h-0">
         <section class="bg-[#161b22] border border-slate-800 rounded-xl p-3 flex-1 flex flex-col min-h-0 justify-between">
           <div>
@@ -249,7 +249,7 @@ async function onEmuChange() {
   }
 }
 
-// 全量 20 类（与 core progressCounts 对齐）：key 是 core 中文类名（数据层），
+// 全量 21 类（与 core progressCounts 对齐）：key 是 core 中文类名（数据层），
 // label 走 i18n（英文界面显示官方英文译名，见 data/progressCategories.js）
 const allCategories = computed(() =>
   PROGRESS_CATEGORY_KEYS.map(key => ({ key, label: progressLabel(key) }))

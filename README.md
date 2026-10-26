@@ -33,8 +33,8 @@ TOTKmap/
 │   ├── vendor/                     ← 第三方库（Leaflet 等）
 │   └── tiles_obj/                  ← 三层地图瓦片（天空 / 地上 / 地下）
 ├── tasks/manual/                   ← 任务人工档案（YAML，任务卡片数据源，build 时并入 app/data/task-plan.js）
-├── xnavi/                          ← 定位核心工程（known 秒锁 / 指针链 / 自愈，双平台统一）
-├── xnavi-gui/                      ← 桌面导航程序 TOTKNavi-GUI（Wails 工程）
+├── totknavi/                       ← 定位核心工程（known 秒锁 / 指针链 / 自愈，双平台统一）
+├── totknavi-gui/                   ← 桌面导航程序 TOTKNavi-GUI（Wails 工程）
 ├── README.md                       ← 本说明
 ├── CHANGELOG.md                    ← 版本变更记录
 └── .gitignore                      ← 入库边界定义
@@ -53,7 +53,7 @@ TOTKmap/
 
 ## 实时角色导航（可选）
 
-配合 `xnavi/` 构建的本地定位服务 TOTKNavi.exe（连接 Ryujinx / Eden 模拟器内存读取坐标，默认端口 8766），在线地图可实时显示你在游戏里的位置：红点 + 轨迹 + 金色引导线 + 距离读数，支持自动跟随切层、到达自动清除。
+配合 `totknavi/` 构建的本地定位服务 TOTKNavi.exe（连接 Ryujinx / Eden 模拟器内存读取坐标，默认端口 8766），在线地图可实时显示你在游戏里的位置：红点 + 轨迹 + 金色引导线 + 距离读数，支持自动跟随切层、到达自动清除。
 
 **TOTKNavi-GUI**（桌面定位导航程序，Wails 构建）：启动即秒锁定位（known 快路径），侧边栏四页——实时定位（坐标/层/锁定来源状态卡）、导航目标（与地图双向同步，可清除）、存档进度（20 类收集进度）、设置；点「开始定位」后自动打开地图并跟随玩家。
 
@@ -105,7 +105,7 @@ TOTKmap/
 
 | 产品线 | Releases 前缀 | 当前版本 | 说明 |
 |---|---|---|---|
-| **网页地图（本仓库主体）** | `totkmap-vX.Y.Z` | **v2.6.0** | 中英双语 + 地图交互五项升级；在线版 <https://totk.yalin.site> 同步 |
-| **导航程序 TOTKNavi** | `totknavi-vX.Y.Z` | **v3.0.0** | 跨场景持久槽定位，传送 / 神庙零重扫，1.5 秒秒锁 |
+| **网页地图（本仓库主体）** | `totkmap-vX.Y.Z` | **v2.7.0** | 官方大世界宝箱 1,334 + 存档进度自动同步；在线版 <https://totk.yalin.site> 同步 |
+| **导航程序 TOTKNavi** | `totknavi-vX.Y.Z` | **v3.0.1** | 跨场景持久槽定位，传送 / 神庙零重扫，1.5 秒秒锁 |
 
 更新明细见 [CHANGELOG.md](CHANGELOG.md)。

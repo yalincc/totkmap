@@ -1,10 +1,10 @@
 # make-release.ps1 - package a self-contained nav release (nav + progress data only)
-# Usage: powershell -File make-release.ps1 [-Version TOTKNavi-v3.0.0]
+# Usage: powershell -File make-release.ps1 [-Version TOTKNavi-v3.0.1]
 # Output: release\<Version>\ with data\<required progress/sky files> + TOTKnavi.exe + totknavi-core.exe + docs
 # The map web app (app/) is NOT bundled: PC uses the online map (totk.yalin.site);
 # phone mirror (/botw/) without app/ serves the embedded fallback guide page.
 param(
-  [string]$Version = "TOTKNavi-v3.0.0"
+  [string]$Version = "TOTKNavi-v3.0.1"
 )
 $ErrorActionPreference = 'Stop'
 $root   = Split-Path -Parent $PSScriptRoot
@@ -27,7 +27,7 @@ foreach ($f in $required) {
   if (-not (Test-Path $src)) { throw "required data missing: $src" }
   Copy-Item $src $dataDst -Force
 }
-# copy shrine_entrances.json from xnavi/data
+# copy shrine_entrances.json from totknavi/data
 $shrineJson = Join-Path $PSScriptRoot "data\shrine_entrances.json"
 if (Test-Path $shrineJson) {
   Copy-Item $shrineJson $dataDst -Force
@@ -47,10 +47,13 @@ foreach ($f in $residue) {
 Get-ChildItem $rel -Filter *.log -File -ErrorAction SilentlyContinue | ForEach-Object {
   Remove-Item $_.FullName -Force; Write-Host "  [clean] removed residue: $($_.Name)"
 }
+Get-ChildItem $rel -Filter *.bak -File -ErrorAction SilentlyContinue | ForEach-Object {
+  Remove-Item $_.FullName -Force; Write-Host "  [clean] removed residue: $($_.Name)"
+}
 
 # 3) exes & apk
-Copy-Item (Join-Path $root "xnavi\totknavi-core.exe")                  $rel -Force
-Copy-Item (Join-Path $root "xnavi-gui\build\bin\TOTKnavi.exe")        $rel -Force
+Copy-Item (Join-Path $root "totknavi\totknavi-core.exe")                  $rel -Force
+Copy-Item (Join-Path $root "totknavi-gui\build\bin\TOTKnavi.exe")        $rel -Force
 $apkSrc = Join-Path $PSScriptRoot "xnavi-mirror.apk"
 if (Test-Path $apkSrc) {
   Copy-Item $apkSrc $rel -Force

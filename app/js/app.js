@@ -60,7 +60,7 @@
   var AREA_SKY = window.TOTK_AREA_SKY || [];
   var AREA_DEPTHS = window.TOTK_AREA_DEPTHS || [];
 
-  var VERSION = 'TOTKMAP V2.6.0';
+  var VERSION = 'TOTKMAP V2.7.0';
   var LS_DONE = 'totkmap_done_v1';
   var LS_CUSTOM = 'totkmap_custom_v1';
   var LS_LAYER = 'totkmap_layer_v1';
@@ -120,7 +120,7 @@
   /* ---------------- 数据访问 ---------------- */
   function catsOfLayer(layerId) {
     return CATALOGS.filter(function (c) {
-      return c.layer === layerId && c.name && c.name !== '未命名' && (c.count || 0) > 0;
+      return c.layer === layerId && c.name && c.name !== '未命名' && !c.hidden && (c.count || 0) > 0;
     });
   }
   function catById(layerId, id) {
@@ -238,6 +238,51 @@
     });
   }
 
+  /* 计算分类在当前图层的收集进度（已完成 / 总数） */
+  function getCatProgress(c) {
+    var total = c.count || 0;
+    var done = 0;
+    var cid = c.id;
+
+    // 1. 官方大世界宝箱 (9901, 9902, 9903)
+    if (cid === 9901 || cid === 9902 || cid === 9903) {
+      if (window.TOTK_CHESTS_OFFICIAL && Array.isArray(window.TOTK_CHESTS_OFFICIAL)) {
+        window.TOTK_CHESTS_OFFICIAL.forEach(function (ch) {
+          if (ch.layer === c.layer) {
+            if (state.done && state.done[ch.id]) done++;
+          }
+        });
+      }
+      return { done: done, total: total };
+    }
+
+    // 2. 双倍克洛格 (130 地表 98对/196点, 160 天空 2对/4点)
+    if (cid === 130 || cid === 160) {
+      var pairDone = 0;
+      var checkedPairs = {};
+      MARKERS.forEach(function (m) {
+        if (m.cat === cid && m.layer === c.layer) {
+          var startId = m.korokStartId || m.id;
+          if (!checkedPairs[startId]) {
+            checkedPairs[startId] = true;
+            if (state.done && (state.done[m.id] || (m.korokStartId && state.done[m.korokStartId]))) {
+              pairDone++;
+            }
+          }
+        }
+      });
+      return { done: pairDone, total: total };
+    }
+
+    // 3. 常规标点
+    MARKERS.forEach(function (m) {
+      if (m.cat === cid && m.layer === c.layer) {
+        if (state.done && state.done[m.id]) done++;
+      }
+    });
+    return { done: done, total: total };
+  }
+
   function buildCatalogPanel() {
     var list = $('catalogList');
     var cats = catsOfLayer(state.layer);
@@ -291,12 +336,14 @@
       html += '<div class="group-title"><span class="gt-name">' + esc(window.I18N ? window.I18N.groupOf(groupName[g]) : groupName[g]) + '</span>' +
         '<button type="button" class="grp-btn" data-grp="' + g + '" data-i18n-title="cat.groupToggleTip" title="' + esc(grpTip) + '"></button></div>';
       html += '<div class="cat-grid">';
+      var hasSaveData = state.done && Object.keys(state.done).length > 0;
       cs.forEach(function (c) {
         var on = state.selected[c.id] ? ' active' : '';
-        // 计数显示：有存档同步数据时显示「已完成/总数」，否则按 gamersky 方式只显示总数
-        // gamersky 式：分类列表只显示该分类标点总数，进度统一看「探索度」
-        var countText = String(c.count);
-        html += '<div class="cat-item' + on + '" data-cat="' + c.id + '">' +
+        var prog = getCatProgress(c);
+        var isAllDone = hasSaveData && prog.total > 0 && prog.done >= prog.total;
+        var doneClass = isAllDone ? ' cat-done' : '';
+        var countText = hasSaveData ? (prog.done + '/' + prog.total) : String(c.count);
+        html += '<div class="cat-item' + on + doneClass + '" data-cat="' + c.id + '">' +
           (c.icon ? '<img src="assets/icons/' + esc(c.icon) + '" alt="">' : '<img src="assets/icons/origin_3845393_70484.png" alt="">') +
           '<span class="cat-name">' + esc(window.I18N ? window.I18N.catOf(c.name) : c.name) + '</span>' +
           '<span class="cat-count">' + esc(countText) + '</span>' +
@@ -356,12 +403,23 @@
   function saveSelected() { saveJson(LS_SELECTED, state.selectedByLayer); }
   function loadSelected() {
     state.selectedByLayer = loadJson(LS_SELECTED, {}) || {};
+    // 物理剔除旧版 252 处宝箱分类缓存 (75, 98, 120)，杜绝历史缓存导致空框或残影
+    Object.keys(state.selectedByLayer).forEach(function (k) {
+      if (state.selectedByLayer[k]) {
+        delete state.selectedByLayer[k][75];
+        delete state.selectedByLayer[k][98];
+        delete state.selectedByLayer[k][120];
+      }
+    });
   }
   /* 保证 state.selected 指向当前层的对象（首次时建空对象） */
   function bindSelected() {
     var l = state.layer;
     if (!state.selectedByLayer[l]) state.selectedByLayer[l] = {};
     state.selected = state.selectedByLayer[l];
+    delete state.selected[75];
+    delete state.selected[98];
+    delete state.selected[120];
   }
   /* 该层是否已经由用户选过（区别于"默认兜底"） */
   function hasUserSelection(l) {
@@ -390,9 +448,9 @@
     if (catName === '鸟望台') return 'tower';
     if (catName === '树根') return 'root';
     if (catName === '克洛格' || catName === '双倍克洛格') return 'korok';
-    if (catName === '宝箱') return 'chest';
-    if (catName === '武器' || catName === '弓与箭' || catName === '盾牌' || catName === '防具') return 'equip';
-    if (catName === '卡邦达立牌') return 'sign';
+    if (catName === '宝箱' || catName === '大世界宝箱' || catName === '官方宝箱') return 'chest';
+    if (catName === '武器' || catName === '弓与箭' || catName === '弓箭' || catName === '盾牌' || catName === '防具') return 'equip';
+    if (catName === '卡邦达' || catName === '卡邦达立牌') return 'sign';
     if (catName === '任务') return 'task';
     // 官方格廉斯勋章 6 类 BOSS（明确排除日常刷取的人马/莱尼尔）
     if (catName === '独眼巨人' || catName === '岩石巨人' || catName === '方块魔像' ||
@@ -402,7 +460,7 @@
 
   function isDoneHidden(hideType) {
     if (SETTINGS.doneMode !== 'hide') return false;
-    if (!hideType) return false;
+    if (!hideType) return true;
     if (!SETTINGS.hideDoneTypes) return true;
     return !!SETTINGS.hideDoneTypes[hideType];
   }
@@ -511,7 +569,7 @@
     if (!doneIconCache[key]) {
       doneIconCache[key] = L.divIcon({
         className: 'mk-done-icon',
-        html: '<img src="assets/icons/' + iconName + '" width="' + sz + '" height="' + sz + '" alt="">' +
+        html: '<img src="assets/icons/' + iconName + '" width="' + sz + '" height="' + sz + '" alt="" style="opacity:0.65;filter:grayscale(35%);">' +
               '<span class="mk-done-check">✓</span>',
         iconSize: [sz, sz],
         iconAnchor: [sz / 2, sz / 2],
@@ -567,6 +625,42 @@
       state.markers[m.id] = mk;
     });
 
+    /* V2.6.1: 官方大世界宝箱分层渲染 */
+    var chestCatId = (state.layer === 20 ? 9903 : (state.layer === 19 ? 9902 : 9901));
+    if (state.selected[chestCatId] && window.TOTK_CHESTS_OFFICIAL && Array.isArray(window.TOTK_CHESTS_OFFICIAL)) {
+      var chestCat = cats[chestCatId];
+      window.TOTK_CHESTS_OFFICIAL.forEach(function (ch) {
+        if (ch.layer !== state.layer) return;
+        var isDone = !!state.done[ch.id];
+        var hideType = 'chest';
+        if (isDone && isDoneHidden(hideType)) return;
+        if (state.filter === 'done' && !isDone) return;
+        if (state.filter === 'undone' && isDone) return;
+
+        var icon = isDone ? doneIconFor(chestCat, ch) : iconFor(chestCat, ch);
+        var opt = { riseOnHover: true };
+        if (icon) opt.icon = icon;
+        var lat = (ch.z !== undefined) ? ch.z : (ch.pos_3d ? ch.pos_3d[2] : 0);
+        var lng = (ch.x !== undefined) ? ch.x : (ch.pos_3d ? ch.pos_3d[0] : 0);
+        var mk = L.marker([lat, lng], opt);
+        mk._totkMarker = ch;
+        var dispDrop = ch.drop_zh || ch.drop || '官方宝箱';
+        var tooltipText = (isDone ? '✓ ' : '') + dispDrop;
+        mk.bindTooltip(tooltipText, {
+          direction: 'top',
+          offset: [0, -12],
+          className: 'mk-label' + (isDone ? ' done-label' : '')
+        });
+        (function (chh) {
+          mk.on('click', function (e) { openChestDetail(chh, e); });
+        })(ch);
+
+        if (!state.groups[chestCatId]) state.groups[chestCatId] = L.layerGroup();
+        state.groups[chestCatId].addLayer(mk);
+        state.markers[ch.id] = mk;
+      });
+    }
+
     Object.keys(state.groups).forEach(function (k) { state.groups[k].addTo(map); });
     renderCustomMarks();
     refreshLabels();
@@ -585,7 +679,7 @@
       if (!mk || !mk._totkMarker) continue;
       var m = mk._totkMarker;
       var isDone = !!state.done[m.id];
-      var cat = cats[m.cat];
+      var cat = cats[m.cat] || (m.id && String(m.id).indexOf('c_') === 0 ? cats[state.layer === 20 ? 9903 : (state.layer === 19 ? 9902 : 9901)] : null);
       var icon = isDone ? doneIconFor(cat, m) : iconFor(cat, m);
       if (icon) mk.setIcon(icon);
     }
@@ -847,6 +941,22 @@
   }
 
   /* V1.8.0 M3: 探索标点 → 独立探索卡片（与材料卡片完全分离，不共用模板/无图） */
+  function openChestDetail(ch, evt) {
+    state.current = ch;
+    var doneId = ch.id;
+    var descText = '掉落物品：' + (ch.drop_zh || ch.drop) + '\n' +
+                   '位置类型：' + (ch.location_type_zh || '野外宝箱') + ' (' + (ch.height_desc || '') + ')\n' +
+                   'GUID: ' + (ch.guid || '');
+    showExploreCard({
+      name: ch.drop_zh || ch.drop || '宝箱',
+      cat: '宝箱',
+      desc: descText,
+      m: { id: ch.id, x: ch.z, y: ch.x, layer: ch.layer, name: ch.drop_zh || '宝箱' },
+      isDone: !!state.done[doneId],
+      evt: evt
+    });
+  }
+
   function openDetail(m, evt) {
     state.current = m;
     var cat = catById(state.layer, m.cat);
@@ -1843,41 +1953,139 @@
       // 旧键迁移：呀哈哈 → 克洛格
       if (p['呀哈哈'] && !p['克洛格']) { p['克洛格'] = p['呀哈哈']; delete p['呀哈哈']; }
       if (p['双倍呀哈哈'] && !p['双倍克洛格']) { p['双倍克洛格'] = p['双倍呀哈哈']; delete p['双倍呀哈哈']; }
+      if (p['大世界宝箱'] && !p['宝箱']) { p['宝箱'] = p['大世界宝箱']; delete p['大世界宝箱']; }
       state.save = p;
       state.saveVersion = saved.version || null;
     }
   }
   /* ---------------- 探索度（V2.6.0 改版） ----------------
    * 对齐 BOTWmap stats 面板：四大组 + 双列紧凑纯数字网格（去掉单薄进度条）。
-   * ★ 存档解析器 collect() 实际产出 20 类，旧版 PROGRESS_ORDER 只列了 9 类，
+   * ★ 存档解析器 collect() 实际产出 21 类（V2.7.0 起含官方大世界宝箱），旧版 PROGRESS_ORDER 只列了 9 类，
    *   白白丢掉 6 类 Boss 讨伐 + 地洞/洞穴/井 + 残旧地图 + 设计图石板。
    *   现在按「探索 / 任务 / 收集 / 讨伐」四组全部呈现，数据源不用新增。
    */
+  /* ---------------- 探索度看板（PROGRESS_GROUPS 四组实时更新） ---------------- */
   var PROGRESS_GROUPS = [
-    { key: 'explore', cn: '探索', items: ['神庙', '树根', '鸟望台', '龙之泪', '地洞入口', '洞穴入口', '井'] },
-    { key: 'quest', cn: '任务', items: null },  // 四档由 TaskData 实时统计
-    { key: 'collect', cn: '收集', items: ['克洛格', '双倍克洛格', '魔犹伊遗失物', '贤者的遗志', '卡邦达立牌', '残旧的地图', '设计图石板'] },
-    { key: 'hunt', cn: '讨伐', items: ['独眼巨人', '岩石巨人', '莫尔德拉吉克', '方块魔像', '巨霸伽马', '古栗欧克'] }
+    { key: 'explore', cn: '基础探索', items: ['神庙', '树根', '鸟望台', '龙之泪', '地洞入口', '洞穴入口', '井'] },
+    { key: 'collect', cn: '收集要素', items: ['克洛格', '宝箱', '魔犹伊遗失物', '贤者的遗志', '卡邦达立牌', '残旧的地图', '设计图石板', '左纳乌制造机'] },
+    { key: 'hunt', cn: '战斗讨伐', items: ['独眼巨人', '岩石巨人', '巨霸伽马', '方块魔像', '古栗欧克', '莫尔德拉吉克'] },
+    { key: 'quest', cn: '任务挑战', items: null }
   ];
 
-  /* 任务四档完成数：全库统计（不分图层），完成态走 TaskDone（存档 + 手动都算） */
+  var PROGRESS_TOTALS = {
+    '神庙': 152, '树根': 120, '鸟望台': 15, '龙之泪': 12, '地洞入口': 36, '洞穴入口': 197, '井': 58,
+    '克洛格': 1000, '宝箱': 1334, '魔犹伊遗失物': 147, '贤者的遗志': 20, '卡邦达立牌': 81,
+    '残旧的地图': 31, '设计图石板': 46, '左纳乌制造机': 30,
+    '独眼巨人': 68, '岩石巨人': 90, '巨霸伽马': 40, '方块魔像': 34, '古栗欧克': 14, '莫尔德拉吉克': 4,
+    '主线任务': 23, '情节挑战': 66, '神庙挑战': 31, '迷你挑战': 165
+  };
+
+  /* 动态计算单项探索进度 [done, total] */
+  function getItemProgress(k) {
+    var saveObj = state.save ? state.save[k] : null;
+    var total = (saveObj && saveObj.total) || PROGRESS_TOTALS[k] || 0;
+    var done = saveObj ? saveObj.done : 0;
+
+    if (k === '克洛格') {
+      var sH = state.save ? (state.save['克洛格'] || { done: 0, total: 800 }) : { done: 0, total: 800 };
+      var sC = state.save ? (state.save['双倍克洛格'] || { done: 0, total: 100 }) : { done: 0, total: 100 };
+      var saveKDone = (sH.done || 0) + (sC.done || 0) * 2;
+      var mkKDone = 0;
+      if (typeof MARKERS !== 'undefined') {
+        var checkedPairs = {};
+        for (var i = 0; i < MARKERS.length; i++) {
+          var m = MARKERS[i];
+          if (m.cat === 73 || m.cat === 96 || m.cat === 118) {
+            if (state.done[m.id]) mkKDone++;
+          } else if (m.cat === 130 || m.cat === 145 || m.cat === 160) {
+            var startId = m.korokStartId || m.id;
+            if (!checkedPairs[startId]) {
+              checkedPairs[startId] = true;
+              if (state.done[m.id] || (m.korokStartId && state.done[m.korokStartId])) {
+                mkKDone += 2;
+              }
+            }
+          }
+        }
+      }
+      done = Math.max(saveKDone, mkKDone);
+      return [done, 1000];
+    }
+
+    if (k === '宝箱' || k === '大世界宝箱') {
+      var saveChest = (saveObj && saveObj.done) || (state.save && state.save['宝箱'] && state.save['宝箱'].done) || 0;
+      var mkChest = 0;
+      if (window.TOTK_CHESTS_OFFICIAL && Array.isArray(window.TOTK_CHESTS_OFFICIAL)) {
+        for (var ci = 0; ci < window.TOTK_CHESTS_OFFICIAL.length; ci++) {
+          var ch = window.TOTK_CHESTS_OFFICIAL[ci];
+          if (ch && state.done[ch.id]) mkChest++;
+        }
+      } else {
+        for (var did in state.done) {
+          if (state.done[did] && (/^(chest_|tbox_|c_)/i.test(did))) {
+            mkChest++;
+          }
+        }
+      }
+      done = Math.max(saveChest, mkChest);
+      return [done, 1334];
+    }
+
+
+    var mkCatDone = 0;
+    if (typeof MARKERS !== 'undefined') {
+      for (var j = 0; j < MARKERS.length; j++) {
+        var mm = MARKERS[j];
+        if (state.done[mm.id]) {
+          var cats = window.TOTK_CATALOGS || [];
+          for (var ci = 0; ci < cats.length; ci++) {
+            if (cats[ci].id === mm.cat) {
+              if (cats[ci].name === k || (k === '井' && cats[ci].name.indexOf('井') >= 0)) {
+                mkCatDone++;
+              }
+              break;
+            }
+          }
+        }
+      }
+    }
+    done = Math.max(done, mkCatDone);
+    return [done, total];
+  }
+
+  /* 任务挑战四档完成数：主线任务 (23), 情节挑战 (66), 神庙挑战 (31), 迷你挑战 (165) */
   function questProgressPairs() {
     var TD = window.TaskData, TDN = window.TaskDone;
-    if (!TD || !TD.tasks) return [];
-    var order = TD.catOrder || ['主剧情挑战', '情节挑战', '神庙挑战', '迷你挑战'];
-    return order.map(function (cat) {
-      var list = TD.tasks.filter(function (t) { return (t.group || '迷你挑战') === cat; });
+    var groups = [
+      { key: '主剧情挑战', name: '主线任务', total: 23 },
+      { key: '情节挑战', name: '情节挑战', total: 66 },
+      { key: '神庙挑战', name: '神庙挑战', total: 31 },
+      { key: '迷你挑战', name: '迷你挑战', total: 165 }
+    ];
+    if (!TD || !TD.tasks) {
+      return groups.map(function (g) {
+        var title = window.I18N ? window.I18N.t('task.group.' + g.key, g.name) : g.name;
+        return [title, 0, g.total];
+      });
+    }
+    return groups.map(function (g) {
+      var list = TD.tasks.filter(function (t) { return (t.group || '迷你挑战') === g.key; });
       var done = list.filter(function (t) { return TDN && TDN.isDone(t.key); }).length;
-      return [window.I18N ? window.I18N.groupOf(cat) : cat, done, list.length];
-    }).filter(function (r) { return r[2] > 0; });
+      var tot = list.length || g.total;
+      var title = window.I18N ? window.I18N.t('task.group.' + g.key, g.name) : g.name;
+      return [title, done, tot];
+    });
   }
 
   function progressGrid(pairs) {
     var rows = '';
     pairs.forEach(function (r, i) {
+      var done = r[1] || 0;
+      var total = r[2] || 0;
+      var pct = total > 0 ? Math.round((done / total) * 100) : 0;
       rows += '<div class="prog-row' + (i % 2 === 1 ? ' col2' : '') + '">' +
         '<span class="pr-name">' + esc(r[0]) + '</span>' +
-        '<span class="pr-val">' + r[1] + '/' + r[2] + '</span></div>';
+        '<span class="pr-val">' + done + '/' + total + '<span class="pr-pct"> (' + pct + '%)</span></span></div>';
     });
     return '<div class="prog-grid">' + rows + '</div>';
   }
@@ -1885,19 +2093,22 @@
   function renderProgress() {
     var list = $('progressList');
     if (!list) return;
-    if (!state.save) {
+    if (!state.save && Object.keys(state.done).length === 0) {
       list.innerHTML = '<div class="progress-empty" data-i18n="progress.empty">' + (window.I18N ? window.I18N.t("progress.empty") : "加载存档后显示探索进度（神庙 / 树根 / 克洛格等收集百分比）") + '</div>';
       return;
     }
-    var html = '<div class="prog-synced">' + (window.I18N ? window.I18N.t('progress.synced', '存档已同步 ✓') : '存档已同步 ✓') + '</div>';
+    var html = state.save
+      ? ('<div class="prog-synced">' + (window.I18N ? window.I18N.t('progress.synced', '存档已同步 ✓') : '存档已同步 ✓') + '</div>')
+      : ('<div class="prog-synced" style="color:rgba(255,255,255,.6)">' + (window.I18N ? window.I18N.t('progress.local', '当前探索进度') : '当前探索进度') + '</div>');
     var any = false;
     PROGRESS_GROUPS.forEach(function (g) {
       var pairs = [];
       if (g.items) {
         g.items.forEach(function (k) {
-          var s = state.save[k];
-          if (!s || !s.total) return;
-          pairs.push([window.I18N ? window.I18N.catOf(k) : k, s.done, s.total]);
+          var prog = getItemProgress(k);
+          if (!prog || !prog[1]) return;
+          var dispName = window.I18N ? window.I18N.catOf(k) : k;
+          pairs.push([dispName, prog[0], prog[1]]);
         });
       } else {
         pairs = questProgressPairs();
@@ -2007,6 +2218,7 @@
     reader.readAsArrayBuffer(file);
   }
 
+
   $('saveFileInput').addEventListener('change', function () {
     var file = this.files && this.files[0];
     this.value = '';
@@ -2108,45 +2320,106 @@
   /* ============================================================
      V1.8.0 M3：独立探索卡片 + 探索队列桥接（材料卡片体系保持原样）
      ============================================================ */
-  /* 权威合并完成点（可逐点判定类别：鸟望台/龙之泪/魔犹伊）——存档为准 */
-  function applyProgressDone(doneIds) {
-    var map = window.TOTK_EXPLORE_MAP || {};
+  /* 权威合并完成点（纯数据驱动写入 state.done） */
+  function applyProgressDone(doneIds, mappedPool, newlyDone) {
     var set = {};
     (doneIds || []).forEach(function (id) { set[id] = true; });
     var changed = false;
-    [['towers', map.towers], ['tears', map.tears], ['bubbuls', map.bubbuls]].forEach(function (pair) {
-      var tbl = pair[1];
-      if (!tbl) return;
-      for (var id in tbl) {
-        var on = !!set[id];
-        if (on && !state.done[id]) { state.done[id] = true; changed = true; }
-        else if (!on && state.done[id]) { delete state.done[id]; changed = true; }
+
+    // 1. 所有已判定的点置为 true
+    for (var id in set) {
+      if (!state.done[id]) {
+        state.done[id] = true;
+        changed = true;
       }
-    });
-    if (changed) {
+    }
+
+    // 2. 权威解绑：对在映射池中但存档中未达成的点予以清除
+    var pool = mappedPool;
+    if (!pool || pool.length === 0) {
+      var map = window.TOTK_EXPLORE_MAP || {};
+      pool = [];
+      for (var cat in map) {
+        var tbl = map[cat];
+        if (tbl && typeof tbl === 'object') {
+          for (var xid in tbl) pool.push(xid);
+        }
+      }
+      var cList = window.TOTK_CHESTS_OFFICIAL || window.CHESTS_OFFICIAL;
+      if (Array.isArray(cList)) {
+        for (var ci = 0; ci < cList.length; ci++) {
+          if (cList[ci] && cList[ci].id != null) pool.push(cList[ci].id);
+        }
+      }
+    }
+    if (pool && pool.length > 0) {
+      for (var i = 0; i < pool.length; i++) {
+        var pid = pool[i];
+        if (!set[pid] && state.done[pid]) {
+          delete state.done[pid];
+          changed = true;
+        }
+      }
+    }
+
+    // 3. 若有刚刚开启的官方宝箱（c_xxx），自动从 window.TOTK_CHESTS_OFFICIAL 查出其中文道具名 drop_zh，弹出友好 Toast 提示
+    if (Array.isArray(newlyDone) && newlyDone.length > 0) {
+      var chestList = window.TOTK_CHESTS_OFFICIAL;
+      newlyDone.forEach(function (nid) {
+        if (String(nid).indexOf('c_') === 0 && Array.isArray(chestList)) {
+          for (var ci = 0; ci < chestList.length; ci++) {
+            if (chestList[ci].id === nid) {
+              var dropZh = chestList[ci].drop_zh || chestList[ci].drop || '官方宝箱';
+              toast('🎮 存档已自动同步：已开启宝箱【' + dropZh + '】✓');
+              break;
+            }
+          }
+        }
+      });
+    }
+
+    if (changed || (Array.isArray(newlyDone) && newlyDone.length > 0)) {
       saveDone();
       renderMarkers();
+      if (window.KorokLayer && window.KorokLayer.render) window.KorokLayer.render();
       buildCatalogPanel();
       updateCount();
+      renderProgress();
     }
   }
 
-  /* 上传存档 → 逐点完成注入（走同一权威合并） */
+  /* 上传存档 → 逐点完成注入（走纯数据驱动 matchExploreDone） */
   function applySavePointDone(parsed) {
     var map = window.TOTK_EXPLORE_MAP || {};
-    var pd = TOTKSaveParser.pointDone(parsed, map);
-    applyProgressDone(Object.keys(pd || {}).map(Number));
+    var chestsOfficial = window.TOTK_CHESTS_OFFICIAL || window.CHESTS_OFFICIAL || null;
+    var pd = TOTKSaveParser.matchExploreDone(parsed, map, chestsOfficial);
 
-    /* V2.1 M5: 任务完成态同样以存档为准。
-     * 机制：hash('Step_<任务key>') 查到 hash 表 → 值等于 hash('Complete') 即完成。
-     * 实测 285/285 全部命中（见 TOTK任务存档同步机制-调研结论.md）。
-     * TaskDone 内部与 localStorage 手动态合并，存档优先。 */
+    var mappedPool = [];
+    for (var cat in map) {
+      var tbl = map[cat];
+      if (tbl && typeof tbl === 'object') {
+        for (var mid in tbl) mappedPool.push(mid);
+      }
+    }
+    if (chestsOfficial) {
+      if (Array.isArray(chestsOfficial)) {
+        for (var i = 0; i < chestsOfficial.length; i++) {
+          var c = chestsOfficial[i];
+          if (c && c.id != null) mappedPool.push(c.id);
+        }
+      } else if (typeof chestsOfficial === 'object') {
+        for (var cid in chestsOfficial) mappedPool.push(cid);
+      }
+    }
+
+    applyProgressDone(Object.keys(pd || {}), mappedPool);
+
+    /* V2.1 M5: 任务完成态同样以存档为准 */
     try {
       if (window.TaskDone) {
         window.TaskDone.applySave(TOTKSaveParser.questDone(parsed, window.TOTK_TASK_SAVE));
       }
     } catch (err) {
-      /* 任务存档同步失败不该影响探索类的进度应用 */
       if (window.console) console.warn('任务存档同步失败', err);
     }
   }
@@ -2154,7 +2427,7 @@
   /* V1.8.0 M3：服务端存档自动同步（BOTWmap 同机制——服务自动定位存档、网页拉取、
    * 游戏内保存后 mtime 变化 → progressGen 变化 → live.js 触发本函数自动刷新） */
   var serverSaveSlot = '';
-  /* V1.9.2 URL 上下文（xnavi 打开地图带 ?game=，见《BOTWmap导航配合接口协议 v1》）：
+  /* V1.9.2 URL 上下文（totknavi 打开地图带 ?game=，见《BOTWmap导航配合接口协议 v1》）：
    * 仅用于异口径进度提示；?follow=1 由 live.js 消费 */
   var urlGame = null, progWarned = false;
   try { urlGame = new URLSearchParams(location.search).get('game'); } catch (e) {}
@@ -2164,7 +2437,7 @@
       .then(function (r) { return r.json(); })
       .then(function (res) {
         if (!res || !res.ok) return;
-        /* V1.9.2 口径防御（协议 §2.3，线上 Bug3 教训）：xnavi /progress 按当前游戏分两种口径——
+        /* V1.9.2 口径防御（协议 §2.3，线上 Bug3 教训）：totknavi /progress 按当前游戏分两种口径——
          * TOTK = doneIds；BOTW = points（无 doneIds）。无 doneIds 即异口径/格式不符，
          * 整段跳过、保留现状，绝不把 BOTW 口径的 counts 当 TOTK 进度应用 */
         if (!Array.isArray(res.doneIds)) {
@@ -2176,7 +2449,7 @@
           }
           return;
         }
-        applyProgressDone(res.doneIds);
+        applyProgressDone(res.doneIds, null, res.newlyDone);
         /* V2.1 M5: 服务端同步路径的任务完成态。
          * questDone = {任务key: {done, stage, idx, total}}，由 server.py 的
          * _quest_done() 用同一套 hash 机制算出（与前端 questDone 同口径）。 */
@@ -2188,6 +2461,14 @@
           }
         }
         if (res.counts) {
+          if (res.counts['大世界宝箱'] && !res.counts['宝箱']) {
+            res.counts['宝箱'] = res.counts['大世界宝箱'];
+            delete res.counts['大世界宝箱'];
+          }
+          if (res.counts['呀哈哈'] && !res.counts['克洛格']) {
+            res.counts['克洛格'] = res.counts['呀哈哈'];
+            delete res.counts['呀哈哈'];
+          }
           state.save = res.counts;
           state.saveVersion = (res.version || '') + ' · 服务端自动同步';
           var m = String(res.save || '').match(/slot_(\d+)/);
@@ -2207,6 +2488,26 @@
     var mk = state.markers[mid];
     if (!mk) return;
     var m = null;
+    if (String(mid).indexOf('c_') === 0 && window.TOTK_CHESTS_OFFICIAL) {
+      for (var ci = 0; ci < window.TOTK_CHESTS_OFFICIAL.length; ci++) {
+        if (window.TOTK_CHESTS_OFFICIAL[ci].id === mid) {
+          m = window.TOTK_CHESTS_OFFICIAL[ci];
+          break;
+        }
+      }
+      if (m) {
+        var chestCatId = (m.layer === 20 ? 9903 : (m.layer === 19 ? 9902 : 9901));
+        var _c = catById(state.layer, chestCatId);
+        mk.setIcon(state.done[mid] ? doneIconFor(_c, m) : iconFor(_c, m));
+        mk.unbindTooltip();
+        var dispDrop = m.drop_zh || m.drop || '官方宝箱';
+        mk.bindTooltip((state.done[mid] ? '✓ ' : '') + dispDrop, {
+          direction: 'top', offset: [0, -12],
+          className: 'mk-label' + (state.done[mid] ? ' done-label' : '')
+        });
+        return;
+      }
+    }
     for (var i = 0; i < MARKERS.length; i++) {
       if (String(MARKERS[i].id) === String(mid)) { m = MARKERS[i]; break; }
     }
@@ -2571,6 +2872,27 @@
     applyDoneToMarker: applyDoneToMarker,
     buildCatalogPanel: buildCatalogPanel,
     updateCount: updateCount,
+    renderProgress: renderProgress,
+    applyCounts: function (res) {
+      if (!res || !res.counts) return;
+      if (res.counts['大世界宝箱'] && !res.counts['宝箱']) {
+        res.counts['宝箱'] = res.counts['大世界宝箱'];
+        delete res.counts['大世界宝箱'];
+      }
+      if (res.counts['呀哈哈'] && !res.counts['克洛格']) {
+        res.counts['克洛格'] = res.counts['呀哈哈'];
+        delete res.counts['呀哈哈'];
+      }
+      state.save = res.counts;
+      state.saveVersion = (res.version || '') + ' · 服务端自动同步';
+      var m = String(res.save || '').match(/slot_(\d+)/);
+      serverSaveSlot = m ? m[1] : '';
+      renderProgress();
+      buildCatalogPanel();
+      updateCount();
+      var btn = $('saveSyncBtn');
+      if (btn) btn.textContent = serverSaveSlot ? ('存档自动同步 ✓（slot_' + serverSaveSlot + '）') : '存档自动同步 ✓';
+    },
     syncProgressFromServer: syncProgressFromServer,
     matById: function (mid) { return matById[mid]; },
     matName: function (mid) { var m = matById[mid]; return m ? m.cn : ('材料' + mid); },

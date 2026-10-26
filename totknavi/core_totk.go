@@ -40,6 +40,7 @@ import (
 type candSlot struct {
 	addr uintptr
 	init [3]float32
+	rot  bool
 }
 
 // trackerOpts 管道平台差异注入。
@@ -68,6 +69,7 @@ func runTotkPipeline(p Platform, opts trackerOpts, rescanCh chan *RescanRequest,
 	defer tick.Stop()
 
 	var lockedAddr uintptr
+	var lockedIsRot bool
 	var cur, prev [3]float32
 	hasPrev := false
 	verified := false
@@ -83,6 +85,7 @@ func runTotkPipeline(p Platform, opts trackerOpts, rescanCh chan *RescanRequest,
 
 	reset := func(reason string) {
 		lockedAddr = 0
+		lockedIsRot = false
 		hasPrev = false
 		verified = false
 		moveN = 0
@@ -186,6 +189,7 @@ func runTotkPipeline(p Platform, opts trackerOpts, rescanCh chan *RescanRequest,
 
 		best := groups[0]
 		lockedAddr = best.Addr
+		lockedIsRot = best.Rot
 		// 内存序 (X, Z_stored, Y_north) → hud 序 (X, -Y北, Z_stored-elevBias)
 		cur = [3]float32{best.P[0], -best.P[2], best.P[1] - elevBias}
 		prev = cur
@@ -198,8 +202,8 @@ func runTotkPipeline(p Platform, opts trackerOpts, rescanCh chan *RescanRequest,
 		lastUnverifiedHint = time.Time{}
 
 		nCand := len(groups)
-		if nCand > 5 {
-			nCand = 5
+		if nCand > 10 {
+			nCand = 10
 		}
 		cands = make([]candSlot, nCand)
 		for i := 0; i < nCand; i++ {
@@ -207,6 +211,7 @@ func runTotkPipeline(p Platform, opts trackerOpts, rescanCh chan *RescanRequest,
 			cands[i] = candSlot{
 				addr: g.Addr,
 				init: [3]float32{g.P[0], -g.P[2], g.P[1] - elevBias},
+				rot:  g.Rot,
 			}
 		}
 
@@ -286,6 +291,7 @@ func runTotkPipeline(p Platform, opts trackerOpts, rescanCh chan *RescanRequest,
 					}
 					if a, v, ok2 := ep.chainTry(h, refPos); ok2 {
 						lockedAddr = a
+						lockedIsRot = true
 						cur = v
 						prev = cur
 						hasPrev = true
@@ -414,8 +420,9 @@ func runTotkPipeline(p Platform, opts trackerOpts, rescanCh chan *RescanRequest,
 				}
 			}
 
-			// 走动确认与多候选走动仲裁：优先确认当前主锁（如 0x48 持久槽）自身累计位移 >=0.5m；
-			// 仅当主锁静止不动时，才仲裁切换到其他移动候选（防副槽抢走 0x48 持久主槽）。
+			// 走动确认与多候选走动仲裁：优先确认当前主锁自身累计位移 >=0.5m；
+			// 铁律：主锁若已命中 0x48 主模块持久槽（lockedIsRot=true），其地址跨场景永不销毁，
+			// 严禁仲裁切换给易被清零的临时堆副槽（锁定即永久锁定）。
 			if !verified && len(cands) > 0 {
 				dSelf := dist3(cur, cands[0].init)
 				if cands[0].addr == lockedAddr && dSelf >= 0.5 && dSelf < 150.0 {
@@ -424,7 +431,7 @@ func runTotkPipeline(p Platform, opts trackerOpts, rescanCh chan *RescanRequest,
 					setLock(lockedAddr, true, 1, opts.name+"-live")
 					fmt.Printf("  [lock] %s 角色移动确认成功！真身锁定 Addr: 0x%X (%.1f, %.1f, %.1f) -> 【已完全锁定】 / Movement confirmed! Live actor locked at 0x%X -> [Fully locked]\n",
 						opts.name, lockedAddr, cur[0], cur[1], cur[2], lockedAddr)
-				} else {
+				} else if !lockedIsRot {
 					for _, c := range cands {
 						if c.addr == lockedAddr {
 							continue
@@ -433,6 +440,7 @@ func runTotkPipeline(p Platform, opts trackerOpts, rescanCh chan *RescanRequest,
 							dCand := dist3(cd, c.init)
 							if dCand >= 0.5 && dCand < 150.0 {
 								lockedAddr = c.addr
+								lockedIsRot = c.rot
 								cur = cd
 								verified = true
 								cands = nil

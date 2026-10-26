@@ -1,8 +1,8 @@
-// progressCategories.js — 本地解析进度的 20 类别名映射
+// progressCategories.js — 本地解析进度的 21 类别名映射
 //
 // key = core status.json progressCounts 的中文类名（数据层，不翻译）；
 // 展示名走 i18n progress.* 路径（英文界面显示游戏官方英文译名）。
-// 与 i18n 两包的 progress 节、core progress_totk2.go 的 20 类一一对应。
+// 与 i18n 两包的 progress 节、core progress_totk2.go 的 21 类一一对应。
 import { i18n } from '../i18n'
 
 // i18n key（不是文案）：两类包各有一份文案
@@ -18,6 +18,7 @@ const KEY_TO_I18N = {
   '贤者的遗志': 'sageWills',
   '设计图石板': 'schemas',
   '卡邦达立牌': 'addison',
+  '宝箱': 'chests',
   '独眼巨人': 'hinoxes',
   '岩石巨人': 'taluses',
   '莫尔德拉吉克': 'moldugas',
@@ -29,7 +30,7 @@ const KEY_TO_I18N = {
   '井': 'wells',
 }
 
-// 固定顺序的 20 个 key（与 core progressCounts 的全量类对齐）
+// 固定顺序的 21 个 key（与 core progressCounts 的全量类对齐）
 export const PROGRESS_CATEGORY_KEYS = Object.keys(KEY_TO_I18N)
 
 // 按当前界面语言取类别展示名；core 新增未知类时原样回落（不丢数据）

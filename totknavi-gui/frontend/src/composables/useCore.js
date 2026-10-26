@@ -48,7 +48,7 @@ export const pos = reactive({
 // ---- 导航目标（core status.json 补 target 字段后可用；未升级时保持 null）----
 export const target = ref(null)
 
-// ---- 存档进度（/progress 现算，core 全量 20 类）----
+// ---- 存档进度（/progress 现算，core 全量 21 类）----
 export const progressData = ref({})
 
 // ---- 配置 / 环境 ----

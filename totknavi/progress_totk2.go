@@ -49,27 +49,36 @@ func parseCompletismHashes() map[string][]string {
 
 // parseExploreMap 解析 data/explore_save_map.js。
 type exploreMap struct {
-	Towers  map[string]string `json:"towers"`
-	Tears   map[string]string `json:"tears"`
-	Bubbuls map[string]string `json:"bubbuls"`
+	Towers  map[string]string            `json:"towers"`
+	Tears   map[string]string            `json:"tears"`
+	Bubbuls map[string]string            `json:"bubbuls"`
+	Chests  map[string]string            `json:"chests"`
+	All     map[string]map[string]string `json:"-"`
 }
 
 func parseExploreMap() *exploreMap {
 	dir := dataDir()
 	buf, err := os.ReadFile(filepath.Join(dir, "explore_save_map.js"))
 	if err != nil {
-		return &exploreMap{}
+		return &exploreMap{All: make(map[string]map[string]string)}
 	}
-	re := regexp.MustCompile(`(?s)window\.TOTK_EXPLORE_MAP\s*=\s*(\{.*?\});`)
+	re := regexp.MustCompile(`(?s)window\.TOTK_EXPLORE_(?:SAVE_)?MAP\s*=\s*(\{.*?\});`)
 	m := re.FindStringSubmatch(string(buf))
 	if m == nil {
-		return &exploreMap{}
+		return &exploreMap{All: make(map[string]map[string]string)}
 	}
-	var em exploreMap
-	if json.Unmarshal([]byte(m[1]), &em) != nil {
-		return &exploreMap{}
+	var all map[string]map[string]string
+	if err := json.Unmarshal([]byte(m[1]), &all); err != nil {
+		return &exploreMap{All: make(map[string]map[string]string)}
 	}
-	return &em
+	em := &exploreMap{
+		Towers:  all["towers"],
+		Tears:   all["tears"],
+		Bubbuls: all["bubbuls"],
+		Chests:  all["chests"],
+		All:     all,
+	}
+	return em
 }
 
 // hval 读 hash 表对应值（与 js hval 同口径）。
@@ -125,7 +134,7 @@ type progressCount struct {
 }
 
 // progressCounts 与 js collect() / server.py _progress_counts() 完全同口径。
-func progressCounts(p *parsedSave, C map[string][]string) map[string]progressCount {
+func progressCounts(p *parsedSave, C map[string][]string, em *exploreMap) map[string]progressCount {
 	out := map[string]progressCount{}
 	cnt := func(name string, lst []string, val string) {
 		out[name] = progressCount{p.progressCount(lst, val), len(lst)}
@@ -149,6 +158,13 @@ func progressCounts(p *parsedSave, C map[string][]string) map[string]progressCou
 	sc := append(append([]string{}, C["SCHEMATICS_STONE_FOUND"]...), C["SCHEMATICS_YIGA_FOUND"]...)
 	cnt("设计图石板", sc, "")
 	cg("卡邦达立牌", C["ADDISON_COMPLETED"])
+	if em != nil && len(em.Chests) > 0 {
+		var chestGuids []string
+		for _, g := range em.Chests {
+			chestGuids = append(chestGuids, g)
+		}
+		cg("宝箱", chestGuids)
+	}
 	for zh, key := range map[string]string{
 		"独眼巨人":   "BOSSES_HINOXES_DEFEATED", "岩石巨人": "BOSSES_TALUSES_DEFEATED",
 		"莫尔德拉吉克": "BOSSES_MOLDUGAS_DEFEATED", "方块魔像": "BOSSES_FLUX_CONSTRUCT_DEFEATED",
@@ -161,52 +177,97 @@ func progressCounts(p *parsedSave, C map[string][]string) map[string]progressCou
 	return out
 }
 
-// buildDoneIds towers/tears hash==1、bubbuls guid 存在（与 server.py 同口径）。
-func buildDoneIds(p *parsedSave, em *exploreMap) ([]int, int) {
-	// 初始化为空 slice 而非 nil：JSON 输出 [] 而不是 null，前端不炸。
-	ids := make([]int, 0)
+// buildDoneIds 解析全要素完成状态（含字符串 ID，如官方宝箱 "c_1" ~ "c_1334" 以及普通数字 ID，返回 []string）。
+func buildDoneIds(p *parsedSave, em *exploreMap) ([]string, int) {
+	ids := make([]string, 0)
+	if em == nil || em.All == nil {
+		return ids, 0
+	}
+
+	clearHash := murmur3_32("Clear", 0)       // 0x62965740
+	openHash := murmur3_32("Open", 0)         // 0x1818ec02
+	completeHash := murmur3_32("Complete", 0) // 0x4c0a63f4
+
+	// 构建 GUID 集合（小写）加速 O(1) 查询
+	guidSet := make(map[string]struct{}, len(p.Guids))
+	for _, gs := range p.Guids {
+		guidSet[strings.ToLower(strings.TrimSpace(gs))] = struct{}{}
+	}
+
 	mapped := 0
-	for _, tbl := range []map[string]string{em.Towers, em.Tears} {
-		for mid, hv := range tbl {
+	doneSet := make(map[string]bool)
+
+	for catKey, tbl := range em.All {
+		if tbl == nil {
+			continue
+		}
+		for mid, target := range tbl {
 			mapped++
-			hvInt, err := strconv.ParseUint(strings.TrimPrefix(hv, "0x"), 16, 32)
+			target = strings.TrimSpace(target)
+			if target == "" {
+				continue
+			}
+
+			// 64 位 GUID（长度 > 10，如 "0x9aea511ed4800e33"）
+			if len(target) > 10 {
+				norm := strings.ToLower(target)
+				if _, ok := guidSet[norm]; ok {
+					if !doneSet[mid] {
+						doneSet[mid] = true
+						ids = append(ids, mid)
+					}
+				}
+				continue
+			}
+
+			// 32 位 Hash（长度 <= 10，如 "0x034a2acf"）
+			hvInt, err := strconv.ParseUint(strings.TrimPrefix(target, "0x"), 16, 32)
 			if err != nil {
 				continue
 			}
-			if v, ok := p.hval(uint32(hvInt)); ok && v == 1 {
-				if id, err := strconv.Atoi(mid); err == nil {
-					ids = append(ids, id)
+			if v, ok := p.hval(uint32(hvInt)); ok {
+				isDone := false
+				switch catKey {
+				case "shrines":
+					isDone = (v == clearHash || v == 1)
+				case "lightroots":
+					isDone = (v == openHash || v == 1)
+				case "koroks_carry":
+					isDone = (v == clearHash || v == 1)
+				case "quests":
+					isDone = (v == completeHash || v == 1)
+				default:
+					isDone = (v == 1)
+				}
+				if isDone {
+					if !doneSet[mid] {
+						doneSet[mid] = true
+						ids = append(ids, mid)
+					}
 				}
 			}
 		}
 	}
-	for mid, guid := range em.Bubbuls {
-		mapped++
-		for _, gs := range p.Guids {
-			if gs == guid {
-				if id, err := strconv.Atoi(mid); err == nil {
-					ids = append(ids, id)
-				}
-				break
-			}
-		}
-	}
-	sort.Ints(ids)
+
+	sort.Strings(ids)
 	return ids, mapped
 }
 
 // ---- watcher ----
 
 type progressWatcher struct {
-	mu         sync.RWMutex
-	ok         bool
-	body       []byte
-	gen        string
-	save       string
-	mtime      float64
-	init       bool
-	completism map[string][]string
-	emap       *exploreMap
+	mu          sync.RWMutex
+	ok          bool
+	body        []byte
+	gen         string
+	save        string
+	mtime       float64
+	lastMtime   float64
+	saveUpdated bool
+	prevDone    map[string]bool
+	init        bool
+	completism  map[string][]string
+	emap        *exploreMap
 }
 
 var progress *progressWatcher
@@ -241,30 +302,57 @@ func (w *progressWatcher) refresh() {
 		return
 	}
 	ids, mapped := buildDoneIds(p, w.emap)
-	counts := progressCounts(p, w.completism)
+	counts := progressCounts(p, w.completism, w.emap)
+
+	currDone := make(map[string]bool, len(ids))
+	for _, id := range ids {
+		currDone[id] = true
+	}
+
+	newlyDone := make([]string, 0)
+	if w.init && w.prevDone != nil {
+		for _, id := range ids {
+			if !w.prevDone[id] {
+				newlyDone = append(newlyDone, id)
+			}
+		}
+	}
+	sort.Strings(newlyDone)
+	w.prevDone = currDone
+
+	if w.init && mt != w.mtime {
+		w.saveUpdated = true
+	}
+	w.lastMtime = w.mtime
+	w.mtime = mt
+	w.save = path
+	w.gen = fmt.Sprintf("%s:%d", path, int64(math.Round(mt)))
+	w.ok = true
+
 	obj := map[string]any{
-		"ok":      true,
-		"version": p.Version,
-		"save":    path,
-		"doneIds": ids,
-		"mapped":  mapped,
-		"counts":  counts,
-		"mtime":   mt,
+		"ok":         true,
+		"version":    p.Version,
+		"save":       path,
+		"doneIds":    ids,
+		"newlyDone":  newlyDone,
+		"mapped":     mapped,
+		"counts":     counts,
+		"mtime":      mt,
+		"save_mtime": mt,
 	}
 	buf, _ := json.Marshal(obj)
 	w.body = buf
-	w.save = path
-	w.mtime = mt
-	w.gen = fmt.Sprintf("%s:%d", path, int64(math.Round(mt)))
-	w.ok = true
+
 	if !w.init {
 		fmt.Printf("  [progress] save=%s\n", path)
-		fmt.Printf("  [progress] doneIds=%d  towers/tears/bubbuls mapped=%d\n", len(ids), mapped)
-		for _, k := range []string{"鸟望台", "神庙", "树根", "克洛格", "魔犹伊遗失物", "卡邦达立牌"} {
+		fmt.Printf("  [progress] doneIds=%d  mapped=%d\n", len(ids), mapped)
+		for _, k := range []string{"鸟望台", "神庙", "树根", "克洛格", "魔犹伊遗失物", "卡邦达立牌", "宝箱"} {
 			if c, ok := counts[k]; ok {
 				fmt.Printf("    %s %d/%d\n", k, c.Done, c.Total)
 			}
 		}
+	} else if len(newlyDone) > 0 {
+		fmt.Printf("  [progress] save updated! newlyDone count=%d: %v\n", len(newlyDone), newlyDone)
 	}
 	w.init = true
 }
@@ -286,4 +374,16 @@ func (w *progressWatcher) snapshot() (bool, []byte, string) {
 	w.mu.RLock()
 	defer w.mu.RUnlock()
 	return w.ok, w.body, w.gen
+}
+
+func (w *progressWatcher) snapshotPos() (bool, string, float64, bool) {
+	w.mu.RLock()
+	defer w.mu.RUnlock()
+	return w.ok, w.gen, w.mtime, w.saveUpdated
+}
+
+func (w *progressWatcher) clearUpdated() {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+	w.saveUpdated = false
 }

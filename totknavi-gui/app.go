@@ -24,7 +24,7 @@ import (
 // guiVersion 导航程序版本（与地图网页版本解耦，见 BOTWmap 项目规则第 3 条）。
 // V1.4.9：UI 精简——移除"网页地图选定目标"卡；校准说明文案简化；
 //         校准按钮提交中保持原形状；锁定提示只显示地址。
-// V2.0.0：合并双平台核心（xnavi.exe，Ryujinx+Eden 统一）——新增模拟器选择
+// V2.0.0：合并双平台核心（totknavi-core.exe，Ryujinx+Eden 统一）——新增模拟器选择
 //         （自动/Ryujinx/Eden），存档设置保留，坐标校准文件通道适配新核心。
 // V2.1.1：新增「手机防息屏（Https）」开关 —— 核心启动时带 --tls，
 //         手机镜像页走 HTTPS（secure context，wakeLock 防息屏生效）。
@@ -32,7 +32,11 @@ import (
 //         预检弹窗（>50m 警告可强制继续，Vue 悬浮卡）。
 // V2.2.0：核心新增第 6 条锁定途径「指针链快路径」（跑动掉锁后毫秒级重锁）；
 //         GUI 侧无 UI 改动，仅版本号对齐核心。
-const guiVersion = "v3.0.0"
+// V3.0.1：全线品牌改名 xnavi -> totknavi（窗口标题、包名、镜像页统一）；
+//         进度看板新增第 21 类「宝箱」，分类计数文案 20 -> 21。
+// V3.0.0：跨场景持久槽定位（传送 / 神庙零重扫，1.5s 秒锁）；
+//         GUI 与核心版本解耦后同号对齐。
+const guiVersion = "v3.0.1"
 
 // App Wails 后端：管理核心子进程 + 读 status.json / xnavi-gui-core.log + 网页端端口探测。
 // 与核心的通信完全走文件（status.json、xnavi-gui-core.log），不依赖 8766 HTTP——
@@ -446,13 +450,13 @@ func (a *App) ClearTarget() string {
 	return "已请求清除目标（地图同步取消）"
 }
 
-// corePath 核心子进程 exe 路径：与 GUI 同目录的 xnavi.exe（V2.0.0 起双平台统一核心）。
+// corePath 核心子进程 exe 路径：与 GUI 同目录的 totknavi-core.exe（V2.0.0 起双平台统一核心）。
 // 命名不以模拟器为前缀：避免 findPid 的 HasPrefix 匹配误认核心进程。
 func (a *App) corePath() string {
 	return filepath.Join(a.workDir, "totknavi-core.exe")
 }
 
-// StartCore 启动核心子进程（xnavi.exe --no-open --emu=<auto|ryujinx|eden>）。
+// StartCore 启动核心子进程（totknavi-core.exe --no-open --emu=<auto|ryujinx|eden>）。
 // V2.0.0：双平台统一核心；模拟器由 Config.Emu 决定（默认 auto 自动探测）。
 // 重复调用会先停掉旧进程。
 func (a *App) StartCore() string {

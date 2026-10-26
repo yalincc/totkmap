@@ -221,6 +221,7 @@ window.TOTK_I18N.en = {
   "cat.克洛格": "Koroks",
   "cat.双倍克洛格": "Carry Koroks",
   "cat.宝箱": "Treasure Chests",
+  "cat.官方宝箱": "Official Chests",
   "cat.龙之泪": "Dragon's Tears",
   "cat.魔犹伊遗失物": "Bubbul Gems",
   "cat.残旧的地图": "Old Maps",

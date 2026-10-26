@@ -31,8 +31,8 @@ TOTKmap/
 │   ├── vendor/                     ← Third-party libs (Leaflet, etc.)
 │   └── tiles_obj/                  ← Three-layer map tiles (Sky / Surface / Depths)
 ├── tasks/manual/                   ← Manual task archives (YAML, source of task card data, merged into app/data/task-plan.js at build time)
-├── xnavi/                          ← Positioning core project (known instant-lock / pointer chain / self-healing, unified for both emulators)
-├── xnavi-gui/                      ← Desktop navigator TOTKNavi-GUI (Wails project)
+├── totknavi/                       ← Positioning core project (known instant-lock / pointer chain / self-healing, unified for both emulators)
+├── totknavi-gui/                   ← Desktop navigator TOTKNavi-GUI (Wails project)
 ├── README.md                       ← This file (Chinese)
 ├── README.en.md                    ← English version of this file
 ├── CHANGELOG.md                    ← Version history
@@ -52,7 +52,7 @@ TOTKmap/
 
 ## Real-Time Player Navigation (Optional)
 
-Pair it with the local positioning service `TOTKNavi.exe` (built from `xnavi/`, reads coordinates from Ryujinx / Eden emulator memory, default port 8766) and the online map shows your in-game position in real time: player dot + movement trail + golden guide line to the target + distance readout, with automatic layer following and auto-clear on arrival.
+Pair it with the local positioning service `TOTKNavi.exe` (built from `totknavi/`, reads coordinates from Ryujinx / Eden emulator memory, default port 8766) and the online map shows your in-game position in real time: player dot + movement trail + golden guide line to the target + distance readout, with automatic layer following and auto-clear on arrival.
 
 **TOTKNavi-GUI** (desktop positioning navigator, Wails build): instant lock on startup (known fast path), four sidebar pages — Live Positioning (coordinates / layer / lock-source status card), Navigation Target (two-way sync with the map, clearable), Save Progress (20 collection categories), Settings. Click "Start Positioning" and the map opens automatically and follows the player.
 
@@ -104,7 +104,7 @@ The two product lines are **released independently**, distinguished by prefix in
 
 | Product line | Releases prefix | Current | Notes |
 |---|---|---|---|
-| **Web map** (main product) | `totkmap-vX.Y.Z` | **v2.6.0** | Bilingual UI + five map interaction upgrades; online version <https://totk.yalin.site> follows along |
-| **Navigator TOTKNavi** | `totknavi-vX.Y.Z` | **v3.0.0** | Cross-scene persistent slot positioning, zero re-scan on warp / shrine, 1.5s lock |
+| **Web map** (main product) | `totkmap-vX.Y.Z` | **v2.7.0** | 1,334 official overworld chests + automatic save progress sync; online version <https://totk.yalin.site> follows along |
+| **Navigator TOTKNavi** | `totknavi-vX.Y.Z` | **v3.0.1** | Cross-scene persistent slot positioning, zero re-scan on warp / shrine, 1.5s lock |
 
 See [CHANGELOG.md](CHANGELOG.md) for details.

@@ -167,7 +167,7 @@ func statusLoop() {
 		}
 
 		// ---- GUI 套壳兼容字段 ----
-		// 让 xnavi-gui（Wails 前端）能直接显示 TOTK 的状态与进度。
+		// 让 totknavi-gui（Wails 前端）能直接显示 TOTK 的状态与进度。
 		// V1.1.0：progress 直接透传 /progress 的 counts（中文 key + {done,total} 对象，
 		// 全量 20 类），前端 ProgressView 按表渲染；旧版 GUI 只认英文 key，发布时
 		// GUI+core 同包更新，不兼容旧壳。

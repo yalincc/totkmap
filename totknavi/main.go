@@ -1,4 +1,4 @@
-// xnavi（TOTK live 追踪服务，合并版）
+// totknavi（TOTK live 追踪服务，合并版）
 //
 // 用途：在本地为互动地图 https://totk.yalin.site/ 提供实时角色追踪。
 // 原理：读 Ryujinx / Eden 模拟器进程内存定位玩家坐标 → HTTP API
@@ -8,7 +8,7 @@
 // 合并自 TOTKmap live-go（Ryujinx，V1.8.7）+ live-eden（Eden，V1.1）。
 // 定位核心（watch.go）是单一状态机，平台差异全部隔离在 platform*.go。
 //
-// 用法：xnavi.exe [port] [--emu=auto|ryujinx|eden] [--no-open] [--no-save] [--tls] [--tls-cert-dir=DIR]
+// 用法：totknavi-core.exe [port] [--emu=auto|ryujinx|eden] [--no-open] [--no-save] [--tls] [--tls-cert-dir=DIR]
 // V2.1.1：新增 --tls —— 8766 起 HTTPS（手机镜像页 secure context，wakeLock 防息屏生效）。
 // 证书默认取工作目录 certs/server.pem + server.key（certs/gen-cert.ps1 一键生成）。
 
@@ -37,9 +37,9 @@ import (
 const mapURL = "https://totk.yalin.site/?follow=1" // V2.4.0: 导航转跳地图直接 800% + 跟随
 
 func main() {
-	// GUI 壳（xnavi-gui）按 "YYYY-MM-DD HH:mm:ss.SSS" 前缀解析日志时间列。
+	// GUI 壳（totknavi-gui）按 "YYYY-MM-DD HH:mm:ss.SSS" 前缀解析日志时间列。
 	enableLogTimestamps()
-	setConsoleTitle("xnavi · TOTK Live")
+	setConsoleTitle("totknavi · TOTK Live")
 
 	port := 8766
 	autoOpen := true
@@ -78,14 +78,14 @@ func main() {
 	}
 
 	// 单实例锁（BOTW xnavi 同款）：避免同端口重复进程互相干扰。
-	if !acquireMutex("Local\\xnavi-totk") {
-		fmt.Println("  another xnavi instance is already running - exiting")
+	if !acquireMutex("Local\\totknavi") {
+		fmt.Println("  another totknavi instance is already running - exiting")
 		flushLog()
 		os.Exit(1)
 	}
 
 	fmt.Println("=" + strings.Repeat("=", 61))
-	fmt.Println(" xnavi · TOTK live - auto locating player position")
+	fmt.Println(" totknavi · TOTK live - auto locating player position")
 	fmt.Println("=" + strings.Repeat("=", 61))
 	fmt.Printf("  version = %s (core)\n", CoreVersion)
 
@@ -176,7 +176,7 @@ func main() {
 	ln, err := net.Listen("tcp", addr)
 	if err != nil {
 		fmt.Printf("\n  listen %s failed: %v\n", addr, err)
-		fmt.Println("  端口被占用：可能已有 xnavi / TOTKNavi / live-python 服务在运行。")
+		fmt.Println("  端口被占用：可能已有 totknavi / TOTKNavi / live-python 服务在运行。")
 		if owner := portOwner(port); owner != "" {
 			fmt.Printf("  占用进程：%s\n", owner)
 			fmt.Println("  请先结束旧进程（任务管理器或执行  taskkill /F /PID <pid>）后再启动。")
