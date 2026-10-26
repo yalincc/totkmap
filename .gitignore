@@ -135,7 +135,10 @@ verify-*.png
 迷你挑战改版数据/
 数据校对/
 report/
-docs/
+docs/**
+# 例外：对外发布的功能详解与发布说明规范，README / CHANGELOG 会链接，需入库
+!docs/FEATURES.md
+!docs/RELEASE-NOTES.md
 tasks/manual-备份-*/
 TOTKmap-*-待确认.*
 任务卡片模板设计稿-待确认.html

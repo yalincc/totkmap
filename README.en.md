@@ -65,29 +65,29 @@ Pair it with the local positioning service `TOTKNavi.exe` (built from `totknavi/
 
 ## Core Features
 
+One-line summary per capability; full details in [docs/FEATURES.md](docs/FEATURES.md) (Chinese).
+
 | Feature | Description |
 |---|---|
-| Three-layer map | Sky / Surface / Depths one-tap switching, each with its own markers, location names, and tiles; layer buttons on the left can lock the current layer |
-| HD tiles | In-game contour-style terrain tiles, per-layer format (WebP q80), sharp even at 1:1 pixel zoom |
-| Multi-layer overlay | Position / collectibles / equipment / places / monsters — five categories freely combinable, select-all / clear-all in one tap |
-| Official location names | 1,312 official Chinese location names printed directly on the map (objmap Location coordinates), layered show/hide by zoom, automatic anti-overlap |
-| Save sync | Upload TOTK `progress.sav` to read real collection progress (Skyview Towers, shrines, Lightroots, Dragon Tears, Koroks, Bubbuls, etc.); parsing is fully local; built-in save-sync help (emulator / game version, save location, loading tech) |
-| Completion panel | After loading a save, completion counts are shown in four groups — Exploration / Quests / Collection / Subjugation — in a compact two-column layout, including 6 boss subjugation categories; click to expand / collapse |
-| Bilingual UI | Switch interface language in the settings panel; shrines / Skyview Towers / Lightroots / Koroks show official English names, while long guides stay Chinese |
-| Group select-all | Each category group title on the left has a one-tap "select / clear" button for all categories in that group, remembered per layer |
-| Material collection | 110 materials, 44,279 farming spots (Surface / Depths / Sky full coverage); check to show on the map; supercluster aggregation + count badges, per-point display at z7 zoom, each material spot is clickable |
-| Material detail card | 256×256 HD icon + usage tags (upgrade material / cooking ingredient / strengthening material) + navigate / collect / mark-done buttons; auto-targets the next uncollected spot after collecting |
-| Material performance | Aggregation radius adjusts dynamically with zoom (100% = 96px → 800% = 128px) + move debounce; 12,000+ Depths spots stay smooth while dragging |
-| Dragon paths | Four dragons' flight routes as an independent layer, **data taken directly from the game's official ROMFS routes** (precise bezier curves + real flight altitudes): Light Dragon (low / high-altitude dual big loops + 2 link tracks + Great Sky Island branch, ~33km) / Dinraal (14.3km) / Farosh (8.6km) / Naydra (10.4km). Entry at the end of the "Locations" group in the sidebar under "Dragon Paths"; click to show / hide, works across layers; **solid = track within the current layer domain, dashed = the other layer domain** (viewing the Depths segment from Surface uses dashed), arrows along the path indicate flight direction |
-| Search & locate | Search by shrine / location name / task / item name, Enter to jump and center-zoom; independent search in the Materials tab |
-| Completion markers | Click a marker for details, mark as done, progress saved locally |
-| Custom markers | Add named personal markers anywhere on the map |
-| URL deep links | `?actor=<item name>` jumps straight to material farming spots, `?q=<keyword>` auto-searches |
-| Mobile support | Panels auto-collapse on narrow screens, touch zoom & pan, detail cards become bottom drawers |
+| Three-layer map | Sky / Surface / Depths one-tap switching, each with its own markers, names and tiles |
+| HD tiles | In-game contour-style terrain, sharp even at 1:1 pixel zoom |
+| Multi-layer overlay | Five categories freely combinable, select-all / clear-all per group |
+| Official location names | 1,312 official names printed on the map, layered by zoom |
+| Dragon paths | Four official ROMFS routes; solid = current layer, dashed = other layer |
+| Official overworld chests | 1,334 official chests, layered display with toggle and progress |
+| Save sync | Local parsing of `progress.sav`, 21 progress categories refreshed live |
+| Completion panel | Exploration / Quests / Collection / Subjugation in four groups, with progress badges |
+| Bilingual UI | One-tap language switch; markers show official English names |
+| Material collection | 110 materials, 44,279 spots, clustered with count badges |
+| Material detail card | HD icon + usage tags + navigate / collect / mark-done buttons |
+| Search & locate | By shrine / place / quest / item name, Enter to jump and center |
+| Completion & custom markers | Mark any spot done, or drop your own named marker |
+| URL deep links | `?actor=` jumps to farming spots, `?q=` auto-searches |
+| Mobile support | Panels auto-collapse, touch zoom & pan, cards become bottom drawers |
 
 ## Data Content
 
-- **Exploration & collectibles**: 120 shrines, 15 Skyview Towers, 12 Dragon Tears, 742 Koroks, 98 carry-Koroks, 191 treasure chests, 147 Bubbuls, 1 schematic stone slab
+- **Exploration & collectibles**: 120 shrines, 15 Skyview Towers, 12 Dragon Tears, 742 Koroks, 98 carry-Koroks, 147 Bubbuls, 1 schematic stone slab, 1,334 official overworld chests
 - **Places**: 10 villages, 17 stables, 4 Great Fairy Fountains, 14 Goddess Statues, 4 Ancient Tech Labs, 1 temple, 36 chasm entrances, 189 cave entrances, 58 wells, 63 cooking pots
 - **Material farming spots**: 6 categories (plants / mushrooms / fruits / insects / fish / ore), 110 materials, 44,279 spots
 - **Location names**: 1,312 official Chinese location names (including duplicate names with multiple coordinates, e.g. segmented rivers / mountain ranges)
