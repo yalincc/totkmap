@@ -57,6 +57,8 @@ window.TOTK_I18N.zh = {
 
   // 材料面板
   "mat.favOnly": "只看收藏 ({0})",
+  "mat.collectedNext": "已收集，继续",
+  "mat.stopCollect": "停止收集",
   "mat.countStat": "{0} 种 · {1} 点",
   "mat.empty": "当前图层暂无材料",
   "mat.searchEmpty": "未找到相关材料",
@@ -77,6 +79,7 @@ window.TOTK_I18N.zh = {
   "card.region": "区域",
   "card.tower": "塔域",
   "card.coord": "坐标",
+  "card.altitude": "高度",
   "card.trial": "试炼",
   "card.place": "位置",
   "card.note": "注意",

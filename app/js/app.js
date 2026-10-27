@@ -3081,7 +3081,10 @@
      */
     var gCoord = window.coordToGame ? window.coordToGame(m) : { x: m.y, uiZ: -m.x, h: m.z != null ? m.z : m.altitude_y };
     var coordStr = 'X ' + Math.round(gCoord.x) + ' · Z ' + Math.round(gCoord.uiZ);
-    if (gCoord.h != null) { coordStr += ' · 高度 ' + Math.round(gCoord.h); }
+    if (gCoord.h != null) {
+      /* 「高度」标签走词条（2026-10-28）：英文下漏成中文，与导航面板的 Alt 口径保持一致 */
+      coordStr += ' · ' + (window.I18N ? window.I18N.t('card.altitude', '高度') : '高度') + ' ' + Math.round(gCoord.h);
+    }
     $('ecCoord').textContent = coordStr;
 
     /* ---------- V2.1 M6.8：坐标旁的定位按钮 ----------
@@ -3517,10 +3520,15 @@
     var gx = Number(ll[1]).toFixed(0), gz = Number(ll[0]).toFixed(0);
     var colBtn = '';
     var MA = window.MAT_AUTO;
-    if (MA && MA.isRunning() && MA.isCurrent(m.id, idx)) colBtn = MA.isArrived() ? '已收集，继续' : '停止收集';
+    if (MA && MA.isRunning() && MA.isCurrent(m.id, idx)) {
+      colBtn = MA.isArrived()
+        ? (window.I18N ? window.I18N.t('mat.collectedNext', '已收集，继续') : '已收集，继续')
+        : (window.I18N ? window.I18N.t('mat.stopCollect', '停止收集') : '停止收集');
+    }
     var pt = pts[idx];
     var gh = pt && pt[2] != null ? Math.round(pt[2]) : null;
-    var matCoordText = 'X ' + gx + ' · Z ' + gz + (gh != null ? (' · 高度 ' + gh) : '');
+    var matCoordText = 'X ' + gx + ' · Z ' + gz +
+      (gh != null ? (' · ' + (window.I18N ? window.I18N.t('card.altitude', '高度') : '高度') + ' ' + gh) : '');
     showDetail({
       name: window.I18N ? (window.I18N.nameOf(m.cn) || m.cn) : m.cn,
       cat: window.I18N ? (window.I18N.catOf(m.cat) + ' · ' + window.I18N.t('layer.' + state.layer)) : (m.cat + ' · ' + LAYER_NAME[state.layer]),

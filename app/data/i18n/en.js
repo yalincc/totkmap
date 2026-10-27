@@ -57,6 +57,8 @@ window.TOTK_I18N.en = {
 
   // Materials Panel
   "mat.favOnly": "Favorites only ({0})",
+  "mat.collectedNext": "Collected, next",
+  "mat.stopCollect": "Stop collecting",
   "mat.countStat": "{0} types · {1} spots",
   "mat.empty": "No materials on current layer",
   "mat.searchEmpty": "No materials found",
@@ -77,6 +79,7 @@ window.TOTK_I18N.en = {
   "card.region": "Region",
   "card.tower": "Tower",
   "card.coord": "Coords",
+  "card.altitude": "Alt",
   "card.trial": "Trial",
   "card.place": "Location",
   "card.note": "Note",
