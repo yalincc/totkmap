@@ -14,6 +14,16 @@
   'use strict';
 
   var A = null;
+
+  /* 2026-10-28：提示文案统一走词条。I18N.t 不自带插值，这里补 {0}{1} 顺序替换；
+     I18N 未加载（理论不会）时退回中文原文。 */
+  function T(key, fb) {
+    var s = window.I18N ? window.I18N.t(key, fb) : fb;
+    for (var i = 2; i < arguments.length; i++) {
+      s = String(s).replace('{' + (i - 2) + '}', arguments[i]);
+    }
+    return s;
+  }
   var running = false;      /* 收集队列运行中 */
   var arrived = false;      /* 当前目标已到达（等待确认收集） */
   var current = null;       /* 当前目标 {mid, idx, x, y} */
@@ -62,7 +72,7 @@
   function navTo(t) {
     var m = A.matById(t.mid);
     A.liveNav({
-      name: m ? m.cn : '材料' + t.mid,
+      name: m ? m.cn : T('auto.matPrefix', '材料') + t.mid,
       x: t.x, y: t.y,
       layer: A.state().layer,
       type: m ? m.cat : ''
@@ -82,21 +92,21 @@
     var layer = (p && p.located) ? p.layer : A.state().layer;
     if (p && p.located) { lastPX = p.mx; lastPY = p.my; }
     var pool = poolForLayer(layer);
-    if (!pool.length) { stop(); A.toast('本层（' + A.layerName(layer) + '）' + A.matName(curMid) + '点位已全部收集，收集队列结束'); return; }
+    A.toast(T('auto.mat.allDoneLayer', '本层（{0}）{1}点位已全部收集，收集队列结束', A.layerName(layer), A.matName(curMid)))
     current = nearest(pool, p);
     navTo(current);
-    A.toast('续导：' + A.matName(current.mid) + ' · 距下一点 ' + Math.round(dist(current, p)) + ' 米');
+    A.toast(T('auto.mat.resume', '续导：{0} · 距下一点 {1} 米', A.matName(current.mid), Math.round(dist(current, p))))
   }
 
   function onArrive() {
     arrived = true;
-    A.toast('已到达 ' + A.matName(current.mid) + '，收集后点卡片【已收集，继续】');
+    A.toast(T('auto.mat.arrived', '已到达 {0}，收集后点卡片【已收集，继续】', A.matName(current.mid)))
     refreshCard();
   }
 
   function tick() {
     if (!running) return;
-    if (!online()) { stop(); A.toast('实时定位服务断开，收集队列已停止'); return; }
+    A.toast(T('auto.mat.offline', '实时定位服务断开，收集队列已停止'))
     var p = pos();
     if (!p || !p.located) return;
     /* 切层 → 不跨层：在新层重建池（当前目标不在本层则换最近点） */
@@ -104,11 +114,11 @@
       lastLayer = p.layer;
       lastPX = p.mx; lastPY = p.my;
       var pool = poolForLayer(p.layer);
-      if (!pool.length) { stop(); A.toast('本层（' + A.layerName(p.layer) + '）' + A.matName(curMid) + '点位已全部收集，队列结束'); return; }
+      A.toast(T('auto.mat.allDoneLayer2', '本层（{0}）{1}点位已全部收集，队列结束', A.layerName(p.layer), A.matName(curMid)))
       arrived = false; holdStart = 0;
       current = nearest(pool, p);
       navTo(current);
-      A.toast('进入' + A.layerName(p.layer) + '层，续导最近材料点');
+      A.toast(T('auto.mat.enterLayer', '进入{0}层，续导最近材料点', A.layerName(p.layer)))
       return;
     }
     /* V1.8.4：玩家大幅移动/传送 → 重选最近材料点（不死守旧目标） */
@@ -116,11 +126,11 @@
       var mv = Math.sqrt((p.mx - lastPX) * (p.mx - lastPX) + (p.my - lastPY) * (p.my - lastPY));
       if (mv > DISPLACE_RECHECK) {
         var pool2 = poolForLayer(p.layer);
-        if (!pool2.length) { stop(); A.toast('本层（' + A.layerName(p.layer) + '）勾选材料已全部收集，队列结束'); return; }
+        A.toast(T('auto.mat.allDoneLayer3', '本层（{0}）勾选材料已全部收集，队列结束', A.layerName(p.layer)))
         arrived = false; holdStart = 0;
         current = nearest(pool2, p);
         navTo(current);
-        A.toast('玩家大幅移动，已切换到最近材料点：' + A.matName(current.mid));
+        A.toast(T('auto.mat.switched', '玩家大幅移动，已切换到最近材料点：{0}', A.matName(current.mid)))
       }
     }
     lastPX = p.mx; lastPY = p.my;
@@ -141,21 +151,21 @@
   /* 启动：标记当前点已收集（未收集时）→ 从最近未收集点开始导航。
      已收集的点点【已收集】= 直接启动队列（不重复标记）。 */
   function start(mid, idx, ll) {
-    if (running) { A.toast('收集队列已在运行（卡片【停止收集】可停）'); return; }
-    if (window.EXPLORE_AUTO && window.EXPLORE_AUTO.isRunning()) { A.toast('探索自动导航运行中，请先停止再开始材料收集'); return; }
-    if (!online()) { A.toast('实时定位服务未连接（TOTKNavi 未启动？）'); return; }
+    A.toast(T('auto.mat.alreadyRunning', '收集队列已在运行（卡片【停止收集】可停）'))
+    A.toast(T('auto.mat.exploreRunning', '探索自动导航运行中，请先停止再开始材料收集'))
+    A.toast(T('auto.common.noService', '实时定位服务未连接（TOTKNavi 未启动？）'))
     var p = pos();
-    if (!p || !p.located) { A.toast('尚未获取玩家位置，请先在游戏内进入可操作状态'); return; }
+    A.toast(T('auto.common.noPos', '尚未获取玩家位置，请先在游戏内进入可操作状态'))
     var st = A.state();
     if (idx >= 0 && (st.matCollected[mid] || []).indexOf(idx) < 0) A.matCollect(mid, idx);
     curMid = String(mid);
     running = true; arrived = false; lastLayer = p.layer; holdStart = 0;
     lastPX = p.mx; lastPY = p.my;
     var pool = poolForLayer(p.layer);
-    if (!pool.length) { running = false; curMid = null; A.toast('本层该材料点位已全部收集'); return; }
+    A.toast(T('auto.mat.allDone', '本层该材料点位已全部收集'))
     current = nearest(pool, p);
     navTo(current);
-    A.toast('收集队列开始：' + A.matName(current.mid) + '（' + A.layerName(p.layer) + '层）');
+    A.toast(T('auto.mat.start', '收集队列开始：{0}（{1}层）', A.matName(current.mid), A.layerName(p.layer)))
   }
 
   function stop() {
@@ -169,7 +179,7 @@
     if (!running || !current || !arrived) return;
     holdStart = 0;
     A.matCollect(current.mid, current.idx);
-    A.toast('已自动标记收集：' + A.matName(current.mid) + '，续导下一目标');
+    A.toast(T('auto.mat.autoMarked', '已自动标记收集：{0}，续导下一目标', A.matName(current.mid)))
     advance();
   }
 
@@ -178,14 +188,14 @@
     if (!running) return;
     running = false; arrived = false; current = null; curMid = null; lastLayer = null; holdStart = 0;
     lastPX = null; lastPY = null;
-    A.toast('导航已结束，收集队列已停止');
+    A.toast(T('auto.mat.ended', '导航已结束，收集队列已停止'))
   }
 
   /* 到达后确认收集当前点并续导 */
   function confirmCurrent() {
     if (!running || !current || !arrived) return;
     A.matCollect(current.mid, current.idx);
-    A.toast('已收集：' + A.matName(current.mid));
+    A.toast(T('auto.mat.collected', '已收集：{0}', A.matName(current.mid)))
     advance();
   }
 

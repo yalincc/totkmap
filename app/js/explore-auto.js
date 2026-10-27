@@ -13,6 +13,16 @@
   'use strict';
 
   var A = null;
+
+  /* 2026-10-28：提示文案统一走词条。I18N.t 不自带插值，这里补 {0}{1} 顺序替换；
+     I18N 未加载（理论不会）时退回中文原文。 */
+  function T(key, fb) {
+    var s = window.I18N ? window.I18N.t(key, fb) : fb;
+    for (var i = 2; i < arguments.length; i++) {
+      s = String(s).replace('{' + (i - 2) + '}', arguments[i]);
+    }
+    return s;
+  }
   var running = false;      /* 自动导航运行中 */
   var waiting = false;      /* 到达后等待确认（存档轮询 or 手动） */
   var arrived = false;      /* 当前目标已到达 */
@@ -69,20 +79,20 @@
     var p = pos();
     var layer = (p && p.located) ? p.layer : A.state().layer;
     var pool = poolForLayer(layer);
-    if (!pool.length) { stop(); A.toast('本层已勾选类别全部完成，自动导航结束'); return; }
+    A.toast(T('auto.exp.allDone', '本层已勾选类别全部完成，自动导航结束'))
     current = nearest(pool, p);
     navTo(current);
-    A.toast('自动续导：' + (current.name || '目标') + ' · ' + (A.catName(current.cat) || ''));
+    A.toast(T('auto.exp.resume', '自动续导：{0} · {1}', (current.name || T('auto.common.target', '目标')), (A.catName(current.cat) || '')))
     refreshCard();
   }
 
   function onArrive() {
     waiting = true;
     if (mappable(current) && online()) {
-      A.toast('已到达 ' + (current.name || '目标') + '，等待存档确认完成后自动续导…');
+      A.toast(T('auto.exp.arrivedWait', '已到达 {0}，等待存档确认完成后自动续导…', (current.name || T('auto.common.target', '目标'))))
       pollProgress();
     } else {
-      A.toast('已到达 ' + (current.name || '目标') + '，请点「标记完成」继续下一个');
+      A.toast(T('auto.exp.arrivedManual', '已到达 {0}，请点「标记完成」继续下一个', (current.name || T('auto.common.target', '目标'))))
     }
     refreshCard();
   }
@@ -97,7 +107,7 @@
           if (running && res && res.ok && res.doneIds && res.doneIds.indexOf(current.id) >= 0) {
             clearInterval(pollT); pollT = null;
             A.applyProgressDone(res.doneIds);
-            A.toast('存档确认完成：' + (current.name || '目标'));
+            A.toast(T('auto.exp.saveConfirmed', '存档确认完成：{0}', (current.name || T('auto.common.target', '目标'))))
             advance();
           }
         })
@@ -107,17 +117,17 @@
 
   function tick() {
     if (!running) return;
-    if (!online()) { stop(); A.toast('实时定位服务断开，自动导航已停止'); return; }
+    A.toast(T('auto.exp.offline', '实时定位服务断开，自动导航已停止'))
     var p = pos();
     if (!p || !p.located) return;
     /* 切层 → 不跨层：在新层重建目标池（当前目标不在本层则不续旧目标） */
     if (current && current.layer !== p.layer) {
       var pool = poolForLayer(p.layer);
-      if (!pool.length) { stop(); A.toast('本层（' + A.layerName(p.layer) + '）已勾选类别全部完成，自动导航结束'); return; }
+      A.toast(T('auto.exp.allDoneLayer', '本层（{0}）已勾选类别全部完成，自动导航结束', A.layerName(p.layer)))
       waiting = false; arrived = false;
       current = nearest(pool, p);
       navTo(current);
-      A.toast('进入' + A.layerName(p.layer) + '层，续导最近目标');
+      A.toast(T('auto.exp.enterLayer', '进入{0}层，续导最近目标', A.layerName(p.layer)))
       refreshCard();
       return;
     }
@@ -128,17 +138,17 @@
   }
 
   function start(m) {
-    if (running) { A.toast('自动导航已在运行（卡片【停止自动导航】可停）'); return; }
-    if (window.MAT_AUTO && window.MAT_AUTO.isRunning()) { A.toast('材料收集队列运行中，请先停止再开始探索'); return; }
-    if (!m || !m.id) { A.toast('该标点暂不支持自动导航'); return; }
-    if (!online()) { A.toast('实时定位服务未连接（TOTKNavi 未启动？）'); return; }
+    A.toast(T('auto.exp.alreadyRunning', '自动导航已在运行（卡片【停止自动导航】可停）'))
+    A.toast(T('auto.exp.matRunning', '材料收集队列运行中，请先停止再开始探索'))
+    A.toast(T('auto.exp.notSupported', '该标点暂不支持自动导航'))
+    A.toast(T('auto.common.noService', '实时定位服务未连接（TOTKNavi 未启动？）'))
     var p = pos();
-    if (!p || !p.located) { A.toast('尚未获取玩家位置，请先在游戏内进入可操作状态'); return; }
-    if (A.state().done[m.id]) { A.toast('该标点已完成，自动导航不可用'); return; }
+    A.toast(T('auto.common.noPos', '尚未获取玩家位置，请先在游戏内进入可操作状态'))
+    A.toast(T('auto.exp.alreadyDone', '该标点已完成，自动导航不可用'))
     running = true; waiting = false; arrived = false;
     current = m;
     navTo(m);
-    A.toast('自动导航开始：' + (m.name || '目标'));
+    A.toast(T('auto.exp.start', '自动导航开始：{0}', (m.name || T('auto.common.target', '目标'))))
     refreshCard();
   }
 
@@ -159,7 +169,7 @@
       A.updateCount();
     }
     if (pollT) { clearInterval(pollT); pollT = null; }
-    A.toast('已标记完成：' + (current.name || '目标'));
+    A.toast(T('auto.exp.marked', '已标记完成：{0}', (current.name || T('auto.common.target', '目标'))))
     advance();
   }
 
@@ -174,7 +184,7 @@
     if (!running) return;
     running = false; waiting = false; arrived = false; current = null;
     if (pollT) { clearInterval(pollT); pollT = null; }
-    A.toast('导航已结束，自动导航已停止');
+    A.toast(T('auto.exp.ended', '导航已结束，自动导航已停止'))
   }
 
   window.EXPLORE_AUTO = {

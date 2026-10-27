@@ -3262,8 +3262,15 @@
     markers: function () { return MARKERS; },
     catsOfLayer: catsOfLayer,
     catById: catById,
-    catName: function (id) { var c = catById(state.layer, id); return c ? c.name : ''; },
-    layerName: function (l) { return LAYER_NAME[l] || ''; },
+    /* 2026-10-28：这两个 helper 的输出会被自动收集/自动导航的 toast 拼进句子，
+       英文界面下必须返回英文，否则会出现「Entered 地上 — …」这种半中半英 */
+    catName: function (id) { var c = catById(state.layer, id); if (!c) return ''; return window.I18N ? window.I18N.catOf(c.name) : c.name; },
+    layerName: function (l) {
+      var nm = LAYER_NAME[l];
+      if (!nm) return '';
+      var key = (l === 20) ? 'sky' : (l === 19) ? 'depths' : 'surface';
+      return window.I18N ? window.I18N.t('layer.' + key, nm) : nm;
+    },
     saveDone: saveDone,
     renderMarkers: renderMarkers,
     /* V2.1 M6.6：跳到某件防具的地图标点（任务卡片的防具图标点它） */
