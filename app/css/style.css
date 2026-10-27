@@ -1922,3 +1922,31 @@ html[lang="en"] .tk-copy {
   .tk-pick-row { min-height: 44px; font-size: 14px; }
   .tk-pick { max-width: min(72vw, 280px); }
 }
+
+/* ===== V2.8 克洛格卡片：序号 / 实拍图 / 解法 / 谜题类型 =====
+ * 顺序（从上而下）：名字+序号 → 区域 → 塔域 → 坐标 → 图片 → 解法 → 类型 → 底部三按钮
+ * 图片默认 .hidden，有图才显示（图源后续接入，korok_info.js 的 img 字段）。 */
+.ec-no {
+  flex: 0 0 auto;
+  font-size: 12px;
+  color: #9db3a6;
+  background: rgba(255, 255, 255, .06);
+  border-radius: 4px;
+  padding: 1px 6px;
+  margin-right: 6px;
+  white-space: nowrap;
+}
+.ec-korok-img {
+  margin: 6px 0 8px;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #2a2f2c;
+  line-height: 0;
+}
+.ec-korok-img img {
+  display: block;
+  width: 100%;
+  cursor: zoom-in;
+}
+#ecSolveRow .ec-value { color: #eef4ef; font-size: 12.5px; line-height: 1.65; }
+#ecTypeRow .ec-value { color: #a8d8b9; font-size: 12.5px; }

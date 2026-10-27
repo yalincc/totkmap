@@ -167,6 +167,8 @@
     <!-- V2.0.3 名字后挂复制按钮（查攻略用：复制名字去搜） -->
     <div class="ec-name-row">
       <h3 class="card-name" id="ecName"></h3>
+      <!-- V2.8 克洛格序号（gamertw Korok 编号，便于对照外部中文攻略） -->
+      <span class="ec-no" id="ecNo"></span>
       <button type="button" class="ec-copy" id="ecCopy" data-i18n-title="card.copyNameTip" title="复制名称，便于搜索攻略" data-i18n="card.copy">复制</button>
     </div>
     <div class="ec-row" id="ecRegionRow"><span class="ec-label" data-i18n="card.region">区域</span><span class="ec-value" id="ecRegion"></span></div>
@@ -188,6 +190,10 @@
         </button>
       </span>
     </div>
+    <!-- V2.8 克洛格实拍截图：有图才显示，无图整块隐藏（图源后续接入） -->
+    <div class="ec-korok-img hidden" id="ecKorokImg">
+      <img id="ecKorokImgEl" src="" alt="">
+    </div>
     <div class="ec-row" id="ecTrialRow"><span class="ec-label" data-i18n="card.trial">试炼</span><span class="ec-value" id="ecTrial"></span></div>
     <!-- V2.0.2 神庙详情：desc 里的「位置 / 注意事项 / 宝箱」原先完全没显示，这里结构化补上 -->
     <div class="ec-row" id="ecPlaceRow"><span class="ec-label" data-i18n="card.place">位置</span><span class="ec-value" id="ecPlace"></span></div>
@@ -199,6 +205,9 @@
       </span>
     </div>
     <div class="ec-row" id="ecChestRow"><span class="ec-label" data-i18n="card.chest">宝箱</span><span class="ec-value" id="ecChest"></span></div>
+    <!-- V2.8 克洛格：解法在前、谜题类型在后（按从上而下顺序） -->
+    <div class="ec-row" id="ecSolveRow"><span class="ec-label" data-i18n="card.solve">解法</span><span class="ec-value" id="ecSolve"></span></div>
+    <div class="ec-row" id="ecTypeRow"><span class="ec-label" data-i18n="card.type">类型</span><span class="ec-value" id="ecType"></span></div>
     <!-- V2.1 M6.6：防具专属区块。只在点的是防具标点时填充，
          非防具标点保持空（CSS :empty 隐藏），不影响其他卡片外观。 -->
     <div id="ecArmor"></div>
@@ -515,6 +524,7 @@
 <script src="data/totk_save_hashes.js"></script>
 <script src="data/explore_save_map.js?v=190"></script>
 <script src="data/chests_official.js"></script>
+<script src="data/korok_info.js"></script>
 <script src="data/layers.js"></script>
 <script src="data/catalogs.js?v=257"></script>
 <script src="data/areas.js"></script>

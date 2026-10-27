@@ -61,6 +61,16 @@
   var AREA_DEPTHS = window.TOTK_AREA_DEPTHS || [];
 
   var VERSION = 'TOTKMAP V2.7.0';
+  /* V2.8 克洛格谜题类型中文名（兜底；正式文案走 i18n 的 korok.type.*）
+   * 由 tools/build_korok_info.py 依据 ROMFS 克洛格 actor 自动标注，
+   * 分类参考游民星空「呀哈哈机关解密方法汇总」。 */
+  var TYPE_CN_FALLBACK = {
+    carry: '与朋友见面', burn_ivy: '烧掉藤蔓 / 杂草', dandelion: '抓住蒲公英',
+    flower: '追小花', pinwheel: '风车射靶', shoot: '射气球 / 橡果',
+    lift_rock: '搬起石头', stone_circle: '补齐石头阵', block_puzzle: '方块拼图',
+    ascend_plate: '通天术 / 叶子标记', break_pot: '打碎壶罐', race: '限时到达',
+    other: '其他'
+  };
   var LS_DONE = 'totkmap_done_v1';
   var LS_CUSTOM = 'totkmap_custom_v1';
   var LS_LAYER = 'totkmap_layer_v1';
@@ -3067,6 +3077,58 @@
     var autoOn = !!(ea && ea.isRunning() && ea.current() && ea.current().id === m.id);
     $('ecChip').textContent = window.I18N ? window.I18N.catOf(opts.cat) : (opts.cat || '');
     $('ecName').textContent = window.I18N ? window.I18N.nameOf(m.name ? m : opts.name) : opts.name;
+    /* ---------- V2.8 克洛格：序号 + 类型 + 解法 ----------
+     * 序号取 gamertw 的 Korok 编号（与官方 900 encounters 一一对应，中文站编号好对照）；
+     * 类型由 ROMFS 克洛格 actor 自动标注（tools/build_korok_info.py）；
+     * 解法沿用 markers.js 现有的 desc（克洛格的 desc 是纯文字，
+     *   parseDescSections 只认「位置/注意事项/宝箱」标签，所以原先根本没显示）。
+     */
+    var KI = window.TOTK_KOROK_INFO || {};
+    var kInfo = KI[String(m.id)] || null;
+    var isKorok = !!kInfo;
+    /* V2.8.1 卡片标题改名（老大拍板方案甲）：卡片不走 markers.js 的俗称，
+     * 统一显示「克洛格果实 / Korok Seed」；序号在旁边 ecNo 徽章。
+     * 只改俗称（名字含呀哈哈/克洛格）；「朋友的营地」等有信息量的描述名保留原样。 */
+    if (isKorok && /呀哈哈|克洛格/.test(m.name || '')) {
+      $('ecName').textContent = window.I18N
+        ? window.I18N.t('card.korokName', '克洛格果实')
+        : '克洛格果实';
+    }
+    var elNo = $('ecNo');
+    if (elNo) {
+      elNo.textContent = (isKorok && kInfo.no != null)
+        ? ('No.' + String(kInfo.no).padStart(4, '0')) : '';
+      elNo.style.display = elNo.textContent ? '' : 'none';
+    }
+    var elSolve = $('ecSolve'), elSolveRow = $('ecSolveRow');
+    if (elSolve) {
+      var solveText = isKorok ? String(m.desc || '').trim() : '';
+      elSolve.textContent = solveText;
+      if (elSolveRow) elSolveRow.style.display = solveText ? '' : 'none';
+    }
+    var elType = $('ecType'), elTypeRow = $('ecTypeRow');
+    if (elType) {
+      var typeKey = isKorok ? (kInfo.type || 'other') : '';
+      elType.textContent = typeKey
+        ? (window.I18N ? window.I18N.t('korok.type.' + typeKey, TYPE_CN_FALLBACK[typeKey] || typeKey)
+                       : (TYPE_CN_FALLBACK[typeKey] || typeKey))
+        : '';
+      if (elTypeRow) elTypeRow.style.display = elType.textContent ? '' : 'none';
+    }
+    /* 图片位：有图才显示（图源尚未接入，img 字段目前全为 null） */
+    var elImg = $('ecKorokImg'), elImgTag = $('ecKorokImgEl');
+    if (elImg && elImgTag) {
+      var imgFile = (isKorok && kInfo.img) ? kInfo.img : null;
+      if (imgFile) {
+        elImgTag.src = 'assets/korok/' + imgFile;
+        elImgTag.alt = '';
+        elImg.classList.remove('hidden');
+      } else {
+        elImgTag.removeAttribute('src');
+        elImg.classList.add('hidden');
+      }
+    }
+
     var ll = [m.x, m.y];
     var rawReg = nearestRegion(ll) || '未知';
     $('ecRegion').textContent = window.I18N ? window.I18N.regionOf(rawReg) : rawReg;
