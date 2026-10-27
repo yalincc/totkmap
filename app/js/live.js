@@ -498,18 +498,40 @@
   }
 
   /* 跟随玩家 Z 自动切层（天空/地上/地底），不跨层 */
+  var pendingSwitchLayer = null;
+  var pendingSwitchCount = 0;
+
+  /* 跟随玩家 Z 自动切层（天空/地上/地底），增加 3 次采样防抖平滑 */
   function autoSwitchLayer() {
-    if (paused || !autoLayer || !pos.online || !pos.located) return;
-    if (layerLock != null) return;   // 手动锁定期间不自动切层
-    if (pos.layer && pos.layer !== T.state.layer) {
-      T.switchLayer(pos.layer, true);
-      if (Date.now() - teleportTS > 2000) {
-        toast('已自动切换到' + (LAYER_NAME[pos.layer] || pos.layer) + '层');
-      }
-      /* 切层会重置地图视野：传送+切层时 followCenter 在切层前已执行（旧层视野），
-         这里切层成功后立即再跟随一次，画面才落到新层红点位置 */
-      if (follow && !paused) followCenter();
+    if (paused || !autoLayer || !pos.online || !pos.located) {
+      pendingSwitchLayer = null;
+      pendingSwitchCount = 0;
+      return;
     }
+    if (layerLock != null) return;   // 手动锁定期间不自动切层
+    if (!pos.layer || pos.layer === T.state.layer) {
+      pendingSwitchLayer = null;
+      pendingSwitchCount = 0;
+      return;
+    }
+    // 连续 3 次轮询采样一致才触发切层，避免临界点抖动
+    if (pendingSwitchLayer === pos.layer) {
+      pendingSwitchCount++;
+    } else {
+      pendingSwitchLayer = pos.layer;
+      pendingSwitchCount = 1;
+    }
+    if (pendingSwitchCount < 3) return;
+
+    var targetLayer = pos.layer;
+    pendingSwitchLayer = null;
+    pendingSwitchCount = 0;
+    T.switchLayer(targetLayer, true);
+    if (Date.now() - teleportTS > 2000) {
+      toast('已自动切换到' + (LAYER_NAME[targetLayer] || targetLayer) + '层');
+    }
+    if (follow && !paused) followCenter();
+    return;
   }
 
   /* 到达提示：距离 ≤ 阈值 判定「已到达」（仅为提示值，不参与算法） */

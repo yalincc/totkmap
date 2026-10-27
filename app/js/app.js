@@ -78,6 +78,28 @@
   var MAX_ZOOM = 7;   // V1.9.0: z7 尺寸由 z6 瓦片 2× 自动缩放实现（maxNativeZoom=6 保持不变），材料聚合 maxZoom 同步 7
   var MIN_ZOOM = 3;
 
+  /* 统一坐标口径工具函数（2026-10-27，甲方案收口）:
+   * markers.js / Leaflet 格式: m.x = Leaflet lat (游戏世界 Z, 北为负), m.y = Leaflet lng (游戏世界 X, 东为正)
+   * 游戏 UI / Actor 真实三维: X = 东(+), Z = 真实世界坐标 (北为负, UI显示取反), h = 海拔高度
+   */
+  window.coordToGame = function (m) {
+    if (!m) return { x: 0, z: 0, uiZ: 0, h: null };
+    var gx = m.y != null ? m.y : 0;
+    var gz = m.x != null ? m.x : 0;
+    var gh = m.z != null ? m.z : (m.h != null ? m.h : (m.altitude_y != null ? m.altitude_y : null));
+    return {
+      x: gx,            // 游戏 X (东为正)
+      z: gz,            // 游戏内部世界 Z (北为负)
+      uiZ: -gz,         // 游戏 UI 显示 Z (北为正)
+      h: gh             // 海拔高度 (可为 null)
+    };
+  };
+
+  window.gameToLeaflet = function (x, z) {
+    // 游戏内部 X, Z 转 Leaflet [lat, lng] -> [z, x]
+    return [z, x];
+  };
+
   var state = {
     layer: 18,
     selected: {},          // 当前层选中的分类 catalogId -> true（是 selectedByLayer[layer] 的引用）
@@ -951,7 +973,7 @@
       name: ch.drop_zh || ch.drop || '宝箱',
       cat: '宝箱',
       desc: descText,
-      m: { id: ch.id, x: ch.z, y: ch.x, layer: ch.layer, name: ch.drop_zh || '宝箱' },
+      m: { id: ch.id, x: ch.z, y: ch.x, z: ch.altitude_y, altitude_y: ch.altitude_y, layer: ch.layer, name: ch.drop_zh || '宝箱' },
       isDone: !!state.done[doneId],
       evt: evt
     });
@@ -2672,7 +2694,10 @@
      * 高度：markers.js 里**没有高度字段**，所以这里不显示高度，
      *不去编造。需要高度的任务卡片里有（走 task-plan.js 的 gy - 106）。
      */
-    $('ecCoord').textContent = 'X ' + Math.round(m.y) + ' · Z ' + Math.round(-m.x);
+    var gCoord = window.coordToGame ? window.coordToGame(m) : { x: m.y, uiZ: -m.x, h: m.z != null ? m.z : m.altitude_y };
+    var coordStr = 'X ' + Math.round(gCoord.x) + ' · Z ' + Math.round(gCoord.uiZ);
+    if (gCoord.h != null) { coordStr += ' · 高度 ' + Math.round(gCoord.h); }
+    $('ecCoord').textContent = coordStr;
 
     /* ---------- V2.1 M6.8：坐标旁的定位按钮 ----------
      * 需求：「点击左边可以定位回地图上的图标位置即可。因为有时候点击套装和
@@ -2950,11 +2975,13 @@
   var matCountByLayer = {};
   (function buildMatPoints() {
     var p = MATS.points || [];
-    for (var i = 0; i < p.length; i += 4) {
+    var step = (MATS.meta && MATS.meta.step) || (p.length % 5 === 0 && p.length % 4 !== 0 ? 5 : 4);
+    for (var i = 0; i < p.length; i += step) {
       var mid = p[i], L = p[i + 1], x = p[i + 2], z = p[i + 3];
+      var h = step >= 5 ? p[i + 4] : undefined;
       if (!matPointsByLayer[L]) { matPointsByLayer[L] = {}; matCountByLayer[L] = {}; }
       if (!matPointsByLayer[L][mid]) { matPointsByLayer[L][mid] = []; matCountByLayer[L][mid] = 0; }
-      matPointsByLayer[L][mid].push([x, z]);
+      matPointsByLayer[L][mid].push(step >= 5 ? [x, z, h] : [x, z]);
       matCountByLayer[L][mid]++;
     }
   })();
@@ -3052,13 +3079,16 @@
     var colBtn = '';
     var MA = window.MAT_AUTO;
     if (MA && MA.isRunning() && MA.isCurrent(m.id, idx)) colBtn = MA.isArrived() ? '已收集，继续' : '停止收集';
+    var pt = pts[idx];
+    var gh = pt && pt[2] != null ? Math.round(pt[2]) : null;
+    var matCoordText = 'X ' + gx + ' · Z ' + gz + (gh != null ? (' · 高度 ' + gh) : '');
     showDetail({
       name: window.I18N ? (window.I18N.nameOf(m.cn) || m.cn) : m.cn,
       cat: window.I18N ? (window.I18N.catOf(m.cat) + ' · ' + window.I18N.t('layer.' + state.layer)) : (m.cat + ' · ' + LAYER_NAME[state.layer]),
       desc: '',
       img: 'assets/materials/' + m.entry + '.png',
       region: nearestRegion(ll),
-      coord: 'X ' + gx + ' · Z ' + gz,
+      coord: matCoordText,
       posText: window.I18N ? window.I18N.t('card.spotNum').replace('{0}', idx + 1).replace('{1}', total) : ('第 ' + (idx + 1) + ' / ' + total + ' 个位置'),
       usage: usageFor(m),
       isDone: isMatDone(m.id, idx),
