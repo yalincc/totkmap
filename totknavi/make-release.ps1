@@ -15,8 +15,8 @@ $dataDst = Join-Path $rel "data"
 
 # data files required by core (progress + sky layer + shrine entrances):
 #   totk_save_hashes.js / explore_save_map.js -> progress counts
-#   area_sky.js / markers.js                  -> sky layer detection
-$required = @('totk_save_hashes.js','explore_save_map.js','area_sky.js','markers.js')
+#   area_sky.js / markers.js / heightmap      -> sky/depths layer detection
+$required = @('totk_save_hashes.js','explore_save_map.js','area_sky.js','markers.js','heightmap_downsampled.bin')
 
 New-Item -ItemType Directory -Force $rel | Out-Null
 
