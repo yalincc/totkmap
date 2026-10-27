@@ -254,6 +254,18 @@ var TOTKSaveParser = (function () {
     c('古栗欧克', C.BOSSES_GLEEOKS_DEFEATED);
     c('莫尔德拉吉克', C.BOSSES_MOLDUGAS_DEFEATED);
 
+    /* 图鉴（2026-10-27 接线）：COMPENDIUM_STATUS = 509 个 PictureBookData.{Actor}.State
+     * ★ 状态不是布尔值，是字符串枚举的哈希（原版 completism.js 也按名取）：
+     *   Unopened 未登记 / TakePhoto 已拍照 / Buy 用点数买过 —— 后两者都算"已登记"。
+     * ★ 509 就是游戏内图鉴条目总数，所以 done/509 与游戏图鉴界面同口径。
+     * ★ 注意口径：图鉴是「拍照登记」，不是「采集/击杀」—— 没拍过的怪哪怕打过也不亮。 */
+    if (C.COMPENDIUM_STATUS && C.COMPENDIUM_STATUS.length) {
+      out['图鉴'] = {
+        done: count(dv, vb, C.COMPENDIUM_STATUS, 'TakePhoto') + count(dv, vb, C.COMPENDIUM_STATUS, 'Buy'),
+        total: C.COMPENDIUM_STATUS.length
+      };
+    }
+
     return out;
   }
 

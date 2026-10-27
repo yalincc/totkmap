@@ -41,6 +41,20 @@ window.TOTK_I18N.zh = {
   "save.synced": "存档已同步 ✓",
   "save.autoSynced": "存档自动同步 ✓",
 
+  /* ===== 帮助弹窗（2026-10-28 重写）：整块 HTML 走词条，改文案只改这里 ===== */
+  "help.title": "同步存档 · 帮助",
+  "help.what": '<div class="hq"><h4>这是什么</h4><p>《塞尔达传说：王国之泪》互动地图，天空 / 地上 / 地下三层可切换，带收集进度追踪与实时角色导航。</p></div>',
+  "help.path": '<div class="hq"><h4>① 存档文件在哪</h4><p>名字是 <code>progress.sav</code>，<code>slot_00</code> ~ <code>slot_05</code> 对应游戏里的六个存档槽：</p><p>Ryujinx：<code>%APPDATA%\\Ryujinx\\bis\\user\\save\\…\\slot_00\\progress.sav</code></p><p>Eden：模拟器目录下 <code>user\\nand\\user\\save\\…\\slot_00\\progress.sav</code></p><p>装了 <b class="hl">TOTKNavi</b> 的话不用自己找 —— 程序里可以直接打开存档目录。</p></div>',
+  "help.load": '<div class="hq"><h4>② 两种加载方式</h4><ul><li><b class="hl">自动（推荐）</b>：启动 TOTKNavi 后，游戏里一存档，地图自动同步，不用手动选文件。</li><li><b class="hl">手动</b>：点「从存档加载进度」，选中 <code>progress.sav</code>。</li></ul></div>',
+  "help.data": '<div class="hq"><h4>③ 能读到什么</h4><p>神庙、树根、鸟望台、克洛格、宝箱、图鉴、Boss 讨伐等 <b class="hl">20+ 类</b>的真实进度。</p><p>读不到的是 <b>背包数量</b>（武器 / 弓 / 盾 / 防具各几件）和任务奖励 —— 存档里没有这些字段。</p></div>',
+  "help.privacy": '<div class="hq"><h4>④ 隐私</h4><p>文件只在你本机浏览器内存里解析，<b class="hl">不上传任何数据</b>。</p></div>',
+  "help.more": '<div class="hq"><h4>⑤ 更多</h4><ul><li>完整说明、桌面导航程序、更新日志：<a href="https://github.com/yalincc/totkmap" target="_blank" rel="noopener">github.com/yalincc/totkmap</a></li><li>在线地图：<a href="https://totk.yalin.site" target="_blank" rel="noopener">totk.yalin.site</a></li><li>国内镜像：<a href="https://gitee.com/yalincc/totkmap" target="_blank" rel="noopener">gitee.com/yalincc/totkmap</a></li></ul></div>',
+  "save.tipBody": '<b>存档文件 = progress.sav（游戏存档）</b><div>存档位置：<code>AppData\\Roaming\\Ryujinx\\bis\\user\\save\\0000000000000007\\0\\slot_00\\progress.sav</code></div><div class="su-tip-sub">点击问号打开「同步存档 · 帮助」，查看存档位置与同步说明。</div>',
+  "nav.arriveThreshold": "到达阈值",
+  "nav.gameUnits": "游戏单位",
+  "nav.holdMark": "停留标记",
+  "nav.holdSeconds": "秒（0=到达即标）",
+
   // 材料面板
   "mat.favOnly": "只看收藏 ({0})",
   "mat.countStat": "{0} 种 · {1} 点",
@@ -126,6 +140,11 @@ window.TOTK_I18N.zh = {
 
   // 任务卡片与板块
   "task.groupHeader": "任务·{0}",
+  // 探索度「任务」组四档（2026-10-28 补，与 en 词典保持对称；中文值与面板显示一致）
+  "task.group.主剧情挑战": "主线任务",
+  "task.group.情节挑战": "情节挑战",
+  "task.group.神庙挑战": "神庙挑战",
+  "task.group.迷你挑战": "迷你挑战",
   "task.allTotal": "全库 {0}",
   "task.noName": "暂无官方名",
   "task.location": "位置",
@@ -162,7 +181,16 @@ window.TOTK_I18N.zh = {
   // 设置面板
   "settings.title": "显示设置",
   "settings.iconSize": "图标大小",
-  "settings.iconSizeHint": "（基准 20-32px，随缩放分级）",
+  // 地图标点大小矩阵（2026-10-28 补齐，此前这批新增 UI 漏了词条；
+  // iconSizeHint 原文件已有词条，这里不重复定义）
+  "settings.presetTiered": "推荐",
+  "settings.presetUniform": "等大",
+  "settings.presetCompact": "紧凑",
+  "settings.presetMore": "更多",
+  "settings.presetCollapse": "收起",
+  "settings.matrixColGroup": "大类",
+  "settings.matrixReset": "重置推荐",
+  "settings.iconSizeHint": "（快速比例与分类细分矩阵）",
   "settings.markerStyle": "定位标记",
   "settings.markerStyleHint": "（大小 16-40 · 透明度 30-100%）",
   "settings.completedMarkers": "完成标记图标",

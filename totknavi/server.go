@@ -1,5 +1,5 @@
 // HTTP API：供在线地图页（https://totk.yalin.site/）跨域连接。
-// 端点：GET /pos、GET/POST /target、GET /rescan、GET /progress。
+// 端点：GET /pos、GET/POST /target、GET /rescan、GET /progress、GET /save。
 // 所有响应带 CORS 头 + Private Network Access 预检头（Chrome 对
 // "公网 HTTPS 页面 → http://127.0.0.1" 的请求强制要求）。
 //
@@ -15,6 +15,7 @@ package main
 import (
 	_ "embed"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -180,6 +181,8 @@ func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 	case "/progress":
 		s.handleProgress(w, r)
+	case "/save":
+		s.handleSave(w, r)
 	case "/set-coords":
 		if r.Method == http.MethodPost {
 			s.handleSetCoords(w, r)
@@ -189,6 +192,40 @@ func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	default:
 		writeJSON(w, map[string]any{"ok": false, "error": "unknown endpoint"})
 	}
+}
+
+// handleSave 原样返回最新 progress.sav 的字节（2026-10-28 新增，对齐 BOTWmap 的 /save）。
+//
+// 为什么要这个接口：浏览器有安全沙箱，网页**不能**自己打开 G:\...\progress.sav。
+// 手动加载是玩家选文件递给网页；自动同步就得由核心把文件字节递过去 ——
+// 两边拿到的是同一种 ArrayBuffer，之后都交给 app/js/save-parser.js 在内存里解析。
+//
+// ★ 这样核心不再承担"统计"职责：新增任何统计项（图鉴、材料、新类别）只改前端一处，
+//   核心只负责「找到最新存档 → 原样吐出去」，不必重新编译。
+// ★ 兼容：老网页不请求本接口，行为不变；新网页拿不到（老核心 404）会退回 /progress 的 counts。
+func (s *server) handleSave(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		writeJSON(w, map[string]any{"ok": false, "error": "GET only"})
+		return
+	}
+	mt, path := findLatestProgress()
+	if path == "" {
+		w.WriteHeader(http.StatusNotFound)
+		writeJSON(w, map[string]any{"ok": false, "error": "save not found"})
+		return
+	}
+	buf, err := os.ReadFile(path)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		writeJSON(w, map[string]any{"ok": false, "error": err.Error()})
+		return
+	}
+	corsHeaders(w)
+	w.Header().Set("Content-Type", "application/octet-stream")
+	// 槽位与 mtime 放头里：网页要用它显示「存档自动同步 ✓ (slot_00)」与数据新鲜度
+	w.Header().Set("X-Save-Slot", filepath.Base(filepath.Dir(path)))
+	w.Header().Set("X-Save-Mtime", fmt.Sprintf("%.0f", mt))
+	w.Write(buf)
 }
 
 // handleSetCoords 坐标校准 HTTP 入口（Eden 特有；Ryujinx 返回不支持）。

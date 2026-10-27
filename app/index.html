@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>塞尔达传说：王国之泪 · 互动地图</title>
 <link rel="stylesheet" href="vendor/leaflet.css">
-<link rel="stylesheet" href="css/style.css?v=241">
+<link rel="stylesheet" href="css/style.css?v=242">
 </head>
 <body>
 
@@ -105,7 +105,7 @@
   <!-- ===== 探索度（加载存档后显示） ===== -->
   <div class="progress-section" id="progressSection">
     <div class="progress-head" id="progressHead" data-i18n-title="progress.toggleTip" title="点击展开/收起">
-      <span class="progress-toggle" id="progressToggle">▾</span>
+      <span class="progress-toggle" id="progressToggle" aria-hidden="true"></span>
       <span class="progress-title" data-i18n="progress.title">探索度</span>
     </div>
     <div id="progressList" class="progress-list"></div>
@@ -116,11 +116,7 @@
     <div class="su-row">
       <button id="saveSyncBtn" data-i18n-title="save.syncBtnTip" type="button" class="su-load-btn" title="读取本机 Ryujinx 的 progress.sav，同步收集进度（文件仅在本机内存处理）" data-i18n="save.loadBtn">📂 从存档加载进度…</button>
       <span class="su-help" id="suHelp" data-i18n-aria="save.helpAria" tabindex="0" role="button" aria-label="存档在哪里">?</span>
-      <div class="su-tip hidden" id="suTip">
-        <b>存档文件 = progress.sav（游戏存档）</b>
-        <div>存档位置：<code>AppData\Roaming\Ryujinx\bis\user\save\0000000000000007\0\slot_00\progress.sav</code></div>
-        <div class="su-tip-sub">点击问号打开「同步存档 · 帮助」，查看模拟器版本、存档位置与同步说明。</div>
-      </div>
+      <div class="su-tip hidden" id="suTip" data-i18n-html="save.tipBody"></div>
       <input type="file" id="saveFileInput" accept=".sav" hidden>
     </div>
   </div>
@@ -199,7 +195,7 @@
       <span class="ec-label" data-i18n="card.note">注意</span>
       <span class="ec-value">
         <span id="ecNoteText"></span>
-        <button type="button" class="ec-more" id="ecNoteMore">展开</button>
+        <button type="button" class="ec-more" id="ecNoteMore" data-i18n="card.expand">展开</button>
       </span>
     </div>
     <div class="ec-row" id="ecChestRow"><span class="ec-label" data-i18n="card.chest">宝箱</span><span class="ec-value" id="ecChest"></span></div>
@@ -240,8 +236,37 @@
   <div class="set-divider"></div>
 
   <div class="set-sec">
-    <div class="set-sec-title"><span data-i18n="settings.iconSize">图标大小</span> <span class="set-title-hint" data-i18n="settings.iconSizeHint">（基准 20-32px，随缩放分级）</span></div>
-    <div class="set-field"><input type="number" id="setIconSize" min="20" max="32" step="2" value="26"> <i>px</i></div>
+    <div class="set-sec-title">
+      <span data-i18n="settings.iconSize">地图标点大小</span>
+      <span class="set-title-hint" data-i18n="settings.iconSizeHint">（快速比例与分类细分矩阵）</span>
+    </div>
+    <div class="set-opts" id="setIconPresetBtns">
+      <button type="button" class="set-opt active" data-preset="tiered" data-i18n="settings.presetTiered">推荐</button>
+      <button type="button" class="set-opt" data-preset="uniform" data-i18n="settings.presetUniform">等大</button>
+      <button type="button" class="set-opt" data-preset="compact" data-i18n="settings.presetCompact">紧凑</button>
+      <button type="button" class="set-opt set-more-toggle" id="setMoreIconBtn" data-i18n="settings.presetMore">更多</button>
+    </div>
+    <div id="setIconMatrixWrap" class="set-matrix-wrap" style="display:none">
+      <div class="set-matrix-table-scroll">
+        <table class="set-matrix-table" id="setIconMatrixTable">
+          <thead>
+            <tr>
+              <th data-i18n="settings.matrixColGroup">大类</th>
+              <th>z3</th>
+              <th>z4</th>
+              <th>z5</th>
+              <th>z6</th>
+              <th>z7</th>
+            </tr>
+          </thead>
+          <tbody id="setIconMatrixBody">
+          </tbody>
+        </table>
+      </div>
+      <div class="set-matrix-actions">
+        <button type="button" class="set-link-btn" id="setResetIconMatrix" data-i18n="settings.matrixReset">重置推荐</button>
+      </div>
+    </div>
   </div>
 
   <div class="set-sec">
@@ -307,7 +332,7 @@
 <style id="settings-css">
   /* V2.5.0 v4：设置卡片（detail-card 同款），位置由 JS 锚定到「设置」按钮上方，标题栏可拖动 */
   #settingsModal.set-pop {
-    position: fixed; z-index: 500; width: 320px;
+    position: fixed; z-index: 500; width: 320px; box-sizing: border-box;
     max-height: calc(100vh - 70px); overflow-y: auto;
     background: rgba(20,22,26,.97); border: 1px solid rgba(255,255,255,.13);
     border-radius: 12px; box-shadow: 0 10px 34px rgba(0,0,0,.55);
@@ -370,6 +395,52 @@
   .set-actions { display: flex; justify-content: flex-end; margin-top: 12px; }
   .set-ghost { padding: 5px 12px; border-radius: 8px; cursor: pointer; font-size: 12px; background: none; border: 1px solid rgba(255,255,255,.2); color: #c8cdd4; }
   .set-ghost:hover { border-color: #eac27e; color: #eac27e; }
+  /* V2.7.0：更多设置图标尺寸矩阵表格（精准紧凑版，锁定320px弹窗，列间距4px） */
+  .set-more-toggle { color: #eac27e !important; }
+  .set-matrix-wrap {
+    margin-top: 6px; padding: 6px 2px;
+    background: rgba(0,0,0,.25); border: 1px solid rgba(255,255,255,.08);
+    border-radius: 8px;
+  }
+  .set-matrix-table-scroll { overflow-x: auto; max-width: 100%; }
+  .set-matrix-table {
+    margin: 0 auto;
+    border-collapse: separate;
+    border-spacing: 4px 3px;
+    font-size: 11px;
+    text-align: center;
+  }
+  .set-matrix-table th {
+    width: 36px; padding: 2px 0;
+    color: #eac27e; font-weight: 500;
+    border-bottom: 1px solid rgba(255,255,255,.15);
+  }
+  .set-matrix-table td {
+    width: 36px; padding: 0;
+    border-bottom: 1px solid rgba(255,255,255,.05);
+  }
+  .set-matrix-table th:first-child, .set-matrix-table td:first-child {
+    width: 38px; font-weight: 600; color: #c8cdd4;
+    text-align: left; padding-left: 2px; white-space: nowrap;
+  }
+  .set-matrix-table input[type="number"]::-webkit-outer-spin-button,
+  .set-matrix-table input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  .set-matrix-table input[type="number"] {
+    -moz-appearance: textfield;
+    appearance: textfield;
+    width: 34px !important; height: 21px !important; padding: 0 !important;
+    text-align: center; line-height: 21px !important;
+    background: rgba(255,255,255,.07) !important; border: 1px solid rgba(255,255,255,.15) !important;
+    border-radius: 3px !important; color: #fff !important; font-size: 11px !important;
+    box-sizing: border-box !important;
+  }
+  .set-matrix-table input[type="number"]:focus {
+    border-color: #eac27e !important; outline: none; background: rgba(234,194,126,.18) !important;
+  }
+  .set-matrix-actions { display: flex; justify-content: flex-end; margin-top: 4px; padding-right: 6px; }
 </style>
 
 <!-- 自定义标点表单 -->
@@ -388,64 +459,17 @@
 
 <!-- ============ 帮助弹窗（同步存档 · 帮助） ============ -->
 <div id="helpBox" class="help-box hidden">
-  <h3>同步存档 · 帮助
+  <h3><span data-i18n="help.title">同步存档 · 帮助</span>
     <button id="hbClose" data-i18n-title="common.close" class="help-close" title="关闭">×</button>
   </h3>
-  <div class="hq">
-    <h4>① 模拟器和游戏版本</h4>
-    <ul>
-      <li><b class="hl">模拟器</b>：Ryujinx（Canary 分支）v1.3.351 —— <a href="https://github.com/Ryujinx/release-channel-canary" target="_blank" rel="noopener">Ryujinx Canary 发布页</a></li>
-      <li><b class="hl">游戏</b>：塞尔达传说：王国之泪（The Legend of Zelda: Tears of the Kingdom）</li>
-      <li><b class="hl">TitleID</b>：0100F2C0115B6000</li>
-      <li><b class="hl">游戏版本</b>：1.2.1（更新号 v720896）</li>
-      <li><b class="hl">存档文件</b>：progress.sav（头部 magic 0x01020304）</li>
-    </ul>
-  </div>
-  <div class="hq">
-    <h4>② 怎么找存档</h4>
-    <p>Ryujinx 存档标准路径：</p>
-    <code>%APPDATA%\Ryujinx\bis\user\save\&lt;SaveId&gt;\&lt;玩家序号&gt;\slot_XX\progress.sav</code>
-    <p>本机实际路径：</p>
-    <code>AppData\Roaming\Ryujinx\bis\user\save\0000000000000007\0\slot_00\progress.sav</code>
-    <ul>
-      <li><b class="hl">快速查看</b>：Ryujinx 游戏列表里右键「塞尔达传说：王国之泪」→「打开存档位置」，直达存档文件夹。</li>
-      <li>路径段含义：<code>0000000000000007</code> = TOTK 固定存档目录；<code>0</code> = 玩家序号；<code>slot_00</code>~<code>slot_05</code> = 游戏内存档槽，每槽独立进度。</li>
-      <li>Win+R 输入 <code>%APPDATA%\Ryujinx\bis\user\save</code> 回车，可直接打开存档根目录。</li>
-    </ul>
-  </div>
-  <div class="hq">
-    <h4>③ 搭配导航程序自动同步最新存档</h4>
-    <ul>
-      <li>启动本地定位服务（TOTKNavi）后，地图<b class="hl">自动读取 Ryujinx 当前游戏的 slot_00</b>，游戏保存后自动刷新同步，无需手动上传（V1.8.0 起）。</li>
-      <li>加载后按钮显示「存档自动同步 ✓」，探索度面板实时更新。</li>
-      <li>换槽位 / 换进度：把对应 <code>progress.sav</code> 放到 <code>slot_00</code>，或重启本地服务让自动检测重新生效。</li>
-    </ul>
-  </div>
-  <div class="hq">
-    <h4>④ 同步后的探索度统计介绍</h4>
-    <p>能显示真实收集进度（「已完成/总数」，如 神庙 8/152）：</p>
-    <p>鸟望台、神庙、树根、克洛格、双倍克洛格、魔犹伊遗失物、卡邦达立牌、设计图石板、贤者的遗志、洞穴/井/地洞入口等。</p>
-    <p>无法直接读取（保持全收集总数）：背包类（武器/弓/盾/防具数量）、任务类（情节/迷你挑战）等。</p>
-  </div>
-  <div class="hq">
-    <h4>⑤ 参考资料和链接</h4>
-    <ul>
-      <li>模拟器：<a href="https://github.com/Ryujinx/release-channel-canary" target="_blank" rel="noopener">Ryujinx Canary 发布页</a>（本机 v1.3.351）</li>
-      <li>游戏文件：本机 <code>G:\YUZU\Switch Games\TOTKroms</code></li>
-      <li>GitHub 仓库：<a href="https://github.com/yalincc/totkmap" target="_blank" rel="noopener">github.com/yalincc/totkmap</a></li>
-      <li>gitee 仓库：<a href="https://gitee.com/yalincc/totkmap" target="_blank" rel="noopener">gitee.com/yalincc/totkmap</a></li>
-      <li>地图线上版：<a href="https://totk.yalin.site" target="_blank" rel="noopener">totk.yalin.site</a></li>
-    </ul>
-  </div>
-  <div class="hq">
-    <h4>⑥ 存档的加载技术介绍</h4>
-    <ul>
-      <li>存档文件 <code>progress.sav</code> 头部 magic <code>0x01020304</code>；哈希表自偏移 <code>0x28</code> 起，每条 8 字节 <code>[uint32 hash][uint32 value]</code>，哨兵 <code>0xa3db7114</code>。</li>
-      <li>按文件大小识别游戏版本：v1.0 = 2,307,552 / v1.1.x·v1.2.x = 2,307,656 / v1.4.x = 2,307,856 字节。</li>
-      <li>解析<b class="hl">全程在本机浏览器内存完成，不会上传任何数据</b>。</li>
-      <li>能同步的类别按存档哈希表逐项匹配；背包/任务类不在存档哈希表内，无法读取。</li>
-    </ul>
-  </div>
+  <!-- 2026-10-28 重写：内容从"技术说明书"压成 5 段用户视角说明，整块走 data-i18n-html，
+       以后改文案只改 data/i18n/{zh,en}.js 的 help.* 一处，不用碰本文件 -->
+  <div data-i18n-html="help.what"></div>
+  <div data-i18n-html="help.path"></div>
+  <div data-i18n-html="help.load"></div>
+  <div data-i18n-html="help.data"></div>
+  <div data-i18n-html="help.privacy"></div>
+  <div data-i18n-html="help.more"></div>
 </div>
 
 <!-- ============ 实时导航面板（V1.8.0） ============ -->
@@ -460,8 +484,8 @@
     <div class="np-row" id="npTargetRow" data-i18n="nav.targetNone">目标：未设置</div>
     <div class="np-row np-arrive hidden" id="npArrive" data-i18n="nav.arrived">✓ 已到达目标（阈值内）</div>
     <div class="np-opts">
-      <label class="np-opt">到达阈值 <input type="number" id="npArriveInput" value="30" min="1" max="500"> 游戏单位</label>
-      <label class="np-opt">停留标记 <input type="number" id="npHold" value="2" min="0" max="10" step="1"> 秒（0=到达即标）</label>
+      <label class="np-opt"><span data-i18n="nav.arriveThreshold">到达阈值</span> <input type="number" id="npArriveInput" value="30" min="1" max="500"> <span data-i18n="nav.gameUnits">游戏单位</span></label>
+      <label class="np-opt"><span data-i18n="nav.holdMark">停留标记</span> <input type="number" id="npHold" value="2" min="0" max="10" step="1"> <span data-i18n="nav.holdSeconds">秒（0=到达即标）</span></label>
       <label class="np-chk"><input type="checkbox" id="npAutoLayer" checked> <span data-i18n="nav.autoLayer">跟随自动切层</span></label>
       <label class="np-chk"><input type="checkbox" id="npFollow"> <span data-i18n="nav.follow">视图跟随</span></label>
     </div>
@@ -506,8 +530,9 @@
 <!-- 图鉴站地址（联动「查看图鉴」按钮 / 对站跳转）：正式图鉴站地址配置后填写，留空则按钮不显示 -->
 <script>window.TOTK_COMPENDIUM_URL = '';</script>
 <script src="js/save-parser.js"></script>
-<script src="js/app.js?v=284"></script>
-<script src="js/live.js?v=284"></script>
+<script src="js/totk-canvas-layer.js?v=296"></script>
+<script src="js/app.js?v=298"></script>
+<script src="js/live.js?v=286"></script>
 <script src="js/explore-auto.js?v=193"></script>
 <script src="js/mat-auto.js?v=194"></script>
 <!-- 手机防息屏降级（V2.4.1）：wakeLock 不可用（局域网 http / iOS 旧版）时播放静音视频保持屏幕常亮；
@@ -537,7 +562,7 @@
 <script src="data/armor-upgrade.js?v=233"></script>
 <script src="js/task/task-data.js?v=270"></script>
 <script src="js/task/task-done.js?v=233"></script>
-<script src="js/task/task-panel.js?v=257"></script>
+<script src="js/task/task-panel.js?v=260"></script>
 <script src="js/task/task-card.js?v=275"></script>
 <script src="js/task/task-flow.js?v=273"></script>
 <!-- M6.5：防具面板 + 数据合并层。必须在 data/armors.js / data/armor-upgrade.js

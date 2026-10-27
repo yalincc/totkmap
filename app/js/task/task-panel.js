@@ -148,6 +148,32 @@
      ★ 只改DOM 高亮，绝不删userOn 里的键——
        否则「切到某层→ 某分类在这层count=0 → 被删 → 切回原层意图丢了」。
        count=0 的分类在 injectPanel 里本来就不会渲染出来，无需清理状态。 */
+  function syncTaskGrpBtn(btn) {
+    var b = btn || document.querySelector('#catalogList .tk-grp-btn');
+    if (!b) return;
+    var stats = D.statsByLayer(curLayer);
+    var validCats = stats.filter(function (s) { return s.count > 0; });
+    var onCount = validCats.filter(function (s) { return isOn(s.cat); }).length;
+    var totalCount = validCats.length;
+    var isEn = window.I18N && window.I18N.getLang() === 'en';
+    if (!totalCount) {
+      b.textContent = '';
+      b.style.display = 'none';
+      return;
+    }
+    b.style.display = '';
+    if (onCount === totalCount) {
+      b.textContent = isEn ? 'Clear' : '清空本组';
+      b.style.opacity = '1';
+    } else if (onCount === 0) {
+      b.textContent = isEn ? 'Select' : '全选本组';
+      b.style.opacity = '0.75';
+    } else {
+      b.textContent = isEn ? ('Select (' + onCount + '/' + totalCount + ')') : ('全选（' + onCount + '/' + totalCount + '）');
+      b.style.opacity = '0.75';
+    }
+  }
+
   function ensureChecked() {
     var m = userOn[curLayer];
     if (!m) return;
@@ -155,10 +181,13 @@
       var el = document.querySelector('#catalogList .tk-cat[data-tkcat="' + cat + '"]');
       if (el) el.classList.toggle('active', !!m[cat]);
     });
+    syncTaskGrpBtn();
   }
-  function calcTaskSize() {
-    if (global.TOTK_GET_TIER_SIZE) return global.TOTK_GET_TIER_SIZE('T2');
-    return 28;
+  function calcTaskSize(zoom) {
+    var z = (typeof zoom === 'number') ? zoom : (map ? map.getZoom() : 5);
+    if (global.TOTK_GET_GROUP_SIZE) return global.TOTK_GET_GROUP_SIZE('任务', z);
+    if (global.TOTK_GET_TIER_SIZE) return global.TOTK_GET_TIER_SIZE('T2', z);
+    return 26;
   }
 
   function signature() {
@@ -218,11 +247,11 @@
     }
     var groupHeader = isEn ? ('Quests · ' + layerCn) : ('任务·' + layerCn);
     var allText = isEn ? ('All ' + D.totalAllLayers()) : ('全库 ' + D.totalAllLayers());
-    var html = '<div class="group-title tk-group">' + esc(groupHeader) +
-      '<span class="tk-count">' + totalDone + '/' + total +
-      (allTotal && allTotal !== total
-        ? '<span class="tk-count-all">' + esc(allText) + '</span>' : '') +
-      '</span></div>';
+    var grpTip = window.I18N ? window.I18N.t('cat.groupToggleTip', '一键勾选 / 取消本组全部分类') : '一键勾选 / 取消本组全部分类';
+    var html = '<div class="group-title tk-group">' +
+      '<span class="gt-name">' + esc(groupHeader) + ' <span class="tk-count">' + totalDone + '/' + total + '</span></span>' +
+      '<button type="button" class="grp-btn tk-grp-btn" data-tk-grp="true" title="' + esc(grpTip) + '"></button>' +
+      '</div>';
     html += '<div class="cat-grid tk-grid">';
     stats.forEach(function (s) {
       if (s.count <= 0) return;
@@ -242,8 +271,31 @@
     box.innerHTML = html;
     var g = box.children[0], gr = box.children[1];
     if (!g || !gr) return;
-    list.appendChild(g);
-    list.appendChild(gr);
+    if (list.firstChild) {
+      list.insertBefore(gr, list.firstChild);
+      list.insertBefore(g, gr);
+    } else {
+      list.appendChild(g);
+      list.appendChild(gr);
+    }
+
+    var grpBtn = g.querySelector('.tk-grp-btn');
+    if (grpBtn) {
+      syncTaskGrpBtn(grpBtn);
+      grpBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var m = userOn[curLayer] || (userOn[curLayer] = {});
+        var validCats = stats.filter(function (s) { return s.count > 0; });
+        var allOn = validCats.length > 0 && validCats.every(function (s) { return !!m[s.cat]; });
+        validCats.forEach(function (s) {
+          if (allOn) delete m[s.cat]; else m[s.cat] = true;
+        });
+        save();
+        ensureChecked();
+        syncTaskGrpBtn(grpBtn);
+        tick();
+      });
+    }
 
     gr.addEventListener('click', function (e) {
       var el = e.target && e.target.closest && e.target.closest('.tk-cat');
@@ -253,6 +305,7 @@
       if (m[cat]) delete m[cat]; else m[cat] = true;
       el.classList.toggle('active', !!m[cat]);
       save();
+      syncTaskGrpBtn();
       tick();
     });
   }
@@ -360,6 +413,48 @@
     });
   }
 
+  /* ---------------- 任务候选列表（2026-10-27） ----------------
+   * 任务图标是独立的 DOM marker（要 hover 上浮、要压过流程线），点击事件不会
+   * 传到 Canvas 层的点击分发，所以「同一位置压了好几个任务/标点」得靠这里主动收候选。
+   * 浮层本身与 Canvas 侧共用 TOTK_APP.showPickEntries（样式/定位/关闭逻辑只有一套）。 */
+  function taskPickEntry(t, evt) {
+    var gk = t.group || '迷你挑战';
+    var isEn = window.I18N && window.I18N.getLang() === 'en';
+    var qg = (window.TOTK_QUESTS_GUIDE && window.TOTK_QUESTS_GUIDE[t.key]) || {};
+    var nm = isEn ? (qg.name_en || (window.I18N ? window.I18N.nameOf(t.name) : t.name))
+                  : (qg.name_zh || t.name);
+    return {
+      name: nm,
+      cat: window.I18N ? window.I18N.catOf(gk) : gk,
+      icon: 'assets/icons/' + taskIcon(gk),
+      done: !!(global.TaskDone && t.key && global.TaskDone.isDone(t.key)),
+      pick: function () { if (global.TaskCard) global.TaskCard.open(t, evt); }
+    };
+  }
+
+  /* 返回 true = 已弹候选列表（调用方不要再直接开卡） */
+  function openTaskPickList(t, e) {
+    var api = global.TOTK_APP;
+    if (!api || !api.showPickEntries || !e || !e.layerPoint || !map) return false;
+    var lp = e.layerPoint;
+    var R2 = 14 * 14;
+    var entries = [taskPickEntry(t, e)];
+    for (var k in mkIndex) {
+      var mk = mkIndex[k];
+      if (!mk || !mk._taskObj || mk._taskObj.key === t.key) continue;
+      var pt = map.latLngToLayerPoint(mk.getLatLng());
+      var dx = pt.x - lp.x, dy = pt.y - lp.y;
+      if (dx * dx + dy * dy <= R2) entries.push(taskPickEntry(mk._taskObj, e));
+    }
+    if (api.pickCanvasEntries) {
+      var cv = api.pickCanvasEntries(e);
+      for (var i = 0; i < cv.length; i++) entries.push(cv[i]);
+    }
+    if (entries.length < 2) return false;
+    api.showPickEntries(entries, e);
+    return true;
+  }
+
   function render() {
     if (!map) return;
     if (group) { map.removeLayer(group); group = null; }
@@ -429,6 +524,12 @@
         className: 'mk-label tk-tip' + (isDone ? ' done-label' : '')
       });
       m.on('click', function (e) {
+        /* 2026-10-27：任务图标也参与「同位置候选」判定。
+         * 任务走的是独立 DOM marker，点击事件不会传到 Canvas 层，所以这边自己收候选：
+         * ① 当前任务（置顶）；② 同位置的其他可见任务（容器像素距离 ≤14px）；
+         * ③ 同位置的 Canvas 标点（神庙/克洛格/宝箱…，由 TOTK_APP.pickCanvasEntries 提供）。
+         * 只有一个候选时照旧直接开卡，不给玩家添一步。 */
+        if (openTaskPickList(t, e)) return;
         if (global.TaskCard) global.TaskCard.open(t, e);
       });
       m.addTo(g);
@@ -509,6 +610,29 @@
     ready = true;
 
     global.TaskPanel = {
+      inject: injectPanel,
+      selectAll: function (layerId) {
+        var l = layerId || curLayer;
+        var stats = D.statsByLayer(l);
+        var m = userOn[l] || (userOn[l] = {});
+        stats.forEach(function (s) { if (s.count > 0) m[s.cat] = true; });
+        save();
+        ensureChecked();
+        syncTaskGrpBtn();
+        tick();
+      },
+      clearAll: function (layerId) {
+        var l = layerId || curLayer;
+        var stats = D.statsByLayer(l);
+        var m = userOn[l] || (userOn[l] = {});
+        stats.forEach(function (s) { delete m[s.cat]; });
+        save();
+        ensureChecked();
+        syncTaskGrpBtn();
+        tick();
+      },
+      syncBtn: syncTaskGrpBtn,
+      updateSizes: updateSizes,
       render: render,
       isOn: isOn,
       refresh: function () {
@@ -643,11 +767,7 @@
 
   var TASK_CSS = [
     /* 分组标题右侧的任务总数 */
-    '.tk-group { display:flex; align-items:center; }',
-    '.tk-group::after { content:""; flex:1; }',
-    '.tk-group .tk-count {',
-    '  margin-left:8px; font-size:11px; color:rgba(255,255,255,.3);',
-    '  font-variant-numeric:tabular-nums; }',
+    '.tk-group .tk-count { margin-left:6px; font-size:11px; color:rgba(255,255,255,.38); font-weight:normal; font-variant-numeric:tabular-nums; }',
     /* 「全库 N」：斜体更淡，区分于本层数字。
        它的作用是让人一眼看出标题里的数字是**分层统计**而不是全量，
        避免切到地底层看到「0/3」时以为数据丢了。 */

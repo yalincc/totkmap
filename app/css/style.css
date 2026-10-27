@@ -554,12 +554,26 @@ html, body {
   user-select: none;
 }
 .progress-head:hover .progress-title { color: #eac27e; }
+/* 2026-10-27：三角改用 CSS 边框绘制 —— 原来 12px 字号的 ▾ 字符实际只有约 4×3px，
+   比 14px 的「探索度」明显小一圈。改成固定 12×8px 的纯 CSS 三角，
+   不受字体回退影响（英文下不同字体的 ▾ 字形大小不一），旋转动画沿用 transform */
 .progress-toggle {
-  font-size: 12px;
-  color: #8a93a0;
-  line-height: 1;
+  display: block;
+  flex: 0 0 auto;
+  width: 12px;
+  height: 8px;
+  position: relative;
   transition: transform .18s ease;
   transform-origin: center;
+}
+.progress-toggle::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 8px solid #8a93a0;
 }
 .progress-section.collapsed .progress-toggle { transform: rotate(-90deg); }
 .progress-title { font-size: 14px; font-weight: 400; color: #fff; }
@@ -594,14 +608,19 @@ html, body {
 .progress-empty { font-size: 12px; color: #7c8591; padding: 3px 0; line-height: 1.6; }
 
 /* V2.6.0：探索度改版 —— 四大组 + 双列紧凑纯数字网格（对齐 BOTWmap stats 面板） */
-.prog-synced { font-size: 11px; color: #7fbf7f; padding: 0 0 2px; }
+/* 2026-10-27：四大组之间加一条细分割线 —— 只加线、不加间距，
+   行距 / 组距与改版前完全一致。
+   ★ 标题外层多了 .prog-group 包裹后，原来的 .prog-group-title:first-of-type
+     会命中「每个组里的第一个标题」（等于每组都变 1px 上边距，间距被改掉），
+     所以首组特例改成 .prog-group:first-child 兜住。 */
+.prog-group + .prog-group { border-top: 1px solid rgba(255,255,255,.10); }
 .prog-group-title {
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 500;
   color: rgba(255,255,255,.9);
   margin: 5px 0 2px;
 }
-.prog-group-title:first-of-type { margin-top: 1px; }
+.prog-group:first-child .prog-group-title { margin-top: 1px; }
 .prog-grid {
   display: grid;
   grid-template-columns: minmax(0,1fr) minmax(0,1fr);
@@ -612,7 +631,7 @@ html, body {
   align-items: center;
   justify-content: space-between;
   gap: 6px;
-  font-size: 11.5px;
+  font-size: 12.5px;
   line-height: 1.45;
   min-width: 0;
 }
@@ -628,7 +647,7 @@ html, body {
 }
 .prog-row .pr-val {
   flex: none;
-  font-size: 11px;
+  font-size: 12px;
   color: #eac27e;
   font-variant-numeric: tabular-nums;
 }
@@ -1839,8 +1858,67 @@ html[lang="en"] .tk-copy {
   filter: grayscale(35%);
   transition: opacity 0.15s ease;
 }
-.prog-row .pr-pct {
-  font-size: 10px;
-  color: rgba(255, 255, 255, 0.55);
-  margin-left: 3px;
+/* 2026-10-27：小类右侧百分比已去掉（只留 14/152），.pr-pct 规则随之清理 */
+
+/* ============ 密集标点候选列表（2026-10-27） ============
+   同一位置叠着多个标点时点开的小浮层：图标 + 名称 + 分类。
+   层级 800 = UI-MANUAL §6.2「新增标点弹窗」同级，不越过 Toast(900)。 */
+.tk-pick {
+  position: fixed;
+  z-index: 800;
+  min-width: 188px;
+  max-width: 262px;
+  max-height: 320px;
+  overflow-y: auto;
+  padding: 4px;
+  background: #1b1d22;
+  border: 1px solid #3a3d45;
+  border-radius: 8px;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, .55);
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, .16) transparent;
+}
+.tk-pick::-webkit-scrollbar { width: 3px; }
+.tk-pick::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, .16); border-radius: 3px; }
+.tk-pick-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 34px;
+  padding: 6px 8px;
+  border: none;
+  border-radius: 6px;
+  background: none;
+  color: #d7d7d9;
+  font-family: inherit;
+  font-size: 13px;
+  line-height: 1.3;
+  text-align: left;
+  cursor: pointer;
+}
+.tk-pick-row:hover { background: rgba(255, 255, 255, .08); }
+.tk-pick-row img {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 auto;
+  object-fit: contain;
+}
+.tk-pick-name {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.tk-pick-cat {
+  flex: 0 0 auto;
+  font-size: 11px;
+  color: #8a93a0;
+}
+.tk-pick-row.done .tk-pick-name { color: #7dffa0; }
+/* 手机端：行高抬到 44px 满足触控标准（UI-MANUAL §6.3） */
+@media (max-width: 640px) {
+  .tk-pick-row { min-height: 44px; font-size: 14px; }
+  .tk-pick { max-width: min(72vw, 280px); }
 }

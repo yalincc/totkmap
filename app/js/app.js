@@ -211,6 +211,61 @@
   map.on('zoomend moveend', updateZoomPct);
   updateZoomPct();
 
+    /* 全局 Canvas 高性能标点渲染图层（接管全量常规标点与大世界宝箱，万级标点 60fps） */
+  if (typeof TotkCanvasLayer !== 'undefined') {
+    state.canvasLayer = new TotkCanvasLayer(map, {
+      isDone: function (m) {
+        var doneId = m.korokStartId || m.id;
+        return !!(state.done && state.done[doneId]);
+      },
+      showNames: !!state.showNames,
+      labelMinZoom: LABEL_MIN_ZOOM,
+      getLabel: function (m) {
+        var isDone = !!(state.done && state.done[m.korokStartId || m.id]);
+        var disp = window.I18N ? window.I18N.nameOf(m) : (m.name || m.full || m.drop_zh || m.drop || '');
+        return (isDone ? '✓ ' : '') + disp;
+      },
+      getMarkerSize: function (m, zoom) {
+        var group = '位置';
+        if (m.drop || m.drop_zh || m.type === 'chest' || (m.id && String(m.id).indexOf('c_') === 0)) {
+          group = '收集';
+        } else {
+          var cat = catById(state.layer, m.cat);
+          if (cat && cat.groupCn) group = cat.groupCn;
+        }
+        return (typeof getGroupIconSize === 'function') ? getGroupIconSize(group, zoom) : 24;
+      },
+      getIconUrl: function (m) {
+        if (m.iconUrl) return m.iconUrl;
+        if (m.icon) {
+          if (m.icon.indexOf('/') !== -1 || m.icon.indexOf('data:') === 0 || m.icon.indexOf('http') === 0) return m.icon;
+          return 'assets/icons/' + m.icon;
+        }
+        if (m.drop || m.drop_zh || m.type === 'chest' || (m.id && String(m.id).indexOf('c_') === 0)) {
+          return 'assets/icons/origin_3845393_77466.png';
+        }
+        var cat = catById(state.layer, m.cat);
+        if (cat && cat.icon) return 'assets/icons/' + cat.icon;
+        return null;
+      }
+    });
+
+    state.canvasLayer.on('click', function (m, e) {
+      if (m.drop || m.drop_zh || m.type === 'chest' || (m.id && String(m.id).indexOf('c_') === 0)) {
+        openChestDetail(m, e);
+      } else {
+        openDetail(m, e);
+      }
+    });
+
+    /* 密集/重叠标点：弹候选列表让玩家自己挑（单点仍走上面的直达卡片） */
+    state.canvasLayer.on('multiclick', function (cands, e) {
+      var list = [];
+      for (var i = 0; i < cands.length; i++) list.push(cands[i].marker);
+      showPickList(list, e);
+    });
+  }
+
   var tileLayer = null;
   /* V1.8.0 瓦片优化: z3/z4 已转 WebP q80(23.9MB->1.9MB), z5+ 仍是 PNG —— 按缩放级选扩展名 */
   var TotkTileLayer = L.TileLayer.extend({
@@ -253,6 +308,12 @@
     if (!list) return;
     var isEn = window.I18N && window.I18N.getLang() === 'en';
     Array.prototype.forEach.call(list.querySelectorAll('.grp-btn'), function (btn) {
+      if (btn.classList.contains('tk-grp-btn')) {
+        if (window.TaskPanel && window.TaskPanel.syncBtn) {
+          window.TaskPanel.syncBtn(btn);
+        }
+        return;
+      }
       var ids = lastGroupCats[btn.getAttribute('data-grp')] || [];
       var on = ids.filter(function (id) { return !!state.selected[id]; }).length;
       btn.textContent = grpBtnText(on, ids.length, isEn);
@@ -375,6 +436,9 @@
     });
     if (!html) html = '<div class="sr-empty">当前图层暂无标点分类</div>';
     list.innerHTML = html;
+    if (window.TaskPanel && window.TaskPanel.inject) {
+      window.TaskPanel.inject();
+    }
 
     Array.prototype.forEach.call(list.querySelectorAll('.cat-item'), function (el) {
       el.addEventListener('click', function () {
@@ -507,31 +571,71 @@
    * T1: z3=24, z4=26, z5=28, z6=30, z7=32
    * T2: z3=22, z4=24, z5=26, z6=28, z7=32
    * T3: z3=20, z4=22, z5=24, z6=26, z7=30 */
-  var TIER_MATRIX = {
-    T1: { 3: 24, 4: 26, 5: 28, 6: 30, 7: 32 },
-    T2: { 3: 22, 4: 24, 5: 26, 6: 28, 7: 32 },
-    T3: { 3: 20, 4: 22, 5: 24, 6: 26, 7: 30 }
+  /* 老大定调尺寸阶梯：z3与z4相同，z5与z6相同，z7最大
+   * T1: z3/z4=24, z5/z6=28, z7=32
+   * T2: z3/z4=22, z5/z6=26, z7=30
+   * T3: z3/z4=18, z5/z6=22, z7=26 */
+  /* ---------------- 7大分类图标尺寸自定义矩阵（V2.7.0） ----------------
+   * 支持左侧 7 大分类（任务、位置、收集、装备、地点、怪物、材料）在 z3-z7 的独立参数配置 */
+  var LS_ICON_MATRIX = 'totkmap_icon_matrix_v1';
+  var LS_ICON_PRESET = 'totkmap_icon_preset_v1';
+  var MATRIX_GROUPS = ['任务', '位置', '收集', '装备', '地点', '怪物', '材料'];
+  var MATRIX_ZOOMS = [3, 4, 5, 6, 7];
+
+  var PRESET_TIERED = {
+    '任务': { 3: 22, 4: 22, 5: 26, 6: 26, 7: 30 },
+    '位置': { 3: 24, 4: 24, 5: 28, 6: 28, 7: 32 },
+    '收集': { 3: 18, 4: 18, 5: 22, 6: 22, 7: 26 },
+    '装备': { 3: 20, 4: 20, 5: 24, 6: 24, 7: 28 },
+    '地点': { 3: 22, 4: 22, 5: 26, 6: 26, 7: 30 },
+    '怪物': { 3: 22, 4: 22, 5: 26, 6: 26, 7: 30 },
+    '材料': { 3: 20, 4: 20, 5: 24, 6: 24, 7: 28 }
   };
 
-  function getTableSize(tier, z) {
-    var tbl = TIER_MATRIX[tier] || TIER_MATRIX.T3;
-    var cz = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, z));
-    var lo = Math.floor(cz);
-    var hi = Math.ceil(cz);
-    if (lo === hi) return tbl[lo];
-    var t = cz - lo;
-    return Math.round(tbl[lo] + (tbl[hi] - tbl[lo]) * t);
+  var PRESET_UNIFORM = {
+    '任务': { 3: 24, 4: 24, 5: 24, 6: 24, 7: 24 },
+    '位置': { 3: 24, 4: 24, 5: 24, 6: 24, 7: 24 },
+    '收集': { 3: 24, 4: 24, 5: 24, 6: 24, 7: 24 },
+    '装备': { 3: 24, 4: 24, 5: 24, 6: 24, 7: 24 },
+    '地点': { 3: 24, 4: 24, 5: 24, 6: 24, 7: 24 },
+    '怪物': { 3: 24, 4: 24, 5: 24, 6: 24, 7: 24 },
+    '材料': { 3: 24, 4: 24, 5: 24, 6: 24, 7: 24 }
+  };
+
+  var PRESET_COMPACT = {
+    '任务': { 3: 18, 4: 18, 5: 22, 6: 22, 7: 26 },
+    '位置': { 3: 20, 4: 20, 5: 24, 6: 24, 7: 28 },
+    '收集': { 3: 16, 4: 16, 5: 20, 6: 20, 7: 24 },
+    '装备': { 3: 18, 4: 18, 5: 22, 6: 22, 7: 26 },
+    '地点': { 3: 18, 4: 18, 5: 22, 6: 22, 7: 26 },
+    '怪物': { 3: 20, 4: 20, 5: 24, 6: 24, 7: 28 },
+    '材料': { 3: 18, 4: 18, 5: 22, 6: 22, 7: 26 }
+  };
+
+  var iconMatrix = loadJson(LS_ICON_MATRIX, null);
+  if (!iconMatrix) {
+    iconMatrix = JSON.parse(JSON.stringify(PRESET_TIERED));
+  }
+  var currentIconPreset = localStorage.getItem(LS_ICON_PRESET) || 'tiered';
+
+  function saveIconMatrix() {
+    saveJson(LS_ICON_MATRIX, iconMatrix);
+    localStorage.setItem(LS_ICON_PRESET, currentIconPreset);
   }
 
-  /* 动态计算图标尺寸：根据层级与当前地图缩放级别自适应缩放，叠加基准偏置（默认基准 26px，范围 20-32px） */
+  function getGroupIconSize(group, z) {
+    var cz = Math.max(3, Math.min(7, Math.round(z || (map ? map.getZoom() : 5))));
+    var grp = iconMatrix[group] || iconMatrix['位置'] || PRESET_TIERED['位置'];
+    return grp[cz] || 24;
+  }
+
   function calcIconSize(tier, zoom) {
-    var base = (SETTINGS && SETTINGS.iconSize) || 26;
     var z = (typeof zoom === 'number') ? zoom : (map ? map.getZoom() : 5);
-    var stdSize = getTableSize(tier, z);
-    var offset = base - 26;
-    return Math.max(14, Math.min(36, stdSize + offset));
+    var grpName = tier === 'T1' ? '位置' : (tier === 'T3' ? '收集' : '地点');
+    return getGroupIconSize(grpName, z);
   }
   window.TOTK_GET_TIER_SIZE = calcIconSize;
+  window.TOTK_GET_GROUP_SIZE = getGroupIconSize;
 
   function updateCount() {
     var total = 0, done = 0;
@@ -601,6 +705,25 @@
     return doneIconCache[key];
   }
 
+    /* Canvas 架构兼容代理：为每个标点提供轻量代理对象，0 DOM 负担且 100% 满足既有系统对 state.markers 的接口调用 */
+  function createProxyMarker(m) {
+    var lat = (m.x !== undefined && m.y !== undefined) ? Number(m.x) : (m.z !== undefined ? Number(m.z) : 0);
+    var lng = (m.x !== undefined && m.y !== undefined) ? Number(m.y) : (m.x !== undefined ? Number(m.x) : 0);
+    var ll = (typeof L !== 'undefined' && L.latLng) ? L.latLng(lat, lng) : { lat: lat, lng: lng };
+    return {
+      _totkMarker: m,
+      getLatLng: function () { return ll; },
+      setLatLng: function (nll) { ll = nll; },
+      isTooltipOpen: function () { return false; },
+      openTooltip: function () { return this; },
+      closeTooltip: function () { return this; },
+      bindTooltip: function () { return this; },
+      unbindTooltip: function () { return this; },
+      setIcon: function () { return this; },
+      getElement: function () { return null; }
+    };
+  }
+
   function renderMarkers() {
     Object.keys(state.groups).forEach(function (k) {
       if (map.hasLayer(state.groups[k])) map.removeLayer(state.groups[k]);
@@ -611,12 +734,11 @@
     var cats = {};
     catsOfLayer(state.layer).forEach(function (c) { cats[c.id] = c; });
 
+    var activeMarkers = [];
     MARKERS.forEach(function (m) {
       if (m.layer !== state.layer) return;
       if (!state.selected[m.cat]) return;
-      /* V2.6.0：朋友的营地（运送终点）只是「给卡片用的正式标点」，
-         地图上的营地图标由 korok-layer 用官方 p.goal 单独绘制（带连线），
-         这里跳过，否则同一位置会叠两个图标。 */
+      /* V2.6.0：朋友的营地（运送终点）由 korok-layer 绘制连线，这里跳过 */
       if (m.korokStartId) return;
       var isDone = !!state.done[m.id];
       var cat = cats[m.cat];
@@ -626,31 +748,14 @@
       if (state.filter === 'done' && !isDone) return;
       if (state.filter === 'undone' && isDone) return;
 
-      /* V1.9.3 完成标记：完成点用带右上角绿勾的 divIcon，未完成保持原 L.icon */
-      var icon = isDone ? doneIconFor(cat, m) : iconFor(cat, m);
-      var opt = { riseOnHover: true };
-      if (icon) opt.icon = icon;
-      var mk = L.marker([m.x, m.y], opt);
-      mk._totkMarker = m;
-      var dispName = window.I18N ? window.I18N.nameOf(m) : (m.name || m.full);
-      mk.bindTooltip((isDone ? '✓ ' : '') + dispName, {
-        direction: 'top',
-        offset: [0, -12],
-        className: 'mk-label' + (isDone ? ' done-label' : '')
-      });
-      (function (mm) {
-        mk.on('click', function (e) { openDetail(mm, e); });
-      })(m);
-
-      if (!state.groups[m.cat]) state.groups[m.cat] = L.layerGroup();
-      state.groups[m.cat].addLayer(mk);
-      state.markers[m.id] = mk;
+      activeMarkers.push(m);
+      state.markers[m.id] = createProxyMarker(m);
     });
 
-    /* V2.6.1: 官方大世界宝箱分层渲染 */
+    /* 官方大世界宝箱分层数据收集 */
     var chestCatId = (state.layer === 20 ? 9903 : (state.layer === 19 ? 9902 : 9901));
+    var activeChests = [];
     if (state.selected[chestCatId] && window.TOTK_CHESTS_OFFICIAL && Array.isArray(window.TOTK_CHESTS_OFFICIAL)) {
-      var chestCat = cats[chestCatId];
       window.TOTK_CHESTS_OFFICIAL.forEach(function (ch) {
         if (ch.layer !== state.layer) return;
         var isDone = !!state.done[ch.id];
@@ -658,32 +763,45 @@
         if (isDone && isDoneHidden(hideType)) return;
         if (state.filter === 'done' && !isDone) return;
         if (state.filter === 'undone' && isDone) return;
+        activeChests.push(ch);
+        state.markers[ch.id] = createProxyMarker(ch);
+      });
+    }
 
-        var icon = isDone ? doneIconFor(chestCat, ch) : iconFor(chestCat, ch);
+    if (state.canvasLayer) {
+      state.canvasLayer.setShowNames(!!state.showNames);
+      state.canvasLayer.setData(activeMarkers.concat(activeChests));
+    } else {
+      // 兼容兜底：若未加载 CanvasLayer 则降级为原生 DOM Marker
+      activeMarkers.concat(activeChests).forEach(function (m) {
+        var isDone = !!state.done[m.id];
+        var cat = cats[m.cat] || (m.drop ? cats[chestCatId] : null);
+        var icon = isDone ? doneIconFor(cat, m) : iconFor(cat, m);
         var opt = { riseOnHover: true };
         if (icon) opt.icon = icon;
-        var lat = (ch.z !== undefined) ? ch.z : (ch.pos_3d ? ch.pos_3d[2] : 0);
-        var lng = (ch.x !== undefined) ? ch.x : (ch.pos_3d ? ch.pos_3d[0] : 0);
+        var lat = (m.z !== undefined && m.x !== undefined) ? m.z : m.x;
+        var lng = (m.z !== undefined && m.x !== undefined) ? m.x : m.y;
         var mk = L.marker([lat, lng], opt);
-        mk._totkMarker = ch;
-        var dispDrop = ch.drop_zh || ch.drop || '官方宝箱';
-        var tooltipText = (isDone ? '✓ ' : '') + dispDrop;
-        mk.bindTooltip(tooltipText, {
+        mk._totkMarker = m;
+        var dispName = window.I18N ? window.I18N.nameOf(m) : (m.name || m.full || m.drop_zh || m.drop);
+        mk.bindTooltip((isDone ? '✓ ' : '') + dispName, {
           direction: 'top',
           offset: [0, -12],
           className: 'mk-label' + (isDone ? ' done-label' : '')
         });
-        (function (chh) {
-          mk.on('click', function (e) { openChestDetail(chh, e); });
-        })(ch);
-
-        if (!state.groups[chestCatId]) state.groups[chestCatId] = L.layerGroup();
-        state.groups[chestCatId].addLayer(mk);
-        state.markers[ch.id] = mk;
+        (function (mm) {
+          mk.on('click', function (e) {
+            if (mm.drop || mm.drop_zh || mm.type === 'chest') openChestDetail(mm, e);
+            else openDetail(mm, e);
+          });
+        })(m);
+        var gid = m.cat || chestCatId;
+        if (!state.groups[gid]) state.groups[gid] = L.layerGroup();
+        state.groups[gid].addLayer(mk);
       });
+      Object.keys(state.groups).forEach(function (k) { state.groups[k].addTo(map); });
     }
 
-    Object.keys(state.groups).forEach(function (k) { state.groups[k].addTo(map); });
     renderCustomMarks();
     refreshLabels();
   }
@@ -691,6 +809,7 @@
   /* 地图缩放时同步更新常规标点尺寸（O(1) setIcon，无需重建图层） */
   var lastMarkerZoom = null;
   function updateMarkerSizes() {
+    if (state.canvasLayer) state.canvasLayer.redraw();
     var z = map.getZoom();
     if (z === lastMarkerZoom) return;
     lastMarkerZoom = z;
@@ -959,7 +1078,7 @@
     var card = $('detail');
     var wasHidden = card.classList.contains('hidden');
     card.classList.remove('hidden');
-    if (wasHidden || opts.evt) positionDetail(opts.evt && opts.evt.originalEvent || null);
+    if (wasHidden || opts.evt) positionDetail(opts.evt && (opts.evt.originalEvent || opts.evt) || null);
   }
 
   /* V1.8.0 M3: 探索标点 → 独立探索卡片（与材料卡片完全分离，不共用模板/无图） */
@@ -992,6 +1111,112 @@
       isDone: !!state.done[doneId],
       evt: evt
     });
+  }
+
+  /* ---------------- 密集标点候选列表（2026-10-27 新增） ----------------
+   * 同一位置叠了好几个标点（任务叠神庙、克洛格叠宝箱…）时，点一下弹这条小列表，
+   * 由玩家自己挑要看哪个，而不是永远打开最上面那一个。单点不会走到这里。
+   * 层级 z-index:800（UI-MANUAL §6.2「新增标点弹窗」同级），点空白 / Esc 关闭。 */
+  var pickPopup = null;
+  function pickDocDown(e) {
+    if (pickPopup && !pickPopup.contains(e.target)) pickPopupClose();
+  }
+  function pickEsc(e) {
+    if (e.key === 'Escape') pickPopupClose();
+  }
+  function pickPopupClose() {
+    if (pickPopup && pickPopup.parentNode) pickPopup.parentNode.removeChild(pickPopup);
+    pickPopup = null;
+    document.removeEventListener('mousedown', pickDocDown, true);
+    document.removeEventListener('keydown', pickEsc, true);
+  }
+  function isChestLike(m) {
+    return !!(m.drop || m.drop_zh || m.type === 'chest' || (m.id && String(m.id).indexOf('c_') === 0));
+  }
+  function pickIconOf(m) {
+    if (m.iconUrl) return m.iconUrl;
+    if (m.icon) {
+      if (m.icon.indexOf('/') !== -1 || m.icon.indexOf('data:') === 0 || m.icon.indexOf('http') === 0) return m.icon;
+      return 'assets/icons/' + m.icon;
+    }
+    if (isChestLike(m)) return 'assets/icons/origin_3845393_77466.png';
+    var cat = catById(state.layer, m.cat);
+    return (cat && cat.icon) ? ('assets/icons/' + cat.icon) : 'assets/icons/origin_3845393_70484.png';
+  }
+  function pickCatOf(m) {
+    if (isChestLike(m)) return window.I18N ? window.I18N.t('cat.宝箱', '宝箱') : '宝箱';
+    var cat = catById(state.layer, m.cat);
+    if (!cat) return '';
+    return window.I18N ? window.I18N.catOf(cat.name) : cat.name;
+  }
+  /* 把 Canvas 标点转成候选列表的统一条目格式。
+   * entries = { name, cat, icon, done, pick() } —— 任务侧（task-panel.js）也构造同格式，
+   * 两边共用同一个浮层，见 showPickEntries()。 */
+  function markerEntries(markers) {
+    return markers.map(function (m) {
+      var chest = isChestLike(m);
+      return {
+        name: m.drop_zh || (window.I18N ? window.I18N.nameOf(m) : (m.name || m.full)) || m.drop || ('ID ' + m.id),
+        cat: pickCatOf(m),
+        icon: pickIconOf(m),
+        done: !!state.done[m.korokStartId || m.id],
+        pick: function () { if (chest) openChestDetail(m, null); else openDetail(m, null); }
+      };
+    });
+  }
+
+  /* 通用候选列表（2026-10-27）：entries 可以是 Canvas 标点，也可以是任务（task-panel 组装）。
+   * 任务图标是独立的 DOM marker，点它的事件不会传到 Canvas 层，所以那侧主动调本函数。 */
+  function showPickEntries(entries, evt) {
+    if (!entries || !entries.length) return;
+    pickPopupClose();
+    var oe = evt && evt.originalEvent;
+    var cx = (oe && oe.clientX) || window.innerWidth / 2;
+    var cy = (oe && oe.clientY) || window.innerHeight / 2;
+    var box = document.createElement('div');
+    box.className = 'tk-pick';
+    entries.forEach(function (it) {
+      var row = document.createElement('button');
+      row.type = 'button';
+      row.className = 'tk-pick-row' + (it.done ? ' done' : '');
+      row.innerHTML = '<img src="' + esc(it.icon || '') + '" alt="">' +
+        '<span class="tk-pick-name">' + esc(it.name || '') + '</span>' +
+        '<span class="tk-pick-cat">' + esc(it.cat || '') + '</span>';
+      row.addEventListener('click', function (ev) {
+        ev.stopPropagation();
+        pickPopupClose();
+        if (typeof it.pick === 'function') it.pick();
+      });
+      box.appendChild(row);
+    });
+    document.body.appendChild(box);
+    pickPopup = box;
+    /* 定位：优先落点击点右下，越界翻到另一侧，别顶出屏幕 */
+    var w = box.offsetWidth, h = box.offsetHeight;
+    var x = cx + 8, y = cy + 8;
+    if (x + w > window.innerWidth - 8) x = Math.max(8, cx - w - 8);
+    if (y + h > window.innerHeight - 8) y = Math.max(8, cy - h - 8);
+    box.style.left = x + 'px';
+    box.style.top = y + 'px';
+    /* 延后一拍再挂外部点击监听：否则触发本次弹出的那次点击会立刻把它关掉 */
+    setTimeout(function () {
+      document.addEventListener('mousedown', pickDocDown, true);
+      document.addEventListener('keydown', pickEsc, true);
+    }, 0);
+  }
+
+  function showPickList(markers, evt) {
+    showPickEntries(markerEntries(markers), evt);
+  }
+
+  /* 供 task-panel.js 取「点击位置的 Canvas 标点候选」（任务与标点叠在一起时合并展示） */
+  function pickCanvasEntries(evt) {
+    var lp = evt && evt.layerPoint;
+    if (!lp || !state.canvasLayer || !state.canvasLayer._pickCandidates) return [];
+    var cands = state.canvasLayer._pickCandidates(lp.x, lp.y);
+    var markers = [];
+    for (var i = 0; i < cands.length; i++) markers.push(cands[i].marker);
+    return markerEntries(markers);
   }
 
   function openCustomDetail(c) {
@@ -1301,6 +1526,7 @@
 
   var pendingPos = null;
   map.on('click', function (e) {
+    if (e && (e._markerClicked || (e.originalEvent && e.originalEvent._markerClicked))) return;
     if (!state.adding) {
       // 点击地图空白处自动关闭详情卡片（V1.7.3；V1.9.3 补：探索卡片 exploreCard 一并关闭）
       $('detail').classList.add('hidden');
@@ -1780,8 +2006,7 @@
     })();
 
     function syncUI() {
-      var rs = $('setIconSize');
-      if (rs) rs.value = SETTINGS.iconSize;
+      syncPresetBtns();
       var ds = $('setDotSize');
       if (ds) ds.value = SETTINGS.dotSize;
       var pk = $('setDotColorPick'), hx = $('setDotColorHex');
@@ -1828,17 +2053,131 @@
       }
     }
 
-    /* 图标大小：number 20~32（change 生效 + 重建标记） */
-    var iconSize = $('setIconSize');
-    if (iconSize) iconSize.addEventListener('change', function () {
-      SETTINGS.iconSize = clamp(iconSize.value, 20, 32, 26);
-      iconSize.value = SETTINGS.iconSize;
-      SETTINGS.save();
+    function redrawAllMarkers() {
       iconCache = {};
       doneIconCache = {};
-      renderMarkers();
+      if (state.canvasLayer) state.canvasLayer.redraw();
+      if (state.matCanvasLayer) state.matCanvasLayer.redraw();
       if (window.TaskPanel && window.TaskPanel.updateSizes) window.TaskPanel.updateSizes();
-    });
+    }
+
+    function buildIconMatrixTable() {
+      var tbody = $('setIconMatrixBody');
+      if (!tbody) return;
+      var html = '';
+      MATRIX_GROUPS.forEach(function (grp) {
+        /* 2026-10-28：行名走 I18N.groupOf（与侧栏大分类同一套词条），
+           data-grp 仍用中文键——iconMatrix 的存储键不能随语言变，否则切语言会丢设置 */
+        var disp = window.I18N ? window.I18N.groupOf(grp) : grp;
+        html += '<tr><td>' + esc(disp) + '</td>';
+        MATRIX_ZOOMS.forEach(function (z) {
+          var val = (iconMatrix[grp] && iconMatrix[grp][z]) || 24;
+          html += '<td><input type="number" min="14" max="40" step="2" value="' + val + '" data-grp="' + esc(grp) + '" data-z="' + z + '"></td>';
+        });
+        html += '</tr>';
+      });
+      tbody.innerHTML = html;
+
+      tbody.querySelectorAll('input').forEach(function (inp) {
+        function commit(val) {
+          var g = inp.getAttribute('data-grp');
+          var z = Number(inp.getAttribute('data-z'));
+          var v = clamp(val, 14, 40, 24);
+          if (!iconMatrix[g]) iconMatrix[g] = {};
+          iconMatrix[g][z] = v;
+          currentIconPreset = 'custom';
+          syncPresetBtns();
+          saveIconMatrix();
+          redrawAllMarkers();
+          return v;
+        }
+        inp.addEventListener('input', function () {
+          var val = parseInt(inp.value, 10);
+          if (!isNaN(val)) commit(val);
+        });
+        inp.addEventListener('change', function () {
+          var val = parseInt(inp.value, 10);
+          inp.value = commit(isNaN(val) ? 24 : val);
+        });
+      });
+    }
+
+    /* 「更多 / 收起」按钮文案（2026-10-28）：跟着展开状态 + 当前语言走。
+     * 原来这里写死中文，切英文会漏「收起」。 */
+    function syncMoreBtnText() {
+      var btn = $('setMoreIconBtn');
+      var wrap = $('setIconMatrixWrap');
+      if (!btn || !wrap) return;
+      var collapsed = wrap.style.display === 'none';
+      var zh = collapsed ? '更多' : '收起';
+      btn.textContent = window.I18N ? window.I18N.t(collapsed ? 'settings.presetMore' : 'settings.presetCollapse', zh) : zh;
+    }
+
+    function syncPresetBtns() {
+      var wrap = $('setIconPresetBtns');
+      if (!wrap) return;
+      wrap.querySelectorAll('.set-opt').forEach(function (b) {
+        if (b.classList.contains('set-more-toggle')) return;
+        b.classList.toggle('active', b.getAttribute('data-preset') === currentIconPreset);
+      });
+    }
+
+    function applyPreset(presetName, matrixData) {
+      iconMatrix = JSON.parse(JSON.stringify(matrixData));
+      currentIconPreset = presetName;
+      saveIconMatrix();
+      syncPresetBtns();
+      buildIconMatrixTable();
+      redrawAllMarkers();
+    }
+
+    var presetWrap = $('setIconPresetBtns');
+    if (presetWrap) {
+      presetWrap.querySelectorAll('.set-opt').forEach(function (b) {
+        if (b.classList.contains('set-more-toggle')) return;
+        b.addEventListener('click', function () {
+          var p = b.getAttribute('data-preset');
+          if (p === 'tiered') applyPreset('tiered', PRESET_TIERED);
+          else if (p === 'uniform') applyPreset('uniform', PRESET_UNIFORM);
+          else if (p === 'compact') applyPreset('compact', PRESET_COMPACT);
+        });
+      });
+    }
+
+    var moreBtn = $('setMoreIconBtn');
+    var matrixWrap = $('setIconMatrixWrap');
+    if (moreBtn && matrixWrap) {
+      moreBtn.addEventListener('click', function () {
+        var isHidden = matrixWrap.style.display === 'none';
+        matrixWrap.style.display = isHidden ? 'block' : 'none';
+        syncMoreBtnText();
+        // modal.classList.toggle('has-matrix', isHidden);
+        if (isHidden) buildIconMatrixTable();
+      });
+    }
+
+    var resetBtn = $('setResetIconMatrix');
+    if (resetBtn) {
+      resetBtn.addEventListener('click', function () {
+        applyPreset('tiered', PRESET_TIERED);
+      });
+    }
+
+    buildIconMatrixTable();
+    syncPresetBtns();
+    syncMoreBtnText();
+
+    /* 2026-10-28：切语言时刷新本面板里的「动态文案」——
+     * 静态按钮（推荐/等大/紧凑/表头/重置）靠 data-i18n 由 I18N.updateDOM() 处理，
+     * 但矩阵表格是 JS 拼的、更多/收起按钮文案是 JS 改的，updateDOM 管不到，必须重建。 */
+    if (window.I18N) {
+      window.I18N.onChange(function () {
+        syncMoreBtnText();
+        /* 表格即使收着也要重建：DOM 里已经渲染过的行名不会自己变语言，
+           等展开时重建会露出一瞬中文（掉字/闪一下），这里无条件重拼。 */
+        buildIconMatrixTable();
+      });
+    }
 
     /* 定位标记：大小 / 颜色 / 透明度 */
     var dotSize = $('setDotSize');
@@ -1986,16 +2325,20 @@
    *   白白丢掉 6 类 Boss 讨伐 + 地洞/洞穴/井 + 残旧地图 + 设计图石板。
    *   现在按「探索 / 任务 / 收集 / 讨伐」四组全部呈现，数据源不用新增。
    */
-  /* ---------------- 探索度看板（PROGRESS_GROUPS 四组实时更新） ---------------- */
+  /* ---------------- 探索度看板（PROGRESS_GROUPS 四组实时更新） ----------------
+   * 2026-10-27：组顺序按老大要求改成「任务 → 探索 → 收集 → 讨伐」。
+   *   任务放第一是因为它会随存档实时变化、最常看；数组顺序即渲染顺序，改这里就够。 */
   var PROGRESS_GROUPS = [
-    { key: 'explore', cn: '基础探索', items: ['神庙', '树根', '鸟望台', '龙之泪', '地洞入口', '洞穴入口', '井'] },
+    { key: 'quest', cn: '任务挑战', items: null },
+    /* 2026-10-27：图鉴按老大要求当小类挂在「探索」组末尾（一行总数，不拆武器/材料/怪物/动物） */
+    { key: 'explore', cn: '基础探索', items: ['神庙', '树根', '鸟望台', '龙之泪', '地洞入口', '洞穴入口', '井', '图鉴'] },
     { key: 'collect', cn: '收集要素', items: ['克洛格', '宝箱', '魔犹伊遗失物', '贤者的遗志', '卡邦达立牌', '残旧的地图', '设计图石板', '左纳乌制造机'] },
-    { key: 'hunt', cn: '战斗讨伐', items: ['独眼巨人', '岩石巨人', '巨霸伽马', '方块魔像', '古栗欧克', '莫尔德拉吉克'] },
-    { key: 'quest', cn: '任务挑战', items: null }
+    { key: 'hunt', cn: '战斗讨伐', items: ['独眼巨人', '岩石巨人', '巨霸伽马', '方块魔像', '古栗欧克', '莫尔德拉吉克'] }
   ];
 
   var PROGRESS_TOTALS = {
     '神庙': 152, '树根': 120, '鸟望台': 15, '龙之泪': 12, '地洞入口': 36, '洞穴入口': 197, '井': 58,
+    '图鉴': 509,
     '克洛格': 1000, '宝箱': 1334, '魔犹伊遗失物': 147, '贤者的遗志': 20, '卡邦达立牌': 81,
     '残旧的地图': 31, '设计图石板': 46, '左纳乌制造机': 30,
     '独眼巨人': 68, '岩石巨人': 90, '巨霸伽马': 40, '方块魔像': 34, '古栗欧克': 14, '莫尔德拉吉克': 4,
@@ -2104,10 +2447,10 @@
     pairs.forEach(function (r, i) {
       var done = r[1] || 0;
       var total = r[2] || 0;
-      var pct = total > 0 ? Math.round((done / total) * 100) : 0;
+      /* 2026-10-27：右侧只留「完成/总数」，百分比交给视觉判断，不再挤一行数字 */
       rows += '<div class="prog-row' + (i % 2 === 1 ? ' col2' : '') + '">' +
         '<span class="pr-name">' + esc(r[0]) + '</span>' +
-        '<span class="pr-val">' + done + '/' + total + '<span class="pr-pct"> (' + pct + '%)</span></span></div>';
+        '<span class="pr-val">' + done + '/' + total + '</span></div>';
     });
     return '<div class="prog-grid">' + rows + '</div>';
   }
@@ -2119,9 +2462,9 @@
       list.innerHTML = '<div class="progress-empty" data-i18n="progress.empty">' + (window.I18N ? window.I18N.t("progress.empty") : "加载存档后显示探索进度（神庙 / 树根 / 克洛格等收集百分比）") + '</div>';
       return;
     }
-    var html = state.save
-      ? ('<div class="prog-synced">' + (window.I18N ? window.I18N.t('progress.synced', '存档已同步 ✓') : '存档已同步 ✓') + '</div>')
-      : ('<div class="prog-synced" style="color:rgba(255,255,255,.6)">' + (window.I18N ? window.I18N.t('progress.local', '当前探索进度') : '当前探索进度') + '</div>');
+    /* 2026-10-27：顶部「存档已同步」提示行已去掉 —— 同步状态由下方「从存档加载进度」
+     * 按钮承载（已同步时按钮自身显示「已同步 ✓ 重新加载」），不再重复占一行。 */
+    var html = '';
     var any = false;
     PROGRESS_GROUPS.forEach(function (g) {
       var pairs = [];
@@ -2138,15 +2481,54 @@
       if (!pairs.length) return;
       any = true;
       var title = window.I18N ? window.I18N.t('progress.group.' + g.key, g.cn) : g.cn;
-      html += '<div class="prog-group-title">' + esc(title) + '</div>' + progressGrid(pairs);
+      /* .prog-group 是给「组与组之间加分割线」用的包裹层（CSS 用 .prog-group + .prog-group 画线），
+         只加边框不加内边距，组距保持原样 */
+      html += '<div class="prog-group"><div class="prog-group-title">' + esc(title) + '</div>' + progressGrid(pairs) + '</div>';
     });
     list.innerHTML = any ? html : ('<div class="progress-empty" data-i18n="progress.noData">' + (window.I18N ? window.I18N.t('progress.noData') : '存档中无可同步类别') + '</div>');
+  }
+
+  /* 存档按钮文案（跟随 state.save）—— 2026-10-27 单独抽出：
+     I18N.updateDOM() 会按 data-i18n="save.loadBtn" 把按钮重新写成「从存档加载进度…」，
+     不看同步状态，导致「已同步的按钮在切英文后显示成未加载」。语言切换回调里补调一次。 */
+  function updateSaveBtnLabel() {
+    var btn = $('saveSyncBtn');
+    if (!btn) return;
+    if (!state.save) {
+      btn.textContent = window.I18N ? window.I18N.t('save.loadBtn') : '📂 从存档加载进度…';
+      return;
+    }
+    /* 导航自动同步（带槽位）与手动加载（无槽位）文案不同，口径在 serverSaveSlot */
+    if (serverSaveSlot) {
+      btn.textContent = (window.I18N ? window.I18N.t('save.autoSynced') : '存档自动同步 ✓') + ' (slot_' + serverSaveSlot + ')';
+      return;
+    }
+    btn.textContent = window.I18N ? window.I18N.t('save.synced') : '存档已同步 ✓';
+  }
+
+  /* 自动同步（2026-10-28 方案 A，对齐 BOTWmap）：核心不解析存档，只把 progress.sav
+   * 的字节递过来，由前端这里复刻「手动加载」的完整流程。
+   * ★ 好处：图鉴这类新增统计项只要写进 save-parser.js 的 collect()，自动同步立刻就有，
+   *   不需要改 Go 核心重新编译（此前 counts 由 Go 算，Go 不认识的项永远是 0）。
+   * slot 来自 /save 响应头 X-Save-Slot（如 slot_00），仅用于按钮文案。 */
+  function applyAutoSave(parsed, progress, slot) {
+    if (!parsed || !parsed.ok || !progress) return;
+    state.save = progress;
+    state.saveVersion = (parsed.version || '') + ' · 服务端自动同步';
+    var m = String(slot || '').match(/slot_(\d+)/);
+    serverSaveSlot = m ? m[1] : '';
+    try { saveJson(LS_SAVE, { version: parsed.version, progress: progress }); } catch (e) {}
+    applySavePointDone(parsed);   /* 复刻手动路径：全量标点打勾 + 任务完成态 */
+    renderProgress();
+    buildCatalogPanel();
+    updateCount();
+    updateSaveBtnLabel();         /* 不 toast：自动同步按 5%/次 静默刷 */
   }
 
   function applySaveSync(silent) {
     var btn = $('saveSyncBtn');
     serverSaveSlot = '';
-    btn.textContent = state.save ? (window.I18N ? window.I18N.t('save.synced') : '已同步 ✓ 重新加载') : (window.I18N ? window.I18N.t('save.loadBtn') : '📂 从存档加载进度…');
+    updateSaveBtnLabel();
     btn.classList.toggle('busy', false);
     buildCatalogPanel();
     updateCount();
@@ -2292,6 +2674,7 @@
       updateCount();
       updateLayerCount();
       renderProgress();
+      updateSaveBtnLabel();   /* 存档按钮文案按同步状态重刷，别被 updateDOM 打回「从存档加载进度…」 */
       if (typeof buildMatPanel === 'function') buildMatPanel();
       if (typeof renderAreas === 'function') renderAreas();
       if (typeof renderMarkers === 'function') renderMarkers();
@@ -2498,8 +2881,7 @@
           renderProgress();
           buildCatalogPanel();
           updateCount();
-          var btn = $('saveSyncBtn');
-          if (btn) btn.textContent = serverSaveSlot ? ('存档自动同步 ✓（slot_' + serverSaveSlot + '）') : '存档自动同步 ✓';
+          updateSaveBtnLabel();
         }
       })
       .catch(function () {});
@@ -2507,6 +2889,9 @@
 
   /* 标点完成状态刷新（卡片回调/队列共用） */
   function applyDoneToMarker(mid) {
+    if (state.canvasLayer) {
+      state.canvasLayer.redraw();
+    }
     var mk = state.markers[mid];
     if (!mk) return;
     var m = null;
@@ -2837,7 +3222,7 @@
     var card = $('exploreCard');
     var wasHidden = card.classList.contains('hidden');
     card.classList.remove('hidden');
-    if (wasHidden || opts.evt) positionExploreCard(opts.evt && opts.evt.originalEvent || null);
+    if (wasHidden || opts.evt) positionExploreCard(opts.evt && (opts.evt.originalEvent || opts.evt) || null);
   }
   $('ecClose').addEventListener('click', function () {
     $('exploreCard').classList.add('hidden');
@@ -2850,8 +3235,9 @@
     var open = !row.classList.contains('expanded');
     row.classList.toggle('expanded', open);
     txt.classList.toggle('clamped', !open);
-    var isEn = window.I18N && window.I18N.getLang() === 'en';
-    this.textContent = open ? (isEn ? 'Collapse' : '收起') : (isEn ? 'Expand' : '展开');
+    this.textContent = open
+      ? (window.I18N ? window.I18N.t('card.collapse', '收起') : '收起')
+      : (window.I18N ? window.I18N.t('card.expand', '展开') : '展开');
     if (txt._fullText) {
       txt.textContent = open ? txt._fullText : (txt._fullText.slice(0, NOTE_LIMIT) + '…');
     }
@@ -2884,6 +3270,11 @@
     liveToggleNav: liveToggleNav,
     toast: toast,
     esc: esc,
+    /* 2026-10-27：任务图标（DOM marker）与 Canvas 标点共用同一个候选浮层 —— 任务侧调这两个 */
+    showPickEntries: showPickEntries,
+    pickCanvasEntries: pickCanvasEntries,
+    /* 2026-10-28：自动同步改为「核心递存档、前端自己解析」，入口在这里 */
+    applyAutoSave: applyAutoSave,
     showCard: function (m) {
       showExploreCard({
         name: m.name || m.full,
@@ -2915,8 +3306,7 @@
       renderProgress();
       buildCatalogPanel();
       updateCount();
-      var btn = $('saveSyncBtn');
-      if (btn) btn.textContent = serverSaveSlot ? ('存档自动同步 ✓（slot_' + serverSaveSlot + '）') : '存档自动同步 ✓';
+      updateSaveBtnLabel();
     },
     syncProgressFromServer: syncProgressFromServer,
     matById: function (mid) { return matById[mid]; },
@@ -3026,9 +3416,58 @@
   }
 
   /* 材料图标分级：随缩放级别 + 聚合数量调整尺寸（参考地名字号随 zoom 调整逻辑） */
+  /* 材料图标分级：阶梯式尺寸控制（z3/z4: 22px, z5/z6: 26px, z7: 32px） */
   function matIconSize(z) {
-    var s = { 3: 20, 4: 22, 5: 26, 6: 30, 7: 34 };
-    return s[z] || (z > 7 ? 34 : 20);
+    if (typeof getGroupIconSize === 'function') {
+      return getGroupIconSize('材料', z);
+    }
+    if (z <= 4) return 20;
+    if (z <= 6) return 24;
+    return 28;
+  }
+
+  /* 全局 Canvas 材料图层（TotkMatCanvasLayer）：接管 44 种材料与万级点位聚合渲染，彻底消灭 DOM 节点 */
+  var MatCanvasLayerClass = (typeof TotkMatCanvasLayer !== 'undefined') ? TotkMatCanvasLayer : (typeof TotkCanvasLayer !== 'undefined' ? TotkCanvasLayer.MatLayer : null);
+  if (MatCanvasLayerClass) {
+    state.matCanvasLayer = new MatCanvasLayerClass(map, {
+      getMatConfig: function (mid) { return matById[mid]; },
+      getClusterer: function (mid, layer, r) { return getMatClusterer(mid, layer, r); },
+      isCollected: function (mid, idx) { return isCollected(mid, idx); },
+      isDone: function (mid, idx) { return isMatDone(mid, idx); },
+      isExpanded: function (mid, cid) { return !!(state.matExpanded && state.matExpanded[mid] && state.matExpanded[mid][cid]); },
+      getSelected: function () { return state.matSelected; },
+      getLayer: function () { return state.layer; },
+      isActive: function () { return state.matTab === 'material'; },
+      getIconSize: function (z) { return matIconSize(z); },
+      FX: FX,
+      FZ: FZ
+    });
+
+    state.matCanvasLayer.on('clusterClick', function (hit, e) {
+      if (map.getZoom() >= 7) {
+        expandMatCluster(hit.mid, hit.cid);
+      } else {
+        map.flyTo(hit.latlng, Math.min(map.getZoom() + 1, 7), { duration: 0.3 });
+      }
+    });
+
+    state.matCanvasLayer.on('leafClick', function (hit, e) {
+      showMatDetail(hit.m, hit.latlng, hit.idx, e);
+      var listEl = $('matList');
+      if (listEl) {
+        var catBody = listEl.querySelector('.mat-cat[data-cat="' + hit.m.cat + '"] .mat-cat-body');
+        if (catBody) {
+          catBody.parentElement.classList.remove('collapsed');
+          var item = listEl.querySelector('.mat-item[data-mat="' + hit.mid + '"]');
+          if (item) {
+            item.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+            item.classList.remove('flash');
+            void item.offsetWidth;
+            item.classList.add('flash');
+          }
+        }
+      }
+    });
   }
 
   /* ---- 材料卡片（克洛格卡式：区域/坐标/256大图/用途/导航/收集/标记完成） ---- */
@@ -3126,155 +3565,18 @@
   }
 
   function renderMatLayer(mid) {
-    if (state.matGroups[mid]) {
-      map.removeLayer(state.matGroups[mid]);
-      delete state.matGroups[mid];
-    }
-    if (!state.matSelected[mid] || state.matTab !== 'material') return;
-    var bounds = map.getBounds();
-    var z = Math.round(map.getZoom());
-    var grp = L.layerGroup();
-    var m = matById[mid];
-    var pts = (matPointsByLayer[state.layer] || {})[mid] || [];
-    if (!pts.length) return;
-
-    /* V1.9.0 方向1: z≥7 强制单点显示（绕过 supercluster 聚合，按视口 bbox 直接过滤点位） */
-    if (z >= 7) {
-      var padV = 60;   // 游戏单位缓冲（图标半宽）
-      var west = bounds.getWest() - padV, east = bounds.getEast() + padV;
-      var south = bounds.getSouth() - padV, north = bounds.getNorth() + padV;
-      var inView = [];
-      for (var pi2 = 0; pi2 < pts.length; pi2++) {
-        var px = pts[pi2][0], pz = pts[pi2][1];
-        if (px >= west && px <= east && pz >= south && pz <= north) inView.push(pi2);
-      }
-      /* 视口内点数超上限 → 回退聚合（防海量单点卡死） */
-      if (inView.length <= 400) {
-        var lsize = matIconSize(z);
-        for (var vi = 0; vi < inView.length; vi++) {
-          var pi3 = inView[vi];
-          var ll2 = [pts[pi3][1], pts[pi3][0]];
-          var icon2 = L.divIcon({
-            className: '',
-            html: '<div class="mat-leaf" style="width:' + lsize + 'px;height:' + lsize + 'px;" title="' + esc(m.cn) + '" data-char="' + esc(m.cn[0]) + '"><img src="assets/materials/' + m.entry + '.png" onerror="this.remove()"></div>',
-            iconSize: [lsize, lsize], iconAnchor: [lsize / 2, lsize / 2]
-          });
-          (function (ll3, mid2, id2) {
-            var mk = L.marker(ll3, { icon: icon2, riseOnHover: true, bubblingMouseEvents: false });
-            if (isCollected(mid2, id2) || isMatDone(mid2, id2)) mk.setOpacity(0.38);
-            var mCn = window.I18N ? (window.I18N.nameOf(m.cn) || m.cn) : m.cn;
-            mk.bindTooltip(mCn, { direction: 'top', offset: [0, -lsize / 2 - 4], className: 'mk-label' });
-            mk.on('click', function (e) { showMatDetail(m, ll3, id2, e); });
-            grp.addLayer(mk);
-          })(ll2, mid, pi3);
-        }
-        grp.addTo(map);
-        state.matGroups[mid] = grp;
-        return;
-      }
-    }
-
-    /* V1.9.0: 聚合半径按缩放级别动态调整。100%（z3）=96、200-283%（z4~z4.9）=192（同级聚合不拆碎，滚轮连续缩放平滑）；400%（z5）=256；800%（z6）=128 过渡平滑；z7 超限回退用 8px */
-    var r = z >= 7 ? 8 : (z <= 3 ? 96 : z < 5 ? 192 : z === 5 ? 256 : 128);
-    var idx = getMatClusterer(mid, state.layer, r);
-    if (!idx) return;
-    var idxr = idx;
-    // supercluster coords are [X*FX, Z*FZ], map bounds are game coords
-    var padX = 800 * FX, padZ = 800 * FZ;
-    var fakeBbox = [
-      bounds.getWest() * FX - padX, bounds.getSouth() * FZ - padZ,
-      bounds.getEast() * FX + padX, bounds.getNorth() * FZ + padZ
-    ];
-    var clusters = idxr.getClusters(fakeBbox, z);
-    clusters.forEach(function (c) {
-      var coords = c.geometry.coordinates;
-      var gx = coords[0] / FX, gz = coords[1] / FZ;
-      var latlng = [gz, gx];
-      var props = c.properties;
-      if (props.cluster) {
-        /* V1.9.0: 已展开的聚合（z7 点击徽标后）→ 渲染其内部所有点位为单点 */
-        var expSet = state.matExpanded[mid];
-        if (expSet && expSet[c.id] && z >= 7) {
-          var leaves = idxr.getLeaves(c.id, Infinity) || [];
-          for (var li = 0; li < leaves.length; li++) {
-            var lf = leaves[li];
-            var lc = lf.geometry.coordinates;
-            var llf = [lc[1] / FZ, lc[0] / FX];
-            var lsize = matIconSize(z);
-            var licon = L.divIcon({
-              className: '',
-              html: '<div class="mat-leaf" style="width:' + lsize + 'px;height:' + lsize + 'px;" title="' + esc(m.cn) + '" data-char="' + esc(m.cn[0]) + '"><img src="assets/materials/' + m.entry + '.png" onerror="this.remove()"></div>',
-              iconSize: [lsize, lsize], iconAnchor: [lsize / 2, lsize / 2]
-            });
-            (function (ll3, mid2, id2) {
-              var mk2 = L.marker(ll3, { icon: licon, riseOnHover: true, bubblingMouseEvents: false });
-              if (isCollected(mid2, id2) || isMatDone(mid2, id2)) mk2.setOpacity(0.38);
-              var mCn = window.I18N ? (window.I18N.nameOf(m.cn) || m.cn) : m.cn;
-              mk2.bindTooltip(mCn, { direction: 'top', offset: [0, -lsize / 2 - 4], className: 'mk-label' });
-              mk2.on('click', function (e) { showMatDetail(m, ll3, id2, e); });
-              grp.addLayer(mk2);
-            })(llf, mid, lf.id);
-          }
-          return;
-        }
-        var size = matIconSize(z) + (props.point_count >= 100 ? 12 : props.point_count >= 20 ? 6 : 0);
-        var icon = L.divIcon({
-          className: '',
-          html: '<div class="mat-cluster" style="width:' + size + 'px;height:' + size + 'px;" data-char="' + esc(m.cn[0]) + '"><img src="assets/materials/' + m.entry + '.png" onerror="this.remove()"><span>' + props.point_count + '</span></div>',
-          iconSize: [size, size], iconAnchor: [size / 2, size / 2]
-        });
-        (function (ll, sz) {
-          var mk = L.marker(ll, { icon: icon, riseOnHover: true, bubblingMouseEvents: false });
-          var mCn = window.I18N ? (window.I18N.nameOf(m.cn) || m.cn) : m.cn;
-          var isEn = window.I18N && window.I18N.getLang() === 'en';
-          mk.bindTooltip(mCn + ' · ' + props.point_count + (isEn ? ' pts' : '点'), { direction: 'top', offset: [0, -sz / 2 - 4] });
-          mk.on('click', function () {
-            /* V1.9.0: z7 已无法再放大 → 展开聚合为单点；z<7 仍逐级放大 */
-            if (map.getZoom() >= 7) expandMatCluster(mid, c.id);
-            else map.flyTo(ll, Math.min(map.getZoom() + 1, 7), { duration: 0.3 });
-          });
-          grp.addLayer(mk);
-        })(latlng, size);
+    if (state.matCanvasLayer) {
+      if (state.matTab === 'material') {
+        state.matCanvasLayer.redraw();
       } else {
-        var lsize = matIconSize(z);
-        var icon2 = L.divIcon({
-          className: '',
-          html: '<div class="mat-leaf" style="width:' + lsize + 'px;height:' + lsize + 'px;" title="' + esc(m.cn) + '" data-char="' + esc(m.cn[0]) + '"><img src="assets/materials/' + m.entry + '.png" onerror="this.remove()"></div>',
-          iconSize: [lsize, lsize], iconAnchor: [lsize / 2, lsize / 2]
-        });
-        (function (ll, mid, idx) {
-          var mk = L.marker(ll, { icon: icon2, riseOnHover: true, bubblingMouseEvents: false });
-          if (isCollected(mid, idx) || isMatDone(mid, idx)) mk.setOpacity(0.38);
-          var mCn = window.I18N ? (window.I18N.nameOf(m.cn) || m.cn) : m.cn;
-          mk.bindTooltip(mCn, { direction: 'top', offset: [0, -lsize / 2 - 4], className: 'mk-label' });
-          mk.on('click', function (e) {
-            showMatDetail(m, ll, idx, e);
-            // Sidebar linkage: expand cat, scroll to item, flash
-            var listEl = $('matList');
-            if (listEl) {
-              var catBody = listEl.querySelector('.mat-cat[data-cat="' + m.cat + '"] .mat-cat-body');
-              if (catBody) {
-                catBody.parentElement.classList.remove('collapsed');
-                var item = listEl.querySelector('.mat-item[data-mat="' + mid + '"]');
-                if (item) {
-                  item.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-                  item.classList.remove('flash');
-                  void item.offsetWidth;
-                  item.classList.add('flash');
-                }
-              }
-            }
-          });
-          grp.addLayer(mk);
-        })(latlng, mid, c.id);
+        state.matCanvasLayer.clear();
       }
-    });
-    grp.addTo(map);
-    state.matGroups[mid] = grp;
+    }
   }
 
   /* V1.9.0: 聚合徽标点击 —— z7 超限回退场景下展开为单点（getLeaves 取聚合内全部位置）；z<7 由点击处 flyTo 逐级放大 */
   function expandMatCluster(mid, cid) {
+    if (!state.matExpanded) state.matExpanded = {};
     if (!state.matExpanded[mid]) state.matExpanded[mid] = {};
     state.matExpanded[mid][cid] = true;
     renderMatLayer(mid);
@@ -3282,8 +3584,13 @@
   }
 
   function renderMaterials() {
-    if (state.matTab !== 'material') return;
-    for (var mid in state.matSelected) renderMatLayer(Number(mid));
+    if (state.matCanvasLayer) {
+      if (state.matTab === 'material') {
+        state.matCanvasLayer.redraw();
+      } else {
+        state.matCanvasLayer.clear();
+      }
+    }
   }
 
   function buildMatPanel() {
@@ -3414,8 +3721,7 @@
     } else {
       matPane.classList.add('hidden');
       explorePane.classList.remove('hidden');
-      for (var mid in state.matGroups) map.removeLayer(state.matGroups[mid]);
-      state.matGroups = {};
+      if (state.matCanvasLayer) state.matCanvasLayer.clear();
       renderMarkers();
     }
   }
@@ -3437,8 +3743,7 @@
     state.matSelected = {};
     saveJson(LS_MAT, state.matSelected);
     buildMatPanel();
-    for (var mid in state.matGroups) map.removeLayer(state.matGroups[mid]);
-    state.matGroups = {};
+    if (state.matCanvasLayer) state.matCanvasLayer.clear();
     updateMatCount();
   });
 
@@ -3489,11 +3794,9 @@
     }
   });
 
-  var matRenderTimer = null;
   map.on('moveend zoomend', function () {
     if (state.matTab !== 'material') return;
-    if (matRenderTimer) clearTimeout(matRenderTimer);
-    matRenderTimer = setTimeout(renderMaterials, 120);
+    renderMaterials();
   });
 
 
@@ -3514,11 +3817,17 @@
   var ltClear = $('ltClear');
   if (ltAll) ltAll.addEventListener('click', function () {
     catsOfLayer(state.layer).forEach(function (c) { state.selected[c.id] = true; });
+    if (window.TaskPanel && window.TaskPanel.selectAll) {
+      try { window.TaskPanel.selectAll(state.layer); } catch (err) { console.error(err); }
+    }
     saveSelected();
     buildCatalogPanel(); renderMarkers(); updateCount(); updateLayerCount();
   });
   if (ltClear) ltClear.addEventListener('click', function () {
     catsOfLayer(state.layer).forEach(function (c) { delete state.selected[c.id]; });
+    if (window.TaskPanel && window.TaskPanel.clearAll) {
+      try { window.TaskPanel.clearAll(state.layer); } catch (err) { console.error(err); }
+    }
     saveSelected();
     buildCatalogPanel(); renderMarkers(); updateCount(); updateLayerCount();
   });

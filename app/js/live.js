@@ -109,7 +109,10 @@
 
   /* 玩家标记图标：有朝向 = SVG 箭头（默认朝北，rotate 与 dragon-layer arrowIcon 同款
    * 范式）；无朝向 = 圆点 div。角度旋转不经 setIcon（重建 DOM），由 redraw 直接改
-   * svg.style.transform（见 updatePlayerIcon）。 */
+   * svg.style.transform（见 updatePlayerIcon）。
+   * ★ 2026-10-27：transform-origin 从盒中心改成 50% 56% —— 燕尾箭头 path 的视觉质心
+   *   在 y≈7.83/14（不是几何中心 7），绕盒中心转会有一个「甩一下」的尾巴；
+   *   图标盒中心与角色坐标实测零偏移（anchor 没问题），所以只调旋转原点。 */
   function playerIcon(hd, verified) {
     /* V2.5.0：大小/颜色/透明度从显示设置读取（window.TOTK_SETTINGS，设置面板实时生效）。
      * 圆点直径 = 定位点大小 × 0.58（箭头与圆点同一主尺寸参数）。 */
@@ -131,7 +134,7 @@
       className: '', iconSize: [size, size], iconAnchor: [size / 2, size / 2],
       html: '<svg class="lv-arrow" width="' + size + '" height="' + size +
             '" viewBox="0 0 14 14" style="transform:rotate(' + (hd || 0) +
-            'deg);transition:transform .18s linear;filter:drop-shadow(0 0 4px rgba(255,60,60,.7));opacity:' + alpha + '">' +
+            'deg);transition:transform .18s ease-out;transform-origin:50% 56%;filter:drop-shadow(0 0 4px rgba(255,60,60,.7));opacity:' + alpha + '">' +
             '<path d="M7 0.5 L12 13 L7 10 L2 13 Z" fill="' + color + '" stroke="rgba(0,0,0,.8)"' +
             ' stroke-width="1.2" stroke-linejoin="round"/></svg>'
     });
@@ -373,7 +376,15 @@
           } else {
             /* 最短弧差（归一到 -180..180，兼容连续累积的大角度值） */
             var hdiff = ((tgt - heading) % 360 + 540) % 360 - 180;
-            heading = heading + hdiff * 0.45;
+            /* 2026-10-27 实测改造（老大反馈「80° 掉头像画小圈、方向跟不上」）：
+             * 原来一律 ×0.45 逼近，而 /pos 是 600ms 轮询一次 —— 实测一次 180° 掉头：
+             *   0.6s→81°  1.3s→125°  1.9s→150°  2.5s→163°  3.7s→175°  5.0s→179.5°
+             * 也就是掉个头要磨 5 秒，箭头绕着角色慢慢爬。
+             * 改成分档：大角度原地转身（一帧到位）、中角度两帧内、小角度才做平滑防抖。 */
+            var adiff = hdiff < 0 ? -hdiff : hdiff;
+            if (adiff > 60) heading = tgt;                        /* 大掉头：直接切到目标角 */
+            else if (adiff > 20) heading = heading + hdiff * 0.8; /* 中角度：1~2 帧到位 */
+            else heading = heading + hdiff * 0.45;                /* 小角度：保持原平滑 */
           }
         }
       }
@@ -449,22 +460,41 @@
       var _n = Date.now();
       if (_n - lastProgFetch > 800) {
         lastProgFetch = _n;
-        fetch(LIVE_API + '/progress?t=' + _n, { cache: 'no-store' })
-          .then(function (r) { return r.json(); })
-          .then(function (res) {
-            if (!res || !res.ok || !Array.isArray(res.doneIds)) return;
-            if (window.TOTK_APP) {
-              if (typeof window.TOTK_APP.applyProgressDone === 'function') {
-                window.TOTK_APP.applyProgressDone(res.doneIds, null, res.newlyDone);
-              }
-              if (res.counts && typeof window.TOTK_APP.applyCounts === 'function') {
-                window.TOTK_APP.applyCounts(res);
-              } else if (typeof window.TOTK_APP.syncProgressFromServer === 'function') {
-                window.TOTK_APP.syncProgressFromServer();
-              }
-            }
+        /* 2026-10-28 方案 A（对齐 BOTWmap）：优先向核心要**存档原始字节**，由网页自己解析。
+         *   核心只负责「找到最新 progress.sav → 原样吐出来」，统计全在前端 save-parser.js，
+         *   于是新增统计项（图鉴等）不必再改 Go 重新编译。
+         * ★ 兼容垫片：老核心没有 /save（404）或解析失败 → 退回原来的 /progress 推送，
+         *   行为与旧版完全一致，不会白屏。 */
+        var _app = window.TOTK_APP || {};
+        fetch(LIVE_API + '/save?t=' + _n, { cache: 'no-store' })
+          .then(function (r) {
+            if (!r.ok) throw new Error('no /save');
+            var slot = r.headers.get('X-Save-Slot') || '';
+            return r.arrayBuffer().then(function (buf) { return { buf: buf, slot: slot }; });
           })
-          .catch(function () {});
+          .then(function (o) {
+            if (!window.TOTKSaveParser || typeof _app.applyAutoSave !== 'function') throw new Error('parser missing');
+            var parsed = window.TOTKSaveParser.parse(o.buf);
+            if (!parsed.ok) throw new Error(parsed.error || 'parse failed');
+            _app.applyAutoSave(parsed, window.TOTKSaveParser.collect(parsed), o.slot);
+          })
+          .catch(function () {
+            /* 降级：老核心只认 /progress —— 用推送过来的 doneIds + counts */
+            fetch(LIVE_API + '/progress?t=' + _n, { cache: 'no-store' })
+              .then(function (r) { return r.json(); })
+              .then(function (res) {
+                if (!res || !res.ok || !Array.isArray(res.doneIds)) return;
+                if (typeof _app.applyProgressDone === 'function') {
+                  _app.applyProgressDone(res.doneIds, null, res.newlyDone);
+                }
+                if (res.counts && typeof _app.applyCounts === 'function') {
+                  _app.applyCounts(res);
+                } else if (typeof _app.syncProgressFromServer === 'function') {
+                  _app.syncProgressFromServer();
+                }
+              })
+              .catch(function () {});
+          });
       }
     }
     tickArrival();

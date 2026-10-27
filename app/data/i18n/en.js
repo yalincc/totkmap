@@ -41,6 +41,20 @@ window.TOTK_I18N.en = {
   "save.synced": "Save Progress Synced ✓",
   "save.autoSynced": "Auto Save Synced ✓",
 
+  /* ===== Help dialog (rewritten 2026-10-28): whole HTML lives here ===== */
+  "help.title": "Save Sync · Help",
+  "help.what": '<div class="hq"><h4>What this is</h4><p>An interactive map for <i>The Legend of Zelda: Tears of the Kingdom</i> — sky / surface / depths layers, collection tracking and live player navigation.</p></div>',
+  "help.path": '<div class="hq"><h4>① Where the save file is</h4><p>The file is <code>progress.sav</code>; <code>slot_00</code> ~ <code>slot_05</code> are the six in-game save slots:</p><p>Ryujinx: <code>%APPDATA%\\Ryujinx\\bis\\user\\save\\…\\slot_00\\progress.sav</code></p><p>Eden: under the emulator folder, <code>user\\nand\\user\\save\\…\\slot_00\\progress.sav</code></p><p>If you run <b class="hl">TOTKNavi</b> you can open the save folder right from the app — no need to hunt for it.</p></div>',
+  "help.load": '<div class="hq"><h4>② Two ways to load</h4><ul><li><b class="hl">Automatic (recommended)</b>: start TOTKNavi — once you save in-game, the map syncs by itself.</li><li><b class="hl">Manual</b>: click "Load Save Progress" and pick <code>progress.sav</code>.</li></ul></div>',
+  "help.data": '<div class="hq"><h4>③ What gets read</h4><p>Real progress for <b class="hl">20+ categories</b>: shrines, lightroots, skyview towers, koroks, chests, compendium, boss kills and more.</p><p><b>Not</b> readable: inventory counts (weapons / bows / shields / armor) and quest rewards — the save file does not store them.</p></div>',
+  "help.privacy": '<div class="hq"><h4>④ Privacy</h4><p>The file is parsed entirely in your browser memory. <b class="hl">Nothing is uploaded.</b></p></div>',
+  "help.more": '<div class="hq"><h4>⑤ More</h4><ul><li>Full docs, desktop navigator, changelog: <a href="https://github.com/yalincc/totkmap" target="_blank" rel="noopener">github.com/yalincc/totkmap</a></li><li>Online map: <a href="https://totk.yalin.site" target="_blank" rel="noopener">totk.yalin.site</a></li></ul></div>',
+  "save.tipBody": '<b>Save file = progress.sav</b><div>Save path: <code>AppData\\Roaming\\Ryujinx\\bis\\user\\save\\0000000000000007\\0\\slot_00\\progress.sav</code></div><div class="su-tip-sub">Click the question mark for save-sync help.</div>',
+  "nav.arriveThreshold": "Arrive threshold",
+  "nav.gameUnits": "game units",
+  "nav.holdMark": "Hold marker",
+  "nav.holdSeconds": "sec (0 = mark on arrival)",
+
   // Materials Panel
   "mat.favOnly": "Favorites only ({0})",
   "mat.countStat": "{0} types · {1} spots",
@@ -126,6 +140,11 @@ window.TOTK_I18N.en = {
 
   // Quest Card & Panel
   "task.groupHeader": "Quests · {0}",
+  // 探索度「任务」组四档（2026-10-28 补：此前缺词条，英文界面会漏出中文）
+  "task.group.主剧情挑战": "Main Quests",
+  "task.group.情节挑战": "Side Adventures",
+  "task.group.神庙挑战": "Shrine Quests",
+  "task.group.迷你挑战": "Side Quests",
   "task.allTotal": "All {0}",
   "task.noName": "No Official Name",
   "task.location": "Location",
@@ -162,7 +181,14 @@ window.TOTK_I18N.en = {
   // Settings Modal
   "settings.title": "Display Settings",
   "settings.iconSize": "Icon Size",
-  "settings.iconSizeHint": "(20-32px base, scales with zoom)",
+  "settings.presetTiered": "Tiered",
+  "settings.presetUniform": "Uniform",
+  "settings.presetCompact": "Compact",
+  "settings.presetMore": "More",
+  "settings.presetCollapse": "Less",
+  "settings.matrixColGroup": "Group",
+  "settings.matrixReset": "Reset to default",
+  "settings.iconSizeHint": "(presets & per-category matrix)",
   "settings.markerStyle": "Player Marker",
   "settings.markerStyleHint": "(Size 16-40 · Opacity 30-100%)",
   "settings.completedMarkers": "Completed Markers",
@@ -199,6 +225,7 @@ window.TOTK_I18N.en = {
   "group.装备": "Equipment",
   "group.地点": "Facilities",
   "group.怪物": "Monsters",
+  "group.材料": "Materials",
   "group.任务": "Quests",
 
   // Core Categories
@@ -213,6 +240,7 @@ window.TOTK_I18N.en = {
   "cat.洞穴入口": "Caves",
   "cat.女神雕像": "Goddess Statues",
   "cat.井": "Wells",
+  "cat.图鉴": "Compendium",
   "cat.古代研究所": "Tech Labs",
   "cat.神殿": "Temples",
   "cat.矿场": "Mines",
