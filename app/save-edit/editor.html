@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0e1115">
+<title>存档修改器 · TOTKmap</title>
+<link rel="stylesheet" href="save-edit.css">
+</head>
+<body>
+
+<!-- ==================== 顶栏 ==================== -->
+<header class="topbar">
+  <button class="back" id="btnBack" title="返回地图" aria-label="返回地图">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+  </button>
+  <div class="brand">
+    <span class="brand-mark" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 1.6l4.11 8.33L24 12l-7.89 2.07L12 22.4l-4.11-8.33L0 12l7.89-2.07z" opacity=".9"/></svg>
+    </span>
+    <span class="brand-name">存档修改器</span>
+    <span class="brand-tag">BETA</span>
+  </div>
+  <div class="top-meta" id="topMeta" hidden>
+    <span class="chip"><span class="dot" id="verDot"></span><b id="chipVer">—</b></span>
+    <span class="chip opt" id="chipSize">—</span>
+  </div>
+</header>
+
+<!-- ==================== 未加载：投放区 ==================== -->
+<main class="stage" id="loadingStage">
+  <div class="drop" id="dropZone">
+    <div class="drop-ring" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 8v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8"/><path d="M1 3h22v5H1z"/><path d="M10 12h4"/>
+      </svg>
+    </div>
+    <h1>把 <span>progress.sav</span> 拖进来</h1>
+    <p class="sub">改完再覆盖回去就行 · 只覆写原有字节，不新增物品、不改文件长度</p>
+
+    <div class="drop-actions">
+      <button class="btn primary" id="btnPick">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>
+        选择存档文件
+      </button>
+      <button class="btn" id="btnFromNavi">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+        从 totknavi 直接读取
+      </button>
+    </div>
+
+    <div class="drop-path">模拟器目录 › bis › user › save › <em>0000000000000007</em> › 0 › slot_00 › progress.sav</div>
+
+    <input type="file" id="fileInput" accept=".sav,application/octet-stream" hidden>
+  </div>
+  <div id="loadMsg"></div>
+</main>
+
+<!-- ==================== 已加载：主体 ==================== -->
+<main class="stage" id="editStage" hidden>
+
+  <!-- 状态总览 -->
+  <section class="hud" id="hud">
+    <div class="stat" id="statRupee">
+      <div class="stat-top">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 2l7 10-7 10-7-10z"/><path d="M12 2v20M5 12h14"/></svg>
+        <span class="stat-lbl">卢比</span>
+      </div>
+      <div class="stat-val">—</div>
+      <div class="stat-was"></div>
+    </div>
+    <div class="stat" id="statHearts">
+      <div class="stat-top">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M20.4 5.6a5.2 5.2 0 0 0-7.4 0L12 6.6l-1-1a5.2 5.2 0 0 0-7.4 7.4L12 21.4l8.4-8.4a5.2 5.2 0 0 0 0-7.4z"/></svg>
+        <span class="stat-lbl">生命</span>
+      </div>
+      <div class="stat-val">—</div>
+      <div class="stat-was"></div>
+    </div>
+    <div class="stat" id="statStamina">
+      <div class="stat-top">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+        <span class="stat-lbl">精力</span>
+      </div>
+      <div class="stat-val">—</div>
+      <div class="stat-was"></div>
+    </div>
+    <div class="stat" id="statEnergy">
+      <div class="stat-top">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="17" height="10" rx="2.5"/><path d="M22 10.5v3"/></svg>
+        <span class="stat-lbl">电池</span>
+      </div>
+      <div class="stat-val">—</div>
+      <div class="stat-was"></div>
+    </div>
+  </section>
+
+  <div class="grid">
+
+    <!-- ---------- 01 基础数值 ---------- -->
+    <section class="card">
+      <div class="card-head">
+        <span class="idx">01</span>
+        <h2>基础数值</h2>
+        <span class="note">留空 = 不改</span>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <span class="lbl">卢比<small id="hintRupee">上限 999999</small></span>
+          <span class="ctl">
+            <input type="number" id="inRupee" min="0" max="999999" placeholder="不改" aria-label="卢比数量">
+            <span class="quick">
+              <button class="qbtn" data-rupee="9999">1万</button>
+              <button class="qbtn" data-rupee="99999">10万</button>
+              <button class="qbtn" data-rupee="999999">满</button>
+            </span>
+          </span>
+        </div>
+
+        <div class="row">
+          <span class="lbl">生命上限<small>1 心 = 4 点，游戏内最多 40 心</small></span>
+          <span class="ctl">
+            <input type="number" id="inHearts" min="1" max="40" placeholder="不改" aria-label="生命上限（心数）">
+            <span class="quick">
+              <button class="qbtn" data-hearts="10">10</button>
+              <button class="qbtn" data-hearts="20">20</button>
+              <button class="qbtn" data-hearts="40">满</button>
+            </span>
+          </span>
+        </div>
+
+        <div class="row">
+          <span class="lbl">精力上限<small id="hintStamina">1 圈 = 1000</small></span>
+          <span class="ctl">
+            <div class="seg" id="segStamina" data-value="">
+              <button data-v="">不改</button>
+              <button data-v="1000">1 圈</button>
+              <button data-v="2000">2 圈</button>
+              <button data-v="3000">3 圈</button>
+            </div>
+          </span>
+        </div>
+
+        <div class="row">
+          <span class="lbl">电池容量<small id="hintEnergy">1 格 = 1000，满 16 格</small></span>
+          <span class="ctl">
+            <div class="seg" id="segEnergy" data-value="">
+              <button data-v="">不改</button>
+              <button data-v="3000">3 格</button>
+              <button data-v="8000">8 格</button>
+              <button data-v="16000">满</button>
+            </div>
+          </span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- 02 材料与道具 ---------- -->
+    <section class="card">
+      <div class="card-head">
+        <span class="idx">02</span>
+        <h2>材料与道具</h2>
+        <span class="note">只改已有的，不新增</span>
+      </div>
+      <div class="card-body">
+        <div class="mg-head">
+          <span class="mg-title">想改哪类就点哪类</span>
+          <button type="button" class="mg-all" id="mgAll">全选</button>
+        </div>
+        <!-- 类别格子由 save-edit.js 按存档实读结果生成（每类有多少种） -->
+        <div class="mg-grid" id="mgGrid"></div>
+
+        <label class="tile">
+          <input type="checkbox" id="swArr">
+          <span class="tile-ico">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20L20 4"/><path d="M20 4l-6 1 5 5z"/><path d="M8 12l4 4"/></svg>
+          </span>
+          <span class="tile-txt">
+            <span class="tile-t1">箭矢全部 999</span>
+            <span class="tile-t2" id="arrHint">—</span>
+          </span>
+        </label>
+
+        <div class="tip">
+          背包里<b>没有的东西不会被凭空生成</b> —— 只把已有物品的数量拉满。这样不会撑爆背包容量，也不会踩坏后续数据。
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- 03 装备强化（跨两列） ---------- -->
+    <section class="card span-2">
+      <div class="card-head">
+        <span class="idx">03</span>
+        <h2>装备强化</h2>
+        <span class="note">只改已拥有 · 不动结构</span>
+      </div>
+      <div class="card-body">
+        <div class="eq-tabs">
+          <button class="eq-tab on" data-cat="weapons">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 3.5L20.5 6l-9 9-2.5-2.5z"/><path d="M9 15l-4 4"/><path d="M4.5 15.5l4 4"/></svg>
+            武器 <span class="cnt" data-cnt="weapons">—</span>
+          </button>
+          <button class="eq-tab" data-cat="bows">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4c9 2 14 7 16 16"/><path d="M4 4l16 16"/></svg>
+            弓 <span class="cnt" data-cnt="bows">—</span>
+          </button>
+          <button class="eq-tab" data-cat="shields">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 3v7c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V5z"/></svg>
+            盾 <span class="cnt" data-cnt="shields">—</span>
+          </button>
+        </div>
+        <div class="eq-list" id="eqList"><div class="empty">加载存档后显示</div></div>
+        <div class="tip">
+          游戏里<b>没有独立的「攻击力」字段</b> —— 武器面板数字 = 自身攻击力 + 附加属性的加数，进游戏现算。
+          所以要<b>先选属性、再填加数</b>：选攻击力就填加多少攻，选耐久就填额外耐久，耐久类点 <b>∞</b> 等于永不损坏。
+          <br>一件装备只能带一种附加属性，<b>攻击力和无限耐久二选一</b>，这是存档结构决定的。
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------- 04 坐标瞬移（跨两列） ---------- -->
+    <section class="card span-2">
+      <div class="card-head">
+        <span class="idx">04</span>
+        <h2>坐标瞬移</h2>
+        <span class="note">改的是游戏内的存档点</span>
+      </div>
+      <div class="card-body">
+        <div class="cur-pos">
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 12-9 12S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          <span>当前存档点 <b id="curPos">—</b></span>
+          <button class="fill" id="btnFillPos" disabled>填入下方</button>
+        </div>
+
+        <div class="axis-row">
+          <label class="axis axis-x">
+            <span class="axis-name"><i></i>X · 东西</span>
+            <input type="number" id="inPosX" step="0.01" placeholder="—" aria-label="X 坐标">
+          </label>
+          <label class="axis axis-y">
+            <span class="axis-name"><i></i>Y · 高度</span>
+            <input type="number" id="inPosY" step="0.01" placeholder="—" aria-label="Y 坐标（高度）">
+          </label>
+          <label class="axis axis-z">
+            <span class="axis-name"><i></i>Z · 南北</span>
+            <input type="number" id="inPosZ" step="0.01" placeholder="—" aria-label="Z 坐标">
+          </label>
+        </div>
+
+        <div class="tip warn">
+          三个数必须<b>同时填</b>（只填一个会被忽略，避免只改一半把人塞进地底）。
+          传送后可能在空中落地或被卡住，建议先在<b>地面开阔处</b>读档试。
+        </div>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<!-- ==================== 底部操作栏 ==================== -->
+<footer class="foot">
+  <div class="status" id="footStatus">还没有加载存档</div>
+  <button class="btn" id="btnReset" disabled>重置</button>
+  <button class="btn primary" id="btnApply" disabled>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+    预览并下载
+  </button>
+</footer>
+
+<!-- ==================== 预览弹层 ==================== -->
+<div class="mask hidden" id="previewMask">
+  <div class="dlg" role="dialog" aria-modal="true" aria-labelledby="dlgTitle">
+    <div class="dlg-head">
+      <span class="dot-ico" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+      </span>
+      <h3 id="dlgTitle">确认要改这些</h3>
+      <button id="btnClosePreview" aria-label="关闭">×</button>
+    </div>
+    <div class="dlg-body" id="previewBody"></div>
+    <div class="dlg-foot">
+      <button class="btn" id="btnCancelPreview">再想想</button>
+      <button class="btn primary" id="btnDownload">下载改好的存档</button>
+    </div>
+  </div>
+</div>
+
+<script src="../data/equip-names.js"></script>
+<script src="../js/save-writer.js"></script>
+<script src="save-edit.js"></script>
+</body>
+</html>

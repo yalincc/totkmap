@@ -242,6 +242,10 @@ window.TOTK_I18N.zh = {
   "settings.selectAll": "全选",
   "settings.clearAll": "清空",
   "settings.reset": "重置默认",
+  // 存档修改器入口（V2.7.0，独立页 app/save-edit/）
+  "settings.saveEdit": "存档修改",
+  "settings.saveEditHint": "（金手指：卢比 / 材料 / 装备 / 瞬移）",
+  "settings.saveEditBtn": "打开存档修改器",
   "settings.trail": "移动轨迹",
   "settings.trailHint": "（玩家走过的路线，仅本次会话记录）",
   "settings.trailShow": "显示",

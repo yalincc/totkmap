@@ -240,6 +240,10 @@ window.TOTK_I18N.en = {
   "settings.selectAll": "Select All",
   "settings.clearAll": "Clear All",
   "settings.reset": "Reset Defaults",
+  // Save editor entry (V2.7.0, standalone page app/save-edit/)
+  "settings.saveEdit": "Save Editing",
+  "settings.saveEditHint": "(cheats: rupees / materials / gear / teleport)",
+  "settings.saveEditBtn": "Open Save Editor",
   "settings.trail": "Movement Trail",
   "settings.trailHint": "(Route walked by the player, this session only)",
   "settings.trailShow": "Show",

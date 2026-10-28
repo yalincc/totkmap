@@ -15,7 +15,7 @@
  *   所以凡是改了 js/css/data 又不 bump SW_VER，就会出现「老页面配新资源」
  *   或干脆看不到新功能。
  */
-var SW_VER = 'v1.9.4-42';
+var SW_VER = 'v1.9.4-44';
 var TILES_CACHE = 'totk-tiles-' + SW_VER;
 var ASSETS_CACHE = 'totk-assets-' + SW_VER;
 var KEEP_CACHES = [TILES_CACHE, ASSETS_CACHE];
@@ -46,7 +46,16 @@ self.addEventListener('fetch', function (e) {
   // index.html 走网络优先，保证页面/版本更新立即可见
   // V2.4.0: 手机镜像入口 /botw/ 也走 network-first（否则被 cache-first 缓存旧 index.html，
   // 改版后镜像页永远拿旧页面 —— 实测 live.js?v=235 卡死即此坑）
-  if (path === '/' || path === '/index.html' || path === '/botw/' || path === '/botw/index.html') {
+  // 存档修改器 /save-edit/ 同理 —— 它是页面不是静态资源，
+  //   走 cache-first 会让「改了改档页但用户永远看到旧版」，必须网络优先。
+  // 命名：改档页是 editor.html，不叫 index.html —— 主站已有 app/index.html，
+  //   两个同名文件在日志/配置/缓存规则里全靠路径猜，属无谓的认知成本。
+  // fix：整个 /save-edit/ 一律网络优先。
+  //   原来只放行了 editor.html 本身，save-edit.js / save-edit.css 仍走 cache-first，
+  //   结果「页面是新的、脚本是旧的」—— 改档页迭代期这个坑一踩就表现为"点了按钮没反应"。
+  //   该目录总共 3 个文件几十 KB，没有缓存价值，整体放行最省心。
+  if (path === '/' || path === '/index.html' || path === '/botw/' || path === '/botw/index.html'
+      || path.indexOf('/save-edit/') === 0) {
     e.respondWith(networkFirst(req));
     return;
   }
