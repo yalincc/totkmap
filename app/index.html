@@ -116,7 +116,7 @@
     <div class="su-row">
       <button id="saveSyncBtn" data-i18n-title="save.syncBtnTip" type="button" class="su-load-btn" title="读取本机 Ryujinx 的 progress.sav，同步收集进度（文件仅在本机内存处理）" data-i18n="save.loadBtn">📂 从存档加载进度…</button>
       <!-- 存档修改器入口（2026-10-28 老大定：图标式，尺寸与 ? 一致，点击直达 editor.html） -->
-      <a id="saveEditBtn" class="su-edit-btn" href="save-edit/editor.html" data-i18n-title="save.editBtnTip" title="打开存档修改器：卢比 / 材料 / 装备 / 坐标传送（改完下载覆盖存档）" data-i18n-aria="save.editAria" role="button" aria-label="存档修改">🔧</a>
+      <a id="saveEditBtn" class="su-edit-btn" href="save-edit/editor.html" target="_blank" rel="noopener" data-i18n-title="save.editBtnTip" title="打开存档修改器：卢比 / 材料 / 装备 / 坐标传送（改完下载覆盖存档）" data-i18n-aria="save.editAria" role="button" aria-label="存档修改">🔧</a>
       <span class="su-help" id="suHelp" data-i18n-aria="save.helpAria" tabindex="0" role="button" aria-label="存档在哪里">?</span>
       <div class="su-tip hidden" id="suTip" data-i18n-html="save.tipBody"></div>
       <input type="file" id="saveFileInput" accept=".sav" hidden>
@@ -341,7 +341,7 @@
   <div class="set-sec">
     <div class="set-sec-title"><span data-i18n="settings.saveEdit">存档修改</span> <span class="set-title-hint" data-i18n="settings.saveEditHint">（金手指：卢比 / 材料 / 装备 / 瞬移）</span></div>
     <div class="set-actions" style="margin-top:0">
-      <a id="setOpenSaveEdit" class="set-ghost" href="save-edit/editor.html" style="text-decoration:none;display:inline-block" data-i18n="settings.saveEditBtn">打开存档修改器</a>
+      <a id="setOpenSaveEdit" class="set-ghost" href="save-edit/editor.html" target="_blank" rel="noopener" style="text-decoration:none;display:inline-block" data-i18n="settings.saveEditBtn">打开存档修改器</a>
     </div>
   </div>
 
