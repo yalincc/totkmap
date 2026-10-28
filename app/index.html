@@ -115,6 +115,8 @@
   <div class="save-upload">
     <div class="su-row">
       <button id="saveSyncBtn" data-i18n-title="save.syncBtnTip" type="button" class="su-load-btn" title="读取本机 Ryujinx 的 progress.sav，同步收集进度（文件仅在本机内存处理）" data-i18n="save.loadBtn">📂 从存档加载进度…</button>
+      <!-- 存档修改器入口（2026-10-28 老大定：图标式，尺寸与 ? 一致，点击直达 editor.html） -->
+      <a id="saveEditBtn" class="su-edit-btn" href="save-edit/editor.html" data-i18n-title="save.editBtnTip" title="打开存档修改器：卢比 / 材料 / 装备 / 坐标传送（改完下载覆盖存档）" data-i18n-aria="save.editAria" role="button" aria-label="存档修改">🔧</a>
       <span class="su-help" id="suHelp" data-i18n-aria="save.helpAria" tabindex="0" role="button" aria-label="存档在哪里">?</span>
       <div class="su-tip hidden" id="suTip" data-i18n-html="save.tipBody"></div>
       <input type="file" id="saveFileInput" accept=".sav" hidden>
@@ -190,6 +192,8 @@
         </button>
       </span>
     </div>
+    <!-- V2.8 左纳乌制造机产出：仅制造机标点显示（数据 dispenser_info.js） -->
+    <div class="ec-row" id="ecDispRow"><span class="ec-label" data-i18n="card.disp">产出</span><span class="ec-value" id="ecDisp"></span></div>
     <!-- V2.8 克洛格实拍截图：有图才显示，无图整块隐藏（图源后续接入） -->
     <div class="ec-korok-img hidden" id="ecKorokImg">
       <img id="ecKorokImgEl" src="" alt="">
@@ -532,6 +536,7 @@
 <script src="data/explore_save_map.js?v=190"></script>
 <script src="data/chests_official.js"></script>
 <script src="data/korok_info.js"></script>
+<script src="data/dispenser_info.js"></script>
 <script src="data/layers.js"></script>
 <script src="data/catalogs.js?v=257"></script>
 <script src="data/areas.js"></script>

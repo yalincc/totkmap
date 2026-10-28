@@ -121,6 +121,7 @@ window.TOTK_I18N.en = {
   "card.chest": "Chest",
   "card.solve": "How to",
   "card.type": "Puzzle",
+  "card.disp": "Output",
   "card.korokName": "Korok Seed",
   "card.usage": "Usage",
   "card.copy": "Copy",
@@ -244,6 +245,7 @@ window.TOTK_I18N.en = {
   "settings.saveEdit": "Save Editing",
   "settings.saveEditHint": "(cheats: rupees / materials / gear / teleport)",
   "settings.saveEditBtn": "Open Save Editor",
+  "save.editBtnTip": "Open the save editor: rupees / materials / gear / teleport. Export and overwrite your save; the file never leaves this device",
   "settings.trail": "Movement Trail",
   "settings.trailHint": "(Route walked by the player, this session only)",
   "settings.trailShow": "Show",
@@ -361,6 +363,7 @@ window.TOTK_I18N.en = {
   "settings.dotAlphaTip": "Opacity",
   "card.locateAria": "Locate on map",
   "save.helpAria": "Where is my save file?",
+  "save.editAria": "Save editing",
   "mirror.qrAlt": "Mobile mirror QR code",
 
   "korok.type.carry": "Carry to a friend",
@@ -376,4 +379,15 @@ window.TOTK_I18N.en = {
   "korok.type.break_pot": "Break the pots",
   "korok.type.race": "Race to the ring",
   "korok.type.other": "Other",
+  /* Zonai devices (official EN) */
+  "device.fan": "Fan", "device.wing": "Wing", "device.cart": "Cart",
+  "device.smallwheel": "Small Wheel", "device.bigwheel": "Big Wheel", "device.balloon": "Balloon",
+  "device.rocket": "Rocket", "device.pot": "Portable Pot", "device.flame": "Flame Emitter",
+  "device.frost": "Frost Emitter", "device.shock": "Shock Emitter", "device.beam": "Beam Emitter",
+  "device.hydrant": "Hydrant", "device.steering": "Steering Stick", "device.timebomb": "Time Bomb",
+  "device.battery": "Battery", "device.cannon": "Cannon", "device.sled": "Sled",
+  "device.mirror": "Mirror", "device.spring": "Spring", "device.stabilizer": "Stabilizer",
+  "device.stake": "Stake", "device.constructhead": "Construct Head", "device.hoverstone": "Hover Stone",
+  "device.light": "Light", "device.homing": "Homing Cart",
+  "device.cellNote": "Battery-cell steward construct at Lookout Landing: trade Crystallized Charges to expand your energy cell; once maxed, it trades them for Zonai devices directly"
 };

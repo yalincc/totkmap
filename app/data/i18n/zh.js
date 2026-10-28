@@ -121,6 +121,7 @@ window.TOTK_I18N.zh = {
   "card.chest": "宝箱",
   "card.solve": "解法",
   "card.type": "类型",
+  "card.disp": "产出",
   "card.korokName": "克洛格果实",
   "card.usage": "用途",
   "card.copy": "复制",
@@ -246,6 +247,7 @@ window.TOTK_I18N.zh = {
   "settings.saveEdit": "存档修改",
   "settings.saveEditHint": "（金手指：卢比 / 材料 / 装备 / 瞬移）",
   "settings.saveEditBtn": "打开存档修改器",
+  "save.editBtnTip": "打开存档修改器：卢比 / 材料 / 装备 / 坐标传送（改完下载覆盖存档，文件仅在本机内存处理）",
   "settings.trail": "移动轨迹",
   "settings.trailHint": "（玩家走过的路线，仅本次会话记录）",
   "settings.trailShow": "显示",
@@ -361,6 +363,7 @@ window.TOTK_I18N.zh = {
   "settings.dotAlphaTip": "透明度",
   "card.locateAria": "定位到地图",
   "save.helpAria": "存档在哪里",
+  "save.editAria": "存档修改",
   "mirror.qrAlt": "手机镜像二维码",
 
   "korok.type.carry": "与朋友见面",
@@ -376,4 +379,15 @@ window.TOTK_I18N.zh = {
   "korok.type.break_pot": "打碎壶罐",
   "korok.type.race": "限时到达",
   "korok.type.other": "其他",
+  /* 左纳乌装置官方简中名（huijiwiki 口径） */
+  "device.fan": "风扇机", "device.wing": "翼", "device.cart": "平台车",
+  "device.smallwheel": "小轮胎", "device.bigwheel": "大轮胎", "device.balloon": "热气球",
+  "device.rocket": "火箭", "device.pot": "便携锅", "device.flame": "火龙头",
+  "device.frost": "冰龙头", "device.shock": "雷龙头", "device.beam": "光线头",
+  "device.hydrant": "放水栓", "device.steering": "操纵杆", "device.timebomb": "计时炸弹",
+  "device.battery": "备用电池", "device.cannon": "大炮", "device.sled": "滑橇",
+  "device.mirror": "镜子", "device.spring": "弹簧", "device.stabilizer": "不倒翁",
+  "device.stake": "桩", "device.constructhead": "魔像的头部", "device.hoverstone": "浮游石",
+  "device.light": "灯", "device.homing": "追踪平台车",
+  "device.cellNote": "监视堡垒的电池格兑换魔像：投入左纳乌能源结晶升级电池格；电池格达到上限后可直接兑换左纳乌装置"
 };

@@ -1950,3 +1950,20 @@ html[lang="en"] .tk-copy {
 }
 #ecSolveRow .ec-value { color: #eef4ef; font-size: 12.5px; line-height: 1.65; }
 #ecTypeRow .ec-value { color: #a8d8b9; font-size: 12.5px; }
+
+/* ===== 存档修改器入口（图标式，尺寸观感与 .su-help 一致，2026-10-28 老大定） ===== */
+.su-edit-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px; height: 18px;
+  margin-left: 4px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.14);
+  font-size: 11px;
+  line-height: 1;
+  text-decoration: none;
+  transition: all .15s;
+  outline: none;
+}
+.su-edit-btn:hover, .su-edit-btn:focus { background: #eac27e; }

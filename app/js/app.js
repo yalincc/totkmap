@@ -71,6 +71,16 @@
     ascend_plate: '通天术 / 叶子标记', break_pot: '打碎壶罐', race: '限时到达',
     other: '其他'
   };
+  /* V2.8 左纳乌装置中文名（兜底；正式文案走 i18n 的 device.*）
+   * 官方简中名参考 huijiwiki「左纳乌装置」词条（火龙头/雷龙头/光线头/放水栓等）。 */
+  var DEV_CN_FALLBACK = {
+    fan: '风扇机', wing: '翼', cart: '平台车', smallwheel: '小轮胎', bigwheel: '大轮胎',
+    balloon: '热气球', rocket: '火箭', pot: '便携锅', flame: '火龙头', frost: '冰龙头',
+    shock: '雷龙头', beam: '光线头', hydrant: '放水栓', steering: '操纵杆',
+    timebomb: '计时炸弹', battery: '备用电池', cannon: '大炮', sled: '滑橇',
+    mirror: '镜子', spring: '弹簧', stabilizer: '不倒翁', stake: '桩',
+    constructhead: '魔像的头部', hoverstone: '浮游石', light: '灯', homing: '追踪平台车'
+  };
   var LS_DONE = 'totkmap_done_v1';
   var LS_CUSTOM = 'totkmap_custom_v1';
   var LS_LAYER = 'totkmap_layer_v1';
@@ -2568,7 +2578,11 @@
     suHelp.addEventListener('click', function (e) {
       e.stopPropagation();
       hideTip();
-      if (helpBox) helpBox.classList.remove('hidden');
+      /* 老大 2026-10-28 定：点击弹出帮助面板，再次点击关闭（toggle） */
+      if (helpBox) {
+        if (helpBox.classList.contains('hidden')) helpBox.classList.remove('hidden');
+        else helpBox.classList.add('hidden');
+      }
     });
     document.addEventListener('click', function (e) {
       if (helpBox && !e.target.closest('#helpBox') && !e.target.closest('#suHelp')) {
@@ -3127,6 +3141,29 @@
         elImgTag.removeAttribute('src');
         elImg.classList.add('hidden');
       }
+    }
+    /* ---------- V2.8 左纳乌制造机「产出」行 ----------
+     * 仅 cat 65/89/111 的制造机标点显示（dispenser_info.js 31 台，
+     * 与社区 4 源坐标配对闭合）；p = [装置key, 概率%]；2003 特例为
+     * 监视堡垒电池格兑换魔像（cell:1），显示说明文字而非装置列表。 */
+    var elDisp = $('ecDisp'), elDispRow = $('ecDispRow');
+    if (elDisp) {
+      var dInfo = (window.TOTK_DISPENSER_INFO || {})[String(m.id)];
+      var dispText = '';
+      if (dInfo && dInfo.p) {
+        dispText = dInfo.p.map(function (it) {
+          var nm = window.I18N
+            ? window.I18N.t('device.' + it[0], DEV_CN_FALLBACK[it[0]] || it[0])
+            : (DEV_CN_FALLBACK[it[0]] || it[0]);
+          return nm + ' ' + it[1] + '%';
+        }).join(' · ');
+      } else if (dInfo && dInfo.cell) {
+        dispText = window.I18N
+          ? window.I18N.t('device.cellNote', '监视堡垒的电池格兑换魔像：投入左纳乌能源结晶升级电池格；电池格达到上限后可直接兑换左纳乌装置')
+          : '监视堡垒的电池格兑换魔像：投入左纳乌能源结晶升级电池格；电池格达到上限后可直接兑换左纳乌装置';
+      }
+      elDisp.textContent = dispText;
+      if (elDispRow) elDispRow.style.display = dispText ? '' : 'none';
     }
 
     var ll = [m.x, m.y];
