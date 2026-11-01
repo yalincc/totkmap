@@ -1,6 +1,8 @@
 package main
 
 // CoreVersion totknavi 核心版本（GUI 壳必须与此一致，见 R11 版本解耦）。
+// V3.1.0：新增 GET /save 端点原样输出 progress.sav 二进制并补齐跨域安全标头，
+//   完美支持网页端自动同步任务与图鉴全量要素；与 PC 重编译版并列发版。
 // V3.0.1：全线品牌改名 xnavi -> totknavi（目录、exe、包名、镜像页统一）；
 //   存档进度新增第 21 类「宝箱」（1334 个官方大世界宝箱 GUID），并统一
 //   核心与 GUI 的分类键名为「宝箱」；progress 自动同步接入网页端。
@@ -15,4 +17,4 @@ package main
 // 换算常数 K，走固定偏移链读坐标；跑动掉锁后毫秒级重锁，失败回退 known/扫描/校准）。
 // V2.1.2：定位引擎 Bug C~H 修复（两个 if 判据 + known 自愈 + 扫描互斥 +
 // 组代表基准 + 空组拒绝）；手机镜像 Bug A（引导页/根路径/appReady 三态）。
-const CoreVersion = "v3.0.1"
+const CoreVersion = "v3.1.0"

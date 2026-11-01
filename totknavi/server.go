@@ -46,6 +46,9 @@ func corsHeaders(w http.ResponseWriter) {
 	h := w.Header()
 	h.Set("Access-Control-Allow-Origin", "*")
 	h.Set("Access-Control-Allow-Private-Network", "true")
+	h.Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+	h.Set("Access-Control-Allow-Headers", "*")
+	h.Set("Access-Control-Expose-Headers", "X-Save-Slot, X-Save-Mtime")
 	h.Set("Cache-Control", "no-store")
 }
 
@@ -149,6 +152,12 @@ func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	// v2.1.2 Bug A：根路径处理——手机只输 IP:端口时不再看到 unknown endpoint
 	// JSON：有 app/ 跳镜像页，无 app/ 回引导页。
+	if r.Method == http.MethodOptions {
+		corsHeaders(w)
+		w.WriteHeader(http.StatusNoContent)
+		return
+	}
+
 	if path == "/" {
 		if botwFS != nil {
 			http.Redirect(w, r, "/botw/?follow=1&game=totk", http.StatusFound)
