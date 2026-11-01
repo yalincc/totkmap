@@ -87,6 +87,76 @@
   var autoLayerWarned = false;                 // 自动切层关闭提示（只提示一次）
   var teleportTS = 0;                           // 最近一次传送解锁时间戳（抑制紧随的切层 toast）
 
+  /* ★ 2026-11-01 图层判定（双保险）：
+   * 服务端有 layer 则 100% 信任服务端；若服务端只传裸坐标 (layer==null)，
+   * 前端直接基于 TOTK_AREA_SKY 多边形 + TOTK_MARKERS 3D点云进行四级漏斗判定。 */
+  function inClientSkyPoly(x, y) {
+    var polys = window.TOTK_AREA_SKY;
+    if (!polys || !polys.length) return false;
+    for (var i = 0; i < polys.length; i++) {
+      var rings = polys[i].rings;
+      if (!rings) continue;
+      for (var r = 0; r < rings.length; r++) {
+        var pts = rings[r];
+        var inside = false;
+        for (var j = 0, k = pts.length - 1; j < pts.length; k = j++) {
+          var xi = pts[j][0], yi = pts[j][1];
+          var xk = pts[k][0], yk = pts[k][1];
+          if (((yi > y) !== (yk > y)) && (x < (xk - xi) * (y - yi) / (yk - yi) + xi)) {
+            inside = !inside;
+          }
+        }
+        if (inside) return true;
+      }
+    }
+    return false;
+  }
+
+  function nearestClientMarker(wx, wz, h, maxDist) {
+    var mks = window.TOTK_MARKERS;
+    if (!mks || !mks.length) return null;
+    var bestD2 = maxDist * maxDist;
+    var best = null;
+    for (var i = 0; i < mks.length; i++) {
+      var m = mks[i];
+      if (m.z == null) continue;
+      var dx = m.y - wx;
+      var dz = m.x - wz;
+      var dh = m.z - h;
+      var d2 = dx*dx + dz*dz + dh*dh;
+      if (d2 < bestD2) {
+        bestD2 = d2;
+        best = m;
+      }
+    }
+    return best;
+  }
+
+  function calcClientLayer(gx, gy, gz) {
+    var h = gz;
+    var wx = gx;
+    var wz = -gy;
+
+    if (h >= 400.0) {
+      // 1. 身边 200m 内有 3D 天空标点，绝对归天空 20
+      var mRes = nearestClientMarker(wx, wz, h, 200.0);
+      if (mRes && mRes.layer === 20) return 20;
+      // 2. 命中空岛多边形边界
+      if (inClientSkyPoly(wx, gy)) return 20;
+      // 3. 其余跳离空岛、悬空下坠情况归地上 18（方便俯瞰地面）
+      return 18;
+    }
+
+    if (h <= -150.0) {
+      if (h < -250.0) return 19;
+      var mResU = nearestClientMarker(wx, wz, h, 250.0);
+      if (mResU && mResU.layer === 19) return 19;
+      return 18;
+    }
+
+    return 18;
+  }
+
   var trail = [];
   var lastPosKey = null;
   var lastDrawKey = '';
@@ -356,13 +426,38 @@
       offlineStreak = 0;
       pos.mx = p.mx; pos.my = p.my;
       pos.gx = p.gx; pos.gy = p.gy; pos.gz = p.gz;
-      pos.layer = p.layer || 18;
+      /* 图层判定（双保险）：
+       * 1. 优先采用服务端返回的 layer（兼容老版 totknavi 以及新版 totknavi-pc）；
+       * 2. 若服务端只给裸坐标（layer==null），前端自动利用空岛多边形 + 3D点云判定。 */
+      var srvLayer = (typeof p.layer === 'number' && (p.layer === 18 || p.layer === 19 || p.layer === 20)) ? p.layer : null;
+      if (srvLayer != null) {
+        pos.layer = srvLayer;
+      } else if (pos.gx != null && pos.gy != null && pos.gz != null) {
+        pos.layer = calcClientLayer(pos.gx, pos.gy, pos.gz);
+      } else {
+        pos.layer = 18;
+      }
       pos.verified = !!p.verified;
       pos.source = p.source || '-';
 
       /* 方向箭头：位移推算（参数 = BOTWmap v3.1.1 已验证值，见文件头注释）。
        * mx/my 口径：mx=北向、my=东向 → 东向位移=d(my)，北向位移=d(mx)。 */
-      if (hdLastX != null) {
+      /* ★ 2026-10-31：服务端若提供真实朝向（PC 重编译版能直接从内存读角色朝向矩阵），
+       * 优先采用；模拟器版不输出 heading → srvHd 为 null → 自动回退到下面的位移推算，
+       * 行为与改动前完全一致（兼容铁律：老核心配新网页必须照常工作）。
+       * 角度口径两端一致：0°=北、顺时针（罗盘角），箭头 SVG 基准朝北可直接 rotate。 */
+      var srvHd = (typeof p.heading === 'number' && isFinite(p.heading)) ? p.heading : null;
+      if (srvHd != null) {
+        if (heading == null) {
+          heading = srvHd;
+        } else {
+          var sdiff = ((srvHd - heading) % 360 + 540) % 360 - 180;
+          var sadiff = sdiff < 0 ? -sdiff : sdiff;
+          if (sadiff > 60) heading = srvHd;                      /* 大转身：一帧到位 */
+          else if (sadiff > 20) heading = heading + sdiff * 0.8; /* 中角度：1~2 帧 */
+          else heading = heading + sdiff * 0.45;                 /* 小角度：平滑防抖 */
+        }
+      } else if (hdLastX != null) {
         /* ★ 轴向口径（实测 2026-10-17 + 坐标速查 §2 定案）：
          * pos.mx = 游戏 Z_objmap，北为负（向北跑 mx 减小）→ 北向位移 = -(Δmx)；
          * pos.my = X 东西，东为正 → 东向位移 = +(Δmy)。

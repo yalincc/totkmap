@@ -1,8 +1,4 @@
 // data_dir.go — 定位前端数据目录（app/data）。
-//
-// progress_totk2.go 需要读 data/totk_save_hashes.js 和 data/explore_save_map.js，
-// 这两个文件在 TOTKmap 的 app/data 下，PC 版与模拟器版共用同一份（任务/神庙/探索
-// 数据结构完全一样），所以这里只做目录探测，不复制数据。
 
 package main
 
@@ -11,21 +7,35 @@ import (
 	"path/filepath"
 )
 
-// dataDir 依次尝试：<exe>/app/data、<exe>/../app/data、<exe>/data、<exe>/../data。
+// dataDir 依次尝试本地与上级各层目录。
 func dataDir() string {
-	isDir := func(p string) bool {
+	isDataDir := func(p string) bool {
 		fi, err := os.Stat(p)
-		return err == nil && fi.IsDir()
+		if err != nil || !fi.IsDir() {
+			return false
+		}
+		// 必须包含关键数据文件之一
+		for _, f := range []string{"heightmap_downsampled.bin", "markers.js", "area_sky.js"} {
+			if _, err := os.Stat(filepath.Join(p, f)); err == nil {
+				return true
+			}
+		}
+		return false
 	}
+
 	if exe, err := os.Executable(); err == nil {
 		dir := filepath.Dir(exe)
 		for _, p := range []string{
-			filepath.Join(dir, "app", "data"),
-			filepath.Join(dir, "..", "app", "data"),
 			filepath.Join(dir, "data"),
+			filepath.Join(dir, "app", "data"),
 			filepath.Join(dir, "..", "data"),
+			filepath.Join(dir, "..", "app", "data"),
+			filepath.Join(dir, "..", "..", "data"),
+			filepath.Join(dir, "..", "..", "app", "data"),
+			filepath.Join(dir, "..", "..", "..", "data"),
+			filepath.Join(dir, "..", "..", "..", "app", "data"),
 		} {
-			if isDir(p) {
+			if isDataDir(p) {
 				return p
 			}
 		}

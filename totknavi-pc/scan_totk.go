@@ -22,7 +22,8 @@ import (
 
 const (
 	ptkRecStride       = 0x40 // 四元数刚体槽步长
-	ptkRotRecStride    = 0x48 // TOTK 跨场景持久 3x4 旋转矩阵+坐标双缓冲槽步长
+	ptkRotRecStride    = 0x48
+	ptkRing28Stride    = 28   // PC版专属：12B 坐标 + 16B 单位四元数 RingBuffer // TOTK 跨场景持久 3x4 旋转矩阵+坐标双缓冲槽步长
 	ptkQuatWindowBytes = 0x0C + 16
 
 	// ptkHitCap 候选总量硬上限（防病态内存下无限累积撑爆进程）。
@@ -230,6 +231,29 @@ func ptkRun48Length(buf []byte, off int) int {
 	return n
 }
 
+// ptkRun28Length 统计连续符合 28 字节 (12B 坐标 + 16B 单位四元数) 的 RingBuffer 帧数。
+// PC 版实测该队列在林克真身上连续存在 4~10 帧，且全内存唯一，跨传送永不销毁。
+func ptkRun28Length(buf []byte, off int) int {
+	n := 0
+	for k := 0; k < 10; k++ {
+		o := off + k*ptkRing28Stride
+		if o+ptkRing28Stride > len(buf) {
+			break
+		}
+		x := math.Float32frombits(binary.LittleEndian.Uint32(buf[o:]))
+		zs := math.Float32frombits(binary.LittleEndian.Uint32(buf[o+4:]))
+		yn := math.Float32frombits(binary.LittleEndian.Uint32(buf[o+8:]))
+		if !ptkCoordOK(x, zs, yn) {
+			break
+		}
+		if !ptkIsQuatUnit(buf, o+12) {
+			break
+		}
+		n++
+	}
+	return n
+}
+
 type ptkHit struct {
 	Addr   uintptr
 	P      [3]float32 // 内存序 X, Z_stored, Y_north
@@ -243,62 +267,6 @@ type ptkHit struct {
 	// 朝向（2026-10-31 实机确认）：来自坐标前 0x30 处的 3x4 变换矩阵。
 	HasHeading bool
 	Heading    float32 // 方位角：北=0°，东=90°（顺时针递增）
-}
-
-// ptkMat3Rec 识别「3x4 变换矩阵 + 坐标」槽（TOTK 角色朝向的真正载体）。
-//
-// 布局（2026-10-31 实测，列主序，每列 4 个 float = xyz + 平移分量）：
-//
-//	[A-0x30] col0 = (m0,m1,m2) + 平移X      ← 局部 X 轴（右）
-//	[A-0x20] col1 = (m4,m5,m6) + 平移Y      ← 局部 Y 轴（上），实测恒为 (0,1,0)
-//	[A-0x10] col2 = (m8,m9,m10)+ 平移Z      ← 局部 Z 轴
-//	[A-0x00] 坐标 (X, Y, Z)                 ← 与上面三个平移分量重复
-//
-// 朝向 = **col2 取反**。回归验证：转前 col2=(0.349,0,0.937) → 前向西北；
-// 转后 col2=(-0.998,0,0.065) → 前向东，与玩家口述方位一致。
-//
-// 注意：这与 totknavi 里 ptkValidRotRec 查的 -0x24（3x3 紧密排布）**差 0x0C**，
-// 所以模拟器版判据在 PC 版永远不命中——两者是不同的内存布局，不能共用。
-func ptkMat3Rec(buf []byte, off int) (ok bool, heading float32) {
-	const mBase = 0x30
-	if off < mBase || off+12 > len(buf) {
-		return false, 0
-	}
-	b := buf[off-mBase:]
-	f := func(i int) float32 { return math.Float32frombits(binary.LittleEndian.Uint32(b[i*4:])) }
-	// 列主序：colN 的 xyz 在 [N*4, N*4+3)，第 4 个是该列的平移分量（跳过）
-	c0x, c0y, c0z := f(0), f(1), f(2)
-	c1x, c1y, c1z := f(4), f(5), f(6)
-	c2x, c2y, c2z := f(8), f(9), f(10)
-
-	// ⓪ NaN/Inf 必须先拦：否则后面的归一化比较对 NaN 恒为 false（NaN 与任何数比较都是 false），
-	//   会把垃圾矩阵放进来，最终 atan2 产出 NaN 传给前端（2026-10-31 实测出现过"朝向=NaN°"）。
-	for _, v := range [9]float32{c0x, c0y, c0z, c1x, c1y, c1z, c2x, c2y, c2z} {
-		if math.IsNaN(float64(v)) || math.IsInf(float64(v), 0) {
-			return false, 0
-		}
-	}
-
-	// ① Y 轴必须是世界向上（角色站在地面上，水平旋转）
-	if abs32(c1x) > 0.20 || abs32(c1y-1.0) > 0.20 || abs32(c1z) > 0.20 {
-		return false, 0
-	}
-	// ② col0 / col2 必须是单位向量且互相正交
-	n0 := c0x*c0x + c0y*c0y + c0z*c0z
-	n2 := c2x*c2x + c2y*c2y + c2z*c2z
-	if abs32(n0-1.0) > 0.08 || abs32(n2-1.0) > 0.08 {
-		return false, 0
-	}
-	if abs32(c0x*c2x+c0y*c2y+c0z*c2z) > 0.08 {
-		return false, 0
-	}
-	// ③ 排除单位阵（场景里大量静态节点的变换是单位阵，没有朝向信息）
-	if abs32(c0x-1.0) < 1e-3 && abs32(c0z) < 1e-3 && abs32(c2x) < 1e-3 && abs32(c2z-1.0) < 1e-3 {
-		return false, 0
-	}
-	// ④ 前方向 = -col2；方位角按「北=0、东=90」计
-	//    内存坐标系：X 东正，Z_stored 北负 → 北 = (0,0,-1)，东 = (1,0,0)
-	return true, float32(math.Atan2(float64(-c2x), float64(c2z)) * 180 / math.Pi)
 }
 
 // ptkFindEdenTriples 滑动扫描：4 字节步进，坐标合法 → 结构判定 → 收集候选。
@@ -324,22 +292,21 @@ func ptkFindEdenTriples(buf []byte, base uintptr, anchor *[3]float32, radius flo
 		if anchor != nil {
 			d = dist3(p, *anchor)
 		}
-		// ① 最优：3x4 变换矩阵槽（自带朝向）——PC 版玩家真身就是这个结构
-		if ok, hd := ptkMat3Rec(buf, off); ok {
-			// ★ Run 必须真算，不能钉死：实测玩家槽 Run 可达 33（前 16 + 后 16 + 自身），
-			//   而零散物件 Run 只有 1~2。这是比"距锚点近"更硬的判据（老大 2026-10-31 指出）。
-			run := ptkRunLength(buf, off)
-			if run < 2 {
-				run = 2
-			}
+		// 严格限定窗口半径：超出 radius 的任何对象一律拒绝（绝不将超出范围的物体拉进候选）
+		if anchor != nil && radius > 0 && d > radius {
+			continue
+		}
+
+
+		// ② 兼容：模拟器版的 3x4 紧密矩阵槽（-0x24），PC 版实测不命中，保留以防版本变化
+				// ① ★ PC 版核心持久槽：28 字节物理运动 RingBuffer 队列（终身常驻）
+		if run28 := ptkRun28Length(buf, off); run28 >= 4 {
 			hits = append(hits, ptkHit{
 				Addr: base + uintptr(off), P: p, Dist: d,
-				Rot: true, Run: run, Chunk: base,
-				HasHeading: true, Heading: hd,
+				Rot: true, Run: run28, Chunk: base,
 			})
 			continue
 		}
-		// ② 兼容：模拟器版的 3x4 紧密矩阵槽（-0x24），PC 版实测不命中，保留以防版本变化
 		if run48 := ptkRun48Length(buf, off); run48 >= 2 {
 			hits = append(hits, ptkHit{
 				Addr: base + uintptr(off), P: p, Dist: d,
@@ -398,29 +365,39 @@ func ptkGroupHits(hits []ptkHit) []ptkHit {
 		idx[k] = len(out)
 		out = append(out, h)
 	}
+	isMain := func(a uintptr) bool {
+		return a >= totkPCScanMainLo && a < totkPCScanMainHi
+	}
+
 	sort.SliceStable(out, func(i, j int) bool {
-		// ① 先排除"副本爆炸"的静态表：实测地表场景里存在 copies=40~120 的骨骼/物件表，
-		//    坐标全在原点附近（(0,54,-105) 这种局部空间），会把真身挤下去。排到最后。
+		// ① 先排除"副本爆炸"的静态表：局部空间骨骼/物件表排最后
 		si := out[i].Copies > 24
 		sj := out[j].Copies > 24
 		if si != sj {
 			return !si
 		}
-		// ② ★ 距锚点最近是主判据，但容差放大到 5m：
-		//    同一位置周围常有若干"坐标几乎相同"的槽，其中只有一部分带实时旋转。
-		//    2026-10-31 实测：太严（1m）会锁到不带朝向的位置槽，/pos 的 heading 变成 null。
-		if math.Abs(float64(out[i].Dist-out[j].Dist)) > 5.0 {
-			return out[i].Dist < out[j].Dist
+		// ② ★ 主模块 .bss 静态段优先（跨场景永不销毁）
+		mi := isMain(out[i].Addr)
+		mj := isMain(out[j].Addr)
+		if mi != mj {
+			return mi
 		}
-		// ③ 容差内：带朝向者优先（能读朝向 = 这个槽的矩阵是活的）
+		// ③ ★ 结构类型优先：Rot（3x4 旋转矩阵持久槽）排最前，对齐技术手册 Rot > Quat > Dist
+		if out[i].Rot != out[j].Rot {
+			return out[i].Rot
+		}
+		// ④ 带实时有效朝向优先
 		if out[i].HasHeading != out[j].HasHeading {
 			return out[i].HasHeading
 		}
-		// ④ 再比 Run（动力学连续性）
+		// ⑤ 同级按距锚点升序
+		if math.Abs(float64(out[i].Dist-out[j].Dist)) > 1.0 {
+			return out[i].Dist < out[j].Dist
+		}
+		// ⑥ 距离相近时：Run 动力学长度优先，其次副本数
 		if out[i].Run != out[j].Run {
 			return out[i].Run > out[j].Run
 		}
-		// ⑤ 副本多者优先
 		if out[i].Copies != out[j].Copies {
 			return out[i].Copies > out[j].Copies
 		}
@@ -448,9 +425,6 @@ func ptkReadSlot(h uintptr, addr uintptr) (pos [3]float32, heading float32, hasH
 		return pos, 0, false, false
 	}
 	pos = [3]float32{x, -yn, zs - elevBias} // HUD 序
-	if hOk, hd := ptkMat3Rec(d, 0x30); hOk {
-		return pos, hd, true, true
-	}
 	return pos, 0, false, true
 }
 

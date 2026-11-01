@@ -78,6 +78,7 @@ xnavi/build-check.txt
 # V2.5 治理（2026-10-09，对齐 BOTWmap 原则）：
 # 数据流水线/工具脚本、归档、发布包、大压缩包——产物已打进 app/，不入库
 归档/
+_archive/
 tools/
 release/
 app.rar

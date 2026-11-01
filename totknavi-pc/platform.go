@@ -43,6 +43,7 @@ type Platform interface {
 	Blocks(minMB float64) []MemBlock
 	LittleEndian() bool
 	SaveRoots() []string
+	IsAlive() bool
 }
 
 // ---- 平台管理（单平台注册，保留多驱动扩展位）----
@@ -89,11 +90,7 @@ func probePlatform() Platform {
 	return curPlat
 }
 
-// hLive 句柄是否仍有效（进程存在）。
+// hLive 句柄是否仍有效（进程存在且未退出）。
 func hLive(h uintptr) bool {
-	if h == 0 {
-		return false
-	}
-	var mbi MemoryBasicInformation
-	return virtualQueryEx(h, 0, &mbi) != 0
+	return isProcessAlive(h)
 }

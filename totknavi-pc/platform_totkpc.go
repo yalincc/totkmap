@@ -63,6 +63,7 @@ func (p *totkpcPlatform) Name() string       { return "TotK-PC" }
 func (p *totkpcPlatform) Handle() uintptr    { return p.h }
 func (p *totkpcPlatform) PID() uint32        { return p.pid }
 func (p *totkpcPlatform) LittleEndian() bool { return true }
+func (p *totkpcPlatform) IsAlive() bool      { return p.h != 0 && isProcessAlive(p.h) }
 
 // Attach 附加到 totk.exe。进程退出后句柄失效时自动重开。
 func (p *totkpcPlatform) Attach() bool {

@@ -19,7 +19,7 @@ import (
 const (
 	hashTableEnd    = 0x03c800
 	guidSentinel    = 0xa3db7114
-	progressCacheS  = 2.0
+	progressCacheS  = 10.0 // 节流防抖：10 秒内重复请求复用内存缓存，避免高频碰磁盘
 )
 
 var saveGameVersions = []struct {
@@ -91,7 +91,7 @@ func findLatestProgress() (float64, string) {
 
 // parseProgressSave 解析 progress.sav（与 js parse() 同口径）。
 func parseProgressSave(path string) *parsedSave {
-	data, err := os.ReadFile(path)
+	data, err := readFileShared(path) // ★ 必须完全共享（含 FILE_SHARE_DELETE），防 Error 5 挡住游戏存档
 	if err != nil {
 		return &parsedSave{Ok: false, Error: "read: " + err.Error()}
 	}

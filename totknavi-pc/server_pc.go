@@ -15,6 +15,7 @@
 package main
 
 import (
+	_ "embed"
 	"encoding/json"
 	"fmt"
 	"net"
@@ -24,6 +25,9 @@ import (
 	"sync"
 	"time"
 )
+
+//go:embed gui.html
+var guiHTML []byte
 
 // posState 定位状态（HTTP /pos 读取；tracker goroutine 写）。
 type posState struct {
@@ -38,12 +42,26 @@ type posState struct {
 	rescans    int // 本会话重扫次数
 
 	// 朝向：方位角，北=0°、东=90°（顺时针递增）。hasHeading=false 时字段无效。
-	heading    float32
-	hasHeading bool
-	verified   bool // 移动确认已通过（对齐 totknavi 的 verified 语义）
+	heading     float32
+	hasHeading  bool
+	verified    bool // 移动确认已通过（对齐 totknavi 的 verified 语义）
+	gameRunning bool
+	pid         uint32
+	lockedAddr  uintptr
 }
 
-var pstate = posState{}
+var pstate = posState{gameRunning: true}
+
+func (s *posState) setGameStatus(running bool, pid uint32, locked uintptr) {
+	s.mu.Lock()
+	s.gameRunning = running
+	s.pid = pid
+	s.lockedAddr = locked
+	if !running {
+		s.ok = false
+	}
+	s.mu.Unlock()
+}
 
 func (s *posState) publish(g [3]float32, heading float32, hasHeading bool, verified bool, source string) {
 	s.mu.Lock()
@@ -78,7 +96,9 @@ func (s *posState) bumpRescan() {
 
 // serveRun 启动追踪 + HTTP 服务（阻塞）。
 func serveRun(p Platform, plat *totkpcPlatform, anchor *[3]float32, addr uintptr, port int, appRoot string) {
+	loadShrineEntrances()
 	go trackerLoop(p, plat, anchor, addr)
+	startStatusAndCoordsLoop(p)
 
 	// 存档进度（探索度/神庙/任务）——直接复用 totknavi 的 progressWatcher，
 	// 存档格式与模拟器版一致，数据表共用 app/data。
@@ -90,18 +110,26 @@ func serveRun(p Platform, plat *totkpcPlatform, anchor *[3]float32, addr uintptr
 	mux := http.NewServeMux()
 	mux.HandleFunc("/pos", handlePosPC)
 	mux.HandleFunc("/progress", handleProgressPC)
+	mux.HandleFunc("/rescan", handleRescanPC)
+	mux.HandleFunc("/set-coords", handleSetCoordsPC)
+	mux.HandleFunc("/save", handleSavePC)
+	mux.HandleFunc("/logs", handleLogsPC)
+	mux.HandleFunc("/save-info", handleSaveInfoPC)
+	mux.HandleFunc("/gui", handleGuiPC)
 
-	// 静态托管地图网页：默认指向 ../app（TOTKmap 主项目的网页，**不复制**，
-	// 避免两份 8000+ 瓦片文件各自维护）。可用 --app 指定其它目录。
-	// 注意：/pos 是精确路径，优先于 "/" 匹配，不会被文件服务吃掉。
-	if appRoot == "" {
-		if exe, err := os.Executable(); err == nil {
-			appRoot = filepath.Join(filepath.Dir(exe), "..", "app")
-		}
-	}
-	if fi, err := os.Stat(appRoot); err == nil && fi.IsDir() {
-		mux.Handle("/", http.FileServer(http.Dir(appRoot)))
+	initLanURL(port)
+
+	// 智能多级探测地图网页目录（必须包含 index.html）
+	appRoot = findAppDir(appRoot)
+	if appRoot != "" {
+		fileServer := http.FileServer(http.Dir(appRoot))
+		// /botw/ 路由：手机镜像专用（契约：live.js 依此识别同源局域网服务）
+		mux.Handle("/botw/", http.StripPrefix("/botw/", fileServer))
+		mux.Handle("/", fileServer)
 		fmt.Printf("\n  [server] 地图网页 → http://127.0.0.1:%d/\n", port)
+		if lanURL != "" {
+			fmt.Printf("  [server] 手机镜像 → %s\n", lanURL)
+		}
 		fmt.Printf("  [server] 网页目录 → %s\n", appRoot)
 	} else {
 		mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
@@ -110,22 +138,38 @@ func serveRun(p Platform, plat *totkpcPlatform, anchor *[3]float32, addr uintptr
 				return
 			}
 			w.Header().Set("Content-Type", "text/plain; charset=utf-8")
-			fmt.Fprintf(w, "totknavi-pc 定位服务运行中\n\nGET /pos  → 当前位置 JSON\n\n（未找到地图网页目录 %s，用 --app 指定）\n", appRoot)
+			fmt.Fprintf(w, "totknavi-pc 定位服务运行中\n\nGET /pos  → 当前位置 JSON\n\n（未找到地图网页目录 app/，可用 --app 指定）\n")
 		})
-		fmt.Printf("\n  [server] 未找到网页目录 %s（只提供 /pos）\n", appRoot)
+		fmt.Printf("\n  [server] 未找到网页目录（仅提供 /pos 定位接口）\n")
 	}
 
-	listenAddr := fmt.Sprintf("127.0.0.1:%d", port)
+	// 全接口监听（0.0.0.0:port），允许同一 WiFi 下手机扫码连入
+	listenAddr := fmt.Sprintf(":%d", port)
 	ln, err := net.Listen("tcp", listenAddr)
 	if err != nil {
 		fmt.Printf("\n  [server] 端口 %d 启动失败：%v\n", port, err)
 		fmt.Printf("  换个端口：--port 8767\n")
 		return
 	}
-	fmt.Printf("  [server] 定位接口 → http://127.0.0.1:%d/pos\n", port)
+	fmt.Printf("  [server] 控制台面板 → http://127.0.0.1:%d/gui\n", port)
+	fmt.Printf("  [server] 定位接口   → http://127.0.0.1:%d/pos\n", port)
 	fmt.Println("  ------------------------------------------------------------------")
 
-	if err := http.Serve(ln, mux); err != nil {
+	// 统一包装跨域 CORS、PNA（私有网络访问预检）与自定义暴露头
+	corsHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Private-Network", "true")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "*")
+		w.Header().Set("Access-Control-Expose-Headers", "X-Save-Slot, X-Save-Mtime")
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusNoContent)
+			return
+		}
+		mux.ServeHTTP(w, r)
+	})
+
+	if err := http.Serve(ln, corsHandler); err != nil {
 		fmt.Printf("  [server] 已停止：%v\n", err)
 	}
 }
@@ -138,7 +182,7 @@ func handlePosPC(w http.ResponseWriter, r *http.Request) {
 	if s.hasHeading {
 		heading = s.heading
 	}
-	// 分层判定（18 地底 / 19 地表 / 20 天空）：完全复用 sky.go 的高度图 + 天空多边形 + markers。
+	// 分层判定（18 地底 / 19 地表 / 20 天空）：四级漏斗地形高度图 + 天空多边形 + 3D点云
 	var layerVal any
 	if s.ok {
 		layerVal = layerOf(s.gx, s.gy, s.gz)
@@ -158,7 +202,10 @@ func handlePosPC(w http.ResponseWriter, r *http.Request) {
 		"source":   s.source,
 		"locks":    s.locks,
 		"rescans":  s.rescans,
-		"game":     "totk-pc",
+		"game":         "totk-pc",
+		"game_running": s.gameRunning,
+		"pid":          s.pid,
+		"locked_addr":  fmt.Sprintf("0x%X", s.lockedAddr),
 	}
 	s.mu.RUnlock()
 
@@ -169,6 +216,9 @@ func handlePosPC(w http.ResponseWriter, r *http.Request) {
 		payload["progressGen"] = gen
 		payload["save_mtime"] = mt
 		payload["save_updated"] = updated
+	}
+	if lanURL != "" {
+		payload["lanUrl"] = lanURL
 	}
 	writeJSONPC(w, payload)
 }
@@ -194,6 +244,61 @@ func handleProgressPC(w http.ResponseWriter, r *http.Request) {
 	w.Write(body)
 }
 
+// handleRescanPC 处理前端请求重扫。
+func handleRescanPC(w http.ResponseWriter, r *http.Request) {
+	RequestRescan()
+	writeJSONPC(w, map[string]any{"ok": true, "started": true})
+}
+
+// handleSetCoordsPC 手动提交 HUD 坐标校准重锁。
+func handleSetCoordsPC(w http.ResponseWriter, r *http.Request) {
+	var obj map[string]any
+	if err := json.NewDecoder(r.Body).Decode(&obj); err != nil {
+		writeJSONPC(w, map[string]any{"ok": false, "error": "bad json"})
+		return
+	}
+	flt := func(v any) float32 {
+		switch t := v.(type) {
+		case float64:
+			return float32(t)
+		case float32:
+			return t
+		case int:
+			return float32(t)
+		default:
+			return 0
+		}
+	}
+	gx, gy, gz := flt(obj["x"]), flt(obj["y"]), flt(obj["z"])
+	if gx == 0 && gy == 0 && gz == 0 {
+		writeJSONPC(w, map[string]any{"ok": false, "error": "empty coords"})
+		return
+	}
+	RequestSetCoords([3]float32{gx, gy, gz})
+	writeJSONPC(w, map[string]any{"ok": true, "message": "calibrating"})
+}
+
+// handleSavePC 返回原始 progress.sav 字节（必须走完全共享读取）。
+func handleSavePC(w http.ResponseWriter, r *http.Request) {
+	mt, path := findLatestProgress()
+	if path == "" {
+		w.WriteHeader(http.StatusNotFound)
+		writeJSONPC(w, map[string]any{"ok": false, "error": "no save file"})
+		return
+	}
+	data, err := readFileShared(path)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		writeJSONPC(w, map[string]any{"ok": false, "error": err.Error()})
+		return
+	}
+	w.Header().Set("Content-Type", "application/octet-stream")
+	w.Header().Set("Cache-Control", "no-store")
+	w.Header().Set("X-Save-Slot", filepath.Base(filepath.Dir(path)))
+	w.Header().Set("X-Save-Mtime", fmt.Sprintf("%.0f", mt))
+	w.Write(data)
+}
+
 func writeJSONPC(w http.ResponseWriter, obj any) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -213,4 +318,133 @@ func trackerLoop(p Platform, plat *totkpcPlatform, anchor *[3]float32, addr uint
 		}
 		pstate.publish(pos, hd, hasH, verified, src)
 	})
+}
+
+func handleLogsPC(w http.ResponseWriter, r *http.Request) {
+	writeJSONPC(w, map[string]any{
+		"ok":   true,
+		"logs": getRecentLogs(),
+	})
+}
+
+func handleSaveInfoPC(w http.ResponseWriter, r *http.Request) {
+	anchors := readAnchors(currentPlatform())
+	if len(anchors) == 0 {
+		writeJSONPC(w, map[string]any{"ok": false, "error": "未检测到存档"})
+		return
+	}
+	a := anchors[0]
+	hud := [3]float32{a.Pos[0], -a.Pos[2], a.Pos[1] - elevBias}
+	writeJSONPC(w, map[string]any{
+		"ok":    true,
+		"path":  a.Path,
+		"time":  a.Mod.Format("2006-01-02 15:04:05"),
+		"hud":   hud,
+		"total": len(anchors),
+	})
+}
+
+func handleGuiPC(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	w.Header().Set("Cache-Control", "no-cache")
+	w.Write(guiHTML)
+}
+
+var lanURL string
+
+func initLanURL(port int) {
+	ip := defaultRouteIPv4()
+	if ip == "" {
+		if ips := lanIPv4s(); len(ips) > 0 {
+			ip = ips[0]
+		}
+	}
+	if ip != "" {
+		lanURL = fmt.Sprintf("http://%s:%d/botw/?follow=1&game=totk", ip, port)
+	}
+}
+
+// defaultRouteIPv4 取本机出公网的默认路由 IPv4（UDP dial 不发包，仅选路）；
+// 手机与 PC 同 WiFi 时，这个 IP 就是手机能直达的局域网地址。
+func defaultRouteIPv4() string {
+	conn, err := net.Dial("udp", "8.8.8.8:80")
+	if err != nil {
+		return ""
+	}
+	defer conn.Close()
+	if la, ok := conn.LocalAddr().(*net.UDPAddr); ok {
+		return la.IP.String()
+	}
+	return ""
+}
+
+// lanIPv4s 列出本机非回环 IPv4 地址（移动端局域网镜像 URL 用）。
+func lanIPv4s() []string {
+	var out []string
+	ifas, err := net.Interfaces()
+	if err != nil {
+		return out
+	}
+	for _, ifa := range ifas {
+		if ifa.Flags&net.FlagUp == 0 || ifa.Flags&net.FlagLoopback != 0 {
+			continue
+		}
+		addrs, err := ifa.Addrs()
+		if err != nil {
+			continue
+		}
+		for _, a := range addrs {
+			var ip net.IP
+			switch v := a.(type) {
+			case *net.IPNet:
+				ip = v.IP
+			case *net.IPAddr:
+				ip = v.IP
+			}
+			if ip == nil || ip.IsLoopback() || ip.To4() == nil {
+				continue
+			}
+			out = append(out, ip.String())
+		}
+	}
+	return out
+}
+
+// findAppDir 智能多级探测包含 index.html 的网页目录
+func findAppDir(custom string) string {
+	candidates := []string{}
+	if custom != "" {
+		candidates = append(candidates, custom)
+	}
+	if exe, err := os.Executable(); err == nil {
+		dir := filepath.Dir(exe)
+		candidates = append(candidates,
+			filepath.Join(dir, "app"),
+			filepath.Join(dir, "..", "app"),
+			filepath.Join(dir, "..", "..", "app"),
+			filepath.Join(dir, "..", "..", "..", "app"),
+		)
+	}
+	if wd, err := os.Getwd(); err == nil {
+		candidates = append(candidates,
+			filepath.Join(wd, "app"),
+			filepath.Join(wd, "..", "app"),
+		)
+	}
+	// 工作区默认绝对路径兜底（开发环境）
+	candidates = append(candidates,
+		`E:\WorkSpace\TOTKmap\app`,
+		`..\TOTKmap\app`,
+		`..\..\TOTKmap\app`,
+	)
+	for _, cand := range candidates {
+		idx := filepath.Join(cand, "index.html")
+		if fi, err := os.Stat(idx); err == nil && !fi.IsDir() {
+			if abs, err := filepath.Abs(cand); err == nil {
+				return abs
+			}
+			return cand
+		}
+	}
+	return ""
 }

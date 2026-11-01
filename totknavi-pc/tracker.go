@@ -14,6 +14,7 @@ package main
 
 import (
 	"fmt"
+	"math"
 	"os"
 	"path/filepath"
 	"time"
@@ -55,15 +56,17 @@ const (
 	failRetry    = 3
 	failRetryGap = 30 * time.Millisecond
 
-	// 移动确认阈值。
-	// BOTW 原版是 delta >= 0.5 连续 3 拍（10Hz）—— 那是按"跑步 5m/s"设计的
-	// （100ms 位移 0.5m）；TOTK 里慢走只有 1.4m/s = 0.14m/拍，永远够不到 0.5，
-	// 于是 moveN 被反复清零、永远确认不了（2026-10-31 实测：走了 12 米仍未 verified）。
-	// 这里降到 0.1m/拍（相当于 1m/s 以上就算在移动），并保持连续 3 拍。
-	moveMin = 0.1
-	moveMax = 150.0
+	// 移动确认阈值（水平与垂直解耦）：
+	// 水平方向：慢走 0.1m/拍 ~ 跑步/滑翔 8.0m/拍（时速 288km/h，包容地面跑动、风弹、滑翔伞）
+	// 垂直方向：鸟望台冲天弹射/高空俯冲单拍可达数十米，垂直上限放宽到 50.0m/拍
+	moveMin  = 0.1
+	moveHMax = 8.0
+	moveVMax = 50.0
 
-	// 传送判定：单拍位移超过此值视为传送/读档（core_totk.go 同值）
+	// 锚点范围门禁：走动仲裁与候选锁定距初始锚点水平距离必须 <= 120m
+	maxAnchorDist = 120.0
+
+	// 传送判定：单拍水平位移超过此值视为传送/读档（core_totk.go 同值）
 	warpDist = 50.0
 
 	// 扫描窗口递进（对齐 core_totk.go：120 → 400 → 3000）
@@ -73,6 +76,22 @@ const (
 
 	maxCands = 10 // 候选上限（移动确认用）
 )
+
+// dist2DHud HUD 序下的水平距离 (X, Y)
+func dist2DHud(a, b [3]float32) float32 {
+	dx, dy := a[0]-b[0], a[1]-b[1]
+	return float32(math.Sqrt(float64(dx*dx + dy*dy)))
+}
+
+// isPhysicsMove 检查位移是否符合角色运动特征（水平与垂直解耦）：
+// 水平位移在 [moveMin, moveHMax] 且垂直位移 <= moveVMax 为合法移动；
+// 单拍水平位移 > moveHMax 的直接视为全图飞行的视锥体/射线噪声，坚决剔除。
+func isPhysicsMove(cur, prev [3]float32) bool {
+	dx, dy, dz := cur[0]-prev[0], cur[1]-prev[1], cur[2]-prev[2]
+	dh := float32(math.Sqrt(float64(dx*dx + dy*dy)))
+	dv := float32(math.Abs(float64(dz)))
+	return dh >= moveMin && dh <= moveHMax && dv <= moveVMax
+}
 
 // tickFn 每拍回调。pos 为 HUD 序；source ∈ {player, hold, lost, no-anchor}
 type tickFn func(pos [3]float32, heading float32, hasHeading bool, verified bool, source string)
@@ -134,6 +153,27 @@ func scanForPlayer(p Platform, plat *totkpcPlatform, anchor *[3]float32) (uintpt
 	return 0, nil, false
 }
 
+var (
+	reqRescanChan = make(chan struct{}, 1)
+	reqCoordChan  = make(chan [3]float32, 1)
+)
+
+// RequestRescan 请求重扫。
+func RequestRescan() {
+	select {
+	case reqRescanChan <- struct{}{}:
+	default:
+	}
+}
+
+// RequestSetCoords 请求以给定 HUD 坐标校准重锁。
+func RequestSetCoords(hud [3]float32) {
+	select {
+	case reqCoordChan <- hud:
+	default:
+	}
+}
+
 // runTracker 追踪主循环（阻塞，直到 Ctrl+C 或调用方退出）。
 func runTracker(p Platform, plat *totkpcPlatform, anchor *[3]float32, addr uintptr, onTick tickFn) {
 	h := p.Handle()
@@ -142,107 +182,196 @@ func runTracker(p Platform, plat *totkpcPlatform, anchor *[3]float32, addr uintp
 	var cands []ptkHit
 	verified := addr != 0
 	moveN := 0
-	lostWarned := false
+	lostTicks := 0
 	var prev [3]float32
 	hasPrev := false
+
+	// 神庙副本锁定（Shrine Hold）状态
+	shrineMode := false
+	var shrineEntrance [3]float32
+	var shrineName string
 
 	if lockedAddr == 0 {
 		var ok bool
 		lockedAddr, cands, ok = scanForPlayer(p, plat, anchor)
 		if !ok {
-			fmt.Println("  [scan] 未命中 —— 请确认：① 已在 3D 世界中 ② 存档是最近 2 分钟内的")
+			logEvent("  [scan] 未命中 —— 请确认：① 已在 3D 世界中 ② 存档是最近 2 分钟内的")
 			onTick([3]float32{}, 0, false, false, "no-anchor")
-			return
+			pstate.setGameStatus(p.IsAlive(), p.PID(), 0)
+		} else {
+			pstate.setGameStatus(true, p.PID(), lockedAddr)
+			if len(cands) > 0 && cands[0].Rot {
+				verified = true
+				logEvent("  [lock] ★ 命中持久真身槽 0x%X (Run=%d)，直接锁定跟随（跨传送永不销毁）", lockedAddr, cands[0].Run)
+			} else {
+				verified = false
+				logEvent("  [lock] 候选 0x%X —— 【请在游戏内移动一下角色以完成验证】", lockedAddr)
+			}
 		}
-		verified = false
-		fmt.Printf("  [lock] 候选 0x%X —— 【请在游戏内移动一下角色以完成验证】\n", lockedAddr)
 	} else {
-		fmt.Printf("  [lock] 直接锁定指定地址 0x%X\n", lockedAddr)
+		pstate.setGameStatus(true, p.PID(), lockedAddr)
+		logEvent("  [lock] 直接锁定指定地址 0x%X", lockedAddr)
 	}
 
 	tick := time.NewTicker(tickInterval)
 	defer tick.Stop()
 
-	for range tick.C {
-		pos, hd, hasH, ok := readWithRetry(h, lockedAddr)
-		if !ok {
-			// 读不到：保持上一帧 + 提示一次。**不重扫、不换锁**（老大 2026-10-31 定）。
-			if !lostWarned {
-				lostWarned = true
-				fmt.Println("  [lost] 读不到角色数据（过图/传送中属正常现象）")
-				fmt.Println("         若长时间不恢复，请重启本程序重新定位")
-			}
+	for {
+		select {
+		case <-reqRescanChan:
+			fmt.Println("  [rescan] 收到重扫请求，正在重新探测...")
+			var ref *[3]float32
 			if hasPrev {
-				logTick(lockedAddr, prev, 0, false, verified, "hold")
-				onTick(prev, 0, false, verified, "hold")
+				mem := [3]float32{prev[0], prev[2] + elevBias, -prev[1]}
+				ref = &mem
 			} else {
-				logTick(lockedAddr, [3]float32{}, 0, false, false, "lost")
-				onTick([3]float32{}, 0, false, false, "lost")
+				ref = anchor
 			}
-			continue
-		}
-		lostWarned = false
-		cur := pos
-
-		// ② 移动确认（严格对齐 BOTW xnavi watch_eden.go:425-433）
-		//
-		// 判据是**单拍位移**，不是"距锁定时刻的累计位移"：
-		//   连续 3 拍（300ms）每拍移动 >=0.5m → 这个槽在跟着玩家动 → 确认真身。
-		//
-		// 2026-10-31 踩坑：TOTKnavi/core_totk.go 把这里改成了
-		//   dSelf = dist3(cur, cands[0].init)  // 累计位移
-		//   if dSelf >= 0.5 && dSelf < 150 {}
-		// 滑翔翼 30 秒能飞几百米，累计值一旦超过 150 就永远无法确认，
-		// 于是每拍都跑走动仲裁 → 地址在几个候选之间乱跳（表现为"疯狂漂移"）。
-		// BOTW 用单拍位移就没这问题（风弹飞得更快也正常）。
-		if !verified {
-			delta := float32(0)
-			if hasPrev {
-				delta = dist3(cur, prev)
-			}
-			if hasPrev && delta >= moveMin && delta < moveMax {
-				moveN++
-				if moveN >= 3 {
-					verified = true
-					cands = nil
-					fmt.Printf("  [lock] 移动确认成功 → 真身锁定 0x%X (%.1f, %.1f, %.1f)\n",
-						lockedAddr, cur[0], cur[1], cur[2])
-				}
-			} else {
-				// 主锁没在动：若是刚锁定不久，看看候选里有没有在动的（防锁到静止 NPC）
+			if newAddr, newCands, ok := scanForPlayer(p, plat, ref); ok {
+				lockedAddr = newAddr
+				cands = newCands
+				verified = false
 				moveN = 0
-				if hasPrev && len(cands) > 0 {
-					for _, c := range cands {
-						if c.Addr == lockedAddr {
-							continue
-						}
-						cp, _, _, cok := ptkReadSlot(h, c.Addr)
-						if !cok {
-							continue
-						}
-						if dC := dist3(cp, hudOf(c)); dC >= moveMin && dC < moveMax {
-							lockedAddr = c.Addr
-							cur = cp
-							moveN = 1
-							fmt.Printf("  [lock] 走动仲裁 → 改用候选 0x%X (%.1f, %.1f, %.1f)\n",
-								lockedAddr, cur[0], cur[1], cur[2])
-							break
+				lostTicks = 0
+				pstate.bumpLock()
+				pstate.bumpRescan()
+				fmt.Printf("  [rescan] 重锁成功 → 0x%X\n", lockedAddr)
+			}
+		case hud := <-reqCoordChan:
+			fmt.Printf("  [coords] 收到手动校准坐标 (%.1f, %.1f, %.1f)，立即校准...\n", hud[0], hud[1], hud[2])
+			mem := [3]float32{hud[0], hud[2] + elevBias, -hud[1]}
+			if newAddr, newCands, ok := scanForPlayer(p, plat, &mem); ok {
+				lockedAddr = newAddr
+				cands = newCands
+				verified = true
+				moveN = 0
+				lostTicks = 0
+				pstate.bumpLock()
+				logEvent("  [coords] 校准重锁成功 → 0x%X", lockedAddr)
+			}
+		case <-tick.C:
+			if !isProcessAlive(h) {
+				logEvent("  [game] 检测到游戏已退出，定位已停止。请重新启动游戏后再运行定位。")
+				pstate.setGameStatus(false, 0, 0)
+				onTick([3]float32{}, 0, false, false, "disconnected")
+				return
+			}
+			pos, _, _, ok := readWithRetry(h, lockedAddr)
+			if !ok {
+				lostTicks++
+				if shrineMode {
+					// 庙内过图/黑屏：保持神庙入口
+					onTick(shrineEntrance, 0, false, true, "shrine")
+					continue
+				}
+				if lostTicks == 1 {
+					logEvent("  [hold] 读不到角色数据（过图/传送中属正常现象，正在保持上一帧）")
+				}
+				if hasPrev {
+					logTick(lockedAddr, prev, 0, false, verified, "hold")
+					onTick(prev, 0, false, verified, "hold")
+				} else {
+					logTick(lockedAddr, [3]float32{}, 0, false, false, "lost")
+					onTick([3]float32{}, 0, false, false, "lost")
+				}
+				continue
+			}
+
+			lostTicks = 0
+			cur := pos
+
+			// ① 神庙副本锁定判定（Shrine Hold）
+			isShrine := isShrineScale(cur)
+			if shrineMode {
+				curShrineName, _ := nearestShrine(cur)
+				curTowerName, _ := nearestTower(cur)
+				if !isShrine || dist3(cur, shrineEntrance) < 35.0 || curShrineName != "" || curTowerName != "" {
+					// 出庙：脱离神庙本地微小尺度，或回到大世界神庙门口，或传送到其他地标
+					shrineMode = false
+					logEvent("  [shrine] 离开神庙试炼场 -> 恢复大世界追踪 (%.1f, %.1f, %.1f)", cur[0], cur[1], cur[2])
+					logTick(lockedAddr, cur, 0, false, verified, "player")
+					onTick(cur, 0, false, verified, "player")
+					prev = cur
+					hasPrev = true
+					continue
+				}
+				// 还在神庙内：死锁保护，对外坐标死死钉在神庙大门入口！
+				logTick(lockedAddr, shrineEntrance, 0, false, true, "shrine")
+				onTick(shrineEntrance, 0, false, true, "shrine")
+				continue
+			} else if isShrine && hasPrev && dist3(cur, prev) > 100.0 {
+				if sName, _ := nearestShrine(prev); sName != "" {
+					curShrine, _ := nearestShrine(cur)
+					curTower, _ := nearestTower(cur)
+					if curShrine == "" && curTower == "" {
+						// 进庙：进入前 prev 在大世界某神庙门口（<30m），当前跳入神庙内部本地坐标，且当前非大世界原点附近的鸟望台/神庙
+						shrineMode = true
+						shrineEntrance = prev
+						shrineName = sName
+						logEvent("  [shrine] 进入神庙 [%s] -> 锁定大门入口 (%.1f, %.1f, %.1f)",
+							shrineName, shrineEntrance[0], shrineEntrance[1], shrineEntrance[2])
+						logTick(lockedAddr, shrineEntrance, 0, false, true, "shrine")
+						onTick(shrineEntrance, 0, false, true, "shrine")
+						continue
+					}
+				}
+			}
+
+			// ② 移动确认（水平与垂直解耦）
+			if !verified {
+				if hasPrev && isPhysicsMove(cur, prev) {
+					moveN++
+					if moveN >= 3 {
+						verified = true
+						cands = nil
+						fmt.Printf("  [lock] 移动确认成功 → 真身锁定 0x%X (%.1f, %.1f, %.1f)\n",
+							lockedAddr, cur[0], cur[1], cur[2])
+					}
+				} else {
+					moveN = 0
+					if hasPrev && len(cands) > 0 {
+						for _, c := range cands {
+							if c.Addr == lockedAddr {
+								continue
+							}
+							cp, _, _, cok := ptkReadSlot(h, c.Addr)
+							if !cok {
+								continue
+							}
+							// 门禁 1：距初始锚点水平距离必须 <= 120m！绝不锁定超出范围的物体
+							if anchor != nil {
+								ancHud := [3]float32{anchor[0], -anchor[2], anchor[1] - elevBias}
+								if dist2DHud(cp, ancHud) > maxAnchorDist {
+									continue
+								}
+							}
+							// 门禁 2：解耦运动特征（水平 <= 8m/拍，垂直 <= 50m/拍）
+							if isPhysicsMove(cp, hudOf(c)) {
+								lockedAddr = c.Addr
+								cur = cp
+								moveN = 1
+								fmt.Printf("  [lock] 走动仲裁 → 改用候选 0x%X (%.1f, %.1f, %.1f)\n",
+									lockedAddr, cur[0], cur[1], cur[2])
+								break
+							}
 						}
 					}
 				}
 			}
-		}
 
-		// 传送：只提示，地址照用（core_totk.go 同语义：零重扫接管）
-		if hasPrev {
-			if d := dist3(cur, prev); d >= warpDist {
-				fmt.Printf("  [warp] 位移 %.0fm → (%.1f, %.1f, %.1f)（地址沿用）\n", d, cur[0], cur[1], cur[2])
+			// 传送与读档：单拍水平位移 >= 50m 判定为传送（不换锁，地址照用）
+			if hasPrev {
+				if dH := dist2DHud(cur, prev); dH >= warpDist {
+					logEvent("  [warp] 传送/瞬移 %.0fm → (%.1f, %.1f, %.1f)（地址沿用）", dH, cur[0], cur[1], cur[2])
+					moveN = 0 // 发生瞬移坚决重置移动验证！
+				}
 			}
-		}
 
-		logTick(lockedAddr, cur, hd, hasH, verified, "player")
-		onTick(cur, hd, hasH, verified, "player")
-		prev = cur
-		hasPrev = true
+			// 减法：朝向由前端 live.js 原生位移平滑推算，后端不输出抽搐的内存矩阵朝向
+			logTick(lockedAddr, cur, 0, false, verified, "player")
+			onTick(cur, 0, false, verified, "player")
+			prev = cur
+			hasPrev = true
+		}
 	}
 }

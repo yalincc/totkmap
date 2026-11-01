@@ -17,6 +17,7 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -105,7 +106,7 @@ func readAnchors(p Platform) []*SaveAnchor {
 			}
 			slot := 99
 			if i := strings.Index(strings.ToLower(path), "slot_"); i >= 0 && i+7 <= len(path) {
-				if v := int(path[i+5] - '0'); v >= 0 && v <= 9 {
+				if v, err := strconv.Atoi(path[i+5 : i+7]); err == nil {
 					slot = v
 				}
 			}
@@ -117,7 +118,7 @@ func readAnchors(p Platform) []*SaveAnchor {
 				mz := math.Float32frombits(binary.LittleEndian.Uint32(data[off+4:]))
 				my := math.Float32frombits(binary.LittleEndian.Uint32(data[off+8:]))
 				// 存档是 (X, Z_stored, Y_north)；totsSane 要 HUD 序 (gx, gy, gz)
-				gx, gz, gy := mx, mz-elevBias, my
+				gx, gz, gy := mx, mz-elevBias, -my
 				if !totkSane(gx, gy, gz) {
 					continue
 				}
@@ -136,8 +137,11 @@ func readAnchors(p Platform) []*SaveAnchor {
 		}
 	}
 	sort.SliceStable(cands, func(i, j int) bool {
-		if cands[i].slot != cands[j].slot {
-			return cands[i].slot < cands[j].slot
+		// slot_00 为玩家手动存档，最高权重
+		isManualI := cands[i].slot == 0
+		isManualJ := cands[j].slot == 0
+		if isManualI != isManualJ {
+			return isManualI
 		}
 		return cands[i].mt.After(cands[j].mt)
 	})

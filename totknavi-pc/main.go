@@ -29,7 +29,6 @@ func main() {
 		blocksOnly bool
 		fullScan   bool
 		watchMode  bool
-		serveMode  bool
 		findMode   bool
 		gapSec     = 3
 		port       = 8766
@@ -68,7 +67,11 @@ func main() {
 		case "--watch":
 			watchMode = true
 		case "--serve":
-			serveMode = true
+			// 默认即为 serve
+		case "--no-open":
+			// 兼容 totknavi-gui 传入的 --no-open
+		case "--emu=auto", "--emu=ryujinx", "--emu=eden", "--emu=pc":
+			// 兼容 totknavi-gui 传入的 --emu 参数
 		case "--find":
 			findMode = true
 		case "--log":
@@ -129,8 +132,9 @@ func main() {
 		fatalf("平台驱动类型异常")
 	}
 	if !p.Attach() {
-		fatalf("未检测到 totk.exe。请先启动游戏（G:\\TOTKPC\\totk.exe），再运行本探针。")
+		fatalf("未检测到 totk.exe 游戏进程。请先启动游戏并进入 3D 画面，再运行定位。")
 	}
+	setPlatform(p)
 	h := p.Handle()
 
 	if logPath != "" {
@@ -198,15 +202,14 @@ func main() {
 		return
 	}
 
-	if serveMode {
-		serveRun(p, plat, anchor, addrArg, port, appRoot)
-		return
-	}
-
 	if watchMode {
 		watchRun(p, plat, anchor, addrArg)
 		return
 	}
+
+	// 默认启动定位服务（提供 8766 HTTP 端口与 status.json 供 GUI 独立窗口使用）
+	serveRun(p, plat, anchor, addrArg, port, appRoot)
+	return
 
 	rd := bufio.NewReader(os.Stdin)
 	var prevTop *ptkHit

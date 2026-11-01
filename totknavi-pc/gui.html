@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TOTKnavi-PC 控制台</title>
+<style>
+  :root {
+    --bg: #0f141c;
+    --card: #18202c;
+    --border: #2b394e;
+    --text: #e1e7f0;
+    --muted: #8c9cb0;
+    --primary: #00d2be;
+    --primary-bg: rgba(0, 210, 190, 0.12);
+    --green: #2ecc71;
+    --yellow: #f1c40f;
+    --red: #e74c3c;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif; }
+  body { background: var(--bg); color: var(--text); padding: 20px; line-height: 1.5; }
+  .container { max-width: 900px; margin: 0 auto; }
+  header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 16px; margin-bottom: 20px; }
+  h1 { font-size: 20px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+  .badges { display: flex; gap: 10px; }
+  .badge { padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 500; display: inline-flex; align-items: center; gap: 6px; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; }
+  .badge-green { background: rgba(46, 204, 113, 0.15); color: var(--green); }
+  .badge-green .dot { background: var(--green); }
+  .badge-yellow { background: rgba(241, 196, 15, 0.15); color: var(--yellow); }
+  .badge-yellow .dot { background: var(--yellow); }
+  .badge-red { background: rgba(231, 76, 60, 0.15); color: var(--red); }
+  .badge-red .dot { background: var(--red); }
+  .badge-gray { background: rgba(140, 156, 176, 0.15); color: var(--muted); }
+  .badge-gray .dot { background: var(--muted); }
+
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+  .full { grid-column: span 2; }
+  @media (max-width: 650px) { .grid { grid-template-columns: 1fr; } .full { grid-column: span 1; } }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 18px; }
+  .card-title { font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); margin-bottom: 12px; font-weight: 600; }
+  
+  .pos-display { display: flex; justify-content: space-around; align-items: center; padding: 10px 0; }
+  .pos-item { text-align: center; }
+  .pos-label { font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+  .pos-val { font-size: 26px; font-weight: 700; font-family: "Cascadia Code", Consolas, monospace; color: var(--primary); }
+
+  .info-list { font-size: 13px; }
+  .info-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px dashed rgba(255,255,255,0.06); }
+  .info-row:last-child { border-bottom: none; }
+  .mono { font-family: "Cascadia Code", Consolas, monospace; }
+
+  .form-group { display: flex; gap: 8px; margin-top: 10px; }
+  input[type="text"] { flex: 1; background: #0c1017; border: 1px solid var(--border); border-radius: 6px; padding: 8px 12px; color: #fff; font-size: 14px; outline: none; }
+  input[type="text"]:focus { border-color: var(--primary); }
+  button { background: var(--primary); color: #000; font-weight: 600; border: none; border-radius: 6px; padding: 8px 16px; cursor: pointer; font-size: 13px; transition: opacity 0.2s; white-space: nowrap; }
+  button:hover { opacity: 0.88; }
+  button.secondary { background: rgba(255,255,255,0.1); color: var(--text); }
+  button.secondary:hover { background: rgba(255,255,255,0.18); }
+
+  .log-box { background: #080c11; border: 1px solid #1f2735; border-radius: 8px; padding: 12px; height: 160px; overflow-y: auto; font-family: "Cascadia Code", Consolas, monospace; font-size: 12px; color: #a9bacf; line-height: 1.6; }
+  .log-line { word-break: break-all; }
+
+  .actions { display: flex; gap: 10px; margin-top: 20px; justify-content: center; }
+  .action-link { display: inline-flex; align-items: center; gap: 6px; text-decoration: none; padding: 10px 18px; border-radius: 8px; font-size: 14px; font-weight: 500; border: 1px solid var(--border); color: var(--text); transition: background 0.2s; }
+  .action-link:hover { background: rgba(255,255,255,0.06); border-color: var(--primary); }
+  .action-link.primary { background: var(--primary-bg); border-color: var(--primary); color: var(--primary); }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <h1>TOTKnavi-PC 控制台</h1>
+    <div class="badges">
+      <div id="badge-game" class="badge badge-gray"><span class="dot"></span><span id="txt-game">检测中</span></div>
+      <div id="badge-lock" class="badge badge-gray"><span class="dot"></span><span id="txt-lock">未锁定</span></div>
+    </div>
+  </header>
+
+  <div class="grid">
+    <!-- 实时坐标 -->
+    <div class="card">
+      <div class="card-title">HUD 实时坐标</div>
+      <div class="pos-display">
+        <div class="pos-item">
+          <div class="pos-label">X (东/西)</div>
+          <div id="val-x" class="pos-val">--</div>
+        </div>
+        <div class="pos-item">
+          <div class="pos-label">Y (南/北)</div>
+          <div id="val-y" class="pos-val">--</div>
+        </div>
+        <div class="pos-item">
+          <div class="pos-label">Z (高度)</div>
+          <div id="val-z" class="pos-val">--</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 锁定与进程状态 -->
+    <div class="card">
+      <div class="card-title">内核状态详情</div>
+      <div class="info-list">
+        <div class="info-row"><span>游戏进程</span><span id="val-pid" class="mono">--</span></div>
+        <div class="info-row"><span>锁定内存槽</span><span id="val-addr" class="mono">--</span></div>
+        <div class="info-row"><span>锁定状态</span><span id="val-status">--</span></div>
+        <div class="info-row"><span>更新延迟</span><span id="val-age" class="mono">--</span></div>
+      </div>
+    </div>
+
+    <!-- 手工校准坐标 -->
+    <div class="card">
+      <div class="card-title">手工坐标校准</div>
+      <div style="font-size: 12px; color: var(--muted); margin-bottom: 8px;">
+        游戏走远且未读档时，输入小地图 3 个数字快速校对重锁：
+      </div>
+      <div class="form-group">
+        <input type="text" id="input-coords" placeholder="例如：2423 -2866 216" />
+        <button id="btn-coords" onclick="submitCoords()">立即校准</button>
+      </div>
+      <div id="coords-msg" style="font-size: 12px; margin-top: 6px; color: var(--primary);"></div>
+    </div>
+
+    <!-- 存档与重扫 -->
+    <div class="card">
+      <div class="card-title">存档锚点 (只读安全)</div>
+      <div class="info-list">
+        <div class="info-row"><span>当前存档</span><span id="save-file" class="mono" style="font-size: 11px;">--</span></div>
+        <div class="info-row"><span>存档时间</span><span id="save-time">--</span></div>
+        <div class="info-row"><span>锚点坐标</span><span id="save-pos" class="mono">--</span></div>
+      </div>
+      <div style="margin-top: 12px; display: flex; justify-content: flex-end;">
+        <button class="secondary" onclick="triggerRescan()">重新读取存档并重扫</button>
+      </div>
+    </div>
+
+    <!-- 内核日志 -->
+    <div class="card full">
+      <div class="card-title">内核事件日志</div>
+      <div id="log-box" class="log-box"></div>
+    </div>
+  </div>
+
+  <!-- 底部快捷跳转 -->
+  <div class="actions">
+    <a href="/?follow=1" target="_blank" class="action-link primary">
+      📍 打开本地地图网页 (离线)
+    </a>
+    <a href="https://totk.yalin.site/?follow=1" target="_blank" class="action-link">
+      🌐 打开线上全功能地图 (totk.yalin.site)
+    </a>
+  </div>
+</div>
+
+<script>
+let lastLogLen = 0;
+
+async function updateStatus() {
+  try {
+    const res = await fetch('/pos?t=' + Date.now());
+    const data = await res.json();
+    
+    // 游戏状态
+    const bgGame = document.getElementById('badge-game');
+    const txtGame = document.getElementById('txt-game');
+    if (data.game_running) {
+      bgGame.className = 'badge badge-green';
+      txtGame.textContent = '游戏运行中 (PID ' + (data.pid || '--') + ')';
+      document.getElementById('val-pid').textContent = 'totk.exe (PID ' + data.pid + ')';
+    } else {
+      bgGame.className = 'badge badge-gray';
+      txtGame.textContent = '等待游戏启动...';
+      document.getElementById('val-pid').textContent = '未运行';
+    }
+
+    // 锁定状态
+    const bgLock = document.getElementById('badge-lock');
+    const txtLock = document.getElementById('txt-lock');
+    const valStatus = document.getElementById('val-status');
+    const valAddr = document.getElementById('val-addr');
+
+    if (data.ok && data.verified) {
+      bgLock.className = 'badge badge-green';
+      txtLock.textContent = '已秒锁跟随';
+      valStatus.innerHTML = '<span style="color:var(--green)">✓ 已秒锁跟随</span>';
+    } else if (data.ok && !data.verified) {
+      bgLock.className = 'badge badge-yellow';
+      txtLock.textContent = '待移动验证';
+      valStatus.innerHTML = '<span style="color:var(--yellow)">? 待验证</span>';
+    } else if (data.source === 'hold') {
+      bgLock.className = 'badge badge-yellow';
+      txtLock.textContent = '保持中 (过图中)';
+      valStatus.innerHTML = '<span style="color:var(--yellow)">保持上一帧</span>';
+    } else {
+      bgLock.className = 'badge badge-red';
+      txtLock.textContent = '未锁定';
+      valStatus.innerHTML = '<span style="color:var(--red)">未命中</span>';
+    }
+
+    valAddr.textContent = data.locked_addr || '--';
+    document.getElementById('val-age').textContent = (data.age ? (data.age * 1000).toFixed(0) + ' ms' : '--');
+
+    // 坐标
+    if (data.ok || data.source === 'hold') {
+      document.getElementById('val-x').textContent = data.gx.toFixed(1);
+      document.getElementById('val-y').textContent = data.gy.toFixed(1);
+      document.getElementById('val-z').textContent = data.gz.toFixed(1);
+    } else {
+      document.getElementById('val-x').textContent = '--';
+      document.getElementById('val-y').textContent = '--';
+      document.getElementById('val-z').textContent = '--';
+    }
+  } catch (e) {
+    document.getElementById('txt-game').textContent = '探针未启动';
+    document.getElementById('badge-game').className = 'badge badge-red';
+  }
+}
+
+async function updateSaveInfo() {
+  try {
+    const res = await fetch('/save-info?t=' + Date.now());
+    const data = await res.json();
+    if (data.ok) {
+      const parts = data.path.split(/[\\/]/);
+      const shortPath = parts.slice(-3).join('/');
+      document.getElementById('save-file').textContent = shortPath;
+      document.getElementById('save-time').textContent = data.time;
+      document.getElementById('save-pos').textContent = `(${data.hud[0].toFixed(1)}, ${data.hud[1].toFixed(1)}, ${data.hud[2].toFixed(1)})`;
+    }
+  } catch (e) {}
+}
+
+async function updateLogs() {
+  try {
+    const res = await fetch('/logs?t=' + Date.now());
+    const data = await res.json();
+    if (data.ok && data.logs) {
+      if (data.logs.length !== lastLogLen) {
+        lastLogLen = data.logs.length;
+        const box = document.getElementById('log-box');
+        box.innerHTML = data.logs.map(l => `<div class="log-line">${escapeHtml(l)}</div>`).join('');
+        box.scrollTop = box.scrollHeight;
+      }
+    }
+  } catch (e) {}
+}
+
+function escapeHtml(text) {
+  return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+async function submitCoords() {
+  const val = document.getElementById('input-coords').value.trim();
+  const msg = document.getElementById('coords-msg');
+  if (!val) {
+    msg.style.color = 'var(--red)';
+    msg.textContent = '请输入坐标数字';
+    return;
+  }
+  // parse 3 numbers
+  const nums = val.replace(/,/g, ' ').split(/\s+/).map(Number).filter(n => !isNaN(n));
+  if (nums.length < 3) {
+    msg.style.color = 'var(--red)';
+    msg.textContent = '需要 3 个数字 (X, Y, Z)';
+    return;
+  }
+  msg.style.color = 'var(--yellow)';
+  msg.textContent = '正在校准...';
+  try {
+    const res = await fetch('/set-coords', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ x: nums[0], y: nums[1], z: nums[2] })
+    });
+    const d = await res.json();
+    if (d.ok) {
+      msg.style.color = 'var(--green)';
+      msg.textContent = '校准命令已下发！';
+      setTimeout(() => { msg.textContent = ''; }, 3000);
+    } else {
+      msg.style.color = 'var(--red)';
+      msg.textContent = d.error || '校准失败';
+    }
+  } catch (e) {
+    msg.style.color = 'var(--red)';
+    msg.textContent = '请求失败: ' + e;
+  }
+}
+
+async function triggerRescan() {
+  try {
+    await fetch('/rescan');
+    updateSaveInfo();
+  } catch (e) {}
+}
+
+setInterval(updateStatus, 500);
+setInterval(updateLogs, 1000);
+setInterval(updateSaveInfo, 3000);
+updateStatus();
+updateSaveInfo();
+updateLogs();
+</script>
+
+</body>
+</html>
+

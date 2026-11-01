@@ -21,6 +21,7 @@ var (
 	procProcess32FirstW          = kernel32.NewProc("Process32FirstW")
 	procProcess32NextW           = kernel32.NewProc("Process32NextW")
 	procSetConsoleTitleW         = kernel32.NewProc("SetConsoleTitleW")
+	procGetExitCodeProcess       = kernel32.NewProc("GetExitCodeProcess")
 )
 
 const (
@@ -31,7 +32,21 @@ const (
 	memMapped               = 0x40000
 	memPrivate              = 0x20000
 	pageGuard               = 0x100
+	stillActive             = 259
 )
+
+// isProcessAlive 进程句柄是否存活（未退出）。
+func isProcessAlive(h uintptr) bool {
+	if h == 0 {
+		return false
+	}
+	var code uint32
+	r, _, _ := procGetExitCodeProcess.Call(h, uintptr(unsafe.Pointer(&code)))
+	if r == 0 {
+		return false
+	}
+	return code == stillActive
+}
 
 // MemoryBasicInformation 与 Windows MEMORY_BASIC_INFORMATION 布局一致（x64 = 48 字节）。
 type MemoryBasicInformation struct {
