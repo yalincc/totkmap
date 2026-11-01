@@ -19,7 +19,7 @@ A Simplified Chinese interactive map for *The Legend of Zelda: Tears of the King
 
 ## Repository Layout
 
-> **What goes into the repo**: web source code & data artifacts, positioning service source, and manual task archives. Data pipeline tools, process data, backups, and release packages are NOT tracked (see "Not tracked" below); reproducible artifacts are already baked into `app/`.
+> **What goes into the repo**: web source code & data artifacts, positioning service source. Data pipeline tools, task archives, process data, backups, and release packages are NOT tracked (see "Not tracked" below); reproducible artifacts are already baked into `app/`.
 
 ```
 TOTKmap/
@@ -30,9 +30,9 @@ TOTKmap/
 │   ├── css/  js/  data/            ← Styles, logic, map data (task cards / flows / data artifacts)
 │   ├── vendor/                     ← Third-party libs (Leaflet, etc.)
 │   └── tiles_obj/                  ← Three-layer map tiles (Sky / Surface / Depths)
-├── tasks/manual/                   ← Manual task archives (YAML, source of task card data, merged into app/data/task-plan.js at build time)
 ├── totknavi/                       ← Positioning core project (known instant-lock / pointer chain / self-healing, unified for both emulators)
 ├── totknavi-gui/                   ← Desktop navigator TOTKNavi-GUI (Wails project)
+├── totknavi-pc/                    ← PC recompilation positioning project
 ├── README.md                       ← This file (Chinese)
 ├── README.en.md                    ← English version of this file
 ├── CHANGELOG.md                    ← Version history
@@ -40,9 +40,10 @@ TOTKmap/
 ```
 
 **Not tracked** (kept locally; process artifacts or rebuildable):
+- `tasks/` — Manual task archives & data sheets (card data already merged into `app/data/task-plan.js`)
 - `tools/` — data pipeline / tile & task build scripts (generated artifacts are baked into `app/`)
-- Main / Story / Shrine / Mini challenge revision data, `data-proofing/` — task proofing process data (card data already merged into `app/data/task-plan.js`)
-- `archive/`, `tasks/manual-backup-*/`, `report/` — historical docs (including the retired live-series engines), pre-import backups, temporary reports
+- Main / Story / Shrine / Mini challenge revision data, `data-proofing/` — task proofing process data
+- `archive/`, `report/` — historical docs, temporary reports
 - `release/`, `certs/` — TOTKNavi desktop release packages & certificates (distributed separately at release time)
 
 **Download guide** (two separate lines, combine as needed):
