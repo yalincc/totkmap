@@ -17,6 +17,51 @@
 
   var ImageCache = {};
 
+  var MatTooltipEl = null;
+  function getMatTooltipEl() {
+    if (!MatTooltipEl) {
+      var el = document.getElementById('matCanvasTooltip');
+      if (!el) {
+        el = document.createElement('div');
+        el.id = 'matCanvasTooltip';
+        el.className = 'totk-mat-tooltip';
+        el.style.cssText = 'position:fixed;pointer-events:none;z-index:99999;background:rgba(10,14,20,0.92);color:#fff;font-size:12px;font-weight:600;padding:4px 8px;border-radius:4px;border:1px solid rgba(255,255,255,0.3);box-shadow:0 2px 8px rgba(0,0,0,0.5);white-space:nowrap;display:none;transform:translate(-50%,-100%);margin-top:-8px;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;';
+        document.body.appendChild(el);
+      }
+      MatTooltipEl = el;
+    }
+    return MatTooltipEl;
+  }
+
+  function showMatTooltip(hit, e, options) {
+    var el = getMatTooltipEl();
+    if (!el || !hit || !hit.m) return;
+    var rawCn = hit.m.cn || hit.m.name || hit.m.title || '';
+    var matName = (window.I18N && typeof window.I18N.nameOf === 'function')
+      ? (window.I18N.nameOf(rawCn) || rawCn)
+      : rawCn;
+    if (!matName) return;
+    if (hit.type === 'cluster') {
+      el.textContent = matName + ' × ' + hit.count;
+    } else {
+      var isDone = (options && typeof options.isDone === 'function' && options.isDone(hit.mid, hit.idx)) ||
+                   (options && typeof options.isCollected === 'function' && options.isCollected(hit.mid, hit.idx));
+      el.textContent = (isDone ? '✓ ' : '') + matName;
+    }
+    var ev = (e && (e.originalEvent || e)) || {};
+    var cx = ev.clientX !== undefined ? ev.clientX : (hit.x || 0);
+    var cy = ev.clientY !== undefined ? ev.clientY : (hit.y || 0);
+    el.style.left = cx + 'px';
+    el.style.top = cy + 'px';
+    el.style.display = 'block';
+  }
+
+  function hideMatTooltip() {
+    if (MatTooltipEl) {
+      MatTooltipEl.style.display = 'none';
+    }
+  }
+
   function getMarkerLatLng(m) {
     if (!m) return null;
     if (Array.isArray(m)) {
@@ -171,7 +216,12 @@
 
     redraw: function () {
       if (this._map) {
-        this._updatePaths();
+        var self = this;
+        if (self._rafId) return this;
+        self._rafId = requestAnimationFrame(function () {
+          self._rafId = null;
+          self._updatePaths();
+        });
       }
       return this;
     },
@@ -337,14 +387,17 @@
           radius: (m.hitRadius || m.radius || hitRadiusDefault)
         });
 
-        // 标签收集（BOTW 规则：全图不显示标签，仅 zoom >= 5 重要地点显示，宝箱绝不显示，呀哈哈近景显示）
+        // 标签收集：全图不显示标签，zoom >= 5 显示重要地点，宝箱与呀哈哈在近景（zoom >= 6 即 800%+）才显示
         if (this.options.showNames && currentZoom >= (this.options.labelMinZoom || 5)) {
           var isChest = !!(m.drop || m.drop_zh || m.type === 'chest' || (m.id && String(m.id).indexOf('c_') === 0));
           var isKorok = (m.cat === 130 || m.cat === 160 || (m.name && m.name.indexOf('克洛格') >= 0));
-          if (!isChest) {
-            if (!isKorok || currentZoom >= 6) {
+          if (isChest) {
+            // 选项 A：近景（zoom >= 6 即 800%+）才显示宝箱内容，避免远景密集轰炸
+            if (currentZoom >= 6) {
               labelList.push({ m: m, x: x, y: y, size: size, isDone: isDone });
             }
+          } else if (!isKorok || currentZoom >= 6) {
+            labelList.push({ m: m, x: x, y: y, size: size, isDone: isDone });
           }
         }
       }
@@ -464,6 +517,7 @@
     },
 
     _unbindEvents: function () {
+      this._hideTooltip();
       if (!this._map) return;
       var map = this._map;
       if (this._mouseMoveHandler) map.off('mousemove', this._mouseMoveHandler);
@@ -553,12 +607,18 @@
 
     redraw: function () {
       if (this._map) {
-        this._updatePaths();
+        var self = this;
+        if (self._rafId) return this;
+        self._rafId = requestAnimationFrame(function () {
+          self._rafId = null;
+          self._updatePaths();
+        });
       }
       return this;
     },
 
     clear: function () {
+      this._hideTooltip();
       this._visibleItems = [];
       if (this._ctx && this._bounds) {
         var minPt = this._bounds.min;
@@ -742,8 +802,7 @@
         var m = (typeof opt.getMatConfig === 'function') ? opt.getMatConfig(mid) : null;
         if (!m) continue;
 
-        var r = currentZoom >= 7 ? 8 : (currentZoom <= 3 ? 96 : currentZoom < 5 ? 192 : currentZoom === 5 ? 256 : 128);
-        var idxr = (typeof opt.getClusterer === 'function') ? opt.getClusterer(mid, curLayer, r) : null;
+        var idxr = (typeof opt.getClusterer === 'function') ? opt.getClusterer(mid, curLayer) : null;
         if (!idxr) continue;
 
         var clusters = idxr.getClusters(fakeBbox, currentZoom);
@@ -768,7 +827,8 @@
 
           var props = c.properties;
           if (props.cluster) {
-            var isExp = (currentZoom >= 7 && typeof opt.isExpanded === 'function' && opt.isExpanded(mid, c.id));
+            // 对齐 BOTWmap：放大到最大倍率（currentZoom >= 7 即 1600%）或已被点击展开时，彻底自动打散为其下所有 leaf 独立单点绘制，零聚合徽章
+            var isExp = (currentZoom >= 7) || (typeof opt.isExpanded === 'function' && opt.isExpanded(mid, c.id));
             if (isExp) {
               var leaves = idxr.getLeaves(c.id, Infinity) || [];
               for (var li = 0; li < leaves.length; li++) {
@@ -858,6 +918,14 @@
       return best;
     },
 
+    _showTooltip: function (hit, e) {
+      showMatTooltip(hit, e, this.options);
+    },
+
+    _hideTooltip: function () {
+      hideMatTooltip();
+    },
+
     _bindEvents: function () {
       if (!this._map) return;
       var self = this;
@@ -868,6 +936,7 @@
           if (self._hoveredItem) {
             self._hoveredItem = null;
             map.getContainer().style.cursor = '';
+            self._hideTooltip();
           }
           return;
         }
@@ -877,10 +946,24 @@
         if (hit) {
           self._hoveredItem = hit;
           map.getContainer().style.cursor = 'pointer';
+          self._showTooltip(hit, e);
         } else if (self._hoveredItem) {
           self._hoveredItem = null;
           map.getContainer().style.cursor = '';
+          self._hideTooltip();
         }
+      };
+
+      this._mouseOutHandler = function () {
+        if (self._hoveredItem) {
+          self._hoveredItem = null;
+          map.getContainer().style.cursor = '';
+        }
+        self._hideTooltip();
+      };
+
+      this._viewResetHandler = function () {
+        self._hideTooltip();
       };
 
       this._clickHandler = function (e) {
@@ -900,13 +983,18 @@
       };
 
       map.on('mousemove', this._mouseMoveHandler);
+      map.on('mouseout', this._mouseOutHandler);
+      map.on('movestart zoomstart', this._viewResetHandler);
       map.on('click', this._clickHandler);
     },
 
     _unbindEvents: function () {
+      this._hideTooltip();
       if (!this._map) return;
       var map = this._map;
       if (this._mouseMoveHandler) map.off('mousemove', this._mouseMoveHandler);
+      if (this._mouseOutHandler) map.off('mouseout', this._mouseOutHandler);
+      if (this._viewResetHandler) map.off('movestart zoomstart', this._viewResetHandler);
       if (this._clickHandler) map.off('click', this._clickHandler);
       map.getContainer().style.cursor = '';
     }

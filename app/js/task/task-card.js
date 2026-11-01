@@ -913,8 +913,8 @@
         icon: L.divIcon({
           className: 'tk-spot-wrap',
           html: '<div class="tk-spot-dot"></div><div class="tk-spot-ring"></div>',
-          iconSize: [12, 12],
-          iconAnchor: [6, 6]
+          iconSize: [18, 18],
+          iconAnchor: [9, 9]
         }),
         zIndexOffset: 2500,
         interactive: false
@@ -1631,15 +1631,17 @@
     '/* V2.5.0：坐标定位的临时红点 + 脉冲光圈（老大 2026-10-11）',
     ' * 红点与脉冲同中心：wrap 12x12 iconAnchor [6,6]，dot/ring 10x10 需 left:1px; top:1px',
     ' * （left:-5px 时 ring 中心偏到 wrap 左上角，脉冲会偏移红点） */',
-    '.tk-spot-wrap { pointer-events:none; position:relative; }',
-    '.tk-spot-dot { position:absolute; left:1px; top:1px; width:10px; height:10px;',
-    '  border-radius:50%; background:#e8695a;',
-    '  border:2px solid rgba(20,22,28,.95); box-shadow:0 1px 6px rgba(0,0,0,.6); }',
-    '.tk-spot-ring { position:absolute; left:1px; top:1px; width:10px; height:10px;',
-    '  border-radius:50%; border:2px solid rgba(232,105,90,.75);',
-    '  animation:tk-spot-pulse 1.1s ease-out infinite; }',
+        '/* 游戏同款海拉鲁金色定位点 + 80px 雷达大波纹脉冲 */',
+    '.tk-spot-wrap { pointer-events:none; position:relative; width:18px; height:18px; }',
+    '.tk-spot-dot { position:absolute; left:0; top:0; width:18px; height:18px;',
+    '  border-radius:50%; background:radial-gradient(circle at 35% 35%, #fff6bd 0%, #ffca36 45%, #e69500 100%);',
+    '  border:2.5px solid #1a1e24; box-shadow:0 0 10px rgba(255,202,54,.95), 0 2px 8px rgba(0,0,0,.8); box-sizing:border-box; }',
+    '.tk-spot-ring { position:absolute; left:0; top:0; width:18px; height:18px; box-sizing:border-box;',
+    '  border-radius:50%; border:2.5px solid rgba(255,214,64,.95);',
+    '  box-shadow:0 0 14px rgba(255,202,54,.85);',
+    '  animation:tk-spot-pulse 1.25s ease-out infinite; }',
     '@keyframes tk-spot-pulse {',
-    '  0% { transform:scale(.5); opacity:.95; }',
-    '  100% { transform:scale(2.6); opacity:0; } }',
+    '  0% { transform:scale(.6); opacity:.95; }',
+    '  100% { transform:scale(4.5); opacity:0; } }',
   ].join('\n'));
 })(window);

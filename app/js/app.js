@@ -202,8 +202,8 @@
     zoomSnap: 0.5,
     wheelPxPerZoomLevel: 140,
     doubleClickZoom: false,
-    maxBounds: TILE_BOX,          // 限制地图不可平移出界（V1.7.2）
-    maxBoundsViscosity: 1.0       // 拖动到边缘平滑停在边界
+    maxBounds: TILE_BOX.pad(0.6), // 宽裕平移缓冲（对齐 BOTWmap，彻底消灭左侧栏遮挡）
+    maxBoundsViscosity: 0.2       // 柔性边界，允许自由拖拽露出左下角点位
   });
 
   /* 右下角缩放控件（百分比 / ＋－ / 全图 / 定位，参考 BOTWmap #zoomControls） */
@@ -242,7 +242,8 @@
       labelMinZoom: LABEL_MIN_ZOOM,
       getLabel: function (m) {
         var isDone = !!(state.done && state.done[m.korokStartId || m.id]);
-        var disp = window.I18N ? window.I18N.nameOf(m) : (m.name || m.full || m.drop_zh || m.drop || '');
+        var rawName = m.name || m.full || m.drop_zh || m.drop || '';
+        var disp = window.I18N ? (window.I18N.nameOf(rawName) || rawName) : rawName;
         return (isDone ? '✓ ' : '') + disp;
       },
       getMarkerSize: function (m, zoom) {
@@ -852,6 +853,9 @@
 
   // 视口内名称标签：缩放级别足够且开启名称时显示
   function refreshLabels() {
+    if (state.canvasLayer) {
+      state.canvasLayer.setShowNames(!!state.showNames);
+    }
     var z = map.getZoom();
     var bounds = map.getBounds();
     for (var id in state.markers) {
@@ -1502,7 +1506,8 @@
     updateLayerCount();
     buildMatPanel();
     renderMaterials();
-    if (!keepView) map.setView(CENTER, 3);
+    /* 默认保留当前视野（坐标与缩放），切层不再重置回 100% 全图 */
+    if (keepView === false) map.setView(CENTER, 3);
   }
 
   /* ---------------- 面板收起 / 名称开关 ---------------- */
@@ -1804,16 +1809,16 @@
         return;
       }
       var el = mk2.getElement && mk2.getElement();
-      if (!el) { toast('已定位到「' + (m.name || m.full || '目标') + '」'); return; }
+      // Canvas 标点无 DOM 节点，降级为坐标容器点计算光圈
 
       /* 目标本体加金色滤镜（marker 背景透明，靠 filter 的drop-shadow 才看得出） */
-      el.classList.add('mk-locate-target');
+      if (el) el.classList.add('mk-locate-target');
 
       /* 独立光圈：按 marker 的屏幕位置算，插到地图容器里。
          用 getBoundingClientRect 而不是 offsetLeft —— marker 祖先带 zoom 动画 transform。 */
       var host = map.getContainer();
       var hr = host.getBoundingClientRect();
-      var r = el.getBoundingClientRect();
+      var r = el ? el.getBoundingClientRect() : (function () { var pt = map.latLngToContainerPoint(ll); return { left: hr.left + pt.x - 16, top: hr.top + pt.y - 16, width: 32, height: 32 }; })();
       var size = Math.max(r.width, r.height) + 26;   /* 环要比图标大一圈 */
       var ring = document.createElement('div');
       ring.className = 'mk-locate-ring';
@@ -1832,11 +1837,11 @@
 
       /* 脉冲结束后换成静态环再留 3 秒，然后清干净 */
       setTimeout(function () {
-        if (!ring.parentNode) { el.classList.remove('mk-locate-target'); return; }
+        if (!ring.parentNode) { if (el) el.classList.remove('mk-locate-target'); return; }
         ring.classList.add('static');
         setTimeout(function () {
           ring.remove();
-          el.classList.remove('mk-locate-target');
+          if (el) el.classList.remove('mk-locate-target');
         }, HOLD_MS);
       }, PULSE_MS);
 
@@ -3504,8 +3509,7 @@
   }
 
   function getMatClusterer(mid, layerId, radius) {
-    var r = radius || 36;
-    var key = layerId + ':' + mid + ':' + r;
+    var key = layerId + ':' + mid;
     if (state.matIdx[key]) return state.matIdx[key];
     var pts = (matPointsByLayer[layerId] || {})[mid] || [];
     if (!pts.length) return null;
@@ -3517,8 +3521,9 @@
         geometry: { type: 'Point', coordinates: [p[0] * FX, p[1] * FZ] }
       };
     });
-    /* V1.9.0: 聚合半径按缩放级别懒构建缓存（低 zoom 大半径减 DOM 数），key=层:材料:半径 */
-    var idx = new Supercluster({ radius: r, maxZoom: 7, minZoom: 2 });
+    /* 对齐 BOTWmap：单例持久缓存，稳定参数（radius: 50, maxZoom: 16, minZoom: 0, nodeSize: 64）
+     * 废除随缩放改变 radius 导致的重复重建，彻底消灭 GC 顿挫与内存暴涨 */
+    var idx = new Supercluster({ radius: 50, maxZoom: 16, minZoom: 0, nodeSize: 64 });
     idx.load(feats);
     state.matIdx[key] = idx;
     return idx;
