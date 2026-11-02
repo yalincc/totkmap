@@ -114,7 +114,7 @@ func (a *App) startup(ctx context.Context) {
 	a.cfg = a.loadConfig()
 	a.tailInit()
 	go a.eventBridge(ctx)
-	go a.checkUpdate()
+	// go a.checkUpdate() // 取消启动自动检查更新
 	go a.ensureWindowVisible()
 	// 手动检查更新
 	runtime.EventsOn(ctx, "update:check", func(data ...interface{}) {

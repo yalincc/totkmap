@@ -298,12 +298,11 @@ func ptkFindEdenTriples(buf []byte, base uintptr, anchor *[3]float32, radius flo
 		}
 
 
-		// ② 兼容：模拟器版的 3x4 紧密矩阵槽（-0x24），PC 版实测不命中，保留以防版本变化
-				// ① ★ PC 版核心持久槽：28 字节物理运动 RingBuffer 队列（终身常驻）
-		if run28 := ptkRun28Length(buf, off); run28 >= 4 {
+		// ① ★ PC 版 28 字节物理运动 RingBuffer 队列（Quat 刚体，按距离排序，不赋予虚假 Rot 特权）
+		if run28 := ptkRun28Length(buf, off); run28 >= 2 {
 			hits = append(hits, ptkHit{
 				Addr: base + uintptr(off), P: p, Dist: d,
-				Rot: true, Run: run28, Chunk: base,
+				Quat: true, Run: run28, Chunk: base,
 			})
 			continue
 		}

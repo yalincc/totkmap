@@ -233,6 +233,7 @@ func runTracker(p Platform, plat *totkpcPlatform, anchor *[3]float32, addr uintp
 				verified = false
 				moveN = 0
 				lostTicks = 0
+				pstate.setGameStatus(true, p.PID(), lockedAddr)
 				pstate.bumpLock()
 				pstate.bumpRescan()
 				fmt.Printf("  [rescan] 重锁成功 → 0x%X\n", lockedAddr)
@@ -246,6 +247,7 @@ func runTracker(p Platform, plat *totkpcPlatform, anchor *[3]float32, addr uintp
 				verified = true
 				moveN = 0
 				lostTicks = 0
+				pstate.setGameStatus(true, p.PID(), lockedAddr)
 				pstate.bumpLock()
 				logEvent("  [coords] 校准重锁成功 → 0x%X", lockedAddr)
 			}
