@@ -827,8 +827,8 @@
 
           var props = c.properties;
           if (props.cluster) {
-            // 对齐 BOTWmap：放大到最大倍率（currentZoom >= 7 即 1600%）或已被点击展开时，彻底自动打散为其下所有 leaf 独立单点绘制，零聚合徽章
-            var isExp = (currentZoom >= 7) || (typeof opt.isExpanded === 'function' && opt.isExpanded(mid, c.id));
+            // 对齐 BOTWmap：仅在用户主动点击展开特定聚合簇时展开；严禁在 z7 暴力解包全图 leaves 造成主线程卡顿
+            var isExp = (typeof opt.isExpanded === 'function' && opt.isExpanded(mid, c.id));
             if (isExp) {
               var leaves = idxr.getLeaves(c.id, Infinity) || [];
               for (var li = 0; li < leaves.length; li++) {
@@ -838,6 +838,14 @@
                 var lll = [lgz, lgx];
                 var llp = map.latLngToLayerPoint(lll);
                 var lx = llp.x, ly = llp.y;
+                if (bounds) {
+                  var pad = opt.padding || 0.2;
+                  var bSize = bounds.getSize();
+                  if (lx < bounds.min.x - bSize.x * pad || lx > bounds.max.x + bSize.x * pad ||
+                      ly < bounds.min.y - bSize.y * pad || ly > bounds.max.y + bSize.y * pad) {
+                    continue;
+                  }
+                }
                 var lsize = (typeof opt.getIconSize === 'function') ? opt.getIconSize(currentZoom) : 26;
                 var leafIdx = lf.id;
                 var done = (typeof opt.isDone === 'function' && opt.isDone(mid, leafIdx)) ||

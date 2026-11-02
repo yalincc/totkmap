@@ -420,6 +420,17 @@ var TOTKSaveParser = (function () {
       }
     }
 
+    // 8. 双呀哈哈运送营地联动：起点运送完成，终点营地自动联动完成
+    if (typeof window !== 'undefined' && Array.isArray(window.TOTK_MARKERS)) {
+      var allM = window.TOTK_MARKERS;
+      for (var mi = 0; mi < allM.length; mi++) {
+        var mItem = allM[mi];
+        if (mItem && mItem.korokStartId && out[mItem.korokStartId]) {
+          out[mItem.id] = true;
+        }
+      }
+    }
+
     return out;
   }
 

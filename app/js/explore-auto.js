@@ -1,21 +1,19 @@
 /* ============================================================
- * TOTKmap · 探索自动导航（V1.8.0 M3 返工）
+ * TOTKmap · 探索自动收集（V2.8.3 纯事件驱动重构）
  * ------------------------------------------------------------
- * 用法：左侧勾选类别 → 地图显示标点 → 点标点卡片【自动导航】
- *       → 在当前层已勾选类别「未完成」标点中按最近优先自动续导。
- * 完成判定：到达后以存档为准 —— 服务端 /progress 轮询（等游戏存档
- *       保存后自动检测），可逐点判定类别（鸟望台/龙之泪/魔犹伊）
- *       自动续导；其余类别 / 服务离线 → 等手动【标记完成】。
- * 约束：不跨层（跟随玩家 Z 自动切层重建池）、不保存路线、
- *       无队列 UI、到达阈值内部固定（LIVENAV.arriveM，面板不可调）。
+ * 极简规则（对齐 BOTWmap）：
+ *   1. 收集模式下：林克距离目标 <= 50m 时自动弹出卡片并智能避让；
+ *   2. 林克距离目标 > 60m（远离防抖）或目标标记完成时，立即自动关闭卡片；
+ *   3. 目标完成（手动打勾 / totknavi 存档事件驱动同步）后，自动续导下一个最近的未完成标点；
+ *   4. 支持点击任意新标点无缝切换收集目标，无需手动取消上一个；
+ *   5. 收集池对克洛格等探索要素独立兜底，不依赖侧边栏勾选状态，杜绝引路线闪退；
+ *   6. 彻底废除多余的 5 秒主动轮询，零多余网络开销，纯事件驱动。
  * ============================================================ */
 (function () {
   'use strict';
 
   var A = null;
 
-  /* 2026-10-28：提示文案统一走词条。I18N.t 不自带插值，这里补 {0}{1} 顺序替换；
-     I18N 未加载（理论不会）时退回中文原文。 */
   function T(key, fb) {
     var s = window.I18N ? window.I18N.t(key, fb) : fb;
     for (var i = 2; i < arguments.length; i++) {
@@ -23,11 +21,17 @@
     }
     return s;
   }
-  var running = false;      /* 自动导航运行中 */
-  var waiting = false;      /* 到达后等待确认（存档轮询 or 手动） */
-  var arrived = false;      /* 当前目标已到达 */
+
+  var running = false;      /* 收集模式运行中 */
+  var arrived = false;      /* 当前目标已到达（卡片已弹出） */
   var current = null;       /* 当前目标 marker */
-  var pollT = null;         /* /progress 轮询定时器 */
+
+  var ARRIVE_DIST = 50;     /* 进入 50m 弹出卡片（用户标准） */
+  var LEAVE_DIST = 60;      /* 离开 60m 关闭卡片（防抖） */
+
+  function isKorokCat(cat) {
+    return cat === 73 || cat === 130 || cat === 118 || cat === 160;
+  }
 
   function online() { return !!(window.LIVENAV && window.LIVENAV.online()); }
 
@@ -36,14 +40,24 @@
   }
 
   function dist(m, p) {
+    if (!m || !p) return Infinity;
     var dx = p.mx - m.x, dy = p.my - m.y;
     return Math.sqrt(dx * dx + dy * dy);
   }
 
-  function poolForLayer(layer) {
+  /* 候选池计算：克洛格类天然包含全部克洛格，其他分类若未勾选则以当前目标类别为准 */
+  function poolForLayer(layer, targetCat) {
     var st = A.state();
+    var isKorok = isKorokCat(targetCat);
     return A.markers().filter(function (m) {
-      return m.layer === layer && st.selected[m.cat] && !st.done[m.id];
+      if (m.layer !== layer) return false;
+      var doneId = m.korokStartId || m.id;
+      if (st.done[doneId]) return false;
+
+      if (isKorok) {
+        return isKorokCat(m.cat);
+      }
+      return st.selected[m.cat] || (m.cat === targetCat);
     });
   }
 
@@ -58,118 +72,137 @@
 
   function navTo(m) {
     A.liveNav({ name: m.name || m.full, x: m.x, y: m.y, layer: m.layer, type: A.catName(m.cat) });
-    /* live.js 的 target 是 fetch 异步返回后才设置：延迟重绘卡片，让「停止导航」标签同步 */
-    setTimeout(refreshCard, 200);
   }
 
-  function mappable(m) {
-    var mp = window.TOTK_EXPLORE_MAP || {};
-    return !!((mp.towers && (m.id in mp.towers)) ||
-              (mp.tears && (m.id in mp.tears)) ||
-              (mp.bubbuls && (m.id in mp.bubbuls)));
+  function showCard(m) {
+    if (A && typeof A.showCard === 'function' && m) A.showCard(m);
   }
 
-  function refreshCard() {
-    if (A && A.showCard && current) A.showCard(current);
+  function closeCard() {
+    if (A && typeof A.hideCard === 'function') {
+      A.hideCard();
+    } else {
+      var c = document.getElementById('exploreCard');
+      if (c) c.classList.add('hidden');
+    }
   }
 
   function advance() {
-    waiting = false;
     arrived = false;
     var p = pos();
     var layer = (p && p.located) ? p.layer : A.state().layer;
-    var pool = poolForLayer(layer);
-    if (!pool.length) { stop(); A.toast(T('auto.exp.allDone', '本层已勾选类别全部完成，自动导航结束')); return; }
+    var targetCat = current ? current.cat : 73;
+    var pool = poolForLayer(layer, targetCat);
+    if (!pool.length) {
+      stop();
+      closeCard();
+      A.toast(T('auto.exp.allDone', '本层收集目标已全部完成！'));
+      return;
+    }
     current = nearest(pool, p);
     navTo(current);
-    A.toast(T('auto.exp.resume', '自动续导：{0} · {1}', (current.name || T('auto.common.target', '目标')), (A.catName(current.cat) || '')));
-    refreshCard();
+    A.toast(T('auto.exp.resume', '自动续导下一个：{0}', (current.name || T('auto.common.target', '目标'))));
   }
 
   function onArrive() {
-    waiting = true;
-    if (mappable(current) && online()) {
-      A.toast(T('auto.exp.arrivedWait', '已到达 {0}，等待存档确认完成后自动续导…', (current.name || T('auto.common.target', '目标'))))
-      pollProgress();
-    } else {
-      A.toast(T('auto.exp.arrivedManual', '已到达 {0}，请点「标记完成」继续下一个', (current.name || T('auto.common.target', '目标'))))
-    }
-    refreshCard();
-  }
-
-  function pollProgress() {
-    if (pollT) clearInterval(pollT);
-    pollT = setInterval(function () {
-      if (!running || !current) { clearInterval(pollT); pollT = null; return; }
-      fetch('http://127.0.0.1:8766/progress?t=' + Date.now(), { cache: 'no-store' })
-        .then(function (r) { return r.json(); })
-        .then(function (res) {
-          if (running && res && res.ok && res.doneIds && res.doneIds.indexOf(current.id) >= 0) {
-            clearInterval(pollT); pollT = null;
-            A.applyProgressDone(res.doneIds);
-            A.toast(T('auto.exp.saveConfirmed', '存档确认完成：{0}', (current.name || T('auto.common.target', '目标'))))
-            advance();
-          }
-        })
-        .catch(function () { /* 服务暂不可达，下轮重试 */ });
-    }, 5000);
+    showCard(current);
+    A.toast(T('auto.exp.arrivedWait', '已到达 {0} 附近（50m），收集完成后自动续导下一个', (current.name || T('auto.common.target', '目标'))));
   }
 
   function tick() {
     if (!running) return;
-    if (!online()) { stop(); A.toast(T('auto.exp.offline', '实时定位服务断开，自动导航已停止')); return; }
+    if (!online()) { stop(); closeCard(); A.toast(T('auto.exp.offline', '实时定位服务断开，已停止收集')); return; }
     var p = pos();
-    if (!p || !p.located) return;
-    /* 切层 → 不跨层：在新层重建目标池（当前目标不在本层则不续旧目标） */
-    if (current && current.layer !== p.layer) {
-      var pool = poolForLayer(p.layer);
-      if (!pool.length) { stop(); A.toast(T('auto.exp.allDoneLayer', '本层（{0}）已勾选类别全部完成，自动导航结束', A.layerName(p.layer))); return; }
-      waiting = false; arrived = false;
+    if (!p || !p.located || !current) return;
+
+    // 1. 全局完成态检测（卡片点完成 / 地图点完成 / totknavi 存档推送自动标记）
+    var doneId = current.korokStartId || current.id;
+    if (A.state().done[doneId]) {
+      closeCard();
+      advance();
+      return;
+    }
+
+    // 2. 切层检测：切层重建目标池
+    if (current.layer !== p.layer) {
+      var pool = poolForLayer(p.layer, current.cat);
+      if (!pool.length) {
+        stop();
+        closeCard();
+        A.toast(T('auto.exp.allDoneLayer', '本层（{0}）收集目标已全部完成', A.layerName(p.layer)));
+        return;
+      }
+      arrived = false;
+      closeCard();
       current = nearest(pool, p);
       navTo(current);
       A.toast(T('auto.exp.enterLayer', '进入{0}层，续导最近目标', A.layerName(p.layer)));
-      refreshCard();
       return;
     }
-    if (!arrived && window.LIVENAV.arrived()) {
-      arrived = true;
-      onArrive();
+
+    // 3. 距离检测：靠近 (<= 50m) 弹出卡片，远离 (> 60m) 自动关闭卡片
+    var d = dist(current, p);
+
+    if (d <= ARRIVE_DIST) {
+      if (!arrived) {
+        arrived = true;
+        onArrive();
+      }
+    } else if (d > LEAVE_DIST) {
+      if (arrived) {
+        arrived = false;
+        closeCard();
+      }
     }
   }
 
   function start(m) {
-    if (running) { A.toast(T('auto.exp.alreadyRunning', '自动导航已在运行（卡片【停止自动导航】可停）')); return; }
     if (window.MAT_AUTO && window.MAT_AUTO.isRunning()) { A.toast(T('auto.exp.matRunning', '材料收集队列运行中，请先停止再开始探索')); return; }
-    if (!m || !m.id) { A.toast(T('auto.exp.notSupported', '该标点暂不支持自动导航')); return; }
+    if (!m || !m.id) { A.toast(T('auto.exp.notSupported', '该标点暂不支持收集模式')); return; }
     if (!online()) { A.toast(T('auto.common.noService', '实时定位服务未连接（TOTKNavi 未启动？）')); return; }
     var p = pos();
     if (!p || !p.located) { A.toast(T('auto.common.noPos', '尚未获取玩家位置，请先在游戏内进入可操作状态')); return; }
-    if (A.state().done[m.id]) { A.toast(T('auto.exp.alreadyDone', '该标点已完成，自动导航不可用')); return; }
-    running = true; waiting = false; arrived = false;
+    var doneId = m.korokStartId || m.id;
+    if (A.state().done[doneId]) { A.toast(T('auto.exp.alreadyDone', '该标点已完成，无需收集')); return; }
+
+    // 无缝切换目标：如果正在运行中，直接切到新目标，不弹窗拒绝
+    if (running) {
+      if (current && current.id === m.id) {
+        A.toast(T('auto.exp.sameTarget', '正在收集中：{0}', (m.name || '目标')));
+        return;
+      }
+      arrived = false;
+      current = m;
+      navTo(m);
+      A.toast(T('auto.exp.switchTarget', '已切换收集目标：{0}', (m.name || T('auto.common.target', '目标'))));
+      return;
+    }
+
+    running = true; arrived = false;
     current = m;
     navTo(m);
-    A.toast(T('auto.exp.start', '自动导航开始：{0}', (m.name || T('auto.common.target', '目标'))));
-    refreshCard();
+    A.toast(T('auto.exp.start', '开始收集：{0}', (m.name || T('auto.common.target', '目标'))));
   }
 
   function stop() {
-    running = false; waiting = false; arrived = false; current = null;
-    if (pollT) { clearInterval(pollT); pollT = null; }
+    running = false; arrived = false; current = null;
     if (window.LIVENAV) window.LIVENAV.endNav();
   }
 
   function completeCurrent() {
     if (!running || !current) return;
-    if (!A.state().done[current.id]) {
-      A.state().done[current.id] = true;
+    var doneId = current.korokStartId || current.id;
+    if (!A.state().done[doneId]) {
+      A.state().done[doneId] = true;
       A.saveDone();
-      A.applyDoneToMarker(current.id);
+      A.applyDoneToMarker(doneId);
       A.renderMarkers();
       A.buildCatalogPanel();
       A.updateCount();
+      if (window.KorokLayer && window.KorokLayer.render) window.KorokLayer.render();
     }
-    if (pollT) { clearInterval(pollT); pollT = null; }
-    A.toast(T('auto.exp.marked', '已标记完成：{0}', (current.name || T('auto.common.target', '目标'))))
+    closeCard();
+    A.toast(T('auto.exp.marked', '已完成：{0}', (current.name || T('auto.common.target', '目标'))));
     advance();
   }
 
@@ -179,12 +212,11 @@
     setInterval(tick, 600);
   }
 
-  /* 外部结束导航（面板「结束」/清除目标）→ 自动导航同步停止（防残留） */
   function onNavEnd() {
     if (!running) return;
-    running = false; waiting = false; arrived = false; current = null;
-    if (pollT) { clearInterval(pollT); pollT = null; }
-    A.toast(T('auto.exp.ended', '导航已结束，自动导航已停止'))
+    running = false; arrived = false; current = null;
+    closeCard();
+    A.toast(T('auto.exp.ended', '导航已结束，已停止收集'));
   }
 
   window.EXPLORE_AUTO = {
@@ -192,7 +224,6 @@
     stop: stop,
     onNavEnd: onNavEnd,
     isRunning: function () { return running; },
-    isWaiting: function () { return waiting; },
     current: function () { return current; },
     completeCurrent: completeCurrent
   };

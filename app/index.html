@@ -552,6 +552,7 @@
 <!-- 图鉴站地址（联动「查看图鉴」按钮 / 对站跳转）：正式图鉴站地址配置后填写，留空则按钮不显示 -->
 <script>window.TOTK_COMPENDIUM_URL = '';</script>
 <script src="js/save-parser.js"></script>
+<script src="js/card-layout.js?v=301"></script>
 <script src="js/totk-canvas-layer.js?v=300"></script>
 <script src="js/app.js?v=301"></script>
 <script src="js/live.js?v=290"></script>
@@ -561,7 +562,6 @@
      1.5KB 黑帧静音。★ V2.4.1 修正：1px 可见（position:fixed）而非 display:none ——
      Chrome Android 会挂起完全隐藏的视频（V2.4.0 版约 5 分钟息屏的可疑主因），
      NoSleep.js 同款规避；手势续播逻辑见 live.js wakeLockKeeper -->
-<video id="keepAwake" src="keep_awake.mp4" muted loop playsinline webkit-playsinline preload="auto" aria-hidden="true" style="position:fixed;right:0;bottom:0;width:1px;height:1px;opacity:0;pointer-events:none"></video>
 <!-- V2.0：龙轨迹图层（独立模块）。数据已改为 ROM 官方轨道 dragon_paths_rom.js，
      旧的社区近似数据 data/dragon_paths.js 不再加载（保留文件仅作对照） -->
 <script src="js/dragon-layer.js?v=255"></script>

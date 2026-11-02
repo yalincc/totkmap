@@ -287,7 +287,7 @@
     });
   }
 
-  var tileLayer = null;
+  var tileLayers = {};
   /* V1.8.0 瓦片优化: z3/z4 已转 WebP q80(23.9MB->1.9MB), z5+ 仍是 PNG —— 按缩放级选扩展名 */
   var TotkTileLayer = L.TileLayer.extend({
     getTileUrl: function (coords) {
@@ -296,18 +296,30 @@
         .replace('{y}', coords.y).replace('{ext}', ext);
     }
   });
+  function getTileLayer(layerId) {
+    if (!tileLayers[layerId]) {
+      tileLayers[layerId] = new TotkTileLayer('tiles_obj/' + LAYER_KEY[layerId] + '/{z}/{x}_{y}.{ext}', {
+        minZoom: MIN_ZOOM,
+        maxZoom: MAX_ZOOM,
+        maxNativeZoom: 6,
+        tileSize: 256,
+        noWrap: true,
+        bounds: TILE_BOX,
+        errorTileUrl: 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
+      });
+    }
+    return tileLayers[layerId];
+  }
   function setTileLayer(layerId) {
-    if (tileLayer) map.removeLayer(tileLayer);
-    tileLayer = new TotkTileLayer('tiles_obj/' + LAYER_KEY[layerId] + '/{z}/{x}_{y}.{ext}', {
-      minZoom: MIN_ZOOM,
-      maxZoom: MAX_ZOOM,
-      maxNativeZoom: 6,   // V1.9.0: 保持 6 —— 地图放大到 z7 时自动请求 z6 瓦片并 2× 缩放（z7 尺寸，无需 z7 瓦片）
-      tileSize: 256,
-      noWrap: true,
-      bounds: TILE_BOX,
-      errorTileUrl: 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
-    });
-    tileLayer.addTo(map);
+    var target = getTileLayer(layerId);
+    for (var k in tileLayers) {
+      if (tileLayers[k] && tileLayers[k] !== target && map.hasLayer(tileLayers[k])) {
+        map.removeLayer(tileLayers[k]);
+      }
+    }
+    if (!map.hasLayer(target)) {
+      target.addTo(map);
+    }
   }
 
   /* ---------------- 完成状态 ---------------- */
@@ -941,7 +953,7 @@
     }
   }
 
-  /* 标签防重叠：同缩放级别内重叠的低优先级标签做偏移，偏移失败则隐藏 */
+  /* 标签防重叠：同缩放级别内重叠的低优先级标签微调或隐藏，防止横屏抽搐乱跳 */
   function avoidOverlap() {
     var els = [], vw = window.innerWidth, vh = window.innerHeight;
     document.querySelectorAll('.area-label').forEach(function (el) {
@@ -952,13 +964,21 @@
       var r = inner.getBoundingClientRect();
       if (r.right <= 0 || r.left >= vw || r.bottom <= 0 || r.top >= vh) return;
       var prio = parseInt(inner.getAttribute('data-prio') || '5', 10);
-      els.push({ r: r, inner: inner, prio: prio });
+      var text = (inner.textContent || '').trim();
+      els.push({ r: r, inner: inner, prio: prio, text: text });
     });
     els.sort(function (a, b) { return a.prio - b.prio; });
-    var tries = [[0,0],[0,-16],[0,16],[-32,0],[32,0],[0,-32],[0,32],[-16,16],[16,16],[-16,-16],[16,-16],[-48,0],[48,0],[0,-48],[0,48],[-48,-16],[48,-16],[-48,16],[48,16],[-64,0],[64,0],[0,-64],[0,64],[-80,0],[80,0]];
+    var tries = [[0,0],[0,-8],[0,8],[-12,0],[12,0]];
     var placed = [];
+    var placedNames = {};
+
     for (var i = 0; i < els.length; i++) {
       var cur = els[i], ok = null;
+      var isRiver = cur.text.indexOf('河') >= 0 || cur.text.indexOf('溪') >= 0 || cur.text.indexOf('谷') >= 0;
+      if (!isRiver && placedNames[cur.text]) {
+        cur.inner.style.display = 'none';
+        continue;
+      }
       for (var t = 0; t < tries.length && !ok; t++) {
         var dx = tries[t][0], dy = tries[t][1];
         var nb = { x: cur.r.left + dx, y: cur.r.top + dy, w: cur.r.width, h: cur.r.height };
@@ -972,6 +992,7 @@
       if (ok) {
         if (ok.dx || ok.dy) cur.inner.style.transform = 'translate(' + ok.dx + 'px,' + ok.dy + 'px)';
         placed.push({ x: cur.r.left + ok.dx, y: cur.r.top + ok.dy, w: cur.r.width, h: cur.r.height });
+        placedNames[cur.text] = true;
       } else {
         cur.inner.style.display = 'none';
       }
@@ -2736,6 +2757,26 @@
   updateCount();
   map.setView(CENTER, 3);
 
+  /* 移动端横屏/视口变化自适应：解决转屏后 Canvas 畸变与地名错位 */
+  function onViewportResize() {
+    if (map) {
+      map.invalidateSize();
+      if (typeof refreshLabels === 'function') refreshLabels();
+      if (typeof updateAreas === 'function') updateAreas();
+      if (state.canvasLayer && typeof state.canvasLayer.redraw === 'function') {
+        state.canvasLayer.redraw();
+      }
+      if (state.matCanvasLayer && typeof state.matCanvasLayer.redraw === 'function') {
+        state.matCanvasLayer.redraw();
+      }
+    }
+  }
+  window.addEventListener('resize', onViewportResize);
+  window.addEventListener('orientationchange', function () {
+    setTimeout(onViewportResize, 150);
+    setTimeout(onViewportResize, 450);
+  });
+
   // 存档同步按钮初始状态
   applySaveSync(true);
 
@@ -2768,33 +2809,19 @@
       }
     }
 
-    // 2. 权威解绑：对在映射池中但存档中未达成的点予以清除
-    var pool = mappedPool;
-    if (!pool || pool.length === 0) {
-      var map = window.TOTK_EXPLORE_MAP || {};
-      pool = [];
-      for (var cat in map) {
-        var tbl = map[cat];
-        if (tbl && typeof tbl === 'object') {
-          for (var xid in tbl) pool.push(xid);
-        }
-      }
-      var cList = window.TOTK_CHESTS_OFFICIAL || window.CHESTS_OFFICIAL;
-      if (Array.isArray(cList)) {
-        for (var ci = 0; ci < cList.length; ci++) {
-          if (cList[ci] && cList[ci].id != null) pool.push(cList[ci].id);
-        }
-      }
-    }
-    if (pool && pool.length > 0) {
-      for (var i = 0; i < pool.length; i++) {
-        var pid = pool[i];
-        if (!set[pid] && state.done[pid]) {
-          delete state.done[pid];
+    // 1.1 运送营地与起点联动：起点完成，营地连带完成
+    if (Array.isArray(markers)) {
+      for (var mi = 0; mi < markers.length; mi++) {
+        var mk = markers[mi];
+        if (mk && mk.korokStartId && state.done[mk.korokStartId] && !state.done[mk.id]) {
+          state.done[mk.id] = true;
           changed = true;
         }
       }
     }
+
+    // 2. 存档同步并集保护模式（参考 BOTWmap 规范）：
+    // 存档识别到的点予以增量点亮，严禁反向 delete 抹杀用户手动打勾的标记！
 
     // 3. 若有刚刚开启的官方宝箱（c_xxx），自动从 window.TOTK_CHESTS_OFFICIAL 查出其中文道具名 drop_zh，弹出友好 Toast 提示
     if (Array.isArray(newlyDone) && newlyDone.length > 0) {
@@ -3039,16 +3066,29 @@
 
   /* 探索卡片定位（同 detail 规则：不挡侧栏、锚点侧、可视区钳制） */
   function positionExploreCard(ev) {
-    var card = $('exploreCard');
+    var card = exploreCard;
     if (!card) return;
+    var ax = null, ay = null;
+    if (ev && typeof ev.clientX === 'number') {
+      ax = ev.clientX; ay = ev.clientY;
+    } else if (state.current && map && typeof map.latLngToContainerPoint === 'function') {
+      try {
+        var pt = map.latLngToContainerPoint([state.current.x, state.current.y]);
+        ax = pt.x; ay = pt.y;
+      } catch (err) {}
+    }
+    if (window.CardLayout && typeof window.CardLayout.positionCard === 'function') {
+      window.CardLayout.positionCard(card, ax, ay);
+      return;
+    }
     var vw = window.innerWidth, vh = window.innerHeight;
     if (vw <= 720) {
       card.style.left = ''; card.style.top = '';
       return;
     }
     var guard = 366;
-    var ax = guard + 200, ay = vh * 0.45;
-    if (ev && typeof ev.clientX === 'number') { ax = ev.clientX; ay = ev.clientY; }
+    if (ax == null) ax = guard + 200;
+    if (ay == null) ay = vh * 0.45;
     var cw = card.offsetWidth || 280;
     var ch = card.offsetHeight || 220;
     var left = ax + 20, top = ay - ch / 2;
@@ -3292,7 +3332,7 @@
     btnNav.onclick = function () {
       liveToggleNav({ name: m.name || '目标', x: m.x, y: m.y, layer: m.layer, type: opts.cat });
     };
-    btnAuto.textContent = autoOn ? (window.I18N ? window.I18N.t('card.stopAuto') : '停止自动导航') : (window.I18N ? window.I18N.t('card.autoNav') : '自动导航');
+    btnAuto.textContent = autoOn ? (window.I18N ? window.I18N.t('card.collecting', '收集中') : '收集中') : (window.I18N ? window.I18N.t('card.collect', '收集') : '收集');
     btnAuto.onclick = function () {
       if (autoOn) { if (ea) ea.stop(); }
       else if (ea) { ea.start(m); }
@@ -3309,7 +3349,9 @@
     btnDone.textContent = opts.isDone ? (isEn ? 'Mark Undone' : '取消完成') : (isEn ? 'Mark Done' : '标记完成');
       btnDone.className = 'btn primary' + (opts.isDone ? ' done' : '');
       btnDone.onclick = function () {
-        if (ea && ea.isRunning() && ea.current() && ea.current().id === m.id) { ea.completeCurrent(); return; }
+        var doneId = m.korokStartId || m.id;
+        var curId = (ea && ea.current()) ? (ea.current().korokStartId || ea.current().id) : null;
+        if (ea && ea.isRunning() && curId === doneId) { ea.completeCurrent(); return; }
         /* V2.6.0：营地（朋友帐篷）不是收集品，它的完成态挂在起点呀哈哈上
            （markers.js 里营地条目带 korokStartId），否则勾营地不会让运送轨迹变灰 */
         var doneId = m.korokStartId || m.id;
@@ -3397,6 +3439,11 @@
         m: m,
         isDone: !!state.done[m.korokStartId || m.id]
       });
+    },
+    hideCard: function () {
+      var c = exploreCard;
+      if (c) c.classList.add('hidden');
+      state.current = null;
     },
     applyProgressDone: applyProgressDone,
     applyDoneToMarker: applyDoneToMarker,
@@ -3523,7 +3570,7 @@
     });
     /* 对齐 BOTWmap：单例持久缓存，稳定参数（radius: 50, maxZoom: 16, minZoom: 0, nodeSize: 64）
      * 废除随缩放改变 radius 导致的重复重建，彻底消灭 GC 顿挫与内存暴涨 */
-    var idx = new Supercluster({ radius: 50, maxZoom: 16, minZoom: 0, nodeSize: 64 });
+    var idx = new Supercluster({ radius: 50, maxZoom: 6, minZoom: 0, nodeSize: 64 });
     idx.load(feats);
     state.matIdx[key] = idx;
     return idx;

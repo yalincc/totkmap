@@ -24,7 +24,6 @@
    *      display:none 的隐藏视频（V2.4.0 版约 5 分钟息屏的可疑主因），且部分浏览器要求手势内 play。
    * 手势事件里再 enable 一次 = NoSleep.js 同款「必须在用户手势中激活」策略的兜底。 */
   (function wakeLockKeeper() {
-    var vid = document.getElementById('keepAwake');
     var sentinel = null;
     function keepOn() {
       try {
@@ -33,22 +32,16 @@
             sentinel = s;
             s.addEventListener('release', function () { sentinel = null; });
           }).catch(function () {});
-        } else if (vid) {
-          var p = vid.play();
-          if (p && p.catch) p.catch(function () {});
         }
       } catch (e) {}
     }
-    function pauseVid() { if (vid) { try { vid.pause(); } catch (e) {} } }
-    /* 手势续命：每次 touch/click 都续播视频（防被浏览器掐）；sentinel 被释放时手势内补 request */
     function onGesture() {
-      if (vid) { var p = vid.play(); if (p && p.catch) p.catch(function () {}); }
       if (sentinel == null && 'wakeLock' in navigator) keepOn();
     }
     document.addEventListener('pointerdown', onGesture, true);
     document.addEventListener('touchstart', onGesture, { passive: true, capture: true });
     document.addEventListener('visibilitychange', function () {
-      if (document.visibilityState === 'visible') keepOn(); else pauseVid();
+      if (document.visibilityState === 'visible') keepOn();
     });
     keepOn();
   })();
