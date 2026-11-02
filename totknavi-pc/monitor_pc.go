@@ -85,6 +85,7 @@ func statusLoop(p Platform) {
 				"jumps":     0,
 				"scans":     rescans,
 			},
+			"target": getTargetPC(),
 		}
 		if lanURL != "" {
 			obj["lanUrl"] = lanURL

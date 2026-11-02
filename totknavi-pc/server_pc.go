@@ -94,6 +94,39 @@ func (s *posState) bumpRescan() {
 	s.mu.Unlock()
 }
 
+// targetT 导航目标（对齐 totknavi/server.go，供网页端 /target 读写与连线）
+type targetT struct {
+	Name  string  `json:"name"`
+	X     float64 `json:"x"`
+	Y     float64 `json:"y"`
+	Type  string  `json:"type"`
+	Layer any     `json:"layer"`
+	Ts    float64 `json:"ts"`
+}
+
+var (
+	targetMu  sync.Mutex
+	curTarget *targetT
+)
+
+func setTargetPC(t *targetT) {
+	targetMu.Lock()
+	curTarget = t
+	targetMu.Unlock()
+}
+
+func getTargetPC() *targetT {
+	targetMu.Lock()
+	defer targetMu.Unlock()
+	return curTarget
+}
+
+func clearTargetPC() {
+	targetMu.Lock()
+	defer targetMu.Unlock()
+	curTarget = nil
+}
+
 // serveRun 启动追踪 + HTTP 服务（阻塞）。
 func serveRun(p Platform, plat *totkpcPlatform, anchor *[3]float32, addr uintptr, port int, appRoot string) {
 	loadShrineEntrances()
@@ -109,6 +142,7 @@ func serveRun(p Platform, plat *totkpcPlatform, anchor *[3]float32, addr uintptr
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/pos", handlePosPC)
+	mux.HandleFunc("/target", handleTargetPC)
 	mux.HandleFunc("/progress", handleProgressPC)
 	mux.HandleFunc("/rescan", handleRescanPC)
 	mux.HandleFunc("/set-coords", handleSetCoordsPC)
@@ -209,6 +243,10 @@ func handlePosPC(w http.ResponseWriter, r *http.Request) {
 	}
 	s.mu.RUnlock()
 
+	targetMu.Lock()
+	payload["target"] = curTarget
+	targetMu.Unlock()
+
 	// 进度代次：前端靠它判断「存档有没有变」，变了才去拉 /progress。
 	// 缺了这三个字段，网页上的进度面板永远不会刷新（2026-10-31 踩坑）。
 	if progress != nil {
@@ -221,6 +259,55 @@ func handlePosPC(w http.ResponseWriter, r *http.Request) {
 		payload["lanUrl"] = lanURL
 	}
 	writeJSONPC(w, payload)
+}
+
+func handleTargetPC(w http.ResponseWriter, r *http.Request) {
+	if r.Method == http.MethodPost {
+		var obj map[string]any
+		if err := json.NewDecoder(r.Body).Decode(&obj); err != nil {
+			obj = map[string]any{}
+		}
+		if clear, _ := obj["clear"].(bool); clear {
+			clearTargetPC()
+			writeJSONPC(w, map[string]any{"ok": true, "target": nil})
+			return
+		}
+		t := &targetT{
+			Name:  strPC(obj["name"]),
+			X:     fltPC(obj["x"]),
+			Y:     fltPC(obj["y"]),
+			Type:  strPC(obj["type"]),
+			Layer: obj["layer"],
+			Ts:    float64(time.Now().UnixNano()) / 1e9,
+		}
+		setTargetPC(t)
+		writeJSONPC(w, map[string]any{"ok": true, "target": t})
+	} else {
+		if t := getTargetPC(); t != nil {
+			writeJSONPC(w, t)
+		} else {
+			writeJSONPC(w, map[string]any{"ok": false})
+		}
+	}
+}
+
+func strPC(v any) string {
+	if s, ok := v.(string); ok {
+		return s
+	}
+	return ""
+}
+
+func fltPC(v any) float64 {
+	switch n := v.(type) {
+	case float64:
+		return n
+	case float32:
+		return float64(n)
+	case int:
+		return float64(n)
+	}
+	return 0
 }
 
 // handleProgressPC 返回服务端现算的进度（doneIds + counts），语义同 totknavi。
