@@ -2,7 +2,7 @@
  * TOTKmap · 探索自动收集（V2.8.3 纯事件驱动重构）
  * ------------------------------------------------------------
  * 极简规则（对齐 BOTWmap）：
- *   1. 收集模式下：林克距离目标 <= 50m 时自动弹出卡片并智能避让；
+ *   1. 收集模式下：林克距离目标 <= 100m 时自动弹出卡片并智能避让；
  *   2. 林克距离目标 > 60m（远离防抖）或目标标记完成时，立即自动关闭卡片；
  *   3. 目标完成（手动打勾 / totknavi 存档事件驱动同步）后，自动续导下一个最近的未完成标点；
  *   4. 支持点击任意新标点无缝切换收集目标，无需手动取消上一个；
@@ -26,8 +26,8 @@
   var arrived = false;      /* 当前目标已到达（卡片已弹出） */
   var current = null;       /* 当前目标 marker */
 
-  var ARRIVE_DIST = 50;     /* 进入 50m 弹出卡片（用户标准） */
-  var LEAVE_DIST = 60;      /* 离开 60m 关闭卡片（防抖） */
+  var ARRIVE_DIST = 100;    /* 进入 100m 空间距离弹出卡片（三维视野标准） */
+  var LEAVE_DIST = 120;     /* 离开 120m 空间距离关闭卡片（防抖） */
 
   function isKorokCat(cat) {
     return cat === 73 || cat === 130 || cat === 118 || cat === 160;
@@ -42,7 +42,10 @@
   function dist(m, p) {
     if (!m || !p) return Infinity;
     var dx = p.mx - m.x, dy = p.my - m.y;
-    return Math.sqrt(dx * dx + dy * dy);
+    var pz = p.mz != null ? p.mz : (p.z || 0);
+    var mz = m.z || 0;
+    var dz = pz - mz;
+    return Math.sqrt(dx * dx + dy * dy + dz * dz);
   }
 
   /* 候选池计算：克洛格类天然包含全部克洛格，其他分类若未勾选则以当前目标类别为准 */

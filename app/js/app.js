@@ -2809,19 +2809,52 @@
       }
     }
 
-    // 1.1 运送营地与起点联动：起点完成，营地连带完成
-    if (Array.isArray(markers)) {
-      for (var mi = 0; mi < markers.length; mi++) {
-        var mk = markers[mi];
-        if (mk && mk.korokStartId && state.done[mk.korokStartId] && !state.done[mk.id]) {
-          state.done[mk.id] = true;
+    // 2. 权威回退与解绑（严格对齐 BOTWmap 规范）：
+    // 凡是在官方存档映射池 (mappedPool) 内的点位，状态 100% 以当前存档为唯一真相！
+    // 读旧档/回档未包含的点，忠实回退为未完成；彻底消除仅增不减的吸收残留。
+    var pool = mappedPool;
+    if (!pool || pool.length === 0) {
+      var map = window.TOTK_EXPLORE_MAP || {};
+      pool = [];
+      for (var cat in map) {
+        var tbl = map[cat];
+        if (tbl && typeof tbl === 'object') {
+          for (var xid in tbl) pool.push(xid);
+        }
+      }
+      var cList = window.TOTK_CHESTS_OFFICIAL || window.CHESTS_OFFICIAL;
+      if (Array.isArray(cList)) {
+        for (var ci = 0; ci < cList.length; ci++) {
+          if (cList[ci] && cList[ci].id != null) pool.push(cList[ci].id);
+        }
+      }
+    }
+    if (pool && pool.length > 0) {
+      for (var i = 0; i < pool.length; i++) {
+        var pid = pool[i];
+        if (!set[pid] && state.done[pid]) {
+          delete state.done[pid];
           changed = true;
         }
       }
     }
 
-    // 2. 存档同步并集保护模式（参考 BOTWmap 规范）：
-    // 存档识别到的点予以增量点亮，严禁反向 delete 抹杀用户手动打勾的标记！
+    // 1.1 运送营地与起点双向联动：起点完成营地完成；起点回退营地亦回退
+    if (Array.isArray(markers)) {
+      for (var mi = 0; mi < markers.length; mi++) {
+        var mk = markers[mi];
+        if (mk && mk.korokStartId) {
+          var startDone = !!state.done[mk.korokStartId];
+          if (startDone && !state.done[mk.id]) {
+            state.done[mk.id] = true;
+            changed = true;
+          } else if (!startDone && state.done[mk.id]) {
+            delete state.done[mk.id];
+            changed = true;
+          }
+        }
+      }
+    }
 
     // 3. 若有刚刚开启的官方宝箱（c_xxx），自动从 window.TOTK_CHESTS_OFFICIAL 查出其中文道具名 drop_zh，弹出友好 Toast 提示
     if (Array.isArray(newlyDone) && newlyDone.length > 0) {
