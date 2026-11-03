@@ -60,7 +60,7 @@
   var AREA_SKY = window.TOTK_AREA_SKY || [];
   var AREA_DEPTHS = window.TOTK_AREA_DEPTHS || [];
 
-  var VERSION = 'TOTKMAP V2.8.0';
+  var VERSION = 'TOTKMAP V2.8.1';
   /* V2.8 克洛格谜题类型中文名（兜底；正式文案走 i18n 的 korok.type.*）
    * 由 tools/build_korok_info.py 依据 ROMFS 克洛格 actor 自动标注，
    * 分类参考游民星空「呀哈哈机关解密方法汇总」。 */
@@ -1441,9 +1441,9 @@
 
   /* ---------------- 区域轮廓图层（单总开关，按当前层自动选对应轮廓） ---------------- */
   var AREA_STYLE = {
-    cave:   { color: '#f3e79b', weight: 1, fillColor: '#f3e79b', fillOpacity: 0.06, dashArray: '4,3' },
-    sky:    { color: '#66ccff', weight: 1, fillColor: '#66ccff', fillOpacity: 0.12 },
-    depths: { color: '#ff4444', weight: 1.5, fill: false, dashArray: '4,3' }
+    cave:   { color: '#f3e79b', weight: 1, fillColor: '#f3e79b', fillOpacity: 0.06, dashArray: '4,3', className: 'area-cave-poly' },
+    sky:    { color: '#66ccff', weight: 1, fillColor: '#66ccff', fillOpacity: 0.12, interactive: false },
+    depths: { color: '#ff4444', weight: 1.5, fill: false, dashArray: '4,3', interactive: false }
   };
   // 当前层 → 对应轮廓 key
   var AREA_KEY_OF_LAYER = { 18: 'cave', 20: 'sky', 19: 'depths' };
@@ -1468,8 +1468,21 @@
       if (key === 'depths') {
         item.polys.forEach(function (poly) { grp.addLayer(L.polygon(poly, style)); });
       } else {
-        var p = L.polygon(item.rings, style);
-        if (key === 'cave' && item.name) { var cName = window.I18N ? (window.I18N.nameOf(item.name) || item.name) : item.name; p.bindTooltip(cName, { sticky: true, direction: 'top' }); }
+        var hasName = (key === 'cave' && !!item.name);
+        var pStyle = hasName ? style : Object.assign({}, style, { interactive: false });
+        var p = L.polygon(item.rings, pStyle);
+        if (hasName) {
+          var cName = window.I18N ? (window.I18N.nameOf(item.name) || item.name) : item.name;
+          p.bindTooltip(cName, { sticky: true, direction: 'top' });
+          /* 鼠标划过洞穴/井内部的装备、宝箱、呀哈哈标点时自动收起轮廓名提示，不抢焦点不遮挡 */
+          p.on('mousemove', function () {
+            if (state.canvasLayer && state.canvasLayer._hoveredMarker) {
+              if (p.isTooltipOpen()) p.closeTooltip();
+            } else if (!p.isTooltipOpen()) {
+              p.openTooltip();
+            }
+          });
+        }
         grp.addLayer(p);
       }
     });
@@ -2684,6 +2697,7 @@
   var aoTimer = null;
   map.on('moveend zoomend', function () {
     refreshLabels(); updateAreas();
+    dodgeExploreCardIfNeeded();
     if (aoTimer) clearTimeout(aoTimer);
     aoTimer = setTimeout(function () {
       avoidOverlap();
@@ -2795,118 +2809,74 @@
   /* ============================================================
      V1.8.0 M3：独立探索卡片 + 探索队列桥接（材料卡片体系保持原样）
      ============================================================ */
-  /* 权威合并完成点（纯数据驱动写入 state.done） */
-  function applyProgressDone(doneIds, mappedPool, newlyDone) {
-    var set = {};
-    (doneIds || []).forEach(function (id) { set[id] = true; });
-    var changed = false;
-
-    // 1. 所有已判定的点置为 true
-    for (var id in set) {
-      if (!state.done[id]) {
-        state.done[id] = true;
-        changed = true;
-      }
-    }
-
-    // 2. 权威回退与解绑（严格对齐 BOTWmap 规范）：
-    // 凡是在官方存档映射池 (mappedPool) 内的点位，状态 100% 以当前存档为唯一真相！
-    // 读旧档/回档未包含的点，忠实回退为未完成；彻底消除仅增不减的吸收残留。
-    var pool = mappedPool;
-    if (!pool || pool.length === 0) {
-      var map = window.TOTK_EXPLORE_MAP || {};
-      pool = [];
-      for (var cat in map) {
-        var tbl = map[cat];
-        if (tbl && typeof tbl === 'object') {
-          for (var xid in tbl) pool.push(xid);
-        }
-      }
-      var cList = window.TOTK_CHESTS_OFFICIAL || window.CHESTS_OFFICIAL;
-      if (Array.isArray(cList)) {
-        for (var ci = 0; ci < cList.length; ci++) {
-          if (cList[ci] && cList[ci].id != null) pool.push(cList[ci].id);
+  /* 统一设置单个标点的完成状态（含克洛格起点与目的地营地双向同步） */
+  function setMarkerDoneState(doneId, isDone) {
+    if (isDone) state.done[doneId] = true;
+    else delete state.done[doneId];
+    if (Array.isArray(MARKERS)) {
+      for (var i = 0; i < MARKERS.length; i++) {
+        var mk = MARKERS[i];
+        if (mk && String(mk.korokStartId) === String(doneId)) {
+          if (isDone) state.done[mk.id] = true;
+          else delete state.done[mk.id];
+          applyDoneToMarker(mk.id);
         }
       }
     }
-    if (pool && pool.length > 0) {
-      for (var i = 0; i < pool.length; i++) {
-        var pid = pool[i];
-        if (!set[pid] && state.done[pid]) {
-          delete state.done[pid];
-          changed = true;
-        }
-      }
-    }
-
-    // 1.1 运送营地与起点双向联动：起点完成营地完成；起点回退营地亦回退
-    if (Array.isArray(markers)) {
-      for (var mi = 0; mi < markers.length; mi++) {
-        var mk = markers[mi];
-        if (mk && mk.korokStartId) {
-          var startDone = !!state.done[mk.korokStartId];
-          if (startDone && !state.done[mk.id]) {
-            state.done[mk.id] = true;
-            changed = true;
-          } else if (!startDone && state.done[mk.id]) {
-            delete state.done[mk.id];
-            changed = true;
-          }
-        }
-      }
-    }
-
-    // 3. 若有刚刚开启的官方宝箱（c_xxx），自动从 window.TOTK_CHESTS_OFFICIAL 查出其中文道具名 drop_zh，弹出友好 Toast 提示
-    if (Array.isArray(newlyDone) && newlyDone.length > 0) {
-      var chestList = window.TOTK_CHESTS_OFFICIAL;
-      newlyDone.forEach(function (nid) {
-        if (String(nid).indexOf('c_') === 0 && Array.isArray(chestList)) {
-          for (var ci = 0; ci < chestList.length; ci++) {
-            if (chestList[ci].id === nid) {
-              var dropZh = chestList[ci].drop_zh || chestList[ci].drop || '官方宝箱';
-              toast('🎮 存档已自动同步：已开启宝箱【' + dropZh + '】✓');
-              break;
-            }
-          }
-        }
-      });
-    }
-
-    if (changed || (Array.isArray(newlyDone) && newlyDone.length > 0)) {
-      saveDone();
-      renderMarkers();
-      if (window.KorokLayer && window.KorokLayer.render) window.KorokLayer.render();
-      buildCatalogPanel();
-      updateCount();
-      renderProgress();
-    }
+    applyDoneToMarker(doneId);
   }
 
-  /* 上传存档 → 逐点完成注入（走纯数据驱动 matchExploreDone） */
+  /* 存档完成态全量覆盖（方案 A：每次存档加载/自动保存时 100% 以存档状态为准覆盖 state.done） */
+  function applyProgressDone(doneIds) {
+    var set = {};
+    (doneIds || []).forEach(function (id) { set[id] = true; });
+
+    // 运送营地与起点联动：起点完成则目的地营地同步完成
+    if (Array.isArray(MARKERS)) {
+      for (var mi = 0; mi < MARKERS.length; mi++) {
+        var mk = MARKERS[mi];
+        if (mk && mk.korokStartId && set[mk.korokStartId]) {
+          set[mk.id] = true;
+        }
+      }
+    }
+
+    state.done = set;
+    saveDone();
+    renderMarkers();
+    if (window.KorokLayer && window.KorokLayer.render) window.KorokLayer.render();
+    buildCatalogPanel();
+    updateCount();
+    renderProgress();
+
+    // 若探索收集模式运行中，立即触发一次检测（若当前目标已完成则自动跳下一个）
+    if (window.EXPLORE_AUTO && typeof window.EXPLORE_AUTO.onTick === 'function' && window.EXPLORE_AUTO.isRunning()) {
+      window.EXPLORE_AUTO.onTick();
+    }
+    refreshOpenCard();
+  }
+
+  function refreshOpenCard() {
+    var card = $('exploreCard');
+    if (!card || card.classList.contains('hidden') || !state.current) return;
+    var m = state.current;
+    var catObj = catById(state.layer, m.cat);
+    showExploreCard({
+      name: m.name || m.full,
+      cat: catObj ? catObj.name : '未知分类',
+      desc: m.desc || '',
+      m: m,
+      isDone: !!state.done[m.korokStartId || m.id],
+      evt: null
+    });
+  }
+
+  /* 上传存档 / 自动同步 → 逐点完成注入（走纯数据驱动 matchExploreDone） */
   function applySavePointDone(parsed) {
     var map = window.TOTK_EXPLORE_MAP || {};
     var chestsOfficial = window.TOTK_CHESTS_OFFICIAL || window.CHESTS_OFFICIAL || null;
     var pd = TOTKSaveParser.matchExploreDone(parsed, map, chestsOfficial);
-
-    var mappedPool = [];
-    for (var cat in map) {
-      var tbl = map[cat];
-      if (tbl && typeof tbl === 'object') {
-        for (var mid in tbl) mappedPool.push(mid);
-      }
-    }
-    if (chestsOfficial) {
-      if (Array.isArray(chestsOfficial)) {
-        for (var i = 0; i < chestsOfficial.length; i++) {
-          var c = chestsOfficial[i];
-          if (c && c.id != null) mappedPool.push(c.id);
-        }
-      } else if (typeof chestsOfficial === 'object') {
-        for (var cid in chestsOfficial) mappedPool.push(cid);
-      }
-    }
-
-    applyProgressDone(Object.keys(pd || {}), mappedPool);
+    applyProgressDone(Object.keys(pd || {}));
 
     /* V2.1 M5: 任务完成态同样以存档为准 */
     try {
@@ -3097,21 +3067,38 @@
   /* 兼容旧调用点 */
   function parseTrial(desc) { return parseDescSections(desc).trial; }
 
-  /* 探索卡片定位（同 detail 规则：不挡侧栏、锚点侧、可视区钳制） */
-  function positionExploreCard(ev) {
-    var card = exploreCard;
-    if (!card) return;
-    var ax = null, ay = null;
+  var exploreCardDragging = false;
+
+  function getScreenAnchors(ev) {
+    var ax = null, ay = null, px = null, py = null;
     if (ev && typeof ev.clientX === 'number') {
       ax = ev.clientX; ay = ev.clientY;
-    } else if (state.current && map && typeof map.latLngToContainerPoint === 'function') {
+    } else if (state.current && state.current.x != null && state.current.y != null && map && typeof map.latLngToContainerPoint === 'function') {
       try {
         var pt = map.latLngToContainerPoint([state.current.x, state.current.y]);
         ax = pt.x; ay = pt.y;
       } catch (err) {}
     }
+    if (window.LIVENAV && typeof window.LIVENAV.pos === 'function' && map && typeof map.latLngToContainerPoint === 'function') {
+      try {
+        var lp = window.LIVENAV.pos();
+        if (lp && lp.located && lp.mx != null && lp.my != null) {
+          var ppt = map.latLngToContainerPoint([lp.mx, lp.my]);
+          px = ppt.x; py = ppt.y;
+        }
+      } catch (err2) {}
+    }
+    return { ax: ax, ay: ay, px: px, py: py };
+  }
+
+  /* 探索卡片定位（同 detail 规则：不挡侧栏、同时避让标点与玩家箭头、可视区钳制） */
+  function positionExploreCard(ev) {
+    var card = exploreCard;
+    if (!card) return;
+    var a = getScreenAnchors(ev);
+    var ax = a.ax, ay = a.ay;
     if (window.CardLayout && typeof window.CardLayout.positionCard === 'function') {
-      window.CardLayout.positionCard(card, ax, ay);
+      window.CardLayout.positionCard(card, ax, ay, a.px, a.py);
       return;
     }
     var vw = window.innerWidth, vh = window.innerHeight;
@@ -3132,6 +3119,18 @@
     card.style.top = top + 'px';
   }
 
+  /* 当角色移动或地图平移导致玩家箭头/标点与打开的探索卡片重叠时，自动调整卡片位置 */
+  function dodgeExploreCardIfNeeded() {
+    if (exploreCardDragging) return;
+    var card = exploreCard;
+    if (!card || card.classList.contains('hidden')) return;
+    if (!window.CardLayout || typeof window.CardLayout.overlaps !== 'function') return;
+    var a = getScreenAnchors(null);
+    if (window.CardLayout.overlaps(card, a.ax, a.ay, a.px, a.py)) {
+      window.CardLayout.positionCard(card, a.ax, a.ay, a.px, a.py);
+    }
+  }
+
   /* 探索卡片拖拽（独立实现，不与材料卡共用） */
   function initExploreCardDrag() {
     var card = $('exploreCard');
@@ -3141,6 +3140,7 @@
     function down(e) {
       if (e.target.closest && e.target.closest('.detail-close')) return;
       dragging = true;
+      exploreCardDragging = true;
       sx = e.clientX; sy = e.clientY;
       ox = card.offsetLeft; oy = card.offsetTop;
     }
@@ -3149,7 +3149,7 @@
       card.style.left = Math.max(0, Math.min(ox + e.clientX - sx, window.innerWidth - card.offsetWidth)) + 'px';
       card.style.top = Math.max(0, Math.min(oy + e.clientY - sy, window.innerHeight - 60)) + 'px';
     }
-    function up() { dragging = false; }
+    function up() { dragging = false; exploreCardDragging = false; }
     head.addEventListener('mousedown', down);
     head.addEventListener('touchstart', function (e) {
       if (e.touches && e.touches[0]) down(e.touches[0]);
@@ -3363,38 +3363,71 @@
       if (_cur && _cur.x === m.x && _cur.y === m.y) btnNav.textContent = window.I18N ? window.I18N.t('card.stopNav') : '停止导航';
     }
     btnNav.onclick = function () {
-      liveToggleNav({ name: m.name || '目标', x: m.x, y: m.y, layer: m.layer, type: opts.cat });
-    };
-    btnAuto.textContent = autoOn ? (window.I18N ? window.I18N.t('card.collecting', '收集中') : '收集中') : (window.I18N ? window.I18N.t('card.collect', '收集') : '收集');
-    btnAuto.onclick = function () {
-      if (autoOn) { if (ea) ea.stop(); }
-      else if (ea) { ea.start(m); }
+      if (ea && ea.isRunning()) {
+        if (autoOn) {
+          ea.stop();
+          showExploreCard({
+            name: opts.name, cat: opts.cat, desc: opts.desc, m: m,
+            isDone: !!state.done[m.korokStartId || m.id], custom: opts.custom, evt: null
+          });
+          return;
+        }
+        if (ea.stopSilent) ea.stopSilent();
+      }
+      liveToggleNav({ id: m.id, name: m.name || '目标', x: m.x, y: m.y, z: (m.z != null ? m.z : m.altitude_y), layer: m.layer, type: opts.cat });
       showExploreCard({
         name: opts.name, cat: opts.cat, desc: opts.desc, m: m,
         isDone: !!state.done[m.korokStartId || m.id], custom: opts.custom, evt: null
       });
+    };
+    btnAuto.textContent = autoOn ? (window.I18N ? window.I18N.t('card.collecting', '收集中') : '收集中') : (window.I18N ? window.I18N.t('card.collect', '收集') : '收集');
+    btnAuto.onclick = function () {
+      if (autoOn) {
+        if (ea) ea.stop();
+        showExploreCard({
+          name: opts.name, cat: opts.cat, desc: opts.desc, m: m,
+          isDone: !!state.done[m.korokStartId || m.id], custom: opts.custom, evt: null
+        });
+      } else if (ea) {
+        ea.start(m);
+      }
     };
     if (opts.custom) {
       btnDone.style.display = 'none';
     } else {
       btnDone.style.display = '';
       var isEn = window.I18N && window.I18N.getLang() === 'en';
-    btnDone.textContent = opts.isDone ? (isEn ? 'Mark Undone' : '取消完成') : (isEn ? 'Mark Done' : '标记完成');
+      btnDone.textContent = opts.isDone ? (isEn ? 'Mark Undone' : '取消完成') : (isEn ? 'Mark Done' : '标记完成');
       btnDone.className = 'btn primary' + (opts.isDone ? ' done' : '');
       btnDone.onclick = function () {
         var doneId = m.korokStartId || m.id;
         var curId = (ea && ea.current()) ? (ea.current().korokStartId || ea.current().id) : null;
-        if (ea && ea.isRunning() && curId === doneId) { ea.completeCurrent(); return; }
-        /* V2.6.0：营地（朋友帐篷）不是收集品，它的完成态挂在起点呀哈哈上
-           （markers.js 里营地条目带 korokStartId），否则勾营地不会让运送轨迹变灰 */
-        var doneId = m.korokStartId || m.id;
-        if (state.done[doneId]) delete state.done[doneId]; else state.done[doneId] = true;
+        var wasDone = !!state.done[doneId];
+        if (!wasDone && ea && ea.isRunning() && curId === doneId) {
+          ea.completeCurrent();
+          return;
+        }
+        setMarkerDoneState(doneId, !wasDone);
         saveDone();
-        applyDoneToMarker(doneId);
         buildCatalogPanel();
         updateCount();
         if (state.filter !== 'all') renderMarkers();
         if (window.KorokLayer && window.KorokLayer.render) window.KorokLayer.render();
+
+        // 若用户在收集模式下手动点击「取消完成」，导航目标立刻跟随切回当前标点
+        if (wasDone && ea && ea.isRunning() && typeof ea.switchTo === 'function') {
+          ea.switchTo(m);
+        } else if (!wasDone && window.LIVENAV && window.LIVENAV.currentTarget) {
+          // 单点导航下若手动标记了当前导航目标为完成，自动结束该点导航并收起卡片
+          var _t = window.LIVENAV.currentTarget();
+          if (_t && _t.x === m.x && _t.y === m.y && !(ea && ea.isRunning())) {
+            window.LIVENAV.clearNav();
+            $('exploreCard').classList.add('hidden');
+            state.current = null;
+            return;
+          }
+        }
+
         showExploreCard({
           name: opts.name, cat: opts.cat, desc: opts.desc, m: m,
           isDone: !!state.done[doneId], custom: opts.custom, evt: null
@@ -3404,7 +3437,7 @@
     var card = $('exploreCard');
     var wasHidden = card.classList.contains('hidden');
     card.classList.remove('hidden');
-    if (wasHidden || opts.evt) positionExploreCard(opts.evt && (opts.evt.originalEvent || opts.evt) || null);
+    if (wasHidden || opts.evt || opts.reposition) positionExploreCard(opts.evt && (opts.evt.originalEvent || opts.evt) || null);
   }
   $('ecClose').addEventListener('click', function () {
     $('exploreCard').classList.add('hidden');
@@ -3464,15 +3497,37 @@
     pickCanvasEntries: pickCanvasEntries,
     /* 2026-10-28：自动同步改为「核心递存档、前端自己解析」，入口在这里 */
     applyAutoSave: applyAutoSave,
-    showCard: function (m) {
+    showCard: function (m) { state.current = m;
       showExploreCard({
         name: m.name || m.full,
         cat: (catById(state.layer, m.cat) || {}).name || '未知分类',
         desc: m.desc || '',
         m: m,
-        isDone: !!state.done[m.korokStartId || m.id]
+        isDone: !!state.done[m.korokStartId || m.id], reposition: true
       });
     },
+    showCardById: function (mid) {
+      if (!Array.isArray(MARKERS)) return;
+      for (var i = 0; i < MARKERS.length; i++) {
+        if (String(MARKERS[i].id) === String(mid)) {
+          window.TOTK_APP.showCard(MARKERS[i]);
+          return;
+        }
+      }
+    },
+    isMarkerDone: function (mid) {
+      if (!Array.isArray(MARKERS)) return !!state.done[mid];
+      for (var i = 0; i < MARKERS.length; i++) {
+        if (String(MARKERS[i].id) === String(mid)) {
+          var did = MARKERS[i].korokStartId || MARKERS[i].id;
+          return !!state.done[did];
+        }
+      }
+      return !!state.done[mid];
+    },
+    refreshOpenCard: refreshOpenCard,
+    dodgeExploreCardIfNeeded: dodgeExploreCardIfNeeded,
+    setMarkerDoneState: setMarkerDoneState,
     hideCard: function () {
       var c = exploreCard;
       if (c) c.classList.add('hidden');
@@ -3733,7 +3788,7 @@
       collected: isCollected(m.id, idx),
       onDone: function () { toggleMatDone(m.id, idx); showMatDetail(m, ll, idx, evt); },
       onNav: function () {
-        liveToggleNav({ name: window.I18N ? (window.I18N.nameOf(m.cn) || m.cn) : m.cn, x: ll[0], y: ll[1], layer: state.layer, type: m.cat });
+        liveToggleNav({ name: window.I18N ? (window.I18N.nameOf(m.cn) || m.cn) : m.cn, x: ll[0], y: ll[1], z: gh, layer: state.layer, type: m.cat });
         toast('第 ' + (idx + 1) + '/' + total + ' 个位置');
       },
       navTarget: { x: ll[0], y: ll[1] },

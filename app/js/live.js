@@ -71,9 +71,10 @@
   var target = null;                  // {x,y,name,type,layer} 服务端目标
   var follow = false, autoLayer = true, arriveM = ARRIVE_DEF, holdSec = HOLD_DEF, paused = false;
   var lastProgGen = null, lastProgFetch = 0;   // 存档进度代次（服务端 /pos.progressGen）
-  var lastSaveMtime = null;                    // 存档变动时间戳（/pos.save_mtime）
   var mirrorShown = false, lastLanUrl = '';      // V2.4.0 手机镜像面板状态 / 服务端 lanUrl
   var arrivedShown = false;
+  var singleCardArrived = false;                 // 单点导航 100m 自动弹卡状态
+  var lastTargetSetTS = 0;                       // 前端最近一次设置/清除目标的时间戳（防轮询旧 /pos 覆盖）
   var layerLock = null;                        // 手动层级锁定：null=自动，18/19/20=锁定该层（传送后恢复自动）
   var lastMX = null, lastMY = null;            // 上一采样位置（传送检测）
   var lastLayer = null;                        // 上一采样层（传送检测：层变化 = 传送/深穴，解除手动锁定）
@@ -264,12 +265,7 @@
     guideLine = L.polyline([[pos.mx, pos.my], [target.x, target.y]], {
       pane: 'overlayPane', color: 'rgba(255,183,3,.92)', weight: 1.6, dashArray: '7,5', interactive: false
     });
-    guideLine.addTo(map);
-    targetRing = L.circleMarker([target.x, target.y], {
-      pane: 'markerPane', radius: 7, color: '#ffb703', weight: 2,
-      fillColor: 'rgba(255,183,3,.28)', fillOpacity: 1, interactive: false
-    });
-    targetRing.addTo(map);
+    guideLine.addTo(map);    // targetRing 已按用户确认移除，避免黄色圆圈遮挡底部标点图标
     var d = Math.round(distToTarget());
     distLabel = L.marker([pos.mx, pos.my], {
       pane: 'markerPane', interactive: false, zIndexOffset: 2000,
@@ -278,10 +274,39 @@
     });
     distLabel.addTo(map);
   }
+  var lastTargetMeta = null;
+  function resolveTargetZ(t) {
+    if (!t || typeof t.x !== 'number' || typeof t.y !== 'number') return null;
+    if (t.z != null && !isNaN(t.z)) return Number(t.z);
+    if (lastTargetMeta && Math.abs(t.x - lastTargetMeta.x) < 0.05 && Math.abs(t.y - lastTargetMeta.y) < 0.05 && lastTargetMeta.z != null) {
+      return lastTargetMeta.z;
+    }
+    var ms = window.TOTK_MARKERS || [];
+    for (var i = 0; i < ms.length; i++) {
+      var m = ms[i];
+      if (Math.abs(m.x - t.x) < 0.05 && Math.abs(m.y - t.y) < 0.05 && m.z != null) {
+        lastTargetMeta = { x: t.x, y: t.y, z: Number(m.z) };
+        return Number(m.z);
+      }
+    }
+    var cs = window.TOTK_CHESTS_OFFICIAL || [];
+    for (var j = 0; j < cs.length; j++) {
+      var c = cs[j];
+      if (Math.abs(c.z - t.x) < 0.05 && Math.abs(c.x - t.y) < 0.05 && c.altitude_y != null) {
+        lastTargetMeta = { x: t.x, y: t.y, z: Number(c.altitude_y) };
+        return Number(c.altitude_y);
+      }
+    }
+    return null;
+  }
+
   function distToTarget() {
     if (!target || pos.mx == null) return null;
-    return Math.sqrt((target.x - pos.mx) * (target.x - pos.mx) +
-                     (target.y - pos.my) * (target.y - pos.my));
+    var dx = target.x - pos.mx;
+    var dy = target.y - pos.my;
+    var tz = resolveTargetZ(target);
+    var dz = (tz != null && pos.gz != null) ? (tz - pos.gz) : 0;
+    return Math.sqrt(dx * dx + dy * dy + dz * dz);
   }
 
   /* ---------------- 状态 / 面板 ---------------- */
@@ -477,7 +502,17 @@
         }
       }
       hdLastX = pos.mx; hdLastY = pos.my;
-      target = (p.target && typeof p.target.x === 'number') ? p.target : null;
+      if (Date.now() - lastTargetSetTS >= 1500) {
+        if (p.target && typeof p.target.x === 'number') {
+          if (!target || Math.abs(target.x - p.target.x) > 0.05 || Math.abs(target.y - p.target.y) > 0.05) {
+            target = p.target;
+          }
+          var _tz = resolveTargetZ(target);
+          if (_tz != null) target.z = _tz;
+        } else {
+          target = null;
+        }
+      }
       arrivedShown = arrivedShown && (target != null);
 
       /* 传送检测：相邻采样位移 > 1000 游戏单位，或层变化（天空↔地上↔地底）= 传送/深穴/重启，
@@ -528,65 +563,37 @@
         renderMirror('', true);
       }
     }
-    /* 存档进度代次与实时变动推送：游戏内保存 → 存档 mtime 变化（或 save_updated === true / progressGen 变化） → 自动重新拉取进度 */
-    var saveChanged = false;
-    if (p && p.save_mtime != null) {
-      if (lastSaveMtime !== null && p.save_mtime !== lastSaveMtime) {
-        saveChanged = true;
-      }
-      lastSaveMtime = p.save_mtime;
-    }
-    if (p && p.save_updated === true) {
-      saveChanged = true;
-    }
+    /* 进度代次变化（游戏内保存 → 存档更新）→ 立即重新拉取存档进度（回归 BOTWmap 方式） */
     if (p && typeof p.progressGen === 'string' && p.progressGen && p.progressGen !== lastProgGen) {
-      lastProgGen = p.progressGen;
-      saveChanged = true;
-    }
-
-    if (saveChanged) {
       var _n = Date.now();
-      if (_n - lastProgFetch > 800) {
+      if (_n - lastProgFetch > 1000) {
+        lastProgGen = p.progressGen;
         lastProgFetch = _n;
-        /* 2026-10-28 方案 A（对齐 BOTWmap）：优先向核心要**存档原始字节**，由网页自己解析。
-         *   核心只负责「找到最新 progress.sav → 原样吐出来」，统计全在前端 save-parser.js，
-         *   于是新增统计项（图鉴等）不必再改 Go 重新编译。
-         * ★ 兼容垫片：老核心没有 /save（404）或解析失败 → 退回原来的 /progress 推送，
-         *   行为与旧版完全一致，不会白屏。 */
         var _app = window.TOTK_APP || {};
         fetch(LIVE_API + '/save?t=' + _n, { cache: 'no-store' })
           .then(function (r) {
-            if (!r.ok) throw new Error('no /save');
+            if (!r.ok) return null;
             var slot = r.headers.get('X-Save-Slot') || '';
             return r.arrayBuffer().then(function (buf) { return { buf: buf, slot: slot }; });
           })
           .then(function (o) {
-            if (!window.TOTKSaveParser || typeof _app.applyAutoSave !== 'function') throw new Error('parser missing');
+            if (!o || !window.TOTKSaveParser || typeof _app.applyAutoSave !== 'function') return;
             var parsed = window.TOTKSaveParser.parse(o.buf);
-            if (!parsed.ok) throw new Error(parsed.error || 'parse failed');
-            _app.applyAutoSave(parsed, window.TOTKSaveParser.collect(parsed), o.slot);
+            if (parsed && parsed.ok) {
+              _app.applyAutoSave(parsed, window.TOTKSaveParser.collect(parsed), o.slot);
+            }
           })
-          .catch(function () {
-            /* 降级：老核心只认 /progress —— 用推送过来的 doneIds + counts */
-            fetch(LIVE_API + '/progress?t=' + _n, { cache: 'no-store' })
-              .then(function (r) { return r.json(); })
-              .then(function (res) {
-                if (!res || !res.ok || !Array.isArray(res.doneIds)) return;
-                if (typeof _app.applyProgressDone === 'function') {
-                  _app.applyProgressDone(res.doneIds, null, res.newlyDone);
-                }
-                if (res.counts && typeof _app.applyCounts === 'function') {
-                  _app.applyCounts(res);
-                } else if (typeof _app.syncProgressFromServer === 'function') {
-                  _app.syncProgressFromServer();
-                }
-              })
-              .catch(function () {});
-          });
+          .catch(function () {});
       }
+    }
+    if (!paused && window.EXPLORE_AUTO && typeof window.EXPLORE_AUTO.onTick === 'function') {
+      window.EXPLORE_AUTO.onTick();
     }
     tickArrival();
     redraw();
+    if (window.TOTK_APP && typeof window.TOTK_APP.dodgeExploreCardIfNeeded === 'function') {
+      window.TOTK_APP.dodgeExploreCardIfNeeded();
+    }
     setStatus();
   }
 
@@ -652,25 +659,54 @@
     return;
   }
 
-  /* 到达提示：距离 ≤ 阈值 判定「已到达」（仅为提示值，不参与算法） */
+  /* 到达检测：
+   *   1. 探索收集模式运行中：由 explore-auto.onTick 统一管理 100m 弹卡与续导；
+   *   2. 单点导航（非收集模式）：统一按 <= 100m 自动弹出标点卡片、> 120m 自动收起、完成后自动结束导航；
+   *   3. 材料队列兼容：保留 arrivedShown 布尔值供 mat-auto.js 查询，不再弹出 30m 重复提示。 */
   function tickArrival() {
-    if (paused || !pos.online || !pos.located || !target) { arrivedShown = false; return; }
-    if (target.layer && target.layer !== renderLayer()) { arrivedShown = false; return; }
+    if (paused || !pos.online || !pos.located || !target) {
+      arrivedShown = false;
+      singleCardArrived = false;
+      return;
+    }
+    if (target.layer && target.layer !== renderLayer()) {
+      arrivedShown = false;
+      singleCardArrived = false;
+      return;
+    }
     var d = distToTarget();
     if (d == null) return;
     if (arrivedShown && d > arriveM * 1.5) arrivedShown = false;
-    if (d <= arriveM && !arrivedShown) {
-      arrivedShown = true;
-      toast('已到达：' + (target.name || '目标') + '（阈值 ' + arriveM + 'm）');
+    if (d <= arriveM && !arrivedShown) arrivedShown = true;
+
+    var expRunning = !!(window.EXPLORE_AUTO && window.EXPLORE_AUTO.isRunning && window.EXPLORE_AUTO.isRunning());
+    var matRunning = !!(window.MAT_AUTO && window.MAT_AUTO.isRunning && window.MAT_AUTO.isRunning());
+    if (!expRunning && !matRunning && target.id != null && window.TOTK_APP) {
+      if (window.TOTK_APP.isMarkerDone && window.TOTK_APP.isMarkerDone(target.id)) {
+        if (window.TOTK_APP.hideCard) window.TOTK_APP.hideCard();
+        clearNav();
+        return;
+      }
+      if (d <= 100) {
+        if (!singleCardArrived) {
+          singleCardArrived = true;
+          if (window.TOTK_APP.showCardById) window.TOTK_APP.showCardById(target.id);
+        }
+      } else if (d > 120) {
+        if (singleCardArrived) {
+          singleCardArrived = false;
+          if (window.TOTK_APP.hideCard) window.TOTK_APP.hideCard();
+        }
+      }
     }
   }
 
-  /* 重绘：轨迹 / 红点 / 引导线，仅在关键状态变化时执行 */
+  /* 重绘：轨迹 / 红点 / 引导线，仅在关键状态变化时执行（含高度 pos.gz 与目标坐标变化） */
   function redraw() {
     var dk = (pos.online ? '1' : '0') + (pos.verified ? 'v' : '') +
-             (pos.mx != null ? Math.round(pos.mx / 2) + ':' + Math.round(pos.my / 2) : '') +
+             (pos.mx != null ? Math.round(pos.mx / 2) + ':' + Math.round(pos.my / 2) + ':' + Math.round((pos.gz || 0) / 2) : '') +
              (heading != null ? 'h' + Math.round(heading / 4) : '') +
-             (target ? 't' : '') + (arrivedShown ? 'a' : '') +
+             (target ? ('t' + Math.round(target.x) + ',' + Math.round(target.y)) : '') + (arrivedShown ? 'a' : '') +
              (pos.layer || '');
     if (dk === lastDrawKey) return;
     lastDrawKey = dk;
@@ -781,21 +817,26 @@
   function navigate(opts) {
     if (!pos.online) { toast('实时定位服务未连接（TOTKNavi 未启动）'); return false; }
     if (!pos.located) { toast('尚未获取玩家位置（请先进入游戏可操作）'); return false; }
+    var tz = (opts.z != null && !isNaN(opts.z)) ? Number(opts.z) : null;
     var body = {
-      name: opts.name || '目标', x: opts.x, y: opts.y,
+      id: opts.id != null ? opts.id : null,
+      name: opts.name || '目标', x: opts.x, y: opts.y, z: tz,
       type: opts.type || '', layer: (opts.layer != null ? opts.layer : null)
     };
+    if (tz != null) lastTargetMeta = { x: opts.x, y: opts.y, z: tz };
+    target = body;
+    lastTargetSetTS = Date.now();
+    arrivedShown = false;
+    var d0 = distToTarget();
+    singleCardArrived = (d0 != null && d0 <= 100);
+    lastDrawKey = '';
+    redraw();
+    setStatus();
+    if (!opts.silent) toast('已设置导航：' + body.name);
     fetch(LIVE_API + '/target', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body)
-    }).then(function (r) { return r.json(); }).then(function () {
-      target = body;
-      arrivedShown = false;
-      lastDrawKey = '';
-      redraw();
-      setStatus();
-      toast('已设置导航：' + body.name);
-    }).catch(function () { toast('导航设置失败（服务未连接）'); });
+    }).catch(function () {});
     return true;
   }
 
@@ -804,9 +845,17 @@
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ clear: true })
     }).catch(function () {});
-    target = null; arrivedShown = false; lastDrawKey = '';
-    drawGuide(); setStatus();
+    target = null;
+    lastTargetSetTS = Date.now();
+    arrivedShown = false;
+    singleCardArrived = false;
+    lastDrawKey = '';
+    drawGuide();
+    setStatus();
     notifyQueueEnd();
+    if (window.TOTK_APP && typeof window.TOTK_APP.refreshOpenCard === 'function') {
+      window.TOTK_APP.refreshOpenCard();
+    }
   }
 
   /* ---------------- 手机镜像面板（V2.4.0，BOTW V1.5.0 同款） ---------------- */
@@ -915,31 +964,7 @@
       mini.textContent = collapsed ? '＋' : '－';
     });
 
-    var iArr = $('npArriveInput');
-    if (iArr) {
-      iArr.value = arriveM;
-      iArr.addEventListener('change', function () {
-        var v = parseInt(this.value, 10);
-        if (isNaN(v) || v < 1) v = ARRIVE_DEF;
-        if (v > 500) v = 500;
-        this.value = v; arriveM = v;
-        lsSet(LS_ARRIVE, String(v));
-        arrivedShown = false;
-        toast('到达阈值已设为 ' + v + ' 游戏单位');
-      });
-    }
-    var iHold = $('npHold');
-    if (iHold) {
-      iHold.value = holdSec;
-      iHold.addEventListener('change', function () {
-        var v = parseInt(this.value, 10);
-        if (isNaN(v) || v < 0) v = HOLD_DEF;
-        if (v > 10) v = 10;
-        this.value = v; holdSec = v;
-        lsSet(LS_HOLD, String(v));
-        toast('停留自动标记已设为 ' + v + ' 秒（0=到达即标记）');
-      });
-    }
+
     var cAuto = $('npAutoLayer');
     if (cAuto) {
       cAuto.checked = autoLayer;
@@ -1077,7 +1102,7 @@
       centerOnPlayer: centerOnPlayer,
       endNav: endNav,
       /* V1.8.0 M3: 探索队列需要的位置/到达状态 */
-      pos: function () { return { online: pos.online, located: pos.located, mx: pos.mx, my: pos.my, layer: pos.layer, verified: pos.verified }; },
+      pos: function () { return { online: pos.online, located: pos.located, mx: pos.mx, my: pos.my, z: pos.gz, gz: pos.gz, layer: pos.layer, verified: pos.verified }; },
       arrived: function () { return arrivedShown; },
       arriveM: function () { return arriveM; },
       holdSec: function () { return holdSec; },

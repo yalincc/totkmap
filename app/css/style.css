@@ -1967,3 +1967,14 @@ html[lang="en"] .tk-copy {
   outline: none;
 }
 .su-edit-btn:hover, .su-edit-btn:focus { background: #eac27e; }
+
+/* ===== 区域轮廓（洞窟/井/空岛/深穴）禁用浏览器点击焦点外方框，不遮挡内部标点 ===== */
+path.leaflet-interactive:focus,
+.leaflet-interactive:focus,
+svg.leaflet-zoom-animated path:focus {
+  outline: none !important;
+}
+path.area-cave-poly {
+  outline: none !important;
+  cursor: inherit !important;
+}

@@ -41,7 +41,9 @@
 
   function dist(t, p) {
     var dx = p.mx - t.x, dy = p.my - t.y;
-    return Math.sqrt(dx * dx + dy * dy);
+    var pz = p.mz != null ? p.mz : (p.z != null ? p.z : p.gz);
+    var dz = (t.z != null && pz != null) ? (pz - t.z) : 0;
+    return Math.sqrt(dx * dx + dy * dy + dz * dz);
   }
 
   /* 池（V1.8.5）：当前层 + 当前收集材料（点图标指定）+ 未收集 + 未标记完成（点级）。
@@ -55,7 +57,7 @@
     var done = st.matDone[curMid] || [];
     for (var i = 0; i < pts.length; i++) {
       if (col.indexOf(i) >= 0 || done.indexOf(i) >= 0) continue;
-      pool.push({ mid: curMid, idx: i, x: pts[i][1], y: pts[i][0] });
+      pool.push({ mid: curMid, idx: i, x: pts[i][1], y: pts[i][0], z: pts[i][2] });
     }
     return pool;
   }
@@ -73,7 +75,7 @@
     var m = A.matById(t.mid);
     A.liveNav({
       name: m ? m.cn : T('auto.matPrefix', '材料') + t.mid,
-      x: t.x, y: t.y,
+      x: t.x, y: t.y, z: t.z,
       layer: A.state().layer,
       type: m ? m.cat : ''
     });

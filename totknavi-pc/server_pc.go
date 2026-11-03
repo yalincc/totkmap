@@ -96,12 +96,14 @@ func (s *posState) bumpRescan() {
 
 // targetT 导航目标（对齐 totknavi/server.go，供网页端 /target 读写与连线）
 type targetT struct {
-	Name  string  `json:"name"`
-	X     float64 `json:"x"`
-	Y     float64 `json:"y"`
-	Type  string  `json:"type"`
-	Layer any     `json:"layer"`
-	Ts    float64 `json:"ts"`
+	Id    any      `json:"id,omitempty"`
+	Name  string   `json:"name"`
+	X     float64  `json:"x"`
+	Y     float64  `json:"y"`
+	Z     *float64 `json:"z,omitempty"`
+	Type  string   `json:"type"`
+	Layer any      `json:"layer"`
+	Ts    float64  `json:"ts"`
 }
 
 var (
@@ -272,10 +274,17 @@ func handleTargetPC(w http.ResponseWriter, r *http.Request) {
 			writeJSONPC(w, map[string]any{"ok": true, "target": nil})
 			return
 		}
+		var zPtr *float64
+		if obj["z"] != nil {
+			zv := fltPC(obj["z"])
+			zPtr = &zv
+		}
 		t := &targetT{
+			Id:    obj["id"],
 			Name:  strPC(obj["name"]),
 			X:     fltPC(obj["x"]),
 			Y:     fltPC(obj["y"]),
+			Z:     zPtr,
 			Type:  strPC(obj["type"]),
 			Layer: obj["layer"],
 			Ts:    float64(time.Now().UnixNano()) / 1e9,

@@ -51,10 +51,10 @@
    * 公式由老大在游戏内实测两个独立样本定稿（误差 <6米）：
    *   X= gx        东西（东为正，与游戏一致）
    *   Z   = -gz       南北（游戏北为正，我们北为负 —— 纯符号约定差）
-   *   高度 = gy - 106  ROM 世界 Y 与游戏 UI 高度有约 106 的系统性基准差
+   *   高度 = gy - 105  ROM 世界 Y 与游戏 UI 高度有 105.0 的海平面零点差（与 totknavi / markers.js 完全统一）
    * 详见台账 P9.4 / P9.5 / 2.3 节。
    */
-  var ELEV_UI_OFFSET = 106;
+  var ELEV_UI_OFFSET = 105;
   /* Math.round 对 -0.5 边界会给出 -0，显示成「-0」很难看 */
   function gameRound(v) {
     if (v == null) return '';
@@ -944,15 +944,16 @@
     if (nav) nav.addEventListener('click', function (e) {
       stopAll(e);
       var A = global.TOTK_APP;
+      var tz = (t.gy != null) ? (t.gy - ELEV_UI_OFFSET) : null;
       if (A && A.liveToggleNav && t.gx != null && t.gz != null) {
         var r = A.liveToggleNav({
-          name: t.name, x: t.gz, y: t.gx, layer: t.layer,
+          name: t.name, x: t.gz, y: t.gx, z: tz, layer: t.layer,
           type: t.group
         });
         nav.textContent = (r === 'navigating') ? '停止导航' : '任务点';
         nav.classList.toggle('is-on', r === 'navigating');
       } else if (A && A.liveNav && t.gx != null && t.gz != null) {
-        A.liveNav({ name: t.name, x: t.gz, y: t.gx, layer: t.layer, type: t.group });
+        A.liveNav({ name: t.name, x: t.gz, y: t.gx, z: tz, layer: t.layer, type: t.group });
       } else {
         toast('导航功能需要本地定位服务');
       }

@@ -25,12 +25,14 @@ import (
 )
 
 type targetT struct {
-	Name  string  `json:"name"`
-	X     float64 `json:"x"`
-	Y     float64 `json:"y"`
-	Type  string  `json:"type"`
-	Layer any     `json:"layer,omitempty"` // 18/19/20 或 null
-	Ts    float64 `json:"ts"`
+	Id    any      `json:"id,omitempty"`
+	Name  string   `json:"name"`
+	X     float64  `json:"x"`
+	Y     float64  `json:"y"`
+	Z     *float64 `json:"z,omitempty"`
+	Type  string   `json:"type"`
+	Layer any      `json:"layer,omitempty"` // 18/19/20 或 null
+	Ts    float64  `json:"ts"`
 }
 
 var (
@@ -325,10 +327,17 @@ func (s *server) handleTargetPost(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, map[string]any{"ok": true, "target": nil})
 		return
 	}
+	var zPtr *float64
+	if obj["z"] != nil {
+		zv := flt(obj["z"])
+		zPtr = &zv
+	}
 	t := &targetT{
+		Id:    obj["id"],
 		Name:  str(obj["name"]),
 		X:     flt(obj["x"]),
 		Y:     flt(obj["y"]),
+		Z:     zPtr,
 		Type:  str(obj["type"]),
 		Layer: obj["layer"],
 		Ts:    float64(time.Now().UnixNano()) / 1e9,

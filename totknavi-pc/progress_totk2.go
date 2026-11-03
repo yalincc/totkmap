@@ -58,7 +58,10 @@ func parseTaskSave() map[string]taskSaveEntry {
 	dir := dataDir()
 	buf, err := readFileShared(filepath.Join(dir, "task-save.js"))
 	if err != nil {
-		return out
+		buf, err = readFileShared(filepath.Join(dir, "..", "js", "task", "task-save.js"))
+		if err != nil {
+			return out
+		}
 	}
 	re := regexp.MustCompile(`"([A-Za-z0-9_]+)"\s*:\s*\{\s*hash:\s*"0x([0-9a-fA-F]+)",\s*done:\s*"0x([0-9a-fA-F]+)",.*?stages:\s*\[(.*?)\]`)
 	stageRe := regexp.MustCompile(`"([^"]+)"|'([^']+)'`)

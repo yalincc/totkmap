@@ -8,9 +8,11 @@ import (
 	"io"
 	"net"
 	"net/http"
+	"net/url"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	stdruntime "runtime"
 	"strings"
 	"sync"
@@ -19,6 +21,7 @@ import (
 	"unsafe"
 
 	"github.com/wailsapp/wails/v2/pkg/runtime"
+	"golang.org/x/sys/windows/registry"
 )
 
 // guiVersion 导航程序版本（与地图网页版本解耦，见 BOTWmap 项目规则第 3 条）。
@@ -187,26 +190,123 @@ func (a *App) ensureWindowVisible() {
 	fmt.Println("  [gui] window repositioned to center:", x, y)
 }
 
-// fetchLatestTag 查 GitHub tags，返回最新 totknavi- 前缀版本号；网络/解析失败返回空串。
-func fetchLatestTag() string {
-	client := &http.Client{Timeout: 5 * time.Second}
-	resp, err := client.Get("https://api.github.com/repos/yalincc/totkmap/tags?per_page=30")
-	if err != nil { return "" }
-	defer resp.Body.Close()
-	body, _ := io.ReadAll(resp.Body)
-	var tags []struct {
-		Name string `json:"name"`
+// winSystemProxyURL 读取 Windows 注册表系统代理（ProxyEnable=1 时返回 http://host:port）。
+func winSystemProxyURL() *url.URL {
+	k, err := registry.OpenKey(registry.CURRENT_USER, `Software\Microsoft\Windows\CurrentVersion\Internet Settings`, registry.QUERY_VALUE)
+	if err != nil {
+		return nil
 	}
-	if json.Unmarshal(body, &tags) != nil { return "" }
-	best := ""
-	for _, t := range tags {
-		if !strings.HasPrefix(t.Name, "totknavi-") { continue }
-		v := strings.TrimPrefix(t.Name, "totknavi-")
-		if best == "" || verGreater(v, best) {
-			best = v
+	defer k.Close()
+	en, _, err := k.GetIntegerValue("ProxyEnable")
+	if err != nil || en == 0 {
+		return nil
+	}
+	srv, _, err := k.GetStringValue("ProxyServer")
+	if err != nil || strings.TrimSpace(srv) == "" {
+		return nil
+	}
+	srv = strings.TrimSpace(srv)
+	// 支持 "http=127.0.0.1:7890;https=127.0.0.1:7890" 格式
+	if strings.Contains(srv, "=") {
+		for _, part := range strings.Split(srv, ";") {
+			if strings.HasPrefix(part, "https=") {
+				srv = strings.TrimPrefix(part, "https=")
+				break
+			}
+			if strings.HasPrefix(part, "http=") {
+				srv = strings.TrimPrefix(part, "http=")
+			}
 		}
 	}
-	return best
+	if !strings.Contains(srv, "://") {
+		srv = "http://" + srv
+	}
+	u, err := url.Parse(srv)
+	if err != nil {
+		return nil
+	}
+	return u
+}
+
+func httpGetText(targetURL string) string {
+	var clients []*http.Client
+	if pu := winSystemProxyURL(); pu != nil {
+		clients = append(clients, &http.Client{
+			Timeout:   5 * time.Second,
+			Transport: &http.Transport{Proxy: http.ProxyURL(pu)},
+		})
+	}
+	clients = append(clients, &http.Client{Timeout: 5 * time.Second})
+
+	for _, c := range clients {
+		req, err := http.NewRequest("GET", targetURL, nil)
+		if err != nil {
+			continue
+		}
+		req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) TOTKnavi/"+guiVersion)
+		resp, err := c.Do(req)
+		if err != nil {
+			continue
+		}
+		body, _ := io.ReadAll(resp.Body)
+		resp.Body.Close()
+		if resp.StatusCode == 200 && len(body) > 0 {
+			return string(body)
+		}
+	}
+	return ""
+}
+
+// fetchLatestTag 多源查 GitHub 最新 totknavi- 版本号（避开 api.github.com 60次/小时匿名限流 + 自动识别 Windows 系统代理）。
+func fetchLatestTag() string {
+	tagRe := regexp.MustCompile(`totknavi-(v\d+\.\d+\.\d+)`)
+
+	// 通道 1：GitHub Tags 网页（无 60次/小时 API 限流）
+	if html := httpGetText("https://github.com/yalincc/TOTKmap/tags"); html != "" {
+		best := ""
+		for _, m := range tagRe.FindAllStringSubmatch(html, -1) {
+			if len(m) > 1 {
+				v := m[1]
+				if best == "" || verGreater(v, best) {
+					best = v
+				}
+			}
+		}
+		if best != "" {
+			return best
+		}
+	}
+
+	// 通道 2：raw version.go 兜底
+	if raw := httpGetText("https://raw.githubusercontent.com/yalincc/TOTKmap/master/totknavi/version.go"); raw != "" {
+		verRe := regexp.MustCompile(`CoreVersion\s*=\s*"(v\d+\.\d+\.\d+)"`)
+		if m := verRe.FindStringSubmatch(raw); len(m) > 1 {
+			return m[1]
+		}
+	}
+
+	// 通道 3：GitHub REST API 兜底
+	if apiBody := httpGetText("https://api.github.com/repos/yalincc/totkmap/tags?per_page=30"); apiBody != "" {
+		var tags []struct {
+			Name string `json:"name"`
+		}
+		if json.Unmarshal([]byte(apiBody), &tags) == nil {
+			best := ""
+			for _, t := range tags {
+				if !strings.HasPrefix(t.Name, "totknavi-") {
+					continue
+				}
+				v := strings.TrimPrefix(t.Name, "totknavi-")
+				if best == "" || verGreater(v, best) {
+					best = v
+				}
+			}
+			if best != "" {
+				return best
+			}
+		}
+	}
+	return ""
 }
 
 // checkUpdate 启动时 + 事件触发时查 GitHub tags 列表，有新版弹窗，无新版/失败静默（自动检查场景）。

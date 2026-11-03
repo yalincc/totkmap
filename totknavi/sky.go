@@ -48,32 +48,47 @@ const (
 )
 
 func dataDir() string {
-	dirExists := func(p string) bool {
-		fi, e := os.Stat(p)
-		return e == nil && fi.IsDir()
+	isDataDir := func(p string) bool {
+		fi, err := os.Stat(p)
+		if err != nil || !fi.IsDir() {
+			return false
+		}
+		for _, f := range []string{"heightmap_downsampled.bin", "markers.js", "area_sky.js"} {
+			if _, err := os.Stat(filepath.Join(p, f)); err == nil {
+				return true
+			}
+		}
+		return false
 	}
-	exe, err := os.Executable()
-	if err == nil {
+	if exe, err := os.Executable(); err == nil {
 		exeDir := filepath.Dir(exe)
 		for _, p := range []string{
-			filepath.Join(exeDir, "app", "data"),
-			filepath.Join(exeDir, "..", "app", "data"),
 			filepath.Join(exeDir, "data"),
+			filepath.Join(exeDir, "app", "data"),
 			filepath.Join(exeDir, "..", "data"),
+			filepath.Join(exeDir, "..", "app", "data"),
+			filepath.Join(exeDir, "..", "..", "data"),
+			filepath.Join(exeDir, "..", "..", "app", "data"),
+			filepath.Join(exeDir, "..", "..", "..", "data"),
+			filepath.Join(exeDir, "..", "..", "..", "app", "data"),
 		} {
-			if dirExists(p) {
+			if isDataDir(p) {
 				return p
 			}
 		}
 	}
 	if wd, err := os.Getwd(); err == nil {
 		for _, p := range []string{
-			filepath.Join(wd, "app", "data"),
-			filepath.Join(wd, "..", "app", "data"),
 			filepath.Join(wd, "data"),
+			filepath.Join(wd, "app", "data"),
 			filepath.Join(wd, "..", "data"),
+			filepath.Join(wd, "..", "app", "data"),
+			filepath.Join(wd, "..", "..", "data"),
+			filepath.Join(wd, "..", "..", "app", "data"),
+			filepath.Join(wd, "..", "..", "..", "data"),
+			filepath.Join(wd, "..", "..", "..", "app", "data"),
 		} {
-			if dirExists(p) {
+			if isDataDir(p) {
 				return p
 			}
 		}
@@ -264,23 +279,30 @@ func layerOf(gx, gy, gz float32) int {
 
 	// 1. 天空交叠区 (h >= 400.0)
 	if h >= 400.0 {
-		// A. 命中 200m 天空栅格区间 [sMin - 150, sMax + 300]
-		if hasHM && sMin != hmNoData && (float32(sMin)-150.0 <= h && h <= float32(sMax)+300.0) {
-			return 20
+		// ① 贴地检查：离真实地表地形 <= 120m（如雪山顶峰），必定归地上 18
+		if hasHM && gVal != hmNoData && (h-float32(gVal) <= 120.0) {
+			return 18
 		}
-		// B. 离地高度 dG > 400 (高空滑翔 / 跳伞)
-		if hasHM && gVal != hmNoData && (h-float32(gVal) > 400.0) {
-			return 20
-		}
-		// C. 3D 最近 marker 属于天空 (距离 <= 300m)
+		// ② 身边 200m 内有 3D 天空标点（神庙/鸟望台等），绝对是天空 20
 		bestLayer, bestDist := nearestMarker3D(wx, wz, h)
-		if bestDist <= 300.0 && bestLayer == 20 {
+		if bestDist <= 200.0 && bestLayer == 20 {
 			return 20
 		}
-		// D. 兜底保留：历史空岛多边形判定 (如果 polygon 命中且 h >= 400)
-		if inSkyPoly(float64(wx), float64(gy)) {
+		// ③ 命中空岛立体栅格区间：从岛底 sMin-100m 到 岛顶 sMax+200m
+		if hasHM && sMin != hmNoData && sMax != hmNoData {
+			// 只有跌破空岛底部 100m 以下（正在往地表坠落寻找目标），才切地上 18
+			if h < float32(sMin)-100.0 {
+				return 18
+			}
+			if h <= float32(sMax)+200.0 {
+				return 20
+			}
+		}
+		// ④ 若命中空岛多边形边界
+		if inSkyPoly(float64(wx), float64(wz)) {
 			return 20
 		}
+		// 其余纯悬空坠落情况归地上 18
 		return 18
 	}
 

@@ -9,11 +9,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 18,
     "x": -1025.05,
-    "altitude_y": 295.82,
+    "altitude_y": 190.82,
     "z": 3783.17,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+295.8m (地表大世界)"
+    "height_desc": "+190.8m (地表大世界)"
   },
   {
     "id": "c_2",
@@ -24,11 +24,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "KeyItem",
     "layer": 20,
     "x": 2552.26,
-    "altitude_y": 1000.12,
+    "altitude_y": 895.12,
     "z": 3601.44,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1000.1m (天空岛)"
+    "height_desc": "+895.1m (天空岛)"
   },
   {
     "id": "c_3",
@@ -39,11 +39,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": -4360.15,
-    "altitude_y": -733.4,
+    "altitude_y": -838.4,
     "z": -3074.64,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-733.4m (地底深渊)"
+    "height_desc": "-838.4m (地底深渊)"
   },
   {
     "id": "c_4",
@@ -54,11 +54,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 18,
     "x": 1908.04,
-    "altitude_y": 125.83,
+    "altitude_y": 20.83,
     "z": 1728.48,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+125.8m (地表大世界)"
+    "height_desc": "+20.8m (地表大世界)"
   },
   {
     "id": "c_5",
@@ -69,11 +69,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Bow",
     "layer": 18,
     "x": 1342.19,
-    "altitude_y": 308.12,
+    "altitude_y": 203.12,
     "z": 1540.57,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+308.1m (地表大世界)"
+    "height_desc": "+203.1m (地表大世界)"
   },
   {
     "id": "c_6",
@@ -84,11 +84,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 1781.47,
-    "altitude_y": 117.0,
+    "altitude_y": 12.0,
     "z": 1968.01,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+117.0m (地表大世界)"
+    "height_desc": "+12.0m (地表大世界)"
   },
   {
     "id": "c_7",
@@ -99,11 +99,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Bow",
     "layer": 18,
     "x": 1780.25,
-    "altitude_y": 114.94,
+    "altitude_y": 9.94,
     "z": 1540.07,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+114.9m (地表大世界)"
+    "height_desc": "+9.9m (地表大世界)"
   },
   {
     "id": "c_8",
@@ -114,11 +114,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "KeyItem",
     "layer": 20,
     "x": -3781.09,
-    "altitude_y": 1343.48,
+    "altitude_y": 1238.48,
     "z": -1572.89,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1343.5m (天空岛)"
+    "height_desc": "+1238.5m (天空岛)"
   },
   {
     "id": "c_9",
@@ -129,11 +129,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Rupee",
     "layer": 18,
     "x": -2333.08,
-    "altitude_y": 356.21,
+    "altitude_y": 251.21,
     "z": -1862.33,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+356.2m (洞窟/水井内)"
+    "height_desc": "+251.2m (洞窟/水井内)"
   },
   {
     "id": "c_10",
@@ -144,11 +144,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 9.4,
-    "altitude_y": 132.47,
+    "altitude_y": 27.47,
     "z": 176.66,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+132.5m (洞窟/水井内)"
+    "height_desc": "+27.5m (洞窟/水井内)"
   },
   {
     "id": "c_11",
@@ -159,11 +159,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Armor",
     "layer": 18,
     "x": 1215.86,
-    "altitude_y": 378.96,
+    "altitude_y": 273.96,
     "z": 2053.35,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+379.0m (洞窟/水井内)"
+    "height_desc": "+274.0m (洞窟/水井内)"
   },
   {
     "id": "c_12",
@@ -174,11 +174,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 20,
     "x": 1041.73,
-    "altitude_y": 924.81,
+    "altitude_y": 819.81,
     "z": 3367.81,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+924.8m (天空岛)"
+    "height_desc": "+819.8m (天空岛)"
   },
   {
     "id": "c_13",
@@ -189,11 +189,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 20,
     "x": 883.14,
-    "altitude_y": 833.48,
+    "altitude_y": 728.48,
     "z": 2787.7,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+833.5m (天空岛)"
+    "height_desc": "+728.5m (天空岛)"
   },
   {
     "id": "c_14",
@@ -204,11 +204,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "KeyItem",
     "layer": 20,
     "x": 952.39,
-    "altitude_y": 862.2,
+    "altitude_y": 757.2,
     "z": 3113.04,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+862.2m (天空岛)"
+    "height_desc": "+757.2m (天空岛)"
   },
   {
     "id": "c_15",
@@ -219,11 +219,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 20,
     "x": 913.86,
-    "altitude_y": 895.45,
+    "altitude_y": 790.45,
     "z": 2994.05,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+895.5m (天空岛)"
+    "height_desc": "+790.5m (天空岛)"
   },
   {
     "id": "c_16",
@@ -234,11 +234,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Bow",
     "layer": 20,
     "x": 1042.71,
-    "altitude_y": 968.36,
+    "altitude_y": 863.36,
     "z": 3513.96,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+968.4m (天空岛)"
+    "height_desc": "+863.4m (天空岛)"
   },
   {
     "id": "c_17",
@@ -249,11 +249,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 20,
     "x": 1311.62,
-    "altitude_y": 989.68,
+    "altitude_y": 884.68,
     "z": 3397.45,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+989.7m (天空岛)"
+    "height_desc": "+884.7m (天空岛)"
   },
   {
     "id": "c_18",
@@ -264,11 +264,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Shield",
     "layer": 20,
     "x": 1242.59,
-    "altitude_y": 952.91,
+    "altitude_y": 847.91,
     "z": 3493.69,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+952.9m (天空岛)"
+    "height_desc": "+847.9m (天空岛)"
   },
   {
     "id": "c_19",
@@ -279,11 +279,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "KeyItem",
     "layer": 20,
     "x": 967.9,
-    "altitude_y": 952.26,
+    "altitude_y": 847.26,
     "z": 3306.12,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+952.3m (天空岛)"
+    "height_desc": "+847.3m (天空岛)"
   },
   {
     "id": "c_20",
@@ -294,11 +294,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 20,
     "x": 1010.46,
-    "altitude_y": 913.89,
+    "altitude_y": 808.89,
     "z": 3286.28,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+913.9m (天空岛)"
+    "height_desc": "+808.9m (天空岛)"
   },
   {
     "id": "c_21",
@@ -309,11 +309,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 2991.53,
-    "altitude_y": 364.56,
+    "altitude_y": 259.56,
     "z": 219.01,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+364.6m (地表大世界)"
+    "height_desc": "+259.6m (地表大世界)"
   },
   {
     "id": "c_22",
@@ -324,11 +324,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -553.88,
-    "altitude_y": 137.36,
+    "altitude_y": 32.36,
     "z": -152.3,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+137.4m (洞窟/水井内)"
+    "height_desc": "+32.4m (洞窟/水井内)"
   },
   {
     "id": "c_23",
@@ -339,11 +339,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 3082.33,
-    "altitude_y": 426.74,
+    "altitude_y": 321.74,
     "z": -2310.38,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+426.7m (洞窟/水井内)"
+    "height_desc": "+321.7m (洞窟/水井内)"
   },
   {
     "id": "c_24",
@@ -354,11 +354,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Rupee",
     "layer": 18,
     "x": 4560.27,
-    "altitude_y": 105.63,
+    "altitude_y": 0.63,
     "z": 2301.78,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+105.6m (洞窟/水井内)"
+    "height_desc": "+0.6m (洞窟/水井内)"
   },
   {
     "id": "c_25",
@@ -369,11 +369,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -719.32,
-    "altitude_y": 139.29,
+    "altitude_y": 34.29,
     "z": 889.84,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+139.3m (地表大世界)"
+    "height_desc": "+34.3m (地表大世界)"
   },
   {
     "id": "c_26",
@@ -384,11 +384,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Rupee",
     "layer": 18,
     "x": -790.82,
-    "altitude_y": 133.01,
+    "altitude_y": 28.01,
     "z": 866.4,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+133.0m (地表大世界)"
+    "height_desc": "+28.0m (地表大世界)"
   },
   {
     "id": "c_27",
@@ -399,11 +399,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -579.25,
-    "altitude_y": 129.42,
+    "altitude_y": 24.42,
     "z": 611.96,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+129.4m (地表大世界)"
+    "height_desc": "+24.4m (地表大世界)"
   },
   {
     "id": "c_28",
@@ -414,11 +414,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Rupee",
     "layer": 18,
     "x": -630.93,
-    "altitude_y": 129.6,
+    "altitude_y": 24.6,
     "z": 571.73,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+129.6m (地表大世界)"
+    "height_desc": "+24.6m (地表大世界)"
   },
   {
     "id": "c_29",
@@ -429,11 +429,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -2504.78,
-    "altitude_y": 244.06,
+    "altitude_y": 139.06,
     "z": 1781.56,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+244.1m (洞窟/水井内)"
+    "height_desc": "+139.1m (洞窟/水井内)"
   },
   {
     "id": "c_30",
@@ -444,11 +444,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -2508.1,
-    "altitude_y": 245.71,
+    "altitude_y": 140.71,
     "z": 1779.78,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+245.7m (洞窟/水井内)"
+    "height_desc": "+140.7m (洞窟/水井内)"
   },
   {
     "id": "c_31",
@@ -459,11 +459,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 3662.78,
-    "altitude_y": 83.65,
+    "altitude_y": -21.35,
     "z": -158.16,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+83.6m (洞窟/水井内)"
+    "height_desc": "-21.4m (洞窟/水井内)"
   },
   {
     "id": "c_32",
@@ -474,11 +474,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 3688.53,
-    "altitude_y": 118.47,
+    "altitude_y": 13.47,
     "z": -393.08,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+118.5m (洞窟/水井内)"
+    "height_desc": "+13.5m (洞窟/水井内)"
   },
   {
     "id": "c_33",
@@ -489,11 +489,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Shield",
     "layer": 18,
     "x": 3733.07,
-    "altitude_y": 67.4,
+    "altitude_y": -37.6,
     "z": -303.44,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+67.4m (洞窟/水井内)"
+    "height_desc": "-37.6m (洞窟/水井内)"
   },
   {
     "id": "c_34",
@@ -504,11 +504,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 3600.19,
-    "altitude_y": 109.58,
+    "altitude_y": 4.58,
     "z": -330.18,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+109.6m (洞窟/水井内)"
+    "height_desc": "+4.6m (洞窟/水井内)"
   },
   {
     "id": "c_35",
@@ -519,11 +519,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Armor",
     "layer": 18,
     "x": 3585.24,
-    "altitude_y": 2.5,
+    "altitude_y": -102.5,
     "z": -246.84,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+2.5m (洞窟/水井内)"
+    "height_desc": "-102.5m (洞窟/水井内)"
   },
   {
     "id": "c_36",
@@ -534,11 +534,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 20,
     "x": 1494.23,
-    "altitude_y": 491.88,
+    "altitude_y": 386.88,
     "z": -257.09,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+491.9m (天空岛)"
+    "height_desc": "+386.9m (天空岛)"
   },
   {
     "id": "c_37",
@@ -549,11 +549,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": -2411.92,
-    "altitude_y": -288.73,
+    "altitude_y": -393.73,
     "z": 3485.3,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-288.7m (地底深渊)"
+    "height_desc": "-393.7m (地底深渊)"
   },
   {
     "id": "c_38",
@@ -564,11 +564,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "KeyItem",
     "layer": 19,
     "x": -2410.01,
-    "altitude_y": -288.73,
+    "altitude_y": -393.73,
     "z": 3484.71,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-288.7m (地底深渊)"
+    "height_desc": "-393.7m (地底深渊)"
   },
   {
     "id": "c_39",
@@ -579,11 +579,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": -2952.07,
-    "altitude_y": -362.42,
+    "altitude_y": -467.42,
     "z": 2354.84,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-362.4m (地底深渊)"
+    "height_desc": "-467.4m (地底深渊)"
   },
   {
     "id": "c_40",
@@ -594,11 +594,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": -2035.04,
-    "altitude_y": -600.37,
+    "altitude_y": -705.37,
     "z": 2881.86,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-600.4m (地底深渊)"
+    "height_desc": "-705.4m (地底深渊)"
   },
   {
     "id": "c_41",
@@ -609,11 +609,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": -2424.27,
-    "altitude_y": -362.9,
+    "altitude_y": -467.9,
     "z": 2929.81,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-362.9m (地底深渊)"
+    "height_desc": "-467.9m (地底深渊)"
   },
   {
     "id": "c_42",
@@ -624,11 +624,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Armor",
     "layer": 18,
     "x": -3043.44,
-    "altitude_y": 292.57,
+    "altitude_y": 187.57,
     "z": -1528.74,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+292.6m (洞窟/水井内)"
+    "height_desc": "+187.6m (洞窟/水井内)"
   },
   {
     "id": "c_43",
@@ -639,11 +639,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Shield",
     "layer": 18,
     "x": -3063.5,
-    "altitude_y": 387.48,
+    "altitude_y": 282.48,
     "z": -1582.11,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+387.5m (地表大世界)"
+    "height_desc": "+282.5m (地表大世界)"
   },
   {
     "id": "c_44",
@@ -654,11 +654,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Shield",
     "layer": 18,
     "x": 3280.32,
-    "altitude_y": 1894.4,
+    "altitude_y": 1789.4,
     "z": -577.33,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+1894.4m (地表大世界)"
+    "height_desc": "+1789.4m (地表大世界)"
   },
   {
     "id": "c_45",
@@ -669,11 +669,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 3524.93,
-    "altitude_y": 1914.88,
+    "altitude_y": 1809.88,
     "z": -643.04,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+1914.9m (地表大世界)"
+    "height_desc": "+1809.9m (地表大世界)"
   },
   {
     "id": "c_46",
@@ -684,11 +684,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 3498.95,
-    "altitude_y": 1892.39,
+    "altitude_y": 1787.39,
     "z": -751.99,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+1892.4m (地表大世界)"
+    "height_desc": "+1787.4m (地表大世界)"
   },
   {
     "id": "c_47",
@@ -699,11 +699,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 3310.81,
-    "altitude_y": 1819.9,
+    "altitude_y": 1714.9,
     "z": -672.06,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+1819.9m (地表大世界)"
+    "height_desc": "+1714.9m (地表大世界)"
   },
   {
     "id": "c_48",
@@ -714,11 +714,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "KeyItem",
     "layer": 20,
     "x": -4447.6,
-    "altitude_y": 1525.34,
+    "altitude_y": 1420.34,
     "z": 2732.09,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1525.3m (天空岛)"
+    "height_desc": "+1420.3m (天空岛)"
   },
   {
     "id": "c_49",
@@ -729,11 +729,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": -3074.63,
-    "altitude_y": -808.09,
+    "altitude_y": -913.09,
     "z": 1578.9,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-808.1m (地底深渊)"
+    "height_desc": "-913.1m (地底深渊)"
   },
   {
     "id": "c_50",
@@ -744,11 +744,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "KeyItem",
     "layer": 19,
     "x": -3075.11,
-    "altitude_y": -808.09,
+    "altitude_y": -913.09,
     "z": 1580.84,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-808.1m (地底深渊)"
+    "height_desc": "-913.1m (地底深渊)"
   },
   {
     "id": "c_51",
@@ -759,11 +759,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Armor",
     "layer": 20,
     "x": 361.13,
-    "altitude_y": 2334.3,
+    "altitude_y": 2229.3,
     "z": 1631.99,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+2334.3m (天空岛)"
+    "height_desc": "+2229.3m (天空岛)"
   },
   {
     "id": "c_52",
@@ -774,11 +774,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 20,
     "x": 379.57,
-    "altitude_y": 2441.25,
+    "altitude_y": 2336.25,
     "z": 1698.73,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+2441.2m (天空岛)"
+    "height_desc": "+2336.2m (天空岛)"
   },
   {
     "id": "c_53",
@@ -789,11 +789,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 20,
     "x": 513.34,
-    "altitude_y": 1540.64,
+    "altitude_y": 1435.64,
     "z": 1100.15,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1540.6m (天空岛)"
+    "height_desc": "+1435.6m (天空岛)"
   },
   {
     "id": "c_54",
@@ -804,11 +804,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 20,
     "x": 280.25,
-    "altitude_y": 1498.3,
+    "altitude_y": 1393.3,
     "z": 922.77,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1498.3m (天空岛)"
+    "height_desc": "+1393.3m (天空岛)"
   },
   {
     "id": "c_55",
@@ -819,11 +819,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 20,
     "x": 24.3,
-    "altitude_y": 1513.76,
+    "altitude_y": 1408.76,
     "z": 1527.69,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1513.8m (天空岛)"
+    "height_desc": "+1408.8m (天空岛)"
   },
   {
     "id": "c_56",
@@ -834,11 +834,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 20,
     "x": 141.79,
-    "altitude_y": 1484.95,
+    "altitude_y": 1379.95,
     "z": 1586.4,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1485.0m (天空岛)"
+    "height_desc": "+1380.0m (天空岛)"
   },
   {
     "id": "c_57",
@@ -849,11 +849,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 20,
     "x": 130.65,
-    "altitude_y": 1480.4,
+    "altitude_y": 1375.4,
     "z": 1450.24,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1480.4m (天空岛)"
+    "height_desc": "+1375.4m (天空岛)"
   },
   {
     "id": "c_58",
@@ -864,11 +864,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Armor",
     "layer": 20,
     "x": 238.5,
-    "altitude_y": 1469.56,
+    "altitude_y": 1364.56,
     "z": 1558.29,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1469.6m (天空岛)"
+    "height_desc": "+1364.6m (天空岛)"
   },
   {
     "id": "c_59",
@@ -879,11 +879,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 20,
     "x": 314.88,
-    "altitude_y": 1522.67,
+    "altitude_y": 1417.67,
     "z": 1627.82,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1522.7m (天空岛)"
+    "height_desc": "+1417.7m (天空岛)"
   },
   {
     "id": "c_60",
@@ -894,11 +894,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Armor",
     "layer": 20,
     "x": 768.12,
-    "altitude_y": 1693.4,
+    "altitude_y": 1588.4,
     "z": 1338.25,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1693.4m (天空岛)"
+    "height_desc": "+1588.4m (天空岛)"
   },
   {
     "id": "c_61",
@@ -909,11 +909,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 20,
     "x": 830.38,
-    "altitude_y": 1701.84,
+    "altitude_y": 1596.84,
     "z": 1236.37,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1701.8m (天空岛)"
+    "height_desc": "+1596.8m (天空岛)"
   },
   {
     "id": "c_62",
@@ -924,11 +924,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 20,
     "x": 738.97,
-    "altitude_y": 1540.34,
+    "altitude_y": 1435.34,
     "z": 1204.38,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1540.3m (天空岛)"
+    "height_desc": "+1435.3m (天空岛)"
   },
   {
     "id": "c_63",
@@ -939,11 +939,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 20,
     "x": 758.59,
-    "altitude_y": 1597.68,
+    "altitude_y": 1492.68,
     "z": 1377.07,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1597.7m (天空岛)"
+    "height_desc": "+1492.7m (天空岛)"
   },
   {
     "id": "c_64",
@@ -954,11 +954,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 20,
     "x": 768.3,
-    "altitude_y": 1650.36,
+    "altitude_y": 1545.36,
     "z": 1369.63,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1650.4m (天空岛)"
+    "height_desc": "+1545.4m (天空岛)"
   },
   {
     "id": "c_65",
@@ -969,11 +969,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 20,
     "x": 542.9,
-    "altitude_y": 1561.27,
+    "altitude_y": 1456.27,
     "z": 1418.87,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1561.3m (天空岛)"
+    "height_desc": "+1456.3m (天空岛)"
   },
   {
     "id": "c_66",
@@ -984,11 +984,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 20,
     "x": 80.95,
-    "altitude_y": 1524.43,
+    "altitude_y": 1419.43,
     "z": 991.21,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1524.4m (天空岛)"
+    "height_desc": "+1419.4m (天空岛)"
   },
   {
     "id": "c_67",
@@ -999,11 +999,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 20,
     "x": 389.25,
-    "altitude_y": 1579.53,
+    "altitude_y": 1474.53,
     "z": 1183.83,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1579.5m (天空岛)"
+    "height_desc": "+1474.5m (天空岛)"
   },
   {
     "id": "c_68",
@@ -1014,11 +1014,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 20,
     "x": 275.43,
-    "altitude_y": 1460.65,
+    "altitude_y": 1355.65,
     "z": 1716.12,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1460.6m (天空岛)"
+    "height_desc": "+1355.6m (天空岛)"
   },
   {
     "id": "c_69",
@@ -1029,11 +1029,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 20,
     "x": 571.6,
-    "altitude_y": 1574.48,
+    "altitude_y": 1469.48,
     "z": 1674.44,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1574.5m (天空岛)"
+    "height_desc": "+1469.5m (天空岛)"
   },
   {
     "id": "c_70",
@@ -1044,11 +1044,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 20,
     "x": 431.96,
-    "altitude_y": 1554.57,
+    "altitude_y": 1449.57,
     "z": 1807.92,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1554.6m (天空岛)"
+    "height_desc": "+1449.6m (天空岛)"
   },
   {
     "id": "c_71",
@@ -1059,11 +1059,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Armor",
     "layer": 19,
     "x": 2243.1,
-    "altitude_y": -361.98,
+    "altitude_y": -466.98,
     "z": 1901.15,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-362.0m (地底深渊)"
+    "height_desc": "-467.0m (地底深渊)"
   },
   {
     "id": "c_72",
@@ -1074,11 +1074,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": 2079.55,
-    "altitude_y": -358.69,
+    "altitude_y": -463.69,
     "z": 1627.39,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-358.7m (地底深渊)"
+    "height_desc": "-463.7m (地底深渊)"
   },
   {
     "id": "c_73",
@@ -1089,11 +1089,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "KeyItem",
     "layer": 19,
     "x": 2077.77,
-    "altitude_y": -358.69,
+    "altitude_y": -463.69,
     "z": 1626.48,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-358.7m (地底深渊)"
+    "height_desc": "-463.7m (地底深渊)"
   },
   {
     "id": "c_74",
@@ -1104,11 +1104,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "KeyItem",
     "layer": 20,
     "x": 1126.41,
-    "altitude_y": 862.67,
+    "altitude_y": 757.67,
     "z": 3273.63,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+862.7m (天空岛)"
+    "height_desc": "+757.7m (天空岛)"
   },
   {
     "id": "c_75",
@@ -1119,11 +1119,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 2432.49,
-    "altitude_y": 98.31,
+    "altitude_y": -6.69,
     "z": 2301.35,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+98.3m (洞窟/水井内)"
+    "height_desc": "-6.7m (洞窟/水井内)"
   },
   {
     "id": "c_76",
@@ -1134,11 +1134,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": -3991.57,
-    "altitude_y": -374.25,
+    "altitude_y": -479.25,
     "z": 3463.29,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-374.2m (地底深渊)"
+    "height_desc": "-479.2m (地底深渊)"
   },
   {
     "id": "c_77",
@@ -1149,11 +1149,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Shield",
     "layer": 18,
     "x": -3186.0,
-    "altitude_y": 313.66,
+    "altitude_y": 208.66,
     "z": -1904.0,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+313.7m (地表大世界)"
+    "height_desc": "+208.7m (地表大世界)"
   },
   {
     "id": "c_78",
@@ -1164,11 +1164,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -3759.31,
-    "altitude_y": 276.24,
+    "altitude_y": 171.24,
     "z": -2215.11,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+276.2m (地表大世界)"
+    "height_desc": "+171.2m (地表大世界)"
   },
   {
     "id": "c_79",
@@ -1179,11 +1179,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Bow",
     "layer": 18,
     "x": -3228.94,
-    "altitude_y": 487.32,
+    "altitude_y": 382.32,
     "z": -2414.62,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+487.3m (地表大世界)"
+    "height_desc": "+382.3m (地表大世界)"
   },
   {
     "id": "c_80",
@@ -1194,11 +1194,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -1488.69,
-    "altitude_y": 279.04,
+    "altitude_y": 174.04,
     "z": -1487.59,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+279.0m (地表大世界)"
+    "height_desc": "+174.0m (地表大世界)"
   },
   {
     "id": "c_81",
@@ -1209,11 +1209,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -1382.28,
-    "altitude_y": 210.0,
+    "altitude_y": 105.0,
     "z": -1948.3,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+210.0m (地表大世界)"
+    "height_desc": "+105.0m (地表大世界)"
   },
   {
     "id": "c_82",
@@ -1224,11 +1224,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -1464.43,
-    "altitude_y": 269.89,
+    "altitude_y": 164.89,
     "z": -1277.35,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+269.9m (地表大世界)"
+    "height_desc": "+164.9m (地表大世界)"
   },
   {
     "id": "c_83",
@@ -1239,11 +1239,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -1450.37,
-    "altitude_y": 247.32,
+    "altitude_y": 142.32,
     "z": -1003.33,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+247.3m (地表大世界)"
+    "height_desc": "+142.3m (地表大世界)"
   },
   {
     "id": "c_84",
@@ -1254,11 +1254,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -1247.0,
-    "altitude_y": 208.34,
+    "altitude_y": 103.34,
     "z": -1851.5,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+208.3m (地表大世界)"
+    "height_desc": "+103.3m (地表大世界)"
   },
   {
     "id": "c_85",
@@ -1269,11 +1269,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": -2865.42,
-    "altitude_y": -826.41,
+    "altitude_y": -931.41,
     "z": -2920.35,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-826.4m (地底深渊)"
+    "height_desc": "-931.4m (地底深渊)"
   },
   {
     "id": "c_86",
@@ -1284,11 +1284,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "KeyItem",
     "layer": 19,
     "x": -2864.42,
-    "altitude_y": -826.41,
+    "altitude_y": -931.41,
     "z": -2918.62,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-826.4m (地底深渊)"
+    "height_desc": "-931.4m (地底深渊)"
   },
   {
     "id": "c_87",
@@ -1299,11 +1299,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 18,
     "x": 629.54,
-    "altitude_y": 181.13,
+    "altitude_y": 76.13,
     "z": 81.28,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+181.1m (地表大世界)"
+    "height_desc": "+76.1m (地表大世界)"
   },
   {
     "id": "c_88",
@@ -1314,11 +1314,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 893.13,
-    "altitude_y": 180.81,
+    "altitude_y": 75.81,
     "z": 37.57,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+180.8m (地表大世界)"
+    "height_desc": "+75.8m (地表大世界)"
   },
   {
     "id": "c_89",
@@ -1329,11 +1329,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": 2059.16,
-    "altitude_y": -815.46,
+    "altitude_y": -920.46,
     "z": -2617.94,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-815.5m (地底深渊)"
+    "height_desc": "-920.5m (地底深渊)"
   },
   {
     "id": "c_90",
@@ -1344,11 +1344,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Bow",
     "layer": 19,
     "x": 1998.29,
-    "altitude_y": -795.28,
+    "altitude_y": -900.28,
     "z": -2629.63,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-795.3m (地底深渊)"
+    "height_desc": "-900.3m (地底深渊)"
   },
   {
     "id": "c_91",
@@ -1359,11 +1359,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": 2078.17,
-    "altitude_y": -854.27,
+    "altitude_y": -959.27,
     "z": -2501.46,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-854.3m (地底深渊)"
+    "height_desc": "-959.3m (地底深渊)"
   },
   {
     "id": "c_92",
@@ -1374,11 +1374,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Armor",
     "layer": 18,
     "x": -2522.79,
-    "altitude_y": 74.8,
+    "altitude_y": -30.2,
     "z": 3738.85,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+74.8m (洞窟/水井内)"
+    "height_desc": "-30.2m (洞窟/水井内)"
   },
   {
     "id": "c_93",
@@ -1389,11 +1389,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Bow",
     "layer": 18,
     "x": -2551.98,
-    "altitude_y": 61.73,
+    "altitude_y": -43.27,
     "z": 3741.01,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+61.7m (洞窟/水井内)"
+    "height_desc": "-43.3m (洞窟/水井内)"
   },
   {
     "id": "c_94",
@@ -1404,11 +1404,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -2473.16,
-    "altitude_y": 63.31,
+    "altitude_y": -41.69,
     "z": 3703.98,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+63.3m (洞窟/水井内)"
+    "height_desc": "-41.7m (洞窟/水井内)"
   },
   {
     "id": "c_95",
@@ -1419,11 +1419,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Shield",
     "layer": 18,
     "x": -2556.63,
-    "altitude_y": 60.95,
+    "altitude_y": -44.05,
     "z": 3678.54,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+60.9m (洞窟/水井内)"
+    "height_desc": "-44.1m (洞窟/水井内)"
   },
   {
     "id": "c_96",
@@ -1434,11 +1434,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -2530.07,
-    "altitude_y": 65.19,
+    "altitude_y": -39.81,
     "z": 3723.03,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+65.2m (洞窟/水井内)"
+    "height_desc": "-39.8m (洞窟/水井内)"
   },
   {
     "id": "c_97",
@@ -1449,11 +1449,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": -1526.18,
-    "altitude_y": -572.77,
+    "altitude_y": -677.77,
     "z": -3698.34,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-572.8m (地底深渊)"
+    "height_desc": "-677.8m (地底深渊)"
   },
   {
     "id": "c_98",
@@ -1464,11 +1464,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -912.06,
-    "altitude_y": 190.61,
+    "altitude_y": 85.61,
     "z": -1609.99,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+190.6m (洞窟/水井内)"
+    "height_desc": "+85.6m (洞窟/水井内)"
   },
   {
     "id": "c_99",
@@ -1479,11 +1479,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -926.57,
-    "altitude_y": 174.27,
+    "altitude_y": 69.27,
     "z": -1613.76,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+174.3m (洞窟/水井内)"
+    "height_desc": "+69.3m (洞窟/水井内)"
   },
   {
     "id": "c_100",
@@ -1494,11 +1494,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "KeyItem",
     "layer": 20,
     "x": 1651.63,
-    "altitude_y": 679.41,
+    "altitude_y": 574.41,
     "z": 2190.7,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+679.4m (天空岛)"
+    "height_desc": "+574.4m (天空岛)"
   },
   {
     "id": "c_101",
@@ -1509,11 +1509,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 386.03,
-    "altitude_y": 270.38,
+    "altitude_y": 165.38,
     "z": -3170.75,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+270.4m (地表大世界)"
+    "height_desc": "+165.4m (地表大世界)"
   },
   {
     "id": "c_102",
@@ -1524,11 +1524,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": 1265.78,
-    "altitude_y": -346.05,
+    "altitude_y": -451.05,
     "z": 3612.88,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-346.0m (地底深渊)"
+    "height_desc": "-451.0m (地底深渊)"
   },
   {
     "id": "c_103",
@@ -1539,11 +1539,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -2308.5,
-    "altitude_y": 393.0,
+    "altitude_y": 288.0,
     "z": -1879.5,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+393.0m (地表大世界)"
+    "height_desc": "+288.0m (地表大世界)"
   },
   {
     "id": "c_104",
@@ -1554,11 +1554,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Shield",
     "layer": 18,
     "x": -2326.0,
-    "altitude_y": 400.98,
+    "altitude_y": 295.98,
     "z": -1934.5,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+401.0m (地表大世界)"
+    "height_desc": "+296.0m (地表大世界)"
   },
   {
     "id": "c_105",
@@ -1569,11 +1569,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": -4458.71,
-    "altitude_y": -756.24,
+    "altitude_y": -861.24,
     "z": 991.98,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-756.2m (地底深渊)"
+    "height_desc": "-861.2m (地底深渊)"
   },
   {
     "id": "c_106",
@@ -1584,11 +1584,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "KeyItem",
     "layer": 19,
     "x": -4457.43,
-    "altitude_y": -756.27,
+    "altitude_y": -861.27,
     "z": 993.51,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-756.3m (地底深渊)"
+    "height_desc": "-861.3m (地底深渊)"
   },
   {
     "id": "c_107",
@@ -1599,11 +1599,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -4412.97,
-    "altitude_y": 221.76,
+    "altitude_y": 116.76,
     "z": -1931.67,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+221.8m (地表大世界)"
+    "height_desc": "+116.8m (地表大世界)"
   },
   {
     "id": "c_108",
@@ -1614,11 +1614,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -3994.94,
-    "altitude_y": 364.06,
+    "altitude_y": 259.06,
     "z": -1987.89,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+364.1m (地表大世界)"
+    "height_desc": "+259.1m (地表大世界)"
   },
   {
     "id": "c_109",
@@ -1629,11 +1629,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -4014.39,
-    "altitude_y": 118.76,
+    "altitude_y": 13.76,
     "z": -2633.29,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+118.8m (洞窟/水井内)"
+    "height_desc": "+13.8m (洞窟/水井内)"
   },
   {
     "id": "c_110",
@@ -1644,11 +1644,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": 1479.5,
-    "altitude_y": -664.2,
+    "altitude_y": -769.2,
     "z": -2120.5,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-664.2m (地底深渊)"
+    "height_desc": "-769.2m (地底深渊)"
   },
   {
     "id": "c_111",
@@ -1659,11 +1659,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Bow",
     "layer": 19,
     "x": 1888.17,
-    "altitude_y": -735.13,
+    "altitude_y": -840.13,
     "z": -2735.33,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-735.1m (地底深渊)"
+    "height_desc": "-840.1m (地底深渊)"
   },
   {
     "id": "c_112",
@@ -1674,11 +1674,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": 1833.1,
-    "altitude_y": -676.34,
+    "altitude_y": -781.34,
     "z": -2968.73,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-676.3m (地底深渊)"
+    "height_desc": "-781.3m (地底深渊)"
   },
   {
     "id": "c_113",
@@ -1689,11 +1689,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": 1929.51,
-    "altitude_y": -706.4,
+    "altitude_y": -811.4,
     "z": -2313.06,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-706.4m (地底深渊)"
+    "height_desc": "-811.4m (地底深渊)"
   },
   {
     "id": "c_114",
@@ -1704,11 +1704,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Shield",
     "layer": 19,
     "x": 1610.29,
-    "altitude_y": -718.67,
+    "altitude_y": -823.67,
     "z": -3005.86,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-718.7m (地底深渊)"
+    "height_desc": "-823.7m (地底深渊)"
   },
   {
     "id": "c_115",
@@ -1719,11 +1719,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": 1729.44,
-    "altitude_y": -705.1,
+    "altitude_y": -810.1,
     "z": -2827.86,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-705.1m (地底深渊)"
+    "height_desc": "-810.1m (地底深渊)"
   },
   {
     "id": "c_116",
@@ -1734,11 +1734,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Bow",
     "layer": 19,
     "x": 1611.71,
-    "altitude_y": -735.32,
+    "altitude_y": -840.32,
     "z": -2837.9,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-735.3m (地底深渊)"
+    "height_desc": "-840.3m (地底深渊)"
   },
   {
     "id": "c_117",
@@ -1749,11 +1749,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": 1626.61,
-    "altitude_y": -718.59,
+    "altitude_y": -823.59,
     "z": -2348.13,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-718.6m (地底深渊)"
+    "height_desc": "-823.6m (地底深渊)"
   },
   {
     "id": "c_118",
@@ -1764,11 +1764,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": 1372.12,
-    "altitude_y": -740.17,
+    "altitude_y": -845.17,
     "z": -2244.84,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-740.2m (地底深渊)"
+    "height_desc": "-845.2m (地底深渊)"
   },
   {
     "id": "c_119",
@@ -1779,11 +1779,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 3085.75,
-    "altitude_y": 238.18,
+    "altitude_y": 133.18,
     "z": 2878.78,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+238.2m (地表大世界)"
+    "height_desc": "+133.2m (地表大世界)"
   },
   {
     "id": "c_120",
@@ -1794,11 +1794,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Armor",
     "layer": 18,
     "x": 3305.35,
-    "altitude_y": 218.06,
+    "altitude_y": 113.06,
     "z": 2293.49,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+218.1m (地表大世界)"
+    "height_desc": "+113.1m (地表大世界)"
   },
   {
     "id": "c_121",
@@ -1809,11 +1809,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": 2669.09,
-    "altitude_y": -486.28,
+    "altitude_y": -591.28,
     "z": -1577.81,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-486.3m (地底深渊)"
+    "height_desc": "-591.3m (地底深渊)"
   },
   {
     "id": "c_122",
@@ -1824,11 +1824,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "KeyItem",
     "layer": 19,
     "x": 2667.09,
-    "altitude_y": -486.28,
+    "altitude_y": -591.28,
     "z": -1577.82,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-486.3m (地底深渊)"
+    "height_desc": "-591.3m (地底深渊)"
   },
   {
     "id": "c_123",
@@ -1839,11 +1839,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 3062.41,
-    "altitude_y": 331.42,
+    "altitude_y": 226.42,
     "z": -723.99,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+331.4m (洞窟/水井内)"
+    "height_desc": "+226.4m (洞窟/水井内)"
   },
   {
     "id": "c_124",
@@ -1854,11 +1854,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 2208.81,
-    "altitude_y": 668.73,
+    "altitude_y": 563.73,
     "z": -2925.42,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+668.7m (地表大世界)"
+    "height_desc": "+563.7m (地表大世界)"
   },
   {
     "id": "c_125",
@@ -1869,11 +1869,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Rupee",
     "layer": 18,
     "x": 2205.37,
-    "altitude_y": 668.75,
+    "altitude_y": 563.75,
     "z": -2919.25,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+668.8m (地表大世界)"
+    "height_desc": "+563.8m (地表大世界)"
   },
   {
     "id": "c_126",
@@ -1884,11 +1884,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 2207.38,
-    "altitude_y": 668.74,
+    "altitude_y": 563.74,
     "z": -2921.69,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+668.7m (地表大世界)"
+    "height_desc": "+563.7m (地表大世界)"
   },
   {
     "id": "c_127",
@@ -1899,11 +1899,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 2951.92,
-    "altitude_y": 187.13,
+    "altitude_y": 82.13,
     "z": 96.77,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+187.1m (洞窟/水井内)"
+    "height_desc": "+82.1m (洞窟/水井内)"
   },
   {
     "id": "c_128",
@@ -1914,11 +1914,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": -2682.22,
-    "altitude_y": -634.43,
+    "altitude_y": -739.43,
     "z": -805.9,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-634.4m (地底深渊)"
+    "height_desc": "-739.4m (地底深渊)"
   },
   {
     "id": "c_129",
@@ -1929,11 +1929,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": -2373.83,
-    "altitude_y": -441.62,
+    "altitude_y": -546.62,
     "z": -700.72,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-441.6m (地底深渊)"
+    "height_desc": "-546.6m (地底深渊)"
   },
   {
     "id": "c_130",
@@ -1944,11 +1944,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": -2561.74,
-    "altitude_y": -495.23,
+    "altitude_y": -600.23,
     "z": -311.23,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-495.2m (地底深渊)"
+    "height_desc": "-600.2m (地底深渊)"
   },
   {
     "id": "c_131",
@@ -1959,11 +1959,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -4377.15,
-    "altitude_y": 150.69,
+    "altitude_y": 45.69,
     "z": 2575.96,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+150.7m (地表大世界)"
+    "height_desc": "+45.7m (地表大世界)"
   },
   {
     "id": "c_132",
@@ -1974,11 +1974,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 18,
     "x": -4163.83,
-    "altitude_y": 157.39,
+    "altitude_y": 52.39,
     "z": 2083.24,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+157.4m (地表大世界)"
+    "height_desc": "+52.4m (地表大世界)"
   },
   {
     "id": "c_133",
@@ -1989,11 +1989,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -4305.31,
-    "altitude_y": 142.27,
+    "altitude_y": 37.27,
     "z": 2826.25,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+142.3m (地表大世界)"
+    "height_desc": "+37.3m (地表大世界)"
   },
   {
     "id": "c_134",
@@ -2004,11 +2004,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -4303.02,
-    "altitude_y": 142.32,
+    "altitude_y": 37.32,
     "z": 2824.45,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+142.3m (地表大世界)"
+    "height_desc": "+37.3m (地表大世界)"
   },
   {
     "id": "c_135",
@@ -2019,11 +2019,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -4633.82,
-    "altitude_y": 142.85,
+    "altitude_y": 37.85,
     "z": 2411.76,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+142.9m (地表大世界)"
+    "height_desc": "+37.9m (地表大世界)"
   },
   {
     "id": "c_136",
@@ -2034,11 +2034,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Shield",
     "layer": 18,
     "x": 1374.07,
-    "altitude_y": 524.98,
+    "altitude_y": 419.98,
     "z": -1959.97,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+525.0m (地表大世界)"
+    "height_desc": "+420.0m (地表大世界)"
   },
   {
     "id": "c_137",
@@ -2049,11 +2049,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Rupee",
     "layer": 18,
     "x": 1371.3,
-    "altitude_y": 525.0,
+    "altitude_y": 420.0,
     "z": -1953.47,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+525.0m (地表大世界)"
+    "height_desc": "+420.0m (地表大世界)"
   },
   {
     "id": "c_138",
@@ -2064,11 +2064,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Bow",
     "layer": 18,
     "x": 1373.04,
-    "altitude_y": 524.99,
+    "altitude_y": 419.99,
     "z": -1956.1,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+525.0m (地表大世界)"
+    "height_desc": "+420.0m (地表大世界)"
   },
   {
     "id": "c_139",
@@ -2079,11 +2079,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 1253.87,
-    "altitude_y": 490.6,
+    "altitude_y": 385.6,
     "z": -1248.13,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+490.6m (地表大世界)"
+    "height_desc": "+385.6m (地表大世界)"
   },
   {
     "id": "c_140",
@@ -2094,11 +2094,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -214.04,
-    "altitude_y": 51.74,
+    "altitude_y": -53.26,
     "z": -527.88,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+51.7m (洞窟/水井内)"
+    "height_desc": "-53.3m (洞窟/水井内)"
   },
   {
     "id": "c_141",
@@ -2109,11 +2109,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Armor",
     "layer": 18,
     "x": -232.08,
-    "altitude_y": 66.42,
+    "altitude_y": -38.58,
     "z": -467.66,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+66.4m (洞窟/水井内)"
+    "height_desc": "-38.6m (洞窟/水井内)"
   },
   {
     "id": "c_142",
@@ -2124,11 +2124,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -213.52,
-    "altitude_y": 78.4,
+    "altitude_y": -26.6,
     "z": -455.95,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+78.4m (洞窟/水井内)"
+    "height_desc": "-26.6m (洞窟/水井内)"
   },
   {
     "id": "c_143",
@@ -2139,11 +2139,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Armor",
     "layer": 18,
     "x": -267.6,
-    "altitude_y": 69.87,
+    "altitude_y": -35.13,
     "z": -637.02,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+69.9m (洞窟/水井内)"
+    "height_desc": "-35.1m (洞窟/水井内)"
   },
   {
     "id": "c_144",
@@ -2154,11 +2154,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Armor",
     "layer": 18,
     "x": -306.4,
-    "altitude_y": 99.27,
+    "altitude_y": -5.73,
     "z": -280.93,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+99.3m (洞窟/水井内)"
+    "height_desc": "-5.7m (洞窟/水井内)"
   },
   {
     "id": "c_145",
@@ -2169,11 +2169,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -323.86,
-    "altitude_y": 99.55,
+    "altitude_y": -5.45,
     "z": -306.82,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+99.6m (洞窟/水井内)"
+    "height_desc": "-5.4m (洞窟/水井内)"
   },
   {
     "id": "c_146",
@@ -2184,11 +2184,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Shield",
     "layer": 18,
     "x": 2348.57,
-    "altitude_y": 143.56,
+    "altitude_y": 38.56,
     "z": 1753.7,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+143.6m (地表大世界)"
+    "height_desc": "+38.6m (地表大世界)"
   },
   {
     "id": "c_147",
@@ -2199,11 +2199,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 18,
     "x": 2257.33,
-    "altitude_y": 131.84,
+    "altitude_y": 26.84,
     "z": 1433.35,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+131.8m (地表大世界)"
+    "height_desc": "+26.8m (地表大世界)"
   },
   {
     "id": "c_148",
@@ -2214,11 +2214,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Bow",
     "layer": 18,
     "x": 2016.38,
-    "altitude_y": 418.37,
+    "altitude_y": 313.37,
     "z": 2732.92,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+418.4m (地表大世界)"
+    "height_desc": "+313.4m (地表大世界)"
   },
   {
     "id": "c_149",
@@ -2229,11 +2229,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Shield",
     "layer": 18,
     "x": 2790.88,
-    "altitude_y": 330.72,
+    "altitude_y": 225.72,
     "z": 2567.86,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+330.7m (地表大世界)"
+    "height_desc": "+225.7m (地表大世界)"
   },
   {
     "id": "c_150",
@@ -2244,11 +2244,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 2787.73,
-    "altitude_y": 208.51,
+    "altitude_y": 103.51,
     "z": 2255.21,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+208.5m (地表大世界)"
+    "height_desc": "+103.5m (地表大世界)"
   },
   {
     "id": "c_151",
@@ -2259,11 +2259,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 2813.92,
-    "altitude_y": 213.9,
+    "altitude_y": 108.9,
     "z": 2244.32,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+213.9m (地表大世界)"
+    "height_desc": "+108.9m (地表大世界)"
   },
   {
     "id": "c_152",
@@ -2274,11 +2274,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 2812.36,
-    "altitude_y": 213.88,
+    "altitude_y": 108.88,
     "z": 2249.95,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+213.9m (地表大世界)"
+    "height_desc": "+108.9m (地表大世界)"
   },
   {
     "id": "c_153",
@@ -2289,11 +2289,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 2812.7,
-    "altitude_y": 213.88,
+    "altitude_y": 108.88,
     "z": 2247.12,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+213.9m (地表大世界)"
+    "height_desc": "+108.9m (地表大世界)"
   },
   {
     "id": "c_154",
@@ -2304,11 +2304,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Bow",
     "layer": 18,
     "x": 2823.23,
-    "altitude_y": 119.38,
+    "altitude_y": 14.38,
     "z": 2126.71,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+119.4m (地表大世界)"
+    "height_desc": "+14.4m (地表大世界)"
   },
   {
     "id": "c_155",
@@ -2319,11 +2319,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 2937.5,
-    "altitude_y": 228.0,
+    "altitude_y": 123.0,
     "z": 2515.0,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+228.0m (地表大世界)"
+    "height_desc": "+123.0m (地表大世界)"
   },
   {
     "id": "c_156",
@@ -2334,11 +2334,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Bow",
     "layer": 18,
     "x": 2604.48,
-    "altitude_y": 349.0,
+    "altitude_y": 244.0,
     "z": 2766.14,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+349.0m (地表大世界)"
+    "height_desc": "+244.0m (地表大世界)"
   },
   {
     "id": "c_157",
@@ -2349,11 +2349,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Bow",
     "layer": 18,
     "x": 2328.45,
-    "altitude_y": 199.55,
+    "altitude_y": 94.55,
     "z": 2084.95,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+199.5m (地表大世界)"
+    "height_desc": "+94.5m (地表大世界)"
   },
   {
     "id": "c_158",
@@ -2364,11 +2364,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Bow",
     "layer": 18,
     "x": 2649.89,
-    "altitude_y": 225.6,
+    "altitude_y": 120.6,
     "z": 2413.08,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+225.6m (地表大世界)"
+    "height_desc": "+120.6m (地表大世界)"
   },
   {
     "id": "c_159",
@@ -2379,11 +2379,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 18,
     "x": 2991.86,
-    "altitude_y": 116.96,
+    "altitude_y": 11.96,
     "z": 2266.94,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+117.0m (地表大世界)"
+    "height_desc": "+12.0m (地表大世界)"
   },
   {
     "id": "c_160",
@@ -2394,11 +2394,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Shield",
     "layer": 18,
     "x": 2303.64,
-    "altitude_y": 274.47,
+    "altitude_y": 169.47,
     "z": 2372.69,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+274.5m (地表大世界)"
+    "height_desc": "+169.5m (地表大世界)"
   },
   {
     "id": "c_161",
@@ -2409,11 +2409,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 20,
     "x": 2098.69,
-    "altitude_y": 846.66,
+    "altitude_y": 741.66,
     "z": -3119.02,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+846.7m (天空岛)"
+    "height_desc": "+741.7m (天空岛)"
   },
   {
     "id": "c_162",
@@ -2424,11 +2424,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -4635.09,
-    "altitude_y": 144.33,
+    "altitude_y": 39.33,
     "z": 3862.14,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+144.3m (地表大世界)"
+    "height_desc": "+39.3m (地表大世界)"
   },
   {
     "id": "c_163",
@@ -2439,11 +2439,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Armor",
     "layer": 18,
     "x": 3430.07,
-    "altitude_y": -20.26,
+    "altitude_y": -125.26,
     "z": -3297.83,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "-20.3m (洞窟/水井内)"
+    "height_desc": "-125.3m (洞窟/水井内)"
   },
   {
     "id": "c_164",
@@ -2454,11 +2454,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 1442.74,
-    "altitude_y": 514.47,
+    "altitude_y": 409.47,
     "z": -2595.1,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+514.5m (地表大世界)"
+    "height_desc": "+409.5m (地表大世界)"
   },
   {
     "id": "c_165",
@@ -2469,11 +2469,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 1480.1,
-    "altitude_y": 508.47,
+    "altitude_y": 403.47,
     "z": -2610.51,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+508.5m (地表大世界)"
+    "height_desc": "+403.5m (地表大世界)"
   },
   {
     "id": "c_166",
@@ -2484,11 +2484,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 1557.03,
-    "altitude_y": 423.81,
+    "altitude_y": 318.81,
     "z": -1962.11,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+423.8m (地表大世界)"
+    "height_desc": "+318.8m (地表大世界)"
   },
   {
     "id": "c_167",
@@ -2499,11 +2499,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 1669.71,
-    "altitude_y": 537.63,
+    "altitude_y": 432.63,
     "z": -2246.86,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+537.6m (地表大世界)"
+    "height_desc": "+432.6m (地表大世界)"
   },
   {
     "id": "c_168",
@@ -2514,11 +2514,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": 1673.84,
-    "altitude_y": -740.17,
+    "altitude_y": -845.17,
     "z": -2724.58,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-740.2m (地底深渊)"
+    "height_desc": "-845.2m (地底深渊)"
   },
   {
     "id": "c_169",
@@ -2529,11 +2529,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Shield",
     "layer": 19,
     "x": 1936.13,
-    "altitude_y": -764.51,
+    "altitude_y": -869.51,
     "z": -2679.77,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-764.5m (地底深渊)"
+    "height_desc": "-869.5m (地底深渊)"
   },
   {
     "id": "c_170",
@@ -2544,11 +2544,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Shield",
     "layer": 19,
     "x": 1982.13,
-    "altitude_y": -773.18,
+    "altitude_y": -878.18,
     "z": -2445.67,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-773.2m (地底深渊)"
+    "height_desc": "-878.2m (地底深渊)"
   },
   {
     "id": "c_171",
@@ -2559,11 +2559,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": 1547.58,
-    "altitude_y": -737.27,
+    "altitude_y": -842.27,
     "z": -2706.85,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-737.3m (地底深渊)"
+    "height_desc": "-842.3m (地底深渊)"
   },
   {
     "id": "c_172",
@@ -2574,11 +2574,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": 1913.51,
-    "altitude_y": -742.89,
+    "altitude_y": -847.89,
     "z": -2493.76,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-742.9m (地底深渊)"
+    "height_desc": "-847.9m (地底深渊)"
   },
   {
     "id": "c_173",
@@ -2589,11 +2589,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": 1934.28,
-    "altitude_y": -744.03,
+    "altitude_y": -849.03,
     "z": -2752.21,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-744.0m (地底深渊)"
+    "height_desc": "-849.0m (地底深渊)"
   },
   {
     "id": "c_174",
@@ -2604,11 +2604,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": 1793.0,
-    "altitude_y": -737.21,
+    "altitude_y": -842.21,
     "z": -2714.5,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-737.2m (地底深渊)"
+    "height_desc": "-842.2m (地底深渊)"
   },
   {
     "id": "c_175",
@@ -2619,11 +2619,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": 1768.73,
-    "altitude_y": -736.64,
+    "altitude_y": -841.64,
     "z": -2772.5,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-736.6m (地底深渊)"
+    "height_desc": "-841.6m (地底深渊)"
   },
   {
     "id": "c_176",
@@ -2634,11 +2634,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 1365.49,
-    "altitude_y": 382.72,
+    "altitude_y": 277.72,
     "z": -2142.88,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+382.7m (洞窟/水井内)"
+    "height_desc": "+277.7m (洞窟/水井内)"
   },
   {
     "id": "c_177",
@@ -2649,11 +2649,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 1333.33,
-    "altitude_y": 396.92,
+    "altitude_y": 291.92,
     "z": -2232.29,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+396.9m (洞窟/水井内)"
+    "height_desc": "+291.9m (洞窟/水井内)"
   },
   {
     "id": "c_178",
@@ -2664,11 +2664,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Armor",
     "layer": 19,
     "x": 4562.77,
-    "altitude_y": -366.31,
+    "altitude_y": -471.31,
     "z": 3619.85,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-366.3m (地底深渊)"
+    "height_desc": "-471.3m (地底深渊)"
   },
   {
     "id": "c_179",
@@ -2679,11 +2679,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Armor",
     "layer": 19,
     "x": -4879.21,
-    "altitude_y": -353.16,
+    "altitude_y": -458.16,
     "z": 3719.52,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-353.2m (地底深渊)"
+    "height_desc": "-458.2m (地底深渊)"
   },
   {
     "id": "c_180",
@@ -2694,11 +2694,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Rupee",
     "layer": 18,
     "x": 2667.63,
-    "altitude_y": 468.97,
+    "altitude_y": 363.97,
     "z": -3460.01,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+469.0m (地表大世界)"
+    "height_desc": "+364.0m (地表大世界)"
   },
   {
     "id": "c_181",
@@ -2709,11 +2709,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 2231.01,
-    "altitude_y": 492.23,
+    "altitude_y": 387.23,
     "z": -3216.62,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+492.2m (地表大世界)"
+    "height_desc": "+387.2m (地表大世界)"
   },
   {
     "id": "c_182",
@@ -2724,11 +2724,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": 4022.55,
-    "altitude_y": -476.45,
+    "altitude_y": -581.45,
     "z": -1520.35,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-476.4m (地底深渊)"
+    "height_desc": "-581.4m (地底深渊)"
   },
   {
     "id": "c_183",
@@ -2739,11 +2739,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Armor",
     "layer": 19,
     "x": 3319.5,
-    "altitude_y": -750.93,
+    "altitude_y": -855.93,
     "z": -1507.0,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-750.9m (地底深渊)"
+    "height_desc": "-855.9m (地底深渊)"
   },
   {
     "id": "c_184",
@@ -2754,11 +2754,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": 3270.64,
-    "altitude_y": -550.78,
+    "altitude_y": -655.78,
     "z": -1202.03,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-550.8m (地底深渊)"
+    "height_desc": "-655.8m (地底深渊)"
   },
   {
     "id": "c_185",
@@ -2769,11 +2769,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": 3033.2,
-    "altitude_y": -617.86,
+    "altitude_y": -722.86,
     "z": -1112.73,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-617.9m (地底深渊)"
+    "height_desc": "-722.9m (地底深渊)"
   },
   {
     "id": "c_186",
@@ -2784,11 +2784,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": 3874.81,
-    "altitude_y": -579.91,
+    "altitude_y": -684.91,
     "z": -1314.27,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-579.9m (地底深渊)"
+    "height_desc": "-684.9m (地底深渊)"
   },
   {
     "id": "c_187",
@@ -2799,11 +2799,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 2719.28,
-    "altitude_y": 224.96,
+    "altitude_y": 119.96,
     "z": -198.82,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+225.0m (地表大世界)"
+    "height_desc": "+120.0m (地表大世界)"
   },
   {
     "id": "c_188",
@@ -2814,11 +2814,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 2508.27,
-    "altitude_y": 156.52,
+    "altitude_y": 51.52,
     "z": -107.81,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+156.5m (地表大世界)"
+    "height_desc": "+51.5m (地表大世界)"
   },
   {
     "id": "c_189",
@@ -2829,11 +2829,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Rupee",
     "layer": 18,
     "x": 2208.95,
-    "altitude_y": 177.71,
+    "altitude_y": 72.71,
     "z": -109.31,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+177.7m (地表大世界)"
+    "height_desc": "+72.7m (地表大世界)"
   },
   {
     "id": "c_190",
@@ -2844,11 +2844,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 2206.13,
-    "altitude_y": 114.64,
+    "altitude_y": 9.64,
     "z": -190.99,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+114.6m (地表大世界)"
+    "height_desc": "+9.6m (地表大世界)"
   },
   {
     "id": "c_191",
@@ -2859,11 +2859,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 18,
     "x": 2529.79,
-    "altitude_y": 256.02,
+    "altitude_y": 151.02,
     "z": -437.22,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+256.0m (地表大世界)"
+    "height_desc": "+151.0m (地表大世界)"
   },
   {
     "id": "c_192",
@@ -2874,11 +2874,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 2878.03,
-    "altitude_y": 477.38,
+    "altitude_y": 372.38,
     "z": -678.12,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+477.4m (地表大世界)"
+    "height_desc": "+372.4m (地表大世界)"
   },
   {
     "id": "c_193",
@@ -2889,11 +2889,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 2818.0,
-    "altitude_y": 489.75,
+    "altitude_y": 384.75,
     "z": -554.0,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+489.8m (地表大世界)"
+    "height_desc": "+384.8m (地表大世界)"
   },
   {
     "id": "c_194",
@@ -2904,11 +2904,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 2895.75,
-    "altitude_y": 465.88,
+    "altitude_y": 360.88,
     "z": -751.2,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+465.9m (地表大世界)"
+    "height_desc": "+360.9m (地表大世界)"
   },
   {
     "id": "c_195",
@@ -2919,11 +2919,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 2840.31,
-    "altitude_y": 274.64,
+    "altitude_y": 169.64,
     "z": -192.88,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+274.6m (地表大世界)"
+    "height_desc": "+169.6m (地表大世界)"
   },
   {
     "id": "c_196",
@@ -2934,11 +2934,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Shield",
     "layer": 18,
     "x": 2658.0,
-    "altitude_y": 203.75,
+    "altitude_y": 98.75,
     "z": -85.25,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+203.8m (地表大世界)"
+    "height_desc": "+98.8m (地表大世界)"
   },
   {
     "id": "c_197",
@@ -2949,11 +2949,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 2173.31,
-    "altitude_y": 142.26,
+    "altitude_y": 37.26,
     "z": -71.91,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+142.3m (地表大世界)"
+    "height_desc": "+37.3m (地表大世界)"
   },
   {
     "id": "c_198",
@@ -2964,11 +2964,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 18,
     "x": 2751.9,
-    "altitude_y": 303.66,
+    "altitude_y": 198.66,
     "z": -768.36,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+303.7m (地表大世界)"
+    "height_desc": "+198.7m (地表大世界)"
   },
   {
     "id": "c_199",
@@ -2979,11 +2979,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": 4113.09,
-    "altitude_y": -505.51,
+    "altitude_y": -610.51,
     "z": -3214.07,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-505.5m (地底深渊)"
+    "height_desc": "-610.5m (地底深渊)"
   },
   {
     "id": "c_200",
@@ -2994,11 +2994,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "KeyItem",
     "layer": 19,
     "x": 4111.82,
-    "altitude_y": -505.51,
+    "altitude_y": -610.51,
     "z": -3215.62,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-505.5m (地底深渊)"
+    "height_desc": "-610.5m (地底深渊)"
   },
   {
     "id": "c_201",
@@ -3009,11 +3009,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Armor",
     "layer": 19,
     "x": 4654.9,
-    "altitude_y": -345.66,
+    "altitude_y": -450.66,
     "z": -3697.0,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-345.7m (地底深渊)"
+    "height_desc": "-450.7m (地底深渊)"
   },
   {
     "id": "c_202",
@@ -3024,11 +3024,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 19,
     "x": 4610.78,
-    "altitude_y": -340.47,
+    "altitude_y": -445.47,
     "z": -3697.0,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-340.5m (地底深渊)"
+    "height_desc": "-445.5m (地底深渊)"
   },
   {
     "id": "c_203",
@@ -3039,11 +3039,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 19,
     "x": 4654.9,
-    "altitude_y": -295.47,
+    "altitude_y": -400.47,
     "z": -3624.5,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-295.5m (地底深渊)"
+    "height_desc": "-400.5m (地底深渊)"
   },
   {
     "id": "c_204",
@@ -3054,11 +3054,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 19,
     "x": 4654.9,
-    "altitude_y": -335.47,
+    "altitude_y": -440.47,
     "z": -3752.0,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-335.5m (地底深渊)"
+    "height_desc": "-440.5m (地底深渊)"
   },
   {
     "id": "c_205",
@@ -3069,11 +3069,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Bow",
     "layer": 19,
     "x": 4698.92,
-    "altitude_y": -340.47,
+    "altitude_y": -445.47,
     "z": -3697.0,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-340.5m (地底深渊)"
+    "height_desc": "-445.5m (地底深渊)"
   },
   {
     "id": "c_206",
@@ -3084,11 +3084,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": 4627.4,
-    "altitude_y": -310.47,
+    "altitude_y": -415.47,
     "z": -3674.5,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-310.5m (地底深渊)"
+    "height_desc": "-415.5m (地底深渊)"
   },
   {
     "id": "c_207",
@@ -3099,11 +3099,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 908.84,
-    "altitude_y": 350.88,
+    "altitude_y": 245.88,
     "z": -2913.87,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+350.9m (地表大世界)"
+    "height_desc": "+245.9m (地表大世界)"
   },
   {
     "id": "c_208",
@@ -3114,11 +3114,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 312.39,
-    "altitude_y": 297.79,
+    "altitude_y": 192.79,
     "z": -2912.29,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+297.8m (地表大世界)"
+    "height_desc": "+192.8m (地表大世界)"
   },
   {
     "id": "c_209",
@@ -3129,11 +3129,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 806.86,
-    "altitude_y": 283.0,
+    "altitude_y": 178.0,
     "z": -2306.93,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+283.0m (地表大世界)"
+    "height_desc": "+178.0m (地表大世界)"
   },
   {
     "id": "c_210",
@@ -3144,11 +3144,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 721.02,
-    "altitude_y": 284.69,
+    "altitude_y": 179.69,
     "z": -2393.94,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+284.7m (地表大世界)"
+    "height_desc": "+179.7m (地表大世界)"
   },
   {
     "id": "c_211",
@@ -3159,11 +3159,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 839.72,
-    "altitude_y": 291.83,
+    "altitude_y": 186.83,
     "z": -2354.8,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+291.8m (地表大世界)"
+    "height_desc": "+186.8m (地表大世界)"
   },
   {
     "id": "c_212",
@@ -3174,11 +3174,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -2182.25,
-    "altitude_y": 163.65,
+    "altitude_y": 58.65,
     "z": 1704.33,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+163.6m (地表大世界)"
+    "height_desc": "+58.6m (地表大世界)"
   },
   {
     "id": "c_213",
@@ -3189,11 +3189,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Rupee",
     "layer": 18,
     "x": -2363.19,
-    "altitude_y": 164.71,
+    "altitude_y": 59.71,
     "z": 1843.47,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+164.7m (地表大世界)"
+    "height_desc": "+59.7m (地表大世界)"
   },
   {
     "id": "c_214",
@@ -3204,11 +3204,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -2425.12,
-    "altitude_y": 166.37,
+    "altitude_y": 61.37,
     "z": 1931.94,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+166.4m (地表大世界)"
+    "height_desc": "+61.4m (地表大世界)"
   },
   {
     "id": "c_215",
@@ -3219,11 +3219,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -2922.42,
-    "altitude_y": 672.42,
+    "altitude_y": 567.42,
     "z": 1295.48,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+672.4m (地表大世界)"
+    "height_desc": "+567.4m (地表大世界)"
   },
   {
     "id": "c_216",
@@ -3234,11 +3234,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": -4105.57,
-    "altitude_y": -382.92,
+    "altitude_y": -487.92,
     "z": 2809.15,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-382.9m (地底深渊)"
+    "height_desc": "-487.9m (地底深渊)"
   },
   {
     "id": "c_217",
@@ -3249,11 +3249,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -4434.33,
-    "altitude_y": 329.86,
+    "altitude_y": 224.86,
     "z": -3739.4,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+329.9m (洞窟/水井内)"
+    "height_desc": "+224.9m (洞窟/水井内)"
   },
   {
     "id": "c_218",
@@ -3264,11 +3264,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Armor",
     "layer": 18,
     "x": -1214.24,
-    "altitude_y": 174.85,
+    "altitude_y": 69.85,
     "z": -773.97,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+174.8m (洞窟/水井内)"
+    "height_desc": "+69.8m (洞窟/水井内)"
   },
   {
     "id": "c_219",
@@ -3279,11 +3279,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 18,
     "x": 2102.36,
-    "altitude_y": 132.14,
+    "altitude_y": 27.14,
     "z": 3931.02,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+132.1m (地表大世界)"
+    "height_desc": "+27.1m (地表大世界)"
   },
   {
     "id": "c_220",
@@ -3294,11 +3294,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -2594.66,
-    "altitude_y": 185.37,
+    "altitude_y": 80.37,
     "z": 2485.48,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+185.4m (洞窟/水井内)"
+    "height_desc": "+80.4m (洞窟/水井内)"
   },
   {
     "id": "c_221",
@@ -3309,11 +3309,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": 2544.44,
-    "altitude_y": -370.62,
+    "altitude_y": -475.62,
     "z": 544.77,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-370.6m (地底深渊)"
+    "height_desc": "-475.6m (地底深渊)"
   },
   {
     "id": "c_222",
@@ -3324,11 +3324,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "KeyItem",
     "layer": 19,
     "x": 2542.47,
-    "altitude_y": -370.62,
+    "altitude_y": -475.62,
     "z": 545.1,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-370.6m (地底深渊)"
+    "height_desc": "-475.6m (地底深渊)"
   },
   {
     "id": "c_223",
@@ -3339,11 +3339,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": 2194.42,
-    "altitude_y": -488.8,
+    "altitude_y": -593.8,
     "z": 649.28,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-488.8m (地底深渊)"
+    "height_desc": "-593.8m (地底深渊)"
   },
   {
     "id": "c_224",
@@ -3354,11 +3354,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 375.44,
-    "altitude_y": 106.1,
+    "altitude_y": 1.1,
     "z": 1095.59,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+106.1m (洞窟/水井内)"
+    "height_desc": "+1.1m (洞窟/水井内)"
   },
   {
     "id": "c_225",
@@ -3369,11 +3369,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Armor",
     "layer": 18,
     "x": -2268.05,
-    "altitude_y": 187.82,
+    "altitude_y": 82.82,
     "z": -841.44,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+187.8m (洞窟/水井内)"
+    "height_desc": "+82.8m (洞窟/水井内)"
   },
   {
     "id": "c_226",
@@ -3384,11 +3384,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 567.16,
-    "altitude_y": 158.42,
+    "altitude_y": 53.42,
     "z": 2149.95,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+158.4m (洞窟/水井内)"
+    "height_desc": "+53.4m (洞窟/水井内)"
   },
   {
     "id": "c_227",
@@ -3399,11 +3399,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Empty",
     "layer": 18,
     "x": 586.37,
-    "altitude_y": 157.98,
+    "altitude_y": 52.98,
     "z": 2120.34,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+158.0m (洞窟/水井内)"
+    "height_desc": "+53.0m (洞窟/水井内)"
   },
   {
     "id": "c_228",
@@ -3414,11 +3414,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 2794.72,
-    "altitude_y": 296.69,
+    "altitude_y": 191.69,
     "z": -561.48,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+296.7m (洞窟/水井内)"
+    "height_desc": "+191.7m (洞窟/水井内)"
   },
   {
     "id": "c_229",
@@ -3429,11 +3429,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Armor",
     "layer": 19,
     "x": 4655.29,
-    "altitude_y": -617.26,
+    "altitude_y": -722.26,
     "z": -620.71,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-617.3m (地底深渊)"
+    "height_desc": "-722.3m (地底深渊)"
   },
   {
     "id": "c_230",
@@ -3444,11 +3444,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": 4040.45,
-    "altitude_y": -565.61,
+    "altitude_y": -670.61,
     "z": -741.45,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-565.6m (地底深渊)"
+    "height_desc": "-670.6m (地底深渊)"
   },
   {
     "id": "c_231",
@@ -3459,11 +3459,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": -972.8,
-    "altitude_y": -445.45,
+    "altitude_y": -550.45,
     "z": -1357.18,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-445.5m (地底深渊)"
+    "height_desc": "-550.5m (地底深渊)"
   },
   {
     "id": "c_232",
@@ -3474,11 +3474,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Armor",
     "layer": 19,
     "x": -2001.29,
-    "altitude_y": -609.78,
+    "altitude_y": -714.78,
     "z": -1309.06,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-609.8m (地底深渊)"
+    "height_desc": "-714.8m (地底深渊)"
   },
   {
     "id": "c_233",
@@ -3489,11 +3489,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": -1131.41,
-    "altitude_y": -442.56,
+    "altitude_y": -547.56,
     "z": -1803.78,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-442.6m (地底深渊)"
+    "height_desc": "-547.6m (地底深渊)"
   },
   {
     "id": "c_234",
@@ -3504,11 +3504,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 4419.24,
-    "altitude_y": 224.63,
+    "altitude_y": 119.63,
     "z": -720.04,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+224.6m (洞窟/水井内)"
+    "height_desc": "+119.6m (洞窟/水井内)"
   },
   {
     "id": "c_235",
@@ -3519,11 +3519,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 18,
     "x": 2460.75,
-    "altitude_y": 335.32,
+    "altitude_y": 230.32,
     "z": 791.72,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+335.3m (地表大世界)"
+    "height_desc": "+230.3m (地表大世界)"
   },
   {
     "id": "c_236",
@@ -3534,11 +3534,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 2344.31,
-    "altitude_y": 251.06,
+    "altitude_y": 146.06,
     "z": 364.1,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+251.1m (地表大世界)"
+    "height_desc": "+146.1m (地表大世界)"
   },
   {
     "id": "c_237",
@@ -3549,11 +3549,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": 3355.19,
-    "altitude_y": -403.93,
+    "altitude_y": -508.93,
     "z": -3078.17,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-403.9m (地底深渊)"
+    "height_desc": "-508.9m (地底深渊)"
   },
   {
     "id": "c_238",
@@ -3564,11 +3564,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": 3262.0,
-    "altitude_y": -339.6,
+    "altitude_y": -444.6,
     "z": -3280.81,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-339.6m (地底深渊)"
+    "height_desc": "-444.6m (地底深渊)"
   },
   {
     "id": "c_239",
@@ -3579,11 +3579,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Armor",
     "layer": 20,
     "x": 4468.06,
-    "altitude_y": 1519.37,
+    "altitude_y": 1414.37,
     "z": -2025.77,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1519.4m (天空岛)"
+    "height_desc": "+1414.4m (天空岛)"
   },
   {
     "id": "c_240",
@@ -3594,11 +3594,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -719.92,
-    "altitude_y": 254.81,
+    "altitude_y": 149.81,
     "z": -1672.16,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+254.8m (地表大世界)"
+    "height_desc": "+149.8m (地表大世界)"
   },
   {
     "id": "c_241",
@@ -3609,11 +3609,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -906.3,
-    "altitude_y": 225.26,
+    "altitude_y": 120.26,
     "z": -1507.28,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+225.3m (地表大世界)"
+    "height_desc": "+120.3m (地表大世界)"
   },
   {
     "id": "c_242",
@@ -3624,11 +3624,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Shield",
     "layer": 18,
     "x": -931.5,
-    "altitude_y": 210.8,
+    "altitude_y": 105.8,
     "z": -1626.0,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+210.8m (地表大世界)"
+    "height_desc": "+105.8m (地表大世界)"
   },
   {
     "id": "c_243",
@@ -3639,11 +3639,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -797.0,
-    "altitude_y": 217.76,
+    "altitude_y": 112.76,
     "z": -1899.62,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+217.8m (地表大世界)"
+    "height_desc": "+112.8m (地表大世界)"
   },
   {
     "id": "c_244",
@@ -3654,11 +3654,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Rupee",
     "layer": 18,
     "x": -168.67,
-    "altitude_y": 330.76,
+    "altitude_y": 225.76,
     "z": -1116.28,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+330.8m (地表大世界)"
+    "height_desc": "+225.8m (地表大世界)"
   },
   {
     "id": "c_245",
@@ -3669,11 +3669,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -235.55,
-    "altitude_y": 484.76,
+    "altitude_y": 379.76,
     "z": -1051.45,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+484.8m (地表大世界)"
+    "height_desc": "+379.8m (地表大世界)"
   },
   {
     "id": "c_246",
@@ -3684,11 +3684,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -178.92,
-    "altitude_y": 378.58,
+    "altitude_y": 273.58,
     "z": -1054.35,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+378.6m (地表大世界)"
+    "height_desc": "+273.6m (地表大世界)"
   },
   {
     "id": "c_247",
@@ -3699,11 +3699,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Rupee",
     "layer": 18,
     "x": -283.8,
-    "altitude_y": 435.91,
+    "altitude_y": 330.91,
     "z": -994.27,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+435.9m (地表大世界)"
+    "height_desc": "+330.9m (地表大世界)"
   },
   {
     "id": "c_248",
@@ -3714,11 +3714,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Armor",
     "layer": 18,
     "x": -254.0,
-    "altitude_y": 456.03,
+    "altitude_y": 351.03,
     "z": -1091.87,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+456.0m (地表大世界)"
+    "height_desc": "+351.0m (地表大世界)"
   },
   {
     "id": "c_249",
@@ -3729,11 +3729,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Bow",
     "layer": 18,
     "x": -202.49,
-    "altitude_y": 404.0,
+    "altitude_y": 299.0,
     "z": -983.6,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+404.0m (地表大世界)"
+    "height_desc": "+299.0m (地表大世界)"
   },
   {
     "id": "c_250",
@@ -3744,11 +3744,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Shield",
     "layer": 18,
     "x": -226.35,
-    "altitude_y": 404.0,
+    "altitude_y": 299.0,
     "z": -961.18,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+404.0m (地表大世界)"
+    "height_desc": "+299.0m (地表大世界)"
   },
   {
     "id": "c_251",
@@ -3759,11 +3759,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -288.78,
-    "altitude_y": 403.99,
+    "altitude_y": 298.99,
     "z": -967.72,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+404.0m (地表大世界)"
+    "height_desc": "+299.0m (地表大世界)"
   },
   {
     "id": "c_252",
@@ -3774,11 +3774,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -3635.08,
-    "altitude_y": 441.2,
+    "altitude_y": 336.2,
     "z": 1334.94,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+441.2m (地表大世界)"
+    "height_desc": "+336.2m (地表大世界)"
   },
   {
     "id": "c_253",
@@ -3789,11 +3789,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -3530.76,
-    "altitude_y": 443.27,
+    "altitude_y": 338.27,
     "z": 1348.49,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+443.3m (地表大世界)"
+    "height_desc": "+338.3m (地表大世界)"
   },
   {
     "id": "c_254",
@@ -3804,11 +3804,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -3630.19,
-    "altitude_y": 449.24,
+    "altitude_y": 344.24,
     "z": 1388.12,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+449.2m (地表大世界)"
+    "height_desc": "+344.2m (地表大世界)"
   },
   {
     "id": "c_255",
@@ -3819,11 +3819,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Armor",
     "layer": 19,
     "x": -4310.56,
-    "altitude_y": -374.21,
+    "altitude_y": -479.21,
     "z": 3782.04,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-374.2m (地底深渊)"
+    "height_desc": "-479.2m (地底深渊)"
   },
   {
     "id": "c_256",
@@ -3834,11 +3834,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": -4102.58,
-    "altitude_y": -358.71,
+    "altitude_y": -463.71,
     "z": 3738.94,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-358.7m (地底深渊)"
+    "height_desc": "-463.7m (地底深渊)"
   },
   {
     "id": "c_257",
@@ -3849,11 +3849,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 3933.56,
-    "altitude_y": 353.15,
+    "altitude_y": 248.15,
     "z": -1187.55,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+353.2m (地表大世界)"
+    "height_desc": "+248.2m (地表大世界)"
   },
   {
     "id": "c_258",
@@ -3864,11 +3864,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 3608.6,
-    "altitude_y": 328.96,
+    "altitude_y": 223.96,
     "z": -1086.08,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+329.0m (地表大世界)"
+    "height_desc": "+224.0m (地表大世界)"
   },
   {
     "id": "c_259",
@@ -3879,11 +3879,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 3723.5,
-    "altitude_y": 328.96,
+    "altitude_y": 223.96,
     "z": -948.63,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+329.0m (地表大世界)"
+    "height_desc": "+224.0m (地表大世界)"
   },
   {
     "id": "c_260",
@@ -3894,11 +3894,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 3657.89,
-    "altitude_y": 194.2,
+    "altitude_y": 89.2,
     "z": -1292.81,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+194.2m (地表大世界)"
+    "height_desc": "+89.2m (地表大世界)"
   },
   {
     "id": "c_261",
@@ -3909,11 +3909,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 3958.95,
-    "altitude_y": 194.39,
+    "altitude_y": 89.39,
     "z": -1502.13,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+194.4m (地表大世界)"
+    "height_desc": "+89.4m (地表大世界)"
   },
   {
     "id": "c_262",
@@ -3924,11 +3924,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 3311.99,
-    "altitude_y": 520.48,
+    "altitude_y": 415.48,
     "z": -1515.47,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+520.5m (地表大世界)"
+    "height_desc": "+415.5m (地表大世界)"
   },
   {
     "id": "c_263",
@@ -3939,11 +3939,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 3241.74,
-    "altitude_y": 479.37,
+    "altitude_y": 374.37,
     "z": -1527.22,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+479.4m (地表大世界)"
+    "height_desc": "+374.4m (地表大世界)"
   },
   {
     "id": "c_264",
@@ -3954,11 +3954,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Shield",
     "layer": 18,
     "x": 3292.0,
-    "altitude_y": 459.0,
+    "altitude_y": 354.0,
     "z": -1421.41,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+459.0m (地表大世界)"
+    "height_desc": "+354.0m (地表大世界)"
   },
   {
     "id": "c_265",
@@ -3969,11 +3969,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Rupee",
     "layer": 18,
     "x": 3993.92,
-    "altitude_y": 232.96,
+    "altitude_y": 127.96,
     "z": -1575.41,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+233.0m (地表大世界)"
+    "height_desc": "+128.0m (地表大世界)"
   },
   {
     "id": "c_266",
@@ -3984,11 +3984,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 3095.9,
-    "altitude_y": 306.26,
+    "altitude_y": 201.26,
     "z": -1667.69,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+306.3m (地表大世界)"
+    "height_desc": "+201.3m (地表大世界)"
   },
   {
     "id": "c_267",
@@ -3999,11 +3999,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "KeyItem",
     "layer": 20,
     "x": 4269.17,
-    "altitude_y": 889.46,
+    "altitude_y": 784.46,
     "z": -3107.88,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+889.5m (天空岛)"
+    "height_desc": "+784.5m (天空岛)"
   },
   {
     "id": "c_268",
@@ -4014,11 +4014,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "KeyItem",
     "layer": 20,
     "x": -3456.83,
-    "altitude_y": 2044.56,
+    "altitude_y": 1939.56,
     "z": 263.47,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+2044.6m (天空岛)"
+    "height_desc": "+1939.6m (天空岛)"
   },
   {
     "id": "c_269",
@@ -4029,11 +4029,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 4380.46,
-    "altitude_y": 195.5,
+    "altitude_y": 90.5,
     "z": 1572.2,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+195.5m (地表大世界)"
+    "height_desc": "+90.5m (地表大世界)"
   },
   {
     "id": "c_270",
@@ -4044,11 +4044,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -3589.94,
-    "altitude_y": 135.64,
+    "altitude_y": 30.64,
     "z": 3023.71,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+135.6m (地表大世界)"
+    "height_desc": "+30.6m (地表大世界)"
   },
   {
     "id": "c_271",
@@ -4059,11 +4059,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -888.76,
-    "altitude_y": 245.12,
+    "altitude_y": 140.12,
     "z": 3576.72,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+245.1m (地表大世界)"
+    "height_desc": "+140.1m (地表大世界)"
   },
   {
     "id": "c_272",
@@ -4074,11 +4074,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -381.98,
-    "altitude_y": 127.56,
+    "altitude_y": 22.56,
     "z": 3557.53,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+127.6m (地表大世界)"
+    "height_desc": "+22.6m (地表大世界)"
   },
   {
     "id": "c_273",
@@ -4089,11 +4089,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -382.74,
-    "altitude_y": 127.62,
+    "altitude_y": 22.62,
     "z": 3560.78,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+127.6m (地表大世界)"
+    "height_desc": "+22.6m (地表大世界)"
   },
   {
     "id": "c_274",
@@ -4104,11 +4104,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -820.4,
-    "altitude_y": 205.42,
+    "altitude_y": 100.42,
     "z": 3385.97,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+205.4m (地表大世界)"
+    "height_desc": "+100.4m (地表大世界)"
   },
   {
     "id": "c_275",
@@ -4119,11 +4119,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -797.81,
-    "altitude_y": 215.07,
+    "altitude_y": 110.07,
     "z": 3383.05,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+215.1m (地表大世界)"
+    "height_desc": "+110.1m (地表大世界)"
   },
   {
     "id": "c_276",
@@ -4134,11 +4134,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 3317.32,
-    "altitude_y": 573.56,
+    "altitude_y": 468.56,
     "z": -994.78,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+573.6m (地表大世界)"
+    "height_desc": "+468.6m (地表大世界)"
   },
   {
     "id": "c_277",
@@ -4149,11 +4149,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 3770.61,
-    "altitude_y": 619.08,
+    "altitude_y": 514.08,
     "z": -595.82,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+619.1m (地表大世界)"
+    "height_desc": "+514.1m (地表大世界)"
   },
   {
     "id": "c_278",
@@ -4164,11 +4164,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 18,
     "x": 3419.46,
-    "altitude_y": 338.38,
+    "altitude_y": 233.38,
     "z": -174.78,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+338.4m (地表大世界)"
+    "height_desc": "+233.4m (地表大世界)"
   },
   {
     "id": "c_279",
@@ -4179,11 +4179,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 3682.62,
-    "altitude_y": 451.0,
+    "altitude_y": 346.0,
     "z": -850.15,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+451.0m (地表大世界)"
+    "height_desc": "+346.0m (地表大世界)"
   },
   {
     "id": "c_280",
@@ -4194,11 +4194,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": -1592.42,
-    "altitude_y": -585.54,
+    "altitude_y": -690.54,
     "z": -2856.02,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-585.5m (地底深渊)"
+    "height_desc": "-690.5m (地底深渊)"
   },
   {
     "id": "c_281",
@@ -4209,11 +4209,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": -1141.53,
-    "altitude_y": -451.87,
+    "altitude_y": -556.87,
     "z": -2312.06,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-451.9m (地底深渊)"
+    "height_desc": "-556.9m (地底深渊)"
   },
   {
     "id": "c_282",
@@ -4224,11 +4224,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 3056.93,
-    "altitude_y": 226.13,
+    "altitude_y": 121.13,
     "z": 2378.06,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+226.1m (地表大世界)"
+    "height_desc": "+121.1m (地表大世界)"
   },
   {
     "id": "c_283",
@@ -4239,11 +4239,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 3357.87,
-    "altitude_y": 351.66,
+    "altitude_y": 246.66,
     "z": 2595.9,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+351.7m (地表大世界)"
+    "height_desc": "+246.7m (地表大世界)"
   },
   {
     "id": "c_284",
@@ -4254,11 +4254,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 3674.59,
-    "altitude_y": 281.39,
+    "altitude_y": 176.39,
     "z": 2055.04,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+281.4m (地表大世界)"
+    "height_desc": "+176.4m (地表大世界)"
   },
   {
     "id": "c_285",
@@ -4269,11 +4269,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Bow",
     "layer": 18,
     "x": 3566.56,
-    "altitude_y": 244.28,
+    "altitude_y": 139.28,
     "z": 2187.6,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+244.3m (地表大世界)"
+    "height_desc": "+139.3m (地表大世界)"
   },
   {
     "id": "c_286",
@@ -4284,11 +4284,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 1674.73,
-    "altitude_y": 141.95,
+    "altitude_y": 36.95,
     "z": 357.09,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+142.0m (地表大世界)"
+    "height_desc": "+37.0m (地表大世界)"
   },
   {
     "id": "c_287",
@@ -4299,11 +4299,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": -2678.77,
-    "altitude_y": -546.44,
+    "altitude_y": -651.44,
     "z": 110.57,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-546.4m (地底深渊)"
+    "height_desc": "-651.4m (地底深渊)"
   },
   {
     "id": "c_288",
@@ -4314,11 +4314,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": -2743.73,
-    "altitude_y": -439.05,
+    "altitude_y": -544.05,
     "z": 780.52,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-439.1m (地底深渊)"
+    "height_desc": "-544.1m (地底深渊)"
   },
   {
     "id": "c_289",
@@ -4329,11 +4329,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -219.99,
-    "altitude_y": 118.52,
+    "altitude_y": 13.52,
     "z": 2983.64,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+118.5m (洞窟/水井内)"
+    "height_desc": "+13.5m (洞窟/水井内)"
   },
   {
     "id": "c_290",
@@ -4344,11 +4344,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": -1201.12,
-    "altitude_y": -347.11,
+    "altitude_y": -452.11,
     "z": -220.68,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-347.1m (地底深渊)"
+    "height_desc": "-452.1m (地底深渊)"
   },
   {
     "id": "c_291",
@@ -4359,11 +4359,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 63.7,
-    "altitude_y": 109.38,
+    "altitude_y": 4.38,
     "z": -587.94,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+109.4m (洞窟/水井内)"
+    "height_desc": "+4.4m (洞窟/水井内)"
   },
   {
     "id": "c_292",
@@ -4374,11 +4374,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": -761.61,
-    "altitude_y": -367.24,
+    "altitude_y": -472.24,
     "z": 338.83,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-367.2m (地底深渊)"
+    "height_desc": "-472.2m (地底深渊)"
   },
   {
     "id": "c_293",
@@ -4389,11 +4389,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": -804.61,
-    "altitude_y": -396.65,
+    "altitude_y": -501.65,
     "z": 147.78,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-396.6m (地底深渊)"
+    "height_desc": "-501.6m (地底深渊)"
   },
   {
     "id": "c_294",
@@ -4404,11 +4404,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": -264.28,
-    "altitude_y": -360.78,
+    "altitude_y": -465.78,
     "z": 577.85,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-360.8m (地底深渊)"
+    "height_desc": "-465.8m (地底深渊)"
   },
   {
     "id": "c_295",
@@ -4419,11 +4419,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": -542.88,
-    "altitude_y": -363.91,
+    "altitude_y": -468.91,
     "z": 870.57,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-363.9m (地底深渊)"
+    "height_desc": "-468.9m (地底深渊)"
   },
   {
     "id": "c_296",
@@ -4434,11 +4434,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "KeyItem",
     "layer": 20,
     "x": -3376.84,
-    "altitude_y": 2390.17,
+    "altitude_y": 2285.17,
     "z": 20.58,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+2390.2m (天空岛)"
+    "height_desc": "+2285.2m (天空岛)"
   },
   {
     "id": "c_297",
@@ -4449,11 +4449,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": 3135.38,
-    "altitude_y": -401.33,
+    "altitude_y": -506.33,
     "z": 2200.96,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-401.3m (地底深渊)"
+    "height_desc": "-506.3m (地底深渊)"
   },
   {
     "id": "c_298",
@@ -4464,11 +4464,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": 3197.78,
-    "altitude_y": -415.71,
+    "altitude_y": -520.71,
     "z": 2047.03,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-415.7m (地底深渊)"
+    "height_desc": "-520.7m (地底深渊)"
   },
   {
     "id": "c_299",
@@ -4479,11 +4479,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Armor",
     "layer": 19,
     "x": 3821.58,
-    "altitude_y": -526.68,
+    "altitude_y": -631.68,
     "z": 1985.38,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-526.7m (地底深渊)"
+    "height_desc": "-631.7m (地底深渊)"
   },
   {
     "id": "c_300",
@@ -4494,11 +4494,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": 3318.83,
-    "altitude_y": -605.25,
+    "altitude_y": -710.25,
     "z": 2497.02,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-605.2m (地底深渊)"
+    "height_desc": "-710.2m (地底深渊)"
   },
   {
     "id": "c_301",
@@ -4509,11 +4509,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": 3564.48,
-    "altitude_y": -469.13,
+    "altitude_y": -574.13,
     "z": 2085.79,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-469.1m (地底深渊)"
+    "height_desc": "-574.1m (地底深渊)"
   },
   {
     "id": "c_302",
@@ -4524,11 +4524,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -804.11,
-    "altitude_y": 249.86,
+    "altitude_y": 144.86,
     "z": 2855.33,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+249.9m (地表大世界)"
+    "height_desc": "+144.9m (地表大世界)"
   },
   {
     "id": "c_303",
@@ -4539,11 +4539,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "KeyItem",
     "layer": 20,
     "x": 4652.54,
-    "altitude_y": 1171.18,
+    "altitude_y": 1066.18,
     "z": 3829.07,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1171.2m (天空岛)"
+    "height_desc": "+1066.2m (天空岛)"
   },
   {
     "id": "c_304",
@@ -4554,11 +4554,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": -1854.67,
-    "altitude_y": -421.6,
+    "altitude_y": -526.6,
     "z": 734.99,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-421.6m (地底深渊)"
+    "height_desc": "-526.6m (地底深渊)"
   },
   {
     "id": "c_305",
@@ -4569,11 +4569,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "KeyItem",
     "layer": 19,
     "x": -1856.01,
-    "altitude_y": -421.6,
+    "altitude_y": -526.6,
     "z": 736.47,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-421.6m (地底深渊)"
+    "height_desc": "-526.6m (地底深渊)"
   },
   {
     "id": "c_306",
@@ -4584,11 +4584,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 20,
     "x": 1709.78,
-    "altitude_y": 649.09,
+    "altitude_y": 544.09,
     "z": -1194.52,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+649.1m (天空岛)"
+    "height_desc": "+544.1m (天空岛)"
   },
   {
     "id": "c_307",
@@ -4599,11 +4599,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 20,
     "x": 1574.49,
-    "altitude_y": 624.34,
+    "altitude_y": 519.34,
     "z": -1189.08,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+624.3m (天空岛)"
+    "height_desc": "+519.3m (天空岛)"
   },
   {
     "id": "c_308",
@@ -4614,11 +4614,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 20,
     "x": 1684.94,
-    "altitude_y": 618.02,
+    "altitude_y": 513.02,
     "z": -1132.03,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+618.0m (天空岛)"
+    "height_desc": "+513.0m (天空岛)"
   },
   {
     "id": "c_309",
@@ -4629,11 +4629,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 18,
     "x": -1182.39,
-    "altitude_y": 132.18,
+    "altitude_y": 27.18,
     "z": -149.06,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+132.2m (地表大世界)"
+    "height_desc": "+27.2m (地表大世界)"
   },
   {
     "id": "c_310",
@@ -4644,11 +4644,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -2882.3,
-    "altitude_y": 1644.37,
+    "altitude_y": 1539.37,
     "z": -3089.48,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+1644.4m (地表大世界)"
+    "height_desc": "+1539.4m (地表大世界)"
   },
   {
     "id": "c_311",
@@ -4659,11 +4659,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -2870.0,
-    "altitude_y": 1623.43,
+    "altitude_y": 1518.43,
     "z": -2928.5,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+1623.4m (地表大世界)"
+    "height_desc": "+1518.4m (地表大世界)"
   },
   {
     "id": "c_312",
@@ -4674,11 +4674,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -2891.03,
-    "altitude_y": 1609.43,
+    "altitude_y": 1504.43,
     "z": -2966.29,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+1609.4m (地表大世界)"
+    "height_desc": "+1504.4m (地表大世界)"
   },
   {
     "id": "c_313",
@@ -4689,11 +4689,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 18,
     "x": -4156.87,
-    "altitude_y": 245.69,
+    "altitude_y": 140.69,
     "z": -1734.43,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+245.7m (地表大世界)"
+    "height_desc": "+140.7m (地表大世界)"
   },
   {
     "id": "c_314",
@@ -4704,11 +4704,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 1651.79,
-    "altitude_y": 320.68,
+    "altitude_y": 215.68,
     "z": 1181.36,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+320.7m (地表大世界)"
+    "height_desc": "+215.7m (地表大世界)"
   },
   {
     "id": "c_315",
@@ -4719,11 +4719,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 1663.58,
-    "altitude_y": 318.74,
+    "altitude_y": 213.74,
     "z": 1182.28,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+318.7m (地表大世界)"
+    "height_desc": "+213.7m (地表大世界)"
   },
   {
     "id": "c_316",
@@ -4734,11 +4734,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 1708.65,
-    "altitude_y": 235.94,
+    "altitude_y": 130.94,
     "z": 1079.57,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+235.9m (地表大世界)"
+    "height_desc": "+130.9m (地表大世界)"
   },
   {
     "id": "c_317",
@@ -4749,11 +4749,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 1660.7,
-    "altitude_y": 355.53,
+    "altitude_y": 250.53,
     "z": 941.61,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+355.5m (地表大世界)"
+    "height_desc": "+250.5m (地表大世界)"
   },
   {
     "id": "c_318",
@@ -4764,11 +4764,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Shield",
     "layer": 20,
     "x": -787.5,
-    "altitude_y": 1190.0,
+    "altitude_y": 1085.0,
     "z": -3522.5,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1190.0m (天空岛)"
+    "height_desc": "+1085.0m (天空岛)"
   },
   {
     "id": "c_319",
@@ -4779,11 +4779,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 20,
     "x": -912.25,
-    "altitude_y": 1190.0,
+    "altitude_y": 1085.0,
     "z": -3522.5,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1190.0m (天空岛)"
+    "height_desc": "+1085.0m (天空岛)"
   },
   {
     "id": "c_320",
@@ -4794,11 +4794,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 20,
     "x": -803.75,
-    "altitude_y": 1189.88,
+    "altitude_y": 1084.88,
     "z": -3622.5,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1189.9m (天空岛)"
+    "height_desc": "+1084.9m (天空岛)"
   },
   {
     "id": "c_321",
@@ -4809,11 +4809,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 20,
     "x": -912.25,
-    "altitude_y": 1190.0,
+    "altitude_y": 1085.0,
     "z": -3547.5,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1190.0m (天空岛)"
+    "height_desc": "+1085.0m (天空岛)"
   },
   {
     "id": "c_322",
@@ -4824,11 +4824,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 20,
     "x": -847.5,
-    "altitude_y": 1190.0,
+    "altitude_y": 1085.0,
     "z": -3577.5,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1190.0m (天空岛)"
+    "height_desc": "+1085.0m (天空岛)"
   },
   {
     "id": "c_323",
@@ -4839,11 +4839,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Bow",
     "layer": 20,
     "x": -705.35,
-    "altitude_y": 1291.49,
+    "altitude_y": 1186.49,
     "z": -3535.05,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1291.5m (天空岛)"
+    "height_desc": "+1186.5m (天空岛)"
   },
   {
     "id": "c_324",
@@ -4854,11 +4854,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": 1541.24,
-    "altitude_y": -333.76,
+    "altitude_y": -438.76,
     "z": -691.56,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-333.8m (地底深渊)"
+    "height_desc": "-438.8m (地底深渊)"
   },
   {
     "id": "c_325",
@@ -4869,11 +4869,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "KeyItem",
     "layer": 19,
     "x": 1539.27,
-    "altitude_y": -333.76,
+    "altitude_y": -438.76,
     "z": -691.91,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-333.8m (地底深渊)"
+    "height_desc": "-438.8m (地底深渊)"
   },
   {
     "id": "c_326",
@@ -4884,11 +4884,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": 1170.31,
-    "altitude_y": -303.21,
+    "altitude_y": -408.21,
     "z": -598.83,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-303.2m (地底深渊)"
+    "height_desc": "-408.2m (地底深渊)"
   },
   {
     "id": "c_327",
@@ -4899,11 +4899,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "KeyItem",
     "layer": 19,
     "x": 1168.49,
-    "altitude_y": -303.21,
+    "altitude_y": -408.21,
     "z": -599.64,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-303.2m (地底深渊)"
+    "height_desc": "-408.2m (地底深渊)"
   },
   {
     "id": "c_328",
@@ -4914,11 +4914,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": -3709.16,
-    "altitude_y": -677.22,
+    "altitude_y": -782.22,
     "z": -3097.61,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-677.2m (地底深渊)"
+    "height_desc": "-782.2m (地底深渊)"
   },
   {
     "id": "c_329",
@@ -4929,11 +4929,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "KeyItem",
     "layer": 19,
     "x": -3709.5,
-    "altitude_y": -677.22,
+    "altitude_y": -782.22,
     "z": -3099.58,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-677.2m (地底深渊)"
+    "height_desc": "-782.2m (地底深渊)"
   },
   {
     "id": "c_330",
@@ -4944,11 +4944,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Armor",
     "layer": 19,
     "x": 3794.24,
-    "altitude_y": -340.39,
+    "altitude_y": -445.39,
     "z": 3613.24,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-340.4m (地底深渊)"
+    "height_desc": "-445.4m (地底深渊)"
   },
   {
     "id": "c_331",
@@ -4959,11 +4959,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": 3122.14,
-    "altitude_y": -530.57,
+    "altitude_y": -635.57,
     "z": 3318.54,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-530.6m (地底深渊)"
+    "height_desc": "-635.6m (地底深渊)"
   },
   {
     "id": "c_332",
@@ -4974,11 +4974,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": 3597.18,
-    "altitude_y": -568.4,
+    "altitude_y": -673.4,
     "z": 3298.94,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-568.4m (地底深渊)"
+    "height_desc": "-673.4m (地底深渊)"
   },
   {
     "id": "c_333",
@@ -4989,11 +4989,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -2652.02,
-    "altitude_y": 129.86,
+    "altitude_y": 24.86,
     "z": 3254.01,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+129.9m (地表大世界)"
+    "height_desc": "+24.9m (地表大世界)"
   },
   {
     "id": "c_334",
@@ -5004,11 +5004,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -2650.47,
-    "altitude_y": 97.49,
+    "altitude_y": -7.51,
     "z": 3251.92,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+97.5m (地表大世界)"
+    "height_desc": "-7.5m (地表大世界)"
   },
   {
     "id": "c_335",
@@ -5019,11 +5019,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Bow",
     "layer": 18,
     "x": -2642.09,
-    "altitude_y": 176.8,
+    "altitude_y": 71.8,
     "z": 2990.56,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+176.8m (地表大世界)"
+    "height_desc": "+71.8m (地表大世界)"
   },
   {
     "id": "c_336",
@@ -5034,11 +5034,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 18,
     "x": 1900.39,
-    "altitude_y": 394.88,
+    "altitude_y": 289.88,
     "z": -1833.23,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+394.9m (洞窟/水井内)"
+    "height_desc": "+289.9m (洞窟/水井内)"
   },
   {
     "id": "c_337",
@@ -5049,11 +5049,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 461.77,
-    "altitude_y": 129.2,
+    "altitude_y": 24.2,
     "z": -373.31,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+129.2m (地表大世界)"
+    "height_desc": "+24.2m (地表大世界)"
   },
   {
     "id": "c_338",
@@ -5064,11 +5064,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 477.47,
-    "altitude_y": 150.38,
+    "altitude_y": 45.38,
     "z": -384.66,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+150.4m (地表大世界)"
+    "height_desc": "+45.4m (地表大世界)"
   },
   {
     "id": "c_339",
@@ -5079,11 +5079,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 525.41,
-    "altitude_y": 157.5,
+    "altitude_y": 52.5,
     "z": -447.52,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+157.5m (地表大世界)"
+    "height_desc": "+52.5m (地表大世界)"
   },
   {
     "id": "c_340",
@@ -5094,11 +5094,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 34.9,
-    "altitude_y": 130.02,
+    "altitude_y": 25.02,
     "z": -443.82,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+130.0m (地表大世界)"
+    "height_desc": "+25.0m (地表大世界)"
   },
   {
     "id": "c_341",
@@ -5109,11 +5109,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Rupee",
     "layer": 18,
     "x": 60.53,
-    "altitude_y": 137.87,
+    "altitude_y": 32.87,
     "z": -598.44,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+137.9m (地表大世界)"
+    "height_desc": "+32.9m (地表大世界)"
   },
   {
     "id": "c_342",
@@ -5124,11 +5124,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Rupee",
     "layer": 18,
     "x": 95.56,
-    "altitude_y": 133.78,
+    "altitude_y": 28.78,
     "z": -547.25,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+133.8m (地表大世界)"
+    "height_desc": "+28.8m (地表大世界)"
   },
   {
     "id": "c_343",
@@ -5139,11 +5139,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Rupee",
     "layer": 18,
     "x": 97.37,
-    "altitude_y": 138.78,
+    "altitude_y": 33.78,
     "z": -425.78,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+138.8m (地表大世界)"
+    "height_desc": "+33.8m (地表大世界)"
   },
   {
     "id": "c_344",
@@ -5154,11 +5154,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Bow",
     "layer": 18,
     "x": 10.37,
-    "altitude_y": 136.19,
+    "altitude_y": 31.19,
     "z": -339.92,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+136.2m (地表大世界)"
+    "height_desc": "+31.2m (地表大世界)"
   },
   {
     "id": "c_345",
@@ -5169,11 +5169,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 305.17,
-    "altitude_y": 144.3,
+    "altitude_y": 39.3,
     "z": -184.12,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+144.3m (地表大世界)"
+    "height_desc": "+39.3m (地表大世界)"
   },
   {
     "id": "c_346",
@@ -5184,11 +5184,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 212.94,
-    "altitude_y": 140.64,
+    "altitude_y": 35.64,
     "z": -544.05,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+140.6m (地表大世界)"
+    "height_desc": "+35.6m (地表大世界)"
   },
   {
     "id": "c_347",
@@ -5199,11 +5199,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 737.85,
-    "altitude_y": 199.94,
+    "altitude_y": 94.94,
     "z": -752.85,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+199.9m (地表大世界)"
+    "height_desc": "+94.9m (地表大世界)"
   },
   {
     "id": "c_348",
@@ -5214,11 +5214,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 663.35,
-    "altitude_y": 205.2,
+    "altitude_y": 100.2,
     "z": -877.68,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+205.2m (地表大世界)"
+    "height_desc": "+100.2m (地表大世界)"
   },
   {
     "id": "c_349",
@@ -5229,11 +5229,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 542.0,
-    "altitude_y": 168.69,
+    "altitude_y": 63.69,
     "z": -726.0,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+168.7m (地表大世界)"
+    "height_desc": "+63.7m (地表大世界)"
   },
   {
     "id": "c_350",
@@ -5244,11 +5244,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 506.41,
-    "altitude_y": 133.83,
+    "altitude_y": 28.83,
     "z": -882.89,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+133.8m (地表大世界)"
+    "height_desc": "+28.8m (地表大世界)"
   },
   {
     "id": "c_351",
@@ -5259,11 +5259,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 22.94,
-    "altitude_y": 131.04,
+    "altitude_y": 26.04,
     "z": -93.99,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+131.0m (地表大世界)"
+    "height_desc": "+26.0m (地表大世界)"
   },
   {
     "id": "c_352",
@@ -5274,11 +5274,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Shield",
     "layer": 18,
     "x": 2629.93,
-    "altitude_y": 233.93,
+    "altitude_y": 128.93,
     "z": -1177.9,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+233.9m (洞窟/水井内)"
+    "height_desc": "+128.9m (洞窟/水井内)"
   },
   {
     "id": "c_353",
@@ -5289,11 +5289,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Rupee",
     "layer": 18,
     "x": 2636.2,
-    "altitude_y": 232.38,
+    "altitude_y": 127.38,
     "z": -1159.69,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+232.4m (洞窟/水井内)"
+    "height_desc": "+127.4m (洞窟/水井内)"
   },
   {
     "id": "c_354",
@@ -5304,11 +5304,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": -4615.86,
-    "altitude_y": -361.6,
+    "altitude_y": -466.6,
     "z": 1837.67,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-361.6m (地底深渊)"
+    "height_desc": "-466.6m (地底深渊)"
   },
   {
     "id": "c_355",
@@ -5319,11 +5319,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": -4222.99,
-    "altitude_y": -386.89,
+    "altitude_y": -491.89,
     "z": 2034.37,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-386.9m (地底深渊)"
+    "height_desc": "-491.9m (地底深渊)"
   },
   {
     "id": "c_356",
@@ -5334,11 +5334,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": -4171.34,
-    "altitude_y": -548.74,
+    "altitude_y": -653.74,
     "z": 1798.17,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-548.7m (地底深渊)"
+    "height_desc": "-653.7m (地底深渊)"
   },
   {
     "id": "c_357",
@@ -5349,11 +5349,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": -4722.76,
-    "altitude_y": -694.3,
+    "altitude_y": -799.3,
     "z": 1583.33,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-694.3m (地底深渊)"
+    "height_desc": "-799.3m (地底深渊)"
   },
   {
     "id": "c_358",
@@ -5364,11 +5364,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": 1945.03,
-    "altitude_y": -386.05,
+    "altitude_y": -491.05,
     "z": 2385.5,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-386.0m (地底深渊)"
+    "height_desc": "-491.0m (地底深渊)"
   },
   {
     "id": "c_359",
@@ -5379,11 +5379,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": 1912.07,
-    "altitude_y": -687.67,
+    "altitude_y": -792.67,
     "z": 2808.08,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-687.7m (地底深渊)"
+    "height_desc": "-792.7m (地底深渊)"
   },
   {
     "id": "c_360",
@@ -5394,11 +5394,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": -2510.14,
-    "altitude_y": -495.35,
+    "altitude_y": -600.35,
     "z": -1332.16,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-495.4m (地底深渊)"
+    "height_desc": "-600.4m (地底深渊)"
   },
   {
     "id": "c_361",
@@ -5409,11 +5409,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Armor",
     "layer": 18,
     "x": 2542.92,
-    "altitude_y": 82.11,
+    "altitude_y": -22.89,
     "z": 1542.86,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+82.1m (洞窟/水井内)"
+    "height_desc": "-22.9m (洞窟/水井内)"
   },
   {
     "id": "c_362",
@@ -5424,11 +5424,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Armor",
     "layer": 19,
     "x": 263.65,
-    "altitude_y": -517.71,
+    "altitude_y": -622.71,
     "z": -3123.77,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-517.7m (地底深渊)"
+    "height_desc": "-622.7m (地底深渊)"
   },
   {
     "id": "c_363",
@@ -5439,11 +5439,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": 621.53,
-    "altitude_y": -434.69,
+    "altitude_y": -539.69,
     "z": -3696.66,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-434.7m (地底深渊)"
+    "height_desc": "-539.7m (地底深渊)"
   },
   {
     "id": "c_364",
@@ -5454,11 +5454,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "KeyItem",
     "layer": 19,
     "x": 621.53,
-    "altitude_y": -434.68,
+    "altitude_y": -539.68,
     "z": -3698.66,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-434.7m (地底深渊)"
+    "height_desc": "-539.7m (地底深渊)"
   },
   {
     "id": "c_365",
@@ -5469,11 +5469,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Armor",
     "layer": 19,
     "x": -4079.21,
-    "altitude_y": -344.94,
+    "altitude_y": -449.94,
     "z": -2801.0,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-344.9m (地底深渊)"
+    "height_desc": "-449.9m (地底深渊)"
   },
   {
     "id": "c_366",
@@ -5484,11 +5484,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 20,
     "x": 4602.5,
-    "altitude_y": 1190.0,
+    "altitude_y": 1085.0,
     "z": -3622.5,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1190.0m (天空岛)"
+    "height_desc": "+1085.0m (天空岛)"
   },
   {
     "id": "c_367",
@@ -5499,11 +5499,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 20,
     "x": 4557.5,
-    "altitude_y": 1190.0,
+    "altitude_y": 1085.0,
     "z": -3672.5,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1190.0m (天空岛)"
+    "height_desc": "+1085.0m (天空岛)"
   },
   {
     "id": "c_368",
@@ -5514,11 +5514,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Shield",
     "layer": 20,
     "x": 4732.5,
-    "altitude_y": 1190.0,
+    "altitude_y": 1085.0,
     "z": -3562.5,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1190.0m (天空岛)"
+    "height_desc": "+1085.0m (天空岛)"
   },
   {
     "id": "c_369",
@@ -5529,11 +5529,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Bow",
     "layer": 20,
     "x": 4772.5,
-    "altitude_y": 1190.0,
+    "altitude_y": 1085.0,
     "z": -3657.5,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1190.0m (天空岛)"
+    "height_desc": "+1085.0m (天空岛)"
   },
   {
     "id": "c_370",
@@ -5544,11 +5544,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 20,
     "x": 4692.5,
-    "altitude_y": 1190.0,
+    "altitude_y": 1085.0,
     "z": -3717.5,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1190.0m (天空岛)"
+    "height_desc": "+1085.0m (天空岛)"
   },
   {
     "id": "c_371",
@@ -5559,11 +5559,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 20,
     "x": 4655.0,
-    "altitude_y": 1169.1,
+    "altitude_y": 1064.1,
     "z": -3712.0,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1169.1m (天空岛)"
+    "height_desc": "+1064.1m (天空岛)"
   },
   {
     "id": "c_372",
@@ -5574,11 +5574,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": 4248.09,
-    "altitude_y": -645.44,
+    "altitude_y": -750.44,
     "z": 1959.93,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-645.4m (地底深渊)"
+    "height_desc": "-750.4m (地底深渊)"
   },
   {
     "id": "c_373",
@@ -5589,11 +5589,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 1549.03,
-    "altitude_y": 114.65,
+    "altitude_y": 9.65,
     "z": 889.82,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+114.6m (洞窟/水井内)"
+    "height_desc": "+9.6m (洞窟/水井内)"
   },
   {
     "id": "c_374",
@@ -5604,11 +5604,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 1535.24,
-    "altitude_y": 127.46,
+    "altitude_y": 22.46,
     "z": 1131.89,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+127.5m (洞窟/水井内)"
+    "height_desc": "+22.5m (洞窟/水井内)"
   },
   {
     "id": "c_375",
@@ -5619,11 +5619,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 3666.3,
-    "altitude_y": 120.04,
+    "altitude_y": 15.04,
     "z": -242.1,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+120.0m (洞窟/水井内)"
+    "height_desc": "+15.0m (洞窟/水井内)"
   },
   {
     "id": "c_376",
@@ -5634,11 +5634,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": -3262.46,
-    "altitude_y": -389.36,
+    "altitude_y": -494.36,
     "z": 3777.96,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-389.4m (地底深渊)"
+    "height_desc": "-494.4m (地底深渊)"
   },
   {
     "id": "c_377",
@@ -5649,11 +5649,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "KeyItem",
     "layer": 19,
     "x": -3262.13,
-    "altitude_y": -389.36,
+    "altitude_y": -494.36,
     "z": 3779.93,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-389.4m (地底深渊)"
+    "height_desc": "-494.4m (地底深渊)"
   },
   {
     "id": "c_378",
@@ -5664,11 +5664,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 20,
     "x": 121.2,
-    "altitude_y": 1522.36,
+    "altitude_y": 1417.36,
     "z": 1272.49,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1522.4m (天空岛)"
+    "height_desc": "+1417.4m (天空岛)"
   },
   {
     "id": "c_379",
@@ -5679,11 +5679,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 20,
     "x": 472.06,
-    "altitude_y": 1516.06,
+    "altitude_y": 1411.06,
     "z": 1605.33,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1516.1m (天空岛)"
+    "height_desc": "+1411.1m (天空岛)"
   },
   {
     "id": "c_380",
@@ -5694,11 +5694,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 20,
     "x": 833.9,
-    "altitude_y": 1672.2,
+    "altitude_y": 1567.2,
     "z": 1458.0,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1672.2m (天空岛)"
+    "height_desc": "+1567.2m (天空岛)"
   },
   {
     "id": "c_381",
@@ -5709,11 +5709,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 20,
     "x": 853.82,
-    "altitude_y": 1656.75,
+    "altitude_y": 1551.75,
     "z": 1444.36,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1656.8m (天空岛)"
+    "height_desc": "+1551.8m (天空岛)"
   },
   {
     "id": "c_382",
@@ -5724,11 +5724,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Armor",
     "layer": 20,
     "x": 453.51,
-    "altitude_y": 1573.47,
+    "altitude_y": 1468.47,
     "z": 765.25,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1573.5m (天空岛)"
+    "height_desc": "+1468.5m (天空岛)"
   },
   {
     "id": "c_383",
@@ -5739,11 +5739,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 20,
     "x": 501.28,
-    "altitude_y": 1893.86,
+    "altitude_y": 1788.86,
     "z": 1613.06,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1893.9m (天空岛)"
+    "height_desc": "+1788.9m (天空岛)"
   },
   {
     "id": "c_384",
@@ -5754,11 +5754,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 20,
     "x": 588.93,
-    "altitude_y": 1579.45,
+    "altitude_y": 1474.45,
     "z": 912.35,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1579.4m (天空岛)"
+    "height_desc": "+1474.4m (天空岛)"
   },
   {
     "id": "c_385",
@@ -5769,11 +5769,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 20,
     "x": 341.23,
-    "altitude_y": 1620.88,
+    "altitude_y": 1515.88,
     "z": 1096.79,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1620.9m (天空岛)"
+    "height_desc": "+1515.9m (天空岛)"
   },
   {
     "id": "c_386",
@@ -5784,11 +5784,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Rupee",
     "layer": 18,
     "x": -3864.97,
-    "altitude_y": 149.37,
+    "altitude_y": 44.37,
     "z": 2984.06,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+149.4m (地表大世界)"
+    "height_desc": "+44.4m (地表大世界)"
   },
   {
     "id": "c_387",
@@ -5799,11 +5799,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -3866.27,
-    "altitude_y": 149.37,
+    "altitude_y": 44.37,
     "z": 2985.35,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+149.4m (地表大世界)"
+    "height_desc": "+44.4m (地表大世界)"
   },
   {
     "id": "c_388",
@@ -5814,11 +5814,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -3867.6,
-    "altitude_y": 149.37,
+    "altitude_y": 44.37,
     "z": 2986.64,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+149.4m (地表大世界)"
+    "height_desc": "+44.4m (地表大世界)"
   },
   {
     "id": "c_389",
@@ -5829,11 +5829,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Bow",
     "layer": 18,
     "x": -3789.64,
-    "altitude_y": 137.92,
+    "altitude_y": 32.92,
     "z": 2634.15,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+137.9m (地表大世界)"
+    "height_desc": "+32.9m (地表大世界)"
   },
   {
     "id": "c_390",
@@ -5844,11 +5844,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Rupee",
     "layer": 18,
     "x": -3841.14,
-    "altitude_y": 137.98,
+    "altitude_y": 32.98,
     "z": 2965.63,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+138.0m (地表大世界)"
+    "height_desc": "+33.0m (地表大世界)"
   },
   {
     "id": "c_391",
@@ -5859,11 +5859,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Bow",
     "layer": 18,
     "x": -3231.06,
-    "altitude_y": 128.88,
+    "altitude_y": 23.88,
     "z": 2517.28,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+128.9m (地表大世界)"
+    "height_desc": "+23.9m (地表大世界)"
   },
   {
     "id": "c_392",
@@ -5874,11 +5874,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -3232.4,
-    "altitude_y": 128.88,
+    "altitude_y": 23.88,
     "z": 2518.94,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+128.9m (地表大世界)"
+    "height_desc": "+23.9m (地表大世界)"
   },
   {
     "id": "c_393",
@@ -5889,11 +5889,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -3482.71,
-    "altitude_y": 125.45,
+    "altitude_y": 20.45,
     "z": 2874.27,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+125.5m (地表大世界)"
+    "height_desc": "+20.5m (地表大世界)"
   },
   {
     "id": "c_394",
@@ -5904,11 +5904,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -3566.72,
-    "altitude_y": 129.84,
+    "altitude_y": 24.84,
     "z": 2603.22,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+129.8m (地表大世界)"
+    "height_desc": "+24.8m (地表大世界)"
   },
   {
     "id": "c_395",
@@ -5919,11 +5919,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Bow",
     "layer": 18,
     "x": -3235.27,
-    "altitude_y": 124.86,
+    "altitude_y": 19.86,
     "z": 2557.47,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+124.9m (地表大世界)"
+    "height_desc": "+19.9m (地表大世界)"
   },
   {
     "id": "c_396",
@@ -5934,11 +5934,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -3291.66,
-    "altitude_y": 128.85,
+    "altitude_y": 23.85,
     "z": 2544.89,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+128.9m (地表大世界)"
+    "height_desc": "+23.9m (地表大世界)"
   },
   {
     "id": "c_397",
@@ -5949,11 +5949,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Rupee",
     "layer": 18,
     "x": -3762.92,
-    "altitude_y": 114.62,
+    "altitude_y": 9.62,
     "z": 2531.73,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+114.6m (地表大世界)"
+    "height_desc": "+9.6m (地表大世界)"
   },
   {
     "id": "c_398",
@@ -5964,11 +5964,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Empty",
     "layer": 18,
     "x": -3231.06,
-    "altitude_y": 128.88,
+    "altitude_y": 23.88,
     "z": 2517.28,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+128.9m (地表大世界)"
+    "height_desc": "+23.9m (地表大世界)"
   },
   {
     "id": "c_399",
@@ -5979,11 +5979,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Empty",
     "layer": 18,
     "x": -3232.4,
-    "altitude_y": 128.88,
+    "altitude_y": 23.88,
     "z": 2518.94,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+128.9m (地表大世界)"
+    "height_desc": "+23.9m (地表大世界)"
   },
   {
     "id": "c_400",
@@ -5994,11 +5994,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Bow",
     "layer": 18,
     "x": -3670.25,
-    "altitude_y": 291.0,
+    "altitude_y": 186.0,
     "z": 2155.14,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+291.0m (地表大世界)"
+    "height_desc": "+186.0m (地表大世界)"
   },
   {
     "id": "c_401",
@@ -6009,11 +6009,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -3815.99,
-    "altitude_y": 247.24,
+    "altitude_y": 142.24,
     "z": 2125.08,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+247.2m (地表大世界)"
+    "height_desc": "+142.2m (地表大世界)"
   },
   {
     "id": "c_402",
@@ -6024,11 +6024,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 3294.92,
-    "altitude_y": 412.33,
+    "altitude_y": 307.33,
     "z": -1543.52,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+412.3m (洞窟/水井内)"
+    "height_desc": "+307.3m (洞窟/水井内)"
   },
   {
     "id": "c_403",
@@ -6039,11 +6039,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 3292.83,
-    "altitude_y": 398.49,
+    "altitude_y": 293.49,
     "z": -1530.81,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+398.5m (洞窟/水井内)"
+    "height_desc": "+293.5m (洞窟/水井内)"
   },
   {
     "id": "c_404",
@@ -6054,11 +6054,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": 1823.24,
-    "altitude_y": -523.86,
+    "altitude_y": -628.86,
     "z": 1164.43,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-523.9m (地底深渊)"
+    "height_desc": "-628.9m (地底深渊)"
   },
   {
     "id": "c_405",
@@ -6069,11 +6069,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Shield",
     "layer": 19,
     "x": 2667.56,
-    "altitude_y": -453.72,
+    "altitude_y": -558.72,
     "z": -253.65,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-453.7m (地底深渊)"
+    "height_desc": "-558.7m (地底深渊)"
   },
   {
     "id": "c_406",
@@ -6084,11 +6084,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": 2504.21,
-    "altitude_y": -490.75,
+    "altitude_y": -595.75,
     "z": -410.08,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-490.8m (地底深渊)"
+    "height_desc": "-595.8m (地底深渊)"
   },
   {
     "id": "c_407",
@@ -6099,11 +6099,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": 2593.39,
-    "altitude_y": -481.25,
+    "altitude_y": -586.25,
     "z": -4.62,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-481.2m (地底深渊)"
+    "height_desc": "-586.2m (地底深渊)"
   },
   {
     "id": "c_408",
@@ -6114,11 +6114,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 563.28,
-    "altitude_y": 134.44,
+    "altitude_y": 29.44,
     "z": 157.52,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+134.4m (地表大世界)"
+    "height_desc": "+29.4m (地表大世界)"
   },
   {
     "id": "c_409",
@@ -6129,11 +6129,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Bow",
     "layer": 18,
     "x": 583.99,
-    "altitude_y": 131.62,
+    "altitude_y": 26.62,
     "z": 850.33,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+131.6m (地表大世界)"
+    "height_desc": "+26.6m (地表大世界)"
   },
   {
     "id": "c_410",
@@ -6144,11 +6144,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 431.91,
-    "altitude_y": 163.83,
+    "altitude_y": 58.83,
     "z": 345.81,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+163.8m (地表大世界)"
+    "height_desc": "+58.8m (地表大世界)"
   },
   {
     "id": "c_411",
@@ -6159,11 +6159,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 217.73,
-    "altitude_y": 133.0,
+    "altitude_y": 28.0,
     "z": 112.08,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+133.0m (地表大世界)"
+    "height_desc": "+28.0m (地表大世界)"
   },
   {
     "id": "c_412",
@@ -6174,11 +6174,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 205.33,
-    "altitude_y": 118.91,
+    "altitude_y": 13.91,
     "z": 15.22,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+118.9m (地表大世界)"
+    "height_desc": "+13.9m (地表大世界)"
   },
   {
     "id": "c_413",
@@ -6189,11 +6189,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Shield",
     "layer": 18,
     "x": 629.42,
-    "altitude_y": 154.29,
+    "altitude_y": 49.29,
     "z": 580.57,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+154.3m (地表大世界)"
+    "height_desc": "+49.3m (地表大世界)"
   },
   {
     "id": "c_414",
@@ -6204,11 +6204,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 193.43,
-    "altitude_y": 124.4,
+    "altitude_y": 19.4,
     "z": 42.27,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+124.4m (地表大世界)"
+    "height_desc": "+19.4m (地表大世界)"
   },
   {
     "id": "c_415",
@@ -6219,11 +6219,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Rupee",
     "layer": 18,
     "x": 145.34,
-    "altitude_y": 128.32,
+    "altitude_y": 23.32,
     "z": 298.72,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+128.3m (地表大世界)"
+    "height_desc": "+23.3m (地表大世界)"
   },
   {
     "id": "c_416",
@@ -6234,11 +6234,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 18,
     "x": 891.57,
-    "altitude_y": 118.09,
+    "altitude_y": 13.09,
     "z": 541.65,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+118.1m (地表大世界)"
+    "height_desc": "+13.1m (地表大世界)"
   },
   {
     "id": "c_417",
@@ -6249,11 +6249,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Armor",
     "layer": 18,
     "x": 632.05,
-    "altitude_y": 133.11,
+    "altitude_y": 28.11,
     "z": -819.64,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+133.1m (洞窟/水井内)"
+    "height_desc": "+28.1m (洞窟/水井内)"
   },
   {
     "id": "c_418",
@@ -6264,11 +6264,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Shield",
     "layer": 20,
     "x": 1497.84,
-    "altitude_y": 784.24,
+    "altitude_y": 679.24,
     "z": -2152.45,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+784.2m (天空岛)"
+    "height_desc": "+679.2m (天空岛)"
   },
   {
     "id": "c_419",
@@ -6279,11 +6279,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Bow",
     "layer": 18,
     "x": -200.55,
-    "altitude_y": 178.68,
+    "altitude_y": 73.68,
     "z": -686.54,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+178.7m (地表大世界)"
+    "height_desc": "+73.7m (地表大世界)"
   },
   {
     "id": "c_420",
@@ -6294,11 +6294,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Shield",
     "layer": 18,
     "x": -96.0,
-    "altitude_y": 400.63,
+    "altitude_y": 295.63,
     "z": -932.87,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+400.6m (地表大世界)"
+    "height_desc": "+295.6m (地表大世界)"
   },
   {
     "id": "c_421",
@@ -6309,11 +6309,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Shield",
     "layer": 18,
     "x": -44.95,
-    "altitude_y": 209.58,
+    "altitude_y": 104.58,
     "z": -823.9,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+209.6m (地表大世界)"
+    "height_desc": "+104.6m (地表大世界)"
   },
   {
     "id": "c_422",
@@ -6324,11 +6324,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -469.89,
-    "altitude_y": 169.68,
+    "altitude_y": 64.68,
     "z": -945.57,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+169.7m (地表大世界)"
+    "height_desc": "+64.7m (地表大世界)"
   },
   {
     "id": "c_423",
@@ -6339,11 +6339,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -259.63,
-    "altitude_y": 570.85,
+    "altitude_y": 465.85,
     "z": -1065.04,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+570.8m (地表大世界)"
+    "height_desc": "+465.8m (地表大世界)"
   },
   {
     "id": "c_424",
@@ -6354,11 +6354,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -98.5,
-    "altitude_y": 430.78,
+    "altitude_y": 325.78,
     "z": -931.37,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+430.8m (地表大世界)"
+    "height_desc": "+325.8m (地表大世界)"
   },
   {
     "id": "c_425",
@@ -6369,11 +6369,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -31.67,
-    "altitude_y": 155.49,
+    "altitude_y": 50.49,
     "z": -875.87,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+155.5m (地表大世界)"
+    "height_desc": "+50.5m (地表大世界)"
   },
   {
     "id": "c_426",
@@ -6384,11 +6384,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Bow",
     "layer": 18,
     "x": -473.1,
-    "altitude_y": 144.21,
+    "altitude_y": 39.21,
     "z": -842.97,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+144.2m (地表大世界)"
+    "height_desc": "+39.2m (地表大世界)"
   },
   {
     "id": "c_427",
@@ -6399,11 +6399,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -326.94,
-    "altitude_y": 291.16,
+    "altitude_y": 186.16,
     "z": -1001.2,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+291.2m (地表大世界)"
+    "height_desc": "+186.2m (地表大世界)"
   },
   {
     "id": "c_428",
@@ -6414,11 +6414,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -387.18,
-    "altitude_y": 345.59,
+    "altitude_y": 240.59,
     "z": -999.75,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+345.6m (地表大世界)"
+    "height_desc": "+240.6m (地表大世界)"
   },
   {
     "id": "c_429",
@@ -6429,11 +6429,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -448.75,
-    "altitude_y": 191.58,
+    "altitude_y": 86.58,
     "z": -1032.37,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+191.6m (地表大世界)"
+    "height_desc": "+86.6m (地表大世界)"
   },
   {
     "id": "c_430",
@@ -6444,11 +6444,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Other",
     "layer": 18,
     "x": -489.72,
-    "altitude_y": 126.14,
+    "altitude_y": 21.14,
     "z": -1009.97,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+126.1m (地表大世界)"
+    "height_desc": "+21.1m (地表大世界)"
   },
   {
     "id": "c_431",
@@ -6459,11 +6459,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 11.01,
-    "altitude_y": 182.58,
+    "altitude_y": 77.58,
     "z": -879.46,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+182.6m (地表大世界)"
+    "height_desc": "+77.6m (地表大世界)"
   },
   {
     "id": "c_432",
@@ -6474,11 +6474,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Armor",
     "layer": 18,
     "x": -410.69,
-    "altitude_y": 181.38,
+    "altitude_y": 76.38,
     "z": -853.11,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+181.4m (地表大世界)"
+    "height_desc": "+76.4m (地表大世界)"
   },
   {
     "id": "c_433",
@@ -6489,11 +6489,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Rupee",
     "layer": 18,
     "x": -74.95,
-    "altitude_y": 138.41,
+    "altitude_y": 33.41,
     "z": -952.42,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+138.4m (地表大世界)"
+    "height_desc": "+33.4m (地表大世界)"
   },
   {
     "id": "c_434",
@@ -6504,11 +6504,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -886.54,
-    "altitude_y": 169.78,
+    "altitude_y": 64.78,
     "z": -436.12,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+169.8m (地表大世界)"
+    "height_desc": "+64.8m (地表大世界)"
   },
   {
     "id": "c_435",
@@ -6519,11 +6519,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": -1146.81,
-    "altitude_y": -375.47,
+    "altitude_y": -480.47,
     "z": 204.44,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-375.5m (地底深渊)"
+    "height_desc": "-480.5m (地底深渊)"
   },
   {
     "id": "c_436",
@@ -6534,11 +6534,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Armor",
     "layer": 19,
     "x": -1077.17,
-    "altitude_y": -408.56,
+    "altitude_y": -513.56,
     "z": 557.2,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-408.6m (地底深渊)"
+    "height_desc": "-513.6m (地底深渊)"
   },
   {
     "id": "c_437",
@@ -6549,11 +6549,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -2162.02,
-    "altitude_y": 58.07,
+    "altitude_y": -46.93,
     "z": -1583.04,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+58.1m (洞窟/水井内)"
+    "height_desc": "-46.9m (洞窟/水井内)"
   },
   {
     "id": "c_438",
@@ -6564,11 +6564,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 3362.06,
-    "altitude_y": 283.64,
+    "altitude_y": 178.64,
     "z": 3250.84,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+283.6m (地表大世界)"
+    "height_desc": "+178.6m (地表大世界)"
   },
   {
     "id": "c_439",
@@ -6579,11 +6579,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 3261.62,
-    "altitude_y": 138.94,
+    "altitude_y": 33.94,
     "z": 3399.95,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+138.9m (地表大世界)"
+    "height_desc": "+33.9m (地表大世界)"
   },
   {
     "id": "c_440",
@@ -6594,11 +6594,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 3795.07,
-    "altitude_y": 105.31,
+    "altitude_y": 0.31,
     "z": 3615.98,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+105.3m (地表大世界)"
+    "height_desc": "+0.3m (地表大世界)"
   },
   {
     "id": "c_441",
@@ -6609,11 +6609,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": 1137.43,
-    "altitude_y": -333.11,
+    "altitude_y": -438.11,
     "z": 2123.78,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-333.1m (地底深渊)"
+    "height_desc": "-438.1m (地底深渊)"
   },
   {
     "id": "c_442",
@@ -6624,11 +6624,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Armor",
     "layer": 19,
     "x": 1284.55,
-    "altitude_y": -679.02,
+    "altitude_y": -784.02,
     "z": 1812.71,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-679.0m (地底深渊)"
+    "height_desc": "-784.0m (地底深渊)"
   },
   {
     "id": "c_443",
@@ -6639,11 +6639,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": 1827.42,
-    "altitude_y": -510.36,
+    "altitude_y": -615.36,
     "z": 1297.86,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-510.4m (地底深渊)"
+    "height_desc": "-615.4m (地底深渊)"
   },
   {
     "id": "c_444",
@@ -6654,11 +6654,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -3210.92,
-    "altitude_y": 66.32,
+    "altitude_y": -38.68,
     "z": 3050.38,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+66.3m (洞窟/水井内)"
+    "height_desc": "-38.7m (洞窟/水井内)"
   },
   {
     "id": "c_445",
@@ -6669,11 +6669,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 19,
     "x": -2048.12,
-    "altitude_y": -440.85,
+    "altitude_y": -545.85,
     "z": 1128.88,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-440.9m (地底深渊)"
+    "height_desc": "-545.9m (地底深渊)"
   },
   {
     "id": "c_446",
@@ -6684,11 +6684,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": -3058.28,
-    "altitude_y": -547.02,
+    "altitude_y": -652.02,
     "z": 1942.28,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-547.0m (地底深渊)"
+    "height_desc": "-652.0m (地底深渊)"
   },
   {
     "id": "c_447",
@@ -6699,11 +6699,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 20,
     "x": 1987.9,
-    "altitude_y": 892.67,
+    "altitude_y": 787.67,
     "z": -2480.24,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+892.7m (天空岛)"
+    "height_desc": "+787.7m (天空岛)"
   },
   {
     "id": "c_448",
@@ -6714,11 +6714,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 2258.95,
-    "altitude_y": 170.75,
+    "altitude_y": 65.75,
     "z": -89.46,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+170.8m (洞窟/水井内)"
+    "height_desc": "+65.8m (洞窟/水井内)"
   },
   {
     "id": "c_449",
@@ -6729,11 +6729,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": 1088.38,
-    "altitude_y": -352.78,
+    "altitude_y": -457.78,
     "z": 526.82,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-352.8m (地底深渊)"
+    "height_desc": "-457.8m (地底深渊)"
   },
   {
     "id": "c_450",
@@ -6744,11 +6744,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Armor",
     "layer": 18,
     "x": -665.05,
-    "altitude_y": 270.13,
+    "altitude_y": 165.13,
     "z": -2108.23,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+270.1m (洞窟/水井内)"
+    "height_desc": "+165.1m (洞窟/水井内)"
   },
   {
     "id": "c_451",
@@ -6759,11 +6759,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": 1034.36,
-    "altitude_y": -412.5,
+    "altitude_y": -517.5,
     "z": 2240.15,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-412.5m (地底深渊)"
+    "height_desc": "-517.5m (地底深渊)"
   },
   {
     "id": "c_452",
@@ -6774,11 +6774,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": 699.0,
-    "altitude_y": -396.87,
+    "altitude_y": -501.87,
     "z": 2492.97,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-396.9m (地底深渊)"
+    "height_desc": "-501.9m (地底深渊)"
   },
   {
     "id": "c_453",
@@ -6789,11 +6789,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": 709.26,
-    "altitude_y": -411.52,
+    "altitude_y": -516.52,
     "z": 2410.97,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-411.5m (地底深渊)"
+    "height_desc": "-516.5m (地底深渊)"
   },
   {
     "id": "c_454",
@@ -6804,11 +6804,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": 248.76,
-    "altitude_y": -381.0,
+    "altitude_y": -486.0,
     "z": 2170.1,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-381.0m (地底深渊)"
+    "height_desc": "-486.0m (地底深渊)"
   },
   {
     "id": "c_455",
@@ -6819,11 +6819,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "KeyItem",
     "layer": 19,
     "x": 247.24,
-    "altitude_y": -381.0,
+    "altitude_y": -486.0,
     "z": 2171.4,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-381.0m (地底深渊)"
+    "height_desc": "-486.0m (地底深渊)"
   },
   {
     "id": "c_456",
@@ -6834,11 +6834,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -1147.47,
-    "altitude_y": 207.33,
+    "altitude_y": 102.33,
     "z": 1934.19,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+207.3m (洞窟/水井内)"
+    "height_desc": "+102.3m (洞窟/水井内)"
   },
   {
     "id": "c_457",
@@ -6849,11 +6849,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Bow",
     "layer": 18,
     "x": 894.81,
-    "altitude_y": 185.59,
+    "altitude_y": 80.59,
     "z": 3476.58,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+185.6m (地表大世界)"
+    "height_desc": "+80.6m (地表大世界)"
   },
   {
     "id": "c_458",
@@ -6864,11 +6864,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 963.46,
-    "altitude_y": 171.48,
+    "altitude_y": 66.48,
     "z": 3371.14,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+171.5m (地表大世界)"
+    "height_desc": "+66.5m (地表大世界)"
   },
   {
     "id": "c_459",
@@ -6879,11 +6879,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 738.31,
-    "altitude_y": 258.83,
+    "altitude_y": 153.83,
     "z": 3787.17,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+258.8m (地表大世界)"
+    "height_desc": "+153.8m (地表大世界)"
   },
   {
     "id": "c_460",
@@ -6894,11 +6894,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Armor",
     "layer": 18,
     "x": 3336.88,
-    "altitude_y": 125.0,
+    "altitude_y": 20.0,
     "z": -545.68,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+125.0m (洞窟/水井内)"
+    "height_desc": "+20.0m (洞窟/水井内)"
   },
   {
     "id": "c_461",
@@ -6909,11 +6909,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 1490.97,
-    "altitude_y": 543.47,
+    "altitude_y": 438.47,
     "z": -2162.81,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+543.5m (地表大世界)"
+    "height_desc": "+438.5m (地表大世界)"
   },
   {
     "id": "c_462",
@@ -6924,11 +6924,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 1589.44,
-    "altitude_y": 509.25,
+    "altitude_y": 404.25,
     "z": -2671.96,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+509.2m (地表大世界)"
+    "height_desc": "+404.2m (地表大世界)"
   },
   {
     "id": "c_463",
@@ -6939,11 +6939,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 1984.77,
-    "altitude_y": 531.02,
+    "altitude_y": 426.02,
     "z": -2332.89,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+531.0m (地表大世界)"
+    "height_desc": "+426.0m (地表大世界)"
   },
   {
     "id": "c_464",
@@ -6954,11 +6954,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 1467.5,
-    "altitude_y": 389.29,
+    "altitude_y": 284.29,
     "z": -2179.0,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+389.3m (地表大世界)"
+    "height_desc": "+284.3m (地表大世界)"
   },
   {
     "id": "c_465",
@@ -6969,11 +6969,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 1891.21,
-    "altitude_y": 502.12,
+    "altitude_y": 397.12,
     "z": -2739.0,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+502.1m (地表大世界)"
+    "height_desc": "+397.1m (地表大世界)"
   },
   {
     "id": "c_466",
@@ -6984,11 +6984,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 1353.12,
-    "altitude_y": 535.61,
+    "altitude_y": 430.61,
     "z": -2261.41,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+535.6m (地表大世界)"
+    "height_desc": "+430.6m (地表大世界)"
   },
   {
     "id": "c_467",
@@ -6999,11 +6999,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Shield",
     "layer": 18,
     "x": 1871.97,
-    "altitude_y": 511.07,
+    "altitude_y": 406.07,
     "z": -2499.41,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+511.1m (地表大世界)"
+    "height_desc": "+406.1m (地表大世界)"
   },
   {
     "id": "c_468",
@@ -7014,11 +7014,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -132.73,
-    "altitude_y": 128.63,
+    "altitude_y": 23.63,
     "z": 536.19,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+128.6m (地表大世界)"
+    "height_desc": "+23.6m (地表大世界)"
   },
   {
     "id": "c_469",
@@ -7029,11 +7029,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -131.17,
-    "altitude_y": 128.63,
+    "altitude_y": 23.63,
     "z": 537.67,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+128.6m (地表大世界)"
+    "height_desc": "+23.6m (地表大世界)"
   },
   {
     "id": "c_470",
@@ -7044,11 +7044,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -603.99,
-    "altitude_y": 148.01,
+    "altitude_y": 43.01,
     "z": 886.01,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+148.0m (地表大世界)"
+    "height_desc": "+43.0m (地表大世界)"
   },
   {
     "id": "c_471",
@@ -7059,11 +7059,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -726.44,
-    "altitude_y": 132.04,
+    "altitude_y": 27.04,
     "z": 552.59,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+132.0m (地表大世界)"
+    "height_desc": "+27.0m (地表大世界)"
   },
   {
     "id": "c_472",
@@ -7074,11 +7074,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -104.31,
-    "altitude_y": 145.89,
+    "altitude_y": 40.89,
     "z": 786.94,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+145.9m (地表大世界)"
+    "height_desc": "+40.9m (地表大世界)"
   },
   {
     "id": "c_473",
@@ -7089,11 +7089,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -512.37,
-    "altitude_y": 128.35,
+    "altitude_y": 23.35,
     "z": 601.65,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+128.3m (地表大世界)"
+    "height_desc": "+23.3m (地表大世界)"
   },
   {
     "id": "c_474",
@@ -7104,11 +7104,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -903.17,
-    "altitude_y": 189.32,
+    "altitude_y": 84.32,
     "z": 56.57,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+189.3m (地表大世界)"
+    "height_desc": "+84.3m (地表大世界)"
   },
   {
     "id": "c_475",
@@ -7119,11 +7119,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -928.71,
-    "altitude_y": 194.72,
+    "altitude_y": 89.72,
     "z": 44.21,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+194.7m (地表大世界)"
+    "height_desc": "+89.7m (地表大世界)"
   },
   {
     "id": "c_476",
@@ -7134,11 +7134,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -923.46,
-    "altitude_y": 194.66,
+    "altitude_y": 89.66,
     "z": 41.64,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+194.7m (地表大世界)"
+    "height_desc": "+89.7m (地表大世界)"
   },
   {
     "id": "c_477",
@@ -7149,11 +7149,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -925.79,
-    "altitude_y": 194.68,
+    "altitude_y": 89.68,
     "z": 43.27,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+194.7m (地表大世界)"
+    "height_desc": "+89.7m (地表大世界)"
   },
   {
     "id": "c_478",
@@ -7164,11 +7164,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -318.11,
-    "altitude_y": 148.17,
+    "altitude_y": 43.17,
     "z": 945.6,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+148.2m (地表大世界)"
+    "height_desc": "+43.2m (地表大世界)"
   },
   {
     "id": "c_479",
@@ -7179,11 +7179,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -857.42,
-    "altitude_y": 128.51,
+    "altitude_y": 23.51,
     "z": 404.16,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+128.5m (地表大世界)"
+    "height_desc": "+23.5m (地表大世界)"
   },
   {
     "id": "c_480",
@@ -7194,11 +7194,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -2786.34,
-    "altitude_y": 135.08,
+    "altitude_y": 30.08,
     "z": 2264.61,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+135.1m (地表大世界)"
+    "height_desc": "+30.1m (地表大世界)"
   },
   {
     "id": "c_481",
@@ -7209,11 +7209,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "KeyItem",
     "layer": 20,
     "x": 4752.22,
-    "altitude_y": 2022.34,
+    "altitude_y": 1917.34,
     "z": 777.56,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+2022.3m (天空岛)"
+    "height_desc": "+1917.3m (天空岛)"
   },
   {
     "id": "c_482",
@@ -7224,11 +7224,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "KeyItem",
     "layer": 20,
     "x": 4659.19,
-    "altitude_y": 1873.97,
+    "altitude_y": 1768.97,
     "z": 869.84,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1874.0m (天空岛)"
+    "height_desc": "+1769.0m (天空岛)"
   },
   {
     "id": "c_483",
@@ -7239,11 +7239,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 1198.09,
-    "altitude_y": 253.0,
+    "altitude_y": 148.0,
     "z": 2657.96,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+253.0m (地表大世界)"
+    "height_desc": "+148.0m (地表大世界)"
   },
   {
     "id": "c_484",
@@ -7254,11 +7254,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 1838.72,
-    "altitude_y": 132.81,
+    "altitude_y": 27.81,
     "z": 2314.86,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+132.8m (地表大世界)"
+    "height_desc": "+27.8m (地表大世界)"
   },
   {
     "id": "c_485",
@@ -7269,11 +7269,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 1468.9,
-    "altitude_y": 284.31,
+    "altitude_y": 179.31,
     "z": 2420.53,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+284.3m (地表大世界)"
+    "height_desc": "+179.3m (地表大世界)"
   },
   {
     "id": "c_486",
@@ -7284,11 +7284,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 1046.7,
-    "altitude_y": 134.55,
+    "altitude_y": 29.55,
     "z": 2953.35,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+134.6m (地表大世界)"
+    "height_desc": "+29.6m (地表大世界)"
   },
   {
     "id": "c_487",
@@ -7299,11 +7299,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 1272.23,
-    "altitude_y": 268.9,
+    "altitude_y": 163.9,
     "z": 2817.61,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+268.9m (地表大世界)"
+    "height_desc": "+163.9m (地表大世界)"
   },
   {
     "id": "c_488",
@@ -7314,11 +7314,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 1175.61,
-    "altitude_y": 193.89,
+    "altitude_y": 88.89,
     "z": 2849.13,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+193.9m (地表大世界)"
+    "height_desc": "+88.9m (地表大世界)"
   },
   {
     "id": "c_489",
@@ -7329,11 +7329,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 1633.34,
-    "altitude_y": 127.51,
+    "altitude_y": 22.51,
     "z": 2056.97,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+127.5m (地表大世界)"
+    "height_desc": "+22.5m (地表大世界)"
   },
   {
     "id": "c_490",
@@ -7344,11 +7344,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Bow",
     "layer": 18,
     "x": 1580.64,
-    "altitude_y": 332.44,
+    "altitude_y": 227.44,
     "z": 2375.02,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+332.4m (地表大世界)"
+    "height_desc": "+227.4m (地表大世界)"
   },
   {
     "id": "c_491",
@@ -7359,11 +7359,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 1516.64,
-    "altitude_y": 310.19,
+    "altitude_y": 205.19,
     "z": 2596.76,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+310.2m (地表大世界)"
+    "height_desc": "+205.2m (地表大世界)"
   },
   {
     "id": "c_492",
@@ -7374,11 +7374,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 18,
     "x": -4517.14,
-    "altitude_y": 283.87,
+    "altitude_y": 178.87,
     "z": 3609.67,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+283.9m (地表大世界)"
+    "height_desc": "+178.9m (地表大世界)"
   },
   {
     "id": "c_493",
@@ -7389,11 +7389,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Bow",
     "layer": 18,
     "x": -4620.78,
-    "altitude_y": 112.66,
+    "altitude_y": 7.66,
     "z": 3717.44,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+112.7m (地表大世界)"
+    "height_desc": "+7.7m (地表大世界)"
   },
   {
     "id": "c_494",
@@ -7404,11 +7404,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 18,
     "x": -4418.93,
-    "altitude_y": 133.75,
+    "altitude_y": 28.75,
     "z": 3492.17,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+133.8m (地表大世界)"
+    "height_desc": "+28.8m (地表大世界)"
   },
   {
     "id": "c_495",
@@ -7419,11 +7419,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 1941.09,
-    "altitude_y": 433.14,
+    "altitude_y": 328.14,
     "z": -3317.76,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+433.1m (地表大世界)"
+    "height_desc": "+328.1m (地表大世界)"
   },
   {
     "id": "c_496",
@@ -7434,11 +7434,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 18,
     "x": 1040.5,
-    "altitude_y": 234.26,
+    "altitude_y": 129.26,
     "z": -3740.91,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+234.3m (地表大世界)"
+    "height_desc": "+129.3m (地表大世界)"
   },
   {
     "id": "c_497",
@@ -7449,11 +7449,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": 124.73,
-    "altitude_y": -518.95,
+    "altitude_y": -623.95,
     "z": -1862.4,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-518.9m (地底深渊)"
+    "height_desc": "-623.9m (地底深渊)"
   },
   {
     "id": "c_498",
@@ -7464,11 +7464,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": 752.07,
-    "altitude_y": -385.27,
+    "altitude_y": -490.27,
     "z": -1010.01,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-385.3m (地底深渊)"
+    "height_desc": "-490.3m (地底深渊)"
   },
   {
     "id": "c_499",
@@ -7479,11 +7479,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "KeyItem",
     "layer": 20,
     "x": 1781.15,
-    "altitude_y": 1331.58,
+    "altitude_y": 1226.58,
     "z": -981.56,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1331.6m (天空岛)"
+    "height_desc": "+1226.6m (天空岛)"
   },
   {
     "id": "c_500",
@@ -7494,11 +7494,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Armor",
     "layer": 18,
     "x": 3512.63,
-    "altitude_y": 110.08,
+    "altitude_y": 5.08,
     "z": 3264.11,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+110.1m (洞窟/水井内)"
+    "height_desc": "+5.1m (洞窟/水井内)"
   },
   {
     "id": "c_501",
@@ -7509,11 +7509,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Bow",
     "layer": 18,
     "x": 3516.75,
-    "altitude_y": 133.81,
+    "altitude_y": 28.81,
     "z": 3220.38,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+133.8m (洞窟/水井内)"
+    "height_desc": "+28.8m (洞窟/水井内)"
   },
   {
     "id": "c_502",
@@ -7524,11 +7524,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 3494.26,
-    "altitude_y": 105.54,
+    "altitude_y": 0.54,
     "z": 3192.15,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+105.5m (洞窟/水井内)"
+    "height_desc": "+0.5m (洞窟/水井内)"
   },
   {
     "id": "c_503",
@@ -7539,11 +7539,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -2486.45,
-    "altitude_y": 472.3,
+    "altitude_y": 367.3,
     "z": -3211.32,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+472.3m (洞窟/水井内)"
+    "height_desc": "+367.3m (洞窟/水井内)"
   },
   {
     "id": "c_504",
@@ -7554,11 +7554,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Rupee",
     "layer": 18,
     "x": -2929.53,
-    "altitude_y": 275.14,
+    "altitude_y": 170.14,
     "z": -513.0,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+275.1m (地表大世界)"
+    "height_desc": "+170.1m (地表大世界)"
   },
   {
     "id": "c_505",
@@ -7569,11 +7569,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -2872.91,
-    "altitude_y": 318.65,
+    "altitude_y": 213.65,
     "z": -287.24,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+318.6m (地表大世界)"
+    "height_desc": "+213.6m (地表大世界)"
   },
   {
     "id": "c_506",
@@ -7584,11 +7584,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -2222.88,
-    "altitude_y": 209.96,
+    "altitude_y": 104.96,
     "z": -988.06,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+210.0m (地表大世界)"
+    "height_desc": "+105.0m (地表大世界)"
   },
   {
     "id": "c_507",
@@ -7599,11 +7599,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -2677.82,
-    "altitude_y": 295.26,
+    "altitude_y": 190.26,
     "z": -109.49,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+295.3m (地表大世界)"
+    "height_desc": "+190.3m (地表大世界)"
   },
   {
     "id": "c_508",
@@ -7614,11 +7614,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -2657.73,
-    "altitude_y": 313.75,
+    "altitude_y": 208.75,
     "z": -104.58,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+313.8m (地表大世界)"
+    "height_desc": "+208.8m (地表大世界)"
   },
   {
     "id": "c_509",
@@ -7629,11 +7629,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": 398.28,
-    "altitude_y": -420.81,
+    "altitude_y": -525.81,
     "z": -3736.55,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-420.8m (地底深渊)"
+    "height_desc": "-525.8m (地底深渊)"
   },
   {
     "id": "c_510",
@@ -7644,11 +7644,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": 825.88,
-    "altitude_y": -535.79,
+    "altitude_y": -640.79,
     "z": -3338.33,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-535.8m (地底深渊)"
+    "height_desc": "-640.8m (地底深渊)"
   },
   {
     "id": "c_511",
@@ -7659,11 +7659,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 20,
     "x": -1795.04,
-    "altitude_y": 1291.56,
+    "altitude_y": 1186.56,
     "z": 3455.5,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1291.6m (天空岛)"
+    "height_desc": "+1186.6m (天空岛)"
   },
   {
     "id": "c_512",
@@ -7674,11 +7674,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Shield",
     "layer": 20,
     "x": -1794.75,
-    "altitude_y": 1127.62,
+    "altitude_y": 1022.62,
     "z": 3560.0,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1127.6m (天空岛)"
+    "height_desc": "+1022.6m (天空岛)"
   },
   {
     "id": "c_513",
@@ -7689,11 +7689,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Bow",
     "layer": 20,
     "x": -1762.5,
-    "altitude_y": 1165.0,
+    "altitude_y": 1060.0,
     "z": 3490.0,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1165.0m (天空岛)"
+    "height_desc": "+1060.0m (天空岛)"
   },
   {
     "id": "c_514",
@@ -7704,11 +7704,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 20,
     "x": -1827.5,
-    "altitude_y": 1167.5,
+    "altitude_y": 1062.5,
     "z": 3490.0,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1167.5m (天空岛)"
+    "height_desc": "+1062.5m (天空岛)"
   },
   {
     "id": "c_515",
@@ -7719,11 +7719,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 20,
     "x": -1827.5,
-    "altitude_y": 1170.0,
+    "altitude_y": 1065.0,
     "z": 3425.0,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1170.0m (天空岛)"
+    "height_desc": "+1065.0m (天空岛)"
   },
   {
     "id": "c_516",
@@ -7734,11 +7734,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 20,
     "x": -1762.5,
-    "altitude_y": 1167.5,
+    "altitude_y": 1062.5,
     "z": 3425.0,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1167.5m (天空岛)"
+    "height_desc": "+1062.5m (天空岛)"
   },
   {
     "id": "c_517",
@@ -7749,11 +7749,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 1706.28,
-    "altitude_y": 344.49,
+    "altitude_y": 239.49,
     "z": -3021.75,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+344.5m (洞窟/水井内)"
+    "height_desc": "+239.5m (洞窟/水井内)"
   },
   {
     "id": "c_518",
@@ -7764,11 +7764,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -3914.06,
-    "altitude_y": 163.53,
+    "altitude_y": 58.53,
     "z": -79.99,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+163.5m (地表大世界)"
+    "height_desc": "+58.5m (地表大世界)"
   },
   {
     "id": "c_519",
@@ -7779,11 +7779,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -3190.16,
-    "altitude_y": 213.08,
+    "altitude_y": 108.08,
     "z": -218.94,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+213.1m (地表大世界)"
+    "height_desc": "+108.1m (地表大世界)"
   },
   {
     "id": "c_520",
@@ -7794,11 +7794,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -3284.9,
-    "altitude_y": 260.17,
+    "altitude_y": 155.17,
     "z": -978.4,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+260.2m (地表大世界)"
+    "height_desc": "+155.2m (地表大世界)"
   },
   {
     "id": "c_521",
@@ -7809,11 +7809,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -3916.34,
-    "altitude_y": 307.61,
+    "altitude_y": 202.61,
     "z": -416.18,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+307.6m (地表大世界)"
+    "height_desc": "+202.6m (地表大世界)"
   },
   {
     "id": "c_522",
@@ -7824,11 +7824,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -3335.5,
-    "altitude_y": 20.62,
+    "altitude_y": -84.38,
     "z": -317.89,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+20.6m (地表大世界)"
+    "height_desc": "-84.4m (地表大世界)"
   },
   {
     "id": "c_523",
@@ -7839,11 +7839,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 1926.11,
-    "altitude_y": 89.8,
+    "altitude_y": -15.2,
     "z": 3036.86,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+89.8m (洞窟/水井内)"
+    "height_desc": "-15.2m (洞窟/水井内)"
   },
   {
     "id": "c_524",
@@ -7854,11 +7854,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 2443.18,
-    "altitude_y": 181.04,
+    "altitude_y": 76.04,
     "z": 3153.83,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+181.0m (洞窟/水井内)"
+    "height_desc": "+76.0m (洞窟/水井内)"
   },
   {
     "id": "c_525",
@@ -7869,11 +7869,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 2460.86,
-    "altitude_y": 163.21,
+    "altitude_y": 58.21,
     "z": 3144.28,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+163.2m (洞窟/水井内)"
+    "height_desc": "+58.2m (洞窟/水井内)"
   },
   {
     "id": "c_526",
@@ -7884,11 +7884,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 2454.62,
-    "altitude_y": 180.27,
+    "altitude_y": 75.27,
     "z": 3141.46,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+180.3m (洞窟/水井内)"
+    "height_desc": "+75.3m (洞窟/水井内)"
   },
   {
     "id": "c_527",
@@ -7899,11 +7899,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Armor",
     "layer": 20,
     "x": 2374.19,
-    "altitude_y": 1594.56,
+    "altitude_y": 1489.56,
     "z": 1774.47,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1594.6m (天空岛)"
+    "height_desc": "+1489.6m (天空岛)"
   },
   {
     "id": "c_528",
@@ -7914,11 +7914,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Rupee",
     "layer": 18,
     "x": -2870.87,
-    "altitude_y": 249.56,
+    "altitude_y": 144.56,
     "z": -470.92,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+249.6m (洞窟/水井内)"
+    "height_desc": "+144.6m (洞窟/水井内)"
   },
   {
     "id": "c_529",
@@ -7929,11 +7929,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": 685.05,
-    "altitude_y": -373.81,
+    "altitude_y": -478.81,
     "z": 43.58,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-373.8m (地底深渊)"
+    "height_desc": "-478.8m (地底深渊)"
   },
   {
     "id": "c_530",
@@ -7944,11 +7944,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 18,
     "x": 511.44,
-    "altitude_y": 157.81,
+    "altitude_y": 52.81,
     "z": -79.21,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+157.8m (地表大世界)"
+    "height_desc": "+52.8m (地表大世界)"
   },
   {
     "id": "c_531",
@@ -7959,11 +7959,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 20,
     "x": 1320.99,
-    "altitude_y": 559.18,
+    "altitude_y": 454.18,
     "z": 3330.41,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+559.2m (天空岛)"
+    "height_desc": "+454.2m (天空岛)"
   },
   {
     "id": "c_532",
@@ -7974,11 +7974,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": -1191.69,
-    "altitude_y": -443.23,
+    "altitude_y": -548.23,
     "z": -2028.28,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-443.2m (地底深渊)"
+    "height_desc": "-548.2m (地底深渊)"
   },
   {
     "id": "c_533",
@@ -7989,11 +7989,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": -1334.26,
-    "altitude_y": -492.42,
+    "altitude_y": -597.42,
     "z": -1497.19,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-492.4m (地底深渊)"
+    "height_desc": "-597.4m (地底深渊)"
   },
   {
     "id": "c_534",
@@ -8004,11 +8004,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "KeyItem",
     "layer": 19,
     "x": -1332.32,
-    "altitude_y": -492.42,
+    "altitude_y": -597.42,
     "z": -1497.64,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-492.4m (地底深渊)"
+    "height_desc": "-597.4m (地底深渊)"
   },
   {
     "id": "c_535",
@@ -8019,11 +8019,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -3474.72,
-    "altitude_y": 181.45,
+    "altitude_y": 76.45,
     "z": 2957.13,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+181.4m (地表大世界)"
+    "height_desc": "+76.4m (地表大世界)"
   },
   {
     "id": "c_536",
@@ -8034,11 +8034,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -3597.2,
-    "altitude_y": 145.8,
+    "altitude_y": 40.8,
     "z": 2834.54,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+145.8m (地表大世界)"
+    "height_desc": "+40.8m (地表大世界)"
   },
   {
     "id": "c_537",
@@ -8049,11 +8049,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Shield",
     "layer": 18,
     "x": -3940.91,
-    "altitude_y": 191.46,
+    "altitude_y": 86.46,
     "z": 2934.61,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+191.5m (地表大世界)"
+    "height_desc": "+86.5m (地表大世界)"
   },
   {
     "id": "c_538",
@@ -8064,11 +8064,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 2346.17,
-    "altitude_y": 129.73,
+    "altitude_y": 24.73,
     "z": 1664.9,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+129.7m (洞窟/水井内)"
+    "height_desc": "+24.7m (洞窟/水井内)"
   },
   {
     "id": "c_539",
@@ -8079,11 +8079,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Armor",
     "layer": 19,
     "x": 1164.56,
-    "altitude_y": -474.8,
+    "altitude_y": -579.8,
     "z": -425.65,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-474.8m (地底深渊)"
+    "height_desc": "-579.8m (地底深渊)"
   },
   {
     "id": "c_540",
@@ -8094,11 +8094,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": 1354.4,
-    "altitude_y": -373.56,
+    "altitude_y": -478.56,
     "z": -113.09,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-373.6m (地底深渊)"
+    "height_desc": "-478.6m (地底深渊)"
   },
   {
     "id": "c_541",
@@ -8109,11 +8109,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "KeyItem",
     "layer": 20,
     "x": -4470.41,
-    "altitude_y": 1359.11,
+    "altitude_y": 1254.11,
     "z": -2170.81,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1359.1m (天空岛)"
+    "height_desc": "+1254.1m (天空岛)"
   },
   {
     "id": "c_542",
@@ -8124,11 +8124,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Shield",
     "layer": 18,
     "x": -1378.28,
-    "altitude_y": 365.47,
+    "altitude_y": 260.47,
     "z": -3693.6,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+365.5m (地表大世界)"
+    "height_desc": "+260.5m (地表大世界)"
   },
   {
     "id": "c_543",
@@ -8139,11 +8139,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -2984.86,
-    "altitude_y": 110.5,
+    "altitude_y": 5.5,
     "z": 3739.23,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+110.5m (洞窟/水井内)"
+    "height_desc": "+5.5m (洞窟/水井内)"
   },
   {
     "id": "c_544",
@@ -8154,11 +8154,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -3007.28,
-    "altitude_y": 95.93,
+    "altitude_y": -9.07,
     "z": 3761.77,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+95.9m (洞窟/水井内)"
+    "height_desc": "-9.1m (洞窟/水井内)"
   },
   {
     "id": "c_545",
@@ -8169,11 +8169,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 2027.81,
-    "altitude_y": 518.55,
+    "altitude_y": 413.55,
     "z": -2652.52,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+518.6m (洞窟/水井内)"
+    "height_desc": "+413.6m (洞窟/水井内)"
   },
   {
     "id": "c_546",
@@ -8184,11 +8184,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": 4161.9,
-    "altitude_y": -347.6,
+    "altitude_y": -452.6,
     "z": 2429.99,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-347.6m (地底深渊)"
+    "height_desc": "-452.6m (地底深渊)"
   },
   {
     "id": "c_547",
@@ -8199,11 +8199,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": 4659.48,
-    "altitude_y": -388.82,
+    "altitude_y": -493.82,
     "z": 2374.89,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-388.8m (地底深渊)"
+    "height_desc": "-493.8m (地底深渊)"
   },
   {
     "id": "c_548",
@@ -8214,11 +8214,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Bow",
     "layer": 18,
     "x": -4324.5,
-    "altitude_y": 397.56,
+    "altitude_y": 292.56,
     "z": -3326.0,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+397.6m (地表大世界)"
+    "height_desc": "+292.6m (地表大世界)"
   },
   {
     "id": "c_549",
@@ -8229,11 +8229,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": -3603.64,
-    "altitude_y": -311.29,
+    "altitude_y": -416.29,
     "z": -167.7,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-311.3m (地底深渊)"
+    "height_desc": "-416.3m (地底深渊)"
   },
   {
     "id": "c_550",
@@ -8244,11 +8244,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": -3357.18,
-    "altitude_y": -482.0,
+    "altitude_y": -587.0,
     "z": -915.32,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-482.0m (地底深渊)"
+    "height_desc": "-587.0m (地底深渊)"
   },
   {
     "id": "c_551",
@@ -8259,11 +8259,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "KeyItem",
     "layer": 20,
     "x": -2297.41,
-    "altitude_y": 1000.12,
+    "altitude_y": 895.12,
     "z": 411.74,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1000.1m (天空岛)"
+    "height_desc": "+895.1m (天空岛)"
   },
   {
     "id": "c_552",
@@ -8274,11 +8274,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "KeyItem",
     "layer": 20,
     "x": -1648.57,
-    "altitude_y": 1070.24,
+    "altitude_y": 965.24,
     "z": -3513.13,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1070.2m (天空岛)"
+    "height_desc": "+965.2m (天空岛)"
   },
   {
     "id": "c_553",
@@ -8289,11 +8289,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 1976.54,
-    "altitude_y": 142.97,
+    "altitude_y": 37.97,
     "z": 2366.1,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+143.0m (地表大世界)"
+    "height_desc": "+38.0m (地表大世界)"
   },
   {
     "id": "c_554",
@@ -8304,11 +8304,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": 1842.15,
-    "altitude_y": -731.54,
+    "altitude_y": -836.54,
     "z": -3024.19,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-731.5m (地底深渊)"
+    "height_desc": "-836.5m (地底深渊)"
   },
   {
     "id": "c_555",
@@ -8319,11 +8319,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": -977.93,
-    "altitude_y": -421.39,
+    "altitude_y": -526.39,
     "z": -248.88,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-421.4m (地底深渊)"
+    "height_desc": "-526.4m (地底深渊)"
   },
   {
     "id": "c_556",
@@ -8334,11 +8334,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": -715.49,
-    "altitude_y": -364.48,
+    "altitude_y": -469.48,
     "z": -407.43,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-364.5m (地底深渊)"
+    "height_desc": "-469.5m (地底深渊)"
   },
   {
     "id": "c_557",
@@ -8349,11 +8349,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": -505.54,
-    "altitude_y": -359.81,
+    "altitude_y": -464.81,
     "z": 6.74,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-359.8m (地底深渊)"
+    "height_desc": "-464.8m (地底深渊)"
   },
   {
     "id": "c_558",
@@ -8364,11 +8364,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": -61.69,
-    "altitude_y": -360.21,
+    "altitude_y": -465.21,
     "z": -136.69,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-360.2m (地底深渊)"
+    "height_desc": "-465.2m (地底深渊)"
   },
   {
     "id": "c_559",
@@ -8379,11 +8379,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": -4250.2,
-    "altitude_y": -687.93,
+    "altitude_y": -792.93,
     "z": -3490.89,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-687.9m (地底深渊)"
+    "height_desc": "-792.9m (地底深渊)"
   },
   {
     "id": "c_560",
@@ -8394,11 +8394,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 4168.83,
-    "altitude_y": 308.69,
+    "altitude_y": 203.69,
     "z": -3293.66,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+308.7m (地表大世界)"
+    "height_desc": "+203.7m (地表大世界)"
   },
   {
     "id": "c_561",
@@ -8409,11 +8409,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Armor",
     "layer": 18,
     "x": 4511.87,
-    "altitude_y": 353.01,
+    "altitude_y": 248.01,
     "z": -3166.6,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+353.0m (地表大世界)"
+    "height_desc": "+248.0m (地表大世界)"
   },
   {
     "id": "c_562",
@@ -8424,11 +8424,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Other",
     "layer": 18,
     "x": 4523.45,
-    "altitude_y": 352.99,
+    "altitude_y": 247.99,
     "z": -3163.68,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+353.0m (地表大世界)"
+    "height_desc": "+248.0m (地表大世界)"
   },
   {
     "id": "c_563",
@@ -8439,11 +8439,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 4687.42,
-    "altitude_y": 195.62,
+    "altitude_y": 90.62,
     "z": -3707.52,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+195.6m (地表大世界)"
+    "height_desc": "+90.6m (地表大世界)"
   },
   {
     "id": "c_564",
@@ -8454,11 +8454,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Bow",
     "layer": 18,
     "x": 4655.01,
-    "altitude_y": 195.62,
+    "altitude_y": 90.62,
     "z": -3726.13,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+195.6m (地表大世界)"
+    "height_desc": "+90.6m (地表大世界)"
   },
   {
     "id": "c_565",
@@ -8469,11 +8469,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 4557.31,
-    "altitude_y": 195.62,
+    "altitude_y": 90.62,
     "z": -3602.54,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+195.6m (地表大世界)"
+    "height_desc": "+90.6m (地表大世界)"
   },
   {
     "id": "c_566",
@@ -8484,11 +8484,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 4562.5,
-    "altitude_y": 195.62,
+    "altitude_y": 90.62,
     "z": -3602.54,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+195.6m (地表大世界)"
+    "height_desc": "+90.6m (地表大世界)"
   },
   {
     "id": "c_567",
@@ -8499,11 +8499,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Shield",
     "layer": 18,
     "x": 4597.51,
-    "altitude_y": 195.62,
+    "altitude_y": 90.62,
     "z": -3722.45,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+195.6m (地表大世界)"
+    "height_desc": "+90.6m (地表大世界)"
   },
   {
     "id": "c_568",
@@ -8514,11 +8514,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 4526.45,
-    "altitude_y": 195.62,
+    "altitude_y": 90.62,
     "z": -3692.44,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+195.6m (地表大世界)"
+    "height_desc": "+90.6m (地表大世界)"
   },
   {
     "id": "c_569",
@@ -8529,11 +8529,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 4638.72,
-    "altitude_y": 195.62,
+    "altitude_y": 90.62,
     "z": -3617.51,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+195.6m (地表大世界)"
+    "height_desc": "+90.6m (地表大世界)"
   },
   {
     "id": "c_570",
@@ -8544,11 +8544,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 4671.39,
-    "altitude_y": 195.62,
+    "altitude_y": 90.62,
     "z": -3617.54,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+195.6m (地表大世界)"
+    "height_desc": "+90.6m (地表大世界)"
   },
   {
     "id": "c_571",
@@ -8559,11 +8559,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 18,
     "x": 4655.0,
-    "altitude_y": 156.1,
+    "altitude_y": 51.1,
     "z": -3640.0,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+156.1m (地表大世界)"
+    "height_desc": "+51.1m (地表大世界)"
   },
   {
     "id": "c_572",
@@ -8574,11 +8574,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 4428.0,
-    "altitude_y": 112.1,
+    "altitude_y": 7.1,
     "z": -3343.5,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+112.1m (地表大世界)"
+    "height_desc": "+7.1m (地表大世界)"
   },
   {
     "id": "c_573",
@@ -8589,11 +8589,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 4814.0,
-    "altitude_y": 105.95,
+    "altitude_y": 0.95,
     "z": -3307.5,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+106.0m (地表大世界)"
+    "height_desc": "+1.0m (地表大世界)"
   },
   {
     "id": "c_574",
@@ -8604,11 +8604,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 4860.95,
-    "altitude_y": 105.53,
+    "altitude_y": 0.53,
     "z": -3151.49,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+105.5m (地表大世界)"
+    "height_desc": "+0.5m (地表大世界)"
   },
   {
     "id": "c_575",
@@ -8619,11 +8619,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Bow",
     "layer": 18,
     "x": 4166.0,
-    "altitude_y": 336.57,
+    "altitude_y": 231.57,
     "z": -3138.5,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+336.6m (地表大世界)"
+    "height_desc": "+231.6m (地表大世界)"
   },
   {
     "id": "c_576",
@@ -8634,11 +8634,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Armor",
     "layer": 18,
     "x": 297.52,
-    "altitude_y": 156.62,
+    "altitude_y": 51.62,
     "z": 3776.58,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+156.6m (洞窟/水井内)"
+    "height_desc": "+51.6m (洞窟/水井内)"
   },
   {
     "id": "c_577",
@@ -8649,11 +8649,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 4637.89,
-    "altitude_y": 77.19,
+    "altitude_y": -27.81,
     "z": -3366.18,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+77.2m (洞窟/水井内)"
+    "height_desc": "-27.8m (洞窟/水井内)"
   },
   {
     "id": "c_578",
@@ -8664,11 +8664,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": -815.27,
-    "altitude_y": -415.18,
+    "altitude_y": -520.18,
     "z": 1934.66,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-415.2m (地底深渊)"
+    "height_desc": "-520.2m (地底深渊)"
   },
   {
     "id": "c_579",
@@ -8679,11 +8679,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Armor",
     "layer": 18,
     "x": -4449.19,
-    "altitude_y": 562.6,
+    "altitude_y": 457.6,
     "z": 640.47,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+562.6m (洞窟/水井内)"
+    "height_desc": "+457.6m (洞窟/水井内)"
   },
   {
     "id": "c_580",
@@ -8694,11 +8694,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 317.82,
-    "altitude_y": 81.38,
+    "altitude_y": -23.62,
     "z": 1843.43,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+81.4m (洞窟/水井内)"
+    "height_desc": "-23.6m (洞窟/水井内)"
   },
   {
     "id": "c_581",
@@ -8709,11 +8709,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 396.05,
-    "altitude_y": 78.18,
+    "altitude_y": -26.82,
     "z": 1979.64,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+78.2m (洞窟/水井内)"
+    "height_desc": "-26.8m (洞窟/水井内)"
   },
   {
     "id": "c_582",
@@ -8724,11 +8724,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Bow",
     "layer": 18,
     "x": 400.0,
-    "altitude_y": 58.01,
+    "altitude_y": -46.99,
     "z": 1937.32,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+58.0m (洞窟/水井内)"
+    "height_desc": "-47.0m (洞窟/水井内)"
   },
   {
     "id": "c_583",
@@ -8739,11 +8739,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 18,
     "x": -3713.34,
-    "altitude_y": 72.82,
+    "altitude_y": -32.18,
     "z": 3257.03,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+72.8m (洞窟/水井内)"
+    "height_desc": "-32.2m (洞窟/水井内)"
   },
   {
     "id": "c_584",
@@ -8754,11 +8754,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 2027.49,
-    "altitude_y": 199.39,
+    "altitude_y": 94.39,
     "z": 3035.77,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+199.4m (洞窟/水井内)"
+    "height_desc": "+94.4m (洞窟/水井内)"
   },
   {
     "id": "c_585",
@@ -8769,11 +8769,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -3391.58,
-    "altitude_y": 512.14,
+    "altitude_y": 407.14,
     "z": 752.0,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+512.1m (地表大世界)"
+    "height_desc": "+407.1m (地表大世界)"
   },
   {
     "id": "c_586",
@@ -8784,11 +8784,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -3517.94,
-    "altitude_y": 736.6,
+    "altitude_y": 631.6,
     "z": 912.66,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+736.6m (地表大世界)"
+    "height_desc": "+631.6m (地表大世界)"
   },
   {
     "id": "c_587",
@@ -8799,11 +8799,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 4513.62,
-    "altitude_y": 158.16,
+    "altitude_y": 53.16,
     "z": 239.18,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+158.2m (地表大世界)"
+    "height_desc": "+53.2m (地表大世界)"
   },
   {
     "id": "c_588",
@@ -8814,11 +8814,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Armor",
     "layer": 19,
     "x": 1674.83,
-    "altitude_y": -455.94,
+    "altitude_y": -560.94,
     "z": -3722.9,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-455.9m (地底深渊)"
+    "height_desc": "-560.9m (地底深渊)"
   },
   {
     "id": "c_589",
@@ -8829,11 +8829,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": -1749.38,
-    "altitude_y": -574.25,
+    "altitude_y": -679.25,
     "z": -3105.98,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-574.3m (地底深渊)"
+    "height_desc": "-679.3m (地底深渊)"
   },
   {
     "id": "c_590",
@@ -8844,11 +8844,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "KeyItem",
     "layer": 19,
     "x": -1751.35,
-    "altitude_y": -574.25,
+    "altitude_y": -679.25,
     "z": -3106.32,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-574.3m (地底深渊)"
+    "height_desc": "-679.3m (地底深渊)"
   },
   {
     "id": "c_591",
@@ -8859,11 +8859,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": 3620.27,
-    "altitude_y": -349.8,
+    "altitude_y": -454.8,
     "z": 571.38,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-349.8m (地底深渊)"
+    "height_desc": "-454.8m (地底深渊)"
   },
   {
     "id": "c_592",
@@ -8874,11 +8874,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "KeyItem",
     "layer": 19,
     "x": 3618.49,
-    "altitude_y": -349.8,
+    "altitude_y": -454.8,
     "z": 570.47,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-349.8m (地底深渊)"
+    "height_desc": "-454.8m (地底深渊)"
   },
   {
     "id": "c_593",
@@ -8889,11 +8889,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Bow",
     "layer": 18,
     "x": -3189.08,
-    "altitude_y": 564.19,
+    "altitude_y": 459.19,
     "z": -2562.46,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+564.2m (地表大世界)"
+    "height_desc": "+459.2m (地表大世界)"
   },
   {
     "id": "c_594",
@@ -8904,11 +8904,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Bow",
     "layer": 18,
     "x": -3131.66,
-    "altitude_y": 322.85,
+    "altitude_y": 217.85,
     "z": -2343.57,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+322.9m (地表大世界)"
+    "height_desc": "+217.9m (地表大世界)"
   },
   {
     "id": "c_595",
@@ -8919,11 +8919,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -3478.48,
-    "altitude_y": 285.04,
+    "altitude_y": 180.04,
     "z": -2067.5,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+285.0m (地表大世界)"
+    "height_desc": "+180.0m (地表大世界)"
   },
   {
     "id": "c_596",
@@ -8934,11 +8934,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Bow",
     "layer": 18,
     "x": -3085.7,
-    "altitude_y": 428.52,
+    "altitude_y": 323.52,
     "z": -2494.72,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+428.5m (地表大世界)"
+    "height_desc": "+323.5m (地表大世界)"
   },
   {
     "id": "c_597",
@@ -8949,11 +8949,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -3915.97,
-    "altitude_y": 86.69,
+    "altitude_y": -18.31,
     "z": -2764.1,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+86.7m (地表大世界)"
+    "height_desc": "-18.3m (地表大世界)"
   },
   {
     "id": "c_598",
@@ -8964,11 +8964,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -3811.4,
-    "altitude_y": 174.38,
+    "altitude_y": 69.38,
     "z": -2777.36,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+174.4m (地表大世界)"
+    "height_desc": "+69.4m (地表大世界)"
   },
   {
     "id": "c_599",
@@ -8979,11 +8979,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "KeyItem",
     "layer": 20,
     "x": 1662.94,
-    "altitude_y": 506.26,
+    "altitude_y": 401.26,
     "z": 352.65,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+506.3m (天空岛)"
+    "height_desc": "+401.3m (天空岛)"
   },
   {
     "id": "c_600",
@@ -8994,11 +8994,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Shield",
     "layer": 18,
     "x": 360.21,
-    "altitude_y": 86.31,
+    "altitude_y": -18.69,
     "z": 1999.34,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+86.3m (洞窟/水井内)"
+    "height_desc": "-18.7m (洞窟/水井内)"
   },
   {
     "id": "c_601",
@@ -9009,11 +9009,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 3173.51,
-    "altitude_y": 541.13,
+    "altitude_y": 436.13,
     "z": -925.15,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+541.1m (地表大世界)"
+    "height_desc": "+436.1m (地表大世界)"
   },
   {
     "id": "c_602",
@@ -9024,11 +9024,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 3879.92,
-    "altitude_y": 591.92,
+    "altitude_y": 486.92,
     "z": -590.68,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+591.9m (地表大世界)"
+    "height_desc": "+486.9m (地表大世界)"
   },
   {
     "id": "c_603",
@@ -9039,11 +9039,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 3656.86,
-    "altitude_y": 550.16,
+    "altitude_y": 445.16,
     "z": -803.36,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+550.2m (地表大世界)"
+    "height_desc": "+445.2m (地表大世界)"
   },
   {
     "id": "c_604",
@@ -9054,11 +9054,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 3462.93,
-    "altitude_y": 572.49,
+    "altitude_y": 467.49,
     "z": -913.78,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+572.5m (地表大世界)"
+    "height_desc": "+467.5m (地表大世界)"
   },
   {
     "id": "c_605",
@@ -9069,11 +9069,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Armor",
     "layer": 18,
     "x": 4094.22,
-    "altitude_y": 692.07,
+    "altitude_y": 587.07,
     "z": -529.48,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+692.1m (地表大世界)"
+    "height_desc": "+587.1m (地表大世界)"
   },
   {
     "id": "c_606",
@@ -9084,11 +9084,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Shield",
     "layer": 18,
     "x": 3114.32,
-    "altitude_y": 439.55,
+    "altitude_y": 334.55,
     "z": -750.45,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+439.6m (地表大世界)"
+    "height_desc": "+334.6m (地表大世界)"
   },
   {
     "id": "c_607",
@@ -9099,11 +9099,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 3763.95,
-    "altitude_y": 536.79,
+    "altitude_y": 431.79,
     "z": -630.68,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+536.8m (地表大世界)"
+    "height_desc": "+431.8m (地表大世界)"
   },
   {
     "id": "c_608",
@@ -9114,11 +9114,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 4163.0,
-    "altitude_y": 392.24,
+    "altitude_y": 287.24,
     "z": -989.04,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+392.2m (地表大世界)"
+    "height_desc": "+287.2m (地表大世界)"
   },
   {
     "id": "c_609",
@@ -9129,11 +9129,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 4416.64,
-    "altitude_y": 378.57,
+    "altitude_y": 273.57,
     "z": -701.85,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+378.6m (地表大世界)"
+    "height_desc": "+273.6m (地表大世界)"
   },
   {
     "id": "c_610",
@@ -9144,11 +9144,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 4169.89,
-    "altitude_y": 432.08,
+    "altitude_y": 327.08,
     "z": -86.33,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+432.1m (地表大世界)"
+    "height_desc": "+327.1m (地表大世界)"
   },
   {
     "id": "c_611",
@@ -9159,11 +9159,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 4166.54,
-    "altitude_y": 437.49,
+    "altitude_y": 332.49,
     "z": -58.15,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+437.5m (地表大世界)"
+    "height_desc": "+332.5m (地表大世界)"
   },
   {
     "id": "c_612",
@@ -9174,11 +9174,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 4162.39,
-    "altitude_y": 437.43,
+    "altitude_y": 332.43,
     "z": -62.27,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+437.4m (地表大世界)"
+    "height_desc": "+332.4m (地表大世界)"
   },
   {
     "id": "c_613",
@@ -9189,11 +9189,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 4164.7,
-    "altitude_y": 437.46,
+    "altitude_y": 332.46,
     "z": -60.59,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+437.5m (地表大世界)"
+    "height_desc": "+332.5m (地表大世界)"
   },
   {
     "id": "c_614",
@@ -9204,11 +9204,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 4194.45,
-    "altitude_y": 253.23,
+    "altitude_y": 148.23,
     "z": -786.48,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+253.2m (地表大世界)"
+    "height_desc": "+148.2m (地表大世界)"
   },
   {
     "id": "c_615",
@@ -9219,11 +9219,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 4103.75,
-    "altitude_y": 368.29,
+    "altitude_y": 263.29,
     "z": -481.69,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+368.3m (地表大世界)"
+    "height_desc": "+263.3m (地表大世界)"
   },
   {
     "id": "c_616",
@@ -9234,11 +9234,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 4462.5,
-    "altitude_y": 200.52,
+    "altitude_y": 95.52,
     "z": -921.13,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+200.5m (地表大世界)"
+    "height_desc": "+95.5m (地表大世界)"
   },
   {
     "id": "c_617",
@@ -9249,11 +9249,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 4666.44,
-    "altitude_y": 313.63,
+    "altitude_y": 208.63,
     "z": -838.0,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+313.6m (地表大世界)"
+    "height_desc": "+208.6m (地表大世界)"
   },
   {
     "id": "c_618",
@@ -9264,11 +9264,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 4674.03,
-    "altitude_y": 327.22,
+    "altitude_y": 222.22,
     "z": -994.01,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+327.2m (地表大世界)"
+    "height_desc": "+222.2m (地表大世界)"
   },
   {
     "id": "c_619",
@@ -9279,11 +9279,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 18,
     "x": 4075.0,
-    "altitude_y": 421.19,
+    "altitude_y": 316.19,
     "z": -907.0,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+421.2m (地表大世界)"
+    "height_desc": "+316.2m (地表大世界)"
   },
   {
     "id": "c_620",
@@ -9294,11 +9294,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Shield",
     "layer": 18,
     "x": 1882.45,
-    "altitude_y": 186.33,
+    "altitude_y": 81.33,
     "z": 2760.06,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+186.3m (洞窟/水井内)"
+    "height_desc": "+81.3m (洞窟/水井内)"
   },
   {
     "id": "c_621",
@@ -9309,11 +9309,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Armor",
     "layer": 18,
     "x": -69.78,
-    "altitude_y": 101.05,
+    "altitude_y": -3.95,
     "z": 1117.33,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+101.1m (洞窟/水井内)"
+    "height_desc": "-3.9m (洞窟/水井内)"
   },
   {
     "id": "c_622",
@@ -9324,11 +9324,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Shield",
     "layer": 18,
     "x": -229.46,
-    "altitude_y": 76.42,
+    "altitude_y": -28.58,
     "z": 1050.61,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+76.4m (洞窟/水井内)"
+    "height_desc": "-28.6m (洞窟/水井内)"
   },
   {
     "id": "c_623",
@@ -9339,11 +9339,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 18,
     "x": -3020.06,
-    "altitude_y": 610.23,
+    "altitude_y": 505.23,
     "z": -3150.69,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+610.2m (洞窟/水井内)"
+    "height_desc": "+505.2m (洞窟/水井内)"
   },
   {
     "id": "c_624",
@@ -9354,11 +9354,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Bow",
     "layer": 18,
     "x": -1187.94,
-    "altitude_y": 152.59,
+    "altitude_y": 47.59,
     "z": 329.98,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+152.6m (地表大世界)"
+    "height_desc": "+47.6m (地表大世界)"
   },
   {
     "id": "c_625",
@@ -9369,11 +9369,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Bow",
     "layer": 18,
     "x": -1793.23,
-    "altitude_y": 204.88,
+    "altitude_y": 99.88,
     "z": 540.7,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+204.9m (地表大世界)"
+    "height_desc": "+99.9m (地表大世界)"
   },
   {
     "id": "c_626",
@@ -9384,11 +9384,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -1359.64,
-    "altitude_y": 89.58,
+    "altitude_y": -15.42,
     "z": 243.14,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+89.6m (地表大世界)"
+    "height_desc": "-15.4m (地表大世界)"
   },
   {
     "id": "c_627",
@@ -9399,11 +9399,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -1361.91,
-    "altitude_y": 120.26,
+    "altitude_y": 15.26,
     "z": 768.92,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+120.3m (地表大世界)"
+    "height_desc": "+15.3m (地表大世界)"
   },
   {
     "id": "c_628",
@@ -9414,11 +9414,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": 3680.33,
-    "altitude_y": -497.18,
+    "altitude_y": -602.18,
     "z": -2082.46,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-497.2m (地底深渊)"
+    "height_desc": "-602.2m (地底深渊)"
   },
   {
     "id": "c_629",
@@ -9429,11 +9429,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": 2889.09,
-    "altitude_y": -685.4,
+    "altitude_y": -790.4,
     "z": -623.96,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-685.4m (地底深渊)"
+    "height_desc": "-790.4m (地底深渊)"
   },
   {
     "id": "c_630",
@@ -9444,11 +9444,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "KeyItem",
     "layer": 20,
     "x": -3860.64,
-    "altitude_y": 853.33,
+    "altitude_y": 748.33,
     "z": -2922.98,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+853.3m (天空岛)"
+    "height_desc": "+748.3m (天空岛)"
   },
   {
     "id": "c_631",
@@ -9459,11 +9459,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "KeyItem",
     "layer": 20,
     "x": -3075.43,
-    "altitude_y": 753.51,
+    "altitude_y": 648.51,
     "z": -2151.92,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+753.5m (天空岛)"
+    "height_desc": "+648.5m (天空岛)"
   },
   {
     "id": "c_632",
@@ -9474,11 +9474,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -3481.36,
-    "altitude_y": 175.72,
+    "altitude_y": 70.72,
     "z": 92.51,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+175.7m (地表大世界)"
+    "height_desc": "+70.7m (地表大世界)"
   },
   {
     "id": "c_633",
@@ -9489,11 +9489,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Shield",
     "layer": 18,
     "x": -2839.07,
-    "altitude_y": 332.01,
+    "altitude_y": 227.01,
     "z": -371.4,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+332.0m (地表大世界)"
+    "height_desc": "+227.0m (地表大世界)"
   },
   {
     "id": "c_634",
@@ -9504,11 +9504,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Rupee",
     "layer": 18,
     "x": -2228.02,
-    "altitude_y": 225.3,
+    "altitude_y": 120.3,
     "z": 712.15,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+225.3m (洞窟/水井内)"
+    "height_desc": "+120.3m (洞窟/水井内)"
   },
   {
     "id": "c_635",
@@ -9519,11 +9519,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 1915.77,
-    "altitude_y": 396.3,
+    "altitude_y": 291.3,
     "z": -1781.82,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+396.3m (洞窟/水井内)"
+    "height_desc": "+291.3m (洞窟/水井内)"
   },
   {
     "id": "c_636",
@@ -9534,11 +9534,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 20,
     "x": 3604.66,
-    "altitude_y": 1307.5,
+    "altitude_y": 1202.5,
     "z": -421.23,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1307.5m (天空岛)"
+    "height_desc": "+1202.5m (天空岛)"
   },
   {
     "id": "c_637",
@@ -9549,11 +9549,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 20,
     "x": 3632.75,
-    "altitude_y": 1372.5,
+    "altitude_y": 1267.5,
     "z": -615.51,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1372.5m (天空岛)"
+    "height_desc": "+1267.5m (天空岛)"
   },
   {
     "id": "c_638",
@@ -9564,11 +9564,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 20,
     "x": 3458.11,
-    "altitude_y": 1617.73,
+    "altitude_y": 1512.73,
     "z": -367.38,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1617.7m (天空岛)"
+    "height_desc": "+1512.7m (天空岛)"
   },
   {
     "id": "c_639",
@@ -9579,11 +9579,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 20,
     "x": 3685.16,
-    "altitude_y": 1312.55,
+    "altitude_y": 1207.55,
     "z": -530.98,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1312.6m (天空岛)"
+    "height_desc": "+1207.6m (天空岛)"
   },
   {
     "id": "c_640",
@@ -9594,11 +9594,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 20,
     "x": 3340.7,
-    "altitude_y": 1560.22,
+    "altitude_y": 1455.22,
     "z": -524.9,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1560.2m (天空岛)"
+    "height_desc": "+1455.2m (天空岛)"
   },
   {
     "id": "c_641",
@@ -9609,11 +9609,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 20,
     "x": 3473.78,
-    "altitude_y": 1385.95,
+    "altitude_y": 1280.95,
     "z": -870.21,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1385.9m (天空岛)"
+    "height_desc": "+1280.9m (天空岛)"
   },
   {
     "id": "c_642",
@@ -9624,11 +9624,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "KeyItem",
     "layer": 20,
     "x": 3379.45,
-    "altitude_y": 1395.97,
+    "altitude_y": 1290.97,
     "z": -633.13,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1396.0m (天空岛)"
+    "height_desc": "+1291.0m (天空岛)"
   },
   {
     "id": "c_643",
@@ -9639,11 +9639,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": -1100.45,
-    "altitude_y": -469.94,
+    "altitude_y": -574.94,
     "z": 1855.75,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-469.9m (地底深渊)"
+    "height_desc": "-574.9m (地底深渊)"
   },
   {
     "id": "c_644",
@@ -9654,11 +9654,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": -1498.75,
-    "altitude_y": -368.65,
+    "altitude_y": -473.65,
     "z": 985.54,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-368.7m (地底深渊)"
+    "height_desc": "-473.7m (地底深渊)"
   },
   {
     "id": "c_645",
@@ -9669,11 +9669,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 18,
     "x": -1762.79,
-    "altitude_y": 177.08,
+    "altitude_y": 72.08,
     "z": 3425.04,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+177.1m (地表大世界)"
+    "height_desc": "+72.1m (地表大世界)"
   },
   {
     "id": "c_646",
@@ -9684,11 +9684,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -1827.51,
-    "altitude_y": 177.08,
+    "altitude_y": 72.08,
     "z": 3405.03,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+177.1m (地表大世界)"
+    "height_desc": "+72.1m (地表大世界)"
   },
   {
     "id": "c_647",
@@ -9699,11 +9699,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -1847.41,
-    "altitude_y": 177.05,
+    "altitude_y": 72.05,
     "z": 3529.88,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+177.1m (地表大世界)"
+    "height_desc": "+72.1m (地表大世界)"
   },
   {
     "id": "c_648",
@@ -9714,11 +9714,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Rupee",
     "layer": 18,
     "x": 1460.56,
-    "altitude_y": 117.03,
+    "altitude_y": 12.03,
     "z": 170.2,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+117.0m (地表大世界)"
+    "height_desc": "+12.0m (地表大世界)"
   },
   {
     "id": "c_649",
@@ -9729,11 +9729,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 1460.47,
-    "altitude_y": 117.04,
+    "altitude_y": 12.04,
     "z": 157.88,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+117.0m (地表大世界)"
+    "height_desc": "+12.0m (地表大世界)"
   },
   {
     "id": "c_650",
@@ -9744,11 +9744,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 18,
     "x": 1434.02,
-    "altitude_y": 111.91,
+    "altitude_y": 6.91,
     "z": 368.83,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+111.9m (地表大世界)"
+    "height_desc": "+6.9m (地表大世界)"
   },
   {
     "id": "c_651",
@@ -9759,11 +9759,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 18,
     "x": 1529.36,
-    "altitude_y": 129.82,
+    "altitude_y": 24.82,
     "z": 201.06,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+129.8m (地表大世界)"
+    "height_desc": "+24.8m (地表大世界)"
   },
   {
     "id": "c_652",
@@ -9774,11 +9774,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 18,
     "x": 1760.37,
-    "altitude_y": 115.31,
+    "altitude_y": 10.31,
     "z": 277.07,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+115.3m (地表大世界)"
+    "height_desc": "+10.3m (地表大世界)"
   },
   {
     "id": "c_653",
@@ -9789,11 +9789,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 18,
     "x": 1606.75,
-    "altitude_y": 115.45,
+    "altitude_y": 10.45,
     "z": 27.32,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+115.4m (地表大世界)"
+    "height_desc": "+10.4m (地表大世界)"
   },
   {
     "id": "c_654",
@@ -9804,11 +9804,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 1056.47,
-    "altitude_y": 127.83,
+    "altitude_y": 22.83,
     "z": 291.43,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+127.8m (地表大世界)"
+    "height_desc": "+22.8m (地表大世界)"
   },
   {
     "id": "c_655",
@@ -9819,11 +9819,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Rupee",
     "layer": 18,
     "x": 1777.78,
-    "altitude_y": 146.06,
+    "altitude_y": 41.06,
     "z": 387.84,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+146.1m (地表大世界)"
+    "height_desc": "+41.1m (地表大世界)"
   },
   {
     "id": "c_656",
@@ -9834,11 +9834,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 1186.51,
-    "altitude_y": 241.84,
+    "altitude_y": 136.84,
     "z": 793.82,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+241.8m (地表大世界)"
+    "height_desc": "+136.8m (地表大世界)"
   },
   {
     "id": "c_657",
@@ -9849,11 +9849,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 1381.05,
-    "altitude_y": 245.48,
+    "altitude_y": 140.48,
     "z": 944.44,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+245.5m (地表大世界)"
+    "height_desc": "+140.5m (地表大世界)"
   },
   {
     "id": "c_658",
@@ -9864,11 +9864,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Rupee",
     "layer": 18,
     "x": 1223.37,
-    "altitude_y": 115.32,
+    "altitude_y": 10.32,
     "z": 428.26,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+115.3m (地表大世界)"
+    "height_desc": "+10.3m (地表大世界)"
   },
   {
     "id": "c_659",
@@ -9879,11 +9879,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 1672.63,
-    "altitude_y": 181.65,
+    "altitude_y": 76.65,
     "z": 702.56,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+181.7m (地表大世界)"
+    "height_desc": "+76.7m (地表大世界)"
   },
   {
     "id": "c_660",
@@ -9894,11 +9894,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 1933.82,
-    "altitude_y": 293.57,
+    "altitude_y": 188.57,
     "z": 734.83,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+293.6m (地表大世界)"
+    "height_desc": "+188.6m (地表大世界)"
   },
   {
     "id": "c_661",
@@ -9909,11 +9909,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 1292.08,
-    "altitude_y": 136.32,
+    "altitude_y": 31.32,
     "z": 655.16,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+136.3m (地表大世界)"
+    "height_desc": "+31.3m (地表大世界)"
   },
   {
     "id": "c_662",
@@ -9924,11 +9924,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Shield",
     "layer": 18,
     "x": 1045.63,
-    "altitude_y": 142.52,
+    "altitude_y": 37.52,
     "z": 649.74,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+142.5m (地表大世界)"
+    "height_desc": "+37.5m (地表大世界)"
   },
   {
     "id": "c_663",
@@ -9939,11 +9939,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Shield",
     "layer": 18,
     "x": 1596.52,
-    "altitude_y": 123.36,
+    "altitude_y": 18.36,
     "z": 464.87,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+123.4m (地表大世界)"
+    "height_desc": "+18.4m (地表大世界)"
   },
   {
     "id": "c_664",
@@ -9954,11 +9954,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Rupee",
     "layer": 18,
     "x": 1519.5,
-    "altitude_y": 206.5,
+    "altitude_y": 101.5,
     "z": 769.5,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+206.5m (地表大世界)"
+    "height_desc": "+101.5m (地表大世界)"
   },
   {
     "id": "c_665",
@@ -9969,11 +9969,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": -4727.76,
-    "altitude_y": -997.72,
+    "altitude_y": -1102.72,
     "z": 602.18,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-997.7m (地底深渊)"
+    "height_desc": "-1102.7m (地底深渊)"
   },
   {
     "id": "c_666",
@@ -9984,11 +9984,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Armor",
     "layer": 19,
     "x": -4180.42,
-    "altitude_y": -1016.29,
+    "altitude_y": -1121.29,
     "z": 698.37,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-1016.3m (地底深渊)"
+    "height_desc": "-1121.3m (地底深渊)"
   },
   {
     "id": "c_667",
@@ -9999,11 +9999,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": -4227.61,
-    "altitude_y": -793.34,
+    "altitude_y": -898.34,
     "z": 447.26,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-793.3m (地底深渊)"
+    "height_desc": "-898.3m (地底深渊)"
   },
   {
     "id": "c_668",
@@ -10014,11 +10014,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": -4892.33,
-    "altitude_y": -979.21,
+    "altitude_y": -1084.21,
     "z": 879.37,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-979.2m (地底深渊)"
+    "height_desc": "-1084.2m (地底深渊)"
   },
   {
     "id": "c_669",
@@ -10029,11 +10029,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "KeyItem",
     "layer": 20,
     "x": 435.19,
-    "altitude_y": 2349.23,
+    "altitude_y": 2244.23,
     "z": -2195.6,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+2349.2m (天空岛)"
+    "height_desc": "+2244.2m (天空岛)"
   },
   {
     "id": "c_670",
@@ -10044,11 +10044,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Armor",
     "layer": 19,
     "x": 1021.02,
-    "altitude_y": -437.75,
+    "altitude_y": -542.75,
     "z": -1407.87,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-437.8m (地底深渊)"
+    "height_desc": "-542.8m (地底深渊)"
   },
   {
     "id": "c_671",
@@ -10059,11 +10059,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 4019.82,
-    "altitude_y": 469.3,
+    "altitude_y": 364.3,
     "z": 1658.79,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+469.3m (地表大世界)"
+    "height_desc": "+364.3m (地表大世界)"
   },
   {
     "id": "c_672",
@@ -10074,11 +10074,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Bow",
     "layer": 18,
     "x": 2956.92,
-    "altitude_y": 267.77,
+    "altitude_y": 162.77,
     "z": -98.29,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+267.8m (地表大世界)"
+    "height_desc": "+162.8m (地表大世界)"
   },
   {
     "id": "c_673",
@@ -10089,11 +10089,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Bow",
     "layer": 18,
     "x": 2849.96,
-    "altitude_y": 188.43,
+    "altitude_y": 83.43,
     "z": -26.76,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+188.4m (地表大世界)"
+    "height_desc": "+83.4m (地表大世界)"
   },
   {
     "id": "c_674",
@@ -10104,11 +10104,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Shield",
     "layer": 18,
     "x": -338.42,
-    "altitude_y": 124.5,
+    "altitude_y": 19.5,
     "z": 1598.98,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+124.5m (地表大世界)"
+    "height_desc": "+19.5m (地表大世界)"
   },
   {
     "id": "c_675",
@@ -10119,11 +10119,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -897.65,
-    "altitude_y": 140.63,
+    "altitude_y": 35.63,
     "z": 1342.24,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+140.6m (地表大世界)"
+    "height_desc": "+35.6m (地表大世界)"
   },
   {
     "id": "c_676",
@@ -10134,11 +10134,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -212.37,
-    "altitude_y": 147.93,
+    "altitude_y": 42.93,
     "z": 1490.29,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+147.9m (地表大世界)"
+    "height_desc": "+42.9m (地表大世界)"
   },
   {
     "id": "c_677",
@@ -10149,11 +10149,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -967.18,
-    "altitude_y": 188.01,
+    "altitude_y": 83.01,
     "z": 1556.92,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+188.0m (地表大世界)"
+    "height_desc": "+83.0m (地表大世界)"
   },
   {
     "id": "c_678",
@@ -10164,11 +10164,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -557.47,
-    "altitude_y": 177.51,
+    "altitude_y": 72.51,
     "z": 1688.37,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+177.5m (地表大世界)"
+    "height_desc": "+72.5m (地表大世界)"
   },
   {
     "id": "c_679",
@@ -10179,11 +10179,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Shield",
     "layer": 18,
     "x": -460.45,
-    "altitude_y": 136.34,
+    "altitude_y": 31.34,
     "z": 1269.35,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+136.3m (地表大世界)"
+    "height_desc": "+31.3m (地表大世界)"
   },
   {
     "id": "c_680",
@@ -10194,11 +10194,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Bow",
     "layer": 18,
     "x": -488.36,
-    "altitude_y": 141.93,
+    "altitude_y": 36.93,
     "z": 1273.87,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+141.9m (地表大世界)"
+    "height_desc": "+36.9m (地表大世界)"
   },
   {
     "id": "c_681",
@@ -10209,11 +10209,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -233.41,
-    "altitude_y": 113.09,
+    "altitude_y": 8.09,
     "z": 1678.45,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+113.1m (地表大世界)"
+    "height_desc": "+8.1m (地表大世界)"
   },
   {
     "id": "c_682",
@@ -10224,11 +10224,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -207.34,
-    "altitude_y": 118.22,
+    "altitude_y": 13.22,
     "z": 1700.6,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+118.2m (地表大世界)"
+    "height_desc": "+13.2m (地表大世界)"
   },
   {
     "id": "c_683",
@@ -10239,11 +10239,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -59.51,
-    "altitude_y": 114.65,
+    "altitude_y": 9.65,
     "z": 1567.05,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+114.6m (地表大世界)"
+    "height_desc": "+9.6m (地表大世界)"
   },
   {
     "id": "c_684",
@@ -10254,11 +10254,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": -3497.72,
-    "altitude_y": -311.19,
+    "altitude_y": -416.19,
     "z": -1851.07,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-311.2m (地底深渊)"
+    "height_desc": "-416.2m (地底深渊)"
   },
   {
     "id": "c_685",
@@ -10269,11 +10269,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": -3497.2,
-    "altitude_y": -311.19,
+    "altitude_y": -416.19,
     "z": -1849.1,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-311.2m (地底深渊)"
+    "height_desc": "-416.2m (地底深渊)"
   },
   {
     "id": "c_686",
@@ -10284,11 +10284,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": 2550.02,
-    "altitude_y": -460.94,
+    "altitude_y": -565.94,
     "z": 3552.47,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-460.9m (地底深渊)"
+    "height_desc": "-565.9m (地底深渊)"
   },
   {
     "id": "c_687",
@@ -10299,11 +10299,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Armor",
     "layer": 19,
     "x": 2519.54,
-    "altitude_y": -520.95,
+    "altitude_y": -625.95,
     "z": 3602.3,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-520.9m (地底深渊)"
+    "height_desc": "-625.9m (地底深渊)"
   },
   {
     "id": "c_688",
@@ -10314,11 +10314,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": 2959.82,
-    "altitude_y": -299.75,
+    "altitude_y": -404.75,
     "z": 3362.49,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-299.7m (地底深渊)"
+    "height_desc": "-404.7m (地底深渊)"
   },
   {
     "id": "c_689",
@@ -10329,11 +10329,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": 2279.79,
-    "altitude_y": -359.25,
+    "altitude_y": -464.25,
     "z": 3873.24,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-359.2m (地底深渊)"
+    "height_desc": "-464.2m (地底深渊)"
   },
   {
     "id": "c_690",
@@ -10344,11 +10344,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": 2821.35,
-    "altitude_y": -342.78,
+    "altitude_y": -447.78,
     "z": 3860.51,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-342.8m (地底深渊)"
+    "height_desc": "-447.8m (地底深渊)"
   },
   {
     "id": "c_691",
@@ -10359,11 +10359,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -2436.49,
-    "altitude_y": 550.09,
+    "altitude_y": 445.09,
     "z": -3102.12,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+550.1m (地表大世界)"
+    "height_desc": "+445.1m (地表大世界)"
   },
   {
     "id": "c_692",
@@ -10374,11 +10374,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Bow",
     "layer": 18,
     "x": -2844.87,
-    "altitude_y": 699.28,
+    "altitude_y": 594.28,
     "z": -3112.58,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+699.3m (地表大世界)"
+    "height_desc": "+594.3m (地表大世界)"
   },
   {
     "id": "c_693",
@@ -10389,11 +10389,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "KeyItem",
     "layer": 20,
     "x": 3294.51,
-    "altitude_y": 900.12,
+    "altitude_y": 795.12,
     "z": -3434.16,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+900.1m (天空岛)"
+    "height_desc": "+795.1m (天空岛)"
   },
   {
     "id": "c_694",
@@ -10404,11 +10404,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -4762.98,
-    "altitude_y": 617.84,
+    "altitude_y": 512.84,
     "z": 1362.05,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+617.8m (地表大世界)"
+    "height_desc": "+512.8m (地表大世界)"
   },
   {
     "id": "c_695",
@@ -10419,11 +10419,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 18,
     "x": -4304.04,
-    "altitude_y": 433.82,
+    "altitude_y": 328.82,
     "z": 1512.21,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+433.8m (地表大世界)"
+    "height_desc": "+328.8m (地表大世界)"
   },
   {
     "id": "c_696",
@@ -10434,11 +10434,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 1880.56,
-    "altitude_y": 210.9,
+    "altitude_y": 105.9,
     "z": 1075.86,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+210.9m (洞窟/水井内)"
+    "height_desc": "+105.9m (洞窟/水井内)"
   },
   {
     "id": "c_697",
@@ -10449,11 +10449,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 2913.03,
-    "altitude_y": 260.75,
+    "altitude_y": 155.75,
     "z": -381.91,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+260.8m (洞窟/水井内)"
+    "height_desc": "+155.8m (洞窟/水井内)"
   },
   {
     "id": "c_698",
@@ -10464,11 +10464,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -1020.21,
-    "altitude_y": 232.43,
+    "altitude_y": 127.43,
     "z": -2449.67,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+232.4m (地表大世界)"
+    "height_desc": "+127.4m (地表大世界)"
   },
   {
     "id": "c_699",
@@ -10479,11 +10479,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -1312.35,
-    "altitude_y": 1.3,
+    "altitude_y": -103.7,
     "z": -2411.02,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+1.3m (地表大世界)"
+    "height_desc": "-103.7m (地表大世界)"
   },
   {
     "id": "c_700",
@@ -10494,11 +10494,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -1808.56,
-    "altitude_y": 356.09,
+    "altitude_y": 251.09,
     "z": -2221.73,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+356.1m (地表大世界)"
+    "height_desc": "+251.1m (地表大世界)"
   },
   {
     "id": "c_701",
@@ -10509,11 +10509,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -1809.59,
-    "altitude_y": 361.5,
+    "altitude_y": 256.5,
     "z": -2193.39,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+361.5m (地表大世界)"
+    "height_desc": "+256.5m (地表大世界)"
   },
   {
     "id": "c_702",
@@ -10524,11 +10524,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -1814.06,
-    "altitude_y": 361.48,
+    "altitude_y": 256.48,
     "z": -2197.14,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+361.5m (地表大世界)"
+    "height_desc": "+256.5m (地表大世界)"
   },
   {
     "id": "c_703",
@@ -10539,11 +10539,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -1811.61,
-    "altitude_y": 361.46,
+    "altitude_y": 256.46,
     "z": -2195.67,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+361.5m (地表大世界)"
+    "height_desc": "+256.5m (地表大世界)"
   },
   {
     "id": "c_704",
@@ -10554,11 +10554,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -1518.34,
-    "altitude_y": 349.15,
+    "altitude_y": 244.15,
     "z": -2845.17,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+349.1m (地表大世界)"
+    "height_desc": "+244.1m (地表大世界)"
   },
   {
     "id": "c_705",
@@ -10569,11 +10569,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Bow",
     "layer": 18,
     "x": -1317.53,
-    "altitude_y": 247.54,
+    "altitude_y": 142.54,
     "z": -2610.81,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+247.5m (地表大世界)"
+    "height_desc": "+142.5m (地表大世界)"
   },
   {
     "id": "c_706",
@@ -10584,11 +10584,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Rupee",
     "layer": 18,
     "x": -1676.1,
-    "altitude_y": 342.49,
+    "altitude_y": 237.49,
     "z": -2618.85,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+342.5m (地表大世界)"
+    "height_desc": "+237.5m (地表大世界)"
   },
   {
     "id": "c_707",
@@ -10599,11 +10599,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -1063.14,
-    "altitude_y": 54.56,
+    "altitude_y": -50.44,
     "z": -2717.16,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+54.6m (地表大世界)"
+    "height_desc": "-50.4m (地表大世界)"
   },
   {
     "id": "c_708",
@@ -10614,11 +10614,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -1344.49,
-    "altitude_y": 35.77,
+    "altitude_y": -69.23,
     "z": -2299.27,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+35.8m (地表大世界)"
+    "height_desc": "-69.2m (地表大世界)"
   },
   {
     "id": "c_709",
@@ -10629,11 +10629,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Bow",
     "layer": 18,
     "x": -1267.03,
-    "altitude_y": 73.88,
+    "altitude_y": -31.12,
     "z": -2496.78,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+73.9m (地表大世界)"
+    "height_desc": "-31.1m (地表大世界)"
   },
   {
     "id": "c_710",
@@ -10644,11 +10644,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Shield",
     "layer": 18,
     "x": -1046.21,
-    "altitude_y": 42.94,
+    "altitude_y": -62.06,
     "z": -2728.72,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+42.9m (地表大世界)"
+    "height_desc": "-62.1m (地表大世界)"
   },
   {
     "id": "c_711",
@@ -10659,11 +10659,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 2638.62,
-    "altitude_y": 189.57,
+    "altitude_y": 84.57,
     "z": -269.46,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+189.6m (洞窟/水井内)"
+    "height_desc": "+84.6m (洞窟/水井内)"
   },
   {
     "id": "c_712",
@@ -10674,11 +10674,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 18,
     "x": -4361.49,
-    "altitude_y": 575.92,
+    "altitude_y": 470.92,
     "z": 453.5,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+575.9m (地表大世界)"
+    "height_desc": "+470.9m (地表大世界)"
   },
   {
     "id": "c_713",
@@ -10689,11 +10689,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -4583.63,
-    "altitude_y": 618.35,
+    "altitude_y": 513.35,
     "z": 997.03,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+618.4m (地表大世界)"
+    "height_desc": "+513.4m (地表大世界)"
   },
   {
     "id": "c_714",
@@ -10704,11 +10704,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -4581.08,
-    "altitude_y": 618.16,
+    "altitude_y": 513.16,
     "z": 999.12,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+618.2m (地表大世界)"
+    "height_desc": "+513.2m (地表大世界)"
   },
   {
     "id": "c_715",
@@ -10719,11 +10719,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 4506.03,
-    "altitude_y": 103.48,
+    "altitude_y": -1.52,
     "z": 2707.71,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+103.5m (地表大世界)"
+    "height_desc": "-1.5m (地表大世界)"
   },
   {
     "id": "c_716",
@@ -10734,11 +10734,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 4554.06,
-    "altitude_y": 117.52,
+    "altitude_y": 12.52,
     "z": 2456.3,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+117.5m (地表大世界)"
+    "height_desc": "+12.5m (地表大世界)"
   },
   {
     "id": "c_717",
@@ -10749,11 +10749,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 4553.53,
-    "altitude_y": 147.5,
+    "altitude_y": 42.5,
     "z": 2451.23,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+147.5m (地表大世界)"
+    "height_desc": "+42.5m (地表大世界)"
   },
   {
     "id": "c_718",
@@ -10764,11 +10764,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -3953.4,
-    "altitude_y": 528.39,
+    "altitude_y": 423.39,
     "z": -3687.79,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+528.4m (地表大世界)"
+    "height_desc": "+423.4m (地表大世界)"
   },
   {
     "id": "c_719",
@@ -10779,11 +10779,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 18,
     "x": -3386.81,
-    "altitude_y": 467.15,
+    "altitude_y": 362.15,
     "z": -3668.66,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+467.2m (地表大世界)"
+    "height_desc": "+362.2m (地表大世界)"
   },
   {
     "id": "c_720",
@@ -10794,11 +10794,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -3856.09,
-    "altitude_y": 368.78,
+    "altitude_y": 263.78,
     "z": -3804.13,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+368.8m (地表大世界)"
+    "height_desc": "+263.8m (地表大世界)"
   },
   {
     "id": "c_721",
@@ -10809,11 +10809,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -3977.19,
-    "altitude_y": 384.19,
+    "altitude_y": 279.19,
     "z": -3131.08,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+384.2m (地表大世界)"
+    "height_desc": "+279.2m (地表大世界)"
   },
   {
     "id": "c_722",
@@ -10824,11 +10824,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 20,
     "x": -1226.71,
-    "altitude_y": 522.15,
+    "altitude_y": 417.15,
     "z": 40.35,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+522.2m (天空岛)"
+    "height_desc": "+417.2m (天空岛)"
   },
   {
     "id": "c_723",
@@ -10839,11 +10839,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": 415.6,
-    "altitude_y": -393.23,
+    "altitude_y": -498.23,
     "z": 3671.99,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-393.2m (地底深渊)"
+    "height_desc": "-498.2m (地底深渊)"
   },
   {
     "id": "c_724",
@@ -10854,11 +10854,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "KeyItem",
     "layer": 19,
     "x": 417.51,
-    "altitude_y": -393.23,
+    "altitude_y": -498.23,
     "z": 3672.59,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-393.2m (地底深渊)"
+    "height_desc": "-498.2m (地底深渊)"
   },
   {
     "id": "c_725",
@@ -10869,11 +10869,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": -4546.17,
-    "altitude_y": -384.24,
+    "altitude_y": -489.24,
     "z": 2172.51,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-384.2m (地底深渊)"
+    "height_desc": "-489.2m (地底深渊)"
   },
   {
     "id": "c_726",
@@ -10884,11 +10884,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "KeyItem",
     "layer": 19,
     "x": -4547.34,
-    "altitude_y": -384.24,
+    "altitude_y": -489.24,
     "z": 2170.89,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-384.2m (地底深渊)"
+    "height_desc": "-489.2m (地底深渊)"
   },
   {
     "id": "c_727",
@@ -10899,11 +10899,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 1423.09,
-    "altitude_y": 183.43,
+    "altitude_y": 78.43,
     "z": 3488.75,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+183.4m (洞窟/水井内)"
+    "height_desc": "+78.4m (洞窟/水井内)"
   },
   {
     "id": "c_728",
@@ -10914,11 +10914,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 597.67,
-    "altitude_y": 110.38,
+    "altitude_y": 5.38,
     "z": 2930.65,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+110.4m (洞窟/水井内)"
+    "height_desc": "+5.4m (洞窟/水井内)"
   },
   {
     "id": "c_729",
@@ -10929,11 +10929,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 18,
     "x": 447.42,
-    "altitude_y": 141.42,
+    "altitude_y": 36.42,
     "z": 1600.32,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+141.4m (地表大世界)"
+    "height_desc": "+36.4m (地表大世界)"
   },
   {
     "id": "c_730",
@@ -10944,11 +10944,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 222.86,
-    "altitude_y": 124.24,
+    "altitude_y": 19.24,
     "z": 1311.84,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+124.2m (地表大世界)"
+    "height_desc": "+19.2m (地表大世界)"
   },
   {
     "id": "c_731",
@@ -10959,11 +10959,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 37.26,
-    "altitude_y": 135.74,
+    "altitude_y": 30.74,
     "z": 1276.8,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+135.7m (地表大世界)"
+    "height_desc": "+30.7m (地表大世界)"
   },
   {
     "id": "c_732",
@@ -10974,11 +10974,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 477.42,
-    "altitude_y": 136.05,
+    "altitude_y": 31.05,
     "z": 1757.3,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+136.1m (地表大世界)"
+    "height_desc": "+31.1m (地表大世界)"
   },
   {
     "id": "c_733",
@@ -10989,11 +10989,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 267.0,
-    "altitude_y": 114.5,
+    "altitude_y": 9.5,
     "z": 1651.5,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+114.5m (地表大世界)"
+    "height_desc": "+9.5m (地表大世界)"
   },
   {
     "id": "c_734",
@@ -11004,11 +11004,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 18,
     "x": 238.57,
-    "altitude_y": 113.53,
+    "altitude_y": 8.53,
     "z": 1648.46,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+113.5m (地表大世界)"
+    "height_desc": "+8.5m (地表大世界)"
   },
   {
     "id": "c_735",
@@ -11019,11 +11019,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 754.66,
-    "altitude_y": 138.91,
+    "altitude_y": 33.91,
     "z": 1225.79,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+138.9m (地表大世界)"
+    "height_desc": "+33.9m (地表大世界)"
   },
   {
     "id": "c_736",
@@ -11034,11 +11034,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Rupee",
     "layer": 18,
     "x": 315.62,
-    "altitude_y": 114.9,
+    "altitude_y": 9.9,
     "z": 1129.22,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+114.9m (地表大世界)"
+    "height_desc": "+9.9m (地表大世界)"
   },
   {
     "id": "c_737",
@@ -11049,11 +11049,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 1016.69,
-    "altitude_y": 115.11,
+    "altitude_y": 10.11,
     "z": 1377.27,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+115.1m (地表大世界)"
+    "height_desc": "+10.1m (地表大世界)"
   },
   {
     "id": "c_738",
@@ -11064,11 +11064,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 1015.54,
-    "altitude_y": 115.07,
+    "altitude_y": 10.07,
     "z": 1375.45,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+115.1m (地表大世界)"
+    "height_desc": "+10.1m (地表大世界)"
   },
   {
     "id": "c_739",
@@ -11079,11 +11079,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 850.71,
-    "altitude_y": 114.62,
+    "altitude_y": 9.62,
     "z": 1623.79,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+114.6m (地表大世界)"
+    "height_desc": "+9.6m (地表大世界)"
   },
   {
     "id": "c_740",
@@ -11094,11 +11094,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 1313.76,
-    "altitude_y": 114.65,
+    "altitude_y": 9.65,
     "z": -668.4,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+114.6m (地表大世界)"
+    "height_desc": "+9.6m (地表大世界)"
   },
   {
     "id": "c_741",
@@ -11109,11 +11109,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 1950.52,
-    "altitude_y": 114.64,
+    "altitude_y": 9.64,
     "z": -166.38,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+114.6m (地表大世界)"
+    "height_desc": "+9.6m (地表大世界)"
   },
   {
     "id": "c_742",
@@ -11124,11 +11124,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Bow",
     "layer": 18,
     "x": 1927.78,
-    "altitude_y": 114.65,
+    "altitude_y": 9.65,
     "z": -11.85,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+114.6m (地表大世界)"
+    "height_desc": "+9.6m (地表大世界)"
   },
   {
     "id": "c_743",
@@ -11139,11 +11139,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Bow",
     "layer": 18,
     "x": 1507.67,
-    "altitude_y": 134.78,
+    "altitude_y": 29.78,
     "z": -375.35,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+134.8m (地表大世界)"
+    "height_desc": "+29.8m (地表大世界)"
   },
   {
     "id": "c_744",
@@ -11154,11 +11154,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 1384.24,
-    "altitude_y": 185.24,
+    "altitude_y": 80.24,
     "z": -607.42,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+185.2m (地表大世界)"
+    "height_desc": "+80.2m (地表大世界)"
   },
   {
     "id": "c_745",
@@ -11169,11 +11169,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 1544.88,
-    "altitude_y": 136.39,
+    "altitude_y": 31.39,
     "z": -386.91,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+136.4m (地表大世界)"
+    "height_desc": "+31.4m (地表大世界)"
   },
   {
     "id": "c_746",
@@ -11184,11 +11184,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 1026.55,
-    "altitude_y": 161.55,
+    "altitude_y": 56.55,
     "z": -694.9,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+161.5m (地表大世界)"
+    "height_desc": "+56.5m (地表大世界)"
   },
   {
     "id": "c_747",
@@ -11199,11 +11199,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 1028.81,
-    "altitude_y": 161.41,
+    "altitude_y": 56.41,
     "z": -694.78,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+161.4m (地表大世界)"
+    "height_desc": "+56.4m (地表大世界)"
   },
   {
     "id": "c_748",
@@ -11214,11 +11214,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 1322.94,
-    "altitude_y": 160.6,
+    "altitude_y": 55.6,
     "z": -423.42,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+160.6m (地表大世界)"
+    "height_desc": "+55.6m (地表大世界)"
   },
   {
     "id": "c_749",
@@ -11229,11 +11229,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 1311.6,
-    "altitude_y": 166.01,
+    "altitude_y": 61.01,
     "z": -407.22,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+166.0m (地表大世界)"
+    "height_desc": "+61.0m (地表大世界)"
   },
   {
     "id": "c_750",
@@ -11244,11 +11244,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 1180.74,
-    "altitude_y": 250.93,
+    "altitude_y": 145.93,
     "z": -320.99,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+250.9m (地表大世界)"
+    "height_desc": "+145.9m (地表大世界)"
   },
   {
     "id": "c_751",
@@ -11259,11 +11259,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 1724.61,
-    "altitude_y": 118.62,
+    "altitude_y": 13.62,
     "z": -94.56,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+118.6m (地表大世界)"
+    "height_desc": "+13.6m (地表大世界)"
   },
   {
     "id": "c_752",
@@ -11274,11 +11274,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Bow",
     "layer": 18,
     "x": 1985.0,
-    "altitude_y": 119.15,
+    "altitude_y": 14.15,
     "z": -115.75,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+119.2m (地表大世界)"
+    "height_desc": "+14.2m (地表大世界)"
   },
   {
     "id": "c_753",
@@ -11289,11 +11289,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 1948.05,
-    "altitude_y": 126.54,
+    "altitude_y": 21.54,
     "z": -55.08,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+126.5m (地表大世界)"
+    "height_desc": "+21.5m (地表大世界)"
   },
   {
     "id": "c_754",
@@ -11304,11 +11304,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 18,
     "x": 1689.5,
-    "altitude_y": 121.61,
+    "altitude_y": 16.61,
     "z": -587.61,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+121.6m (地表大世界)"
+    "height_desc": "+16.6m (地表大世界)"
   },
   {
     "id": "c_755",
@@ -11319,11 +11319,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 1656.0,
-    "altitude_y": 128.88,
+    "altitude_y": 23.88,
     "z": -800.5,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+128.9m (地表大世界)"
+    "height_desc": "+23.9m (地表大世界)"
   },
   {
     "id": "c_756",
@@ -11334,11 +11334,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 1633.06,
-    "altitude_y": 114.65,
+    "altitude_y": 9.65,
     "z": -528.47,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+114.6m (地表大世界)"
+    "height_desc": "+9.6m (地表大世界)"
   },
   {
     "id": "c_757",
@@ -11349,11 +11349,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Rupee",
     "layer": 18,
     "x": 1453.54,
-    "altitude_y": 114.65,
+    "altitude_y": 9.65,
     "z": -561.46,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+114.6m (地表大世界)"
+    "height_desc": "+9.6m (地表大世界)"
   },
   {
     "id": "c_758",
@@ -11364,11 +11364,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -3931.0,
-    "altitude_y": 683.04,
+    "altitude_y": 578.04,
     "z": 745.63,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+683.0m (洞窟/水井内)"
+    "height_desc": "+578.0m (洞窟/水井内)"
   },
   {
     "id": "c_759",
@@ -11379,11 +11379,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 600.36,
-    "altitude_y": 155.65,
+    "altitude_y": 50.65,
     "z": 2098.21,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+155.7m (地表大世界)"
+    "height_desc": "+50.7m (地表大世界)"
   },
   {
     "id": "c_760",
@@ -11394,11 +11394,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Armor",
     "layer": 18,
     "x": 1005.67,
-    "altitude_y": 119.2,
+    "altitude_y": 14.2,
     "z": 2539.38,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+119.2m (地表大世界)"
+    "height_desc": "+14.2m (地表大世界)"
   },
   {
     "id": "c_761",
@@ -11409,11 +11409,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Armor",
     "layer": 18,
     "x": 951.13,
-    "altitude_y": 118.2,
+    "altitude_y": 13.2,
     "z": 2705.68,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+118.2m (地表大世界)"
+    "height_desc": "+13.2m (地表大世界)"
   },
   {
     "id": "c_762",
@@ -11424,11 +11424,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Armor",
     "layer": 18,
     "x": 985.23,
-    "altitude_y": 117.7,
+    "altitude_y": 12.7,
     "z": 2828.97,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+117.7m (地表大世界)"
+    "height_desc": "+12.7m (地表大世界)"
   },
   {
     "id": "c_763",
@@ -11439,11 +11439,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 587.6,
-    "altitude_y": 195.14,
+    "altitude_y": 90.14,
     "z": 2395.94,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+195.1m (地表大世界)"
+    "height_desc": "+90.1m (地表大世界)"
   },
   {
     "id": "c_764",
@@ -11454,11 +11454,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 562.07,
-    "altitude_y": 200.56,
+    "altitude_y": 95.56,
     "z": 2383.51,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+200.6m (地表大世界)"
+    "height_desc": "+95.6m (地表大世界)"
   },
   {
     "id": "c_765",
@@ -11469,11 +11469,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 567.32,
-    "altitude_y": 200.49,
+    "altitude_y": 95.49,
     "z": 2380.95,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+200.5m (地表大世界)"
+    "height_desc": "+95.5m (地表大世界)"
   },
   {
     "id": "c_766",
@@ -11484,11 +11484,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 564.98,
-    "altitude_y": 200.51,
+    "altitude_y": 95.51,
     "z": 2382.59,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+200.5m (地表大世界)"
+    "height_desc": "+95.5m (地表大世界)"
   },
   {
     "id": "c_767",
@@ -11499,11 +11499,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Bow",
     "layer": 18,
     "x": 993.15,
-    "altitude_y": 230.75,
+    "altitude_y": 125.75,
     "z": 2221.15,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+230.8m (地表大世界)"
+    "height_desc": "+125.8m (地表大世界)"
   },
   {
     "id": "c_768",
@@ -11514,11 +11514,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 391.11,
-    "altitude_y": 114.24,
+    "altitude_y": 9.24,
     "z": 2316.78,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+114.2m (地表大世界)"
+    "height_desc": "+9.2m (地表大世界)"
   },
   {
     "id": "c_769",
@@ -11529,11 +11529,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Shield",
     "layer": 18,
     "x": 736.85,
-    "altitude_y": 216.51,
+    "altitude_y": 111.51,
     "z": 2237.77,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+216.5m (地表大世界)"
+    "height_desc": "+111.5m (地表大世界)"
   },
   {
     "id": "c_770",
@@ -11544,11 +11544,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 1351.69,
-    "altitude_y": 194.65,
+    "altitude_y": 89.65,
     "z": 3266.56,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+194.6m (地表大世界)"
+    "height_desc": "+89.6m (地表大世界)"
   },
   {
     "id": "c_771",
@@ -11559,11 +11559,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 1415.94,
-    "altitude_y": 255.8,
+    "altitude_y": 150.8,
     "z": 3213.65,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+255.8m (地表大世界)"
+    "height_desc": "+150.8m (地表大世界)"
   },
   {
     "id": "c_772",
@@ -11574,11 +11574,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Shield",
     "layer": 18,
     "x": 1666.85,
-    "altitude_y": 293.02,
+    "altitude_y": 188.02,
     "z": 3012.97,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+293.0m (地表大世界)"
+    "height_desc": "+188.0m (地表大世界)"
   },
   {
     "id": "c_773",
@@ -11589,11 +11589,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 1907.24,
-    "altitude_y": 202.09,
+    "altitude_y": 97.09,
     "z": 3217.35,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+202.1m (地表大世界)"
+    "height_desc": "+97.1m (地表大世界)"
   },
   {
     "id": "c_774",
@@ -11604,11 +11604,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 1821.62,
-    "altitude_y": 243.17,
+    "altitude_y": 138.17,
     "z": 3078.98,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+243.2m (地表大世界)"
+    "height_desc": "+138.2m (地表大世界)"
   },
   {
     "id": "c_775",
@@ -11619,11 +11619,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Shield",
     "layer": 18,
     "x": 1888.86,
-    "altitude_y": 211.52,
+    "altitude_y": 106.52,
     "z": 3303.69,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+211.5m (地表大世界)"
+    "height_desc": "+106.5m (地表大世界)"
   },
   {
     "id": "c_776",
@@ -11634,11 +11634,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Bow",
     "layer": 18,
     "x": 1084.22,
-    "altitude_y": 141.2,
+    "altitude_y": 36.2,
     "z": 3160.85,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+141.2m (地表大世界)"
+    "height_desc": "+36.2m (地表大世界)"
   },
   {
     "id": "c_777",
@@ -11649,11 +11649,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 20,
     "x": 3358.09,
-    "altitude_y": 1400.84,
+    "altitude_y": 1295.84,
     "z": -665.15,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1400.8m (天空岛)"
+    "height_desc": "+1295.8m (天空岛)"
   },
   {
     "id": "c_778",
@@ -11664,11 +11664,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "KeyItem",
     "layer": 20,
     "x": 3692.78,
-    "altitude_y": 1350.65,
+    "altitude_y": 1245.65,
     "z": -593.25,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1350.6m (天空岛)"
+    "height_desc": "+1245.6m (天空岛)"
   },
   {
     "id": "c_779",
@@ -11679,11 +11679,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 20,
     "x": 3415.31,
-    "altitude_y": 1436.96,
+    "altitude_y": 1331.96,
     "z": -844.47,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1437.0m (天空岛)"
+    "height_desc": "+1332.0m (天空岛)"
   },
   {
     "id": "c_780",
@@ -11694,11 +11694,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 20,
     "x": 3613.16,
-    "altitude_y": 1401.69,
+    "altitude_y": 1296.69,
     "z": -757.73,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1401.7m (天空岛)"
+    "height_desc": "+1296.7m (天空岛)"
   },
   {
     "id": "c_781",
@@ -11709,11 +11709,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 20,
     "x": 3877.16,
-    "altitude_y": 1285.0,
+    "altitude_y": 1180.0,
     "z": -566.73,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1285.0m (天空岛)"
+    "height_desc": "+1180.0m (天空岛)"
   },
   {
     "id": "c_782",
@@ -11724,11 +11724,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 20,
     "x": 3356.04,
-    "altitude_y": 1612.03,
+    "altitude_y": 1507.03,
     "z": -350.23,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1612.0m (天空岛)"
+    "height_desc": "+1507.0m (天空岛)"
   },
   {
     "id": "c_783",
@@ -11739,11 +11739,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "KeyItem",
     "layer": 20,
     "x": 3200.16,
-    "altitude_y": 1522.57,
+    "altitude_y": 1417.57,
     "z": -598.47,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1522.6m (天空岛)"
+    "height_desc": "+1417.6m (天空岛)"
   },
   {
     "id": "c_784",
@@ -11754,11 +11754,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 20,
     "x": 3559.66,
-    "altitude_y": 1396.85,
+    "altitude_y": 1291.85,
     "z": -481.48,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1396.8m (天空岛)"
+    "height_desc": "+1291.8m (天空岛)"
   },
   {
     "id": "c_785",
@@ -11769,11 +11769,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Bow",
     "layer": 19,
     "x": 2669.34,
-    "altitude_y": -802.62,
+    "altitude_y": -907.62,
     "z": -2207.43,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-802.6m (地底深渊)"
+    "height_desc": "-907.6m (地底深渊)"
   },
   {
     "id": "c_786",
@@ -11784,11 +11784,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": 2085.13,
-    "altitude_y": -712.32,
+    "altitude_y": -817.32,
     "z": -2116.02,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-712.3m (地底深渊)"
+    "height_desc": "-817.3m (地底深渊)"
   },
   {
     "id": "c_787",
@@ -11799,11 +11799,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 3441.74,
-    "altitude_y": 1880.84,
+    "altitude_y": 1775.84,
     "z": -819.23,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+1880.8m (地表大世界)"
+    "height_desc": "+1775.8m (地表大世界)"
   },
   {
     "id": "c_788",
@@ -11814,11 +11814,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 3379.3,
-    "altitude_y": 1824.84,
+    "altitude_y": 1719.84,
     "z": -715.54,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+1824.8m (地表大世界)"
+    "height_desc": "+1719.8m (地表大世界)"
   },
   {
     "id": "c_789",
@@ -11829,11 +11829,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 18,
     "x": -807.22,
-    "altitude_y": 375.0,
+    "altitude_y": 270.0,
     "z": -3535.0,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+375.0m (地表大世界)"
+    "height_desc": "+270.0m (地表大世界)"
   },
   {
     "id": "c_790",
@@ -11844,11 +11844,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -824.99,
-    "altitude_y": 345.0,
+    "altitude_y": 240.0,
     "z": -3419.97,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+345.0m (地表大世界)"
+    "height_desc": "+240.0m (地表大世界)"
   },
   {
     "id": "c_791",
@@ -11859,11 +11859,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Shield",
     "layer": 18,
     "x": -825.0,
-    "altitude_y": 345.0,
+    "altitude_y": 240.0,
     "z": -3652.41,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+345.0m (地表大世界)"
+    "height_desc": "+240.0m (地表大世界)"
   },
   {
     "id": "c_792",
@@ -11874,11 +11874,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Bow",
     "layer": 18,
     "x": -709.99,
-    "altitude_y": 345.0,
+    "altitude_y": 240.0,
     "z": -3535.02,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+345.0m (地表大世界)"
+    "height_desc": "+240.0m (地表大世界)"
   },
   {
     "id": "c_793",
@@ -11889,11 +11889,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -775.0,
-    "altitude_y": 365.0,
+    "altitude_y": 260.0,
     "z": -3535.0,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+365.0m (地表大世界)"
+    "height_desc": "+260.0m (地表大世界)"
   },
   {
     "id": "c_794",
@@ -11904,11 +11904,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -778.78,
-    "altitude_y": 340.5,
+    "altitude_y": 235.5,
     "z": -3534.99,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+340.5m (地表大世界)"
+    "height_desc": "+235.5m (地表大世界)"
   },
   {
     "id": "c_795",
@@ -11919,11 +11919,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -881.78,
-    "altitude_y": 340.21,
+    "altitude_y": 235.21,
     "z": -3592.58,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+340.2m (地表大世界)"
+    "height_desc": "+235.2m (地表大世界)"
   },
   {
     "id": "c_796",
@@ -11934,11 +11934,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -634.5,
-    "altitude_y": 338.85,
+    "altitude_y": 233.85,
     "z": -3536.0,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+338.9m (地表大世界)"
+    "height_desc": "+233.9m (地表大世界)"
   },
   {
     "id": "c_797",
@@ -11949,11 +11949,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -860.02,
-    "altitude_y": 335.7,
+    "altitude_y": 230.7,
     "z": -3350.99,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+335.7m (地表大世界)"
+    "height_desc": "+230.7m (地表大世界)"
   },
   {
     "id": "c_798",
@@ -11964,11 +11964,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 18,
     "x": -746.59,
-    "altitude_y": 342.86,
+    "altitude_y": 237.86,
     "z": -3397.75,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+342.9m (地表大世界)"
+    "height_desc": "+237.9m (地表大世界)"
   },
   {
     "id": "c_799",
@@ -11979,11 +11979,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -748.79,
-    "altitude_y": 337.11,
+    "altitude_y": 232.11,
     "z": -3725.83,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+337.1m (地表大世界)"
+    "height_desc": "+232.1m (地表大世界)"
   },
   {
     "id": "c_800",
@@ -11994,11 +11994,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -290.17,
-    "altitude_y": 215.73,
+    "altitude_y": 110.73,
     "z": -3080.1,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+215.7m (地表大世界)"
+    "height_desc": "+110.7m (地表大世界)"
   },
   {
     "id": "c_801",
@@ -12009,11 +12009,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -129.09,
-    "altitude_y": 207.91,
+    "altitude_y": 102.91,
     "z": -3273.66,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+207.9m (地表大世界)"
+    "height_desc": "+102.9m (地表大世界)"
   },
   {
     "id": "c_802",
@@ -12024,11 +12024,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "KeyItem",
     "layer": 20,
     "x": -3634.97,
-    "altitude_y": 1776.16,
+    "altitude_y": 1671.16,
     "z": -466.73,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1776.2m (天空岛)"
+    "height_desc": "+1671.2m (天空岛)"
   },
   {
     "id": "c_803",
@@ -12039,11 +12039,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Armor",
     "layer": 20,
     "x": -3593.3,
-    "altitude_y": 1836.96,
+    "altitude_y": 1731.96,
     "z": -942.66,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1837.0m (天空岛)"
+    "height_desc": "+1732.0m (天空岛)"
   },
   {
     "id": "c_804",
@@ -12054,11 +12054,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 2071.27,
-    "altitude_y": 675.78,
+    "altitude_y": 570.78,
     "z": -2314.65,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+675.8m (地表大世界)"
+    "height_desc": "+570.8m (地表大世界)"
   },
   {
     "id": "c_805",
@@ -12069,11 +12069,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 2466.15,
-    "altitude_y": 637.09,
+    "altitude_y": 532.09,
     "z": -2293.29,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+637.1m (地表大世界)"
+    "height_desc": "+532.1m (地表大世界)"
   },
   {
     "id": "c_806",
@@ -12084,11 +12084,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 2346.58,
-    "altitude_y": 631.61,
+    "altitude_y": 526.61,
     "z": -2156.02,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+631.6m (地表大世界)"
+    "height_desc": "+526.6m (地表大世界)"
   },
   {
     "id": "c_807",
@@ -12099,11 +12099,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": -3841.99,
-    "altitude_y": -382.35,
+    "altitude_y": -487.35,
     "z": 2914.71,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-382.4m (地底深渊)"
+    "height_desc": "-487.4m (地底深渊)"
   },
   {
     "id": "c_808",
@@ -12114,11 +12114,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -1357.59,
-    "altitude_y": 253.57,
+    "altitude_y": 148.57,
     "z": 1810.08,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+253.6m (地表大世界)"
+    "height_desc": "+148.6m (地表大世界)"
   },
   {
     "id": "c_809",
@@ -12129,11 +12129,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Shield",
     "layer": 18,
     "x": -1454.68,
-    "altitude_y": 252.04,
+    "altitude_y": 147.04,
     "z": 1771.32,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+252.0m (地表大世界)"
+    "height_desc": "+147.0m (地表大世界)"
   },
   {
     "id": "c_810",
@@ -12144,11 +12144,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -1086.82,
-    "altitude_y": 184.32,
+    "altitude_y": 79.32,
     "z": 1673.12,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+184.3m (地表大世界)"
+    "height_desc": "+79.3m (地表大世界)"
   },
   {
     "id": "c_811",
@@ -12159,11 +12159,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 18,
     "x": -1571.55,
-    "altitude_y": 144.45,
+    "altitude_y": 39.45,
     "z": 1497.71,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+144.4m (地表大世界)"
+    "height_desc": "+39.4m (地表大世界)"
   },
   {
     "id": "c_812",
@@ -12174,11 +12174,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -1473.0,
-    "altitude_y": 137.5,
+    "altitude_y": 32.5,
     "z": 1278.5,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+137.5m (地表大世界)"
+    "height_desc": "+32.5m (地表大世界)"
   },
   {
     "id": "c_813",
@@ -12189,11 +12189,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 18,
     "x": -1735.63,
-    "altitude_y": 126.9,
+    "altitude_y": 21.9,
     "z": 1748.67,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+126.9m (地表大世界)"
+    "height_desc": "+21.9m (地表大世界)"
   },
   {
     "id": "c_814",
@@ -12204,11 +12204,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": 2908.38,
-    "altitude_y": -347.73,
+    "altitude_y": -452.73,
     "z": 3416.16,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-347.7m (地底深渊)"
+    "height_desc": "-452.7m (地底深渊)"
   },
   {
     "id": "c_815",
@@ -12219,11 +12219,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Armor",
     "layer": 19,
     "x": -1795.0,
-    "altitude_y": -422.72,
+    "altitude_y": -527.72,
     "z": 3462.5,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-422.7m (地底深渊)"
+    "height_desc": "-527.7m (地底深渊)"
   },
   {
     "id": "c_816",
@@ -12234,11 +12234,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 19,
     "x": -1823.99,
-    "altitude_y": -387.53,
+    "altitude_y": -492.53,
     "z": 3462.5,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-387.5m (地底深渊)"
+    "height_desc": "-492.5m (地底深渊)"
   },
   {
     "id": "c_817",
@@ -12249,11 +12249,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Bow",
     "layer": 19,
     "x": -1779.04,
-    "altitude_y": -387.53,
+    "altitude_y": -492.53,
     "z": 3470.0,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-387.5m (地底深渊)"
+    "height_desc": "-492.5m (地底深渊)"
   },
   {
     "id": "c_818",
@@ -12264,11 +12264,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 19,
     "x": -1780.0,
-    "altitude_y": -405.03,
+    "altitude_y": -510.03,
     "z": 3412.5,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-405.0m (地底深渊)"
+    "height_desc": "-510.0m (地底深渊)"
   },
   {
     "id": "c_819",
@@ -12279,11 +12279,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 19,
     "x": -1810.0,
-    "altitude_y": -405.03,
+    "altitude_y": -510.03,
     "z": 3512.5,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-405.0m (地底深渊)"
+    "height_desc": "-510.0m (地底深渊)"
   },
   {
     "id": "c_820",
@@ -12294,11 +12294,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": -1129.97,
-    "altitude_y": -732.76,
+    "altitude_y": -837.76,
     "z": 3608.43,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-732.8m (地底深渊)"
+    "height_desc": "-837.8m (地底深渊)"
   },
   {
     "id": "c_821",
@@ -12309,11 +12309,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 2602.56,
-    "altitude_y": 529.81,
+    "altitude_y": 424.81,
     "z": -1967.98,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+529.8m (地表大世界)"
+    "height_desc": "+424.8m (地表大世界)"
   },
   {
     "id": "c_822",
@@ -12324,11 +12324,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 2609.12,
-    "altitude_y": 529.83,
+    "altitude_y": 424.83,
     "z": -1970.62,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+529.8m (地表大世界)"
+    "height_desc": "+424.8m (地表大世界)"
   },
   {
     "id": "c_823",
@@ -12339,11 +12339,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 2606.03,
-    "altitude_y": 529.82,
+    "altitude_y": 424.82,
     "z": -1969.98,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+529.8m (地表大世界)"
+    "height_desc": "+424.8m (地表大世界)"
   },
   {
     "id": "c_824",
@@ -12354,11 +12354,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Shield",
     "layer": 18,
     "x": 3137.57,
-    "altitude_y": 185.33,
+    "altitude_y": 80.33,
     "z": 119.66,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+185.3m (洞窟/水井内)"
+    "height_desc": "+80.3m (洞窟/水井内)"
   },
   {
     "id": "c_825",
@@ -12369,11 +12369,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 3087.79,
-    "altitude_y": 186.55,
+    "altitude_y": 81.55,
     "z": 168.4,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+186.6m (洞窟/水井内)"
+    "height_desc": "+81.6m (洞窟/水井内)"
   },
   {
     "id": "c_826",
@@ -12384,11 +12384,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 3340.5,
-    "altitude_y": 150.39,
+    "altitude_y": 45.39,
     "z": 383.0,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+150.4m (地表大世界)"
+    "height_desc": "+45.4m (地表大世界)"
   },
   {
     "id": "c_827",
@@ -12399,11 +12399,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 3339.0,
-    "altitude_y": 150.45,
+    "altitude_y": 45.45,
     "z": 382.0,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+150.5m (地表大世界)"
+    "height_desc": "+45.5m (地表大世界)"
   },
   {
     "id": "c_828",
@@ -12414,11 +12414,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -3189.52,
-    "altitude_y": 66.86,
+    "altitude_y": -38.14,
     "z": 3061.22,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+66.9m (洞窟/水井内)"
+    "height_desc": "-38.1m (洞窟/水井内)"
   },
   {
     "id": "c_829",
@@ -12429,11 +12429,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Rupee",
     "layer": 18,
     "x": -3189.3,
-    "altitude_y": 67.05,
+    "altitude_y": -37.95,
     "z": 3087.69,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+67.0m (洞窟/水井内)"
+    "height_desc": "-38.0m (洞窟/水井内)"
   },
   {
     "id": "c_830",
@@ -12444,11 +12444,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -1224.42,
-    "altitude_y": 1.3,
+    "altitude_y": -103.7,
     "z": -2497.61,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+1.3m (地表大世界)"
+    "height_desc": "-103.7m (地表大世界)"
   },
   {
     "id": "c_831",
@@ -12459,11 +12459,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Bow",
     "layer": 18,
     "x": -1301.9,
-    "altitude_y": 47.91,
+    "altitude_y": -57.09,
     "z": -2447.55,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+47.9m (地表大世界)"
+    "height_desc": "-57.1m (地表大世界)"
   },
   {
     "id": "c_832",
@@ -12474,11 +12474,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -1149.36,
-    "altitude_y": 48.02,
+    "altitude_y": -56.98,
     "z": -2648.72,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+48.0m (地表大世界)"
+    "height_desc": "-57.0m (地表大世界)"
   },
   {
     "id": "c_833",
@@ -12489,11 +12489,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -1057.04,
-    "altitude_y": 88.64,
+    "altitude_y": -16.36,
     "z": -2698.62,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+88.6m (地表大世界)"
+    "height_desc": "-16.4m (地表大世界)"
   },
   {
     "id": "c_834",
@@ -12504,11 +12504,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "KeyItem",
     "layer": 20,
     "x": 3664.83,
-    "altitude_y": 1094.38,
+    "altitude_y": 989.38,
     "z": -1795.0,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1094.4m (天空岛)"
+    "height_desc": "+989.4m (天空岛)"
   },
   {
     "id": "c_835",
@@ -12519,11 +12519,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": -2255.8,
-    "altitude_y": -914.1,
+    "altitude_y": -1019.1,
     "z": -3294.51,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-914.1m (地底深渊)"
+    "height_desc": "-1019.1m (地底深渊)"
   },
   {
     "id": "c_836",
@@ -12534,11 +12534,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 336.84,
-    "altitude_y": 125.33,
+    "altitude_y": 20.33,
     "z": 2128.96,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+125.3m (洞窟/水井内)"
+    "height_desc": "+20.3m (洞窟/水井内)"
   },
   {
     "id": "c_837",
@@ -12549,11 +12549,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": 3575.55,
-    "altitude_y": -482.8,
+    "altitude_y": -587.8,
     "z": 2215.95,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-482.8m (地底深渊)"
+    "height_desc": "-587.8m (地底深渊)"
   },
   {
     "id": "c_838",
@@ -12564,11 +12564,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -804.57,
-    "altitude_y": 286.54,
+    "altitude_y": 181.54,
     "z": -2924.44,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+286.5m (地表大世界)"
+    "height_desc": "+181.5m (地表大世界)"
   },
   {
     "id": "c_839",
@@ -12579,11 +12579,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -358.03,
-    "altitude_y": 230.47,
+    "altitude_y": 125.47,
     "z": -2195.98,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+230.5m (地表大世界)"
+    "height_desc": "+125.5m (地表大世界)"
   },
   {
     "id": "c_840",
@@ -12594,11 +12594,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -258.5,
-    "altitude_y": 247.12,
+    "altitude_y": 142.12,
     "z": -2193.7,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+247.1m (地表大世界)"
+    "height_desc": "+142.1m (地表大世界)"
   },
   {
     "id": "c_841",
@@ -12609,11 +12609,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 18,
     "x": -550.5,
-    "altitude_y": 379.0,
+    "altitude_y": 274.0,
     "z": -2351.0,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+379.0m (地表大世界)"
+    "height_desc": "+274.0m (地表大世界)"
   },
   {
     "id": "c_842",
@@ -12624,11 +12624,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 18,
     "x": -681.5,
-    "altitude_y": 440.0,
+    "altitude_y": 335.0,
     "z": -2660.5,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+440.0m (地表大世界)"
+    "height_desc": "+335.0m (地表大世界)"
   },
   {
     "id": "c_843",
@@ -12639,11 +12639,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Armor",
     "layer": 18,
     "x": -3535.25,
-    "altitude_y": 348.06,
+    "altitude_y": 243.06,
     "z": -410.16,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+348.1m (洞窟/水井内)"
+    "height_desc": "+243.1m (洞窟/水井内)"
   },
   {
     "id": "c_844",
@@ -12654,11 +12654,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Armor",
     "layer": 18,
     "x": -1108.18,
-    "altitude_y": 140.9,
+    "altitude_y": 35.9,
     "z": 546.13,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+140.9m (洞窟/水井内)"
+    "height_desc": "+35.9m (洞窟/水井内)"
   },
   {
     "id": "c_845",
@@ -12669,11 +12669,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -3920.08,
-    "altitude_y": 178.87,
+    "altitude_y": 73.87,
     "z": -1114.02,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+178.9m (洞窟/水井内)"
+    "height_desc": "+73.9m (洞窟/水井内)"
   },
   {
     "id": "c_846",
@@ -12684,11 +12684,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Armor",
     "layer": 19,
     "x": -3955.03,
-    "altitude_y": -752.66,
+    "altitude_y": -857.66,
     "z": -3724.56,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-752.7m (地底深渊)"
+    "height_desc": "-857.7m (地底深渊)"
   },
   {
     "id": "c_847",
@@ -12699,11 +12699,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": -3393.44,
-    "altitude_y": -676.84,
+    "altitude_y": -781.84,
     "z": -3572.14,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-676.8m (地底深渊)"
+    "height_desc": "-781.8m (地底深渊)"
   },
   {
     "id": "c_848",
@@ -12714,11 +12714,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 2617.89,
-    "altitude_y": 297.6,
+    "altitude_y": 192.6,
     "z": -558.64,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+297.6m (洞窟/水井内)"
+    "height_desc": "+192.6m (洞窟/水井内)"
   },
   {
     "id": "c_849",
@@ -12729,11 +12729,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "KeyItem",
     "layer": 20,
     "x": -1956.29,
-    "altitude_y": 1272.59,
+    "altitude_y": 1167.59,
     "z": 1809.8,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1272.6m (天空岛)"
+    "height_desc": "+1167.6m (天空岛)"
   },
   {
     "id": "c_850",
@@ -12744,11 +12744,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": 2302.16,
-    "altitude_y": -475.45,
+    "altitude_y": -580.45,
     "z": 2328.06,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-475.4m (地底深渊)"
+    "height_desc": "-580.4m (地底深渊)"
   },
   {
     "id": "c_851",
@@ -12759,11 +12759,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": 2157.52,
-    "altitude_y": -374.33,
+    "altitude_y": -479.33,
     "z": 2177.61,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-374.3m (地底深渊)"
+    "height_desc": "-479.3m (地底深渊)"
   },
   {
     "id": "c_852",
@@ -12774,11 +12774,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": 2390.76,
-    "altitude_y": -450.58,
+    "altitude_y": -555.58,
     "z": 2196.71,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-450.6m (地底深渊)"
+    "height_desc": "-555.6m (地底深渊)"
   },
   {
     "id": "c_853",
@@ -12789,11 +12789,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": 2510.93,
-    "altitude_y": -543.62,
+    "altitude_y": -648.62,
     "z": 2485.59,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-543.6m (地底深渊)"
+    "height_desc": "-648.6m (地底深渊)"
   },
   {
     "id": "c_854",
@@ -12804,11 +12804,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": 2501.24,
-    "altitude_y": -557.6,
+    "altitude_y": -662.6,
     "z": 2678.1,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-557.6m (地底深渊)"
+    "height_desc": "-662.6m (地底深渊)"
   },
   {
     "id": "c_855",
@@ -12819,11 +12819,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": 2583.3,
-    "altitude_y": -516.97,
+    "altitude_y": -621.97,
     "z": 2972.78,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-517.0m (地底深渊)"
+    "height_desc": "-622.0m (地底深渊)"
   },
   {
     "id": "c_856",
@@ -12834,11 +12834,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -749.38,
-    "altitude_y": 168.0,
+    "altitude_y": 63.0,
     "z": -557.79,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+168.0m (地表大世界)"
+    "height_desc": "+63.0m (地表大世界)"
   },
   {
     "id": "c_857",
@@ -12849,11 +12849,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Bow",
     "layer": 18,
     "x": -0.34,
-    "altitude_y": 130.15,
+    "altitude_y": 25.15,
     "z": -828.87,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+130.1m (地表大世界)"
+    "height_desc": "+25.1m (地表大世界)"
   },
   {
     "id": "c_858",
@@ -12864,11 +12864,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -64.47,
-    "altitude_y": 150.21,
+    "altitude_y": 45.21,
     "z": -983.24,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+150.2m (地表大世界)"
+    "height_desc": "+45.2m (地表大世界)"
   },
   {
     "id": "c_859",
@@ -12879,11 +12879,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -77.83,
-    "altitude_y": 133.18,
+    "altitude_y": 28.18,
     "z": -1147.39,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+133.2m (地表大世界)"
+    "height_desc": "+28.2m (地表大世界)"
   },
   {
     "id": "c_860",
@@ -12894,11 +12894,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Bow",
     "layer": 18,
     "x": -196.46,
-    "altitude_y": 153.2,
+    "altitude_y": 48.2,
     "z": -1218.59,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+153.2m (地表大世界)"
+    "height_desc": "+48.2m (地表大世界)"
   },
   {
     "id": "c_861",
@@ -12909,11 +12909,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -262.51,
-    "altitude_y": 163.72,
+    "altitude_y": 58.72,
     "z": -1163.78,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+163.7m (地表大世界)"
+    "height_desc": "+58.7m (地表大世界)"
   },
   {
     "id": "c_862",
@@ -12924,11 +12924,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -455.79,
-    "altitude_y": 146.89,
+    "altitude_y": 41.89,
     "z": -1076.87,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+146.9m (地表大世界)"
+    "height_desc": "+41.9m (地表大世界)"
   },
   {
     "id": "c_863",
@@ -12939,11 +12939,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -164.76,
-    "altitude_y": 375.07,
+    "altitude_y": 270.07,
     "z": -1051.94,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+375.1m (地表大世界)"
+    "height_desc": "+270.1m (地表大世界)"
   },
   {
     "id": "c_864",
@@ -12954,11 +12954,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -111.36,
-    "altitude_y": 125.1,
+    "altitude_y": 20.1,
     "z": -789.82,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+125.1m (地表大世界)"
+    "height_desc": "+20.1m (地表大世界)"
   },
   {
     "id": "c_865",
@@ -12969,11 +12969,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -230.65,
-    "altitude_y": 114.65,
+    "altitude_y": 9.65,
     "z": -1199.56,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+114.6m (地表大世界)"
+    "height_desc": "+9.6m (地表大世界)"
   },
   {
     "id": "c_866",
@@ -12984,11 +12984,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -231.99,
-    "altitude_y": 114.65,
+    "altitude_y": 9.65,
     "z": -1176.44,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+114.6m (地表大世界)"
+    "height_desc": "+9.6m (地表大世界)"
   },
   {
     "id": "c_867",
@@ -12999,11 +12999,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Bow",
     "layer": 18,
     "x": -365.82,
-    "altitude_y": 119.47,
+    "altitude_y": 14.47,
     "z": -748.22,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+119.5m (地表大世界)"
+    "height_desc": "+14.5m (地表大世界)"
   },
   {
     "id": "c_868",
@@ -13014,11 +13014,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Shield",
     "layer": 18,
     "x": -154.0,
-    "altitude_y": 141.78,
+    "altitude_y": 36.78,
     "z": -1157.37,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+141.8m (地表大世界)"
+    "height_desc": "+36.8m (地表大世界)"
   },
   {
     "id": "c_869",
@@ -13029,11 +13029,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Bow",
     "layer": 18,
     "x": -229.64,
-    "altitude_y": 177.53,
+    "altitude_y": 72.53,
     "z": -787.34,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+177.5m (地表大世界)"
+    "height_desc": "+72.5m (地表大世界)"
   },
   {
     "id": "c_870",
@@ -13044,11 +13044,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Shield",
     "layer": 18,
     "x": -229.64,
-    "altitude_y": 146.32,
+    "altitude_y": 41.32,
     "z": -787.34,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+146.3m (地表大世界)"
+    "height_desc": "+41.3m (地表大世界)"
   },
   {
     "id": "c_871",
@@ -13059,11 +13059,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -925.0,
-    "altitude_y": 125.56,
+    "altitude_y": 20.56,
     "z": -317.01,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+125.6m (地表大世界)"
+    "height_desc": "+20.6m (地表大世界)"
   },
   {
     "id": "c_872",
@@ -13074,11 +13074,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -292.04,
-    "altitude_y": 158.81,
+    "altitude_y": 53.81,
     "z": -801.48,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+158.8m (地表大世界)"
+    "height_desc": "+53.8m (地表大世界)"
   },
   {
     "id": "c_873",
@@ -13089,11 +13089,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -253.72,
-    "altitude_y": 193.21,
+    "altitude_y": 88.21,
     "z": -761.67,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+193.2m (地表大世界)"
+    "height_desc": "+88.2m (地表大世界)"
   },
   {
     "id": "c_874",
@@ -13104,11 +13104,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -230.02,
-    "altitude_y": 177.52,
+    "altitude_y": 72.52,
     "z": -793.05,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+177.5m (地表大世界)"
+    "height_desc": "+72.5m (地表大世界)"
   },
   {
     "id": "c_875",
@@ -13119,11 +13119,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -784.99,
-    "altitude_y": 158.43,
+    "altitude_y": 53.43,
     "z": -815.94,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+158.4m (地表大世界)"
+    "height_desc": "+53.4m (地表大世界)"
   },
   {
     "id": "c_876",
@@ -13134,11 +13134,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -335.05,
-    "altitude_y": 129.43,
+    "altitude_y": 24.43,
     "z": -391.17,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+129.4m (地表大世界)"
+    "height_desc": "+24.4m (地表大世界)"
   },
   {
     "id": "c_877",
@@ -13149,11 +13149,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Rupee",
     "layer": 18,
     "x": -365.54,
-    "altitude_y": 135.23,
+    "altitude_y": 30.23,
     "z": -527.46,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+135.2m (地表大世界)"
+    "height_desc": "+30.2m (地表大世界)"
   },
   {
     "id": "c_878",
@@ -13164,11 +13164,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Rupee",
     "layer": 18,
     "x": -580.1,
-    "altitude_y": 126.32,
+    "altitude_y": 21.32,
     "z": -527.27,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+126.3m (地表大世界)"
+    "height_desc": "+21.3m (地表大世界)"
   },
   {
     "id": "c_879",
@@ -13179,11 +13179,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Bow",
     "layer": 18,
     "x": -419.94,
-    "altitude_y": 133.58,
+    "altitude_y": 28.58,
     "z": -327.23,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+133.6m (地表大世界)"
+    "height_desc": "+28.6m (地表大世界)"
   },
   {
     "id": "c_880",
@@ -13194,11 +13194,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Rupee",
     "layer": 18,
     "x": -341.41,
-    "altitude_y": 132.87,
+    "altitude_y": 27.87,
     "z": -267.69,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+132.9m (地表大世界)"
+    "height_desc": "+27.9m (地表大世界)"
   },
   {
     "id": "c_881",
@@ -13209,11 +13209,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -522.39,
-    "altitude_y": 134.69,
+    "altitude_y": 29.69,
     "z": -312.49,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+134.7m (地表大世界)"
+    "height_desc": "+29.7m (地表大世界)"
   },
   {
     "id": "c_882",
@@ -13224,11 +13224,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -525.63,
-    "altitude_y": 132.82,
+    "altitude_y": 27.82,
     "z": -454.79,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+132.8m (地表大世界)"
+    "height_desc": "+27.8m (地表大世界)"
   },
   {
     "id": "c_883",
@@ -13239,11 +13239,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -640.91,
-    "altitude_y": 128.3,
+    "altitude_y": 23.3,
     "z": -441.39,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+128.3m (地表大世界)"
+    "height_desc": "+23.3m (地表大世界)"
   },
   {
     "id": "c_884",
@@ -13254,11 +13254,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Rupee",
     "layer": 18,
     "x": -463.45,
-    "altitude_y": 137.14,
+    "altitude_y": 32.14,
     "z": -573.14,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+137.1m (地表大世界)"
+    "height_desc": "+32.1m (地表大世界)"
   },
   {
     "id": "c_885",
@@ -13269,11 +13269,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Rupee",
     "layer": 18,
     "x": -421.66,
-    "altitude_y": 133.18,
+    "altitude_y": 28.18,
     "z": -394.31,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+133.2m (地表大世界)"
+    "height_desc": "+28.2m (地表大世界)"
   },
   {
     "id": "c_886",
@@ -13284,11 +13284,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Rupee",
     "layer": 18,
     "x": -13.1,
-    "altitude_y": 130.84,
+    "altitude_y": 25.84,
     "z": -518.95,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+130.8m (地表大世界)"
+    "height_desc": "+25.8m (地表大世界)"
   },
   {
     "id": "c_887",
@@ -13299,11 +13299,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Rupee",
     "layer": 18,
     "x": -136.41,
-    "altitude_y": 129.6,
+    "altitude_y": 24.6,
     "z": -458.48,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+129.6m (地表大世界)"
+    "height_desc": "+24.6m (地表大世界)"
   },
   {
     "id": "c_888",
@@ -13314,11 +13314,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Rupee",
     "layer": 18,
     "x": -35.92,
-    "altitude_y": 137.06,
+    "altitude_y": 32.06,
     "z": -351.98,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+137.1m (地表大世界)"
+    "height_desc": "+32.1m (地表大世界)"
   },
   {
     "id": "c_889",
@@ -13329,11 +13329,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Rupee",
     "layer": 18,
     "x": -105.23,
-    "altitude_y": 132.87,
+    "altitude_y": 27.87,
     "z": -334.61,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+132.9m (地表大世界)"
+    "height_desc": "+27.9m (地表大世界)"
   },
   {
     "id": "c_890",
@@ -13344,11 +13344,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -80.52,
-    "altitude_y": 132.73,
+    "altitude_y": 27.73,
     "z": -489.92,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+132.7m (地表大世界)"
+    "height_desc": "+27.7m (地表大世界)"
   },
   {
     "id": "c_891",
@@ -13359,11 +13359,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": -950.18,
-    "altitude_y": -501.79,
+    "altitude_y": -606.79,
     "z": 2569.11,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-501.8m (地底深渊)"
+    "height_desc": "-606.8m (地底深渊)"
   },
   {
     "id": "c_892",
@@ -13374,11 +13374,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Armor",
     "layer": 18,
     "x": 1382.41,
-    "altitude_y": 399.97,
+    "altitude_y": 294.97,
     "z": -2225.35,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+400.0m (洞窟/水井内)"
+    "height_desc": "+295.0m (洞窟/水井内)"
   },
   {
     "id": "c_893",
@@ -13389,11 +13389,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -189.71,
-    "altitude_y": 325.73,
+    "altitude_y": 220.73,
     "z": -1083.42,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+325.7m (地表大世界)"
+    "height_desc": "+220.7m (地表大世界)"
   },
   {
     "id": "c_894",
@@ -13404,11 +13404,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Bow",
     "layer": 18,
     "x": -228.03,
-    "altitude_y": 505.6,
+    "altitude_y": 400.6,
     "z": -1040.08,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+505.6m (地表大世界)"
+    "height_desc": "+400.6m (地表大世界)"
   },
   {
     "id": "c_895",
@@ -13419,11 +13419,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -248.34,
-    "altitude_y": 570.85,
+    "altitude_y": 465.85,
     "z": -1065.05,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+570.8m (地表大世界)"
+    "height_desc": "+465.8m (地表大世界)"
   },
   {
     "id": "c_896",
@@ -13434,11 +13434,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Rupee",
     "layer": 18,
     "x": -254.0,
-    "altitude_y": 526.78,
+    "altitude_y": 421.78,
     "z": -1068.9,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+526.8m (地表大世界)"
+    "height_desc": "+421.8m (地表大世界)"
   },
   {
     "id": "c_897",
@@ -13449,11 +13449,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Rupee",
     "layer": 18,
     "x": -272.5,
-    "altitude_y": 462.28,
+    "altitude_y": 357.28,
     "z": -1034.37,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+462.3m (地表大世界)"
+    "height_desc": "+357.3m (地表大世界)"
   },
   {
     "id": "c_898",
@@ -13464,11 +13464,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -384.23,
-    "altitude_y": 419.9,
+    "altitude_y": 314.9,
     "z": -993.05,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+419.9m (地表大世界)"
+    "height_desc": "+314.9m (地表大世界)"
   },
   {
     "id": "c_899",
@@ -13479,11 +13479,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -153.5,
-    "altitude_y": 388.78,
+    "altitude_y": 283.78,
     "z": -895.37,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+388.8m (地表大世界)"
+    "height_desc": "+283.8m (地表大世界)"
   },
   {
     "id": "c_900",
@@ -13494,11 +13494,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -342.0,
-    "altitude_y": 365.71,
+    "altitude_y": 260.71,
     "z": -1093.37,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+365.7m (地表大世界)"
+    "height_desc": "+260.7m (地表大世界)"
   },
   {
     "id": "c_901",
@@ -13509,11 +13509,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Bow",
     "layer": 18,
     "x": -159.73,
-    "altitude_y": 430.21,
+    "altitude_y": 325.21,
     "z": -879.23,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+430.2m (地表大世界)"
+    "height_desc": "+325.2m (地表大世界)"
   },
   {
     "id": "c_902",
@@ -13524,11 +13524,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Armor",
     "layer": 18,
     "x": -174.51,
-    "altitude_y": 320.46,
+    "altitude_y": 215.46,
     "z": -1122.64,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+320.5m (地表大世界)"
+    "height_desc": "+215.5m (地表大世界)"
   },
   {
     "id": "c_903",
@@ -13539,11 +13539,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Armor",
     "layer": 18,
     "x": -331.86,
-    "altitude_y": 406.46,
+    "altitude_y": 301.46,
     "z": -1005.72,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+406.5m (地表大世界)"
+    "height_desc": "+301.5m (地表大世界)"
   },
   {
     "id": "c_904",
@@ -13554,11 +13554,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 20,
     "x": 943.65,
-    "altitude_y": 534.88,
+    "altitude_y": 429.88,
     "z": 44.69,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+534.9m (天空岛)"
+    "height_desc": "+429.9m (天空岛)"
   },
   {
     "id": "c_905",
@@ -13569,11 +13569,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": 3296.97,
-    "altitude_y": -644.88,
+    "altitude_y": -749.88,
     "z": -574.83,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-644.9m (地底深渊)"
+    "height_desc": "-749.9m (地底深渊)"
   },
   {
     "id": "c_906",
@@ -13584,11 +13584,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 4176.12,
-    "altitude_y": 125.01,
+    "altitude_y": 20.01,
     "z": -2209.88,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+125.0m (地表大世界)"
+    "height_desc": "+20.0m (地表大世界)"
   },
   {
     "id": "c_907",
@@ -13599,11 +13599,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Bow",
     "layer": 18,
     "x": 4774.49,
-    "altitude_y": 110.18,
+    "altitude_y": 5.18,
     "z": -2773.74,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+110.2m (地表大世界)"
+    "height_desc": "+5.2m (地表大世界)"
   },
   {
     "id": "c_908",
@@ -13614,11 +13614,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 4830.84,
-    "altitude_y": 113.48,
+    "altitude_y": 8.48,
     "z": -2757.21,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+113.5m (地表大世界)"
+    "height_desc": "+8.5m (地表大世界)"
   },
   {
     "id": "c_909",
@@ -13629,11 +13629,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 4896.89,
-    "altitude_y": 135.62,
+    "altitude_y": 30.62,
     "z": -2779.23,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+135.6m (地表大世界)"
+    "height_desc": "+30.6m (地表大世界)"
   },
   {
     "id": "c_910",
@@ -13644,11 +13644,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 4721.08,
-    "altitude_y": 105.53,
+    "altitude_y": 0.53,
     "z": -2183.57,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+105.5m (地表大世界)"
+    "height_desc": "+0.5m (地表大世界)"
   },
   {
     "id": "c_911",
@@ -13659,11 +13659,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Rupee",
     "layer": 18,
     "x": 4874.9,
-    "altitude_y": 105.53,
+    "altitude_y": 0.53,
     "z": -2063.9,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+105.5m (地表大世界)"
+    "height_desc": "+0.5m (地表大世界)"
   },
   {
     "id": "c_912",
@@ -13674,11 +13674,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 4555.02,
-    "altitude_y": 105.53,
+    "altitude_y": 0.53,
     "z": -2638.79,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+105.5m (地表大世界)"
+    "height_desc": "+0.5m (地表大世界)"
   },
   {
     "id": "c_913",
@@ -13689,11 +13689,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Shield",
     "layer": 18,
     "x": 4224.39,
-    "altitude_y": 230.99,
+    "altitude_y": 125.99,
     "z": -2785.56,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+231.0m (地表大世界)"
+    "height_desc": "+126.0m (地表大世界)"
   },
   {
     "id": "c_914",
@@ -13704,11 +13704,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 167.64,
-    "altitude_y": 274.4,
+    "altitude_y": 169.4,
     "z": -3212.75,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+274.4m (地表大世界)"
+    "height_desc": "+169.4m (地表大世界)"
   },
   {
     "id": "c_915",
@@ -13719,11 +13719,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 450.3,
-    "altitude_y": 275.44,
+    "altitude_y": 170.44,
     "z": -3084.5,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+275.4m (地表大世界)"
+    "height_desc": "+170.4m (地表大世界)"
   },
   {
     "id": "c_916",
@@ -13734,11 +13734,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 247.97,
-    "altitude_y": 274.48,
+    "altitude_y": 169.48,
     "z": -3121.14,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+274.5m (地表大世界)"
+    "height_desc": "+169.5m (地表大世界)"
   },
   {
     "id": "c_917",
@@ -13749,11 +13749,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 364.1,
-    "altitude_y": 275.12,
+    "altitude_y": 170.12,
     "z": -3053.5,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+275.1m (地表大世界)"
+    "height_desc": "+170.1m (地表大世界)"
   },
   {
     "id": "c_918",
@@ -13764,11 +13764,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 238.6,
-    "altitude_y": 173.56,
+    "altitude_y": 68.56,
     "z": -3689.76,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+173.6m (地表大世界)"
+    "height_desc": "+68.6m (地表大世界)"
   },
   {
     "id": "c_919",
@@ -13779,11 +13779,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 906.51,
-    "altitude_y": 217.1,
+    "altitude_y": 112.1,
     "z": -3636.11,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+217.1m (地表大世界)"
+    "height_desc": "+112.1m (地表大世界)"
   },
   {
     "id": "c_920",
@@ -13794,11 +13794,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 157.64,
-    "altitude_y": 288.63,
+    "altitude_y": 183.63,
     "z": -3257.45,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+288.6m (地表大世界)"
+    "height_desc": "+183.6m (地表大世界)"
   },
   {
     "id": "c_921",
@@ -13809,11 +13809,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 862.77,
-    "altitude_y": 344.99,
+    "altitude_y": 239.99,
     "z": -3114.0,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+345.0m (地表大世界)"
+    "height_desc": "+240.0m (地表大世界)"
   },
   {
     "id": "c_922",
@@ -13824,11 +13824,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 18,
     "x": 47.03,
-    "altitude_y": 181.45,
+    "altitude_y": 76.45,
     "z": -3546.4,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+181.5m (地表大世界)"
+    "height_desc": "+76.5m (地表大世界)"
   },
   {
     "id": "c_923",
@@ -13839,11 +13839,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 18,
     "x": 545.0,
-    "altitude_y": 198.42,
+    "altitude_y": 93.42,
     "z": -3679.47,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+198.4m (地表大世界)"
+    "height_desc": "+93.4m (地表大世界)"
   },
   {
     "id": "c_924",
@@ -13854,11 +13854,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Bow",
     "layer": 18,
     "x": 2401.04,
-    "altitude_y": 239.48,
+    "altitude_y": 134.48,
     "z": -1881.59,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+239.5m (洞窟/水井内)"
+    "height_desc": "+134.5m (洞窟/水井内)"
   },
   {
     "id": "c_925",
@@ -13869,11 +13869,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": -566.91,
-    "altitude_y": -698.31,
+    "altitude_y": -803.31,
     "z": -2569.73,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-698.3m (地底深渊)"
+    "height_desc": "-803.3m (地底深渊)"
   },
   {
     "id": "c_926",
@@ -13884,11 +13884,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "KeyItem",
     "layer": 20,
     "x": 1810.72,
-    "altitude_y": 1309.84,
+    "altitude_y": 1204.84,
     "z": -1013.62,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1309.8m (天空岛)"
+    "height_desc": "+1204.8m (天空岛)"
   },
   {
     "id": "c_927",
@@ -13899,11 +13899,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 20,
     "x": 2025.1,
-    "altitude_y": 1364.26,
+    "altitude_y": 1259.26,
     "z": -1147.04,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1364.3m (天空岛)"
+    "height_desc": "+1259.3m (天空岛)"
   },
   {
     "id": "c_928",
@@ -13914,11 +13914,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 2827.0,
-    "altitude_y": 342.17,
+    "altitude_y": 237.17,
     "z": -465.5,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+342.2m (洞窟/水井内)"
+    "height_desc": "+237.2m (洞窟/水井内)"
   },
   {
     "id": "c_929",
@@ -13929,11 +13929,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Armor",
     "layer": 18,
     "x": 2849.71,
-    "altitude_y": 294.08,
+    "altitude_y": 189.08,
     "z": -542.59,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+294.1m (洞窟/水井内)"
+    "height_desc": "+189.1m (洞窟/水井内)"
   },
   {
     "id": "c_930",
@@ -13944,11 +13944,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": 3308.4,
-    "altitude_y": -592.83,
+    "altitude_y": -697.83,
     "z": 58.22,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-592.8m (地底深渊)"
+    "height_desc": "-697.8m (地底深渊)"
   },
   {
     "id": "c_931",
@@ -13959,11 +13959,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": 3707.41,
-    "altitude_y": -626.32,
+    "altitude_y": -731.32,
     "z": 60.89,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-626.3m (地底深渊)"
+    "height_desc": "-731.3m (地底深渊)"
   },
   {
     "id": "c_932",
@@ -13974,11 +13974,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 18,
     "x": -2090.95,
-    "altitude_y": 340.95,
+    "altitude_y": 235.95,
     "z": 3051.88,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+341.0m (地表大世界)"
+    "height_desc": "+236.0m (地表大世界)"
   },
   {
     "id": "c_933",
@@ -13989,11 +13989,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 1990.75,
-    "altitude_y": 457.04,
+    "altitude_y": 352.04,
     "z": -1562.04,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+457.0m (地表大世界)"
+    "height_desc": "+352.0m (地表大世界)"
   },
   {
     "id": "c_934",
@@ -14004,11 +14004,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 1156.73,
-    "altitude_y": 125.23,
+    "altitude_y": 20.23,
     "z": -1141.16,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+125.2m (地表大世界)"
+    "height_desc": "+20.2m (地表大世界)"
   },
   {
     "id": "c_935",
@@ -14019,11 +14019,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 1594.48,
-    "altitude_y": 507.56,
+    "altitude_y": 402.56,
     "z": -1684.88,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+507.6m (地表大世界)"
+    "height_desc": "+402.6m (地表大世界)"
   },
   {
     "id": "c_936",
@@ -14034,11 +14034,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 1649.19,
-    "altitude_y": 484.33,
+    "altitude_y": 379.33,
     "z": -1838.49,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+484.3m (地表大世界)"
+    "height_desc": "+379.3m (地表大世界)"
   },
   {
     "id": "c_937",
@@ -14049,11 +14049,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 18,
     "x": 1038.57,
-    "altitude_y": 177.68,
+    "altitude_y": 72.68,
     "z": -1253.27,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+177.7m (地表大世界)"
+    "height_desc": "+72.7m (地表大世界)"
   },
   {
     "id": "c_938",
@@ -14064,11 +14064,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 1490.48,
-    "altitude_y": 457.45,
+    "altitude_y": 352.45,
     "z": -1590.48,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+457.5m (地表大世界)"
+    "height_desc": "+352.5m (地表大世界)"
   },
   {
     "id": "c_939",
@@ -14079,11 +14079,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 1337.91,
-    "altitude_y": 167.95,
+    "altitude_y": 62.95,
     "z": -1059.69,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+168.0m (地表大世界)"
+    "height_desc": "+63.0m (地表大世界)"
   },
   {
     "id": "c_940",
@@ -14094,11 +14094,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 1476.12,
-    "altitude_y": 417.76,
+    "altitude_y": 312.76,
     "z": -1866.31,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+417.8m (地表大世界)"
+    "height_desc": "+312.8m (地表大世界)"
   },
   {
     "id": "c_941",
@@ -14109,11 +14109,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 1100.0,
-    "altitude_y": 126.75,
+    "altitude_y": 21.75,
     "z": -1113.0,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+126.8m (地表大世界)"
+    "height_desc": "+21.8m (地表大世界)"
   },
   {
     "id": "c_942",
@@ -14124,11 +14124,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 18,
     "x": 1727.47,
-    "altitude_y": 462.66,
+    "altitude_y": 357.66,
     "z": -1868.43,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+462.7m (地表大世界)"
+    "height_desc": "+357.7m (地表大世界)"
   },
   {
     "id": "c_943",
@@ -14139,11 +14139,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 1276.02,
-    "altitude_y": 120.85,
+    "altitude_y": 15.85,
     "z": -1156.58,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+120.8m (地表大世界)"
+    "height_desc": "+15.8m (地表大世界)"
   },
   {
     "id": "c_944",
@@ -14154,11 +14154,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Rupee",
     "layer": 18,
     "x": 1704.53,
-    "altitude_y": 377.18,
+    "altitude_y": 272.18,
     "z": -1525.64,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+377.2m (地表大世界)"
+    "height_desc": "+272.2m (地表大世界)"
   },
   {
     "id": "c_945",
@@ -14169,11 +14169,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 1498.79,
-    "altitude_y": 285.31,
+    "altitude_y": 180.31,
     "z": -1183.56,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+285.3m (地表大世界)"
+    "height_desc": "+180.3m (地表大世界)"
   },
   {
     "id": "c_946",
@@ -14184,11 +14184,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": 3263.82,
-    "altitude_y": -552.27,
+    "altitude_y": -657.27,
     "z": 1445.68,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-552.3m (地底深渊)"
+    "height_desc": "-657.3m (地底深渊)"
   },
   {
     "id": "c_947",
@@ -14199,11 +14199,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "KeyItem",
     "layer": 19,
     "x": 3261.97,
-    "altitude_y": -552.26,
+    "altitude_y": -657.26,
     "z": 1446.42,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-552.3m (地底深渊)"
+    "height_desc": "-657.3m (地底深渊)"
   },
   {
     "id": "c_948",
@@ -14214,11 +14214,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": -2695.52,
-    "altitude_y": -362.31,
+    "altitude_y": -467.31,
     "z": 2880.45,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-362.3m (地底深渊)"
+    "height_desc": "-467.3m (地底深渊)"
   },
   {
     "id": "c_949",
@@ -14229,11 +14229,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "KeyItem",
     "layer": 19,
     "x": -2694.24,
-    "altitude_y": -362.31,
+    "altitude_y": -467.31,
     "z": 2881.98,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-362.3m (地底深渊)"
+    "height_desc": "-467.3m (地底深渊)"
   },
   {
     "id": "c_950",
@@ -14244,11 +14244,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": -1901.28,
-    "altitude_y": -576.69,
+    "altitude_y": -681.69,
     "z": -2095.82,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-576.7m (地底深渊)"
+    "height_desc": "-681.7m (地底深渊)"
   },
   {
     "id": "c_951",
@@ -14259,11 +14259,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "KeyItem",
     "layer": 19,
     "x": -1903.18,
-    "altitude_y": -576.69,
+    "altitude_y": -681.69,
     "z": -2095.2,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-576.7m (地底深渊)"
+    "height_desc": "-681.7m (地底深渊)"
   },
   {
     "id": "c_952",
@@ -14274,11 +14274,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": -373.89,
-    "altitude_y": -443.66,
+    "altitude_y": -548.66,
     "z": -3128.28,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-443.7m (地底深渊)"
+    "height_desc": "-548.7m (地底深渊)"
   },
   {
     "id": "c_953",
@@ -14289,11 +14289,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -3067.38,
-    "altitude_y": 589.76,
+    "altitude_y": 484.76,
     "z": -3332.74,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+589.8m (地表大世界)"
+    "height_desc": "+484.8m (地表大世界)"
   },
   {
     "id": "c_954",
@@ -14304,11 +14304,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Armor",
     "layer": 19,
     "x": 4516.29,
-    "altitude_y": -348.74,
+    "altitude_y": -453.74,
     "z": -2170.07,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-348.7m (地底深渊)"
+    "height_desc": "-453.7m (地底深渊)"
   },
   {
     "id": "c_955",
@@ -14319,11 +14319,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": 2776.02,
-    "altitude_y": -470.12,
+    "altitude_y": -575.12,
     "z": 626.63,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-470.1m (地底深渊)"
+    "height_desc": "-575.1m (地底深渊)"
   },
   {
     "id": "c_956",
@@ -14334,11 +14334,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": -3145.03,
-    "altitude_y": -520.95,
+    "altitude_y": -625.95,
     "z": 543.75,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-521.0m (地底深渊)"
+    "height_desc": "-626.0m (地底深渊)"
   },
   {
     "id": "c_957",
@@ -14349,11 +14349,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "KeyItem",
     "layer": 20,
     "x": -1959.23,
-    "altitude_y": 1245.79,
+    "altitude_y": 1140.79,
     "z": 1813.13,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1245.8m (天空岛)"
+    "height_desc": "+1140.8m (天空岛)"
   },
   {
     "id": "c_958",
@@ -14364,11 +14364,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Shield",
     "layer": 18,
     "x": -1530.55,
-    "altitude_y": 87.87,
+    "altitude_y": -17.13,
     "z": 2232.56,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+87.9m (洞窟/水井内)"
+    "height_desc": "-17.1m (洞窟/水井内)"
   },
   {
     "id": "c_959",
@@ -14379,11 +14379,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -1508.41,
-    "altitude_y": 362.44,
+    "altitude_y": 257.44,
     "z": -3510.25,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+362.4m (地表大世界)"
+    "height_desc": "+257.4m (地表大世界)"
   },
   {
     "id": "c_960",
@@ -14394,11 +14394,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 682.97,
-    "altitude_y": 109.86,
+    "altitude_y": 4.86,
     "z": 808.69,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+109.9m (洞窟/水井内)"
+    "height_desc": "+4.9m (洞窟/水井内)"
   },
   {
     "id": "c_961",
@@ -14409,11 +14409,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 20,
     "x": -572.53,
-    "altitude_y": 517.88,
+    "altitude_y": 412.88,
     "z": 317.06,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+517.9m (天空岛)"
+    "height_desc": "+412.9m (天空岛)"
   },
   {
     "id": "c_962",
@@ -14424,11 +14424,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 3688.86,
-    "altitude_y": 293.53,
+    "altitude_y": 188.53,
     "z": -635.51,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+293.5m (洞窟/水井内)"
+    "height_desc": "+188.5m (洞窟/水井内)"
   },
   {
     "id": "c_963",
@@ -14439,11 +14439,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Bow",
     "layer": 18,
     "x": 3184.29,
-    "altitude_y": 179.54,
+    "altitude_y": 74.54,
     "z": 1921.38,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+179.5m (地表大世界)"
+    "height_desc": "+74.5m (地表大世界)"
   },
   {
     "id": "c_964",
@@ -14454,11 +14454,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 3792.09,
-    "altitude_y": 442.94,
+    "altitude_y": 337.94,
     "z": 1659.71,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+442.9m (地表大世界)"
+    "height_desc": "+337.9m (地表大世界)"
   },
   {
     "id": "c_965",
@@ -14469,11 +14469,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Shield",
     "layer": 18,
     "x": 3082.21,
-    "altitude_y": 335.1,
+    "altitude_y": 230.1,
     "z": 1249.72,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+335.1m (地表大世界)"
+    "height_desc": "+230.1m (地表大世界)"
   },
   {
     "id": "c_966",
@@ -14484,11 +14484,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Bow",
     "layer": 18,
     "x": 3151.06,
-    "altitude_y": 296.61,
+    "altitude_y": 191.61,
     "z": 1556.71,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+296.6m (地表大世界)"
+    "height_desc": "+191.6m (地表大世界)"
   },
   {
     "id": "c_967",
@@ -14499,11 +14499,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Armor",
     "layer": 18,
     "x": -4673.2,
-    "altitude_y": 105.76,
+    "altitude_y": 0.76,
     "z": 2091.71,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+105.8m (洞窟/水井内)"
+    "height_desc": "+0.8m (洞窟/水井内)"
   },
   {
     "id": "c_968",
@@ -14514,11 +14514,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -2652.25,
-    "altitude_y": 465.18,
+    "altitude_y": 360.18,
     "z": -2049.38,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+465.2m (地表大世界)"
+    "height_desc": "+360.2m (地表大世界)"
   },
   {
     "id": "c_969",
@@ -14529,11 +14529,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Bow",
     "layer": 18,
     "x": -2650.19,
-    "altitude_y": 468.66,
+    "altitude_y": 363.66,
     "z": -2067.02,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+468.7m (地表大世界)"
+    "height_desc": "+363.7m (地表大世界)"
   },
   {
     "id": "c_970",
@@ -14544,11 +14544,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -2664.64,
-    "altitude_y": 484.0,
+    "altitude_y": 379.0,
     "z": -2399.5,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+484.0m (地表大世界)"
+    "height_desc": "+379.0m (地表大世界)"
   },
   {
     "id": "c_971",
@@ -14559,11 +14559,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Bow",
     "layer": 18,
     "x": -2627.35,
-    "altitude_y": 616.04,
+    "altitude_y": 511.04,
     "z": -2713.96,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+616.0m (地表大世界)"
+    "height_desc": "+511.0m (地表大世界)"
   },
   {
     "id": "c_972",
@@ -14574,11 +14574,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -2779.6,
-    "altitude_y": 422.22,
+    "altitude_y": 317.22,
     "z": -2018.88,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+422.2m (地表大世界)"
+    "height_desc": "+317.2m (地表大世界)"
   },
   {
     "id": "c_973",
@@ -14589,11 +14589,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "KeyItem",
     "layer": 20,
     "x": -3437.53,
-    "altitude_y": 1296.21,
+    "altitude_y": 1191.21,
     "z": -1431.37,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1296.2m (天空岛)"
+    "height_desc": "+1191.2m (天空岛)"
   },
   {
     "id": "c_974",
@@ -14604,11 +14604,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Armor",
     "layer": 18,
     "x": -2904.85,
-    "altitude_y": 507.68,
+    "altitude_y": 402.68,
     "z": -2571.12,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+507.7m (洞窟/水井内)"
+    "height_desc": "+402.7m (洞窟/水井内)"
   },
   {
     "id": "c_975",
@@ -14619,11 +14619,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Armor",
     "layer": 18,
     "x": -3960.8,
-    "altitude_y": 245.61,
+    "altitude_y": 140.61,
     "z": -3268.18,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+245.6m (洞窟/水井内)"
+    "height_desc": "+140.6m (洞窟/水井内)"
   },
   {
     "id": "c_976",
@@ -14634,11 +14634,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -3941.79,
-    "altitude_y": 238.25,
+    "altitude_y": 133.25,
     "z": -3216.22,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+238.3m (洞窟/水井内)"
+    "height_desc": "+133.3m (洞窟/水井内)"
   },
   {
     "id": "c_977",
@@ -14649,11 +14649,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "KeyItem",
     "layer": 20,
     "x": 2159.54,
-    "altitude_y": 1368.36,
+    "altitude_y": 1263.36,
     "z": 2592.08,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1368.4m (天空岛)"
+    "height_desc": "+1263.4m (天空岛)"
   },
   {
     "id": "c_978",
@@ -14664,11 +14664,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": -398.03,
-    "altitude_y": -517.78,
+    "altitude_y": -622.78,
     "z": -1774.06,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-517.8m (地底深渊)"
+    "height_desc": "-622.8m (地底深渊)"
   },
   {
     "id": "c_979",
@@ -14679,11 +14679,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "KeyItem",
     "layer": 19,
     "x": -398.13,
-    "altitude_y": -517.78,
+    "altitude_y": -622.78,
     "z": -1776.06,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-517.8m (地底深渊)"
+    "height_desc": "-622.8m (地底深渊)"
   },
   {
     "id": "c_980",
@@ -14694,11 +14694,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": 908.92,
-    "altitude_y": -349.85,
+    "altitude_y": -454.85,
     "z": 2562.81,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-349.9m (地底深渊)"
+    "height_desc": "-454.9m (地底深渊)"
   },
   {
     "id": "c_981",
@@ -14709,11 +14709,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": 547.41,
-    "altitude_y": -421.97,
+    "altitude_y": -526.97,
     "z": 2179.31,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-422.0m (地底深渊)"
+    "height_desc": "-527.0m (地底深渊)"
   },
   {
     "id": "c_982",
@@ -14724,11 +14724,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Shield",
     "layer": 19,
     "x": 863.01,
-    "altitude_y": -388.01,
+    "altitude_y": -493.01,
     "z": 2133.21,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-388.0m (地底深渊)"
+    "height_desc": "-493.0m (地底深渊)"
   },
   {
     "id": "c_983",
@@ -14739,11 +14739,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 19,
     "x": 873.07,
-    "altitude_y": -388.01,
+    "altitude_y": -493.01,
     "z": 2133.17,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-388.0m (地底深渊)"
+    "height_desc": "-493.0m (地底深渊)"
   },
   {
     "id": "c_984",
@@ -14754,11 +14754,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": 743.17,
-    "altitude_y": -350.37,
+    "altitude_y": -455.37,
     "z": 2799.29,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-350.4m (地底深渊)"
+    "height_desc": "-455.4m (地底深渊)"
   },
   {
     "id": "c_985",
@@ -14769,11 +14769,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Armor",
     "layer": 18,
     "x": 2283.21,
-    "altitude_y": 512.5,
+    "altitude_y": 407.5,
     "z": -2990.99,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+512.5m (洞窟/水井内)"
+    "height_desc": "+407.5m (洞窟/水井内)"
   },
   {
     "id": "c_986",
@@ -14784,11 +14784,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Shield",
     "layer": 18,
     "x": 2662.11,
-    "altitude_y": 228.62,
+    "altitude_y": 123.62,
     "z": 1388.2,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+228.6m (洞窟/水井内)"
+    "height_desc": "+123.6m (洞窟/水井内)"
   },
   {
     "id": "c_987",
@@ -14799,11 +14799,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -3619.97,
-    "altitude_y": 380.73,
+    "altitude_y": 275.73,
     "z": -997.78,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+380.7m (地表大世界)"
+    "height_desc": "+275.7m (地表大世界)"
   },
   {
     "id": "c_988",
@@ -14814,11 +14814,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Armor",
     "layer": 19,
     "x": -3231.46,
-    "altitude_y": -370.13,
+    "altitude_y": -475.13,
     "z": 2476.91,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-370.1m (地底深渊)"
+    "height_desc": "-475.1m (地底深渊)"
   },
   {
     "id": "c_989",
@@ -14829,11 +14829,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": -3908.89,
-    "altitude_y": -384.29,
+    "altitude_y": -489.29,
     "z": 3067.14,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-384.3m (地底深渊)"
+    "height_desc": "-489.3m (地底深渊)"
   },
   {
     "id": "c_990",
@@ -14844,11 +14844,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": -3201.91,
-    "altitude_y": -335.38,
+    "altitude_y": -440.38,
     "z": 2441.42,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-335.4m (地底深渊)"
+    "height_desc": "-440.4m (地底深渊)"
   },
   {
     "id": "c_991",
@@ -14859,11 +14859,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": -3509.23,
-    "altitude_y": -373.58,
+    "altitude_y": -478.58,
     "z": 2555.69,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-373.6m (地底深渊)"
+    "height_desc": "-478.6m (地底深渊)"
   },
   {
     "id": "c_992",
@@ -14874,11 +14874,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": -3131.04,
-    "altitude_y": -362.93,
+    "altitude_y": -467.93,
     "z": 2096.97,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-362.9m (地底深渊)"
+    "height_desc": "-467.9m (地底深渊)"
   },
   {
     "id": "c_993",
@@ -14889,11 +14889,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": -3347.63,
-    "altitude_y": -367.64,
+    "altitude_y": -472.64,
     "z": 2943.36,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-367.6m (地底深渊)"
+    "height_desc": "-472.6m (地底深渊)"
   },
   {
     "id": "c_994",
@@ -14904,11 +14904,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": -3257.28,
-    "altitude_y": -388.87,
+    "altitude_y": -493.87,
     "z": 2701.31,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-388.9m (地底深渊)"
+    "height_desc": "-493.9m (地底深渊)"
   },
   {
     "id": "c_995",
@@ -14919,11 +14919,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": -1226.88,
-    "altitude_y": -374.76,
+    "altitude_y": -479.76,
     "z": 2610.65,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-374.8m (地底深渊)"
+    "height_desc": "-479.8m (地底深渊)"
   },
   {
     "id": "c_996",
@@ -14934,11 +14934,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "KeyItem",
     "layer": 19,
     "x": -1224.91,
-    "altitude_y": -374.76,
+    "altitude_y": -479.76,
     "z": 2611.0,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-374.8m (地底深渊)"
+    "height_desc": "-479.8m (地底深渊)"
   },
   {
     "id": "c_997",
@@ -14949,11 +14949,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Rupee",
     "layer": 18,
     "x": 2585.05,
-    "altitude_y": 240.46,
+    "altitude_y": 135.46,
     "z": -1416.41,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+240.5m (洞窟/水井内)"
+    "height_desc": "+135.5m (洞窟/水井内)"
   },
   {
     "id": "c_998",
@@ -14964,11 +14964,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Rupee",
     "layer": 18,
     "x": 2580.05,
-    "altitude_y": 240.22,
+    "altitude_y": 135.22,
     "z": -1425.41,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+240.2m (洞窟/水井内)"
+    "height_desc": "+135.2m (洞窟/水井内)"
   },
   {
     "id": "c_999",
@@ -14979,11 +14979,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Rupee",
     "layer": 18,
     "x": 2588.05,
-    "altitude_y": 240.38,
+    "altitude_y": 135.38,
     "z": -1430.41,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+240.4m (洞窟/水井内)"
+    "height_desc": "+135.4m (洞窟/水井内)"
   },
   {
     "id": "c_1000",
@@ -14994,11 +14994,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Rupee",
     "layer": 18,
     "x": 2580.55,
-    "altitude_y": 240.36,
+    "altitude_y": 135.36,
     "z": -1417.41,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+240.4m (洞窟/水井内)"
+    "height_desc": "+135.4m (洞窟/水井内)"
   },
   {
     "id": "c_1001",
@@ -15009,11 +15009,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Rupee",
     "layer": 18,
     "x": 2578.16,
-    "altitude_y": 240.43,
+    "altitude_y": 135.43,
     "z": -1421.0,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+240.4m (洞窟/水井内)"
+    "height_desc": "+135.4m (洞窟/水井内)"
   },
   {
     "id": "c_1002",
@@ -15024,11 +15024,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Rupee",
     "layer": 18,
     "x": 2590.05,
-    "altitude_y": 239.24,
+    "altitude_y": 134.24,
     "z": -1425.91,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+239.2m (洞窟/水井内)"
+    "height_desc": "+134.2m (洞窟/水井内)"
   },
   {
     "id": "c_1003",
@@ -15039,11 +15039,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Rupee",
     "layer": 18,
     "x": 2593.55,
-    "altitude_y": 241.06,
+    "altitude_y": 136.06,
     "z": -1414.91,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+241.1m (洞窟/水井内)"
+    "height_desc": "+136.1m (洞窟/水井内)"
   },
   {
     "id": "c_1004",
@@ -15054,11 +15054,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Rupee",
     "layer": 18,
     "x": 2585.07,
-    "altitude_y": 240.32,
+    "altitude_y": 135.32,
     "z": -1422.63,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+240.3m (洞窟/水井内)"
+    "height_desc": "+135.3m (洞窟/水井内)"
   },
   {
     "id": "c_1005",
@@ -15069,11 +15069,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Rupee",
     "layer": 18,
     "x": 2583.6,
-    "altitude_y": 240.56,
+    "altitude_y": 135.56,
     "z": -1430.36,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+240.6m (洞窟/水井内)"
+    "height_desc": "+135.6m (洞窟/水井内)"
   },
   {
     "id": "c_1006",
@@ -15084,11 +15084,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Rupee",
     "layer": 18,
     "x": 2575.25,
-    "altitude_y": 241.33,
+    "altitude_y": 136.33,
     "z": -1417.25,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+241.3m (洞窟/水井内)"
+    "height_desc": "+136.3m (洞窟/水井内)"
   },
   {
     "id": "c_1007",
@@ -15099,11 +15099,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Rupee",
     "layer": 18,
     "x": 2593.17,
-    "altitude_y": 240.3,
+    "altitude_y": 135.3,
     "z": -1421.13,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+240.3m (洞窟/水井内)"
+    "height_desc": "+135.3m (洞窟/水井内)"
   },
   {
     "id": "c_1008",
@@ -15114,11 +15114,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Rupee",
     "layer": 18,
     "x": 2593.17,
-    "altitude_y": 242.4,
+    "altitude_y": 137.4,
     "z": -1434.67,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+242.4m (洞窟/水井内)"
+    "height_desc": "+137.4m (洞窟/水井内)"
   },
   {
     "id": "c_1009",
@@ -15129,11 +15129,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Rupee",
     "layer": 18,
     "x": 2576.32,
-    "altitude_y": 241.87,
+    "altitude_y": 136.87,
     "z": -1433.97,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+241.9m (洞窟/水井内)"
+    "height_desc": "+136.9m (洞窟/水井内)"
   },
   {
     "id": "c_1010",
@@ -15144,11 +15144,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Rupee",
     "layer": 18,
     "x": 2564.88,
-    "altitude_y": 247.72,
+    "altitude_y": 142.72,
     "z": -1422.82,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+247.7m (洞窟/水井内)"
+    "height_desc": "+142.7m (洞窟/水井内)"
   },
   {
     "id": "c_1011",
@@ -15159,11 +15159,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Rupee",
     "layer": 18,
     "x": 2595.14,
-    "altitude_y": 247.89,
+    "altitude_y": 142.89,
     "z": -1410.02,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+247.9m (洞窟/水井内)"
+    "height_desc": "+142.9m (洞窟/水井内)"
   },
   {
     "id": "c_1012",
@@ -15174,11 +15174,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Rupee",
     "layer": 18,
     "x": 2571.72,
-    "altitude_y": 242.04,
+    "altitude_y": 137.04,
     "z": -1420.5,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+242.0m (洞窟/水井内)"
+    "height_desc": "+137.0m (洞窟/水井内)"
   },
   {
     "id": "c_1013",
@@ -15189,11 +15189,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Rupee",
     "layer": 18,
     "x": 2585.31,
-    "altitude_y": 241.36,
+    "altitude_y": 136.36,
     "z": -1409.84,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+241.4m (洞窟/水井内)"
+    "height_desc": "+136.4m (洞窟/水井内)"
   },
   {
     "id": "c_1014",
@@ -15204,11 +15204,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Rupee",
     "layer": 18,
     "x": 2589.15,
-    "altitude_y": 247.08,
+    "altitude_y": 142.08,
     "z": -1438.25,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+247.1m (洞窟/水井内)"
+    "height_desc": "+142.1m (洞窟/水井内)"
   },
   {
     "id": "c_1015",
@@ -15219,11 +15219,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Rupee",
     "layer": 18,
     "x": 2573.89,
-    "altitude_y": 248.12,
+    "altitude_y": 143.12,
     "z": -1435.84,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+248.1m (洞窟/水井内)"
+    "height_desc": "+143.1m (洞窟/水井内)"
   },
   {
     "id": "c_1016",
@@ -15234,11 +15234,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Rupee",
     "layer": 18,
     "x": 2570.35,
-    "altitude_y": 243.52,
+    "altitude_y": 138.52,
     "z": -1430.4,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+243.5m (洞窟/水井内)"
+    "height_desc": "+138.5m (洞窟/水井内)"
   },
   {
     "id": "c_1017",
@@ -15249,11 +15249,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Rupee",
     "layer": 18,
     "x": 2595.69,
-    "altitude_y": 241.81,
+    "altitude_y": 136.81,
     "z": -1430.95,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+241.8m (洞窟/水井内)"
+    "height_desc": "+136.8m (洞窟/水井内)"
   },
   {
     "id": "c_1018",
@@ -15264,11 +15264,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Rupee",
     "layer": 18,
     "x": 2582.29,
-    "altitude_y": 250.5,
+    "altitude_y": 145.5,
     "z": -1436.79,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+250.5m (洞窟/水井内)"
+    "height_desc": "+145.5m (洞窟/水井内)"
   },
   {
     "id": "c_1019",
@@ -15279,11 +15279,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Rupee",
     "layer": 18,
     "x": 2598.73,
-    "altitude_y": 247.37,
+    "altitude_y": 142.37,
     "z": -1434.09,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+247.4m (洞窟/水井内)"
+    "height_desc": "+142.4m (洞窟/水井内)"
   },
   {
     "id": "c_1020",
@@ -15294,11 +15294,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Rupee",
     "layer": 18,
     "x": 2585.89,
-    "altitude_y": 241.7,
+    "altitude_y": 136.7,
     "z": -1433.62,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+241.7m (洞窟/水井内)"
+    "height_desc": "+136.7m (洞窟/水井内)"
   },
   {
     "id": "c_1021",
@@ -15309,11 +15309,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Rupee",
     "layer": 18,
     "x": 2573.96,
-    "altitude_y": 242.47,
+    "altitude_y": 137.47,
     "z": -1409.44,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+242.5m (洞窟/水井内)"
+    "height_desc": "+137.5m (洞窟/水井内)"
   },
   {
     "id": "c_1022",
@@ -15324,11 +15324,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Rupee",
     "layer": 18,
     "x": 2591.61,
-    "altitude_y": 241.8,
+    "altitude_y": 136.8,
     "z": -1411.93,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+241.8m (洞窟/水井内)"
+    "height_desc": "+136.8m (洞窟/水井内)"
   },
   {
     "id": "c_1023",
@@ -15339,11 +15339,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 2624.09,
-    "altitude_y": 241.94,
+    "altitude_y": 136.94,
     "z": -1417.55,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+241.9m (洞窟/水井内)"
+    "height_desc": "+136.9m (洞窟/水井内)"
   },
   {
     "id": "c_1024",
@@ -15354,11 +15354,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Empty",
     "layer": 18,
     "x": 2584.51,
-    "altitude_y": 243.7,
+    "altitude_y": 138.7,
     "z": -1401.09,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+243.7m (洞窟/水井内)"
+    "height_desc": "+138.7m (洞窟/水井内)"
   },
   {
     "id": "c_1025",
@@ -15369,11 +15369,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Empty",
     "layer": 18,
     "x": 2577.6,
-    "altitude_y": 243.01,
+    "altitude_y": 138.01,
     "z": -1405.36,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+243.0m (洞窟/水井内)"
+    "height_desc": "+138.0m (洞窟/水井内)"
   },
   {
     "id": "c_1026",
@@ -15384,11 +15384,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Empty",
     "layer": 18,
     "x": 2576.11,
-    "altitude_y": 249.78,
+    "altitude_y": 144.78,
     "z": -1371.41,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+249.8m (洞窟/水井内)"
+    "height_desc": "+144.8m (洞窟/水井内)"
   },
   {
     "id": "c_1027",
@@ -15399,11 +15399,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 18,
     "x": -4328.91,
-    "altitude_y": 491.62,
+    "altitude_y": 386.62,
     "z": -3606.19,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+491.6m (地表大世界)"
+    "height_desc": "+386.6m (地表大世界)"
   },
   {
     "id": "c_1028",
@@ -15414,11 +15414,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Bow",
     "layer": 18,
     "x": -4366.14,
-    "altitude_y": 491.72,
+    "altitude_y": 386.72,
     "z": -3514.09,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+491.7m (地表大世界)"
+    "height_desc": "+386.7m (地表大世界)"
   },
   {
     "id": "c_1029",
@@ -15429,11 +15429,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 18,
     "x": -4255.99,
-    "altitude_y": 574.15,
+    "altitude_y": 469.15,
     "z": -3587.58,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+574.2m (地表大世界)"
+    "height_desc": "+469.2m (地表大世界)"
   },
   {
     "id": "c_1030",
@@ -15444,11 +15444,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Shield",
     "layer": 18,
     "x": -4051.45,
-    "altitude_y": 467.57,
+    "altitude_y": 362.57,
     "z": -3754.77,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+467.6m (地表大世界)"
+    "height_desc": "+362.6m (地表大世界)"
   },
   {
     "id": "c_1031",
@@ -15459,11 +15459,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 18,
     "x": -4132.9,
-    "altitude_y": 327.41,
+    "altitude_y": 222.41,
     "z": -3420.33,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+327.4m (地表大世界)"
+    "height_desc": "+222.4m (地表大世界)"
   },
   {
     "id": "c_1032",
@@ -15474,11 +15474,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 19,
     "x": 2380.47,
-    "altitude_y": -490.71,
+    "altitude_y": -595.71,
     "z": -1539.44,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-490.7m (地底深渊)"
+    "height_desc": "-595.7m (地底深渊)"
   },
   {
     "id": "c_1033",
@@ -15489,11 +15489,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 19,
     "x": 2373.0,
-    "altitude_y": -495.65,
+    "altitude_y": -600.65,
     "z": -1559.0,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-495.7m (地底深渊)"
+    "height_desc": "-600.7m (地底深渊)"
   },
   {
     "id": "c_1034",
@@ -15504,11 +15504,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 19,
     "x": 2510.9,
-    "altitude_y": -495.97,
+    "altitude_y": -600.97,
     "z": -1741.32,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-496.0m (地底深渊)"
+    "height_desc": "-601.0m (地底深渊)"
   },
   {
     "id": "c_1035",
@@ -15519,11 +15519,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": 2528.49,
-    "altitude_y": -526.06,
+    "altitude_y": -631.06,
     "z": -1411.2,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-526.1m (地底深渊)"
+    "height_desc": "-631.1m (地底深渊)"
   },
   {
     "id": "c_1036",
@@ -15534,11 +15534,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -251.5,
-    "altitude_y": 107.26,
+    "altitude_y": 2.26,
     "z": -96.99,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+107.3m (洞窟/水井内)"
+    "height_desc": "+2.3m (洞窟/水井内)"
   },
   {
     "id": "c_1037",
@@ -15549,11 +15549,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -2828.0,
-    "altitude_y": 1587.53,
+    "altitude_y": 1482.53,
     "z": -2901.56,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+1587.5m (地表大世界)"
+    "height_desc": "+1482.5m (地表大世界)"
   },
   {
     "id": "c_1038",
@@ -15564,11 +15564,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -2890.75,
-    "altitude_y": 1587.43,
+    "altitude_y": 1482.43,
     "z": -3104.6,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+1587.4m (地表大世界)"
+    "height_desc": "+1482.4m (地表大世界)"
   },
   {
     "id": "c_1039",
@@ -15579,11 +15579,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Shield",
     "layer": 18,
     "x": -2830.5,
-    "altitude_y": 1623.43,
+    "altitude_y": 1518.43,
     "z": -3066.0,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+1623.4m (地表大世界)"
+    "height_desc": "+1518.4m (地表大世界)"
   },
   {
     "id": "c_1040",
@@ -15594,11 +15594,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Bow",
     "layer": 18,
     "x": -2716.65,
-    "altitude_y": 1589.37,
+    "altitude_y": 1484.37,
     "z": -2965.37,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+1589.4m (地表大世界)"
+    "height_desc": "+1484.4m (地表大世界)"
   },
   {
     "id": "c_1041",
@@ -15609,11 +15609,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -2888.5,
-    "altitude_y": 1623.43,
+    "altitude_y": 1518.43,
     "z": -3097.0,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+1623.4m (地表大世界)"
+    "height_desc": "+1518.4m (地表大世界)"
   },
   {
     "id": "c_1042",
@@ -15624,11 +15624,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -2859.5,
-    "altitude_y": 1587.43,
+    "altitude_y": 1482.43,
     "z": -3067.0,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+1587.4m (地表大世界)"
+    "height_desc": "+1482.4m (地表大世界)"
   },
   {
     "id": "c_1043",
@@ -15639,11 +15639,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -3002.64,
-    "altitude_y": 1617.06,
+    "altitude_y": 1512.06,
     "z": -2976.87,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+1617.1m (地表大世界)"
+    "height_desc": "+1512.1m (地表大世界)"
   },
   {
     "id": "c_1044",
@@ -15654,11 +15654,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "KeyItem",
     "layer": 20,
     "x": -3475.8,
-    "altitude_y": 1035.9,
+    "altitude_y": 930.9,
     "z": -3513.55,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1035.9m (天空岛)"
+    "height_desc": "+930.9m (天空岛)"
   },
   {
     "id": "c_1045",
@@ -15669,11 +15669,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 18,
     "x": -410.17,
-    "altitude_y": 138.75,
+    "altitude_y": 33.75,
     "z": 3150.4,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+138.7m (地表大世界)"
+    "height_desc": "+33.7m (地表大世界)"
   },
   {
     "id": "c_1046",
@@ -15684,11 +15684,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": -253.35,
-    "altitude_y": -1110.46,
+    "altitude_y": -1215.46,
     "z": -781.26,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-1110.5m (地底深渊)"
+    "height_desc": "-1215.5m (地底深渊)"
   },
   {
     "id": "c_1047",
@@ -15699,11 +15699,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Bow",
     "layer": 18,
     "x": 679.48,
-    "altitude_y": 162.95,
+    "altitude_y": 57.95,
     "z": 1886.24,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+163.0m (地表大世界)"
+    "height_desc": "+58.0m (地表大世界)"
   },
   {
     "id": "c_1048",
@@ -15714,11 +15714,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 127.26,
-    "altitude_y": 118.83,
+    "altitude_y": 13.83,
     "z": 1499.38,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+118.8m (地表大世界)"
+    "height_desc": "+13.8m (地表大世界)"
   },
   {
     "id": "c_1049",
@@ -15729,11 +15729,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": -962.56,
-    "altitude_y": -426.63,
+    "altitude_y": -531.63,
     "z": 1695.87,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-426.6m (地底深渊)"
+    "height_desc": "-531.6m (地底深渊)"
   },
   {
     "id": "c_1050",
@@ -15744,11 +15744,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": -374.13,
-    "altitude_y": -367.18,
+    "altitude_y": -472.18,
     "z": 1575.87,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-367.2m (地底深渊)"
+    "height_desc": "-472.2m (地底深渊)"
   },
   {
     "id": "c_1051",
@@ -15759,11 +15759,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": -799.43,
-    "altitude_y": -361.24,
+    "altitude_y": -466.24,
     "z": 1920.48,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-361.2m (地底深渊)"
+    "height_desc": "-466.2m (地底深渊)"
   },
   {
     "id": "c_1052",
@@ -15774,11 +15774,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": -745.68,
-    "altitude_y": -553.8,
+    "altitude_y": -658.8,
     "z": 1872.03,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-553.8m (地底深渊)"
+    "height_desc": "-658.8m (地底深渊)"
   },
   {
     "id": "c_1053",
@@ -15789,11 +15789,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": -658.62,
-    "altitude_y": -412.17,
+    "altitude_y": -517.17,
     "z": 1683.34,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-412.2m (地底深渊)"
+    "height_desc": "-517.2m (地底深渊)"
   },
   {
     "id": "c_1054",
@@ -15804,11 +15804,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": -255.0,
-    "altitude_y": -360.16,
+    "altitude_y": -465.16,
     "z": 1438.22,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-360.2m (地底深渊)"
+    "height_desc": "-465.2m (地底深渊)"
   },
   {
     "id": "c_1055",
@@ -15819,11 +15819,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": 5.34,
-    "altitude_y": -359.99,
+    "altitude_y": -464.99,
     "z": 1036.68,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-360.0m (地底深渊)"
+    "height_desc": "-465.0m (地底深渊)"
   },
   {
     "id": "c_1056",
@@ -15834,11 +15834,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": 0.75,
-    "altitude_y": -411.23,
+    "altitude_y": -516.23,
     "z": 1801.95,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-411.2m (地底深渊)"
+    "height_desc": "-516.2m (地底深渊)"
   },
   {
     "id": "c_1057",
@@ -15849,11 +15849,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": -465.89,
-    "altitude_y": -357.37,
+    "altitude_y": -462.37,
     "z": 1597.03,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-357.4m (地底深渊)"
+    "height_desc": "-462.4m (地底深渊)"
   },
   {
     "id": "c_1058",
@@ -15864,11 +15864,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": 129.87,
-    "altitude_y": -528.81,
+    "altitude_y": -633.81,
     "z": -2869.9,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-528.8m (地底深渊)"
+    "height_desc": "-633.8m (地底深渊)"
   },
   {
     "id": "c_1059",
@@ -15879,11 +15879,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "KeyItem",
     "layer": 19,
     "x": 131.04,
-    "altitude_y": -528.81,
+    "altitude_y": -633.81,
     "z": -2868.27,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-528.8m (地底深渊)"
+    "height_desc": "-633.8m (地底深渊)"
   },
   {
     "id": "c_1060",
@@ -15894,11 +15894,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 780.52,
-    "altitude_y": 134.94,
+    "altitude_y": 29.94,
     "z": 2919.94,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+134.9m (地表大世界)"
+    "height_desc": "+29.9m (地表大世界)"
   },
   {
     "id": "c_1061",
@@ -15909,11 +15909,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 591.18,
-    "altitude_y": 194.32,
+    "altitude_y": 89.32,
     "z": 2788.16,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+194.3m (地表大世界)"
+    "height_desc": "+89.3m (地表大世界)"
   },
   {
     "id": "c_1062",
@@ -15924,11 +15924,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "KeyItem",
     "layer": 20,
     "x": -1232.51,
-    "altitude_y": 1093.91,
+    "altitude_y": 988.91,
     "z": 1399.99,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1093.9m (天空岛)"
+    "height_desc": "+988.9m (天空岛)"
   },
   {
     "id": "c_1063",
@@ -15939,11 +15939,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "KeyItem",
     "layer": 20,
     "x": -1456.58,
-    "altitude_y": 1325.98,
+    "altitude_y": 1220.98,
     "z": 1584.35,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1326.0m (天空岛)"
+    "height_desc": "+1221.0m (天空岛)"
   },
   {
     "id": "c_1064",
@@ -15954,11 +15954,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "KeyItem",
     "layer": 20,
     "x": -815.71,
-    "altitude_y": 1020.34,
+    "altitude_y": 915.34,
     "z": 1590.62,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1020.3m (天空岛)"
+    "height_desc": "+915.3m (天空岛)"
   },
   {
     "id": "c_1065",
@@ -15969,11 +15969,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "KeyItem",
     "layer": 20,
     "x": -1347.79,
-    "altitude_y": 907.24,
+    "altitude_y": 802.24,
     "z": 1542.0,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+907.2m (天空岛)"
+    "height_desc": "+802.2m (天空岛)"
   },
   {
     "id": "c_1066",
@@ -15984,11 +15984,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Armor",
     "layer": 19,
     "x": -3353.29,
-    "altitude_y": -707.18,
+    "altitude_y": -812.18,
     "z": -2312.86,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-707.2m (地底深渊)"
+    "height_desc": "-812.2m (地底深渊)"
   },
   {
     "id": "c_1067",
@@ -15999,11 +15999,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": -3808.29,
-    "altitude_y": -477.91,
+    "altitude_y": -582.91,
     "z": -2125.06,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-477.9m (地底深渊)"
+    "height_desc": "-582.9m (地底深渊)"
   },
   {
     "id": "c_1068",
@@ -16014,11 +16014,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": -3073.14,
-    "altitude_y": -705.86,
+    "altitude_y": -810.86,
     "z": -2913.07,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-705.9m (地底深渊)"
+    "height_desc": "-810.9m (地底深渊)"
   },
   {
     "id": "c_1069",
@@ -16029,11 +16029,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "KeyItem",
     "layer": 20,
     "x": 3167.95,
-    "altitude_y": 1041.18,
+    "altitude_y": 936.18,
     "z": -459.37,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1041.2m (天空岛)"
+    "height_desc": "+936.2m (天空岛)"
   },
   {
     "id": "c_1070",
@@ -16044,11 +16044,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "KeyItem",
     "layer": 20,
     "x": 2910.59,
-    "altitude_y": 1035.44,
+    "altitude_y": 930.44,
     "z": -525.0,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1035.4m (天空岛)"
+    "height_desc": "+930.4m (天空岛)"
   },
   {
     "id": "c_1071",
@@ -16059,11 +16059,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 620.0,
-    "altitude_y": 147.66,
+    "altitude_y": 42.66,
     "z": -1316.99,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+147.7m (地表大世界)"
+    "height_desc": "+42.7m (地表大世界)"
   },
   {
     "id": "c_1072",
@@ -16074,11 +16074,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 897.19,
-    "altitude_y": 300.19,
+    "altitude_y": 195.19,
     "z": -1650.58,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+300.2m (地表大世界)"
+    "height_desc": "+195.2m (地表大世界)"
   },
   {
     "id": "c_1073",
@@ -16089,11 +16089,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 938.66,
-    "altitude_y": 291.43,
+    "altitude_y": 186.43,
     "z": -1623.2,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+291.4m (地表大世界)"
+    "height_desc": "+186.4m (地表大世界)"
   },
   {
     "id": "c_1074",
@@ -16104,11 +16104,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Rupee",
     "layer": 18,
     "x": 792.56,
-    "altitude_y": 193.58,
+    "altitude_y": 88.58,
     "z": -1444.14,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+193.6m (地表大世界)"
+    "height_desc": "+88.6m (地表大世界)"
   },
   {
     "id": "c_1075",
@@ -16119,11 +16119,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Bow",
     "layer": 18,
     "x": 869.58,
-    "altitude_y": 196.11,
+    "altitude_y": 91.11,
     "z": -1451.55,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+196.1m (地表大世界)"
+    "height_desc": "+91.1m (地表大世界)"
   },
   {
     "id": "c_1076",
@@ -16134,11 +16134,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 116.5,
-    "altitude_y": 128.22,
+    "altitude_y": 23.22,
     "z": -1012.0,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+128.2m (地表大世界)"
+    "height_desc": "+23.2m (地表大世界)"
   },
   {
     "id": "c_1077",
@@ -16149,11 +16149,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 706.63,
-    "altitude_y": 149.14,
+    "altitude_y": 44.14,
     "z": -1276.36,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+149.1m (地表大世界)"
+    "height_desc": "+44.1m (地表大世界)"
   },
   {
     "id": "c_1078",
@@ -16164,11 +16164,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 815.94,
-    "altitude_y": 107.81,
+    "altitude_y": 2.81,
     "z": -1138.93,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+107.8m (地表大世界)"
+    "height_desc": "+2.8m (地表大世界)"
   },
   {
     "id": "c_1079",
@@ -16179,11 +16179,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 975.05,
-    "altitude_y": 105.88,
+    "altitude_y": 0.88,
     "z": -1066.02,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+105.9m (地表大世界)"
+    "height_desc": "+0.9m (地表大世界)"
   },
   {
     "id": "c_1080",
@@ -16194,11 +16194,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 915.5,
-    "altitude_y": 115.0,
+    "altitude_y": 10.0,
     "z": -1093.0,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+115.0m (地表大世界)"
+    "height_desc": "+10.0m (地表大世界)"
   },
   {
     "id": "c_1081",
@@ -16209,11 +16209,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Bow",
     "layer": 18,
     "x": 63.81,
-    "altitude_y": 282.76,
+    "altitude_y": 177.76,
     "z": -1908.01,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+282.8m (地表大世界)"
+    "height_desc": "+177.8m (地表大世界)"
   },
   {
     "id": "c_1082",
@@ -16224,11 +16224,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 3355.65,
-    "altitude_y": 80.76,
+    "altitude_y": -24.24,
     "z": -3425.68,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+80.8m (地表大世界)"
+    "height_desc": "-24.2m (地表大世界)"
   },
   {
     "id": "c_1083",
@@ -16239,11 +16239,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 18,
     "x": 3095.49,
-    "altitude_y": 353.32,
+    "altitude_y": 248.32,
     "z": -3577.5,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+353.3m (地表大世界)"
+    "height_desc": "+248.3m (地表大世界)"
   },
   {
     "id": "c_1084",
@@ -16254,11 +16254,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": -1621.19,
-    "altitude_y": -377.32,
+    "altitude_y": -482.32,
     "z": -244.63,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-377.3m (地底深渊)"
+    "height_desc": "-482.3m (地底深渊)"
   },
   {
     "id": "c_1085",
@@ -16269,11 +16269,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "KeyItem",
     "layer": 19,
     "x": -1621.53,
-    "altitude_y": -377.36,
+    "altitude_y": -482.36,
     "z": -246.6,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-377.4m (地底深渊)"
+    "height_desc": "-482.4m (地底深渊)"
   },
   {
     "id": "c_1086",
@@ -16284,11 +16284,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 1851.37,
-    "altitude_y": 235.55,
+    "altitude_y": 130.55,
     "z": 2838.94,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+235.6m (洞窟/水井内)"
+    "height_desc": "+130.6m (洞窟/水井内)"
   },
   {
     "id": "c_1087",
@@ -16299,11 +16299,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 1889.26,
-    "altitude_y": 216.67,
+    "altitude_y": 111.67,
     "z": 2684.32,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+216.7m (洞窟/水井内)"
+    "height_desc": "+111.7m (洞窟/水井内)"
   },
   {
     "id": "c_1088",
@@ -16314,11 +16314,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Armor",
     "layer": 18,
     "x": 1593.11,
-    "altitude_y": 81.74,
+    "altitude_y": -23.26,
     "z": 2945.73,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+81.7m (洞窟/水井内)"
+    "height_desc": "-23.3m (洞窟/水井内)"
   },
   {
     "id": "c_1089",
@@ -16329,11 +16329,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 20,
     "x": 590.79,
-    "altitude_y": 479.88,
+    "altitude_y": 374.88,
     "z": 182.45,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+479.9m (天空岛)"
+    "height_desc": "+374.9m (天空岛)"
   },
   {
     "id": "c_1090",
@@ -16344,11 +16344,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 1678.15,
-    "altitude_y": 272.58,
+    "altitude_y": 167.58,
     "z": 2996.07,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+272.6m (洞窟/水井内)"
+    "height_desc": "+167.6m (洞窟/水井内)"
   },
   {
     "id": "c_1091",
@@ -16359,11 +16359,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Shield",
     "layer": 18,
     "x": 3406.66,
-    "altitude_y": 201.67,
+    "altitude_y": 96.67,
     "z": 2153.74,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+201.7m (洞窟/水井内)"
+    "height_desc": "+96.7m (洞窟/水井内)"
   },
   {
     "id": "c_1092",
@@ -16374,11 +16374,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Armor",
     "layer": 19,
     "x": -147.62,
-    "altitude_y": -516.04,
+    "altitude_y": -621.04,
     "z": -2380.11,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-516.0m (地底深渊)"
+    "height_desc": "-621.0m (地底深渊)"
   },
   {
     "id": "c_1093",
@@ -16389,11 +16389,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": 3723.16,
-    "altitude_y": -434.4,
+    "altitude_y": -539.4,
     "z": -1694.46,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-434.4m (地底深渊)"
+    "height_desc": "-539.4m (地底深渊)"
   },
   {
     "id": "c_1094",
@@ -16404,11 +16404,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Armor",
     "layer": 18,
     "x": 2924.5,
-    "altitude_y": 101.19,
+    "altitude_y": -3.81,
     "z": 3528.89,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+101.2m (地表大世界)"
+    "height_desc": "-3.8m (地表大世界)"
   },
   {
     "id": "c_1095",
@@ -16419,11 +16419,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Rupee",
     "layer": 18,
     "x": 2895.75,
-    "altitude_y": 103.35,
+    "altitude_y": -1.65,
     "z": 3473.9,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+103.3m (地表大世界)"
+    "height_desc": "-1.7m (地表大世界)"
   },
   {
     "id": "c_1096",
@@ -16434,11 +16434,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Rupee",
     "layer": 18,
     "x": 2891.93,
-    "altitude_y": 102.1,
+    "altitude_y": -2.9,
     "z": 3509.15,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+102.1m (地表大世界)"
+    "height_desc": "-2.9m (地表大世界)"
   },
   {
     "id": "c_1097",
@@ -16449,11 +16449,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 2113.9,
-    "altitude_y": 126.71,
+    "altitude_y": 21.71,
     "z": 3429.5,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+126.7m (地表大世界)"
+    "height_desc": "+21.7m (地表大世界)"
   },
   {
     "id": "c_1098",
@@ -16464,11 +16464,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 2283.39,
-    "altitude_y": 161.18,
+    "altitude_y": 56.18,
     "z": 3245.15,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+161.2m (地表大世界)"
+    "height_desc": "+56.2m (地表大世界)"
   },
   {
     "id": "c_1099",
@@ -16479,11 +16479,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 2002.89,
-    "altitude_y": 309.01,
+    "altitude_y": 204.01,
     "z": 3296.61,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+309.0m (地表大世界)"
+    "height_desc": "+204.0m (地表大世界)"
   },
   {
     "id": "c_1100",
@@ -16494,11 +16494,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 2706.53,
-    "altitude_y": 256.5,
+    "altitude_y": 151.5,
     "z": 3671.73,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+256.5m (地表大世界)"
+    "height_desc": "+151.5m (地表大世界)"
   },
   {
     "id": "c_1101",
@@ -16509,11 +16509,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Shield",
     "layer": 18,
     "x": 2811.98,
-    "altitude_y": 109.87,
+    "altitude_y": 4.87,
     "z": 3415.13,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+109.9m (地表大世界)"
+    "height_desc": "+4.9m (地表大世界)"
   },
   {
     "id": "c_1102",
@@ -16524,11 +16524,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": -3382.27,
-    "altitude_y": -513.66,
+    "altitude_y": -618.66,
     "z": -665.21,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-513.7m (地底深渊)"
+    "height_desc": "-618.7m (地底深渊)"
   },
   {
     "id": "c_1103",
@@ -16539,11 +16539,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "KeyItem",
     "layer": 19,
     "x": -3380.38,
-    "altitude_y": -513.66,
+    "altitude_y": -618.66,
     "z": -665.86,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-513.7m (地底深渊)"
+    "height_desc": "-618.7m (地底深渊)"
   },
   {
     "id": "c_1104",
@@ -16554,11 +16554,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 834.5,
-    "altitude_y": 102.5,
+    "altitude_y": -2.5,
     "z": 2908.57,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+102.5m (洞窟/水井内)"
+    "height_desc": "-2.5m (洞窟/水井内)"
   },
   {
     "id": "c_1105",
@@ -16569,11 +16569,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -4247.5,
-    "altitude_y": 302.59,
+    "altitude_y": 197.59,
     "z": -2826.0,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+302.6m (地表大世界)"
+    "height_desc": "+197.6m (地表大世界)"
   },
   {
     "id": "c_1106",
@@ -16584,11 +16584,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -4205.76,
-    "altitude_y": 110.73,
+    "altitude_y": 5.73,
     "z": -2225.25,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+110.7m (地表大世界)"
+    "height_desc": "+5.7m (地表大世界)"
   },
   {
     "id": "c_1107",
@@ -16599,11 +16599,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -4539.39,
-    "altitude_y": 336.59,
+    "altitude_y": 231.59,
     "z": -2763.77,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+336.6m (地表大世界)"
+    "height_desc": "+231.6m (地表大世界)"
   },
   {
     "id": "c_1108",
@@ -16614,11 +16614,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Armor",
     "layer": 19,
     "x": -1151.85,
-    "altitude_y": -393.54,
+    "altitude_y": -498.54,
     "z": 1263.46,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-393.5m (地底深渊)"
+    "height_desc": "-498.5m (地底深渊)"
   },
   {
     "id": "c_1109",
@@ -16629,11 +16629,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "KeyItem",
     "layer": 20,
     "x": 2993.42,
-    "altitude_y": 1000.12,
+    "altitude_y": 895.12,
     "z": 251.77,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1000.1m (天空岛)"
+    "height_desc": "+895.1m (天空岛)"
   },
   {
     "id": "c_1110",
@@ -16644,11 +16644,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -3459.32,
-    "altitude_y": 261.43,
+    "altitude_y": 156.43,
     "z": -1835.13,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+261.4m (地表大世界)"
+    "height_desc": "+156.4m (地表大世界)"
   },
   {
     "id": "c_1111",
@@ -16659,11 +16659,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -3459.61,
-    "altitude_y": 261.16,
+    "altitude_y": 156.16,
     "z": -1833.21,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+261.2m (地表大世界)"
+    "height_desc": "+156.2m (地表大世界)"
   },
   {
     "id": "c_1112",
@@ -16674,11 +16674,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -3434.76,
-    "altitude_y": 251.22,
+    "altitude_y": 146.22,
     "z": -1885.85,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+251.2m (地表大世界)"
+    "height_desc": "+146.2m (地表大世界)"
   },
   {
     "id": "c_1113",
@@ -16689,11 +16689,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -3434.74,
-    "altitude_y": 251.06,
+    "altitude_y": 146.06,
     "z": -1885.86,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+251.1m (地表大世界)"
+    "height_desc": "+146.1m (地表大世界)"
   },
   {
     "id": "c_1114",
@@ -16704,11 +16704,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Rupee",
     "layer": 18,
     "x": -3497.0,
-    "altitude_y": 260.17,
+    "altitude_y": 155.17,
     "z": -1848.0,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+260.2m (地表大世界)"
+    "height_desc": "+155.2m (地表大世界)"
   },
   {
     "id": "c_1115",
@@ -16719,11 +16719,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Rupee",
     "layer": 18,
     "x": -3497.01,
-    "altitude_y": 259.56,
+    "altitude_y": 154.56,
     "z": -1847.96,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+259.6m (地表大世界)"
+    "height_desc": "+154.6m (地表大世界)"
   },
   {
     "id": "c_1116",
@@ -16734,11 +16734,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -3568.25,
-    "altitude_y": 268.12,
+    "altitude_y": 163.12,
     "z": -1754.92,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+268.1m (地表大世界)"
+    "height_desc": "+163.1m (地表大世界)"
   },
   {
     "id": "c_1117",
@@ -16749,11 +16749,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -3568.2,
-    "altitude_y": 267.52,
+    "altitude_y": 162.52,
     "z": -1754.87,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+267.5m (地表大世界)"
+    "height_desc": "+162.5m (地表大世界)"
   },
   {
     "id": "c_1118",
@@ -16764,11 +16764,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -3095.49,
-    "altitude_y": 266.09,
+    "altitude_y": 161.09,
     "z": -1288.16,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+266.1m (地表大世界)"
+    "height_desc": "+161.1m (地表大世界)"
   },
   {
     "id": "c_1119",
@@ -16779,11 +16779,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Bow",
     "layer": 18,
     "x": -3296.13,
-    "altitude_y": 249.96,
+    "altitude_y": 144.96,
     "z": -1362.79,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+250.0m (地表大世界)"
+    "height_desc": "+145.0m (地表大世界)"
   },
   {
     "id": "c_1120",
@@ -16794,11 +16794,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": 1965.81,
-    "altitude_y": -720.29,
+    "altitude_y": -825.29,
     "z": -3019.82,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-720.3m (地底深渊)"
+    "height_desc": "-825.3m (地底深渊)"
   },
   {
     "id": "c_1121",
@@ -16809,11 +16809,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 485.16,
-    "altitude_y": 111.77,
+    "altitude_y": 6.77,
     "z": 3721.54,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+111.8m (洞窟/水井内)"
+    "height_desc": "+6.8m (洞窟/水井内)"
   },
   {
     "id": "c_1122",
@@ -16824,11 +16824,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 540.24,
-    "altitude_y": 112.76,
+    "altitude_y": 7.76,
     "z": 3611.81,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+112.8m (洞窟/水井内)"
+    "height_desc": "+7.8m (洞窟/水井内)"
   },
   {
     "id": "c_1123",
@@ -16839,11 +16839,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 593.89,
-    "altitude_y": 119.64,
+    "altitude_y": 14.64,
     "z": 3120.04,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+119.6m (洞窟/水井内)"
+    "height_desc": "+14.6m (洞窟/水井内)"
   },
   {
     "id": "c_1124",
@@ -16854,11 +16854,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Bow",
     "layer": 18,
     "x": 782.05,
-    "altitude_y": 189.98,
+    "altitude_y": 84.98,
     "z": 3552.6,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+190.0m (地表大世界)"
+    "height_desc": "+85.0m (地表大世界)"
   },
   {
     "id": "c_1125",
@@ -16869,11 +16869,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Rupee",
     "layer": 18,
     "x": 547.52,
-    "altitude_y": 155.24,
+    "altitude_y": 50.24,
     "z": 3380.15,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+155.2m (地表大世界)"
+    "height_desc": "+50.2m (地表大世界)"
   },
   {
     "id": "c_1126",
@@ -16884,11 +16884,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 866.03,
-    "altitude_y": 140.0,
+    "altitude_y": 35.0,
     "z": 3335.98,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+140.0m (地表大世界)"
+    "height_desc": "+35.0m (地表大世界)"
   },
   {
     "id": "c_1127",
@@ -16899,11 +16899,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 652.74,
-    "altitude_y": 170.92,
+    "altitude_y": 65.92,
     "z": 3163.85,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+170.9m (地表大世界)"
+    "height_desc": "+65.9m (地表大世界)"
   },
   {
     "id": "c_1128",
@@ -16914,11 +16914,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 165.01,
-    "altitude_y": 227.11,
+    "altitude_y": 122.11,
     "z": 3557.47,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+227.1m (地表大世界)"
+    "height_desc": "+122.1m (地表大世界)"
   },
   {
     "id": "c_1129",
@@ -16929,11 +16929,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -3921.15,
-    "altitude_y": 484.42,
+    "altitude_y": 379.42,
     "z": 1249.55,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+484.4m (洞窟/水井内)"
+    "height_desc": "+379.4m (洞窟/水井内)"
   },
   {
     "id": "c_1130",
@@ -16944,11 +16944,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Bow",
     "layer": 18,
     "x": -3939.27,
-    "altitude_y": 514.46,
+    "altitude_y": 409.46,
     "z": 1192.56,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+514.5m (洞窟/水井内)"
+    "height_desc": "+409.5m (洞窟/水井内)"
   },
   {
     "id": "c_1131",
@@ -16959,11 +16959,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 18,
     "x": -1681.62,
-    "altitude_y": 138.94,
+    "altitude_y": 33.94,
     "z": 2067.24,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+138.9m (地表大世界)"
+    "height_desc": "+33.9m (地表大世界)"
   },
   {
     "id": "c_1132",
@@ -16974,11 +16974,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -1040.72,
-    "altitude_y": 250.77,
+    "altitude_y": 145.77,
     "z": 1995.25,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+250.8m (地表大世界)"
+    "height_desc": "+145.8m (地表大世界)"
   },
   {
     "id": "c_1133",
@@ -16989,11 +16989,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -1888.47,
-    "altitude_y": 209.48,
+    "altitude_y": 104.48,
     "z": 2043.77,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+209.5m (地表大世界)"
+    "height_desc": "+104.5m (地表大世界)"
   },
   {
     "id": "c_1134",
@@ -17004,11 +17004,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -1776.95,
-    "altitude_y": 275.9,
+    "altitude_y": 170.9,
     "z": 2720.67,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+275.9m (地表大世界)"
+    "height_desc": "+170.9m (地表大世界)"
   },
   {
     "id": "c_1135",
@@ -17019,11 +17019,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -1088.58,
-    "altitude_y": 339.0,
+    "altitude_y": 234.0,
     "z": 2167.68,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+339.0m (地表大世界)"
+    "height_desc": "+234.0m (地表大世界)"
   },
   {
     "id": "c_1136",
@@ -17034,11 +17034,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 18,
     "x": -1387.46,
-    "altitude_y": 212.57,
+    "altitude_y": 107.57,
     "z": 2435.41,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+212.6m (地表大世界)"
+    "height_desc": "+107.6m (地表大世界)"
   },
   {
     "id": "c_1137",
@@ -17049,11 +17049,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 4479.79,
-    "altitude_y": 148.44,
+    "altitude_y": 43.44,
     "z": 3764.9,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+148.4m (地表大世界)"
+    "height_desc": "+43.4m (地表大世界)"
   },
   {
     "id": "c_1138",
@@ -17064,11 +17064,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 4571.2,
-    "altitude_y": 171.11,
+    "altitude_y": 66.11,
     "z": 3526.28,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+171.1m (地表大世界)"
+    "height_desc": "+66.1m (地表大世界)"
   },
   {
     "id": "c_1139",
@@ -17079,11 +17079,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 4673.34,
-    "altitude_y": 170.58,
+    "altitude_y": 65.58,
     "z": 3742.67,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+170.6m (地表大世界)"
+    "height_desc": "+65.6m (地表大世界)"
   },
   {
     "id": "c_1140",
@@ -17094,11 +17094,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Shield",
     "layer": 18,
     "x": 3264.1,
-    "altitude_y": 152.42,
+    "altitude_y": 47.42,
     "z": 3172.0,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+152.4m (洞窟/水井内)"
+    "height_desc": "+47.4m (洞窟/水井内)"
   },
   {
     "id": "c_1141",
@@ -17109,11 +17109,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Bow",
     "layer": 18,
     "x": 3325.99,
-    "altitude_y": 167.86,
+    "altitude_y": 62.86,
     "z": 3286.93,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+167.9m (洞窟/水井内)"
+    "height_desc": "+62.9m (洞窟/水井内)"
   },
   {
     "id": "c_1142",
@@ -17124,11 +17124,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 3237.61,
-    "altitude_y": 123.1,
+    "altitude_y": 18.1,
     "z": 3083.44,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+123.1m (洞窟/水井内)"
+    "height_desc": "+18.1m (洞窟/水井内)"
   },
   {
     "id": "c_1143",
@@ -17139,11 +17139,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 919.85,
-    "altitude_y": 127.07,
+    "altitude_y": 22.07,
     "z": -57.8,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+127.1m (洞窟/水井内)"
+    "height_desc": "+22.1m (洞窟/水井内)"
   },
   {
     "id": "c_1144",
@@ -17154,11 +17154,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 912.81,
-    "altitude_y": 125.79,
+    "altitude_y": 20.79,
     "z": -75.71,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+125.8m (洞窟/水井内)"
+    "height_desc": "+20.8m (洞窟/水井内)"
   },
   {
     "id": "c_1145",
@@ -17169,11 +17169,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -3071.92,
-    "altitude_y": 672.74,
+    "altitude_y": 567.74,
     "z": 1615.0,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+672.7m (地表大世界)"
+    "height_desc": "+567.7m (地表大世界)"
   },
   {
     "id": "c_1146",
@@ -17184,11 +17184,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 18,
     "x": -3439.04,
-    "altitude_y": 629.45,
+    "altitude_y": 524.45,
     "z": 1146.03,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+629.5m (地表大世界)"
+    "height_desc": "+524.5m (地表大世界)"
   },
   {
     "id": "c_1147",
@@ -17199,11 +17199,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -3057.74,
-    "altitude_y": 331.26,
+    "altitude_y": 226.26,
     "z": 1938.41,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+331.3m (地表大世界)"
+    "height_desc": "+226.3m (地表大世界)"
   },
   {
     "id": "c_1148",
@@ -17214,11 +17214,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -3902.68,
-    "altitude_y": 380.7,
+    "altitude_y": 275.7,
     "z": 1895.38,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+380.7m (地表大世界)"
+    "height_desc": "+275.7m (地表大世界)"
   },
   {
     "id": "c_1149",
@@ -17229,11 +17229,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Shield",
     "layer": 18,
     "x": -3401.76,
-    "altitude_y": 467.1,
+    "altitude_y": 362.1,
     "z": 1762.23,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+467.1m (地表大世界)"
+    "height_desc": "+362.1m (地表大世界)"
   },
   {
     "id": "c_1150",
@@ -17244,11 +17244,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -3864.21,
-    "altitude_y": 497.08,
+    "altitude_y": 392.08,
     "z": 1512.19,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+497.1m (地表大世界)"
+    "height_desc": "+392.1m (地表大世界)"
   },
   {
     "id": "c_1151",
@@ -17259,11 +17259,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Armor",
     "layer": 18,
     "x": 1576.64,
-    "altitude_y": 487.74,
+    "altitude_y": 382.74,
     "z": -2756.92,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+487.7m (洞窟/水井内)"
+    "height_desc": "+382.7m (洞窟/水井内)"
   },
   {
     "id": "c_1152",
@@ -17274,11 +17274,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "KeyItem",
     "layer": 20,
     "x": 1764.17,
-    "altitude_y": 933.06,
+    "altitude_y": 828.06,
     "z": -2266.85,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+933.1m (天空岛)"
+    "height_desc": "+828.1m (天空岛)"
   },
   {
     "id": "c_1153",
@@ -17289,11 +17289,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": 2965.2,
-    "altitude_y": -402.13,
+    "altitude_y": -507.13,
     "z": 2572.38,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-402.1m (地底深渊)"
+    "height_desc": "-507.1m (地底深渊)"
   },
   {
     "id": "c_1154",
@@ -17304,11 +17304,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "KeyItem",
     "layer": 19,
     "x": 2963.28,
-    "altitude_y": -402.16,
+    "altitude_y": -507.16,
     "z": 2571.79,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-402.2m (地底深渊)"
+    "height_desc": "-507.2m (地底深渊)"
   },
   {
     "id": "c_1155",
@@ -17319,11 +17319,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -2186.86,
-    "altitude_y": 181.22,
+    "altitude_y": 76.22,
     "z": 1848.8,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+181.2m (洞窟/水井内)"
+    "height_desc": "+76.2m (洞窟/水井内)"
   },
   {
     "id": "c_1156",
@@ -17334,11 +17334,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": -2286.16,
-    "altitude_y": -694.26,
+    "altitude_y": -799.26,
     "z": 411.1,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-694.3m (地底深渊)"
+    "height_desc": "-799.3m (地底深渊)"
   },
   {
     "id": "c_1157",
@@ -17349,11 +17349,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "KeyItem",
     "layer": 20,
     "x": 1309.22,
-    "altitude_y": 564.73,
+    "altitude_y": 459.73,
     "z": 3209.53,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+564.7m (天空岛)"
+    "height_desc": "+459.7m (天空岛)"
   },
   {
     "id": "c_1158",
@@ -17364,11 +17364,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": -371.18,
-    "altitude_y": -369.81,
+    "altitude_y": -474.81,
     "z": 3560.39,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-369.8m (地底深渊)"
+    "height_desc": "-474.8m (地底深渊)"
   },
   {
     "id": "c_1159",
@@ -17379,11 +17379,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": 4411.44,
-    "altitude_y": -603.62,
+    "altitude_y": -708.62,
     "z": -639.33,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-603.6m (地底深渊)"
+    "height_desc": "-708.6m (地底深渊)"
   },
   {
     "id": "c_1160",
@@ -17394,11 +17394,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "KeyItem",
     "layer": 19,
     "x": 4412.89,
-    "altitude_y": -603.62,
+    "altitude_y": -708.62,
     "z": -637.94,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-603.6m (地底深渊)"
+    "height_desc": "-708.6m (地底深渊)"
   },
   {
     "id": "c_1161",
@@ -17409,11 +17409,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 4632.01,
-    "altitude_y": 123.64,
+    "altitude_y": 18.64,
     "z": 3721.62,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+123.6m (洞窟/水井内)"
+    "height_desc": "+18.6m (洞窟/水井内)"
   },
   {
     "id": "c_1162",
@@ -17424,11 +17424,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Rupee",
     "layer": 18,
     "x": 4635.83,
-    "altitude_y": 127.84,
+    "altitude_y": 22.84,
     "z": 3705.56,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+127.8m (洞窟/水井内)"
+    "height_desc": "+22.8m (洞窟/水井内)"
   },
   {
     "id": "c_1163",
@@ -17439,11 +17439,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "KeyItem",
     "layer": 20,
     "x": 1933.78,
-    "altitude_y": 1066.83,
+    "altitude_y": 961.83,
     "z": 1064.56,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1066.8m (天空岛)"
+    "height_desc": "+961.8m (天空岛)"
   },
   {
     "id": "c_1164",
@@ -17454,11 +17454,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "KeyItem",
     "layer": 20,
     "x": 1765.79,
-    "altitude_y": 1007.66,
+    "altitude_y": 902.66,
     "z": 1310.74,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1007.7m (天空岛)"
+    "height_desc": "+902.7m (天空岛)"
   },
   {
     "id": "c_1165",
@@ -17469,11 +17469,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "KeyItem",
     "layer": 20,
     "x": 1851.51,
-    "altitude_y": 1044.21,
+    "altitude_y": 939.21,
     "z": 979.0,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1044.2m (天空岛)"
+    "height_desc": "+939.2m (天空岛)"
   },
   {
     "id": "c_1166",
@@ -17484,11 +17484,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": -4005.62,
-    "altitude_y": -821.27,
+    "altitude_y": -926.27,
     "z": 1200.48,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-821.3m (地底深渊)"
+    "height_desc": "-926.3m (地底深渊)"
   },
   {
     "id": "c_1167",
@@ -17499,11 +17499,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": -3342.47,
-    "altitude_y": -780.32,
+    "altitude_y": -885.32,
     "z": 1435.82,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-780.3m (地底深渊)"
+    "height_desc": "-885.3m (地底深渊)"
   },
   {
     "id": "c_1168",
@@ -17514,11 +17514,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": -3374.69,
-    "altitude_y": -922.55,
+    "altitude_y": -1027.55,
     "z": 981.17,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-922.6m (地底深渊)"
+    "height_desc": "-1027.6m (地底深渊)"
   },
   {
     "id": "c_1169",
@@ -17529,11 +17529,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Shield",
     "layer": 18,
     "x": 4433.44,
-    "altitude_y": 135.58,
+    "altitude_y": 30.58,
     "z": 660.17,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+135.6m (洞窟/水井内)"
+    "height_desc": "+30.6m (洞窟/水井内)"
   },
   {
     "id": "c_1170",
@@ -17544,11 +17544,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -2530.64,
-    "altitude_y": 456.03,
+    "altitude_y": 351.03,
     "z": -3222.89,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+456.0m (洞窟/水井内)"
+    "height_desc": "+351.0m (洞窟/水井内)"
   },
   {
     "id": "c_1171",
@@ -17559,11 +17559,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Shield",
     "layer": 18,
     "x": -804.8,
-    "altitude_y": 208.95,
+    "altitude_y": 103.95,
     "z": 1925.15,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+209.0m (地表大世界)"
+    "height_desc": "+104.0m (地表大世界)"
   },
   {
     "id": "c_1172",
@@ -17574,11 +17574,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Bow",
     "layer": 18,
     "x": -337.82,
-    "altitude_y": 125.89,
+    "altitude_y": 20.89,
     "z": 1913.99,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+125.9m (地表大世界)"
+    "height_desc": "+20.9m (地表大世界)"
   },
   {
     "id": "c_1173",
@@ -17589,11 +17589,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Rupee",
     "layer": 18,
     "x": -304.22,
-    "altitude_y": 113.15,
+    "altitude_y": 8.15,
     "z": 1644.85,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+113.1m (地表大世界)"
+    "height_desc": "+8.1m (地表大世界)"
   },
   {
     "id": "c_1174",
@@ -17604,11 +17604,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Other",
     "layer": 18,
     "x": -811.25,
-    "altitude_y": 263.59,
+    "altitude_y": 158.59,
     "z": 1963.41,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+263.6m (地表大世界)"
+    "height_desc": "+158.6m (地表大世界)"
   },
   {
     "id": "c_1175",
@@ -17619,11 +17619,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -21.73,
-    "altitude_y": 177.94,
+    "altitude_y": 72.94,
     "z": 1727.77,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+177.9m (地表大世界)"
+    "height_desc": "+72.9m (地表大世界)"
   },
   {
     "id": "c_1176",
@@ -17634,11 +17634,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -772.38,
-    "altitude_y": 176.41,
+    "altitude_y": 71.41,
     "z": 1560.95,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+176.4m (地表大世界)"
+    "height_desc": "+71.4m (地表大世界)"
   },
   {
     "id": "c_1177",
@@ -17649,11 +17649,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Armor",
     "layer": 18,
     "x": 3301.2,
-    "altitude_y": 501.39,
+    "altitude_y": 396.39,
     "z": -1492.1,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+501.4m (洞窟/水井内)"
+    "height_desc": "+396.4m (洞窟/水井内)"
   },
   {
     "id": "c_1178",
@@ -17664,11 +17664,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Armor",
     "layer": 18,
     "x": -3881.77,
-    "altitude_y": 98.97,
+    "altitude_y": -6.03,
     "z": -2887.96,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+99.0m (洞窟/水井内)"
+    "height_desc": "-6.0m (洞窟/水井内)"
   },
   {
     "id": "c_1179",
@@ -17679,11 +17679,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -3927.12,
-    "altitude_y": 70.55,
+    "altitude_y": -34.45,
     "z": -2915.39,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+70.6m (洞窟/水井内)"
+    "height_desc": "-34.4m (洞窟/水井内)"
   },
   {
     "id": "c_1180",
@@ -17694,11 +17694,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "KeyItem",
     "layer": 20,
     "x": -3961.84,
-    "altitude_y": 1813.72,
+    "altitude_y": 1708.72,
     "z": -608.13,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1813.7m (天空岛)"
+    "height_desc": "+1708.7m (天空岛)"
   },
   {
     "id": "c_1181",
@@ -17709,11 +17709,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 20,
     "x": -3569.13,
-    "altitude_y": 1858.13,
+    "altitude_y": 1753.13,
     "z": -1081.98,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1858.1m (天空岛)"
+    "height_desc": "+1753.1m (天空岛)"
   },
   {
     "id": "c_1182",
@@ -17724,11 +17724,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 20,
     "x": -3633.06,
-    "altitude_y": 1874.85,
+    "altitude_y": 1769.85,
     "z": -1049.88,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1874.9m (天空岛)"
+    "height_desc": "+1769.9m (天空岛)"
   },
   {
     "id": "c_1183",
@@ -17739,11 +17739,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -698.1,
-    "altitude_y": 90.26,
+    "altitude_y": -14.74,
     "z": -1457.63,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+90.3m (洞窟/水井内)"
+    "height_desc": "-14.7m (洞窟/水井内)"
   },
   {
     "id": "c_1184",
@@ -17754,11 +17754,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -631.78,
-    "altitude_y": 84.46,
+    "altitude_y": -20.54,
     "z": -1474.59,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+84.5m (洞窟/水井内)"
+    "height_desc": "-20.5m (洞窟/水井内)"
   },
   {
     "id": "c_1185",
@@ -17769,11 +17769,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Shield",
     "layer": 18,
     "x": -3251.42,
-    "altitude_y": 114.52,
+    "altitude_y": 9.52,
     "z": 2644.29,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+114.5m (洞窟/水井内)"
+    "height_desc": "+9.5m (洞窟/水井内)"
   },
   {
     "id": "c_1186",
@@ -17784,11 +17784,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -193.29,
-    "altitude_y": 90.73,
+    "altitude_y": -14.27,
     "z": 3045.51,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+90.7m (洞窟/水井内)"
+    "height_desc": "-14.3m (洞窟/水井内)"
   },
   {
     "id": "c_1187",
@@ -17799,11 +17799,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -194.5,
-    "altitude_y": 90.28,
+    "altitude_y": -14.72,
     "z": 3051.0,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+90.3m (洞窟/水井内)"
+    "height_desc": "-14.7m (洞窟/水井内)"
   },
   {
     "id": "c_1188",
@@ -17814,11 +17814,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "KeyItem",
     "layer": 20,
     "x": -332.64,
-    "altitude_y": 1000.12,
+    "altitude_y": 895.12,
     "z": 2591.48,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1000.1m (天空岛)"
+    "height_desc": "+895.1m (天空岛)"
   },
   {
     "id": "c_1189",
@@ -17829,11 +17829,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 3288.71,
-    "altitude_y": 393.56,
+    "altitude_y": 288.56,
     "z": -2786.58,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+393.6m (地表大世界)"
+    "height_desc": "+288.6m (地表大世界)"
   },
   {
     "id": "c_1190",
@@ -17844,11 +17844,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Bow",
     "layer": 18,
     "x": 3268.32,
-    "altitude_y": 290.85,
+    "altitude_y": 185.85,
     "z": -2019.01,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+290.9m (地表大世界)"
+    "height_desc": "+185.9m (地表大世界)"
   },
   {
     "id": "c_1191",
@@ -17859,11 +17859,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": -2820.49,
-    "altitude_y": -460.38,
+    "altitude_y": -565.38,
     "z": -901.9,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-460.4m (地底深渊)"
+    "height_desc": "-565.4m (地底深渊)"
   },
   {
     "id": "c_1192",
@@ -17874,11 +17874,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "KeyItem",
     "layer": 19,
     "x": -2822.4,
-    "altitude_y": -460.38,
+    "altitude_y": -565.38,
     "z": -901.3,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-460.4m (地底深渊)"
+    "height_desc": "-565.4m (地底深渊)"
   },
   {
     "id": "c_1193",
@@ -17889,11 +17889,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": -1382.69,
-    "altitude_y": -790.21,
+    "altitude_y": -895.21,
     "z": 3400.32,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-790.2m (地底深渊)"
+    "height_desc": "-895.2m (地底深渊)"
   },
   {
     "id": "c_1194",
@@ -17904,11 +17904,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": -1422.82,
-    "altitude_y": -754.79,
+    "altitude_y": -859.79,
     "z": 3613.13,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-754.8m (地底深渊)"
+    "height_desc": "-859.8m (地底深渊)"
   },
   {
     "id": "c_1195",
@@ -17919,11 +17919,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": -1697.57,
-    "altitude_y": -510.34,
+    "altitude_y": -615.34,
     "z": 3846.6,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-510.3m (地底深渊)"
+    "height_desc": "-615.3m (地底深渊)"
   },
   {
     "id": "c_1196",
@@ -17934,11 +17934,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Armor",
     "layer": 19,
     "x": 2143.55,
-    "altitude_y": -732.87,
+    "altitude_y": -837.87,
     "z": -3183.37,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-732.9m (地底深渊)"
+    "height_desc": "-837.9m (地底深渊)"
   },
   {
     "id": "c_1197",
@@ -17949,11 +17949,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 20,
     "x": -3356.58,
-    "altitude_y": 1078.9,
+    "altitude_y": 973.9,
     "z": -3415.02,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1078.9m (天空岛)"
+    "height_desc": "+973.9m (天空岛)"
   },
   {
     "id": "c_1198",
@@ -17964,11 +17964,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 20,
     "x": -3466.82,
-    "altitude_y": 1126.73,
+    "altitude_y": 1021.73,
     "z": -3628.35,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1126.7m (天空岛)"
+    "height_desc": "+1021.7m (天空岛)"
   },
   {
     "id": "c_1199",
@@ -17979,11 +17979,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 20,
     "x": -3040.17,
-    "altitude_y": 1188.05,
+    "altitude_y": 1083.05,
     "z": -3147.26,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1188.0m (天空岛)"
+    "height_desc": "+1083.0m (天空岛)"
   },
   {
     "id": "c_1200",
@@ -17994,11 +17994,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 20,
     "x": -3122.84,
-    "altitude_y": 1399.54,
+    "altitude_y": 1294.54,
     "z": -3398.88,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1399.5m (天空岛)"
+    "height_desc": "+1294.5m (天空岛)"
   },
   {
     "id": "c_1201",
@@ -18009,11 +18009,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 20,
     "x": -3259.29,
-    "altitude_y": 1062.05,
+    "altitude_y": 957.05,
     "z": -3319.0,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1062.1m (天空岛)"
+    "height_desc": "+957.1m (天空岛)"
   },
   {
     "id": "c_1202",
@@ -18024,11 +18024,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 20,
     "x": -2918.16,
-    "altitude_y": 989.05,
+    "altitude_y": 884.05,
     "z": -3092.34,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+989.1m (天空岛)"
+    "height_desc": "+884.1m (天空岛)"
   },
   {
     "id": "c_1203",
@@ -18039,11 +18039,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 20,
     "x": -2841.4,
-    "altitude_y": 2070.14,
+    "altitude_y": 1965.14,
     "z": -2490.21,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+2070.1m (天空岛)"
+    "height_desc": "+1965.1m (天空岛)"
   },
   {
     "id": "c_1204",
@@ -18054,11 +18054,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 20,
     "x": -2541.79,
-    "altitude_y": 2069.89,
+    "altitude_y": 1964.89,
     "z": -3411.87,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+2069.9m (天空岛)"
+    "height_desc": "+1964.9m (天空岛)"
   },
   {
     "id": "c_1205",
@@ -18069,11 +18069,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -2708.14,
-    "altitude_y": 47.25,
+    "altitude_y": -57.75,
     "z": 2846.67,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+47.3m (洞窟/水井内)"
+    "height_desc": "-57.7m (洞窟/水井内)"
   },
   {
     "id": "c_1206",
@@ -18084,11 +18084,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": 2965.43,
-    "altitude_y": -659.57,
+    "altitude_y": -764.57,
     "z": 1399.68,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-659.6m (地底深渊)"
+    "height_desc": "-764.6m (地底深渊)"
   },
   {
     "id": "c_1207",
@@ -18099,11 +18099,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Armor",
     "layer": 18,
     "x": -1156.73,
-    "altitude_y": 140.47,
+    "altitude_y": 35.47,
     "z": 1264.05,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+140.5m (洞窟/水井内)"
+    "height_desc": "+35.5m (洞窟/水井内)"
   },
   {
     "id": "c_1208",
@@ -18114,11 +18114,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Armor",
     "layer": 18,
     "x": 4276.48,
-    "altitude_y": 84.3,
+    "altitude_y": -20.7,
     "z": 378.05,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+84.3m (洞窟/水井内)"
+    "height_desc": "-20.7m (洞窟/水井内)"
   },
   {
     "id": "c_1209",
@@ -18129,11 +18129,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 792.21,
-    "altitude_y": 157.57,
+    "altitude_y": 52.57,
     "z": -1350.36,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+157.6m (洞窟/水井内)"
+    "height_desc": "+52.6m (洞窟/水井内)"
   },
   {
     "id": "c_1210",
@@ -18144,11 +18144,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -4534.73,
-    "altitude_y": 100.8,
+    "altitude_y": -4.2,
     "z": 3635.01,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+100.8m (地表大世界)"
+    "height_desc": "-4.2m (地表大世界)"
   },
   {
     "id": "c_1211",
@@ -18159,11 +18159,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -4513.95,
-    "altitude_y": 88.66,
+    "altitude_y": -16.34,
     "z": 3613.3,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+88.7m (地表大世界)"
+    "height_desc": "-16.3m (地表大世界)"
   },
   {
     "id": "c_1212",
@@ -18174,11 +18174,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Shield",
     "layer": 18,
     "x": -4685.52,
-    "altitude_y": 99.87,
+    "altitude_y": -5.13,
     "z": 3665.35,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+99.9m (地表大世界)"
+    "height_desc": "-5.1m (地表大世界)"
   },
   {
     "id": "c_1213",
@@ -18189,11 +18189,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -4535.51,
-    "altitude_y": 169.03,
+    "altitude_y": 64.03,
     "z": 3585.73,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+169.0m (地表大世界)"
+    "height_desc": "+64.0m (地表大世界)"
   },
   {
     "id": "c_1214",
@@ -18204,11 +18204,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Shield",
     "layer": 18,
     "x": -4377.97,
-    "altitude_y": 186.35,
+    "altitude_y": 81.35,
     "z": 3594.28,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+186.3m (地表大世界)"
+    "height_desc": "+81.3m (地表大世界)"
   },
   {
     "id": "c_1215",
@@ -18219,11 +18219,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -4560.19,
-    "altitude_y": 220.1,
+    "altitude_y": 115.1,
     "z": 3683.97,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+220.1m (地表大世界)"
+    "height_desc": "+115.1m (地表大世界)"
   },
   {
     "id": "c_1216",
@@ -18234,11 +18234,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Shield",
     "layer": 18,
     "x": -3709.87,
-    "altitude_y": 452.42,
+    "altitude_y": 347.42,
     "z": -3563.14,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+452.4m (地表大世界)"
+    "height_desc": "+347.4m (地表大世界)"
   },
   {
     "id": "c_1217",
@@ -18249,11 +18249,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 2163.34,
-    "altitude_y": 499.31,
+    "altitude_y": 394.31,
     "z": -2040.15,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+499.3m (洞窟/水井内)"
+    "height_desc": "+394.3m (洞窟/水井内)"
   },
   {
     "id": "c_1218",
@@ -18264,11 +18264,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -2154.15,
-    "altitude_y": 342.54,
+    "altitude_y": 237.54,
     "z": -1230.48,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+342.5m (地表大世界)"
+    "height_desc": "+237.5m (地表大世界)"
   },
   {
     "id": "c_1219",
@@ -18279,11 +18279,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -2976.16,
-    "altitude_y": 356.97,
+    "altitude_y": 251.97,
     "z": -1557.35,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+357.0m (地表大世界)"
+    "height_desc": "+252.0m (地表大世界)"
   },
   {
     "id": "c_1220",
@@ -18294,11 +18294,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "KeyItem",
     "layer": 20,
     "x": -3830.44,
-    "altitude_y": 650.1,
+    "altitude_y": 545.1,
     "z": -2715.02,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+650.1m (天空岛)"
+    "height_desc": "+545.1m (天空岛)"
   },
   {
     "id": "c_1221",
@@ -18309,11 +18309,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 20,
     "x": -3869.76,
-    "altitude_y": 813.65,
+    "altitude_y": 708.65,
     "z": -2840.58,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+813.6m (天空岛)"
+    "height_desc": "+708.6m (天空岛)"
   },
   {
     "id": "c_1222",
@@ -18324,11 +18324,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 20,
     "x": -3889.49,
-    "altitude_y": 808.85,
+    "altitude_y": 703.85,
     "z": -2811.37,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+808.8m (天空岛)"
+    "height_desc": "+703.8m (天空岛)"
   },
   {
     "id": "c_1223",
@@ -18339,11 +18339,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 20,
     "x": -3801.67,
-    "altitude_y": 624.3,
+    "altitude_y": 519.3,
     "z": -2465.67,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+624.3m (天空岛)"
+    "height_desc": "+519.3m (天空岛)"
   },
   {
     "id": "c_1224",
@@ -18354,11 +18354,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -2772.47,
-    "altitude_y": 308.26,
+    "altitude_y": 203.26,
     "z": 197.58,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+308.3m (地表大世界)"
+    "height_desc": "+203.3m (地表大世界)"
   },
   {
     "id": "c_1225",
@@ -18369,11 +18369,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -2433.0,
-    "altitude_y": 306.46,
+    "altitude_y": 201.46,
     "z": 543.83,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+306.5m (地表大世界)"
+    "height_desc": "+201.5m (地表大世界)"
   },
   {
     "id": "c_1226",
@@ -18384,11 +18384,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 18,
     "x": -2953.04,
-    "altitude_y": 197.55,
+    "altitude_y": 92.55,
     "z": 321.97,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+197.6m (地表大世界)"
+    "height_desc": "+92.6m (地表大世界)"
   },
   {
     "id": "c_1227",
@@ -18399,11 +18399,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -2706.8,
-    "altitude_y": 339.78,
+    "altitude_y": 234.78,
     "z": 122.97,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+339.8m (地表大世界)"
+    "height_desc": "+234.8m (地表大世界)"
   },
   {
     "id": "c_1228",
@@ -18414,11 +18414,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 2399.69,
-    "altitude_y": 617.83,
+    "altitude_y": 512.83,
     "z": -2684.18,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+617.8m (洞窟/水井内)"
+    "height_desc": "+512.8m (洞窟/水井内)"
   },
   {
     "id": "c_1229",
@@ -18429,11 +18429,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 18,
     "x": -1676.75,
-    "altitude_y": 251.99,
+    "altitude_y": 146.99,
     "z": -732.58,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+252.0m (地表大世界)"
+    "height_desc": "+147.0m (地表大世界)"
   },
   {
     "id": "c_1230",
@@ -18444,11 +18444,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -1708.09,
-    "altitude_y": 251.88,
+    "altitude_y": 146.88,
     "z": -773.68,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+251.9m (地表大世界)"
+    "height_desc": "+146.9m (地表大世界)"
   },
   {
     "id": "c_1231",
@@ -18459,11 +18459,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -1820.41,
-    "altitude_y": 251.88,
+    "altitude_y": 146.88,
     "z": -748.03,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+251.9m (地表大世界)"
+    "height_desc": "+146.9m (地表大世界)"
   },
   {
     "id": "c_1232",
@@ -18474,11 +18474,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 18,
     "x": -1814.45,
-    "altitude_y": 251.47,
+    "altitude_y": 146.47,
     "z": -859.16,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+251.5m (地表大世界)"
+    "height_desc": "+146.5m (地表大世界)"
   },
   {
     "id": "c_1233",
@@ -18489,11 +18489,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 18,
     "x": -1747.18,
-    "altitude_y": 248.79,
+    "altitude_y": 143.79,
     "z": -827.47,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+248.8m (地表大世界)"
+    "height_desc": "+143.8m (地表大世界)"
   },
   {
     "id": "c_1234",
@@ -18504,11 +18504,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -1628.48,
-    "altitude_y": 260.08,
+    "altitude_y": 155.08,
     "z": -766.49,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+260.1m (地表大世界)"
+    "height_desc": "+155.1m (地表大世界)"
   },
   {
     "id": "c_1235",
@@ -18519,11 +18519,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Bow",
     "layer": 18,
     "x": -1201.16,
-    "altitude_y": 169.28,
+    "altitude_y": 64.28,
     "z": -239.25,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+169.3m (地表大世界)"
+    "height_desc": "+64.3m (地表大世界)"
   },
   {
     "id": "c_1236",
@@ -18534,11 +18534,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -1982.73,
-    "altitude_y": 262.77,
+    "altitude_y": 157.77,
     "z": -35.12,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+262.8m (地表大世界)"
+    "height_desc": "+157.8m (地表大世界)"
   },
   {
     "id": "c_1237",
@@ -18549,11 +18549,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -1842.73,
-    "altitude_y": 267.02,
+    "altitude_y": 162.02,
     "z": -706.65,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+267.0m (地表大世界)"
+    "height_desc": "+162.0m (地表大世界)"
   },
   {
     "id": "c_1238",
@@ -18564,11 +18564,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Rupee",
     "layer": 18,
     "x": -1356.65,
-    "altitude_y": 190.41,
+    "altitude_y": 85.41,
     "z": -693.77,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+190.4m (地表大世界)"
+    "height_desc": "+85.4m (地表大世界)"
   },
   {
     "id": "c_1239",
@@ -18579,11 +18579,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Rupee",
     "layer": 18,
     "x": -1390.98,
-    "altitude_y": 172.6,
+    "altitude_y": 67.6,
     "z": -734.39,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+172.6m (洞窟/水井内)"
+    "height_desc": "+67.6m (洞窟/水井内)"
   },
   {
     "id": "c_1240",
@@ -18594,11 +18594,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -4948.3,
-    "altitude_y": 47.28,
+    "altitude_y": -57.72,
     "z": 3858.48,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+47.3m (洞窟/水井内)"
+    "height_desc": "-57.7m (洞窟/水井内)"
   },
   {
     "id": "c_1241",
@@ -18609,11 +18609,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 2524.43,
-    "altitude_y": 122.74,
+    "altitude_y": 17.74,
     "z": 1802.02,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+122.7m (地表大世界)"
+    "height_desc": "+17.7m (地表大世界)"
   },
   {
     "id": "c_1242",
@@ -18624,11 +18624,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Shield",
     "layer": 18,
     "x": 2382.9,
-    "altitude_y": 268.68,
+    "altitude_y": 163.68,
     "z": 1327.97,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+268.7m (地表大世界)"
+    "height_desc": "+163.7m (地表大世界)"
   },
   {
     "id": "c_1243",
@@ -18639,11 +18639,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Bow",
     "layer": 18,
     "x": 2226.03,
-    "altitude_y": 381.15,
+    "altitude_y": 276.15,
     "z": 1041.37,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+381.2m (地表大世界)"
+    "height_desc": "+276.2m (地表大世界)"
   },
   {
     "id": "c_1244",
@@ -18654,11 +18654,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 19,
     "x": -2736.66,
-    "altitude_y": -1014.63,
+    "altitude_y": -1119.63,
     "z": -2918.0,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-1014.6m (地底深渊)"
+    "height_desc": "-1119.6m (地底深渊)"
   },
   {
     "id": "c_1245",
@@ -18669,11 +18669,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": 555.21,
-    "altitude_y": -365.97,
+    "altitude_y": -470.97,
     "z": -281.18,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-366.0m (地底深渊)"
+    "height_desc": "-471.0m (地底深渊)"
   },
   {
     "id": "c_1246",
@@ -18684,11 +18684,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": 976.01,
-    "altitude_y": -387.76,
+    "altitude_y": -492.76,
     "z": -237.2,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-387.8m (地底深渊)"
+    "height_desc": "-492.8m (地底深渊)"
   },
   {
     "id": "c_1247",
@@ -18699,11 +18699,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "KeyItem",
     "layer": 20,
     "x": 3810.99,
-    "altitude_y": 1250.06,
+    "altitude_y": 1145.06,
     "z": -1581.71,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1250.1m (天空岛)"
+    "height_desc": "+1145.1m (天空岛)"
   },
   {
     "id": "c_1248",
@@ -18714,11 +18714,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "KeyItem",
     "layer": 20,
     "x": -954.14,
-    "altitude_y": 1111.9,
+    "altitude_y": 1006.9,
     "z": 1735.55,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1111.9m (天空岛)"
+    "height_desc": "+1006.9m (天空岛)"
   },
   {
     "id": "c_1249",
@@ -18729,11 +18729,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 20,
     "x": -986.27,
-    "altitude_y": 1116.85,
+    "altitude_y": 1011.85,
     "z": 1739.21,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1116.9m (天空岛)"
+    "height_desc": "+1011.9m (天空岛)"
   },
   {
     "id": "c_1250",
@@ -18744,11 +18744,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 1563.82,
-    "altitude_y": 357.66,
+    "altitude_y": 252.66,
     "z": -2823.31,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+357.7m (洞窟/水井内)"
+    "height_desc": "+252.7m (洞窟/水井内)"
   },
   {
     "id": "c_1251",
@@ -18759,11 +18759,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": 3804.15,
-    "altitude_y": -849.12,
+    "altitude_y": -954.12,
     "z": -448.46,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-849.1m (地底深渊)"
+    "height_desc": "-954.1m (地底深渊)"
   },
   {
     "id": "c_1252",
@@ -18774,11 +18774,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": 3189.77,
-    "altitude_y": -644.41,
+    "altitude_y": -749.41,
     "z": -535.19,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-644.4m (地底深渊)"
+    "height_desc": "-749.4m (地底深渊)"
   },
   {
     "id": "c_1253",
@@ -18789,11 +18789,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": 3454.36,
-    "altitude_y": -741.22,
+    "altitude_y": -846.22,
     "z": -962.49,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-741.2m (地底深渊)"
+    "height_desc": "-846.2m (地底深渊)"
   },
   {
     "id": "c_1254",
@@ -18804,11 +18804,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Armor",
     "layer": 18,
     "x": 3712.38,
-    "altitude_y": 416.02,
+    "altitude_y": 311.02,
     "z": -494.84,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+416.0m (洞窟/水井内)"
+    "height_desc": "+311.0m (洞窟/水井内)"
   },
   {
     "id": "c_1255",
@@ -18819,11 +18819,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": 3967.44,
-    "altitude_y": -794.24,
+    "altitude_y": -899.24,
     "z": 1364.63,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-794.2m (地底深渊)"
+    "height_desc": "-899.2m (地底深渊)"
   },
   {
     "id": "c_1256",
@@ -18834,11 +18834,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": 3856.0,
-    "altitude_y": -674.44,
+    "altitude_y": -779.44,
     "z": 1682.01,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-674.4m (地底深渊)"
+    "height_desc": "-779.4m (地底深渊)"
   },
   {
     "id": "c_1257",
@@ -18849,11 +18849,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 3208.31,
-    "altitude_y": 219.64,
+    "altitude_y": 114.64,
     "z": 1116.83,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+219.6m (洞窟/水井内)"
+    "height_desc": "+114.6m (洞窟/水井内)"
   },
   {
     "id": "c_1258",
@@ -18864,11 +18864,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 3465.84,
-    "altitude_y": 201.72,
+    "altitude_y": 96.72,
     "z": -2254.27,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+201.7m (地表大世界)"
+    "height_desc": "+96.7m (地表大世界)"
   },
   {
     "id": "c_1259",
@@ -18879,11 +18879,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Shield",
     "layer": 18,
     "x": 3464.16,
-    "altitude_y": 201.71,
+    "altitude_y": 96.71,
     "z": -2251.42,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+201.7m (地表大世界)"
+    "height_desc": "+96.7m (地表大世界)"
   },
   {
     "id": "c_1260",
@@ -18894,11 +18894,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 3135.5,
-    "altitude_y": 447.0,
+    "altitude_y": 342.0,
     "z": -2816.0,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+447.0m (地表大世界)"
+    "height_desc": "+342.0m (地表大世界)"
   },
   {
     "id": "c_1261",
@@ -18909,11 +18909,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 3897.64,
-    "altitude_y": 220.93,
+    "altitude_y": 115.93,
     "z": -2955.19,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+220.9m (地表大世界)"
+    "height_desc": "+115.9m (地表大世界)"
   },
   {
     "id": "c_1262",
@@ -18924,11 +18924,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Bow",
     "layer": 18,
     "x": 3926.77,
-    "altitude_y": 156.99,
+    "altitude_y": 51.99,
     "z": -2631.06,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+157.0m (地表大世界)"
+    "height_desc": "+52.0m (地表大世界)"
   },
   {
     "id": "c_1263",
@@ -18939,11 +18939,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": 3607.33,
-    "altitude_y": -372.6,
+    "altitude_y": -477.6,
     "z": -2279.86,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-372.6m (地底深渊)"
+    "height_desc": "-477.6m (地底深渊)"
   },
   {
     "id": "c_1264",
@@ -18954,11 +18954,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "KeyItem",
     "layer": 19,
     "x": 3605.84,
-    "altitude_y": -372.6,
+    "altitude_y": -477.6,
     "z": -2281.19,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-372.6m (地底深渊)"
+    "height_desc": "-477.6m (地底深渊)"
   },
   {
     "id": "c_1265",
@@ -18969,11 +18969,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -1860.14,
-    "altitude_y": 138.65,
+    "altitude_y": 33.65,
     "z": 2013.9,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+138.6m (洞窟/水井内)"
+    "height_desc": "+33.6m (洞窟/水井内)"
   },
   {
     "id": "c_1266",
@@ -18984,11 +18984,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -257.54,
-    "altitude_y": 131.36,
+    "altitude_y": 26.36,
     "z": 2089.18,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+131.4m (地表大世界)"
+    "height_desc": "+26.4m (地表大世界)"
   },
   {
     "id": "c_1267",
@@ -18999,11 +18999,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Armor",
     "layer": 18,
     "x": -781.55,
-    "altitude_y": 193.51,
+    "altitude_y": 88.51,
     "z": 2258.61,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+193.5m (地表大世界)"
+    "height_desc": "+88.5m (地表大世界)"
   },
   {
     "id": "c_1268",
@@ -19014,11 +19014,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -917.41,
-    "altitude_y": 287.0,
+    "altitude_y": 182.0,
     "z": 2626.94,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+287.0m (地表大世界)"
+    "height_desc": "+182.0m (地表大世界)"
   },
   {
     "id": "c_1269",
@@ -19029,11 +19029,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Shield",
     "layer": 18,
     "x": 1529.0,
-    "altitude_y": 105.5,
+    "altitude_y": 0.5,
     "z": -186.0,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+105.5m (洞窟/水井内)"
+    "height_desc": "+0.5m (洞窟/水井内)"
   },
   {
     "id": "c_1270",
@@ -19044,11 +19044,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": 371.81,
-    "altitude_y": -356.06,
+    "altitude_y": -461.06,
     "z": 1375.33,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-356.1m (地底深渊)"
+    "height_desc": "-461.1m (地底深渊)"
   },
   {
     "id": "c_1271",
@@ -19059,11 +19059,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 19,
     "x": 3239.78,
-    "altitude_y": -324.65,
+    "altitude_y": -429.65,
     "z": -3446.48,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-324.6m (地底深渊)"
+    "height_desc": "-429.6m (地底深渊)"
   },
   {
     "id": "c_1272",
@@ -19074,11 +19074,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": 3274.77,
-    "altitude_y": -555.17,
+    "altitude_y": -660.17,
     "z": -3699.09,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-555.2m (地底深渊)"
+    "height_desc": "-660.2m (地底深渊)"
   },
   {
     "id": "c_1273",
@@ -19089,11 +19089,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "KeyItem",
     "layer": 19,
     "x": 3274.77,
-    "altitude_y": -555.17,
+    "altitude_y": -660.17,
     "z": -3697.09,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-555.2m (地底深渊)"
+    "height_desc": "-660.2m (地底深渊)"
   },
   {
     "id": "c_1274",
@@ -19104,11 +19104,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Armor",
     "layer": 19,
     "x": -1287.48,
-    "altitude_y": -602.15,
+    "altitude_y": -707.15,
     "z": 2249.98,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-602.2m (地底深渊)"
+    "height_desc": "-707.2m (地底深渊)"
   },
   {
     "id": "c_1275",
@@ -19119,11 +19119,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": -1814.59,
-    "altitude_y": -424.73,
+    "altitude_y": -529.73,
     "z": 2137.14,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-424.7m (地底深渊)"
+    "height_desc": "-529.7m (地底深渊)"
   },
   {
     "id": "c_1276",
@@ -19134,11 +19134,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": -1883.17,
-    "altitude_y": -336.85,
+    "altitude_y": -441.85,
     "z": 2334.29,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-336.9m (地底深渊)"
+    "height_desc": "-441.9m (地底深渊)"
   },
   {
     "id": "c_1277",
@@ -19149,11 +19149,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": -1712.76,
-    "altitude_y": -332.53,
+    "altitude_y": -437.53,
     "z": 2354.08,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-332.5m (地底深渊)"
+    "height_desc": "-437.5m (地底深渊)"
   },
   {
     "id": "c_1278",
@@ -19164,11 +19164,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": -1586.41,
-    "altitude_y": -495.87,
+    "altitude_y": -600.87,
     "z": 2703.35,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-495.9m (地底深渊)"
+    "height_desc": "-600.9m (地底深渊)"
   },
   {
     "id": "c_1279",
@@ -19179,11 +19179,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 20,
     "x": 1855.88,
-    "altitude_y": 858.73,
+    "altitude_y": 753.73,
     "z": -2887.41,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+858.7m (天空岛)"
+    "height_desc": "+753.7m (天空岛)"
   },
   {
     "id": "c_1280",
@@ -19194,11 +19194,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -2940.61,
-    "altitude_y": 669.44,
+    "altitude_y": 564.44,
     "z": -2885.31,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+669.4m (地表大世界)"
+    "height_desc": "+564.4m (地表大世界)"
   },
   {
     "id": "c_1281",
@@ -19209,11 +19209,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -2966.65,
-    "altitude_y": 672.35,
+    "altitude_y": 567.35,
     "z": -2781.23,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+672.3m (地表大世界)"
+    "height_desc": "+567.3m (地表大世界)"
   },
   {
     "id": "c_1282",
@@ -19224,11 +19224,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -2727.5,
-    "altitude_y": 752.38,
+    "altitude_y": 647.38,
     "z": -2824.5,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+752.4m (地表大世界)"
+    "height_desc": "+647.4m (地表大世界)"
   },
   {
     "id": "c_1283",
@@ -19239,11 +19239,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -3776.74,
-    "altitude_y": 114.82,
+    "altitude_y": 9.82,
     "z": 2547.75,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+114.8m (洞窟/水井内)"
+    "height_desc": "+9.8m (洞窟/水井内)"
   },
   {
     "id": "c_1284",
@@ -19254,11 +19254,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 331.86,
-    "altitude_y": 173.91,
+    "altitude_y": 68.91,
     "z": -3465.08,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+173.9m (洞窟/水井内)"
+    "height_desc": "+68.9m (洞窟/水井内)"
   },
   {
     "id": "c_1285",
@@ -19269,11 +19269,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 378.07,
-    "altitude_y": 177.91,
+    "altitude_y": 72.91,
     "z": -3528.83,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+177.9m (洞窟/水井内)"
+    "height_desc": "+72.9m (洞窟/水井内)"
   },
   {
     "id": "c_1286",
@@ -19284,11 +19284,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Shield",
     "layer": 18,
     "x": 1388.84,
-    "altitude_y": 241.41,
+    "altitude_y": 136.41,
     "z": 1142.45,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+241.4m (洞窟/水井内)"
+    "height_desc": "+136.4m (洞窟/水井内)"
   },
   {
     "id": "c_1287",
@@ -19299,11 +19299,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 4230.06,
-    "altitude_y": 214.49,
+    "altitude_y": 109.49,
     "z": -1799.07,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+214.5m (地表大世界)"
+    "height_desc": "+109.5m (地表大世界)"
   },
   {
     "id": "c_1288",
@@ -19314,11 +19314,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 4230.98,
-    "altitude_y": 230.36,
+    "altitude_y": 125.36,
     "z": -1814.26,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+230.4m (地表大世界)"
+    "height_desc": "+125.4m (地表大世界)"
   },
   {
     "id": "c_1289",
@@ -19329,11 +19329,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Bow",
     "layer": 18,
     "x": 4419.46,
-    "altitude_y": 105.53,
+    "altitude_y": 0.53,
     "z": -1914.08,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+105.5m (地表大世界)"
+    "height_desc": "+0.5m (地表大世界)"
   },
   {
     "id": "c_1290",
@@ -19344,11 +19344,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 4849.6,
-    "altitude_y": 105.53,
+    "altitude_y": 0.53,
     "z": -1868.01,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+105.5m (地表大世界)"
+    "height_desc": "+0.5m (地表大世界)"
   },
   {
     "id": "c_1291",
@@ -19359,11 +19359,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 2497.61,
-    "altitude_y": 671.87,
+    "altitude_y": 566.87,
     "z": -2276.43,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+671.9m (地表大世界)"
+    "height_desc": "+566.9m (地表大世界)"
   },
   {
     "id": "c_1292",
@@ -19374,11 +19374,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 2705.31,
-    "altitude_y": 627.57,
+    "altitude_y": 522.57,
     "z": -2208.15,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+627.6m (地表大世界)"
+    "height_desc": "+522.6m (地表大世界)"
   },
   {
     "id": "c_1293",
@@ -19389,11 +19389,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -3763.94,
-    "altitude_y": 104.1,
+    "altitude_y": -0.9,
     "z": 2770.45,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+104.1m (洞窟/水井内)"
+    "height_desc": "-0.9m (洞窟/水井内)"
   },
   {
     "id": "c_1294",
@@ -19404,11 +19404,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": -3828.81,
-    "altitude_y": 70.02,
+    "altitude_y": -34.98,
     "z": 2760.63,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+70.0m (洞窟/水井内)"
+    "height_desc": "-35.0m (洞窟/水井内)"
   },
   {
     "id": "c_1295",
@@ -19419,11 +19419,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 1710.29,
-    "altitude_y": 419.8,
+    "altitude_y": 314.8,
     "z": -2047.77,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+419.8m (洞窟/水井内)"
+    "height_desc": "+314.8m (洞窟/水井内)"
   },
   {
     "id": "c_1296",
@@ -19434,11 +19434,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 1212.06,
-    "altitude_y": 158.26,
+    "altitude_y": 53.26,
     "z": -274.91,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+158.3m (洞窟/水井内)"
+    "height_desc": "+53.3m (洞窟/水井内)"
   },
   {
     "id": "c_1297",
@@ -19449,11 +19449,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 1730.49,
-    "altitude_y": 135.26,
+    "altitude_y": 30.26,
     "z": 3705.38,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+135.3m (洞窟/水井内)"
+    "height_desc": "+30.3m (洞窟/水井内)"
   },
   {
     "id": "c_1298",
@@ -19464,11 +19464,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": -3593.78,
-    "altitude_y": -926.29,
+    "altitude_y": -1031.29,
     "z": 871.54,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-926.3m (地底深渊)"
+    "height_desc": "-1031.3m (地底深渊)"
   },
   {
     "id": "c_1299",
@@ -19479,11 +19479,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": -3404.78,
-    "altitude_y": -376.95,
+    "altitude_y": -481.95,
     "z": 224.29,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-377.0m (地底深渊)"
+    "height_desc": "-482.0m (地底深渊)"
   },
   {
     "id": "c_1300",
@@ -19494,11 +19494,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "KeyItem",
     "layer": 19,
     "x": -3404.43,
-    "altitude_y": -376.95,
+    "altitude_y": -481.95,
     "z": 222.32,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-377.0m (地底深渊)"
+    "height_desc": "-482.0m (地底深渊)"
   },
   {
     "id": "c_1301",
@@ -19509,11 +19509,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Armor",
     "layer": 19,
     "x": -3788.98,
-    "altitude_y": -576.76,
+    "altitude_y": -681.76,
     "z": -1344.09,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-576.8m (地底深渊)"
+    "height_desc": "-681.8m (地底深渊)"
   },
   {
     "id": "c_1302",
@@ -19524,11 +19524,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": -3466.67,
-    "altitude_y": -243.36,
+    "altitude_y": -348.36,
     "z": -1918.63,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-243.4m (地底深渊)"
+    "height_desc": "-348.4m (地底深渊)"
   },
   {
     "id": "c_1303",
@@ -19539,11 +19539,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": -3569.74,
-    "altitude_y": -478.79,
+    "altitude_y": -583.79,
     "z": -1507.86,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-478.8m (地底深渊)"
+    "height_desc": "-583.8m (地底深渊)"
   },
   {
     "id": "c_1304",
@@ -19554,11 +19554,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 19,
     "x": -3202.56,
-    "altitude_y": -512.36,
+    "altitude_y": -617.36,
     "z": -1601.82,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-512.4m (地底深渊)"
+    "height_desc": "-617.4m (地底深渊)"
   },
   {
     "id": "c_1305",
@@ -19569,11 +19569,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Shield",
     "layer": 18,
     "x": -3373.79,
-    "altitude_y": 75.47,
+    "altitude_y": -29.53,
     "z": 2941.96,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+75.5m (洞窟/水井内)"
+    "height_desc": "-29.5m (洞窟/水井内)"
   },
   {
     "id": "c_1306",
@@ -19584,11 +19584,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Armor",
     "layer": 18,
     "x": 4050.23,
-    "altitude_y": 262.01,
+    "altitude_y": 157.01,
     "z": 1874.81,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+262.0m (洞窟/水井内)"
+    "height_desc": "+157.0m (洞窟/水井内)"
   },
   {
     "id": "c_1307",
@@ -19599,11 +19599,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 3985.42,
-    "altitude_y": 251.75,
+    "altitude_y": 146.75,
     "z": 1989.73,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+251.8m (洞窟/水井内)"
+    "height_desc": "+146.8m (洞窟/水井内)"
   },
   {
     "id": "c_1308",
@@ -19614,11 +19614,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 4162.0,
-    "altitude_y": 270.14,
+    "altitude_y": 165.14,
     "z": 1819.79,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+270.1m (洞窟/水井内)"
+    "height_desc": "+165.1m (洞窟/水井内)"
   },
   {
     "id": "c_1309",
@@ -19629,11 +19629,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 4105.05,
-    "altitude_y": 269.68,
+    "altitude_y": 164.68,
     "z": 1921.27,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+269.7m (洞窟/水井内)"
+    "height_desc": "+164.7m (洞窟/水井内)"
   },
   {
     "id": "c_1310",
@@ -19644,11 +19644,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": 1656.23,
-    "altitude_y": -353.62,
+    "altitude_y": -458.62,
     "z": 83.63,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-353.6m (地底深渊)"
+    "height_desc": "-458.6m (地底深渊)"
   },
   {
     "id": "c_1311",
@@ -19659,11 +19659,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 19,
     "x": 991.4,
-    "altitude_y": -363.87,
+    "altitude_y": -468.87,
     "z": 494.96,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-363.9m (地底深渊)"
+    "height_desc": "-468.9m (地底深渊)"
   },
   {
     "id": "c_1312",
@@ -19674,11 +19674,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Armor",
     "layer": 18,
     "x": -2967.62,
-    "altitude_y": 140.78,
+    "altitude_y": 35.78,
     "z": 980.88,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+140.8m (洞窟/水井内)"
+    "height_desc": "+35.8m (洞窟/水井内)"
   },
   {
     "id": "c_1313",
@@ -19689,11 +19689,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -2959.08,
-    "altitude_y": 121.46,
+    "altitude_y": 16.46,
     "z": 857.12,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+121.5m (洞窟/水井内)"
+    "height_desc": "+16.5m (洞窟/水井内)"
   },
   {
     "id": "c_1314",
@@ -19704,11 +19704,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Armor",
     "layer": 19,
     "x": -814.75,
-    "altitude_y": -581.97,
+    "altitude_y": -686.97,
     "z": -3534.4,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-582.0m (地底深渊)"
+    "height_desc": "-687.0m (地底深渊)"
   },
   {
     "id": "c_1315",
@@ -19719,11 +19719,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 19,
     "x": -794.75,
-    "altitude_y": -576.78,
+    "altitude_y": -681.78,
     "z": -3589.4,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-576.8m (地底深渊)"
+    "height_desc": "-681.8m (地底深渊)"
   },
   {
     "id": "c_1316",
@@ -19734,11 +19734,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 19,
     "x": -869.75,
-    "altitude_y": -576.78,
+    "altitude_y": -681.78,
     "z": -3514.4,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-576.8m (地底深渊)"
+    "height_desc": "-681.8m (地底深渊)"
   },
   {
     "id": "c_1317",
@@ -19749,11 +19749,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 19,
     "x": -834.75,
-    "altitude_y": -576.78,
+    "altitude_y": -681.78,
     "z": -3479.4,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-576.8m (地底深渊)"
+    "height_desc": "-681.8m (地底深渊)"
   },
   {
     "id": "c_1318",
@@ -19764,11 +19764,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Bow",
     "layer": 19,
     "x": -759.75,
-    "altitude_y": -576.78,
+    "altitude_y": -681.78,
     "z": -3514.4,
     "is_cave": false,
     "location_type_zh": "地底深渊",
-    "height_desc": "-576.8m (地底深渊)"
+    "height_desc": "-681.8m (地底深渊)"
   },
   {
     "id": "c_1319",
@@ -19779,11 +19779,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "KeyItem",
     "layer": 20,
     "x": 2644.91,
-    "altitude_y": 1581.15,
+    "altitude_y": 1476.15,
     "z": 1414.08,
     "is_cave": false,
     "location_type_zh": "天空岛",
-    "height_desc": "+1581.2m (天空岛)"
+    "height_desc": "+1476.2m (天空岛)"
   },
   {
     "id": "c_1320",
@@ -19794,11 +19794,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 2063.4,
-    "altitude_y": 533.96,
+    "altitude_y": 428.96,
     "z": -2698.66,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+534.0m (洞窟/水井内)"
+    "height_desc": "+429.0m (洞窟/水井内)"
   },
   {
     "id": "c_1321",
@@ -19809,11 +19809,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 2672.0,
-    "altitude_y": 246.5,
+    "altitude_y": 141.5,
     "z": -1580.5,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+246.5m (地表大世界)"
+    "height_desc": "+141.5m (地表大世界)"
   },
   {
     "id": "c_1322",
@@ -19824,11 +19824,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Armor",
     "layer": 18,
     "x": 2578.4,
-    "altitude_y": 240.65,
+    "altitude_y": 135.65,
     "z": -1430.5,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+240.7m (地表大世界)"
+    "height_desc": "+135.7m (地表大世界)"
   },
   {
     "id": "c_1323",
@@ -19839,11 +19839,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 2531.82,
-    "altitude_y": 258.31,
+    "altitude_y": 153.31,
     "z": -1269.52,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+258.3m (地表大世界)"
+    "height_desc": "+153.3m (地表大世界)"
   },
   {
     "id": "c_1324",
@@ -19854,11 +19854,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": 2593.37,
-    "altitude_y": 256.3,
+    "altitude_y": 151.3,
     "z": -1233.61,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+256.3m (地表大世界)"
+    "height_desc": "+151.3m (地表大世界)"
   },
   {
     "id": "c_1325",
@@ -19869,11 +19869,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Bow",
     "layer": 18,
     "x": 2654.13,
-    "altitude_y": 265.38,
+    "altitude_y": 160.38,
     "z": -1125.43,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+265.4m (地表大世界)"
+    "height_desc": "+160.4m (地表大世界)"
   },
   {
     "id": "c_1326",
@@ -19884,11 +19884,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Zonai",
     "layer": 18,
     "x": 2396.5,
-    "altitude_y": 296.54,
+    "altitude_y": 191.54,
     "z": -1586.89,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+296.5m (地表大世界)"
+    "height_desc": "+191.5m (地表大世界)"
   },
   {
     "id": "c_1327",
@@ -19899,11 +19899,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 2332.0,
-    "altitude_y": 298.87,
+    "altitude_y": 193.87,
     "z": -1480.5,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+298.9m (地表大世界)"
+    "height_desc": "+193.9m (地表大世界)"
   },
   {
     "id": "c_1328",
@@ -19914,11 +19914,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 2470.03,
-    "altitude_y": 262.41,
+    "altitude_y": 157.41,
     "z": -1619.3,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+262.4m (地表大世界)"
+    "height_desc": "+157.4m (地表大世界)"
   },
   {
     "id": "c_1329",
@@ -19929,11 +19929,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 2360.46,
-    "altitude_y": 315.77,
+    "altitude_y": 210.77,
     "z": -1221.92,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+315.8m (地表大世界)"
+    "height_desc": "+210.8m (地表大世界)"
   },
   {
     "id": "c_1330",
@@ -19944,11 +19944,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 2810.24,
-    "altitude_y": 232.19,
+    "altitude_y": 127.19,
     "z": -1158.65,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+232.2m (地表大世界)"
+    "height_desc": "+127.2m (地表大世界)"
   },
   {
     "id": "c_1331",
@@ -19959,11 +19959,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 2724.42,
-    "altitude_y": 232.19,
+    "altitude_y": 127.19,
     "z": -1284.91,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+232.2m (地表大世界)"
+    "height_desc": "+127.2m (地表大世界)"
   },
   {
     "id": "c_1332",
@@ -19974,11 +19974,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Material",
     "layer": 18,
     "x": 2967.77,
-    "altitude_y": 395.13,
+    "altitude_y": 290.13,
     "z": -1471.24,
     "is_cave": false,
     "location_type_zh": "地表大世界",
-    "height_desc": "+395.1m (地表大世界)"
+    "height_desc": "+290.1m (地表大世界)"
   },
   {
     "id": "c_1333",
@@ -19989,11 +19989,11 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -2956.28,
-    "altitude_y": 351.61,
+    "altitude_y": 246.61,
     "z": -1786.32,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+351.6m (洞窟/水井内)"
+    "height_desc": "+246.6m (洞窟/水井内)"
   },
   {
     "id": "c_1334",
@@ -20004,10 +20004,10 @@ window.TOTK_CHESTS_OFFICIAL = [
     "category": "Weapon",
     "layer": 18,
     "x": -2948.36,
-    "altitude_y": 355.92,
+    "altitude_y": 250.92,
     "z": -1813.31,
     "is_cave": true,
     "location_type_zh": "洞窟/水井内",
-    "height_desc": "+355.9m (洞窟/水井内)"
+    "height_desc": "+250.9m (洞窟/水井内)"
   }
 ];

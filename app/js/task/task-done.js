@@ -121,9 +121,11 @@
   /* ---------- 存档接入 ---------- */
 
   /* 从 TOTKSaveParser.questDone() 的结果刷新存档态。
-     parsed 可以为 null（未加载存档）→ 只清存档态，手动态保留。 */
+     每次加载存档/自动同步存档时，以存档真实进度 100% 覆盖手动态。 */
   function applySave(questMap) {
     saveState = questMap || {};
+    manual = {};
+    persistManual();
     notify();
   }
 

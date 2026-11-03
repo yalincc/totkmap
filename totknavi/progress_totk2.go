@@ -48,6 +48,77 @@ func parseCompletismHashes() map[string][]string {
 }
 
 // parseExploreMap 解析 data/explore_save_map.js。
+type taskSaveEntry struct {
+	Hash   uint32
+	Done   uint32
+	Stages []string
+}
+
+func parseTaskSave() map[string]taskSaveEntry {
+	out := map[string]taskSaveEntry{}
+	dir := dataDir()
+	buf, err := os.ReadFile(filepath.Join(dir, "task-save.js"))
+	if err != nil {
+		// 开发环境下回退查 app/js/task/task-save.js
+		buf, err = os.ReadFile(filepath.Join(dir, "..", "js", "task", "task-save.js"))
+		if err != nil {
+			return out
+		}
+	}
+	re := regexp.MustCompile(`"([A-Za-z0-9_]+)"\s*:\s*\{\s*hash:\s*"0x([0-9a-fA-F]+)",\s*done:\s*"0x([0-9a-fA-F]+)",.*?stages:\s*\[(.*?)\]`)
+	stageRe := regexp.MustCompile(`"([^"]+)"|'([^']+)'`)
+	for _, m := range re.FindAllStringSubmatch(string(buf), -1) {
+		if len(m) < 5 {
+			continue
+		}
+		key := m[1]
+		h, _ := strconv.ParseUint(m[2], 16, 32)
+		d, _ := strconv.ParseUint(m[3], 16, 32)
+		var stages []string
+		for _, sm := range stageRe.FindAllStringSubmatch(m[4], -1) {
+			if sm[1] != "" {
+				stages = append(stages, sm[1])
+			} else if sm[2] != "" {
+				stages = append(stages, sm[2])
+			}
+		}
+		out[key] = taskSaveEntry{
+			Hash:   uint32(h),
+			Done:   uint32(d),
+			Stages: stages,
+		}
+	}
+	return out
+}
+
+func (p *parsedSave) buildQuestDone(tasks map[string]taskSaveEntry) map[string]map[string]any {
+	out := make(map[string]map[string]any, len(tasks))
+	doneHash := uint32(0x4c0a63f4)
+	for key, t := range tasks {
+		val, ok := p.hval(t.Hash)
+		if !ok {
+			continue
+		}
+		isDone := (val == t.Done || val == doneHash)
+		stageName := ""
+		stageIdx := -1
+		for idx, st := range t.Stages {
+			if murmur3_32(st, 0) == val {
+				stageName = st
+				stageIdx = idx
+				break
+			}
+		}
+		out[key] = map[string]any{
+			"done":  isDone,
+			"stage": stageName,
+			"idx":   stageIdx,
+			"total": len(t.Stages),
+		}
+	}
+	return out
+}
+
 type exploreMap struct {
 	Towers  map[string]string            `json:"towers"`
 	Tears   map[string]string            `json:"tears"`
@@ -268,6 +339,7 @@ type progressWatcher struct {
 	init        bool
 	completism  map[string][]string
 	emap        *exploreMap
+	taskSave    map[string]taskSaveEntry
 }
 
 var progress *progressWatcher
@@ -276,6 +348,7 @@ func newProgressWatcher() *progressWatcher {
 	w := &progressWatcher{}
 	w.completism = parseCompletismHashes()
 	w.emap = parseExploreMap()
+	w.taskSave = parseTaskSave()
 	w.refresh()
 	return w
 }
@@ -329,6 +402,8 @@ func (w *progressWatcher) refresh() {
 	w.gen = fmt.Sprintf("%s:%d", path, int64(math.Round(mt)))
 	w.ok = true
 
+	qDone := p.buildQuestDone(w.taskSave)
+
 	obj := map[string]any{
 		"ok":         true,
 		"version":    p.Version,
@@ -337,6 +412,7 @@ func (w *progressWatcher) refresh() {
 		"newlyDone":  newlyDone,
 		"mapped":     mapped,
 		"counts":     counts,
+		"questDone":  qDone,
 		"mtime":      mt,
 		"save_mtime": mt,
 	}
@@ -345,7 +421,7 @@ func (w *progressWatcher) refresh() {
 
 	if !w.init {
 		fmt.Printf("  [progress] save=%s\n", path)
-		fmt.Printf("  [progress] doneIds=%d  mapped=%d\n", len(ids), mapped)
+		fmt.Printf("  [progress] doneIds=%d  mapped=%d  questDone=%d\n", len(ids), mapped, len(qDone))
 		for _, k := range []string{"鸟望台", "神庙", "树根", "克洛格", "魔犹伊遗失物", "卡邦达立牌", "宝箱"} {
 			if c, ok := counts[k]; ok {
 				fmt.Printf("    %s %d/%d\n", k, c.Done, c.Total)
