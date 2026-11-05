@@ -48,17 +48,18 @@ export default {
   },
   source: {
     known: '⚡ 秒锁',
-    chain: '🔗 指针链',
-    scan: '扫描',
+    chain: '⚡ L1 静态直读',
+    scan: '⚠ L2 扫描降级',
+    coords: '📍 L3 手动校准',
     probe: '探针换组',
     consensus: '共识恢复',
     locating: '定位中'
   },
   emu: {
-    auto: '自动探测',
+    auto: 'PC-Recomp',
     ryujinx: 'Ryujinx',
     eden: 'Eden',
-    pickTitle: '选择模拟器（改后需重启定位）'
+    pickTitle: '选择平台（PC版默认使用 pc-recomp）'
   },
   buttons: {
     openMap: '打开网页地图',

@@ -185,6 +185,15 @@ func runTracker(p Platform, plat *totkpcPlatform, anchor *[3]float32, addr uintp
 	lostTicks := 0
 	var prev [3]float32
 	hasPrev := false
+	var prevPrev [3]float32
+	hasPrevPrev := false
+	oscCount := 0
+
+	usingStaticChain := false
+	var mainBase uintptr
+	if plat != nil {
+		mainBase = plat.MainBase()
+	}
 
 	// 神庙副本锁定（Shrine Hold）状态
 	shrineMode := false
@@ -192,20 +201,30 @@ func runTracker(p Platform, plat *totkpcPlatform, anchor *[3]float32, addr uintp
 	var shrineName string
 
 	if lockedAddr == 0 {
-		var ok bool
-		lockedAddr, cands, ok = scanForPlayer(p, plat, anchor)
-		if !ok {
-			logEvent("  [scan] 未命中 —— 请确认：① 已在 3D 世界中 ② 存档是最近 2 分钟内的")
-			onTick([3]float32{}, 0, false, false, "no-anchor")
-			pstate.setGameStatus(p.IsAlive(), p.PID(), 0)
-		} else {
+		// ① 主路径：静态指针链直读秒锁（零扫描、无需存档锚点，开局秒锁）
+		if sPos, sAddr, sOk := ptkReadStaticChain(h, mainBase); sOk {
+			lockedAddr = sAddr
+			verified = true
+			usingStaticChain = true
 			pstate.setGameStatus(true, p.PID(), lockedAddr)
-			if len(cands) > 0 && cands[0].Rot {
-				verified = true
-				logEvent("  [lock] ★ 命中持久真身槽 0x%X (Run=%d)，直接锁定跟随（跨传送永不销毁）", lockedAddr, cands[0].Run)
+			logEvent("  [lock] ★ [LEVEL-1 静态直读] 命中主模块静态真身指针链 0x%X，开局秒锁直读 (%.1f, %.1f, %.1f) · 载具飞行完美跟随", lockedAddr, sPos[0], sPos[1], sPos[2])
+		} else {
+			// ② 兜底路径：存档锚点滑动扫描
+			var ok bool
+			lockedAddr, cands, ok = scanForPlayer(p, plat, anchor)
+			if !ok {
+				logEvent("  [scan] 未命中 —— 请确认：① 已在 3D 世界中 ② 存档是最近 2 分钟内的")
+				onTick([3]float32{}, 0, false, false, "no-anchor")
+				pstate.setGameStatus(p.IsAlive(), p.PID(), 0)
 			} else {
-				verified = false
-				logEvent("  [lock] 候选 0x%X —— 【请在游戏内移动一下角色以完成验证】", lockedAddr)
+				pstate.setGameStatus(true, p.PID(), lockedAddr)
+				if len(cands) > 0 && cands[0].Rot {
+					verified = true
+					logEvent("  [lock] ★ [LEVEL-2 扫描降级] 命中 28B 物理真身槽 0x%X (Run=%d) · 驾驶载具期间可能暂缓刷新", lockedAddr, cands[0].Run)
+				} else {
+					verified = false
+					logEvent("  [lock] 候选 0x%X (LEVEL-2 扫描降级) —— 【请在游戏内移动一下角色以完成验证】", lockedAddr)
+				}
 			}
 		}
 	} else {
@@ -213,6 +232,7 @@ func runTracker(p Platform, plat *totkpcPlatform, anchor *[3]float32, addr uintp
 		logEvent("  [lock] 直接锁定指定地址 0x%X", lockedAddr)
 	}
 
+	tickCount := 0
 	tick := time.NewTicker(tickInterval)
 	defer tick.Stop()
 
@@ -220,36 +240,68 @@ func runTracker(p Platform, plat *totkpcPlatform, anchor *[3]float32, addr uintp
 		select {
 		case <-reqRescanChan:
 			fmt.Println("  [rescan] 收到重扫请求，正在重新探测...")
-			var ref *[3]float32
-			if hasPrev {
-				mem := [3]float32{prev[0], prev[2] + elevBias, -prev[1]}
-				ref = &mem
-			} else {
-				ref = anchor
-			}
-			if newAddr, newCands, ok := scanForPlayer(p, plat, ref); ok {
-				lockedAddr = newAddr
-				cands = newCands
-				verified = false
-				moveN = 0
+			if sPos, sAddr, sOk := ptkReadStaticChain(h, mainBase); sOk {
+				lockedAddr = sAddr
+				verified = true
+				usingStaticChain = true
 				lostTicks = 0
+				moveN = 0
+				cands = nil
+				oscCount = 0
 				pstate.setGameStatus(true, p.PID(), lockedAddr)
 				pstate.bumpLock()
 				pstate.bumpRescan()
-				fmt.Printf("  [rescan] 重锁成功 → 0x%X\n", lockedAddr)
+				fmt.Printf("  [rescan] 静态指针重锁成功 → 0x%X (%.1f, %.1f, %.1f)\n", lockedAddr, sPos[0], sPos[1], sPos[2])
+			} else {
+				var ref *[3]float32
+				if hasPrev {
+					mem := [3]float32{prev[0], prev[2] + elevBias, -prev[1]}
+					ref = &mem
+				} else {
+					ref = anchor
+				}
+				if newAddr, newCands, ok := scanForPlayer(p, plat, ref); ok {
+					lockedAddr = newAddr
+					cands = newCands
+					usingStaticChain = false
+					verified = len(newCands) > 0 && newCands[0].Rot
+					moveN = 0
+					lostTicks = 0
+					oscCount = 0
+					pstate.setGameStatus(true, p.PID(), lockedAddr)
+					pstate.bumpLock()
+					pstate.bumpRescan()
+					fmt.Printf("  [rescan] 扫描重锁成功 → 0x%X\n", lockedAddr)
+				}
 			}
 		case hud := <-reqCoordChan:
 			fmt.Printf("  [coords] 收到手动校准坐标 (%.1f, %.1f, %.1f)，立即校准...\n", hud[0], hud[1], hud[2])
+			if sPos, sAddr, sOk := ptkReadStaticChain(h, mainBase); sOk && dist3(sPos, hud) < 5.0 {
+				lockedAddr = sAddr
+				usingStaticChain = true
+				verified = true
+				moveN = 0
+				lostTicks = 0
+				oscCount = 0
+				cands = nil
+				pstate.setGameStatus(true, p.PID(), lockedAddr)
+				pstate.bumpLock()
+				logEvent("  [coords] ★ 手动校准成功直通 [LEVEL-1 黄金真身] -> 0x%X (MK2/载具飞行完美跟随)", sAddr)
+				continue
+			}
 			mem := [3]float32{hud[0], hud[2] + elevBias, -hud[1]}
 			if newAddr, newCands, ok := scanForPlayer(p, plat, &mem); ok {
 				lockedAddr = newAddr
 				cands = newCands
-				verified = true
+				usingStaticChain = false
+				// 严格门禁：只有 Run>=4 的长队列真身才直接 verified，否则必须走移动确认，避免锁死在鸟望台等静态槽上
+				verified = len(newCands) > 0 && newCands[0].Rot
 				moveN = 0
 				lostTicks = 0
+				oscCount = 0
 				pstate.setGameStatus(true, p.PID(), lockedAddr)
 				pstate.bumpLock()
-				logEvent("  [coords] 校准重锁成功 → 0x%X", lockedAddr)
+				logEvent("  [coords] 📍 [LEVEL-3 手动校准] 校准成功 → 0x%X (verified=%v)", lockedAddr, verified)
 			}
 		case <-tick.C:
 			if !isProcessAlive(h) {
@@ -258,7 +310,30 @@ func runTracker(p Platform, plat *totkpcPlatform, anchor *[3]float32, addr uintp
 				onTick([3]float32{}, 0, false, false, "disconnected")
 				return
 			}
-			pos, _, _, ok := readWithRetry(h, lockedAddr)
+			var pos [3]float32
+			var ok bool
+			if usingStaticChain {
+				pos, lockedAddr, ok = ptkReadStaticChain(h, mainBase)
+				if ok {
+					verified = true
+				}
+			} else {
+				pos, _, _, ok = readWithRetry(h, lockedAddr)
+				if ok {
+					tickCount++
+					if tickCount%10 == 0 {
+						if sPos, sAddr, sOk := ptkReadStaticChain(h, mainBase); sOk {
+							if dist3(sPos, pos) < 3.0 {
+								usingStaticChain = true
+								lockedAddr = sAddr
+								verified = true
+								cands = nil
+								logEvent("  [upgrade] ★ 恭喜！当前位置与主模块静态指针完全对齐，成功升阶至 [LEVEL-1 黄金真身] 0x%X！(载具飞行/MK2全面激活)", sAddr)
+							}
+						}
+					}
+				}
+			}
 			if !ok {
 				lostTicks++
 				if shrineMode {
@@ -361,17 +436,44 @@ func runTracker(p Platform, plat *totkpcPlatform, anchor *[3]float32, addr uintp
 				}
 			}
 
-			// 传送与读档：单拍水平位移 >= 50m 判定为传送（不换锁，地址照用）
+			// 传送与读档：单拍水平位移 >= 50m 判定为传送
 			if hasPrev {
 				if dH := dist2DHud(cur, prev); dH >= warpDist {
-					logEvent("  [warp] 传送/瞬移 %.0fm → (%.1f, %.1f, %.1f)（地址沿用）", dH, cur[0], cur[1], cur[2])
+					// 乒乓振荡检测：连续两拍位移超大，且当前坐标跳回前前拍附近（在两点间反复横跳）
+					if !usingStaticChain && hasPrevPrev && dist2DHud(cur, prevPrev) < 10.0 {
+						oscCount++
+						if oscCount >= 2 {
+							logEvent("  [warp] 检测到坐标在两点间反复振荡（错锁交替复用槽），丢弃坏地址 0x%X，自动自愈重锁...", lockedAddr)
+							oscCount = 0
+							moveN = 0
+							verified = false
+							lockedAddr = 0
+							usingStaticChain = false
+							RequestRescan()
+							if hasPrev {
+								onTick(prev, 0, false, false, "hold")
+							}
+							continue
+						}
+					} else {
+						oscCount = 0
+						logEvent("  [warp] 传送/瞬移 %.0fm → (%.1f, %.1f, %.1f)（地址沿用）", dH, cur[0], cur[1], cur[2])
+					}
 					moveN = 0 // 发生瞬移坚决重置移动验证！
+				} else {
+					oscCount = 0
 				}
 			}
 
 			// 减法：朝向由前端 live.js 原生位移平滑推算，后端不输出抽搐的内存矩阵朝向
-			logTick(lockedAddr, cur, 0, false, verified, "player")
-			onTick(cur, 0, false, verified, "player")
+			srcTag := "scan"
+			if usingStaticChain {
+				srcTag = "chain"
+			}
+			logTick(lockedAddr, cur, 0, false, verified, srcTag)
+			onTick(cur, 0, false, verified, srcTag)
+			prevPrev = prev
+			hasPrevPrev = hasPrev
 			prev = cur
 			hasPrev = true
 		}

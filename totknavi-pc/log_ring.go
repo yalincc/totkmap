@@ -5,7 +5,6 @@ package main
 import (
 	"fmt"
 	"sync"
-	"time"
 )
 
 const maxRingLogs = 100
@@ -17,9 +16,7 @@ var (
 
 // logEvent 格式化打印并保存到内存环形缓冲区。
 func logEvent(format string, args ...any) {
-	msg := fmt.Sprintf(format, args...)
-	now := time.Now().Format("15:04:05")
-	entry := fmt.Sprintf("[%s] %s", now, msg)
+	entry := fmt.Sprintf(format, args...)
 
 	// 控制台输出
 	fmt.Println(entry)

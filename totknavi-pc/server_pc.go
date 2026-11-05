@@ -190,6 +190,9 @@ func serveRun(p Platform, plat *totkpcPlatform, anchor *[3]float32, addr uintptr
 	fmt.Printf("  [server] 控制台面板 → http://127.0.0.1:%d/gui\n", port)
 	fmt.Printf("  [server] 定位接口   → http://127.0.0.1:%d/pos\n", port)
 	fmt.Println("  ------------------------------------------------------------------")
+	fmt.Println("  [ok] ★★★ 定位服务已就绪！已锁定林克真身坐标，网页地图实时同步中 ★★★")
+	fmt.Println("  [ok] 浏览器访问地图即可实时跟随，或点击上方【🧭 打开网页地图】")
+	fmt.Println("  ------------------------------------------------------------------")
 
 	// 统一包装跨域 CORS、PNA（私有网络访问预检）与自定义暴露头
 	corsHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

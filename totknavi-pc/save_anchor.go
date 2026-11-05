@@ -137,13 +137,16 @@ func readAnchors(p Platform) []*SaveAnchor {
 		}
 	}
 	sort.SliceStable(cands, func(i, j int) bool {
-		// slot_00 为玩家手动存档，最高权重
+		// mtime 修改时间最新降序优先（权威圆心），同刻写入时 slot_00 手动存档优先兜底
+		if !cands[i].mt.Equal(cands[j].mt) {
+			return cands[i].mt.After(cands[j].mt)
+		}
 		isManualI := cands[i].slot == 0
 		isManualJ := cands[j].slot == 0
 		if isManualI != isManualJ {
 			return isManualI
 		}
-		return cands[i].mt.After(cands[j].mt)
+		return cands[i].slot < cands[j].slot
 	})
 	out := make([]*SaveAnchor, 0, len(cands))
 	for _, c := range cands {

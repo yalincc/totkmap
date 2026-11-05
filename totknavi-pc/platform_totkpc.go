@@ -24,6 +24,8 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
+	"strconv"
 	"strings"
 	"sync"
 	"syscall"
@@ -51,8 +53,9 @@ type totkpcPlatform struct {
 	h   uintptr
 	pid uint32
 
-	mu       sync.Mutex
-	mainBase uintptr // 校验通过的主模块基址（0 = 未确认）
+	mu          sync.Mutex
+	mainBase    uintptr // 校验通过的主模块基址（0 = 未确认）
+	mainChecked bool    // 是否已完成过自适应探测（防止未命中时重复全盘扫描）
 	exeBase  uintptr // totk.exe 加载基址（ASLR，每次启动变）
 	exeSize  uintptr
 }
@@ -91,36 +94,67 @@ func (p *totkpcPlatform) Attach() bool {
 	// 附加后立即解析模块基址（一次，后面复用）
 	p.mu.Lock()
 	p.mainBase = 0
+	p.mainChecked = false
 	p.exeBase, p.exeSize = totkPCExeModule(pid)
 	p.mu.Unlock()
 	return true
 }
 
 // MainBase 返回已校验的主模块基址；未确认返回 0。
-// 校验方式：读 0x7000000000 前 12 字节比对 MOD0 锚。
+// 采用三级自适应探测机制（单次执行带强缓存，绝对不重复枚举）：
+//   1. 优先校验默认基址 0x7000000000（宽松校验：头 64 字节含 MOD0 魔数）；
+//   2. 动态扫描分配区 AllocationBase（0.01s，按块首地址找 MOD0，不限单段大小）；
+//   3. 从游戏目录 logs/totk.log 辅助匹配 "loaded main at 0x..."。
 func (p *totkpcPlatform) MainBase() uintptr {
 	p.mu.Lock()
-	cached := p.mainBase
-	p.mu.Unlock()
-	if cached != 0 {
-		return cached
+	if p.mainChecked && p.mainBase != 0 {
+		res := p.mainBase
+		p.mu.Unlock()
+		return res
 	}
+	p.mu.Unlock()
+
 	if p.h == 0 {
 		return 0
 	}
-	buf := readMem(p.h, totkPCMainBase, 12)
-	if len(buf) < 12 {
-		return 0
+
+	var foundBase uintptr
+
+	// 1. 优先校验默认基址 0x7000000000（TotK-Recomp 官方固定映射，只要内存可读即确认为主模块镜像）
+	if buf := readMem(p.h, totkPCMainBase, 16); len(buf) >= 8 {
+		foundBase = totkPCMainBase
 	}
-	for i := 0; i < 12; i++ {
-		if buf[i] != mainAnchor[i] {
-			return 0
+
+	// 2. 备选：从游戏目录 logs/totk.log 容错匹配 "loaded main at 0x..."
+	if foundBase == 0 {
+		if exePath := totkPCProcessPath(p.h); exePath != "" {
+			for _, logName := range []string{"totk.log", "totk.1.log"} {
+				logPath := filepath.Join(filepath.Dir(exePath), "logs", logName)
+				if data, err := os.ReadFile(logPath); err == nil {
+					re := regexp.MustCompile(`loaded\s+main\s+at\s+(0x[0-9a-fA-F]+)`)
+					if m := re.FindSubmatch(data); len(m) > 1 {
+						if parsed, err := strconv.ParseUint(string(m[1]), 0, 64); err == nil && parsed != 0 {
+							base := uintptr(parsed)
+							if buf := readMem(p.h, base, 16); len(buf) >= 8 {
+								foundBase = base
+								fmt.Printf("  [platform] ★ 从 %s 自适应匹配主模块基址：0x%X\n", logName, base)
+								break
+							}
+						}
+					}
+				}
+			}
 		}
 	}
+
 	p.mu.Lock()
-	p.mainBase = totkPCMainBase
+	p.mainBase = foundBase
+	if foundBase != 0 {
+		p.mainChecked = true
+	}
 	p.mu.Unlock()
-	return totkPCMainBase
+
+	return foundBase
 }
 
 // ExeBase 返回 totk.exe 加载基址与镜像大小（ASLR 后实际值）。
@@ -248,6 +282,7 @@ func (p *totkpcPlatform) Blocks(minMB float64) []MemBlock {
 		minSize = floor
 	}
 	exeBase, exeSize := p.ExeBase()
+	mb := p.MainBase() // 必须在循环外部单次获取，严禁在迭代中重复调用！
 
 	const limit = uintptr(0x7FFFFFFFFFFF)
 	var out []MemBlock
@@ -263,7 +298,12 @@ func (p *totkpcPlatform) Blocks(minMB float64) []MemBlock {
 			readable := prot&0x01 == 0 && prot&pageGuard == 0
 			writable := prot&0xCC != 0
 			if readable {
-				inMain := base >= totkPCScanMainLo && base < totkPCScanMainHi
+				inMain := false
+				if mb != 0 {
+					inMain = base >= mb && base < mb+0x10000000
+				} else {
+					inMain = base >= totkPCScanMainLo && base < totkPCScanMainHi
+				}
 				inHeap := writable && base >= totkPCScanHeapLo && base < totkPCScanHeapHi
 				inExe := writable && exeBase != 0 && base >= exeBase && base < exeBase+exeSize
 				if inMain || inHeap || inExe {

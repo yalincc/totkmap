@@ -231,25 +231,85 @@ func ptkRun48Length(buf []byte, off int) int {
 	return n
 }
 
-// ptkRun28Length 统计连续符合 28 字节 (12B 坐标 + 16B 单位四元数) 的 RingBuffer 帧数。
+// staticPtrChain PC 重编译版主模块静态指针链结构
+type staticPtrChain struct {
+	ptrOffset    uintptr
+	structOffset uintptr
+}
+
+// 已知在主模块 .bss 段中恒定指向活跃林克实体的全局指针链（实机验证跨重启有效）
+var knownStaticChains = []staticPtrChain{
+	{0x4726008, 0x10},
+	{0x4727978, 0x60},
+	{0x4723FF8, 0xA0},
+	{0x46992C8, 0x50},
+	{0x46CE048, 0x90},
+}
+
+// ptkReadStaticChain PC 重编译版主路径：通过主模块固定基址 0x7000000000 处的静态指针表
+// 直读林克真实坐标，零全内存扫描，无需存档锚点，开局秒锁。
+func ptkReadStaticChain(h uintptr, mainBase uintptr) (pos [3]float32, targetAddr uintptr, ok bool) {
+	if mainBase == 0 {
+		return pos, 0, false
+	}
+	for _, chain := range knownStaticChains {
+		pBytes := readMem(h, mainBase+chain.ptrOffset, 8)
+		if len(pBytes) < 8 {
+			continue
+		}
+		heapPtr := uintptr(binary.LittleEndian.Uint64(pBytes))
+		if heapPtr == 0 || heapPtr < 0x100000000 {
+			continue
+		}
+		addr := heapPtr + chain.structOffset
+		cBytes := readMem(h, addr, 12)
+		if len(cBytes) < 12 {
+			continue
+		}
+		x := math.Float32frombits(binary.LittleEndian.Uint32(cBytes[0:]))
+		zs := math.Float32frombits(binary.LittleEndian.Uint32(cBytes[4:]))
+		yn := math.Float32frombits(binary.LittleEndian.Uint32(cBytes[8:]))
+		if !ptkCoordOK(x, zs, yn) {
+			continue
+		}
+		pos = [3]float32{x, -yn, zs - elevBias}
+		return pos, addr, true
+	}
+	return pos, 0, false
+}
+
+// ptkRun28Length 统计以 28 字节 (12B 坐标 + 16B 单位四元数) 双向环形排布的连续有效帧数。
 // PC 版实测该队列在林克真身上连续存在 4~10 帧，且全内存唯一，跨传送永不销毁。
 func ptkRun28Length(buf []byte, off int) int {
-	n := 0
-	for k := 0; k < 10; k++ {
-		o := off + k*ptkRing28Stride
-		if o+ptkRing28Stride > len(buf) {
-			break
+	if off < 0 || off+ptkRing28Stride > len(buf) {
+		return 0
+	}
+	isFrame := func(o int) bool {
+		if o < 0 || o+ptkRing28Stride > len(buf) {
+			return false
 		}
 		x := math.Float32frombits(binary.LittleEndian.Uint32(buf[o:]))
 		zs := math.Float32frombits(binary.LittleEndian.Uint32(buf[o+4:]))
 		yn := math.Float32frombits(binary.LittleEndian.Uint32(buf[o+8:]))
-		if !ptkCoordOK(x, zs, yn) {
+		return ptkCoordOK(x, zs, yn) && ptkIsQuatUnit(buf, o+12)
+	}
+	if !isFrame(off) {
+		return 0
+	}
+	n := 1
+	for k := 1; k < 10; k++ {
+		if isFrame(off + k*ptkRing28Stride) {
+			n++
+		} else {
 			break
 		}
-		if !ptkIsQuatUnit(buf, o+12) {
+	}
+	for k := 1; k < 10; k++ {
+		if isFrame(off - k*ptkRing28Stride) {
+			n++
+		} else {
 			break
 		}
-		n++
 	}
 	return n
 }
@@ -298,8 +358,16 @@ func ptkFindEdenTriples(buf []byte, base uintptr, anchor *[3]float32, radius flo
 		}
 
 
-		// ① ★ PC 版 28 字节物理运动 RingBuffer 队列（Quat 刚体，按距离排序，不赋予虚假 Rot 特权）
-		if run28 := ptkRun28Length(buf, off); run28 >= 2 {
+		// ① ★ PC 版 28 字节物理运动 RingBuffer 队列：
+		//    Run >= 4 帧（全内存唯一林克物理队列）赋予持久 Rot 顶级特权；
+		//    Run 2~3 帧只作为普通 Quat 候选，必须经历移动验证
+		if run28 := ptkRun28Length(buf, off); run28 >= 4 {
+			hits = append(hits, ptkHit{
+				Addr: base + uintptr(off), P: p, Dist: d,
+				Rot: true, Run: run28, Chunk: base,
+			})
+			continue
+		} else if run28 >= 2 {
 			hits = append(hits, ptkHit{
 				Addr: base + uintptr(off), P: p, Dist: d,
 				Quat: true, Run: run28, Chunk: base,

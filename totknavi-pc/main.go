@@ -152,10 +152,9 @@ func main() {
 	// 主模块基址校验
 	mb := plat.MainBase()
 	if mb == 0 {
-		fmt.Println("  [!] 主模块基址校验失败：0x7000000000 处不是预期的 MOD0 镜像。")
-		fmt.Println("      可能 Recomp 改了加载基址，请把 logs\\totk.log 里 'loaded main at' 那行发我。")
+		fmt.Println("  [warn] 主模块镜像自适应探测未命中，将回退至特征扫描模式")
 	} else {
-		fmt.Printf("  [ok] 主模块镜像已确认：0x%X（固定基址，跨启动不变）\n", mb)
+		fmt.Printf("  [ok] 主模块镜像已确认：0x%X（自适应探测成功）\n", mb)
 	}
 	eb, es := plat.ExeBase()
 	fmt.Printf("  [ok] totk.exe 加载基址：0x%X  镜像 %.1fMB（ASLR，每次启动会变）\n", eb, float64(es)/1048576.0)

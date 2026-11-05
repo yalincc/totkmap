@@ -188,8 +188,8 @@ function pushLogs(lines) {
     let color = 'text-slate-400'
     let levelColor = 'text-slate-400'
 
-    if (rawTag === 'lock' || /confirmed live|confirmed!|fully locked/i.test(text)) {
-      level = 'LOCK'
+    if (rawTag === 'lock' || rawTag === 'ok' || /confirmed live|confirmed!|fully locked/i.test(text)) {
+      level = rawTag === 'ok' ? 'OK' : 'LOCK'
       color = 'text-emerald-300'
       levelColor = 'text-emerald-400 font-semibold'
     } else if (rawTag === 'shrine') {

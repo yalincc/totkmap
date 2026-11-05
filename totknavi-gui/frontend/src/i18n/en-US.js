@@ -49,17 +49,18 @@ export default {
   },
   source: {
     known: '⚡ Quick lock',
-    chain: '🔗 Pointer chain',
-    scan: 'Scan',
+    chain: '⚡ L1 Static chain',
+    scan: '⚠ L2 Heap scan',
+    coords: '📍 L3 Calibrated',
     probe: 'Probe regroup',
     consensus: 'Consensus recovery',
     locating: 'Locating'
   },
   emu: {
-    auto: 'Auto detect',
+    auto: 'PC-Recomp',
     ryujinx: 'Ryujinx',
     eden: 'Eden',
-    pickTitle: 'Select emulator (restart locating to apply)'
+    pickTitle: 'Select platform (PC edition uses pc-recomp)'
   },
   buttons: {
     openMap: 'Open web map',
