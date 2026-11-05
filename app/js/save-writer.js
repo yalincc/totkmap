@@ -148,6 +148,19 @@
    * 也避免读档瞬间出现「SavePos 在新位置、World_PlayerPos 还在旧位置」的矛盾状态。 */
   var POS_VARS = ['PlayerStatus.SavePos', 'World_PlayerPos'];
 
+  /* 蓝图（AutoBuilder）四个具名数组。依据 marcrobledo/savegame-editors：
+   *   zelda-totk.js:48-51 变量表；zelda-totk.hashes.csv 里 CombinedActorInfo = BinaryArray
+   *   示例存档实测：count=30，每槽 [u32 长度=6688][6688 数据]，stride=6692
+   * 全部按变量名哈希定位，不写死任何偏移 —— 与版本无关，和本库其它变量同一套机制。 */
+  var BP = {
+    index: 'AutoBuilder.Draft.Content.Index',
+    info: 'AutoBuilder.Draft.Content.CombinedActorInfo',
+    camPos: 'AutoBuilder.Draft.Content.CameraPos',
+    camAt: 'AutoBuilder.Draft.Content.CameraAt'
+  };
+  var BP_DATA = 6688;
+  var BP_STRIDE = 6692;
+
   /* 背包四类（materials/arrows 只有数量；三类装备另有耐久与附加属性）
    *
    * ★ zonai（左纳乌装置）用的是**变量名哈希直连**，不是字符串名。
@@ -351,6 +364,57 @@
           y: view.getFloat32(b + 4, true),
           z: view.getFloat32(b + 8, true)
         };
+      },
+
+      /* ---------- 蓝图槽（只读） ----------
+       * 返回 { ok, count, slots:[{ i, index, used, data(6688), camPos, camAt }] }
+       * 结构不对 / 版本不含蓝图变量时一律 ok:false，绝不拿可疑地址去写。 */
+      readBlueprints: function () {
+        var bi = blockOff(BP.index), bf = blockOff(BP.info),
+            bp = blockOff(BP.camPos), ba = blockOff(BP.camAt);
+        if (bi < 0 || bf < 0 || bp < 0 || ba < 0) {
+          return { ok: false, error: '这个存档里没有蓝图数据（可能还没解锁蓝图能力）' };
+        }
+        var n = count(BP.info);
+        if (n < 1 || n > 64) return { ok: false, error: '蓝图槽数量异常（' + n + '），已停用' };
+        if (count(BP.index) !== n || count(BP.camPos) !== n || count(BP.camAt) !== n) {
+          return { ok: false, error: '蓝图各字段容量不一致，已停用以免写错位置' };
+        }
+        var base = bf + 4;                    // 第一个槽的长度头
+        if (base + n * BP_STRIDE > size) return { ok: false, error: '蓝图数据区越界，已停用' };
+
+        function vec(b, k) {
+          var o = b + 4 + k * 12;
+          if (o + 12 > size) return { x: 0, y: 0, z: 0 };
+          return { x: view.getFloat32(o, true), y: view.getFloat32(o + 4, true), z: view.getFloat32(o + 8, true) };
+        }
+        function headOf(d) {
+          return d.length >= 6 && d[0] === 67 && d[1] === 109 && d[2] === 98 &&
+                 d[3] === 65 && d[4] === 99 && d[5] === 116;   // 'CmbAct'
+        }
+
+        var slots = [];
+        for (var k = 0; k < n; k++) {
+          var hp = base + k * BP_STRIDE;
+          var len = view.getUint32(hp, true);
+          /* 块定位靠变量名哈希 + count + 各数组容量一致，这三关已经足够硬。
+           * 长度头只是每槽的自描述：正常档 6688，未初始化 0，
+           * 个别被改过的档可能是随机值 —— 只把该槽标成 suspect，不整体停用，
+           * 导入时会把长度头覆写成 6688 顺手修回来。 */
+          var suspect = (len !== BP_DATA && len !== 0);
+          var dp = hp + 4;
+          var data = bytes.slice(dp, dp + BP_DATA);
+          slots.push({
+            i: k,
+            index: view.getInt32(bi + 4 + k * 4, true),
+            used: !suspect && headOf(data),
+            suspect: suspect,
+            data: data,
+            camPos: vec(bp, k),
+            camAt: vec(ba, k)
+          });
+        }
+        return { ok: true, count: n, slots: slots, elementSize: BP_DATA, stride: BP_STRIDE };
       },
 
       /* 读某一类背包。skipEmpty=true 时只返回有物品的槽位（v1 全用 true） */
@@ -614,6 +678,62 @@
           });
         }
 
+        /* ---- 蓝图导入：定长覆写一个槽，不动结构、不改文件长度 ----
+         * plan.blueprint = { i, data(6688), camPos?, camAt? }
+         * 覆写目标槽的 4 字节长度头 + 6688 字节数据 + 相机参数。
+         * Index 沿用开源编辑器行为保持不变；只有 -1（从未启用过的空槽）才补一个序号，
+         * 否则游戏不会把这条新历史列出来。 */
+        if (plan.blueprint) {
+          var bq = plan.blueprint;
+          var qb = blockOff(BP.info), qi = blockOff(BP.index),
+              qp = blockOff(BP.camPos), qa = blockOff(BP.camAt);
+          var qn = count(BP.info);
+          var qd = bq.data;
+          var qOk = !!qd && qd.length === BP_DATA;
+          if (qOk) {
+            var qh = 'CmbAct';
+            for (var hi = 0; hi < 6; hi++) { if (qd[hi] !== qh.charCodeAt(hi)) { qOk = false; break; } }
+          }
+          if (qb < 0 || qi < 0 || qp < 0 || qa < 0) {
+            errs.push('蓝图字段定位失败');
+          } else if (qn < 1 || qn > 64) {
+            errs.push('蓝图槽数量异常');
+          } else if (typeof bq.i !== 'number' || bq.i < 0 || bq.i >= qn) {
+            errs.push('目标蓝图槽非法');
+          } else if (!qOk) {
+            errs.push('待导入的蓝图数据无效（应为 6688 字节且以 CmbAct 开头）');
+          } else {
+            var qhp = qb + 4 + bq.i * BP_STRIDE;
+            if (qhp + 4 + BP_DATA > size) {
+              errs.push('蓝图 #' + (bq.i + 1) + ' 越界，已中止');
+            } else {
+              edits.push({ off: qhp, len: 4, kind: 'i32', value: BP_DATA, label: '蓝图 #' + (bq.i + 1) + ' 长度头' });
+              edits.push({ off: qhp + 4, len: BP_DATA, kind: 'bytes', value: qd, label: '蓝图 #' + (bq.i + 1) + ' 数据' });
+              ['camPos', 'camAt'].forEach(function (key, kk) {
+                var c = bq[key];
+                if (!c) return;               /* 6688 长度的 .cai 没带相机 → 保留原视角 */
+                var vo = (kk === 0 ? qp : qa) + 4 + bq.i * 12;
+                if (vo + 12 > size) { errs.push('蓝图相机参数越界'); return; }
+                ['x', 'y', 'z'].forEach(function (ax, ai) {
+                  edits.push({
+                    off: vo + ai * 4, len: 4, kind: 'f32', value: +c[ax] || 0,
+                    label: '蓝图 #' + (bq.i + 1) + ' 视角' + (kk ? '朝向' : '位置') + ax.toUpperCase()
+                  });
+                });
+              });
+              var qio = qi + 4 + bq.i * 4;
+              if (view.getInt32(qio, true) === -1) {
+                var mx = -1;
+                for (var z = 0; z < qn; z++) {
+                  var zv = view.getInt32(qi + 4 + z * 4, true);
+                  if (zv > mx) mx = zv;
+                }
+                edits.push({ off: qio, len: 4, kind: 'i32', value: mx + 1, label: '蓝图 #' + (bq.i + 1) + ' 启用' });
+              }
+            }
+          }
+        }
+
         if (errs.length) return { ok: false, error: errs.join('；'), edits: [] };
         if (!edits.length) return { ok: true, changed: 0, edits: [], bytes: new Uint8Array(bytes) };
 
@@ -637,6 +757,20 @@
         var ov = new DataView(out.buffer);
         var report = [], touched = 0;
         edits.forEach(function (ed) {
+          /* 蓝图是 6688 字节的定长块，不是 4 字节标量 —— 单独走字节覆写分支。
+           * 仍然只写 [表结束, 文件末尾) 内的原有区间，长度不变。 */
+          if (ed.kind === 'bytes') {
+            var differs = false;
+            for (var bi2 = 0; bi2 < ed.len; bi2++) {
+              if (out[ed.off + bi2] !== ed.value[bi2]) { differs = true; break; }
+            }
+            if (differs) {
+              out.set(ed.value, ed.off);
+              report.push({ off: ed.off, label: ed.label, from: '原蓝图数据', to: '新蓝图数据' });
+              touched++;
+            }
+            return;
+          }
           var before = ed.kind === 'f32' ? ov.getFloat32(ed.off, true) : ov.getInt32(ed.off, true);
           if (ed.kind === 'f32') ov.setFloat32(ed.off, ed.value, true);
           else ov.setInt32(ed.off, ed.value, true);

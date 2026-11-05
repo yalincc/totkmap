@@ -254,6 +254,58 @@
       </div>
     </section>
 
+    <!-- ---------- 05 蓝图分享 ---------- -->
+    <section class="card span-2">
+      <div class="card-head">
+        <span class="idx">05</span>
+        <h2>蓝图分享</h2>
+        <span class="note">导出 · 导入</span>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <span class="lbl">存档里的蓝图<small id="bpCount">加载后显示</small></span>
+          <span class="ctl" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+            <select id="bpSlot" aria-label="选择要导出的蓝图槽" style="min-width:190px;background:#1b212a;color:#e8edf4;border:1px solid #313b48;border-radius:6px;padding:6px 8px;font-size:12px"></select>
+            <button type="button" class="btn" id="bpExport">导出 .cai</button>
+            <button type="button" class="btn" id="bpShare">生成分享码</button>
+          </span>
+        </div>
+
+        <div id="bpShareBox" hidden style="margin:12px 0;padding:12px;border:1px solid #313b48;border-radius:8px">
+          <div style="font-size:12px;opacity:.8;margin-bottom:6px">把这串发给别人，对方粘贴到本页即可导入；扫码也会得到同样的文本</div>
+          <textarea id="bpShareText" readonly rows="3" style="width:100%;box-sizing:border-box;background:#141920;color:#e8edf4;border:1px solid #313b48;border-radius:6px;padding:8px;font-size:11px;font-family:monospace;word-break:break-all"></textarea>
+          <div style="display:flex;gap:12px;align-items:flex-start;margin-top:10px;flex-wrap:wrap">
+            <button type="button" class="btn" id="bpCopy">复制分享码</button>
+            <div id="bpQr" style="background:#fff;padding:6px;border-radius:6px;line-height:0"></div>
+            <div id="bpQrHint" style="font-size:11px;opacity:.7;align-self:center"></div>
+          </div>
+        </div>
+
+        <div class="row">
+          <span class="lbl">导入到<small id="bpTargetHint">选一个槽位覆盖</small></span>
+          <span class="ctl" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+            <select id="bpTarget" aria-label="选择导入目标槽位" style="min-width:190px;background:#1b212a;color:#e8edf4;border:1px solid #313b48;border-radius:6px;padding:6px 8px;font-size:12px"></select>
+            <label class="btn" for="bpFile" style="cursor:pointer;display:inline-flex;align-items:center">选择 .cai 文件</label>
+            <input type="file" id="bpFile" accept=".cai,application/octet-stream" hidden>
+          </span>
+        </div>
+
+        <div class="row">
+          <span class="lbl">或粘贴分享码<small>TKB1- 开头</small></span>
+          <span class="ctl" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+            <input type="text" id="bpCode" placeholder="TKB1-..." style="flex:1;min-width:220px;background:#1b212a;color:#e8edf4;border:1px solid #313b48;border-radius:6px;padding:6px 8px;font-size:12px">
+            <button type="button" class="btn" id="bpCodeLoad">读取</button>
+          </span>
+        </div>
+
+        <div class="tip ok" id="bpPending" hidden></div>
+        <div class="tip">
+          导出的 <b>.cai</b> 是社区通用格式，HyruleWorks 与其它存档编辑器都能用。
+          导入会覆盖所选槽位，点底部「预览并下载」后<b>先备份原档</b>，再手动覆盖 progress.sav。
+        </div>
+      </div>
+    </section>
+
   </div>
 </main>
 
@@ -286,6 +338,8 @@
 </div>
 
 <script src="../data/equip-names.js"></script>
+<script src="../js/vendor/qrcode.min.js"></script>
+<script src="../js/blueprint.js"></script>
 <script src="../js/save-writer.js"></script>
 <script src="save-edit.js"></script>
 </body>

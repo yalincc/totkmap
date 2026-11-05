@@ -30,7 +30,9 @@
     dlBufs: null,      // 已算好的两份字节（备份 / 改档），供「再下一次」复用
     dlDone: false,     // 下载已完成（此时底部按钮变成"关闭"）
     origin: { rupee: 0, hearts: 0, stamina: 0, energy: 0 },  // 存档原值（HUD 对比用）
-    pos: null          // 当前存档点
+    pos: null,          // 当前存档点
+    bp: null,           // 存档里的蓝图槽（readBlueprints 结果）
+    bpImport: null      // 待写入的蓝图 { i, data, camPos, camAt }
   };
 
   var $ = function (id) { return document.getElementById(id); };
@@ -141,6 +143,13 @@
 
     renderMatGrid();
     renderEquip();
+
+    /* 蓝图：换了一份存档 → 上一份待导入的蓝图一律作废 */
+    state.bp = sw.readBlueprints();
+    state.bpImport = null;
+    $('bpPending').hidden = true;
+    $('bpShareBox').hidden = true;
+    renderBlueprints();
 
     /* 坐标 */
     var p = sw.readPos();
@@ -385,6 +394,90 @@
     shields: ['None', 'DurabilityUp', 'DurabilityUpPlus', 'GuardUp', 'GuardUpPlus']
   };
 
+  /* ---------- 蓝图分享 / 导入 ----------
+   * 字节读写全在 save-writer.js，这里只做「选槽 → 导出/生成分享码 → 读回 → 交给预览」。
+   * 导入不会立刻改档：先记进 state.bpImport，由底部「预览并下载」统一走强制备份流程。 */
+  function bpLabel(s) {
+    return '#' + String(s.i + 1).padStart(2, '0') + ' · ' + (s.used ? '有蓝图' : '空槽') +
+           (s.index < 0 ? '（未启用）' : '');
+  }
+
+  function renderBlueprints() {
+    var src = $('bpSlot'), dst = $('bpTarget'), cnt = $('bpCount');
+    var b = state.bp;
+    if (!b || !b.ok) {
+      cnt.textContent = b ? b.error : '读取失败';
+      src.innerHTML = ''; dst.innerHTML = '';
+      $('bpExport').disabled = true; $('bpShare').disabled = true;
+      return;
+    }
+    var used = 0, firstUsed = -1, firstEmpty = -1;
+    b.slots.forEach(function (s) {
+      if (s.used) { used++; if (firstUsed < 0) firstUsed = s.i; }
+      else if (firstEmpty < 0) firstEmpty = s.i;
+    });
+    cnt.textContent = b.count + ' 个槽 · ' + used + ' 个有蓝图';
+    var opts = b.slots.map(function (s) {
+      return '<option value="' + s.i + '">' + esc(bpLabel(s)) + '</option>';
+    }).join('');
+    src.innerHTML = opts; dst.innerHTML = opts;
+    if (firstUsed >= 0) src.value = String(firstUsed);
+    dst.value = String(firstEmpty >= 0 ? firstEmpty : b.slots[b.slots.length - 1].i);
+    $('bpExport').disabled = firstUsed < 0;
+    $('bpShare').disabled = firstUsed < 0;
+  }
+
+  function bpSlot() {
+    if (!state.bp || !state.bp.ok) return null;
+    return state.bp.slots[+$('bpSlot').value] || null;
+  }
+
+  function bpExport() {
+    var s = bpSlot();
+    if (!s || !s.used) { showMsg('这个槽里没有蓝图，换一个再导出。', 'warn'); return; }
+    try {
+      var cai = window.Blueprint.toCai(s);
+      window.Blueprint.download(cai, 'blueprint_' + String(s.i + 1).padStart(2, '0') + '.cai');
+      showMsg('<b>已导出 .cai。</b>可以直接发给别人，或上传到 HyruleWorks。', 'ok');
+    } catch (e) { showMsg('<b>导出失败：</b>' + esc(e.message), 'warn'); }
+  }
+
+  function bpShare() {
+    var s = bpSlot();
+    if (!s || !s.used) { showMsg('这个槽里没有蓝图，换一个再分享。', 'warn'); return; }
+    try {
+      var code = window.Blueprint.encodeShare(window.Blueprint.toCai(s));
+      var svg = window.Blueprint.qrSvg(code);
+      $('bpShareText').value = code;
+      $('bpQr').innerHTML = svg || '';
+      $('bpQrHint').textContent = svg
+        ? '用任意扫码工具扫出来就是这串文本，复制粘贴到本页即可导入。'
+        : '这张蓝图太长，二维码放不下，请改用分享码文本或 .cai 文件。';
+      $('bpShareBox').hidden = false;
+    } catch (e) { showMsg('<b>生成分享码失败：</b>' + esc(e.message), 'warn'); }
+  }
+
+  function bpPendingHtml(i, from) {
+    var tgt = state.bp.slots[i];
+    return '<b>已读取一张蓝图</b>' + (from ? '（来源：' + esc(from) + '）' : '') + ' → 将' +
+      (tgt.used ? '<b>覆盖</b>' : '写入') + ' <b>' + esc(bpLabel(tgt)) + '</b>' +
+      (tgt.used ? '（该槽原有蓝图会被替换，可先导出留底）' : '') +
+      '。点底部「预览并下载」生成改好的存档。';
+  }
+
+  function bpSetImport(caiBytes, from) {
+    if (!state.bp || !state.bp.ok) { showMsg('先加载存档，再导入蓝图。', 'warn'); return; }
+    try {
+      var parsed = window.Blueprint.parseCai(caiBytes);
+      var i = +$('bpTarget').value;
+      state.bpImport = { i: i, data: parsed.data, camPos: parsed.camPos, camAt: parsed.camAt };
+      var el = $('bpPending');
+      el.hidden = false;
+      el.innerHTML = bpPendingHtml(i, from);
+      updateFoot();
+    } catch (e) { showMsg('<b>导入失败：</b>' + esc(e.message), 'warn'); }
+  }
+
   /* ---------- 收集用户意图 ---------- */
   function collectPlan() {
     var p = {};
@@ -429,6 +522,9 @@
     });
     if (items.length) p.items = items;
 
+    /* 蓝图导入与其它改动一起进预览，共用强制备份 / 下载流程 */
+    if (state.bpImport) p.blueprint = state.bpImport;
+
     return p;
   }
 
@@ -439,7 +535,7 @@
     /* 「什么都没填」和「填了但值跟存档一样」是两件事，提示必须分开说。
        以前两种情况都报"你还没改任何东西"，用户明明填了数却被告知没改，只会以为按钮坏了。 */
     if (!Object.keys(plan).length) {
-      showMsg('还没选要改什么 —— 上面四张卡片里挑一项填上，再点这里。', '');
+      showMsg('还没选要改什么 —— 上面的卡片里挑一项填上，再点这里。', '');
       return;
     }
 
@@ -687,6 +783,7 @@
     if (plan.arrows999) n++;
     if (plan.pos) n++;
     if (plan.items) n += plan.items.length;
+    if (plan.blueprint) n++;
 
     var src = state.source === 'navi' ? 'navi 直连' : '本地文件';
     $('footStatus').innerHTML = n
@@ -845,10 +942,52 @@
       /* 装备改动和材料勾选都存在 state 里，重置必须连 state 一起清，否则重绘后又被回填回来 */
       state.eqEdits = {};
       state.mgSel = {};
+      state.bpImport = null;
+      $('bpPending').hidden = true;
+      $('bpShareBox').hidden = true;
+      $('bpCode').value = '';
       renderMatGrid();
       renderEquip();
       updateFoot();
       showMsg('已重置所有输入，存档本身一个字节都没动。', '');
+    });
+
+    /* 蓝图分享 / 导入 */
+    $('bpExport').addEventListener('click', bpExport);
+    $('bpShare').addEventListener('click', bpShare);
+    $('bpCopy').addEventListener('click', function () {
+      var t = $('bpShareText');
+      t.select();
+      var ok = false;
+      try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+      if (!ok && navigator.clipboard) {
+        navigator.clipboard.writeText(t.value).then(function () {
+          showMsg('分享码已复制。', 'ok');
+        }, function () { showMsg('复制失败，请手动全选文本框里的分享码。', 'warn'); });
+        return;
+      }
+      showMsg(ok ? '分享码已复制。' : '复制失败，请手动全选文本框里的分享码。', ok ? 'ok' : 'warn');
+    });
+    $('bpFile').addEventListener('change', function () {
+      var f = this.files && this.files[0];
+      if (!f) return;
+      var name = f.name;
+      var r = new FileReader();
+      r.onload = function () { bpSetImport(new Uint8Array(r.result), name); };
+      r.onerror = function () { showMsg('文件读不出来，换一个 .cai 试试。', 'warn'); };
+      r.readAsArrayBuffer(f);
+      this.value = '';
+    });
+    $('bpCodeLoad').addEventListener('click', function () {
+      try {
+        var cai = window.Blueprint.decodeShare($('bpCode').value);
+        bpSetImport(cai, '分享码');
+      } catch (e) { showMsg('<b>分享码读不了：</b>' + esc(e.message), 'warn'); }
+    });
+    $('bpTarget').addEventListener('change', function () {
+      if (!state.bpImport) return;
+      state.bpImport.i = +this.value;
+      $('bpPending').innerHTML = bpPendingHtml(state.bpImport.i);
     });
 
     /* 预览 / 下载 */
