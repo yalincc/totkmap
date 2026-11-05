@@ -140,6 +140,7 @@ docs/**
 # 例外：对外发布的功能详解与发布说明规范，README / CHANGELOG 会链接，需入库
 !docs/FEATURES.md
 !docs/RELEASE-NOTES.md
+!docs/TOTKnavi-PC定位技术与真身追踪手册.md
 # 任务中间校对底表（运行产物已打入 app/data/task-plan.js，底表不入库）
 tasks/
 TOTKmap-*-待确认.*
