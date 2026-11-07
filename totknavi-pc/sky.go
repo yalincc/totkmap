@@ -472,10 +472,6 @@ func layerOf(gx, gy, gz float32) int {
 				return 20
 			}
 		}
-		// ④ 若命中空岛多边形边界
-		if inSkyPoly(float64(wx), float64(wz)) {
-			return 20
-		}
 		// 其余纯悬空坠落情况归地上 18
 		return 18
 	}
