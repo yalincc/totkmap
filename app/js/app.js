@@ -594,7 +594,7 @@
         catName === '莫尔德拉吉克' || catName === '巨霸伽马' || catName === '古栗欧克' ||
         catName === '古代研究所' || catName === '神殿' || catName === '大妖精之泉' ||
         catName === '左纳乌制造机' || catName === '村庄' || catName === '驿站' ||
-        catName === '任务') {
+        catName === '任务' || catName.startsWith('瘴气魔')) {
       return 'T2';
     }
     return 'T3';
@@ -2823,6 +2823,16 @@
         }
       }
     }
+    // 宝箱与装备联动：若操作宝箱则同步联动内部装备标点
+    if (window.TOTK_CHEST_TO_EQUIP && window.TOTK_CHEST_TO_EQUIP[doneId]) {
+      var equips = window.TOTK_CHEST_TO_EQUIP[doneId];
+      for (var ei = 0; ei < equips.length; ei++) {
+        var eqId = equips[ei];
+        if (isDone) state.done[eqId] = true;
+        else delete state.done[eqId];
+        applyDoneToMarker(eqId);
+      }
+    }
     applyDoneToMarker(doneId);
   }
 
@@ -2837,6 +2847,18 @@
         var mk = MARKERS[mi];
         if (mk && mk.korokStartId && set[mk.korokStartId]) {
           set[mk.id] = true;
+        }
+      }
+    }
+
+    // 宝箱完成联动装备标点：若宝箱已开则内部装备同步标记完成
+    if (window.TOTK_CHEST_TO_EQUIP) {
+      for (var cId in window.TOTK_CHEST_TO_EQUIP) {
+        if (set[cId]) {
+          var eqList = window.TOTK_CHEST_TO_EQUIP[cId];
+          for (var eki = 0; eki < eqList.length; eki++) {
+            set[eqList[eki]] = true;
+          }
         }
       }
     }
@@ -3342,6 +3364,14 @@
       }
       aeBox.innerHTML = html;
       bindArmorEnhance(aeBox);
+    }
+    /* 人马（莱尼尔）强敌机制提示：游戏底层无官方讨伐勋章记录，红月刷新，需手动标记 */
+    var isLynel = m.cat === 81 || m.cat === 104 || (/莱尼尔|人马/.test(m.name || '') && m.cat !== 144 && m.cat !== 76 && m.cat !== 77);
+    if (isLynel) {
+      var lynelNote = (window.I18N && window.I18N.getLang() === 'en')
+        ? 'Note: Lynels are standard enemies without defeat medals. They respawn with Blood Moons and require manual completion marking.'
+        : '提示：莱尼尔（人马）属于普通强敌，游戏无官方讨伐勋章记录（红月会刷新），需手动点击完成标记。';
+      noteRaw = noteRaw ? (noteRaw + '\n\n' + lynelNote) : lynelNote;
     }
     /* 「注意」较长，默认折叠 + 展开按钮（不足一屏时按钮不出现） */
     var noteRow = $('ecNoteRow'), noteText = $('ecNoteText'), noteMore = $('ecNoteMore');
