@@ -105,7 +105,7 @@ The two product lines are **released independently**, distinguished by prefix in
 
 | Product line | Releases prefix | Current | Notes |
 |---|---|---|---|
-| **Web map** (main product) | `totkmap-vX.Y.Z` | **v2.7.0** | 1,334 official overworld chests + automatic save progress sync; online version <https://totk.yalin.site> follows along |
+| **Web map** (main product) | `totkmap-vX.Y.Z` | **v2.8.3** | 1,334 official overworld chests + automatic save progress sync; online version <https://totk.yalin.site> follows along |
 | **Navigator TOTKNavi** | `totknavi-vX.Y.Z` | **v3.0.1** | Cross-scene persistent slot positioning, zero re-scan on warp / shrine, 1.5s lock |
 
 See [CHANGELOG.md](CHANGELOG.md) for details.

@@ -106,7 +106,7 @@ TOTKmap/
 
 | 产品线 | Releases 前缀 | 当前版本 | 说明 |
 |---|---|---|---|
-| **网页地图（本仓库主体）** | `totkmap-vX.Y.Z` | **v2.7.0** | 官方大世界宝箱 1,334 + 存档进度自动同步；在线版 <https://totk.yalin.site> 同步 |
+| **网页地图（本仓库主体）** | `totkmap-vX.Y.Z` | **v2.8.3** | 官方大世界宝箱 1,334 + 存档进度自动同步；在线版 <https://totk.yalin.site> 同步 |
 | **导航程序 TOTKNavi** | `totknavi-vX.Y.Z` | **v3.0.1** | 跨场景持久槽定位，传送 / 神庙零重扫，1.5 秒秒锁 |
 
 更新明细见 [CHANGELOG.md](CHANGELOG.md)。
