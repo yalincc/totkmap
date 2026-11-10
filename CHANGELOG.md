@@ -31,6 +31,12 @@
 - **瘴气魔全量 49 处标点入库**：细分「固定（32 处）」与「随机触发（17 处）」双分类，配置专属图标与中英文多语言；
 - **材料要素补全**：补入烟雾蘑菇（5,655 点）与大生命松露（21 点）至 `materials.js`。
 
+### 五、紧急小修（2026-11-11）
+- **修复跨端探索映射断流与缓存穿透**：修复 `explore_save_map.js` 缺失 `window.TOTK_EXPLORE_MAP` 别名导致手机与在线端呀哈哈/立牌无法标记已完成的问题；
+- **消费端防御与收口**：`save-parser.js` 抽象 `getExploreMap()` 实现 `TOTK_EXPLORE_SAVE_MAP` 与 `TOTK_EXPLORE_MAP` 双读兼容；
+- **缓存版本与静态资源穿透**：`sw.js` 的 `SW_VER` 升级为 `v1.9.4-66`，穿透 Service Worker 缓存，并同步 bump `index.html` 资源版本号；
+- **门禁防线建立**：在 `tools/audit_explore_map.py` 增设双全局变量存在性断言，杜绝后续重生成再次遗漏。
+
 ---
 
 ## TOTKNavi v3.1.2 — PC 重编译版主模块静态指针链直读秒锁与定位稳定性重构（2026-11-05）

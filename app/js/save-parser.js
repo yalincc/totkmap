@@ -50,6 +50,20 @@ var TOTKSaveParser = (function () {
     return '0x' + ('0000000000000000' + hex).slice(-16);
   }
 
+  /* 辅助：统一获取探索映射表（双读兼容 TOTK_EXPLORE_SAVE_MAP 与 TOTK_EXPLORE_MAP，兼容 window 与 global） */
+  function getExploreMap(explicitMap) {
+    if (explicitMap && typeof explicitMap === 'object' && Object.keys(explicitMap).length > 0) return explicitMap;
+    if (typeof window !== 'undefined') {
+      if (window.TOTK_EXPLORE_SAVE_MAP) return window.TOTK_EXPLORE_SAVE_MAP;
+      if (window.TOTK_EXPLORE_MAP) return window.TOTK_EXPLORE_MAP;
+    }
+    if (typeof global !== 'undefined') {
+      if (global.TOTK_EXPLORE_SAVE_MAP) return global.TOTK_EXPLORE_SAVE_MAP;
+      if (global.TOTK_EXPLORE_MAP) return global.TOTK_EXPLORE_MAP;
+    }
+    return {};
+  }
+
   /* 解析 progress.sav 为纯数据驱动的集合对象 */
   function parse(buffer) {
     if (!buffer || !(buffer instanceof ArrayBuffer)) return { ok: false, error: '请选择有效的 progress.sav 文件' };
@@ -231,13 +245,12 @@ var TOTKSaveParser = (function () {
         }
       }
     }
-    if (!chestGuids.length && typeof window !== 'undefined' && window.TOTK_EXPLORE_MAP && window.TOTK_EXPLORE_MAP.chests) {
-      for (var chid in window.TOTK_EXPLORE_MAP.chests) {
-        chestGuids.push(window.TOTK_EXPLORE_MAP.chests[chid]);
-      }
-    } else if (!chestGuids.length && typeof global !== 'undefined' && global.TOTK_EXPLORE_MAP && global.TOTK_EXPLORE_MAP.chests) {
-      for (var chid2 in global.TOTK_EXPLORE_MAP.chests) {
-        chestGuids.push(global.TOTK_EXPLORE_MAP.chests[chid2]);
+    if (!chestGuids.length) {
+      var expMap = getExploreMap();
+      if (expMap && expMap.chests) {
+        for (var chid in expMap.chests) {
+          chestGuids.push(expMap.chests[chid]);
+        }
       }
     }
     if (chestGuids.length) {
@@ -309,7 +322,7 @@ var TOTKSaveParser = (function () {
       return null;
     }
 
-    var map = exploreMap || (typeof window !== 'undefined' ? window.TOTK_EXPLORE_MAP : {}) || (typeof global !== 'undefined' ? global.TOTK_EXPLORE_MAP : {}) || {};
+    var map = getExploreMap(exploreMap);
 
     // 1. 鸟望台 (32位 Hash，值为 1 表示已发现)
     if (map.towers) {

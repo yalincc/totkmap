@@ -2895,7 +2895,7 @@
 
   /* 上传存档 / 自动同步 → 逐点完成注入（走纯数据驱动 matchExploreDone） */
   function applySavePointDone(parsed) {
-    var map = window.TOTK_EXPLORE_MAP || {};
+    var map = window.TOTK_EXPLORE_SAVE_MAP || window.TOTK_EXPLORE_MAP || undefined;
     var chestsOfficial = window.TOTK_CHESTS_OFFICIAL || window.CHESTS_OFFICIAL || null;
     var pd = TOTKSaveParser.matchExploreDone(parsed, map, chestsOfficial);
     applyProgressDone(Object.keys(pd || {}));
