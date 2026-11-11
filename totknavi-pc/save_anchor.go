@@ -48,6 +48,10 @@ func totkSane(gx, gy, gz float32) bool {
 	if gx == 0 && gy == 0 {
 		return false
 	}
+	// 本地坐标系/占位值：神庙内部、物件内部、以及 progress.sav 的假坐标都贴近原点
+	if abs32(gx) < 20 && abs32(gy) < 20 {
+		return false
+	}
 	return true
 }
 
@@ -85,7 +89,10 @@ func readAnchors(p Platform) []*SaveAnchor {
 			var offs []int
 			switch strings.ToLower(filepath.Base(path)) {
 			case "progress.sav":
-				offs = []int{progressOff1, progressOff2}
+				// PC 版 1.4.3 实测：progress.sav 的 0x532AC/0x53324 已不是玩家坐标
+				// （解出 (0, 0, -105) / (32.3, 0, -105) 这类占位值），会把假锚点带进
+				// 候选池，导致窄窗扫描锁到原点附近的静态副本。坐标只信 caption.sav。
+				continue
 			case "caption.sav":
 				offs = []int{captionOff}
 			default:

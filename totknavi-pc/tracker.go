@@ -183,6 +183,9 @@ func runTracker(p Platform, plat *totkpcPlatform, anchor *[3]float32, addr uintp
 	verified := addr != 0
 	moveN := 0
 	lostTicks := 0
+	stallTicks := 0
+	huntFails := 0
+	var lastHunt time.Time
 	var prev [3]float32
 	hasPrev := false
 	var prevPrev [3]float32
@@ -398,6 +401,7 @@ func runTracker(p Platform, plat *totkpcPlatform, anchor *[3]float32, addr uintp
 			if !verified {
 				if hasPrev && isPhysicsMove(cur, prev) {
 					moveN++
+					stallTicks = 0
 					if moveN >= 3 {
 						verified = true
 						cands = nil
@@ -406,6 +410,12 @@ func runTracker(p Platform, plat *totkpcPlatform, anchor *[3]float32, addr uintp
 					}
 				} else {
 					moveN = 0
+					// 静止判定：候选槽连续不动，可能是存档残影/静态副本，而非玩家真身
+					if hasPrev && dist3(cur, prev) < 0.05 {
+						stallTicks++
+					} else {
+						stallTicks = 0
+					}
 					if hasPrev && len(cands) > 0 {
 						for _, c := range cands {
 							if c.Addr == lockedAddr {
@@ -427,12 +437,45 @@ func runTracker(p Platform, plat *totkpcPlatform, anchor *[3]float32, addr uintp
 								lockedAddr = c.Addr
 								cur = cp
 								moveN = 1
+								stallTicks = 0
 								fmt.Printf("  [lock] 走动仲裁 → 改用候选 0x%X (%.1f, %.1f, %.1f)\n",
 									lockedAddr, cur[0], cur[1], cur[2])
 								break
 							}
 						}
 					}
+				}
+			}
+
+			// ②.5 卡死自愈：候选持续静止 1.5s，且没有可仲裁的候选 → 判定锁错，
+			// 启动"移动搜寻"（两次全范围差分），把真正在动的玩家槽找回来。
+			// 玩家站着不动时差分同样无命中，不会误锁，只是安静退避。
+			if !verified && stallTicks >= 15 {
+				cool := 3 * time.Second
+				if huntFails >= 3 {
+					cool = 15 * time.Second
+				}
+				if time.Since(lastHunt) >= cool {
+					lastHunt = time.Now()
+					logEvent("  [hunt] 候选 0x%X 连续 1.5s 静止，疑似存档残影/静态副本，启动移动搜寻...", lockedAddr)
+					if newAddr, newPos, ok := huntMoving(p); ok {
+						lockedAddr = newAddr
+						cands = nil
+						usingStaticChain = false
+						moveN = 0
+						verified = false
+						stallTicks = 0
+						huntFails = 0
+						pstate.setGameStatus(true, p.PID(), lockedAddr)
+						pstate.bumpLock()
+						logEvent("  [hunt] 找到移动槽 0x%X hud=(%.1f, %.1f, %.1f)，等待移动确认", newAddr, newPos[0], newPos[1], newPos[2])
+						prev = newPos
+						hasPrev = true
+						onTick(newPos, 0, false, false, "scan")
+						continue
+					}
+					huntFails++
+					logEvent("  [hunt] 未找到移动槽（角色未移动或仍在读取），稍后重试")
 				}
 			}
 
