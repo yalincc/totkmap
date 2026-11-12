@@ -2662,7 +2662,7 @@
       }
     });
 
-    /* 地底洁净武器机制弹窗关闭事件 */
+    /* 地底洁净武器机制弹窗关闭与地面腐朽武器直达事件 */
     var swhBox = $('shadowWeaponHelpBox');
     var swhClose = $('swHelpClose');
     if (swhClose && swhBox) {
@@ -2674,6 +2674,29 @@
       });
       document.addEventListener('keydown', function (e) {
         if (e.key === 'Escape' && !swhBox.classList.contains('hidden')) swhBox.classList.add('hidden');
+      });
+      /* 点击地面腐朽武器直达链接：关闭弹层 -> gotoMarker 跨层直达 -> 弹出探索卡片 */
+      swhBox.addEventListener('click', function (e) {
+        var link = e.target.closest('.sw-locate-link');
+        if (!link) return;
+        var mId = parseInt(link.getAttribute('data-id'), 10);
+        if (!mId) return;
+        var targetMarker = window.TOTK_MARKERS ? window.TOTK_MARKERS.find(function (x) { return x.id === mId; }) : null;
+        if (!targetMarker) return;
+        swhBox.classList.add('hidden');
+        gotoMarker(targetMarker);
+        state.current = targetMarker;
+        var catObj = catById(targetMarker.layer, targetMarker.cat);
+        showExploreCard({
+          name: targetMarker.name || targetMarker.full,
+          cat: catObj ? catObj.name : '武器',
+          desc: targetMarker.desc || '',
+          m: targetMarker,
+          isDone: !!state.done[targetMarker.id],
+          reposition: true
+        });
+        var mName = (window.I18N && window.I18N.nameOf(targetMarker)) || targetMarker.name;
+        toast((window.I18N && window.I18N.getLang() === 'en') ? ('Located: ' + mName) : ('已定位地面武器：' + mName));
       });
     }
   }

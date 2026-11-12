@@ -3821,4 +3821,17 @@ window.TOTK_MARKERS_EN = {
   "8677": "Forest Dweller's Sword",
   "8678": "Gerudo Spear",
   "8679": "Gerudo Claymore"
+
+  4057: "Decayed Royal Guard's Claymore",
+  8701: "Decayed Royal Guard's Sword",
+  8702: "Decayed Royal Guard's Spear",
+  8703: "Decayed Royal Claymore",
+  8704: "Decayed Royal Broadsword",
+  8705: "Decayed Zora Spear",
+  8706: "Decayed Zora Sword",
+  8707: "Decayed Gerudo Claymore",
+  8708: "Decayed Gerudo Scimitar",
+  8709: "Decayed Cobble Crusher",
+  8710: "Decayed Forest Dweller's Sword",
+  8711: "Decayed Feathered Edge",
 };

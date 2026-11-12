@@ -1283,6 +1283,17 @@ html, body {
 #ecSwHelpBtn:hover {
   color: #7dd3fc;
 }
+.sw-locate-link {
+  color: #38bdf8;
+  text-decoration: underline;
+  cursor: pointer;
+  font-weight: 500;
+  margin-left: 2px;
+  transition: color .15s;
+}
+.sw-locate-link:hover {
+  color: #7dd3fc;
+}
 #ecNoteText.clamped {
   display: -webkit-box;
   -webkit-line-clamp: 2;
