@@ -1005,6 +1005,70 @@
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape' && !$('previewMask').classList.contains('hidden')) closePreview();
     });
+
+    renderBlueprintPresets();
+  }
+
+  /* ---------- 精选蓝图工坊渲染 ---------- */
+  function renderBlueprintPresets() {
+    var grid = $('bpPresetGrid');
+    if (!grid) return;
+    var list = window.TOTK_BLUEPRINTS_PRESET || [];
+    if (!list.length) {
+      grid.innerHTML = '<div style="opacity:.6;font-size:12px">暂无预设蓝图</div>';
+      return;
+    }
+    var html = '';
+    list.forEach(function (p, idx) {
+      html += '<div class="bp-pcard" data-idx="' + idx + '" style="background:#141920;border:1px solid #313b48;border-radius:8px;padding:10px;display:flex;flex-direction:column;gap:6px">' +
+        '<div style="display:flex;justify-content:space-between;align-items:center">' +
+          '<span style="font-weight:600;font-size:13px;color:#e8edf4">' + esc(p.name) + '</span>' +
+          '<span style="font-size:11px;background:#1e293b;color:#38bdf8;padding:2px 6px;border-radius:4px">' + esc(p.tag || '') + '</span>' +
+        '</div>' +
+        '<div style="font-size:11px;color:#94a3b8">' + esc(p.desc) + '</div>' +
+        '<div style="font-size:11px;color:#fbbf24;margin-top:2px">💎 消耗矿石：' + p.costOre + ' 块</div>' +
+        '<div style="font-size:11px;color:#64748b;line-height:1.4"><b>零件：</b>' + esc((p.parts || []).join('、')) + '</div>' +
+        '<div style="display:flex;gap:6px;margin-top:auto;padding-top:6px">' +
+          '<button type="button" class="btn primary bp-load-btn" data-idx="' + idx + '" style="flex:1;padding:5px 8px;font-size:11px">📥 填入存档</button>' +
+          '<button type="button" class="btn bp-copy-btn" data-idx="' + idx + '" style="padding:5px 8px;font-size:11px">📋 复制码</button>' +
+        '</div>' +
+      '</div>';
+    });
+    grid.innerHTML = html;
+
+    Array.prototype.forEach.call(grid.querySelectorAll('.bp-load-btn'), function (btn) {
+      btn.addEventListener('click', function () {
+        var idx = +this.dataset.idx;
+        var p = list[idx];
+        if (!p) return;
+        if (!state.bp || !state.bp.ok) {
+          showMsg('请先在页面顶部【从游戏拉取】或【选择 progress.sav】加载存档，再填入蓝图。', 'warn');
+          return;
+        }
+        try {
+          var cai = window.Blueprint.decodeShare(p.shareCode);
+          bpSetImport(cai, p.name);
+          showMsg('已成功装载【' + p.name + '】至目标槽位，请在底部【预览并下载】写回存档。', 'ok');
+        } catch (e) {
+          showMsg('预设载入失败：' + e.message, 'warn');
+        }
+      });
+    });
+
+    Array.prototype.forEach.call(grid.querySelectorAll('.bp-copy-btn'), function (btn) {
+      btn.addEventListener('click', function () {
+        var idx = +this.dataset.idx;
+        var p = list[idx];
+        if (!p) return;
+        if (navigator.clipboard) {
+          navigator.clipboard.writeText(p.shareCode).then(function () {
+            showMsg('【' + p.name + '】分享码已复制到剪贴板！', 'ok');
+          }, function () {
+            showMsg('复制失败，请手动在分享框复制。', 'warn');
+          });
+        }
+      });
+    });
   }
 
   if (!window.SaveWriter) {

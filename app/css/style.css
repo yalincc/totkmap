@@ -1268,6 +1268,21 @@ html, body {
 /* V2.0.2 神庙详情：位置 / 注意 / 宝箱 */
 #ecPlaceRow .ec-value, #ecChestRow .ec-value { color: #dfe8e1; font-size: 12.5px; }
 #ecNoteRow .ec-value { color: #ffd9a0; }
+#ecNoteText {
+  white-space: pre-line;
+  line-height: 1.5;
+}
+#ecSwHelpBtn {
+  color: #38bdf8;
+  text-decoration: underline;
+  cursor: pointer;
+  font-size: 12.5px;
+  font-weight: 600;
+  line-height: 1.6;
+}
+#ecSwHelpBtn:hover {
+  color: #7dd3fc;
+}
 #ecNoteText.clamped {
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -1967,6 +1982,21 @@ html[lang="en"] .tk-copy {
   outline: none;
 }
 .su-edit-btn:hover, .su-edit-btn:focus { background: #eac27e; }
+.su-bp-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px; height: 18px;
+  margin-left: 4px;
+  border-radius: 50%;
+  background: rgba(56, 189, 248, 0.25);
+  font-size: 11px;
+  line-height: 1;
+  text-decoration: none;
+  transition: all .15s;
+  outline: none;
+}
+.su-bp-btn:hover, .su-bp-btn:focus { background: #38bdf8; }
 
 /* ===== 区域轮廓（洞窟/井/空岛/深穴）禁用浏览器点击焦点外方框，不遮挡内部标点 ===== */
 path.leaflet-interactive:focus,

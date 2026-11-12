@@ -115,7 +115,8 @@
   <div class="save-upload">
     <div class="su-row">
       <button id="saveSyncBtn" data-i18n-title="save.syncBtnTip" type="button" class="su-load-btn" title="读取本机 Ryujinx 的 progress.sav，同步收集进度（文件仅在本机内存处理）" data-i18n="save.loadBtn">📂 从存档加载进度…</button>
-      <!-- 存档修改器入口（2026-10-28 老大定：图标式，尺寸与 ? 一致，点击直达 editor.html） -->
+      <!-- 存档修改器与蓝图工坊入口（点击直达 editor.html） -->
+      <a id="bpWorkshopBtn" class="su-bp-btn" href="save-edit/editor.html" target="_blank" rel="noopener" data-i18n-title="save.bpBtnTip" title="📐 打开蓝图工坊：精选神级蓝图库 · 蓝图导入导出与分享" data-i18n-aria="save.bpAria" aria-label="蓝图工坊">📐</a>
       <a id="saveEditBtn" class="su-edit-btn" href="save-edit/editor.html" target="_blank" rel="noopener" data-i18n-title="save.editBtnTip" title="打开存档修改器：卢比 / 材料 / 装备 / 坐标传送（改完下载覆盖存档）" data-i18n-aria="save.editAria" role="button" aria-label="存档修改">🔧</a>
       <span class="su-help" id="suHelp" data-i18n-aria="save.helpAria" tabindex="0" role="button" aria-label="存档在哪里">?</span>
       <div class="su-tip hidden" id="suTip" data-i18n-html="save.tipBody"></div>
@@ -206,6 +207,12 @@
       <span class="ec-value">
         <span id="ecNoteText"></span>
         <button type="button" class="ec-more" id="ecNoteMore" data-i18n="card.expand">展开</button>
+      </span>
+    </div>
+    <div class="ec-row" id="ecSwHelpRow" style="display:none">
+      <span class="ec-label"></span>
+      <span class="ec-value">
+        <a href="javascript:void(0)" id="ecSwHelpBtn">💡武器刷新机制说明</a>
       </span>
     </div>
     <div class="ec-row" id="ecChestRow"><span class="ec-label" data-i18n="card.chest">宝箱</span><span class="ec-value" id="ecChest"></span></div>
@@ -492,6 +499,14 @@
   <div data-i18n-html="help.more"></div>
 </div>
 
+<!-- ============ 地底洁净武器刷新与SL机制说明弹窗 ============ -->
+<div id="shadowWeaponHelpBox" class="help-box hidden">
+  <h3><span data-i18n="swHelp.title">地底洁净武器（✨）刷新与刷取秘籍</span>
+    <button id="swHelpClose" data-i18n-title="common.close" class="help-close" title="关闭">×</button>
+  </h3>
+  <div data-i18n-html="swHelp.content"></div>
+</div>
+
 <!-- ============ 实时导航面板（V1.8.0） ============ -->
 <div id="navPanel" class="nav-panel hidden">
   <div class="np-head">
@@ -536,6 +551,7 @@
 <script src="data/dispenser_info.js"></script>
 <script src="data/layers.js"></script>
 <script src="data/catalogs.js?v=257"></script>
+<script src="data/shadow-weapons.js?v=286"></script>
 <script src="data/areas.js"></script>
 <script src="data/area_cave.js"></script>
 <script src="data/area_sky.js"></script>

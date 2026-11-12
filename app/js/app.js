@@ -1316,6 +1316,15 @@
       if (m.layer !== state.layer) continue;
       var enName = window.I18N ? window.I18N.nameOf(m) : '';
       var nameHay = ((m.name || '') + ' ' + (m.full || '') + ' ' + enName).toLowerCase();
+      /* 残影士兵标点联动武器池检索：支持搜武器名（如近卫双手剑、王族之枪、洁净、无腐蚀等）秒中石柱 */
+      if ((m.cat >= 241 && m.cat <= 248) && window.TOTK_SHADOW_WEAPONS) {
+        var SW_POOL = window.TOTK_SHADOW_WEAPONS.pools;
+        var pList = (SW_POOL[m.macro] && SW_POOL[m.macro][m.kind]) || (SW_POOL['中央海拉鲁'] && SW_POOL['中央海拉鲁'][m.kind]) || [];
+        for (var pi = 0; pi < pList.length; pi++) {
+          nameHay += ' ' + pList[pi].name.toLowerCase() + ' ' + pList[pi].nameEn.toLowerCase();
+        }
+        nameHay += ' 洁净 无腐蚀 残影 阴影 pristine shadow';
+      }
       if (nameHay.indexOf(ql) >= 0) {
         nameHits.push(m);
       } else if (m.desc && m.desc.toLowerCase().indexOf(ql) >= 0) {
@@ -2652,6 +2661,21 @@
         helpBox.classList.add('hidden');
       }
     });
+
+    /* 地底洁净武器机制弹窗关闭事件 */
+    var swhBox = $('shadowWeaponHelpBox');
+    var swhClose = $('swHelpClose');
+    if (swhClose && swhBox) {
+      swhClose.addEventListener('click', function () { swhBox.classList.add('hidden'); });
+      document.addEventListener('click', function (e) {
+        if (!swhBox.classList.contains('hidden') && !e.target.closest('#shadowWeaponHelpBox') && !e.target.closest('#ecSwHelpBtn')) {
+          swhBox.classList.add('hidden');
+        }
+      });
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && !swhBox.classList.contains('hidden')) swhBox.classList.add('hidden');
+      });
+    }
   }
 
   /* 拖拽 progress.sav 到面板 */
@@ -3396,6 +3420,22 @@
         : '提示：莱尼尔（人马）属于普通强敌，游戏无官方讨伐勋章记录（红月会刷新），需手动点击完成标记。';
       noteRaw = noteRaw ? (noteRaw + '\n\n' + lynelNote) : lynelNote;
     }
+    /* 残影士兵专属：地底未腐朽洁净武器（✨）极简格式（如：卓拉之剑 - 19攻击 - 27耐久） */
+    var isShadowSoldier = (m.cat >= 241 && m.cat <= 248);
+    if (isShadowSoldier && window.TOTK_SHADOW_WEAPONS) {
+      var SW = window.TOTK_SHADOW_WEAPONS;
+      var isEnSW = window.I18N && window.I18N.getLang() === 'en';
+      var swKind = m.kind || '1H';
+      var swMacro = m.macro || '中央海拉鲁';
+      var swPool = (SW.pools[swMacro] && SW.pools[swMacro][swKind]) || (SW.pools['中央海拉鲁'] && SW.pools['中央海拉鲁'][swKind]) || [];
+      var swLines = swPool.map(function (wp) {
+        var wn = isEnSW ? wp.nameEn.replace(' ✨', '') : wp.name.replace(' ✨', '');
+        var durStr = wp.dur ? (isEnSW ? (' - ' + wp.dur + ' Dur') : (' - ' + wp.dur + '耐久')) : '';
+        return wn + ' - ' + wp.atk + (isEnSW ? ' Atk' : '攻击') + durStr;
+      }).join('\n');
+      noteRaw = swLines;
+      isDescFallback = true;
+    }
     /* 「注意/说明」较长，默认折叠 + 展开按钮（不足一屏时按钮不出现） */
     var noteRow = $('ecNoteRow'), noteText = $('ecNoteText'), noteMore = $('ecNoteMore');
     var noteLabel = noteRow ? noteRow.querySelector('.ec-label') : null;
@@ -3409,12 +3449,30 @@
     noteRow.style.display = noteRaw ? '' : 'none';
     if (noteRaw) {
       noteText._fullText = noteRaw;
-      var long = noteRaw.length > NOTE_LIMIT;
+      var long = isShadowSoldier ? false : (noteRaw.length > NOTE_LIMIT);
       noteText.textContent = long ? noteRaw.slice(0, NOTE_LIMIT) + '…' : noteRaw;
       noteRow.classList.remove('expanded');
       noteMore.style.display = long ? '' : 'none';
       noteText.classList.toggle('clamped', long);
       noteMore.textContent = window.I18N ? window.I18N.t('card.expand') : '展开';
+    }
+
+    /* 残影士兵独立行：💡武器刷新机制说明 整齐排在说明正下方 */
+    var swRow = $('ecSwHelpRow');
+    if (swRow) {
+      swRow.style.display = isShadowSoldier ? '' : 'none';
+      var swBtn = $('ecSwHelpBtn');
+      if (swBtn) {
+        swBtn.textContent = (window.I18N && window.I18N.getLang() === 'en') ? '💡 Weapon Respawn Rules' : '💡武器刷新机制说明';
+        swBtn.onclick = function (e) {
+          e.stopPropagation();
+          var hb = $('shadowWeaponHelpBox');
+          if (hb) {
+            hb.classList.remove('hidden');
+            if (window.I18N) window.I18N.updateDOM(hb);
+          }
+        };
+      }
     }
     var isEn = window.I18N && window.I18N.getLang() === 'en';
     var btnNav = $('ecNav'), btnAuto = $('ecAuto'), btnDone = $('ecDone');

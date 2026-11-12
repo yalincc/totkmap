@@ -258,10 +258,18 @@
     <section class="card span-2">
       <div class="card-head">
         <span class="idx">05</span>
-        <h2>蓝图分享</h2>
-        <span class="note">导出 · 导入</span>
+        <h2>蓝图工坊与分享</h2>
+        <span class="note">预设 · 导出 · 导入</span>
       </div>
       <div class="card-body">
+        <!-- 精选蓝图工坊 -->
+        <div class="bp-preset-section" style="margin-bottom:16px;border-bottom:1px solid #313b48;padding-bottom:16px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+            <span style="font-weight:600;font-size:13px;color:#38bdf8">📐 精选神级蓝图库（点击一键填入存档或复制分享码）</span>
+          </div>
+          <div id="bpPresetGrid" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(230px, 1fr));gap:10px"></div>
+        </div>
+
         <div class="row">
           <span class="lbl">存档里的蓝图<small id="bpCount">加载后显示</small></span>
           <span class="ctl" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
@@ -338,6 +346,7 @@
 </div>
 
 <script src="../data/equip-names.js"></script>
+<script src="../data/blueprints-preset.js"></script>
 <script src="../js/vendor/qrcode.min.js"></script>
 <script src="../js/blueprint.js"></script>
 <script src="../js/save-writer.js"></script>
