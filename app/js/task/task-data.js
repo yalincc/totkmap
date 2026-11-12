@@ -213,6 +213,7 @@
         tier: raw.tier || 'L3',        /* L1=多点可画线 / L2=单点 / L3=无点 */
         flowPts: (raw.flowPts || []).map(function (p) {
           var o = { gx: num(p.gx), gy: num(p.gy), gz: num(p.gz) };
+          if (p.layer != null) o.layer = p.layer;
           /* ★ V2.5.0：保留档案 _note 地点名（卡片流程点显示用） */
           if (p.note) o.note = p.note;
           return o;

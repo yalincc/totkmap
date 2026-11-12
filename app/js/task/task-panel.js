@@ -23,9 +23,6 @@
   var group = null;          // 任务点的 LayerGroup
   var curLayer = 18;
   var ready = false;
-  var lastSig = '';
-  /* 完成态版本号：TaskDone 每次变化（手动标记/ 载入存档）自增，
-     混进 signature 里做重绘判据。见 signature() 注释。 */
   var doneRev = 0;
   var userOn = {};           // {layer: {cat:true}} 用户勾选意图
   /* task key → Leaflet marker 引用。每次 render() 重建 layerGroup 时清空。
@@ -140,20 +137,22 @@
   function save() {
     try { localStorage.setItem(LS, JSON.stringify(userOn)); } catch (e) { /* 隐私模式忽略 */ }
   }
-  function isOn(cat) {
-    var m = userOn[curLayer];
+  function isOn(cat, layer) {
+    var l = (layer != null) ? layer : curLayer;
+    var m = userOn[l];
     return !!(m && m[cat]);
   }
   /* 切层后按用户意图补勾高亮。
      ★ 只改DOM 高亮，绝不删userOn 里的键——
        否则「切到某层→ 某分类在这层count=0 → 被删 → 切回原层意图丢了」。
        count=0 的分类在 injectPanel 里本来就不会渲染出来，无需清理状态。 */
-  function syncTaskGrpBtn(btn) {
+  function syncTaskGrpBtn(btn, layer) {
+    var l = (layer != null) ? layer : curLayer;
     var b = btn || document.querySelector('#catalogList .tk-grp-btn');
     if (!b) return;
-    var stats = D.statsByLayer(curLayer);
+    var stats = D.statsByLayer(l);
     var validCats = stats.filter(function (s) { return s.count > 0; });
-    var onCount = validCats.filter(function (s) { return isOn(s.cat); }).length;
+    var onCount = validCats.filter(function (s) { return isOn(s.cat, l); }).length;
     var totalCount = validCats.length;
     var isEn = window.I18N && window.I18N.getLang() === 'en';
     if (!totalCount) {
@@ -174,14 +173,15 @@
     }
   }
 
-  function ensureChecked() {
-    var m = userOn[curLayer];
+  function ensureChecked(layer) {
+    var l = (layer != null) ? layer : curLayer;
+    var m = userOn[l];
     if (!m) return;
     D.catOrder.forEach(function (cat) {
       var el = document.querySelector('#catalogList .tk-cat[data-tkcat="' + cat + '"]');
       if (el) el.classList.toggle('active', !!m[cat]);
     });
-    syncTaskGrpBtn();
+    syncTaskGrpBtn(null, l);
   }
   function calcTaskSize(zoom) {
     var z = (typeof zoom === 'number') ? zoom : (map ? map.getZoom() : 5);
@@ -190,63 +190,29 @@
     return 26;
   }
 
-  function signature() {
-    var m = userOn[curLayer] || {};
-    var settings = global.TOTK_SETTINGS || {};
-    var doneMode = settings.doneMode || 'default';
-    var hideTask = (settings.hideDoneTypes && settings.hideDoneTypes.task !== false) ? '1' : '0';
-    var s = curLayer + '|' + doneRev + '|' + doneMode + '|' + hideTask + '|';
-    D.catOrder.forEach(function (cat) {
-      s += m[cat] ? '1' : '0';
-    });
-    return s;
-  }
 
-  /* ---------- 侧栏注入 ---------- */
-  /* app.js 每次切层会重建整个 #catalogList（innerHTML 替换），
-     所以每次都要重新注入一次任务组。 */
-  function injectPanel() {
-    var list = $('catalogList');
-    if (!list) return;
-    if (list.querySelector('.tk-group')) return;   /* 已注入 */
 
-    var stats = D.statsByLayer(curLayer);
-    /* 全是0（这层没任务）就不显示，避免出现空组 */
+  /* ---------- 侧栏生成（方案B：作为左侧栏一等公民同步渲染） ---------- */
+  function getPanelHtml(layer) {
+    var l = (layer != null) ? Number(layer) : curLayer;
+    curLayer = l;
+    var stats = D.statsByLayer(l);
     var total = 0, totalDone = 0;
     stats.forEach(function (s) {
       total += s.count;
-      /* 完成数：本层该分组里已完成的任务（存档态 + 手动态，见 task-done.js） */
       if (window.TaskDone) {
-        D.listBy(curLayer, s.cat).forEach(function (t) {
+        D.listBy(l, s.cat).forEach(function (t) {
           if (window.TaskDone.isDone(t.key)) totalDone++;
         });
       }
     });
-    if (!total) return;
+    if (!total) return '';
 
-    /* ★ 标题要标明「本图层」（2026-10-07）
-     *
-     * 问题：原来只写「任务 0/233」，老大看到 233 与全库 253 不符，以为数据错了。
-     * 真相：statsByLayer(curLayer) **只统计当前图层**——
-     *   地表 234 条（onMap 233）/ 地底 3 / 天空 16 = 全库 253。
-     * 切到地底层只剩 3 条（台账 P5 记的「图层归属倾斜」就是这个）。
-     * 数据没问题，是**标题没交代口径**。
-     *
-     * 改法：标题带图层名 + 补全库总数，让人一眼看出这是分层统计。
-     * 「全库」用斜体小字跟在后面，避免有人误以为本层只有这么多条。
-     * ★ 全库数是**去重后的任务总数**（253），不是各层相加——
-     *   跨层任务（2026-10-07 起11 条）在两层都出现，相加会得到 263。
-     */
     var isEn = window.I18N && window.I18N.getLang() === 'en';
     var layerCn = isEn
-      ? ({ 18: 'Surface', 19: 'Depths', 20: 'Sky' }[curLayer] || '')
-      : ({ 18: '地表', 19: '地底', 20: '天空' }[curLayer] || '');
-    var allTotal = 0;
-    for (var li = 18; li <= 20; li++) {
-      allTotal += D.totalByLayer ? D.totalByLayer(li) : 0;
-    }
+      ? ({ 18: 'Surface', 19: 'Depths', 20: 'Sky' }[l] || '')
+      : ({ 18: '地表', 19: '地底', 20: '天空' }[l] || '');
     var groupHeader = isEn ? ('Quests · ' + layerCn) : ('任务·' + layerCn);
-    var allText = isEn ? ('All ' + D.totalAllLayers()) : ('全库 ' + D.totalAllLayers());
     var grpTip = window.I18N ? window.I18N.t('cat.groupToggleTip', '一键勾选 / 取消本组全部分类') : '一键勾选 / 取消本组全部分类';
     var html = '<div class="group-title tk-group">' +
       '<span class="gt-name">' + esc(groupHeader) + ' <span class="tk-count">' + totalDone + '/' + total + '</span></span>' +
@@ -255,7 +221,7 @@
     html += '<div class="cat-grid tk-grid">';
     stats.forEach(function (s) {
       if (s.count <= 0) return;
-      var on = isOn(s.cat) ? ' active' : '';
+      var on = isOn(s.cat, l) ? ' active' : '';
       var catName = isEn ? (window.I18N.catOf(s.name) || s.name) : s.name;
       html += '<div class="cat-item tk-cat' + on + '" data-tkcat="' + esc(s.cat) + '">' +
         '<img src="assets/icons/' + taskIcon(s.cat) + '" alt="">' +
@@ -264,11 +230,58 @@
         '</div>';
     });
     html += '</div>';
+    return html;
+  }
 
-    /* 用 children 取（不用 firstChild/lastChild —— innerHTML 里若有空白文本节点，
-       lastChild 会拿到文本节点而非元素，事件就绑不上，表现为「勾了没反应」。 */
+  function bindEvents(container, layer) {
+    var l = (layer != null) ? Number(layer) : curLayer;
+    curLayer = l;
+    var c = container || $('catalogList');
+    if (!c) return;
+
+    var grpBtn = c.querySelector('.tk-grp-btn');
+    var stats = D.statsByLayer(l);
+    if (grpBtn) {
+      syncTaskGrpBtn(grpBtn, l);
+      grpBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var m = userOn[l] || (userOn[l] = {});
+        var validCats = stats.filter(function (s) { return s.count > 0; });
+        var allOn = validCats.length > 0 && validCats.every(function (s) { return !!m[s.cat]; });
+        validCats.forEach(function (s) {
+          if (allOn) delete m[s.cat]; else m[s.cat] = true;
+        });
+        save();
+        ensureChecked(l);
+        syncTaskGrpBtn(grpBtn, l);
+        render(l);
+      });
+    }
+
+    var grid = c.querySelector('.tk-grid');
+    if (grid) {
+      grid.addEventListener('click', function (e) {
+        var el = e.target && e.target.closest && e.target.closest('.tk-cat');
+        if (!el) return;
+        var cat = el.getAttribute('data-tkcat');
+        var m = userOn[l] || (userOn[l] = {});
+        if (m[cat]) delete m[cat]; else m[cat] = true;
+        el.classList.toggle('active', !!m[cat]);
+        save();
+        syncTaskGrpBtn(grpBtn, l);
+        render(l);
+      });
+    }
+  }
+
+  function injectPanel() {
+    var list = $('catalogList');
+    if (!list) return;
+    if (list.querySelector('.tk-group')) return;
+    var h = getPanelHtml(curLayer);
+    if (!h) return;
     var box = document.createElement('div');
-    box.innerHTML = html;
+    box.innerHTML = h;
     var g = box.children[0], gr = box.children[1];
     if (!g || !gr) return;
     if (list.firstChild) {
@@ -278,36 +291,7 @@
       list.appendChild(g);
       list.appendChild(gr);
     }
-
-    var grpBtn = g.querySelector('.tk-grp-btn');
-    if (grpBtn) {
-      syncTaskGrpBtn(grpBtn);
-      grpBtn.addEventListener('click', function (e) {
-        e.stopPropagation();
-        var m = userOn[curLayer] || (userOn[curLayer] = {});
-        var validCats = stats.filter(function (s) { return s.count > 0; });
-        var allOn = validCats.length > 0 && validCats.every(function (s) { return !!m[s.cat]; });
-        validCats.forEach(function (s) {
-          if (allOn) delete m[s.cat]; else m[s.cat] = true;
-        });
-        save();
-        ensureChecked();
-        syncTaskGrpBtn(grpBtn);
-        tick();
-      });
-    }
-
-    gr.addEventListener('click', function (e) {
-      var el = e.target && e.target.closest && e.target.closest('.tk-cat');
-      if (!el) return;
-      var cat = el.getAttribute('data-tkcat');
-      var m = userOn[curLayer] || (userOn[curLayer] = {});
-      if (m[cat]) delete m[cat]; else m[cat] = true;
-      el.classList.toggle('active', !!m[cat]);
-      save();
-      syncTaskGrpBtn();
-      tick();
-    });
+    bindEvents(list, curLayer);
   }
 
   /* 分类图标分配专属 96px 官方任务徽章 */
@@ -557,33 +541,7 @@
     group = g;
   }
 
-  /* ---------- 循环 ---------- */
-  function tick() {
-    if (!ready) return;
-    injectPanel();       /* app.js 重建列表后要补回来 */
-    ensureChecked();     /* 切层后按用户意图补勾高亮 */
-    var sig = signature();
-    if (sig !== lastSig) { lastSig = sig; render(); }
-  }
 
-  /* app.js 改的是普通对象（state.selected），没有 change 事件，只能轮询 */
-  function observe() {
-    setInterval(tick, 150);
-  }
-
-  function observeLayer() {
-    var sw = $('layerSwitch');
-    if (!sw) return;
-    var obs = new MutationObserver(function () {
-      var l = currentLayer();
-      if (l !== curLayer) {
-        curLayer = l;
-        lastSig = '';        /* 强制重画 */
-        tick();
-      }
-    });
-    obs.observe(sw, { attributes: true, subtree: true, attributeFilter: ['class'] });
-  }
 
   function updateSizes() {
     if (!ready || !group) return;
@@ -595,165 +553,170 @@
   }
 
   /* ---------- 初始化 ---------- */
-  function init() {
+  function initMap() {
     map = (global.TOTK && global.TOTK.map) || null;
-    if (!map) { setTimeout(init, 300); return; }
+    if (!map) { setTimeout(initMap, 200); return; }
     curLayer = currentLayer();
-    load();
-    lastSig = '';
-    injectCSS();
-    observeLayer();
-    injectPanel();
-    observe();
-    render();
-    map.on('zoomend', updateSizes);
     ready = true;
-
-    global.TaskPanel = {
-      inject: injectPanel,
-      selectAll: function (layerId) {
-        var l = layerId || curLayer;
-        var stats = D.statsByLayer(l);
-        var m = userOn[l] || (userOn[l] = {});
-        stats.forEach(function (s) { if (s.count > 0) m[s.cat] = true; });
-        save();
-        ensureChecked();
-        syncTaskGrpBtn();
-        tick();
-      },
-      clearAll: function (layerId) {
-        var l = layerId || curLayer;
-        var stats = D.statsByLayer(l);
-        var m = userOn[l] || (userOn[l] = {});
-        stats.forEach(function (s) { delete m[s.cat]; });
-        save();
-        ensureChecked();
-        syncTaskGrpBtn();
-        tick();
-      },
-      syncBtn: syncTaskGrpBtn,
-      updateSizes: updateSizes,
-      render: render,
-      isOn: isOn,
-      refresh: function () {
-        tick();
-        if (ready) render();
-      },
-      stats: function () { return D.statsByLayer(curLayer); },
-      /* ---------- 给task-flow.js 的追踪光环用 ----------
-       * 需求：追踪某任务时，给它的地图图标加一个脉动光环 class。
-       * 追踪关掉卡片后地图上只剩「线 + 节点」，玩家不知道线属于哪个任务；
-       * 光环既标示归属，也提示「点这个图标能回卡片取消追踪」。
-       *
-       * 为什么不自己再画一个 marker：那样会在同一坐标再叠一个元素，
-       * 又回到「谁盖住谁」的老问题（见 render() 里 zIndexOffset 900 的注释）。
-       * 直接给现有 marker 的 DOM 加 class 最小、也最稳。
-       *
-       * 找不到 marker 时静默返回 false —— 可能是该分类被取消勾选、
-       * 任务不在当前层，追踪功能不该因此报错。 */
-      markByKey: function (key, on) {
-        if (!key) return false;
-        var m = mkIndex[key];
-        if (!m || !m.getElement) return false;
-        var el = m.getElement();
-        if (!el) return false;
-        var dot = el.querySelector('.tk-dot') || el;
-        if (dot.classList) dot.classList.toggle('is-tracked', !!on);
-        return true;
-      },
-      /* ---------- V2.1（2026-10-07）：给任务卡片的「定位」按钮用 ----------
-       * 需求：点坐标右边的定位图标 → 地图跳到这个任务图标所在位置。
-       *
-       * 为什么必须有这个：任务点画在**独立的 Leaflet 图层**里（render() 的
-       * group），分类勾选状态是 `userOn[layer][group]`，**不在** app.js 的
-       * `state.selected` 里。所以 app.js 的 gotoMarker 帮不上任务点——
-       * 它的「自动勾分类」只认state.selected。
-       *
-       * 所以这里先把该任务**所在层 + 所在分类**确保勾上并重绘，
-       * 再由调用方走 gotoMarker 飞行+ 光圈。返回坐标供调用方使用。
-       */
-      locate: function (t, opts) {
-        if (!t) return null;
-        opts = opts || {};
-        var layers = (t.layers && t.layers.length) ? t.layers : [t.layer];
-        /* 该切到哪一层？
-         * ★「留在当前层」vs「切到目标层」的取舍（2026-10-07 修）：
-         *   原来只要当前层在 `t.layers` 里就**不切**——多目标任务在任一层
-         *   都能显示，从卡片点定位时停在原地本来是合理的。
-         *   但搜索/列表点定位的目的就是「飞到那个点**所在的地方**」，
-         *   停在错误的层等于没定位：「未知的天空巨人」layers=[18,20]，
-         *   停在地表就找不到它在天空诸岛。
-         *   所以加 `opts.preferLayer`：调用方指定要去的层
-         *   （搜索结果、任务卡定位按钮都传）。不传时保持旧行为。 */
-        var l;
-        if (opts.preferLayer != null && layers.indexOf(opts.preferLayer) >= 0) {
-          l = opts.preferLayer;
-        } else if (layers.indexOf(curLayer) >= 0) {
-          l = curLayer;
-        } else {
-          l = layers[0];
-        }
-        if (l != null && l !== curLayer) {
-          if (global.TOTK && global.TOTK.switchLayer) global.TOTK.switchLayer(l);
-          /* switchLayer 会重建 #catalogList 并触发 tick → curLayer 异步更新，
-             这里同步一次，保证下面 isOn() / pointInLayer() 用的是新层。 */
-          curLayer = l;
-        }
-        /*勾上该任务所属分类，否则 render() 会跳过它、地图上找不到点 */
-        var g = t.group;
-        if (g && !isOn(g)) {
-          userOn[curLayer] = userOn[curLayer] || {};
-          userOn[curLayer][g] = true;
-          save();
-        }
-        render();
-        /* 优先用该层内的那个点（跨层任务每个层各有各的坐标） */
-        var pt = pointInLayer(t, curLayer) || { gx: t.gx, gz: t.gz };
-        /* ★ 把真实 marker 带回去：调用方靠它拿 getElement() 的屏幕位置，
-         *   gotoMarker 的光圈就是按这个位置画的。
-         *   只回坐标的话地图会飞，但**没有任何发光效果**。 */
-        return { gx: pt.gx, gz: pt.gz, layer: curLayer, marker: mkIndex[t.key] || null };
-      },
-      /* 完成数变化时刷新标题上的 done/total。
-         injectPanel 有「已注入就不重复注入」的短路，所以这里直接改
-         已存在的计数节点，而不是重跑 injectPanel。 */
-      refreshDoneCount: function () {
-        var el = document.querySelector('.tk-group .tk-count');
-        if (!el) return;
-        var total = 0, done = 0;
-        D.statsByLayer(curLayer).forEach(function (s) {
-          total += s.count;
-          if (global.TaskDone) {
-            D.listBy(curLayer, s.cat).forEach(function (t) {
-              if (global.TaskDone.isDone(t.key)) done++;
-            });
-          }
-        });
-        el.textContent = done + '/' + total;
-      },
-      updateSizes: function () {
-        if (!ready || !group) return;
-        for (var k in mkIndex) {
-          var m = mkIndex[k];
-          if (!m || !m._taskObj) continue;
-          m.setIcon(taskIconDot(m._taskObj));
-        }
-      },
-      render: render
-    };
-
-    /* 订阅完成态变化：手动标记、或加载存档后，标题数字要跟着动。
-       ★ 地图任务点的重绘**不在这里做**——只把 doneRev 加一，
-         下一轮 tick()（150ms 轮询）比对 signature 发现变了自然会重画。
-         早先在这里直接调 render() 是冗余的：存档加载时 TaskDone 连续
-         notify 十几次，每次全量重建 254 个 marker，明显卡顿。
-         地图任务点重绘的判据见 signature() 里的 doneRev 注释。 */
-    if (global.TaskDone) {
-      global.TaskDone.onChange(function () {
-        doneRev++;
-        if (ready) global.TaskPanel.refreshDoneCount();
-      });
+    map.on('zoomend', updateSizes);
+    var list = $('catalogList');
+    if (list && !list.querySelector('.tk-group') && global.TOTK_APP && global.TOTK_APP.buildCatalogPanel) {
+      global.TOTK_APP.buildCatalogPanel();
     }
+    render(curLayer);
+  }
+
+  load();
+  injectCSS();
+
+  global.TaskPanel = {
+    getPanelHtml: getPanelHtml,
+    bindEvents: bindEvents,
+    inject: injectPanel,
+    selectAll: function (layerId) {
+      var l = (layerId != null) ? Number(layerId) : curLayer;
+      var stats = D.statsByLayer(l);
+      var m = userOn[l] || (userOn[l] = {});
+      stats.forEach(function (s) { if (s.count > 0) m[s.cat] = true; });
+      save();
+      ensureChecked(l);
+      syncTaskGrpBtn(null, l);
+      render(l);
+    },
+    clearAll: function (layerId) {
+      var l = (layerId != null) ? Number(layerId) : curLayer;
+      var stats = D.statsByLayer(l);
+      var m = userOn[l] || (userOn[l] = {});
+      stats.forEach(function (s) { delete m[s.cat]; });
+      save();
+      ensureChecked(l);
+      syncTaskGrpBtn(null, l);
+      render(l);
+    },
+    syncBtn: syncTaskGrpBtn,
+    updateSizes: updateSizes,
+    render: function (targetLayer) {
+      if (targetLayer != null) curLayer = Number(targetLayer);
+      if (!ready || !map) return;
+      render(curLayer);
+    },
+    isOn: isOn,
+    refresh: function () {
+      if (!ready) return;
+      ensureChecked(curLayer);
+      syncTaskGrpBtn(null, curLayer);
+      render(curLayer);
+    },
+    stats: function () { return D.statsByLayer(curLayer); },
+    /* ---------- 给task-flow.js 的追踪光环用 ----------
+     * 需求：追踪某任务时，给它的地图图标加一个脉动光环 class。
+     * 追踪关掉卡片后地图上只剩「线 + 节点」，玩家不知道线属于哪个任务；
+     * 光环既标示归属，也提示「点这个图标能回卡片取消追踪」。
+     *
+     * 为什么不自己再画一个 marker：那样会在同一坐标再叠一个元素，
+     * 又回到「谁盖住谁」的老问题（见 render() 里 zIndexOffset 900 的注释）。
+     * 直接给现有 marker 的 DOM 加 class 最小、也最稳。
+     *
+     * 找不到 marker 时静默返回 false —— 可能是该分类被取消勾选、
+     * 任务不在当前层，追踪功能不该因此报错。 */
+    markByKey: function (key, on) {
+      if (!key) return false;
+      var m = mkIndex[key];
+      if (!m || !m.getElement) return false;
+      var el = m.getElement();
+      if (!el) return false;
+      var dot = el.querySelector('.tk-dot') || el;
+      if (dot.classList) dot.classList.toggle('is-tracked', !!on);
+      return true;
+    },
+    /* ---------- V2.1（2026-10-07）：给任务卡片的「定位」按钮用 ----------
+     * 需求：点坐标右边的定位图标 → 地图跳到这个任务图标所在位置。
+     *
+     * 为什么必须有这个：任务点画在**独立的 Leaflet 图层**里（render() 的
+     * group），分类勾选状态是 `userOn[layer][group]`，**不在** app.js 的
+     * `state.selected` 里。所以 app.js 的 gotoMarker 帮不上任务点——
+     * 它的「自动勾分类」只认state.selected。
+     *
+     * 所以这里先把该任务**所在层 + 所在分类**确保勾上并重绘，
+     * 再由调用方走 gotoMarker 飞行+ 光圈。返回坐标供调用方使用。
+     */
+    locate: function (t, opts) {
+      if (!t) return null;
+      opts = opts || {};
+      var layers = (t.layers && t.layers.length) ? t.layers : [t.layer];
+      /* 该切到哪一层？
+       * ★「留在当前层」vs「切到目标层」的取舍（2026-10-07 修）：
+       *   原来只要当前层在 `t.layers` 里就**不切**——多目标任务在任一层
+       *   都能显示，从卡片点定位时停在原地本来是合理的。
+       *   但搜索/列表点定位的目的就是「飞到那个点**所在的地方**」，
+       *   停在错误的层等于没定位：「未知的天空巨人」layers=[18,20]，
+       *   停在地表就找不到它在天空诸岛。
+       *   所以加 `opts.preferLayer`：调用方指定要去的层
+       *   （搜索结果、任务卡定位按钮都传）。不传时保持旧行为。 */
+      var l;
+      if (opts.preferLayer != null && layers.indexOf(opts.preferLayer) >= 0) {
+        l = opts.preferLayer;
+      } else if (layers.indexOf(curLayer) >= 0) {
+        l = curLayer;
+      } else {
+        l = layers[0];
+      }
+      if (l != null && l !== curLayer) {
+        if (global.TOTK && global.TOTK.switchLayer) global.TOTK.switchLayer(l);
+        /* switchLayer 会重建 #catalogList 并触发任务组渲染，
+           这里同步一次，保证下面 isOn() / pointInLayer() 用的是新层。 */
+        curLayer = l;
+      }
+      /* 勾上该任务所属分类，否则 render() 会跳过它、地图上找不到点 */
+      var g = t.group;
+      if (g && !isOn(g, curLayer)) {
+        userOn[curLayer] = userOn[curLayer] || {};
+        userOn[curLayer][g] = true;
+        save();
+        ensureChecked(curLayer);
+        syncTaskGrpBtn(null, curLayer);
+      }
+      render(curLayer);
+      /* 优先用该层内的那个点（跨层任务每个层各有各的坐标） */
+      var pt = pointInLayer(t, curLayer) || { gx: t.gx, gz: t.gz };
+      /* ★ 把真实 marker 带回去：调用方靠它拿 getElement() 的屏幕位置，
+       *   gotoMarker 的光圈就是按这个位置画的。
+       *   只回坐标的话地图会飞，但**没有任何发光效果**。 */
+      return { gx: pt.gx, gz: pt.gz, layer: curLayer, marker: mkIndex[t.key] || null };
+    },
+    /* 完成数变化时刷新标题上的 done/total。
+       injectPanel 有「已注入就不重复注入」的短路，所以这里直接改
+       已存在的计数节点，而不是重跑 injectPanel。 */
+    refreshDoneCount: function () {
+      var el = document.querySelector('.tk-group .tk-count');
+      if (!el) return;
+      var total = 0, done = 0;
+      D.statsByLayer(curLayer).forEach(function (s) {
+        total += s.count;
+        if (global.TaskDone) {
+          D.listBy(curLayer, s.cat).forEach(function (t) {
+            if (global.TaskDone.isDone(t.key)) done++;
+          });
+        }
+      });
+      el.textContent = done + '/' + total;
+    }
+  };
+
+  if (global.TaskDone) {
+    global.TaskDone.onChange(function () {
+      doneRev++;
+      if (ready) {
+        global.TaskPanel.refreshDoneCount();
+        render(curLayer);
+      }
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initMap);
+  } else {
+    initMap();
   }
 
   /* ---------- 样式（.tk- 前缀，与 app.js 的样式完全隔离） ---------- */
@@ -809,9 +772,5 @@
     '.tk-tip { white-space:nowrap; }'
   ].join('\n');
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
-  } else {
-    init();
-  }
+
 })(window);

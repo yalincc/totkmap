@@ -118,6 +118,7 @@ window.TOTK_I18N.en = {
   "card.trial": "Trial",
   "card.place": "Location",
   "card.note": "Note",
+  "card.desc": "Description",
   "card.chest": "Chest",
   "card.solve": "How to",
   "card.type": "Puzzle",

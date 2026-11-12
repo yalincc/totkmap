@@ -440,6 +440,9 @@
     });
 
     var html = '';
+    if (window.TaskPanel && window.TaskPanel.getPanelHtml) {
+      html += window.TaskPanel.getPanelHtml(state.layer);
+    }
     lastGroupCats = {};
     relIdx.forEach(function (g) {
       var cs = groups[g];
@@ -469,11 +472,13 @@
     });
     if (!html) html = '<div class="sr-empty">当前图层暂无标点分类</div>';
     list.innerHTML = html;
-    if (window.TaskPanel && window.TaskPanel.inject) {
+    if (window.TaskPanel && window.TaskPanel.bindEvents) {
+      window.TaskPanel.bindEvents(list, state.layer);
+    } else if (window.TaskPanel && window.TaskPanel.inject) {
       window.TaskPanel.inject();
     }
 
-    Array.prototype.forEach.call(list.querySelectorAll('.cat-item'), function (el) {
+    Array.prototype.forEach.call(list.querySelectorAll('.cat-item:not(.tk-cat)'), function (el) {
       el.addEventListener('click', function () {
         var id = Number(el.getAttribute('data-cat'));
         if (state.selected[id]) delete state.selected[id];
@@ -487,7 +492,7 @@
     });
 
     /* 组按钮：全开时点=清空本组，否则=全选本组（BOTWmap 同款行为） */
-    Array.prototype.forEach.call(list.querySelectorAll('.grp-btn'), function (btn) {
+    Array.prototype.forEach.call(list.querySelectorAll('.grp-btn:not(.tk-grp-btn)'), function (btn) {
       btn.addEventListener('click', function (ev) {
         ev.stopPropagation();
         var ids = lastGroupCats[btn.getAttribute('data-grp')] || [];
@@ -1304,17 +1309,21 @@
 
   function doSearch(q) {
     var ql = q.toLowerCase();
-    var hits = [];
+    var nameHits = [];
+    var descHits = [];
     for (var i = 0; i < MARKERS.length; i++) {
       var m = MARKERS[i];
       if (m.layer !== state.layer) continue;
       var enName = window.I18N ? window.I18N.nameOf(m) : '';
-      var hay = ((m.name || '') + ' ' + (m.full || '') + ' ' + enName).toLowerCase();
-      if (hay.indexOf(ql) >= 0) {
-        hits.push(m);
-        if (hits.length >= 30) break;
+      var nameHay = ((m.name || '') + ' ' + (m.full || '') + ' ' + enName).toLowerCase();
+      if (nameHay.indexOf(ql) >= 0) {
+        nameHits.push(m);
+      } else if (m.desc && m.desc.toLowerCase().indexOf(ql) >= 0) {
+        descHits.push(m);
       }
+      if (nameHits.length + descHits.length >= 40) break;
     }
+    var hits = nameHits.concat(descHits).slice(0, 30);
     /* ---------- 任务也要能搜（2026-10-07 补）----------
      * ★ 缺口：搜索框只遍历 MARKERS（探索标点），**任务从来没接进来**。
      *   输入框 placeholder 写着「搜索神庙/地名/任务/物品」，但「任务」是骗人的——
@@ -1349,10 +1358,14 @@
     var html = '';
     hits.forEach(function (m) {
       var cat = catById(state.layer, m.cat);
+      var catName = cat ? (window.I18N ? window.I18N.catOf(cat.name) : cat.name) : '';
+      if (nameHits.indexOf(m) < 0) {
+        catName += (catName ? ' · ' : '') + (window.I18N && window.I18N.getLang() === 'en' ? 'Desc match' : '描述匹配');
+      }
       html += '<div class="sr-item" data-id="' + m.id + '">' +
         (cat && cat.icon ? '<img src="assets/icons/' + esc(cat.icon) + '" alt="">' : '') +
         '<span class="sr-name">' + esc(window.I18N ? window.I18N.nameOf(m) : (m.name || m.full)) + '</span>' +
-        '<span class="sr-cat">' + esc(cat ? (window.I18N ? window.I18N.catOf(cat.name) : cat.name) : '') + '</span>' +
+        '<span class="sr-cat">' + esc(catName) + '</span>' +
         '</div>';
     });
     taskHits.forEach(function (t) {
@@ -1540,6 +1553,9 @@
     updateLayerCount();
     buildMatPanel();
     renderMaterials();
+    if (window.TaskPanel && window.TaskPanel.render) {
+      window.TaskPanel.render(id);
+    }
     /* 默认保留当前视野（坐标与缩放），切层不再重置回 100% 全图 */
     if (keepView === false) map.setView(CENTER, 3);
   }
@@ -3332,6 +3348,13 @@
       ? window.I18N.towerNoteOf(m.name, sec.note)
       : (sGuide && sGuide.note ? sGuide.note : sec.note);
 
+    /* 2026-11-12：特殊NPC等非神庙标点的 desc 通用上屏展示（如管家魔像显示「解锁蓝图功能」） */
+    var isDescFallback = false;
+    if (!noteRaw && m.desc && m.desc.trim()) {
+      noteRaw = m.desc.trim();
+      isDescFallback = true;
+    }
+
     var placeRaw = sGuide && sGuide.place
       ? sGuide.place
       : (window.I18N ? window.I18N.placeOf(sec.place) : sec.place);
@@ -3373,8 +3396,16 @@
         : '提示：莱尼尔（人马）属于普通强敌，游戏无官方讨伐勋章记录（红月会刷新），需手动点击完成标记。';
       noteRaw = noteRaw ? (noteRaw + '\n\n' + lynelNote) : lynelNote;
     }
-    /* 「注意」较长，默认折叠 + 展开按钮（不足一屏时按钮不出现） */
+    /* 「注意/说明」较长，默认折叠 + 展开按钮（不足一屏时按钮不出现） */
     var noteRow = $('ecNoteRow'), noteText = $('ecNoteText'), noteMore = $('ecNoteMore');
+    var noteLabel = noteRow ? noteRow.querySelector('.ec-label') : null;
+    if (noteLabel) {
+      if (isDescFallback) {
+        noteLabel.textContent = window.I18N ? window.I18N.t('card.desc', '说明') : '说明';
+      } else {
+        noteLabel.textContent = window.I18N ? window.I18N.t('card.note', '注意') : '注意';
+      }
+    }
     noteRow.style.display = noteRaw ? '' : 'none';
     if (noteRaw) {
       noteText._fullText = noteRaw;

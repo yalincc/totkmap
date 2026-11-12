@@ -546,12 +546,20 @@
 <script src="data/dragon_paths_rom.js?v=255"></script>
 <!-- 克洛格运输轨迹：ROM 官方起始点与目的地营地连接线 -->
 <script src="data/korok_paths.js?v=254"></script>
+<!-- 任务数据与底层（提前加载：保证 app.js 首次 buildCatalogPanel 同步渲染任务分类） -->
+<script src="data/armors.js?v=234"></script>
+<script src="data/armor-upgrade.js?v=233"></script>
+<script src="data/task-plan.js?v=277"></script>
+<script src="data/task-save.js?v=234"></script>
+<script src="js/task/task-data.js?v=272"></script>
+<script src="js/task/task-done.js?v=234"></script>
+<script src="js/task/task-panel.js?v=262"></script>
 <!-- 图鉴站地址（联动「查看图鉴」按钮 / 对站跳转）：正式图鉴站地址配置后填写，留空则按钮不显示 -->
 <script>window.TOTK_COMPENDIUM_URL = '';</script>
 <script src="js/save-parser.js?v=1"></script>
 <script src="js/card-layout.js?v=302"></script>
 <script src="js/totk-canvas-layer.js?v=300"></script>
-<script src="js/app.js?v=309"></script>
+<script src="js/app.js?v=312"></script>
 <script src="js/live.js?v=295"></script>
 <script src="js/explore-auto.js?v=198"></script>
 <script src="js/mat-auto.js?v=195"></script>
@@ -564,25 +572,7 @@
 <script src="js/dragon-layer.js?v=255"></script>
 <!-- V2.5：克洛格运输轨迹图层（独立模块，参考 BOTWmap 轨迹设计） -->
 <script src="js/korok-layer.js?v=255"></script>
-<!-- V2.1：任务板块（独立模块）。data/task-plan.js 由 tools/build_task_plan.py 生成，
-     依赖 app.js 暴露的 window.TOTK / TOTK_APP，必须排在app.js 之后。
-     要下线任务板块：删掉下面 6 行即可，界面完全回到 V2.0 状态。
-
-     data/task-save.js 是任务存档变量表（hash 键 + 阶段枚举），由
-     tools/build_task_save.py 从 marcrobledo/savegame-editors 的 hashes.csv 生成。
-     它只是纯数据，解析逻辑在 js/save-parser.js 的 questDone()。 -->
-<script src="data/task-plan.js?v=274"></script>
-<script src="data/task-save.js?v=234"></script>
-<!-- M6.1：防具数据。task-data.js 的 armorsOf() 要读window.TOTK_ARMORS
-     做「任务 → 可获得防具」反查，必须排在自己之前，否则反查全空。 -->
-<script src="data/armors.js?v=234"></script>
-<!-- M6.5：防具强化数据（每级星星数 + 材料，生成脚本 tools/build_armor_upgrade.py）。
-     armor-data.js 的 upgradeOf() 直接读它。 -->
-<script src="data/armor-upgrade.js?v=233"></script>
-<script src="js/task/task-data.js?v=270"></script>
-<script src="js/task/task-done.js?v=234"></script>
-<script src="js/task/task-panel.js?v=260"></script>
-<script src="js/task/task-card.js?v=278"></script>
+<script src="js/task/task-card.js?v=282"></script>
 <script src="js/task/task-flow.js?v=273"></script>
 <!-- M6.5：防具面板 + 数据合并层。必须在 data/armors.js / data/armor-upgrade.js
      之后加载（ArmorData 依赖它们），且在 ArmorCard 之前。 -->

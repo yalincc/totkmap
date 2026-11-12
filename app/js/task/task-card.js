@@ -529,6 +529,60 @@
     return '<div class="tk-kv"><span class="tk-k">' + k + '</span><span class="tk-v">' + v + '</span></div>';
   }
 
+  /* 地名反查地标分类集：鸟望台/神庙/树根/村庄/驿站/大妖精/洞穴/井/龙之泪/特殊NPC/研究所/神殿/废矿 */
+  var LANDMARK_CATS = {
+    62:1, 63:1, 109:1, 97:1, 66:1, 67:1, 68:1, 70:1, 82:1, 83:1, 102:1, 183:1, 184:1, 189:1, 193:1, 203:1, 207:1
+  };
+
+  function resolvePointName(t, p, i) {
+    if (!p) return null;
+    if (p.note) return p.note;
+
+    var pLayer = (p.layer != null) ? p.layer : (t.layer || 18);
+    var markers = (window.TOTK_MARKERS || []);
+    var len = markers.length;
+
+    /* 1. 近距离（150米内）地标高精匹配（研究所/神庙/村庄/驿站/鸟望台等） */
+    var best = null, bestDist = 150;
+    for (var k = 0; k < len; k++) {
+      var m = markers[k];
+      if (m.layer !== pLayer || !LANDMARK_CATS[m.cat]) continue;
+      var dx = m.y - p.gx;
+      var dz = m.x - p.gz;
+      var d = Math.sqrt(dx * dx + dz * dz);
+      if (d < bestDist) {
+        bestDist = d;
+        best = m;
+      }
+    }
+    if (best && best.name) return best.name;
+
+    /* 2. 单点任务或第 1 号点（起点）：优先取任务自带的 ROM 官方地区名 locCn */
+    if ((i === 0 || (t.flowPts && t.flowPts.length === 1)) && t.locCn) {
+      return t.locCn;
+    }
+
+    /* 3. 中距离（350米内）地标兜底匹配 */
+    best = null; bestDist = 350;
+    for (var k2 = 0; k2 < len; k2++) {
+      var m2 = markers[k2];
+      if (m2.layer !== pLayer || !LANDMARK_CATS[m2.cat]) continue;
+      var dx2 = m2.y - p.gx;
+      var dz2 = m2.x - p.gz;
+      var d2 = Math.sqrt(dx2 * dx2 + dz2 * dz2);
+      if (d2 < bestDist) {
+        bestDist = d2;
+        best = m2;
+      }
+    }
+    if (best && best.name) return best.name;
+
+    /* 4. 其余情况若任务有 locCn 且是起点 */
+    if (i === 0 && t.locCn) return t.locCn;
+
+    return null;
+  }
+
   /* ---------- 组装 ---------- */
   function buildHtml(t) {
     var h = '';
@@ -568,40 +622,15 @@
       '<button type="button" class="tk-copy" id="tkCopy" title="' + (isEn ? 'Copy quest title' : '复制任务名') + '">'+(window.I18N ? ('[' + window.I18N.t('card.copy') + ']') : '[复制]')+'</button></h3>';
     h += '</div>';
 
-    /* 关键信息行：NPC / 坐标 / 进度
-     *
-     * ★ 2026-10-07 老大精简（截图指正）：删掉「原分类」「类型」「步骤」三行。
-     *   - 原分类(oldCat)：攻略侧分类，和顶部徽章（group）重复
-     *   - 类型(kindCn)：写的是「其他任务」，既跟顶部「迷你挑战」重复，
-     *     又是个没信息量的兜底值（默认值就是它），最容易误导
-     *   - 步骤(nStepsUI)：下面「任务原文」分区已经列了同样的内容，
-     *     顶部再来一次是重复（截图里两处都显示"1 步"）
-     * 顶部徽章已经承担了分类展示，分类信息不会丢。 */
-    h += '<div class="tk-meta">';
-    /* 坐标（★ V2.5.0 v4 定稿）：金色链接式，hover 单下划线，点击地图定位；
-       统一格式 (X，Z，高) 全角括号+中文逗号，无文字前缀；无高度省略第三位。
-       NPC 名不再单独显示（已并入「任务要点 · 接取」的对话模板）。 */
-    if (t.gx != null && t.gz != null) {
-      /* ★ V2.5.0（老大 2026-10-11）：去掉坐标外括号，直接「位置  坐标」 */
-      var co = '' + gameRound(t.gx) + '，' + gameRound(-t.gz);
-      if (t.hasHeight && t.gy != null) co += '，' + gameRound(t.gy - ELEV_UI_OFFSET);
-      h += '<span class="tk-plabel">'+(window.I18N ? window.I18N.t('task.location') : '位置')+'</span>' +
-        '<span class="co-link"' + (t.onMap ? ' data-tk-locate="1"' : '') +
-        ' title="' + (isEn ? 'Click to locate on map' : '点击定位到该坐标') + '">' + esc(co) + '</span>';
-    } else {
-      h += '<span class="tk-plabel">'+(window.I18N ? window.I18N.t('task.location') : '位置')+'</span><span class="co-none">无</span>';
-    }
-    h += '</div>';
-    /* 完成进度：阶段名 + 「第 n/total 步」，让存档进度可见 */
+    /* 关键信息行：进度（2026-11-12：去掉冗余的「位置」行，位置与坐标统一由下方流程地点承载） */
     var dst = doneState(t);
     if (dst.src === 'save' && dst.stage) {
       var pg = dst.total > 1
         ? esc(dst.stage) + '<span class="tk-mv-sub">（第 ' + (dst.idx + 1) + '/' + dst.total + ' 步）</span>'
         : esc(dst.stage);
-      h += '<div class="tk-mrow"><span class="tk-mk">'+(window.I18N ? window.I18N.t('task.progress') : '进度')+'</span><span class="tk-mv' +
-        (dst.done ? ' tk-mv-done' : '') + '">' + pg + '</span></div>';
+      h += '<div class="tk-meta"><div class="tk-mrow"><span class="tk-mk">'+(window.I18N ? window.I18N.t('task.progress') : '进度')+'</span><span class="tk-mv' +
+        (dst.done ? ' tk-mv-done' : '') + '">' + pg + '</span></div></div>';
     }
-    h += '</div>';
 
     /* ---------- M6：任务链 / 系列 ----------
      * ★ V2.5.0（老大 2026-10-11）：任务链板块与「前置条件/后续解锁」内容重复，
@@ -651,7 +680,10 @@
       var num = ['①','②','③','④','⑤','⑥','⑦','⑧','⑨','⑩','⑪','⑫','⑬','⑭','⑮','⑯','⑰','⑱','⑲','⑳'];
       var ptsHtml = fpts.map(function (q, i) {
         var isEn = window.I18N && window.I18N.getLang() === 'en';
-        var nm = q.note ? (window.I18N ? (window.I18N.nameOf(q.note) || q.note) : q.note) : (window.I18N ? window.I18N.t('task.pointNum').replace('{0}', i + 1) : ((i + 1) + ' 号点'));
+        var autoName = resolvePointName(t, q, i);
+        var rawName = q.note || autoName;
+        var nm = rawName ? (window.I18N ? (window.I18N.nameOf(rawName) || rawName) : rawName)
+                         : (window.I18N ? window.I18N.t('task.pointNum').replace('{0}', i + 1) : ((i + 1) + ' 号点'));
         var tip = '' + gameRound(q.gx) + '，' + gameRound(-q.gz) +
           (q.gy != null ? '，' + gameRound(q.gy - ELEV_UI_OFFSET) : '');
         return '<span class="fp" data-tk-pt="' + i + '" title="' + (window.I18N ? window.I18N.t('task.pointLocate') : '点击定位') + '">' +
@@ -1021,7 +1053,7 @@
       });
     });
 
-    /* 流程点定位（★ V2.5.0 v4：点击 ①②③ 数字定位到对应流程点坐标） */
+    /* 流程点定位（★ V2.5.0 v4：点击 ①②③ 数字定位到对应流程点坐标；2026-11-12：支持 3D 权威 layer 自动跨图层直达） */
     Array.prototype.forEach.call(card.querySelectorAll('[data-tk-pt]'), function (el) {
       el.addEventListener('click', function (e) {
         e.preventDefault();
@@ -1029,12 +1061,21 @@
         var i = parseInt(el.getAttribute('data-tk-pt'), 10);
         var q = (t.flowPts || [])[i];
         if (!q || q.gx == null || q.gz == null) { toast('该流程点没有坐标'); return; }
+        var targetLayer = (q.layer != null) ? q.layer : (t.layer || 18);
+        var autoName = resolvePointName(t, q, i);
+        var ptLabel = q.note || autoName || ('点' + (i + 1));
         if (global.TOTK && global.TOTK.gotoMarker) {
-          /* Leaflet 坐标 (latlng=Z, lng=X)：x=q.gz、y=q.gx，同现有定位逻辑 */
-          global.TOTK.gotoMarker({ x: q.gz, y: q.gx, cat: null,
-            name: t.name + ' · 点' + (i + 1) });
+          /* Leaflet 坐标 (latlng=Z, lng=X)：x=q.gz、y=q.gx，带权威 layer 自动切图层 */
+          global.TOTK.gotoMarker({
+            x: q.gz, y: q.gx, cat: null,
+            layer: targetLayer,
+            name: t.name + ' · ' + ptLabel
+          });
           spotMark(q.gz, q.gx);            /* V2.5.0：定位后加临时红点标识 */
         } else if (global.TOTK && global.TOTK.map) {
+          if (global.TOTK.switchLayer && targetLayer !== (global.TOTK.state && global.TOTK.state.layer)) {
+            global.TOTK.switchLayer(targetLayer);
+          }
           global.TOTK.map.setView([q.gz, q.gx], Math.max(global.TOTK.map.getZoom(), 6));
           spotMark(q.gz, q.gx);
         } else {

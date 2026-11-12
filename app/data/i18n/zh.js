@@ -118,6 +118,7 @@ window.TOTK_I18N.zh = {
   "card.trial": "试炼",
   "card.place": "位置",
   "card.note": "注意",
+  "card.desc": "说明",
   "card.chest": "宝箱",
   "card.solve": "解法",
   "card.type": "类型",
