@@ -678,35 +678,56 @@
           });
         }
 
-        /* ---- 蓝图导入：定长覆写一个槽，不动结构、不改文件长度 ----
-         * plan.blueprint = { i, data(6688), camPos?, camAt? }
+        /* ---- 蓝图导入：定长覆写一个或多个槽，不动结构、不改文件长度 ----
+         * plan.blueprints = [{ i, data(6688), camPos?, camAt? }, ...]（兼容单条 plan.blueprint）
          * 覆写目标槽的 4 字节长度头 + 6688 字节数据 + 相机参数。
-         * Index 沿用开源编辑器行为保持不变；只有 -1（从未启用过的空槽）才补一个序号，
+         * Index 沿用开源编辑器行为保持不变；只有 -1（从未启用过的空槽）才顺延补序号，
          * 否则游戏不会把这条新历史列出来。 */
-        if (plan.blueprint) {
-          var bq = plan.blueprint;
+        var bpList = Array.isArray(plan.blueprints) ? plan.blueprints
+                   : (plan.blueprint ? [plan.blueprint] : []);
+        if (bpList.length) {
           var qb = blockOff(BP.info), qi = blockOff(BP.index),
               qp = blockOff(BP.camPos), qa = blockOff(BP.camAt);
           var qn = count(BP.info);
-          var qd = bq.data;
-          var qOk = !!qd && qd.length === BP_DATA;
-          if (qOk) {
-            var qh = 'CmbAct';
-            for (var hi = 0; hi < 6; hi++) { if (qd[hi] !== qh.charCodeAt(hi)) { qOk = false; break; } }
-          }
           if (qb < 0 || qi < 0 || qp < 0 || qa < 0) {
             errs.push('蓝图字段定位失败');
           } else if (qn < 1 || qn > 64) {
             errs.push('蓝图槽数量异常');
-          } else if (typeof bq.i !== 'number' || bq.i < 0 || bq.i >= qn) {
-            errs.push('目标蓝图槽非法');
-          } else if (!qOk) {
-            errs.push('待导入的蓝图数据无效（应为 6688 字节且以 CmbAct 开头）');
           } else {
-            var qhp = qb + 4 + bq.i * BP_STRIDE;
-            if (qhp + 4 + BP_DATA > size) {
-              errs.push('蓝图 #' + (bq.i + 1) + ' 越界，已中止');
-            } else {
+            var mx = -1;
+            for (var z = 0; z < qn; z++) {
+              var zv = view.getInt32(qi + 4 + z * 4, true);
+              if (zv > mx) mx = zv;
+            }
+            var seenSlot = {}, maxSlot = -1;
+            for (var bi = 0; bi < bpList.length; bi++) {
+              var bq = bpList[bi];
+              var qd = bq && bq.data;
+              var qOk = !!qd && qd.length === BP_DATA;
+              if (qOk) {
+                var qh = 'CmbAct';
+                for (var hi = 0; hi < 6; hi++) { if (qd[hi] !== qh.charCodeAt(hi)) { qOk = false; break; } }
+                if (qOk && (qd[8] < 1 || qd[8] > 10 || qd[9] < 1 || qd[9] > 64)) qOk = false;
+              }
+              if (!bq || typeof bq.i !== 'number' || bq.i < 0 || bq.i >= qn) {
+                errs.push('目标蓝图槽非法');
+                break;
+              }
+              if (seenSlot[bq.i]) {
+                errs.push('目标蓝图槽 #' + (bq.i + 1) + ' 重复');
+                break;
+              }
+              seenSlot[bq.i] = true;
+              if (bq.i > maxSlot) maxSlot = bq.i;
+              if (!qOk) {
+                errs.push('蓝图 #' + (bq.i + 1) + ' 数据无效（非有效 6688 字节 CmbAct 结构）');
+                break;
+              }
+              var qhp = qb + 4 + bq.i * BP_STRIDE;
+              if (qhp + 4 + BP_DATA > size) {
+                errs.push('蓝图 #' + (bq.i + 1) + ' 越界，已中止');
+                break;
+              }
               edits.push({ off: qhp, len: 4, kind: 'i32', value: BP_DATA, label: '蓝图 #' + (bq.i + 1) + ' 长度头' });
               edits.push({ off: qhp + 4, len: BP_DATA, kind: 'bytes', value: qd, label: '蓝图 #' + (bq.i + 1) + ' 数据' });
               ['camPos', 'camAt'].forEach(function (key, kk) {
@@ -723,12 +744,35 @@
               });
               var qio = qi + 4 + bq.i * 4;
               if (view.getInt32(qio, true) === -1) {
-                var mx = -1;
-                for (var z = 0; z < qn; z++) {
-                  var zv = view.getInt32(qi + 4 + z * 4, true);
-                  if (zv > mx) mx = zv;
+                mx += 1;
+                edits.push({ off: qio, len: 4, kind: 'i32', value: mx, label: '蓝图 #' + (bq.i + 1) + ' 启用' });
+              }
+            }
+            /* TotK BinaryArray 读档按 [u32 len][len bytes] 顺序步进：
+             * 1) 已写入槽之前不能留 len=0 空洞；
+             * 2) 最后一个连续有效槽之后紧接的空槽区域，必须清零剩余 (qn - nextSlot) * 4 字节，
+             *    否则未初始化脏字节（如 0xa0200fe0）会被当成长度头导致读档越界闪退！ */
+            if (!errs.length && maxSlot >= 0) {
+              for (var cj = 0; cj <= maxSlot; cj++) {
+                if (!seenSlot[cj] && view.getUint32(qb + 4 + cj * BP_STRIDE, true) !== BP_DATA) {
+                  errs.push('请按顺序填入前面的空槽 #' + (cj + 1) + '（不能跳过空槽写入 #' + (maxSlot + 1) + '）');
+                  break;
                 }
-                edits.push({ off: qio, len: 4, kind: 'i32', value: mx + 1, label: '蓝图 #' + (bq.i + 1) + ' 启用' });
+              }
+              if (!errs.length) {
+                var nextSlot = maxSlot + 1;
+                while (nextSlot < qn && view.getUint32(qb + 4 + nextSlot * BP_STRIDE, true) === BP_DATA) nextSlot++;
+                if (nextSlot < qn) {
+                  var tailZeroLen = (qn - nextSlot) * 4;
+                  var tailOff = qb + 4 + nextSlot * BP_STRIDE;
+                  if (tailOff + tailZeroLen <= size) {
+                    edits.push({
+                      off: tailOff, len: tailZeroLen, kind: 'bytes',
+                      value: new Uint8Array(tailZeroLen),
+                      label: '蓝图空槽尾标清零（防脏长度头闪退）'
+                    });
+                  }
+                }
               }
             }
           }

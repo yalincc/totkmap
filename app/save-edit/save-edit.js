@@ -32,7 +32,8 @@
     origin: { rupee: 0, hearts: 0, stamina: 0, energy: 0 },  // 存档原值（HUD 对比用）
     pos: null,          // 当前存档点
     bp: null,           // 存档里的蓝图槽（readBlueprints 结果）
-    bpImport: null      // 待写入的蓝图 { i, data, camPos, camAt }
+    bpImports: [],      // 待写入的蓝图队列 [{ i, data, camPos, camAt, from, summary }]
+    bpPresetSel: {}     // 精选蓝图多选状态 { id: true }
   };
 
   var $ = function (id) { return document.getElementById(id); };
@@ -146,7 +147,7 @@
 
     /* 蓝图：换了一份存档 → 上一份待导入的蓝图一律作废 */
     state.bp = sw.readBlueprints();
-    state.bpImport = null;
+    state.bpImports = [];
     $('bpPending').hidden = true;
     $('bpShareBox').hidden = true;
     renderBlueprints();
@@ -397,9 +398,17 @@
   /* ---------- 蓝图分享 / 导入 ----------
    * 字节读写全在 save-writer.js，这里只做「选槽 → 导出/生成分享码 → 读回 → 交给预览」。
    * 导入不会立刻改档：先记进 state.bpImport，由底部「预览并下载」统一走强制备份流程。 */
+  function bpInspectSlot(s) {
+    if (!s || !s.used || !window.Blueprint || !window.Blueprint.inspect) return null;
+    if (!s._info) s._info = window.Blueprint.inspect(s.data);
+    return s._info;
+  }
+
   function bpLabel(s) {
-    return '#' + String(s.i + 1).padStart(2, '0') + ' · ' + (s.used ? '有蓝图' : '空槽') +
-           (s.index < 0 ? '（未启用）' : '');
+    var no = '#' + String(s.i + 1).padStart(2, '0');
+    if (!s.used) return no + ' · 空槽' + (s.index < 0 ? '（未启用）' : '');
+    var info = bpInspectSlot(s);
+    return no + ' · ' + (info && info.valid ? info.actorCount + ' 零件：' + info.summary : '有蓝图');
   }
 
   function renderBlueprints() {
@@ -409,6 +418,8 @@
       cnt.textContent = b ? b.error : '读取失败';
       src.innerHTML = ''; dst.innerHTML = '';
       $('bpExport').disabled = true; $('bpShare').disabled = true;
+      if ($('bpToggleOverview')) $('bpToggleOverview').disabled = true;
+      renderBlueprintOverview();
       return;
     }
     var used = 0, firstUsed = -1, firstEmpty = -1;
@@ -425,6 +436,41 @@
     dst.value = String(firstEmpty >= 0 ? firstEmpty : b.slots[b.slots.length - 1].i);
     $('bpExport').disabled = firstUsed < 0;
     $('bpShare').disabled = firstUsed < 0;
+    if ($('bpToggleOverview')) $('bpToggleOverview').disabled = false;
+    renderBlueprintOverview();
+  }
+
+  function renderBlueprintOverview() {
+    var wrap = $('bpOverviewWrap'), grid = $('bpOverviewGrid');
+    if (!wrap || !grid || wrap.hidden) return;
+    var b = state.bp;
+    if (!b || !b.ok) { grid.innerHTML = '<div style="font-size:12px;opacity:.6">请先加载存档</div>'; return; }
+    var onlyUsed = $('bpOnlyUsed') && $('bpOnlyUsed').checked;
+    var list = onlyUsed ? b.slots.filter(function (s) { return s.used; }) : b.slots;
+    if (!list.length) {
+      grid.innerHTML = '<div style="font-size:12px;opacity:.6">当前存档还没有已保存的蓝图，可取消勾选「仅显示已有蓝图」查看全部 30 个空槽。</div>';
+      return;
+    }
+    grid.innerHTML = list.map(function (s) {
+      var info = bpInspectSlot(s);
+      var title = '#' + String(s.i + 1).padStart(2, '0') + (s.used ? ' · 已占用' : (s.suspect ? ' · 未初始化' : ' · 空槽'));
+      var desc = s.used && info && info.valid
+        ? '<b>' + info.actorCount + ' 零件</b>：' + esc(info.summary)
+        : (s.index < 0 ? '未启用空槽（导入时自动启用）' : '空槽');
+      var btns = s.used
+        ? '<button type="button" class="btn bp-ov-exp" data-i="' + s.i + '" style="font-size:11px;padding:3px 7px">导出</button>' +
+          '<button type="button" class="btn bp-ov-shr" data-i="' + s.i + '" style="font-size:11px;padding:3px 7px">分享码</button>' +
+          '<button type="button" class="btn bp-ov-tgt" data-i="' + s.i + '" style="font-size:11px;padding:3px 7px">设为目标</button>'
+        : '<button type="button" class="btn bp-ov-tgt" data-i="' + s.i + '" style="font-size:11px;padding:3px 7px">设为导入目标</button>';
+      return '<div style="background:#161c24;border:1px solid ' + (s.used ? '#2e4a62' : '#262f3b') + ';border-radius:7px;padding:8px 10px;display:flex;flex-direction:column;gap:5px">' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;font-size:12px">' +
+          '<span style="font-weight:600;color:' + (s.used ? '#38bdf8' : '#94a3b8') + '">' + title + '</span>' +
+          '<span style="font-size:10px;opacity:.6">Index: ' + s.index + '</span>' +
+        '</div>' +
+        '<div style="font-size:11px;color:#cbd5e1;line-height:1.4">' + desc + '</div>' +
+        '<div style="display:flex;gap:5px;margin-top:auto;padding-top:4px;flex-wrap:wrap">' + btns + '</div>' +
+      '</div>';
+    }).join('');
   }
 
   function bpSlot() {
@@ -457,25 +503,81 @@
     } catch (e) { showMsg('<b>生成分享码失败：</b>' + esc(e.message), 'warn'); }
   }
 
-  function bpPendingHtml(i, from) {
-    var tgt = state.bp.slots[i];
-    return '<b>已读取一张蓝图</b>' + (from ? '（来源：' + esc(from) + '）' : '') + ' → 将' +
-      (tgt.used ? '<b>覆盖</b>' : '写入') + ' <b>' + esc(bpLabel(tgt)) + '</b>' +
-      (tgt.used ? '（该槽原有蓝图会被替换，可先导出留底）' : '') +
-      '。点底部「预览并下载」生成改好的存档。';
+  function renderBpPending() {
+    var el = $('bpPending');
+    if (!state.bpImports.length) {
+      el.hidden = true;
+      el.innerHTML = '';
+      return;
+    }
+    el.hidden = false;
+    var rows = state.bpImports.map(function (item, idx) {
+      var tgt = state.bp.slots[item.i];
+      var action = tgt && tgt.used ? '<b style="color:#fbbf24">覆盖</b>' : '写入';
+      return '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:3px 0;border-bottom:1px dashed rgba(255,255,255,.08)">' +
+        '<span><b>#' + String(item.i + 1).padStart(2, '0') + '</b>（' + action + '）← ' +
+          esc(item.from || '蓝图') + ' <span style="opacity:.75">[' + esc(item.summary || '') + ']</span></span>' +
+        '<button type="button" class="btn bp-rm-item" data-idx="' + idx + '" style="font-size:11px;padding:1px 6px">移除</button>' +
+      '</div>';
+    }).join('');
+    el.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">' +
+      '<b>待写入蓝图队列（共 ' + state.bpImports.length + ' 张，点底部「预览并下载」生效）</b>' +
+      '<button type="button" class="btn" id="bpClearQueue" style="font-size:11px;padding:2px 8px">清空队列</button>' +
+      '</div>' + rows;
   }
 
-  function bpSetImport(caiBytes, from) {
+  function bpSetImport(caiBytes, from, targetIdx) {
     if (!state.bp || !state.bp.ok) { showMsg('先加载存档，再导入蓝图。', 'warn'); return; }
     try {
       var parsed = window.Blueprint.parseCai(caiBytes);
-      var i = +$('bpTarget').value;
-      state.bpImport = { i: i, data: parsed.data, camPos: parsed.camPos, camAt: parsed.camAt };
-      var el = $('bpPending');
-      el.hidden = false;
-      el.innerHTML = bpPendingHtml(i, from);
+      var info = window.Blueprint.inspect(parsed.data);
+      var i = typeof targetIdx === 'number' ? targetIdx : +$('bpTarget').value;
+      var rec = {
+        i: i, data: parsed.data, camPos: parsed.camPos, camAt: parsed.camAt,
+        from: from || '蓝图',
+        summary: info.valid ? (info.actorCount + ' 零件：' + info.summary) : ''
+      };
+      var replaced = false;
+      for (var k = 0; k < state.bpImports.length; k++) {
+        if (state.bpImports[k].i === i) { state.bpImports[k] = rec; replaced = true; break; }
+      }
+      if (!replaced) state.bpImports.push(rec);
+      renderBpPending();
       updateFoot();
     } catch (e) { showMsg('<b>导入失败：</b>' + esc(e.message), 'warn'); }
+  }
+
+  function bpBatchQueue(entries) {
+    if (!state.bp || !state.bp.ok) { showMsg('先加载存档，再批量导入蓝图。', 'warn'); return; }
+    var occupied = {};
+    state.bpImports.forEach(function (it) { occupied[it.i] = true; });
+    var emptySlots = state.bp.slots.filter(function (s) { return !s.used && !occupied[s.i]; });
+    var added = 0, skipped = 0, errs = [];
+    for (var k = 0; k < entries.length; k++) {
+      if (added >= emptySlots.length) { skipped += (entries.length - k); break; }
+      try {
+        var parsed = window.Blueprint.parseCai(entries[k].caiBytes);
+        var info = window.Blueprint.inspect(parsed.data);
+        var slot = emptySlots[added];
+        state.bpImports.push({
+          i: slot.i, data: parsed.data, camPos: parsed.camPos, camAt: parsed.camAt,
+          from: entries[k].from || '蓝图',
+          summary: info.valid ? (info.actorCount + ' 零件：' + info.summary) : ''
+        });
+        added++;
+      } catch (e) {
+        errs.push((entries[k].from || ('#' + (k + 1))) + '：' + e.message);
+      }
+    }
+    renderBpPending();
+    updateFoot();
+    if (errs.length) {
+      showMsg('批量导入部分失败（成功 ' + added + ' 个）：' + esc(errs[0]), 'warn');
+    } else if (skipped > 0) {
+      showMsg('已填入 ' + added + ' 个空槽，剩余 ' + skipped + ' 个因空槽不足未填入（可先手动选槽覆盖）。', 'warn');
+    } else if (added > 0) {
+      showMsg('已将 <b>' + added + '</b> 张蓝图加入待写入队列，点底部「预览并下载」生成新存档。', 'ok');
+    }
   }
 
   /* ---------- 收集用户意图 ---------- */
@@ -523,7 +625,7 @@
     if (items.length) p.items = items;
 
     /* 蓝图导入与其它改动一起进预览，共用强制备份 / 下载流程 */
-    if (state.bpImport) p.blueprint = state.bpImport;
+    if (state.bpImports.length) p.blueprints = state.bpImports;
 
     return p;
   }
@@ -783,7 +885,7 @@
     if (plan.arrows999) n++;
     if (plan.pos) n++;
     if (plan.items) n += plan.items.length;
-    if (plan.blueprint) n++;
+    if (plan.blueprints) n += plan.blueprints.length;
 
     var src = state.source === 'navi' ? 'navi 直连' : '本地文件';
     $('footStatus').innerHTML = n
@@ -969,14 +1071,25 @@
       showMsg(ok ? '分享码已复制。' : '复制失败，请手动全选文本框里的分享码。', ok ? 'ok' : 'warn');
     });
     $('bpFile').addEventListener('change', function () {
-      var f = this.files && this.files[0];
-      if (!f) return;
-      var name = f.name;
-      var r = new FileReader();
-      r.onload = function () { bpSetImport(new Uint8Array(r.result), name); };
-      r.onerror = function () { showMsg('文件读不出来，换一个 .cai 试试。', 'warn'); };
-      r.readAsArrayBuffer(f);
+      var files = Array.prototype.slice.call(this.files || []);
       this.value = '';
+      if (!files.length) return;
+      if (files.length === 1) {
+        var f = files[0], name = f.name;
+        var r = new FileReader();
+        r.onload = function () { bpSetImport(new Uint8Array(r.result), name); };
+        r.onerror = function () { showMsg('文件读不出来，换一个 .cai 试试。', 'warn'); };
+        r.readAsArrayBuffer(f);
+        return;
+      }
+      Promise.all(files.map(function (file) {
+        return new Promise(function (resolve) {
+          var fr = new FileReader();
+          fr.onload = function () { resolve({ caiBytes: new Uint8Array(fr.result), from: file.name }); };
+          fr.onerror = function () { resolve({ caiBytes: new Uint8Array(0), from: file.name }); };
+          fr.readAsArrayBuffer(file);
+        });
+      })).then(bpBatchQueue);
     });
     $('bpCodeLoad').addEventListener('click', function () {
       try {
@@ -984,11 +1097,73 @@
         bpSetImport(cai, '分享码');
       } catch (e) { showMsg('<b>分享码读不了：</b>' + esc(e.message), 'warn'); }
     });
-    $('bpTarget').addEventListener('change', function () {
-      if (!state.bpImport) return;
-      state.bpImport.i = +this.value;
-      $('bpPending').innerHTML = bpPendingHtml(state.bpImport.i);
+    $('bpPending').addEventListener('click', function (e) {
+      var t = e.target;
+      if (t && t.id === 'bpClearQueue') {
+        state.bpImports = [];
+        renderBpPending();
+        updateFoot();
+      } else if (t && t.classList.contains('bp-rm-item')) {
+        state.bpImports.splice(+t.dataset.idx, 1);
+        renderBpPending();
+        updateFoot();
+      }
     });
+    if ($('bpToggleOverview')) {
+      $('bpToggleOverview').addEventListener('click', function () {
+        var wrap = $('bpOverviewWrap');
+        wrap.hidden = !wrap.hidden;
+        this.textContent = wrap.hidden ? '查看全部蓝图' : '收起蓝图总览';
+        if (!wrap.hidden) renderBlueprintOverview();
+      });
+    }
+    if ($('bpOnlyUsed')) {
+      $('bpOnlyUsed').addEventListener('change', renderBlueprintOverview);
+    }
+    if ($('bpOverviewGrid')) {
+      $('bpOverviewGrid').addEventListener('click', function (e) {
+        var t = e.target;
+        if (!t || !t.dataset || t.dataset.i === undefined) return;
+        var idx = +t.dataset.i;
+        if (t.classList.contains('bp-ov-exp')) {
+          $('bpSlot').value = String(idx);
+          bpExport();
+        } else if (t.classList.contains('bp-ov-shr')) {
+          $('bpSlot').value = String(idx);
+          bpShare();
+        } else if (t.classList.contains('bp-ov-tgt')) {
+          $('bpTarget').value = String(idx);
+          showMsg('已将导入目标槽位设为 <b>#' + String(idx + 1).padStart(2, '0') + '</b>。', 'ok');
+        }
+      });
+    }
+    if ($('bpPresetSelAll')) {
+      $('bpPresetSelAll').addEventListener('click', function () {
+        var list = window.TOTK_BLUEPRINTS_PRESET || [];
+        var allOn = list.length && list.every(function (p) { return !!state.bpPresetSel[p.id]; });
+        list.forEach(function (p) { state.bpPresetSel[p.id] = !allOn; });
+        Array.prototype.forEach.call(document.querySelectorAll('.bp-preset-chk'), function (chk) {
+          chk.checked = !allOn;
+        });
+      });
+    }
+    if ($('bpPresetBatch')) {
+      $('bpPresetBatch').addEventListener('click', function () {
+        var list = window.TOTK_BLUEPRINTS_PRESET || [];
+        var chosen = list.filter(function (p) { return !!state.bpPresetSel[p.id]; });
+        if (!chosen.length) { showMsg('请先勾选要批量填入的精选蓝图。', 'warn'); return; }
+        var entries = [];
+        for (var i = 0; i < chosen.length; i++) {
+          try {
+            entries.push({ caiBytes: window.Blueprint.decodeShare(chosen[i].shareCode), from: chosen[i].name });
+          } catch (e) {
+            showMsg('预设【' + esc(chosen[i].name) + '】解码失败：' + esc(e.message), 'warn');
+            return;
+          }
+        }
+        bpBatchQueue(entries);
+      });
+    }
 
     /* 预览 / 下载 */
     $('btnApply').addEventListener('click', openPreview);
@@ -1020,13 +1195,21 @@
     }
     var html = '';
     list.forEach(function (p, idx) {
+      var chk = state.bpPresetSel[p.id] ? ' checked' : '';
+      var srcLink = p.sourceUrl
+        ? '<a href="' + esc(p.sourceUrl) + '" target="_blank" rel="noopener" style="font-size:10px;color:#64748b;text-decoration:none">来源 #' + esc(p.hwId || '') + ' ↗</a>'
+        : '';
       html += '<div class="bp-pcard" data-idx="' + idx + '" style="background:#141920;border:1px solid #313b48;border-radius:8px;padding:10px;display:flex;flex-direction:column;gap:6px">' +
-        '<div style="display:flex;justify-content:space-between;align-items:center">' +
-          '<span style="font-weight:600;font-size:13px;color:#e8edf4">' + esc(p.name) + '</span>' +
-          '<span style="font-size:11px;background:#1e293b;color:#38bdf8;padding:2px 6px;border-radius:4px">' + esc(p.tag || '') + '</span>' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;gap:6px">' +
+          '<label style="display:inline-flex;align-items:center;gap:5px;font-weight:600;font-size:13px;color:#e8edf4;cursor:pointer">' +
+            '<input type="checkbox" class="bp-preset-chk" data-id="' + esc(p.id) + '"' + chk + '> ' + esc(p.name) +
+          '</label>' +
+          '<span style="font-size:11px;background:#1e293b;color:#38bdf8;padding:2px 6px;border-radius:4px;white-space:nowrap">' + esc(p.tag || '') + '</span>' +
         '</div>' +
         '<div style="font-size:11px;color:#94a3b8">' + esc(p.desc) + '</div>' +
-        '<div style="font-size:11px;color:#fbbf24;margin-top:2px">💎 消耗矿石：' + p.costOre + ' 块</div>' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;color:#fbbf24;margin-top:2px">' +
+          '<span>💎 消耗矿石：' + p.costOre + ' 块</span>' + srcLink +
+        '</div>' +
         '<div style="font-size:11px;color:#64748b;line-height:1.4"><b>零件：</b>' + esc((p.parts || []).join('、')) + '</div>' +
         '<div style="display:flex;gap:6px;margin-top:auto;padding-top:6px">' +
           '<button type="button" class="btn primary bp-load-btn" data-idx="' + idx + '" style="flex:1;padding:5px 8px;font-size:11px">📥 填入存档</button>' +
@@ -1035,6 +1218,12 @@
       '</div>';
     });
     grid.innerHTML = html;
+
+    Array.prototype.forEach.call(grid.querySelectorAll('.bp-preset-chk'), function (chk) {
+      chk.addEventListener('change', function () {
+        state.bpPresetSel[this.dataset.id] = this.checked;
+      });
+    });
 
     Array.prototype.forEach.call(grid.querySelectorAll('.bp-load-btn'), function (btn) {
       btn.addEventListener('click', function () {

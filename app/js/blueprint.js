@@ -35,6 +35,81 @@
     return true;
   }
 
+  /* 校验 CmbAct 内部基本结构（ver / 零件数），拦截占位假数据或损坏文件，防止写回后游戏闪退 */
+  function isValidCmbAct(u8) {
+    if (!isHeader(u8) || u8.length < 16) return false;
+    var ver = u8[8], actors = u8[9];
+    if (ver < 1 || ver > 10) return false;
+    if (actors < 1 || actors > 64) return false;
+    return true;
+  }
+
+  var ACTOR_CN = {
+    SpObj_WindGenerator_A_01: '风扇机',
+    SpObj_ControlStick_A_01: '操纵杆',
+    SpObj_LiftGeneratorWing_A_01: '翼',
+    SpObj_LiftGeneratorWing_A_01_MiniGame: '无限翼',
+    SpObj_FloatingStone_A_01: '浮游石',
+    SpObj_Rocket_A_01: '火箭',
+    SpObj_Beamos_A_01: '光线头',
+    SpObj_Cannon_A_01: '大炮',
+    SpObj_FlameThrower_A_01: '火龙头',
+    SpObj_FrostThrower_A_01: '冰龙头',
+    SpObj_ElectricStone_A_01: '雷龙头',
+    SpObj_GolemHead_A_01: '魔像头',
+    SpObj_SwitchWheel_B_01: '大轮胎',
+    SpObj_FastWheel_A_01: '小轮胎',
+    SpObj_Cart_A_01: '车身',
+    SpObj_SlipBoard_A_01: '雪橇',
+    SpObj_EnergyBank_A_01: '备用电池',
+    SpObj_EnergyBank_A_02: '大容量电池',
+    SpObj_FlashLight_A_01: '车灯',
+    SpObj_Pile_A_01: '桩',
+    SpObj_Spring_A_01: '弹簧',
+    SpObj_BalloonEnvelope_A_01: '热气球',
+    SpObj_TimerBomb_A_01: '定时炸弹',
+    SpObj_CookSet_A_01: '便携锅',
+    SpObj_Mirror_A_01: '镜子',
+    SpObj_WaterPump_A_01: '放水栓',
+    SpObj_Chaser_A_01: '追踪台车',
+    SpObj_TiltingDoll_A_01: '不倒翁',
+    DgnObj_Zonau_SliderBox_A_02: '神庙电梯导轨',
+    DgnObj_Motor_A_01: '神庙马达',
+    DgnObj_PropellerAndWind: '神庙螺旋桨',
+    DgnObj_Small_BoardNet_A_04: '网格板',
+    DgnObj_Small_Lift_A_01: '神庙升降板',
+    AsbObj_MetalRectangle_A_M_01: '金属板',
+    AsbObj_MetalPole_A_LL_01: '长金属杆',
+    AsbObj_WoodWheel_A_01: '木车轮',
+    AsbObj_Assassin_Raft_01: '依盖队木筏',
+    Item_Enemy_214: '龙鳞',
+    Item_Enemy_158: '怪物素材',
+    Item_Fruit_A: '苹果'
+  };
+
+  function inspect(raw) {
+    var b = u8(raw);
+    if (!isValidCmbAct(b)) return { valid: false, ver: 0, actorCount: 0, parts: [], summary: '无效蓝图' };
+    var ver = b[8], actorCount = b[9];
+    var s = '', len = Math.min(b.length, CAI_SIZE);
+    for (var i = 0; i < len; i++) s += String.fromCharCode(b[i]);
+    var re = /\x00((?:SpObj|AsbObj|DgnObj|Item|Weapon|FldObj|Obj)_[A-Za-z0-9_]+)\x00/g;
+    var map = {}, order = [], m;
+    while ((m = re.exec(s)) !== null) {
+      var id = m[1];
+      if (!map[id]) { map[id] = 0; order.push(id); }
+      map[id]++;
+    }
+    var parts = order.map(function (id) {
+      return { id: id, name: ACTOR_CN[id] || id, count: map[id] };
+    });
+    var summary = parts.length
+      ? parts.slice(0, 4).map(function (p) { return p.name + (p.count > 1 ? '×' + p.count : ''); }).join('、') +
+        (parts.length > 4 ? ' 等' : '')
+      : actorCount + ' 个零件';
+    return { valid: true, ver: ver, actorCount: actorCount, parts: parts, summary: summary };
+  }
+
   function u8(x) { return x instanceof Uint8Array ? x : new Uint8Array(x); }
 
   /* ---------- .cai 封装 / 解封 ---------- */
@@ -64,6 +139,7 @@
       fail('不是有效的 .cai 蓝图（长度 ' + b.length + '，只认 6688 / 6712 / 7840）');
     }
     if (!isHeader(b)) fail('不是有效的 .cai 蓝图（缺 CmbAct 文件头）');
+    if (!isValidCmbAct(b)) fail('蓝图数据格式异常（非有效 CmbAct 结构，已拦截以防游戏闪退）');
     var data = b.slice(0, CAI_SIZE);
     var out = { data: data, camPos: null, camAt: null, hasCamera: b.length === CAI_EDITOR_SIZE };
     if (out.hasCamera) {
@@ -215,6 +291,8 @@
     CAI_DRAFT_SIZE: CAI_DRAFT_SIZE,
     PREFIX: PREFIX,
     isHeader: isHeader,
+    isValidCmbAct: isValidCmbAct,
+    inspect: inspect,
     toCai: toCai,
     parseCai: parseCai,
     encodeShare: encodeShare,

@@ -264,8 +264,13 @@
       <div class="card-body">
         <!-- 精选蓝图工坊 -->
         <div class="bp-preset-section" style="margin-bottom:16px;border-bottom:1px solid #313b48;padding-bottom:16px">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-            <span style="font-weight:600;font-size:13px;color:#38bdf8">📐 精选神级蓝图库（点击一键填入存档或复制分享码）</span>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:8px;flex-wrap:wrap">
+            <span style="font-weight:600;font-size:13px;color:#38bdf8">📐 精选神级蓝图库（社区真实 .cai 验证 · 支持单填或批量填入空槽）</span>
+            <span style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+              <a class="btn" href="https://www.hyruleworks.com/" target="_blank" rel="noopener" style="font-size:11px;padding:4px 8px;text-decoration:none">🌐 HyruleWorks 更多蓝图 ↗</a>
+              <button type="button" class="btn" id="bpPresetSelAll" style="font-size:11px;padding:4px 8px">全选/取消</button>
+              <button type="button" class="btn primary" id="bpPresetBatch" style="font-size:11px;padding:4px 8px">📥 批量填入空槽</button>
+            </span>
           </div>
           <div id="bpPresetGrid" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(230px, 1fr));gap:10px"></div>
         </div>
@@ -276,7 +281,18 @@
             <select id="bpSlot" aria-label="选择要导出的蓝图槽" style="min-width:190px;background:#1b212a;color:#e8edf4;border:1px solid #313b48;border-radius:6px;padding:6px 8px;font-size:12px"></select>
             <button type="button" class="btn" id="bpExport">导出 .cai</button>
             <button type="button" class="btn" id="bpShare">生成分享码</button>
+            <button type="button" class="btn" id="bpToggleOverview">查看全部蓝图</button>
           </span>
+        </div>
+
+        <div id="bpOverviewWrap" hidden style="margin:12px 0;padding:12px;border:1px solid #313b48;border-radius:8px;background:#11161d">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:8px;flex-wrap:wrap">
+            <span style="font-size:12px;font-weight:600;color:#e8edf4">存档蓝图总览（自动解析零件构成）</span>
+            <label style="font-size:11px;color:#94a3b8;display:inline-flex;align-items:center;gap:5px;cursor:pointer">
+              <input type="checkbox" id="bpOnlyUsed" checked> 仅显示已有蓝图
+            </label>
+          </div>
+          <div id="bpOverviewGrid" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));gap:8px"></div>
         </div>
 
         <div id="bpShareBox" hidden style="margin:12px 0;padding:12px;border:1px solid #313b48;border-radius:8px">
@@ -290,11 +306,11 @@
         </div>
 
         <div class="row">
-          <span class="lbl">导入到<small id="bpTargetHint">选一个槽位覆盖</small></span>
+          <span class="lbl">导入到<small id="bpTargetHint">选槽单填，或多选批量入空槽</small></span>
           <span class="ctl" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
             <select id="bpTarget" aria-label="选择导入目标槽位" style="min-width:190px;background:#1b212a;color:#e8edf4;border:1px solid #313b48;border-radius:6px;padding:6px 8px;font-size:12px"></select>
-            <label class="btn" for="bpFile" style="cursor:pointer;display:inline-flex;align-items:center">选择 .cai 文件</label>
-            <input type="file" id="bpFile" accept=".cai,application/octet-stream" hidden>
+            <label class="btn" for="bpFile" style="cursor:pointer;display:inline-flex;align-items:center">选择 .cai（可多选）</label>
+            <input type="file" id="bpFile" accept=".cai,application/octet-stream" multiple hidden>
           </span>
         </div>
 
@@ -309,7 +325,7 @@
         <div class="tip ok" id="bpPending" hidden></div>
         <div class="tip">
           导出的 <b>.cai</b> 是社区通用格式，HyruleWorks 与其它存档编辑器都能用。
-          导入会覆盖所选槽位，点底部「预览并下载」后<b>先备份原档</b>，再手动覆盖 progress.sav。
+          支持一次多选多个 <b>.cai</b> 文件或勾选多个精选蓝图批量填入空槽，点底部「预览并下载」后<b>先备份原档</b>，再手动覆盖 progress.sav。
         </div>
       </div>
     </section>
