@@ -188,7 +188,7 @@ html, body {
 .panel.collapsed { transform: translateX(-100%); }
 
 .panel-top {
-  padding: 16px 16px 14px;
+  padding: 12px 16px 0;
   border-bottom: 1px solid #45454d;
 }
 .panel-head-row {
@@ -231,29 +231,44 @@ html, body {
 .name-switch.cur .switch { background-color: #eac27e; }
 .name-switch.cur .switch i { transform: translateX(12px); }
 
-/* 图层切换（天空/地上/地下） */
+/* 图层切换（天空/地上/地下：与底部分割线相连的 Tab 标签） */
 .layer-switch {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 18px;
-  padding-top: 6px;
+  gap: 6px;
+  padding-top: 4px;
 }
 .layer-switch button {
-  height: 32px;
-  line-height: 32px;
+  height: 30px;
+  line-height: 28px;
   text-align: center;
-  background: #46464c;
-  color: #d7d7d9;
-  border-radius: 4px;
-  border: none;
-  font-size: 12px;
+  background: rgba(255,255,255,.04);
+  color: #a7a7ad;
+  border-radius: 6px 6px 0 0;
+  border: 1px solid transparent;
+  border-bottom: none;
+  font-size: 13px;
   font-weight: 500;
   cursor: pointer;
   transition: all .15s;
 }
-.layer-switch button.active { background: #eac27e; color: #222; font-weight: 600; }
-.layer-switch button.locked { box-shadow: inset 0 0 0 2px #ffb703; color: #ffd166; }
-.layer-switch button.locked.active { background: #eac27e; color: #222; box-shadow: inset 0 0 0 2px #b45309; }
+.layer-switch button:hover { color: #e2e2e8; background: rgba(255,255,255,.08); }
+.layer-switch button.active {
+  background: #23262c;
+  color: #eac27e;
+  font-weight: 600;
+  border-color: #45454d;
+  box-shadow: inset 0 2px 0 #eac27e;
+  margin-bottom: -1px;
+  padding-bottom: 1px;
+}
+.layer-switch button.locked { box-shadow: inset 0 2px 0 #ffb703; color: #ffd166; }
+.layer-switch button.locked.active {
+  background: #23262c;
+  color: #ffd166;
+  border-color: #ffb703;
+  box-shadow: inset 0 2px 0 #ffb703;
+}
 
 /* 地图标点区 */
 .marker-section {
@@ -398,12 +413,12 @@ html, body {
 /* 搜索（与下方图层工具条构成一个紧凑模块：间距收紧、无中间分隔线） */
 .search-box {
   position: relative;
-  padding: 12px 16px 6px;
+  padding: 6px 16px 4px;
 }
 .search-box input {
   width: 100%;
-  height: 32px;
-  padding: 0 12px;
+  height: 28px;
+  padding: 0 10px;
   border-radius: 4px;
   border: 1px solid rgba(255,255,255,.12);
   background: rgba(0,0,0,.3);
@@ -416,7 +431,7 @@ html, body {
 .search-box input::placeholder { color: #7c8591; }
 .search-result {
   position: absolute;
-  top: 50px; left: 16px; right: 16px;
+  top: 38px; left: 16px; right: 16px;
   max-height: 260px;
   overflow-y: auto;
   background: rgba(24,28,34,.98);
@@ -462,14 +477,16 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 32px;
+  height: 28px;
   line-height: 1;
-  color: #a7a7ad;
-  font-size: 16px;
-  font-weight: 400;
-  margin-bottom: 10px;
-  margin-top: 6px;
+  color: #e2e2e8;
+  font-size: 15px;
+  font-weight: 600;
+  padding-bottom: 4px;
+  border-bottom: 1px solid rgba(255, 255, 255, .08);
+  margin: 8px 0 6px;
 }
+.group-title:first-child { margin-top: 2px; }
 /* V2.6.0：大分类一键全选 / 清空按钮（对齐 BOTWmap .lg-btn） */
 .group-title .gt-name {
   overflow: hidden;
@@ -494,8 +511,8 @@ html, body {
 .cat-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  grid-gap: 10px 17px;
-  margin-bottom: 12px;
+  grid-gap: 8px 16px;
+  margin-bottom: 10px;
 }
 .cat-item {
   display: flex;
@@ -543,17 +560,24 @@ html, body {
    内容整体由侧栏滚动承载；行距/组距同步压紧 */
 .progress-section {
   border-top: 1px solid #45454d;
-  padding: 8px 16px 8px;
+  padding: 0 16px 10px;
 }
+.progress-section.collapsed { padding-bottom: 0; }
 .progress-head {
   display: flex;
   align-items: center;
-  gap: 6px;
-  margin-bottom: 6px;
+  gap: 7px;
+  margin: 0 -16px 8px;
+  padding: 8px 16px;
+  background: rgba(255, 255, 255, .05);
+  border-bottom: 1px solid rgba(255, 255, 255, .07);
   cursor: pointer;
   user-select: none;
+  transition: background .15s;
 }
-.progress-head:hover .progress-title { color: #eac27e; }
+.progress-head:hover { background: rgba(234, 194, 126, .10); }
+.progress-section.collapsed .progress-head { margin-bottom: 0; border-bottom-color: transparent; }
+.progress-head:hover .progress-title { color: #f6dcb0; }
 /* 2026-10-27：三角改用 CSS 边框绘制 —— 原来 12px 字号的 ▾ 字符实际只有约 4×3px，
    比 14px 的「探索度」明显小一圈。改成固定 12×8px 的纯 CSS 三角，
    不受字体回退影响（英文下不同字体的 ▾ 字形大小不一），旋转动画沿用 transform */
@@ -573,10 +597,21 @@ html, body {
   top: 0;
   border-left: 6px solid transparent;
   border-right: 6px solid transparent;
-  border-top: 8px solid #8a93a0;
+  border-top: 8px solid #eac27e;
 }
 .progress-section.collapsed .progress-toggle { transform: rotate(-90deg); }
-.progress-title { font-size: 14px; font-weight: 400; color: #fff; }
+.progress-title { font-size: 15px; font-weight: 600; color: #eac27e; }
+.progress-more {
+  margin-left: auto;
+  font-size: 11.5px;
+  font-weight: 400;
+  color: rgba(234, 194, 126, .75);
+  line-height: 1;
+}
+.progress-more::after { content: '点击收起'; }
+.progress-section.collapsed .progress-more::after { content: '点击展开'; }
+html[lang="en"] .progress-more::after { content: 'Collapse'; }
+html[lang="en"] .progress-section.collapsed .progress-more::after { content: 'Expand'; }
 .progress-list { display: flex; flex-direction: column; gap: 2px; }
 .progress-section.collapsed .progress-list { display: none; }
 .progress-item {
@@ -613,14 +648,33 @@ html, body {
    ★ 标题外层多了 .prog-group 包裹后，原来的 .prog-group-title:first-of-type
      会命中「每个组里的第一个标题」（等于每组都变 1px 上边距，间距被改掉），
      所以首组特例改成 .prog-group:first-child 兜住。 */
-.prog-group + .prog-group { border-top: 1px solid rgba(255,255,255,.10); }
-.prog-group-title {
-  font-size: 14px;
-  font-weight: 500;
-  color: rgba(255,255,255,.9);
-  margin: 5px 0 2px;
+.prog-group + .prog-group {
+  margin-top: 6px;
 }
-.prog-group:first-child .prog-group-title { margin-top: 1px; }
+.prog-group-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.25;
+  color: #f0f0f5;
+  background: rgba(255,255,255,.055);
+  border-radius: 4px;
+  padding: 3px 7px;
+  margin: 0 -7px 4px;
+}
+.prog-group-title .pgt-name { flex: none; }
+.prog-group-title .pgt-pct {
+  flex: none;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #f0f0f5;
+  font-variant-numeric: tabular-nums;
+}
+.prog-group-title.done .pgt-pct { color: #2ecc71; }
+.prog-group:first-child .prog-group-title { margin-top: 0; }
 .prog-grid {
   display: grid;
   grid-template-columns: minmax(0,1fr) minmax(0,1fr);
@@ -631,6 +685,7 @@ html, body {
   align-items: center;
   justify-content: space-between;
   gap: 6px;
+  padding-right: 10px;
   font-size: 12.5px;
   line-height: 1.45;
   min-width: 0;
@@ -638,6 +693,7 @@ html, body {
 .prog-row.col2 {
   border-left: 1px solid rgba(255,255,255,.14);
   padding-left: 10px;
+  padding-right: 0;
 }
 .prog-row .pr-name {
   color: rgba(255,255,255,.78);
@@ -666,6 +722,18 @@ html, body {
 }
 .side-foot p { font-size: 11.5px; color: #8a93a0; line-height: 1.7; }
 .side-foot .foot-version { color: #a7a7ad; font-weight: 500; }
+.cl-ver { margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,.08); }
+.cl-ver:last-child { margin-bottom: 4px; padding-bottom: 0; border-bottom: none; }
+.cl-head { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; margin-bottom: 6px; }
+.cl-tag {
+  font-size: 11px; font-weight: 700; padding: 1px 7px; border-radius: 5px;
+  background: rgba(234,194,126,.16); color: #eac27e; border: 1px solid rgba(234,194,126,.38);
+}
+.cl-title { font-size: 13.5px; font-weight: 600; color: #f1f3f5; }
+.cl-date { margin-left: auto; font-size: 11.5px; color: #8a93a0; }
+.cl-list { margin: 0; padding-left: 18px; color: #c9cdd3; font-size: 12.5px; line-height: 1.65; }
+.cl-list li { margin-bottom: 3px; }
+.cl-foot { display: flex; justify-content: flex-end; margin-top: 12px; }
 .side-foot a { color: #8a93a0; text-decoration: underline; text-underline-offset: 2px; }
 .side-foot a:hover { color: #eac27e; }
 
@@ -967,16 +1035,13 @@ html, body {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 6px 16px 10px;
+  padding: 4px 16px 8px;
   border-bottom: 1px solid #45454d;
 }
 .lt-btn {
-  /* ★ 触控下限：原来 height:26px 是纯鼠标时代的尺寸，
-     在手机上点不准（实测 375px 视口下按钮只有 26px 高）。
-     改 min-height:36px —— 工具栏是次要操作，40px 太大占地方，
-     36px 配合 full-width 的按钮横向有富余，够手指点。 */
-  min-height: 36px;
-  padding: 0 12px;
+  height: 26px;
+  min-height: 26px;
+  padding: 0 10px;
   background: rgba(255,255,255,.1);
   border: 1px solid rgba(255,255,255,.12);
   border-radius: 4px;
@@ -1057,7 +1122,7 @@ html, body {
 /* ============ 探索/材料 Tab ============ */
 .side-tabs {
   display: flex;
-  margin: 8px 12px 0;
+  margin: 6px 12px 0;
   border-radius: 8px;
   overflow: hidden;
   background: rgba(255,255,255,.05);
@@ -1065,7 +1130,7 @@ html, body {
 }
 .side-tabs button {
   flex: 1;
-  padding: 8px 0;
+  padding: 6px 0;
   background: transparent;
   border: none;
   color: #bbb;
@@ -1079,21 +1144,25 @@ html, body {
   font-weight: 700;
 }
 
-/* 材料手风琴分类 —— 与探索页 cat-grid/cat-item 风格一致 */
+/* 材料手风琴分类 —— 与探索页 group-title / cat-grid 风格一致 */
 .mat-cat { border-bottom: 1px solid rgba(255,255,255,.06); }
+.mat-cat:last-child { border-bottom: none; }
 .mat-cat-head {
-  display: flex; align-items: center; height: 32px; line-height: 1;
-  cursor: pointer; user-select: none; font-size: 16px; color: #a7a7ad;
-  margin-bottom: 10px; margin-top: 6px;
+  display: flex; align-items: center; gap: 4px; height: 28px; line-height: 1;
+  cursor: pointer; user-select: none; font-size: 15px; color: #e2e2e8;
+  padding-bottom: 4px; border-bottom: 1px solid rgba(255,255,255,.08);
+  margin: 8px 0 6px;
 }
-.mat-cat-head:hover { color: rgba(255,255,255,.85); }
-.mat-cat-head .mat-cat-arrow { display: inline-block; width: 12px; transition: transform .15s; color: #999; font-size: 12px; }
+.mat-cat:first-child .mat-cat-head { margin-top: 2px; }
+.mat-cat.collapsed .mat-cat-head { margin-bottom: 4px; border-bottom-color: transparent; }
+.mat-cat-head:hover { color: #fff; }
+.mat-cat-head .mat-cat-arrow { display: inline-block; width: 12px; transition: transform .15s; color: #a7a7ad; font-size: 12px; }
 .mat-cat.collapsed .mat-cat-arrow { transform: rotate(-90deg); }
-.mat-cat-head .mat-cat-name { flex: 1; font-weight: 400; }
-.mat-cat-head .mat-cat-count { color: #888; font-size: 12px; margin-right: 0; }
+.mat-cat-head .mat-cat-name { flex: 1; font-weight: 600; }
+.mat-cat-head .mat-cat-count { color: #8a93a0; font-size: 12px; margin-right: 0; font-variant-numeric: tabular-nums; }
 .mat-cat-body {
   display: grid; grid-template-columns: repeat(2, 1fr);
-  grid-gap: 10px 17px; margin-bottom: 12px;
+  grid-gap: 8px 16px; margin-bottom: 10px;
 }
 .mat-cat.collapsed .mat-cat-body { display: none; }
 .mat-item {
@@ -2017,37 +2086,38 @@ html[lang="en"] .tk-copy {
 #ecSolveRow .ec-value { color: #eef4ef; font-size: 12.5px; line-height: 1.65; }
 #ecTypeRow .ec-value { color: #a8d8b9; font-size: 12.5px; }
 
-/* ===== 存档修改器入口（图标式，尺寸观感与 .su-help 一致，2026-10-28 老大定） ===== */
-.su-edit-btn {
+/* ===== 存档修改器与蓝图工坊入口（极简图标+文字，无边框无小字） ===== */
+.su-links {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  padding: 2px 0 0;
+}
+.su-link {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  width: 18px; height: 18px;
-  margin-left: 4px;
-  border-radius: 50%;
-  background: rgba(255,255,255,.14);
-  font-size: 11px;
-  line-height: 1;
+  gap: 4px;
+  background: none;
+  border: none;
+  color: #cfd8e3;
+  font-size: 12px;
+  font-family: inherit;
+  font-weight: 500;
   text-decoration: none;
-  transition: all .15s;
-  outline: none;
+  padding: 3px 5px;
+  border-radius: 5px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color .15s, background .15s;
 }
-.su-edit-btn:hover, .su-edit-btn:focus { background: #eac27e; }
-.su-bp-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 18px; height: 18px;
-  margin-left: 4px;
-  border-radius: 50%;
-  background: rgba(56, 189, 248, 0.25);
-  font-size: 11px;
-  line-height: 1;
-  text-decoration: none;
-  transition: all .15s;
-  outline: none;
+.su-link:hover, .su-link:focus {
+  color: #eac27e;
+  background: rgba(255, 255, 255, .06);
 }
-.su-bp-btn:hover, .su-bp-btn:focus { background: #38bdf8; }
+.su-link.bp:hover, .su-link.bp:focus {
+  color: #6fd3e0;
+}
 
 /* ===== 区域轮廓（洞窟/井/空岛/深穴）禁用浏览器点击焦点外方框，不遮挡内部标点 ===== */
 path.leaflet-interactive:focus,

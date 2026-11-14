@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>塞尔达传说：王国之泪 · 互动地图</title>
 <link rel="stylesheet" href="vendor/leaflet.css">
-<link rel="stylesheet" href="css/style.css?v=243">
+<link rel="stylesheet" href="css/style.css?v=244">
 </head>
 <body>
 
@@ -107,6 +107,7 @@
     <div class="progress-head" id="progressHead" data-i18n-title="progress.toggleTip" title="点击展开/收起">
       <span class="progress-toggle" id="progressToggle" aria-hidden="true"></span>
       <span class="progress-title" data-i18n="progress.title">探索度</span>
+      <span class="progress-more" aria-hidden="true"></span>
     </div>
     <div id="progressList" class="progress-list"></div>
   </div>
@@ -115,17 +116,19 @@
   <div class="save-upload">
     <div class="su-row">
       <button id="saveSyncBtn" data-i18n-title="save.syncBtnTip" type="button" class="su-load-btn" title="读取本机 Ryujinx 的 progress.sav，同步收集进度（文件仅在本机内存处理）" data-i18n="save.loadBtn">📂 从存档加载进度…</button>
-      <!-- 存档修改器与蓝图工坊入口（点击直达 editor.html） -->
-      <a id="bpWorkshopBtn" class="su-bp-btn" href="save-edit/editor.html" target="_blank" rel="noopener" data-i18n-title="save.bpBtnTip" title="📐 打开蓝图工坊：精选神级蓝图库 · 蓝图导入导出与分享" data-i18n-aria="save.bpAria" aria-label="蓝图工坊">📐</a>
-      <a id="saveEditBtn" class="su-edit-btn" href="save-edit/editor.html" target="_blank" rel="noopener" data-i18n-title="save.editBtnTip" title="打开存档修改器：卢比 / 材料 / 装备 / 坐标传送（改完下载覆盖存档）" data-i18n-aria="save.editAria" role="button" aria-label="存档修改">🔧</a>
       <span class="su-help" id="suHelp" data-i18n-aria="save.helpAria" tabindex="0" role="button" aria-label="存档在哪里">?</span>
       <div class="su-tip hidden" id="suTip" data-i18n-html="save.tipBody"></div>
       <input type="file" id="saveFileInput" accept=".sav" hidden>
     </div>
+    <div class="su-links">
+      <a id="saveEditBtn" class="su-link" href="save-edit/editor.html" target="_blank" rel="noopener" data-i18n-title="save.editBtnTip" title="打开存档修改器：卢比 / 材料 / 装备 / 坐标传送">🔧 存档修改</a>
+      <a id="bpWorkshopBtn" class="su-link bp" href="save-edit/editor.html#blueprint" target="_blank" rel="noopener" data-i18n-title="save.bpBtnTip" title="打开蓝图工坊：精选蓝图库 · 拖拽导入导出与分享">📐 蓝图工坊</a>
+      <button type="button" id="btnChangelog" class="su-link cl" title="查看最近版本更新内容">📢 更新公告</button>
+    </div>
   </div>
 
   <footer class="side-foot">
-    <p class="foot-version">TOTKMAP V2.8.3 © 2026 yalincc</p>
+    <p class="foot-version">TOTKMAP V2.8.4 © 2026 yalincc</p>
     <p>GitHub <a href="https://github.com/yalincc/totkmap" target="_blank" rel="noopener">https://github.com/yalincc/totkmap</a></p>
   </footer>
 </aside>
@@ -507,6 +510,17 @@
   <div data-i18n-html="swHelp.content"></div>
 </div>
 
+<!-- ============ 版本更新公告弹窗 ============ -->
+<div id="changelogBox" class="help-box hidden" role="dialog" aria-modal="true" aria-labelledby="clTitle">
+  <h3><span id="clTitle">🎉 版本更新公告</span>
+    <button id="clClose" class="help-close" title="关闭">×</button>
+  </h3>
+  <div id="changelogBody"></div>
+  <div class="cl-foot">
+    <button type="button" id="clAck" class="btn primary">我知道了</button>
+  </div>
+</div>
+
 <!-- ============ 实时导航面板（V1.8.0） ============ -->
 <div id="navPanel" class="nav-panel hidden">
   <div class="np-head">
@@ -575,7 +589,8 @@
 <script src="js/save-parser.js?v=1"></script>
 <script src="js/card-layout.js?v=302"></script>
 <script src="js/totk-canvas-layer.js?v=300"></script>
-<script src="js/app.js?v=312"></script>
+<script src="data/changelog.js?v=1"></script>
+<script src="js/app.js?v=313"></script>
 <script src="js/live.js?v=295"></script>
 <script src="js/explore-auto.js?v=198"></script>
 <script src="js/mat-auto.js?v=195"></script>

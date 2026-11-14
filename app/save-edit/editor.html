@@ -27,172 +27,163 @@
   </div>
 </header>
 
-<!-- ==================== 未加载：投放区 ==================== -->
-<main class="stage" id="loadingStage">
-  <div class="drop" id="dropZone">
-    <div class="drop-ring" aria-hidden="true">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M21 8v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8"/><path d="M1 3h22v5H1z"/><path d="M10 12h4"/>
-      </svg>
-    </div>
-    <h1>把 <span>progress.sav</span> 拖进来</h1>
-    <p class="sub">改完再覆盖回去就行 · 只覆写原有字节，不新增物品、不改文件长度</p>
+<!-- ==================== 主体（直接进入，支持顶部横幅选档或整页拖入 .sav） ==================== -->
+<main class="stage" id="editStage">
 
-    <div class="drop-actions">
-      <button class="btn primary" id="btnPick">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>
-        选择存档文件
-      </button>
-      <button class="btn" id="btnFromNavi">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-        从 totknavi 直接读取
-      </button>
-    </div>
-
-    <div class="drop-path">模拟器目录 › bis › user › save › <em>0000000000000007</em> › 0 › slot_00 › progress.sav</div>
-
-    <input type="file" id="fileInput" accept=".sav,application/octet-stream" hidden>
-  </div>
-  <div id="loadMsg"></div>
-</main>
-
-<!-- ==================== 已加载：主体 ==================== -->
-<main class="stage" id="editStage" hidden>
-
-  <!-- 状态总览 -->
-  <section class="hud" id="hud">
-    <div class="stat" id="statRupee">
-      <div class="stat-top">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 2l7 10-7 10-7-10z"/><path d="M12 2v20M5 12h14"/></svg>
-        <span class="stat-lbl">卢比</span>
-      </div>
-      <div class="stat-val">—</div>
-      <div class="stat-was"></div>
-    </div>
-    <div class="stat" id="statHearts">
-      <div class="stat-top">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M20.4 5.6a5.2 5.2 0 0 0-7.4 0L12 6.6l-1-1a5.2 5.2 0 0 0-7.4 7.4L12 21.4l8.4-8.4a5.2 5.2 0 0 0 0-7.4z"/></svg>
-        <span class="stat-lbl">生命</span>
-      </div>
-      <div class="stat-val">—</div>
-      <div class="stat-was"></div>
-    </div>
-    <div class="stat" id="statStamina">
-      <div class="stat-top">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-        <span class="stat-lbl">精力</span>
-      </div>
-      <div class="stat-val">—</div>
-      <div class="stat-was"></div>
-    </div>
-    <div class="stat" id="statEnergy">
-      <div class="stat-top">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="17" height="10" rx="2.5"/><path d="M22 10.5v3"/></svg>
-        <span class="stat-lbl">电池</span>
-      </div>
-      <div class="stat-val">—</div>
-      <div class="stat-was"></div>
-    </div>
-  </section>
-
-  <div class="grid">
-
-    <!-- ---------- 01 基础数值 ---------- -->
-    <section class="card">
-      <div class="card-head">
-        <span class="idx">01</span>
-        <h2>基础数值</h2>
-        <span class="note">留空 = 不改</span>
-      </div>
-      <div class="card-body">
-        <div class="row">
-          <span class="lbl">卢比<small id="hintRupee">上限 999999</small></span>
-          <span class="ctl">
-            <input type="number" id="inRupee" min="0" max="999999" placeholder="不改" aria-label="卢比数量">
-            <span class="quick">
-              <button class="qbtn" data-rupee="9999">1万</button>
-              <button class="qbtn" data-rupee="99999">10万</button>
-              <button class="qbtn" data-rupee="999999">满</button>
-            </span>
-          </span>
+  <!-- 顶部左右双栏：左卡（存档信息 + 无框列表式基础数值）/ 右卡（修改记录） -->
+  <section class="top-split">
+    <section class="save-banner drop-zone" id="saveBanner">
+      <div class="sb-top">
+        <div class="sb-top-row">
+          <div class="sb-ico" aria-hidden="true">📄</div>
+          <span class="sb-drag-hint">拖入 progress.sav 或选择文件</span>
+          <div class="sb-actions-inline">
+            <button type="button" class="btn-mini gold" id="btnPick">选择存档</button>
+            <button type="button" class="btn-mini cyan" id="btnFromNavi">totknavi 读取</button>
+          </div>
         </div>
-
-        <div class="row">
-          <span class="lbl">生命上限<small>1 心 = 4 点，游戏内最多 40 心</small></span>
-          <span class="ctl">
-            <input type="number" id="inHearts" min="1" max="40" placeholder="不改" aria-label="生命上限（心数）">
-            <span class="quick">
-              <button class="qbtn" data-hearts="10">10</button>
-              <button class="qbtn" data-hearts="20">20</button>
-              <button class="qbtn" data-hearts="40">满</button>
-            </span>
-          </span>
+        <div class="sb-info">
+          <div class="sb-title"><b id="sbFileName">progress.sav</b> <span id="sbReady">· 未加载</span></div>
+          <div class="sb-sub" id="sbSub">等待加载存档…</div>
         </div>
+      </div>
 
-        <div class="row">
-          <span class="lbl">精力上限<small id="hintStamina">1 圈 = 1000</small></span>
-          <span class="ctl">
+      <div class="stats-subhead">
+        <span>基础数值</span>
+        <div class="stats-subhead-acts">
+          <button type="button" class="btn-mini" id="btnUndoAllStats" title="撤销全部基础数值修改" hidden>↩ 撤销基础修改</button>
+          <button type="button" class="btn-mini gold" id="btnMaxAllStats" title="卢比999999 / 40心 / 3圈精力 / 16格电池">⚡ 一键全满</button>
+        </div>
+      </div>
+
+      <div class="stat-rows stat-list-plain" id="hud">
+        <div class="stat stat-line" id="statRupee">
+          <span class="stat-lbl">卢比</span>
+          <span class="stat-val">—</span>
+          <span class="stat-was"></span>
+          <div class="stat-edit">
+            <input type="number" id="inRupee" min="0" max="999999" placeholder="改卢比" aria-label="卢比数量">
+            <button type="button" class="qbtn" data-rupee="999999">满</button>
+          </div>
+        </div>
+        <div class="stat stat-line" id="statHearts">
+          <span class="stat-lbl">生命</span>
+          <span class="stat-val">—</span>
+          <span class="stat-was"></span>
+          <div class="stat-edit">
+            <input type="number" id="inHearts" min="1" max="40" placeholder="1~40心" aria-label="生命上限（心数）">
+            <button type="button" class="qbtn" data-hearts="40">40</button>
+          </div>
+        </div>
+        <div class="stat stat-line" id="statStamina">
+          <span class="stat-lbl">精力</span>
+          <span class="stat-val">—</span>
+          <span class="stat-was"></span>
+          <div class="stat-edit">
             <div class="seg" id="segStamina" data-value="">
-              <button data-v="">不改</button>
-              <button data-v="1000">1 圈</button>
-              <button data-v="2000">2 圈</button>
-              <button data-v="3000">3 圈</button>
+              <button type="button" data-v="">原</button>
+              <button type="button" data-v="1000">1圈</button>
+              <button type="button" data-v="2000">2圈</button>
+              <button type="button" data-v="3000">3圈</button>
             </div>
-          </span>
+          </div>
         </div>
-
-        <div class="row">
-          <span class="lbl">电池容量<small id="hintEnergy">1 格 = 1000，满 16 格</small></span>
-          <span class="ctl">
+        <div class="stat stat-line" id="statEnergy">
+          <span class="stat-lbl">电池</span>
+          <span class="stat-val">—</span>
+          <span class="stat-was"></span>
+          <div class="stat-edit">
             <div class="seg" id="segEnergy" data-value="">
-              <button data-v="">不改</button>
-              <button data-v="3000">3 格</button>
-              <button data-v="8000">8 格</button>
-              <button data-v="16000">满</button>
+              <button type="button" data-v="">原</button>
+              <button type="button" data-v="3000">3格</button>
+              <button type="button" data-v="8000">8格</button>
+              <button type="button" data-v="16000">满</button>
             </div>
-          </span>
+          </div>
         </div>
       </div>
+      <input type="file" id="fileInput" accept=".sav,application/octet-stream" hidden>
     </section>
 
-    <!-- ---------- 02 材料与道具 ---------- -->
+    <section class="mod-log-panel">
+      <div class="mod-log-head">
+        <span>修改记录（<b id="sbCount">0 项</b>）</span>
+        <span class="sb-meta">状态 <b id="sbState">未加载</b></span>
+      </div>
+      <div class="mod-log-list" id="modLogList">
+        <div class="mod-log-empty">加载存档后，所有待导出改动将在此实时列出</div>
+      </div>
+    </section>
+  </section>
+  <div id="loadMsg"></div>
+
+  <!-- 3 个主 Tab -->
+  <nav class="main-tabs" id="mainTabs" role="tablist">
+    <button type="button" class="mtab on" data-tab="bag" role="tab">🎒 背包物品 <span class="badge" id="tabBagBadge">—</span></button>
+    <button type="button" class="mtab" data-tab="equip" role="tab">⚔️ 装备强化 <span class="badge" id="tabEquipBadge">—</span></button>
+    <button type="button" class="mtab cyan" data-tab="bp" role="tab">📐 蓝图工坊 <span class="badge" id="tabBpBadge">0</span></button>
+  </nav>
+
+  <!-- ==================== Tab 1: 背包物品 ==================== -->
+  <section class="tab-pane on" id="pane-bag">
     <section class="card">
-      <div class="card-head">
-        <span class="idx">02</span>
-        <h2>材料与道具</h2>
-        <span class="note">只改已有的，不新增</span>
-      </div>
-      <div class="card-body">
-        <div class="mg-head">
-          <span class="mg-title">想改哪类就点哪类</span>
-          <button type="button" class="mg-all" id="mgAll">全选</button>
-        </div>
-        <!-- 类别格子由 save-edit.js 按存档实读结果生成（每类有多少种） -->
-        <div class="mg-grid" id="mgGrid"></div>
-
-        <label class="tile">
-          <input type="checkbox" id="swArr">
-          <span class="tile-ico">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20L20 4"/><path d="M20 4l-6 1 5 5z"/><path d="M8 12l4 4"/></svg>
-          </span>
-          <span class="tile-txt">
-            <span class="tile-t1">箭矢全部 999</span>
-            <span class="tile-t2" id="arrHint">—</span>
-          </span>
-        </label>
-
-        <div class="tip">
-          背包里<b>没有的东西不会被凭空生成</b> —— 只把已有物品的数量拉满。这样不会撑爆背包容量，也不会踩坏后续数据。
-        </div>
-      </div>
-    </section>
-
-    <!-- ---------- 03 装备强化（跨两列） ---------- -->
-    <section class="card span-2">
       <div class="card-head">
         <span class="idx">03</span>
+        <h2>物品选择器</h2>
+        <span class="bag-quick-group">
+          <button type="button" class="btn-mini gold" id="btnBagFill999">本类全部 999</button>
+          <button type="button" class="btn-mini" id="btnBagFill99">99</button>
+          <button type="button" class="btn-mini" id="btnBagFill1">1</button>
+          <button type="button" class="btn-mini gold" id="btnBagFillAll">⚡ 全部已有物品 999</button>
+        </span>
+      </div>
+      <div class="card-body">
+        <input type="search" class="bag-search" id="bagSearch" placeholder="搜索物品名称或内部名，例如：炸弹花、钻石、BombFruit、风扇...">
+        <div class="bag-cats" id="bagCatPills"></div>
+
+        <!-- 点击某个物品卡片时弹出数量微调条 -->
+        <div class="bag-editor-bar" id="bagEditorBar" hidden>
+          <span class="bag-ed-name">正在修改：<b id="bagEdName">—</b> <small id="bagEdSub"></small></span>
+          <span class="bag-ed-ctl">
+            <input type="number" id="bagEdQty" min="1" max="999" aria-label="物品数量">
+            <button type="button" class="btn-mini" data-bqty="1">1</button>
+            <button type="button" class="btn-mini" data-bqty="99">99</button>
+            <button type="button" class="btn-mini gold" data-bqty="999">999</button>
+          </span>
+        </div>
+
+        <div class="bag-grid" id="bagItemGrid">
+          <div class="empty">加载存档后显示</div>
+        </div>
+
+        <div class="bag-pager" id="bagPager" hidden>
+          <span id="bagPageInfo">—</span>
+          <span class="bag-pager-btns">
+            <button type="button" class="btn-mini" id="btnBagPrev">上一页</button>
+            <button type="button" class="btn-mini" id="btnBagNext">下一页</button>
+            <button type="button" class="btn-mini" id="btnBagShowAll">展开全部</button>
+          </span>
+        </div>
+
+        <div class="tip">
+          只修改背包里<b>已有物品</b>的数量，绝不凭空生成未拥有的物品，避免撑爆背包或踩坏后续数据。
+        </div>
+      </div>
+    </section>
+  </section>
+
+  <!-- ==================== Tab 3: 装备强化 ==================== -->
+  <section class="tab-pane" id="pane-equip">
+    <section class="card">
+      <div class="card-head">
+        <span class="idx">04</span>
         <h2>装备强化</h2>
-        <span class="note">只改已拥有 · 不动结构</span>
+        <span class="note">游戏内每件装备只能带一种附加词条（攻击力和无限耐久二选一）</span>
+        <span class="bag-quick-group eq-quick-group">
+          <button type="button" class="btn-mini" id="btnEqUndoCat" hidden>↩ 撤销本类</button>
+          <button type="button" class="btn-mini gold" id="btnEqFill999">本类耐久 999</button>
+          <button type="button" class="btn-mini gold" id="btnEqFillAll999">⚡ 全部耐久 999</button>
+        </span>
       </div>
       <div class="card-body">
         <div class="eq-tabs">
@@ -209,139 +200,143 @@
             盾 <span class="cnt" data-cnt="shields">—</span>
           </button>
         </div>
-        <div class="eq-list" id="eqList"><div class="empty">加载存档后显示</div></div>
-        <div class="tip">
-          游戏里<b>没有独立的「攻击力」字段</b> —— 武器面板数字 = 自身攻击力 + 附加属性的加数，进游戏现算。
-          所以要<b>先选属性、再填加数</b>：选攻击力就填加多少攻，选耐久就填额外耐久，耐久类点 <b>∞</b> 等于永不损坏。
-          <br>一件装备只能带一种附加属性，<b>攻击力和无限耐久二选一</b>，这是存档结构决定的。
-        </div>
+        <div class="eq-grid" id="eqList"><div class="empty">加载存档后显示</div></div>
       </div>
     </section>
+  </section>
 
-    <!-- ---------- 04 坐标瞬移（跨两列） ---------- -->
-    <section class="card span-2">
-      <div class="card-head">
-        <span class="idx">04</span>
-        <h2>坐标瞬移</h2>
-        <span class="note">改的是游戏内的存档点</span>
-      </div>
-      <div class="card-body">
-        <div class="cur-pos">
-          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 12-9 12S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-          <span>当前存档点 <b id="curPos">—</b></span>
-          <button class="fill" id="btnFillPos" disabled>填入下方</button>
+  <!-- ==================== Tab 3: 蓝图工坊（左右双表格） ==================== -->
+  <section class="tab-pane" id="pane-bp">
+    <div class="bp-split">
+      <!-- 左表：我的蓝图 #01~#30 -->
+      <section class="card">
+        <div class="card-head">
+          <span class="idx">05</span>
+          <h2>我的蓝图（#01 ~ #30）</h2>
+          <span class="note" id="bpCount">加载后显示</span>
         </div>
+        <div class="card-body">
+          <div class="bp-slot-tools">
+            <select id="bpSlot" aria-label="选择蓝图槽"></select>
+            <input type="text" id="bpSlotAlias" placeholder="选中槽位别名（与零件配置并存）" aria-label="槽位别名">
+            <button type="button" class="btn-mini" id="bpSaveAlias">保存别名</button>
+          </div>
 
-        <div class="axis-row">
-          <label class="axis axis-x">
-            <span class="axis-name"><i></i>X · 东西</span>
-            <input type="number" id="inPosX" step="0.01" placeholder="—" aria-label="X 坐标">
-          </label>
-          <label class="axis axis-y">
-            <span class="axis-name"><i></i>Y · 高度</span>
-            <input type="number" id="inPosY" step="0.01" placeholder="—" aria-label="Y 坐标（高度）">
-          </label>
-          <label class="axis axis-z">
-            <span class="axis-name"><i></i>Z · 南北</span>
-            <input type="number" id="inPosZ" step="0.01" placeholder="—" aria-label="Z 坐标">
-          </label>
+          <div class="bp-table-wrap">
+            <table class="bp-table">
+              <thead>
+                <tr>
+                  <th style="width:54px">槽位</th>
+                  <th>别名 / 零件配置</th>
+                  <th style="width:118px;text-align:right">操作</th>
+                </tr>
+              </thead>
+              <tbody id="bpSlotBody">
+                <tr><td colspan="3" class="empty">加载存档后显示 30 个蓝图槽</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="bp-code-row" style="margin-top:8px">
+            <input type="text" id="bpCode" placeholder="粘贴分享码 TKB1-... 加入下一个连续空槽">
+            <button type="button" class="btn-mini" id="bpCodeLoad">读取</button>
+          </div>
         </div>
+      </section>
 
-        <div class="tip warn">
-          三个数必须<b>同时填</b>（只填一个会被忽略，避免只改一半把人塞进地底）。
-          传送后可能在空中落地或被卡住，建议先在<b>地面开阔处</b>读档试。
+      <!-- 右表：本地蓝图库 -->
+      <section class="card">
+        <div class="card-head">
+          <span class="idx">06</span>
+          <h2>本地蓝图库</h2>
+          <span class="bp-lib-actions">
+            <a class="btn-mini" href="https://www.hyruleworks.com/" target="_blank" rel="noopener" style="text-decoration:none">🌐 HyruleWorks</a>
+            <label class="btn-mini cyan" for="bpFile" style="cursor:pointer">导入 .cai / .json</label>
+            <input type="file" id="bpFile" accept=".cai,.json,application/json,application/octet-stream" multiple hidden>
+            <button type="button" class="btn-mini" id="bpExportJson">导出 .json</button>
+          </span>
         </div>
-      </div>
-    </section>
-
-    <!-- ---------- 05 蓝图分享 ---------- -->
-    <section class="card span-2">
-      <div class="card-head">
-        <span class="idx">05</span>
-        <h2>蓝图工坊与分享</h2>
-        <span class="note">预设 · 导出 · 导入</span>
-      </div>
-      <div class="card-body">
-        <!-- 精选蓝图工坊 -->
-        <div class="bp-preset-section" style="margin-bottom:16px;border-bottom:1px solid #313b48;padding-bottom:16px">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:8px;flex-wrap:wrap">
-            <span style="font-weight:600;font-size:13px;color:#38bdf8">📐 精选神级蓝图库（社区真实 .cai 验证 · 支持单填或批量填入空槽）</span>
-            <span style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
-              <a class="btn" href="https://www.hyruleworks.com/" target="_blank" rel="noopener" style="font-size:11px;padding:4px 8px;text-decoration:none">🌐 HyruleWorks 更多蓝图 ↗</a>
-              <button type="button" class="btn" id="bpPresetSelAll" style="font-size:11px;padding:4px 8px">全选/取消</button>
-              <button type="button" class="btn primary" id="bpPresetBatch" style="font-size:11px;padding:4px 8px">📥 批量填入空槽</button>
+        <div class="card-body">
+          <div class="bp-lib-toolbar">
+            <span style="font-size:12px;color:var(--tk-text-3)">双击行或拖动到左侧槽位放入</span>
+            <span style="display:flex;gap:6px">
+              <button type="button" class="btn-mini" id="bpPresetSelAll">全选/取消</button>
+              <button type="button" class="btn-mini gold" id="bpPresetBatch">📥 批量放入</button>
+              <button type="button" class="btn-mini" id="bpDeleteSelected">清除已选</button>
             </span>
           </div>
-          <div id="bpPresetGrid" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(230px, 1fr));gap:10px"></div>
-        </div>
-
-        <div class="row">
-          <span class="lbl">存档里的蓝图<small id="bpCount">加载后显示</small></span>
-          <span class="ctl" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
-            <select id="bpSlot" aria-label="选择要导出的蓝图槽" style="min-width:190px;background:#1b212a;color:#e8edf4;border:1px solid #313b48;border-radius:6px;padding:6px 8px;font-size:12px"></select>
-            <button type="button" class="btn" id="bpExport">导出 .cai</button>
-            <button type="button" class="btn" id="bpShare">生成分享码</button>
-            <button type="button" class="btn" id="bpToggleOverview">查看全部蓝图</button>
-          </span>
-        </div>
-
-        <div id="bpOverviewWrap" hidden style="margin:12px 0;padding:12px;border:1px solid #313b48;border-radius:8px;background:#11161d">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:8px;flex-wrap:wrap">
-            <span style="font-size:12px;font-weight:600;color:#e8edf4">存档蓝图总览（自动解析零件构成）</span>
-            <label style="font-size:11px;color:#94a3b8;display:inline-flex;align-items:center;gap:5px;cursor:pointer">
-              <input type="checkbox" id="bpOnlyUsed" checked> 仅显示已有蓝图
-            </label>
+          <div class="bp-table-wrap">
+            <table class="bp-table bp-table-lib">
+              <thead>
+                <tr>
+                  <th style="width:30px">选</th>
+                  <th>蓝图名称（矿石）&amp; 配件清单</th>
+                </tr>
+              </thead>
+              <tbody id="bpPresetBody"></tbody>
+            </table>
           </div>
-          <div id="bpOverviewGrid" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));gap:8px"></div>
-        </div>
-
-        <div id="bpShareBox" hidden style="margin:12px 0;padding:12px;border:1px solid #313b48;border-radius:8px">
-          <div style="font-size:12px;opacity:.8;margin-bottom:6px">把这串发给别人，对方粘贴到本页即可导入；扫码也会得到同样的文本</div>
-          <textarea id="bpShareText" readonly rows="3" style="width:100%;box-sizing:border-box;background:#141920;color:#e8edf4;border:1px solid #313b48;border-radius:6px;padding:8px;font-size:11px;font-family:monospace;word-break:break-all"></textarea>
-          <div style="display:flex;gap:12px;align-items:flex-start;margin-top:10px;flex-wrap:wrap">
-            <button type="button" class="btn" id="bpCopy">复制分享码</button>
-            <div id="bpQr" style="background:#fff;padding:6px;border-radius:6px;line-height:0"></div>
-            <div id="bpQrHint" style="font-size:11px;opacity:.7;align-self:center"></div>
+          <div class="bp-lib-foot">
+            <span id="bpLibFootInfo">已加载 0 款蓝图</span>
+            <button type="button" class="btn-mini cyan" id="bpLoadRecommended">加载推荐蓝图</button>
           </div>
         </div>
+      </section>
+    </div>
+    <div id="bpMsg"></div>
 
-        <div class="row">
-          <span class="lbl">导入到<small id="bpTargetHint">选槽单填，或多选批量入空槽</small></span>
-          <span class="ctl" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
-            <select id="bpTarget" aria-label="选择导入目标槽位" style="min-width:190px;background:#1b212a;color:#e8edf4;border:1px solid #313b48;border-radius:6px;padding:6px 8px;font-size:12px"></select>
-            <label class="btn" for="bpFile" style="cursor:pointer;display:inline-flex;align-items:center">选择 .cai（可多选）</label>
-            <input type="file" id="bpFile" accept=".cai,application/octet-stream" multiple hidden>
-          </span>
-        </div>
-
-        <div class="row">
-          <span class="lbl">或粘贴分享码<small>TKB1- 开头</small></span>
-          <span class="ctl" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
-            <input type="text" id="bpCode" placeholder="TKB1-..." style="flex:1;min-width:220px;background:#1b212a;color:#e8edf4;border:1px solid #313b48;border-radius:6px;padding:6px 8px;font-size:12px">
-            <button type="button" class="btn" id="bpCodeLoad">读取</button>
-          </span>
-        </div>
-
-        <div class="tip ok" id="bpPending" hidden></div>
-        <div class="tip">
-          导出的 <b>.cai</b> 是社区通用格式，HyruleWorks 与其它存档编辑器都能用。
-          支持一次多选多个 <b>.cai</b> 文件或勾选多个精选蓝图批量填入空槽，点底部「预览并下载」后<b>先备份原档</b>，再手动覆盖 progress.sav。
+    <!-- 通栏可收起：蓝图分享码文本 -->
+    <section class="card bp-share-panel" id="bpSharePanel" hidden>
+      <div class="card-head">
+        <span class="idx">CODE</span>
+        <h2 id="bpShareDlgTitle">蓝图分享码</h2>
+        <button type="button" class="btn-mini" id="btnCloseShare">× 收起</button>
+      </div>
+      <div class="card-body">
+        <div class="bp-share-code-box">
+          <div style="font-size:12px;color:var(--tk-text-3);margin-bottom:6px">复制下方完整分享码发给好友（可在左侧底部输入框粘贴导入，或直接导出 .cai 文件分享）</div>
+          <textarea id="bpShareText" readonly rows="4"></textarea>
+          <div style="display:flex;gap:8px;margin-top:8px">
+            <button type="button" class="btn-mini gold" id="bpCopy">复制分享码</button>
+            <button type="button" class="btn-mini" id="btnCloseShareFoot">收起</button>
+          </div>
         </div>
       </div>
     </section>
+  </section>
 
-  </div>
 </main>
 
 <!-- ==================== 底部操作栏 ==================== -->
 <footer class="foot">
   <div class="status" id="footStatus">还没有加载存档</div>
-  <button class="btn" id="btnReset" disabled>重置</button>
+  <button class="btn" id="btnUndoStep" disabled title="撤销上一步操作 (Ctrl+Z)">↩ 撤销上一步</button>
+  <button class="btn" id="btnReset" disabled>重置全部</button>
   <button class="btn primary" id="btnApply" disabled>
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
-    预览并下载
+    提交修改并导出
   </button>
 </footer>
+
+<!-- ==================== 余料附着选择弹窗 ==================== -->
+<div class="mask hidden" id="fuseMask">
+  <div class="dlg" role="dialog" aria-modal="true" aria-labelledby="fuseDlgTitle">
+    <div class="dlg-head">
+      <h3 id="fuseDlgTitle">选择余料附着 · <span id="fuseTargetName" style="color:var(--tk-cyan)">—</span></h3>
+      <button id="btnCloseFuse" aria-label="关闭">×</button>
+    </div>
+    <div class="dlg-body">
+      <div class="fuse-sec-lbl">常用热门余料（点击直接附着）</div>
+      <div class="fuse-presets" id="fusePresets"></div>
+      <input type="search" class="fuse-search" id="fuseSearch" placeholder="搜索全库素材 / 武器 / 盾 / 左纳乌装置（中文或内部名）…">
+      <div class="fuse-list" id="fuseResults"></div>
+    </div>
+    <div class="dlg-foot">
+      <button class="btn" id="btnFuseClear">清除余料</button>
+      <button class="btn" id="btnCancelFuse">取消</button>
+    </div>
+  </div>
+</div>
 
 <!-- ==================== 预览弹层 ==================== -->
 <div class="mask hidden" id="previewMask">
@@ -355,13 +350,17 @@
     </div>
     <div class="dlg-body" id="previewBody"></div>
     <div class="dlg-foot">
+      <button class="btn" id="btnDownloadBackup" title="可选：单独保存一份未修改的原存档">单独备份原档</button>
       <button class="btn" id="btnCancelPreview">再想想</button>
-      <button class="btn primary" id="btnDownload">下载改好的存档</button>
+      <button class="btn primary" id="btnDownload">导出 progress.sav</button>
     </div>
   </div>
 </div>
 
 <script src="../data/equip-names.js"></script>
+<script src="../data/equip-durability.js"></script>
+<script src="../data/mat-names.js"></script>
+<script src="../data/fuse-names.js"></script>
 <script src="../data/blueprints-preset.js"></script>
 <script src="../js/vendor/qrcode.min.js"></script>
 <script src="../js/blueprint.js"></script>

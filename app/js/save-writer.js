@@ -182,7 +182,9 @@
       label: '武器', name: 'Pouch.Weapon.Content.Name',
       life: 'Pouch.Weapon.Content.Life',
       eff: 'Pouch.Weapon.Content.Effect.Type',
-      effVal: 'Pouch.Weapon.Content.Effect.Value'
+      effVal: 'Pouch.Weapon.Content.Effect.Value',
+      combName: 'Pouch.Weapon.Content.Combined.Name',
+      combLife: 'Pouch.Weapon.Content.Combined.Life'
     },
     bows: {
       label: '弓', name: 'Pouch.Bow.Content.Name',
@@ -194,7 +196,9 @@
       label: '盾', name: 'Pouch.Shield.Content.Name',
       life: 'Pouch.Shield.Content.Life',
       eff: 'Pouch.Shield.Content.Effect.Type',
-      effVal: 'Pouch.Shield.Content.Effect.Value'
+      effVal: 'Pouch.Shield.Content.Effect.Value',
+      combName: 'Pouch.Shield.Content.Combined.Name',
+      combLife: 'Pouch.Shield.Content.Combined.Life'
     }
   };
 
@@ -429,6 +433,8 @@
         var lifeBase = def.life ? blockOff(def.life) : -1;
         var effBase = def.eff ? blockOff(def.eff) : -1;
         var effValBase = def.effVal ? blockOff(def.effVal) : -1;
+        var combNameBase = def.combName ? blockOff(def.combName) : -1;
+        var combLifeBase = def.combLife ? blockOff(def.combLife) : -1;
 
         /* SoA 的命门：同下标对应，容量必须相等，否则说明定位错了 → 整体不做 */
         var cnts = { name: n };
@@ -436,6 +442,8 @@
         if (def.life) cnts.life = count(def.life);
         if (def.eff) cnts.eff = count(def.eff);
         if (def.effVal) cnts.effVal = count(def.effVal);
+        if (def.combName && combNameBase >= 0) cnts.combName = count(def.combName);
+        if (def.combLife && combLifeBase >= 0) cnts.combLife = count(def.combLife);
         var mismatch = Object.keys(cnts).filter(function (k) { return cnts[k] !== n; });
         if (mismatch.length) {
           return { ok: false, error: def.label + ' 各字段容量不一致（' + JSON.stringify(cnts) + '），已停用该类以免写坏', items: [] };
@@ -444,16 +452,23 @@
         /* 容量上限挡一下：510 是材料上限、40 是武器上限，超过 10 万肯定是定位错了 */
         if (n < 0 || n > 200000) return { ok: false, error: def.label + ' 容量异常（' + n + '）', items: [] };
 
+        function str64At(base, idx) {
+          var sp = base + 4 + idx * 64;
+          if (sp + 64 > size) return '';
+          var s = '';
+          for (var ci = 0; ci < 64; ci++) {
+            var ch = bytes[sp + ci];
+            if (!ch) break;
+            s += String.fromCharCode(ch);
+          }
+          return s;
+        }
+
         var items = [];
         for (var k = 0; k < n; k++) {
           var np = nameBase + 4 + k * 64;
           if (np + 64 > size) break;
-          var name = '';
-          for (var ci = 0; ci < 64; ci++) {
-            var ch = bytes[np + ci];
-            if (!ch) break;
-            name += String.fromCharCode(ch);
-          }
+          var name = str64At(nameBase, k);
           if (!name) { if (skipEmpty) continue; }
           var it = { i: k, name: name };
           if (numBase >= 0) it.qty = view.getInt32(numBase + 4 + k * 4, true);
@@ -464,6 +479,8 @@
             it.eff = nameByHash(ev) || ('?' + ev.toString(16));
           }
           if (effValBase >= 0) it.effVal = view.getInt32(effValBase + 4 + k * 4, true);
+          if (combNameBase >= 0) it.combName = str64At(combNameBase, k);
+          if (combLifeBase >= 0) it.combLife = view.getInt32(combLifeBase + 4 + k * 4, true);
           items.push(it);
         }
 
@@ -621,6 +638,26 @@
         if (plan.zonai999) fillPouch('zonai', null);
         if (plan.arrows999) fillPouch('arrows', null);
 
+        /* ---- 单个背包物品数量微调（仅改已有槽位，不新增） ---- */
+        if (plan.pouchQty && plan.pouchQty.length) {
+          plan.pouchQty.forEach(function (pq) {
+            var def = POUCH[pq.cat];
+            if (!def || !def.num) { errs.push('未知背包类别 ' + pq.cat); return; }
+            var nb = blockOff(def.name), numBase = blockOff(def.num), n = count(def.name);
+            if (nb < 0 || numBase < 0 || n < 0 || count(def.num) !== n) {
+              errs.push(def.label + ' 定位失败'); return;
+            }
+            var idx = pq.i | 0;
+            if (idx < 0 || idx >= n) { errs.push(def.label + ' 下标越界'); return; }
+            var np = nb + 4 + idx * 64;
+            if (np + 64 > size || !bytes[np]) { errs.push(def.label + ' #' + idx + ' 为空槽，跳过'); return; }
+            if (def.expect && !def.expect.test(nameAt(np))) {
+              errs.push(def.label + ' #' + idx + ' 校验未通过'); return;
+            }
+            pushI32(numBase + 4 + idx * 4, clamp(pq.qty, 1, 999), def.label + ' #' + idx + ' 数量');
+          });
+        }
+
         /* ---- 单件装备：耐久 / 附加属性 / 附加数值 ---- */
         if (plan.items && plan.items.length) {
           plan.items.forEach(function (it) {
@@ -673,6 +710,32 @@
                     pushI32(vb + 4 + i * 4, nv, def.label + '#' + i + ' ' + valueLabel(tgtEff));
                   }
                 }
+              }
+            }
+            if (typeof it.combName === 'string') {
+              if (!def.combName) { errs.push(def.label + ' 不支持余料附着'); }
+              else {
+                var cb = blockOff(def.combName), cn = count(def.combName);
+                if (cb < 0 || cn < 0 || i >= cn) errs.push(def.label + ' 余料名称定位失败');
+                else if (it.combName.length >= 64 || /[^\x20-\x7e]/.test(it.combName)) {
+                  errs.push(def.label + '#' + i + ' 余料内部名非法：' + it.combName);
+                } else {
+                  var b64 = new Uint8Array(64);
+                  for (var ci2 = 0; ci2 < it.combName.length; ci2++) b64[ci2] = it.combName.charCodeAt(ci2);
+                  edits.push({
+                    off: cb + 4 + i * 64, len: 64, kind: 'str64',
+                    value: b64, strTo: it.combName, area: 'data',
+                    label: def.label + '#' + i + ' 余料附着'
+                  });
+                }
+              }
+            }
+            if (typeof it.combLife === 'number') {
+              if (!def.combLife) { errs.push(def.label + ' 不支持余料耐久'); }
+              else {
+                var clb = blockOff(def.combLife), cln = count(def.combLife);
+                if (clb < 0 || cln < 0 || i >= cln) errs.push(def.label + ' 余料耐久定位失败');
+                else pushI32(clb + 4 + i * 4, clamp(Math.round(it.combLife), -1, 99999), def.label + '#' + i + ' 余料耐久');
               }
             }
           });
@@ -803,6 +866,24 @@
         edits.forEach(function (ed) {
           /* 蓝图是 6688 字节的定长块，不是 4 字节标量 —— 单独走字节覆写分支。
            * 仍然只写 [表结束, 文件末尾) 内的原有区间，长度不变。 */
+          if (ed.kind === 'str64') {
+            var differs64 = false;
+            for (var si = 0; si < 64; si++) {
+              if (out[ed.off + si] !== ed.value[si]) { differs64 = true; break; }
+            }
+            if (differs64) {
+              var beforeStr = '';
+              for (var sj = 0; sj < 64; sj++) {
+                var ch2 = out[ed.off + sj];
+                if (!ch2) break;
+                beforeStr += String.fromCharCode(ch2);
+              }
+              out.set(ed.value, ed.off);
+              report.push({ off: ed.off, label: ed.label, from: beforeStr || '无', to: ed.strTo || '无' });
+              touched++;
+            }
+            return;
+          }
           if (ed.kind === 'bytes') {
             var differs = false;
             for (var bi2 = 0; bi2 < ed.len; bi2++) {

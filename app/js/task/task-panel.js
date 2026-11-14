@@ -222,11 +222,18 @@
     stats.forEach(function (s) {
       if (s.count <= 0) return;
       var on = isOn(s.cat, l) ? ' active' : '';
+      var catDone = 0;
+      if (window.TaskDone) {
+        D.listBy(l, s.cat).forEach(function (t) {
+          if (window.TaskDone.isDone(t.key)) catDone++;
+        });
+      }
+      var doneCls = (catDone >= s.count) ? ' cat-done' : '';
       var catName = isEn ? (window.I18N.catOf(s.name) || s.name) : s.name;
-      html += '<div class="cat-item tk-cat' + on + '" data-tkcat="' + esc(s.cat) + '">' +
+      html += '<div class="cat-item tk-cat' + on + doneCls + '" data-tkcat="' + esc(s.cat) + '">' +
         '<img src="assets/icons/' + taskIcon(s.cat) + '" alt="">' +
         '<span class="cat-name">' + esc(catName) + '</span>' +
-        '<span class="cat-count">' + s.count + '</span>' +
+        '<span class="cat-count">' + catDone + '/' + s.count + '</span>' +
         '</div>';
     });
     html += '</div>';
@@ -693,10 +700,18 @@
       var total = 0, done = 0;
       D.statsByLayer(curLayer).forEach(function (s) {
         total += s.count;
+        var catDone = 0;
         if (global.TaskDone) {
           D.listBy(curLayer, s.cat).forEach(function (t) {
-            if (global.TaskDone.isDone(t.key)) done++;
+            if (global.TaskDone.isDone(t.key)) catDone++;
           });
+        }
+        done += catDone;
+        var catEl = document.querySelector('#catalogList .tk-cat[data-tkcat="' + s.cat + '"]');
+        if (catEl) {
+          var cntEl = catEl.querySelector('.cat-count');
+          if (cntEl) cntEl.textContent = catDone + '/' + s.count;
+          catEl.classList.toggle('cat-done', s.count > 0 && catDone >= s.count);
         }
       });
       el.textContent = done + '/' + total;

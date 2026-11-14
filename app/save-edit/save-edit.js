@@ -1,78 +1,170 @@
-/* ============ TOTKMAP · 存档修改器 页面逻辑 ============
+/* ============ TOTKMAP · 存档修改器 页面逻辑（v3 4-Tab 重构） ============
  *
  * 职责边界：
  *   save-writer.js  负责「字节怎么改」（定位、写入、校验），一行 UI 逻辑都没有
- *   本文件          只负责「怎么问用户要参数、怎么把结果交给用户」
- *
- * 三条铁律（改这个文件前先读）：
- *   1. 任何写入都必须先出预览，用户确认后才下载 —— 不给「一键盲改」
- *   2. 下载改档之前，强制先下载一份原档备份（不给跳过选项）
- *   3. 只调 SaveWriter 的公开 API，不在这里直接碰 DataView / 偏移
+ *   本文件          只负责「4-Tab 交互、预览确认、单文件导出」
  */
 (function () {
   'use strict';
 
   var NAVI = 'http://127.0.0.1:8766';
+  var BAG_PAGE_SIZE = 24;
 
   var state = {
-    sw: null,          // SaveWriter 会话
-    file: null,        // 原档 ArrayBuffer
-    source: '',        // 'navi' | 'file'
-    pouch: {},         // 各类背包读出来的结果
+    sw: null,
+    file: null,
+    source: '',
+    activeTab: 'bag',
+    pouch: {},
     eqCat: 'weapons',
-    /* ★ 装备改动必须存在这里，不能只留在 DOM 里。
-     *   装备区按武器/弓/盾分三个 tab，切一次 tab 就整块重绘，
-     *   DOM 里的输入随之销毁 —— 之前就是因此「只有最后停留的那个分类生效」，
-     *   用户改了武器和弓、最后停在盾，结果只有盾被导出。 */
-    eqEdits: {},       // 'weapons|3' → { life?, eff?, effVal?, inf? }
-    mgSel: {},         // 材料分类勾选 { food:true, zonai:true, ... }
-    pending: null,     // 待下载的结果
-    dlBufs: null,      // 已算好的两份字节（备份 / 改档），供「再下一次」复用
-    dlDone: false,     // 下载已完成（此时底部按钮变成"关闭"）
-    origin: { rupee: 0, hearts: 0, stamina: 0, energy: 0 },  // 存档原值（HUD 对比用）
-    pos: null,          // 当前存档点
-    bp: null,           // 存档里的蓝图槽（readBlueprints 结果）
-    bpImports: [],      // 待写入的蓝图队列 [{ i, data, camPos, camAt, from, summary }]
-    bpPresetSel: {}     // 精选蓝图多选状态 { id: true }
+    eqEdits: {},        // 'weapons|3' -> { life?, eff?, effVal?, inf? }
+    bagItems: [],       // [{ key, cat, i, name, cn, group, qty }]
+    bagEdits: {},       // 'materials|0' -> qty
+    bagCat: 'all',
+    bagQuery: '',
+    bagPage: 1,
+    bagShowAll: false,
+    bagSelKey: null,
+    pending: null,
+    dlBufs: null,
+    dlDone: false,
+    origin: { rupee: 0, hearts: 0, stamina: 0, energy: 0 },
+    pos: null,
+    bp: null,
+    bpImports: [],      // [{ i, data, camPos, camAt, from, summary }]
+    bpSelSlot: 0,
+    bpAliases: (function () { try { return JSON.parse(localStorage.getItem('totkmap_bp_aliases') || '{}'); } catch (_) { return {}; } })(),
+    bpLibrary: (function () {
+      try {
+        var raw = localStorage.getItem('totkmap_bp_library');
+        if (raw !== null) return JSON.parse(raw);
+      } catch (_) {}
+      return (window.TOTK_BLUEPRINTS_PRESET || []).slice();
+    })(),
+    bpPresetSel: {},
+    undoStack: []       // 操作历史栈，支持 Ctrl+Z / 撤销上一步
   };
+
+  function saveBpLibrary() {
+    try { localStorage.setItem('totkmap_bp_library', JSON.stringify(state.bpLibrary || [])); } catch (_) {}
+  }
+
+  function cloneSimple(o) { return JSON.parse(JSON.stringify(o || {})); }
+  function segValOf(id) { var v = $(id) ? $(id).dataset.value : ''; return v === '' ? '' : +v; }
+
+  function snapState() {
+    return {
+      rupee: $('inRupee') ? $('inRupee').value : '',
+      hearts: $('inHearts') ? $('inHearts').value : '',
+      stamina: segValOf('segStamina'),
+      energy: segValOf('segEnergy'),
+      bagEdits: cloneSimple(state.bagEdits),
+      eqEdits: cloneSimple(state.eqEdits),
+      bpImports: state.bpImports.slice()
+    };
+  }
+  function pushUndo() {
+    if (!state.sw) return;
+    state.undoStack.push(snapState());
+    if (state.undoStack.length > 50) state.undoStack.shift();
+    updateUndoBtn();
+  }
+  function updateUndoBtn() {
+    var b = $('btnUndoStep');
+    if (b) b.disabled = !state.sw || state.undoStack.length === 0;
+  }
+  function popUndo() {
+    if (!state.undoStack.length) return;
+    var s = state.undoStack.pop();
+    if ($('inRupee')) $('inRupee').value = s.rupee;
+    if ($('inHearts')) $('inHearts').value = s.hearts;
+    setSeg('segStamina', s.stamina === '' ? null : s.stamina);
+    setSeg('segEnergy', s.energy === '' ? null : s.energy);
+    state.bagEdits = s.bagEdits || {};
+    state.eqEdits = s.eqEdits || {};
+    state.bpImports = s.bpImports || [];
+    renderBag();
+    renderEquip();
+    renderBpPending();
+    updateFoot();
+    updateUndoBtn();
+  }
 
   var $ = function (id) { return document.getElementById(id); };
 
-  /* ---------- 小工具 ---------- */
   function esc(s) {
     return String(s).replace(/[&<>"']/g, function (c) {
       return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
     });
   }
   function nameOf(actor) {
-    var n = window.EQUIP_NAMES && window.EQUIP_NAMES[actor];
-    return n || null;
+    if (!actor || !window.EQUIP_NAMES) return null;
+    if (window.EQUIP_NAMES[actor]) return window.EQUIP_NAMES[actor];
+    if (actor.slice(-9) === '_NoBurned') return window.EQUIP_NAMES[actor.slice(0, -9)] || null;
+    return null;
   }
-  /* 提示分两个落点：
-   *   未加载 → 投放区下方（loadMsg）
-   *   已加载 → 编辑区顶部（liveMsg）
-   * 以前一律写进 loadMsg，导致「改不了」「连不上 navi」这类提示落在已隐藏的首页区，
-   * 用户点了按钮毫无反应 —— 这是真实的可用性缺陷，不是样式问题。 */
-  function showMsg(html, cls) {
-    if (!html) {
-      $('loadMsg').innerHTML = '';
-      var old = $('liveMsg');
-      if (old) old.innerHTML = '';
-      return;
-    }
-    var el = '<div class="tip ' + (cls || '') + '">' + html + '</div>';
-    if (state.sw) {
-      var live = $('liveMsg');
-      if (!live) {
-        $('editStage').insertAdjacentHTML('afterbegin', '<div id="liveMsg"></div>');
-        live = $('liveMsg');
+  function matNameOf(actor) {
+    return (window.MAT_NAMES && window.MAT_NAMES[actor]) || null;
+  }
+
+  var FUSE_PRESETS = [
+    { id: 'Item_Enemy_151', cn: '白银莱尼尔的刃角', tag: '+55攻', life: 0 },
+    { id: 'Item_Enemy_218', cn: '白银莱尼尔的碎角', tag: '+51攻', life: 0 },
+    { id: 'Item_Enemy_69', cn: '吉波得之骨', tag: '+40攻', life: 0 },
+    { id: 'Item_Enemy_210', cn: '莫尔德拉吉克的颚骨', tag: '+32攻', life: 0 },
+    { id: 'Item_Enemy_137', cn: '岩石巨人之心', tag: '+33攻', life: 0 },
+    { id: 'Item_Ore_A', cn: '钻石', tag: '+25攻', life: 0 },
+    { id: 'Item_Ore_B', cn: '红宝石', tag: '火属性', life: 0 },
+    { id: 'Item_Ore_C', cn: '蓝宝石', tag: '冰属性', life: 0 },
+    { id: 'Item_Ore_D', cn: '黄玉', tag: '雷属性', life: 0 },
+    { id: 'SpObj_FlameThrower_A_01', cn: '火龙头', tag: '左纳乌', life: 54000 },
+    { id: 'SpObj_SnowMachine_A_01', cn: '冰龙头', tag: '左纳乌', life: 54000 },
+    { id: 'SpObj_ElectricBoxGenerator_A_01', cn: '雷龙头', tag: '左纳乌', life: 54000 },
+    { id: 'SpObj_Cannon_A_01', cn: '大炮', tag: '左纳乌', life: 54000 },
+    { id: 'SpObj_Rocket_A_01', cn: '火箭', tag: '盾滑', life: 100 },
+    { id: 'SpObj_SlipBoard_A_01', cn: '滑橇', tag: '盾滑', life: 500 },
+    { id: 'Weapon_Shield_030', cn: '海利亚盾', tag: '耐久800', life: 800 }
+  ];
+  function fuseNameOf(actor) {
+    if (!actor) return '';
+    var FN = window.FUSE_NAMES || {};
+    var norm = actor.replace(/_ForAttachment$/, '');
+    var hit = FN[actor] || FN[norm] || matNameOf(actor) || matNameOf(norm) || nameOf(actor) || nameOf(norm);
+    if (hit) return hit;
+    if (norm.indexOf('SpObj_') === 0) {
+      var cap = norm.replace(/_([AB]_\d+)$/, '_Capsule_$1');
+      if (cap !== norm && matNameOf(cap)) return matNameOf(cap);
+      var stem = norm.split('_').slice(0, 2).join('_') + '_';
+      var fnKeys = Object.keys(FN);
+      for (var fi = 0; fi < fnKeys.length; fi++) {
+        if (fnKeys[fi].indexOf(stem) === 0) return FN[fnKeys[fi]];
       }
-      live.innerHTML = el;
-      live.scrollIntoView({ block: 'nearest' });
-    } else {
-      $('loadMsg').innerHTML = el;
     }
+    return actor;
   }
+  function defaultFuseLife(actor) {
+    if (!actor) return -1;
+    for (var i = 0; i < FUSE_PRESETS.length; i++) {
+      if (FUSE_PRESETS[i].id === actor) return FUSE_PRESETS[i].life;
+    }
+    if (window.EQUIP_DURABILITY && window.EQUIP_DURABILITY[actor]) return window.EQUIP_DURABILITY[actor];
+    if (actor.indexOf('SpObj_') === 0) return 54000;
+    return 0;
+  }
+
+  function showMsg(html, cls) {
+    var box = $('loadMsg');
+    if (!box) return;
+    if (!html) { box.innerHTML = ''; return; }
+    box.innerHTML = '<div class="tip ' + (cls || '') + '">' + html + '</div>';
+  }
+  function showBpMsg(html, cls) {
+    var box = $('bpMsg');
+    if (!box) { showMsg(html, cls); return; }
+    if (!html) { box.innerHTML = ''; return; }
+    box.innerHTML = '<div class="tip ' + (cls || '') + '" style="margin-top:10px">' + html + '</div>';
+  }
+
   function fmt(n) {
     return typeof n === 'number' ? (Math.abs(n - Math.round(n)) < 1e-6 ? String(Math.round(n)) : n.toFixed(2)) : n;
   }
@@ -80,7 +172,6 @@
     return typeof n === 'number' ? n.toLocaleString('en-US') : '—';
   }
 
-  /* 分段选择器：读 / 写 / 高亮都由 data-value 驱动，不让按钮和状态各存一份 */
   function segVal(id) {
     var v = $(id).dataset.value;
     return v === '' ? null : +v;
@@ -90,6 +181,18 @@
     box.dataset.value = (v === null || v === undefined) ? '' : String(v);
     Array.prototype.forEach.call(box.querySelectorAll('button'), function (b) {
       b.classList.toggle('on', b.dataset.v === box.dataset.value);
+    });
+  }
+
+  function switchTab(tabId) {
+    var valid = { bag: 1, equip: 1, bp: 1 };
+    if (!valid[tabId]) tabId = 'bag';
+    state.activeTab = tabId;
+    Array.prototype.forEach.call(document.querySelectorAll('#mainTabs .mtab'), function (b) {
+      b.classList.toggle('on', b.dataset.tab === tabId);
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('.tab-pane'), function (p) {
+      p.classList.toggle('on', p.id === 'pane-' + tabId);
     });
   }
 
@@ -105,27 +208,26 @@
     state.sw = sw;
     state.file = buf;
     state.source = source;
-    /* 换了一份存档 → 上一份的改动全部作废，否则会把旧档的改动带进新档 */
     state.eqEdits = {};
-    state.mgSel = {};
+    state.bagEdits = {};
+    state.bagSelKey = null;
+    state.bagPage = 1;
+    state.undoStack = [];
+    updateUndoBtn();
 
-    $('loadingStage').hidden = true;
-    $('editStage').hidden = false;
-
-    /* 顶栏信息 */
     $('topMeta').hidden = false;
     $('chipVer').textContent = sw.version;
     $('chipSize').textContent = sw.size.toLocaleString() + ' 字节';
     $('verDot').classList.toggle('bad', !sw.isKnownVersion);
-    $('verDot').title = sw.isKnownVersion ? '存档版本已识别' : '版本未识别（仍可改，按运行时定位）';
 
-    /* 读出各背包。zonai = 左纳乌装置，它是独立容器（不在材料里），
-       所以 999 要单独算一类，见 save-writer 的 POUCH 注释 */
+    $('sbFileName').textContent = 'progress.sav';
+    if ($('sbReady')) $('sbReady').textContent = '· 已就绪';
+    $('sbSub').textContent = '游戏版本 ' + sw.version + ' · Switch / PC 重编译版 · ' + (sw.size / (1024 * 1024)).toFixed(2) + ' MB';
+
     ['materials', 'arrows', 'zonai', 'weapons', 'bows', 'shields'].forEach(function (cat) {
       state.pouch[cat] = sw.readPouch(cat, true);
     });
 
-    /* 记住原值 —— HUD 要拿它做"改前 → 改后"对比 */
     var sc = sw.readScalars().values;
     state.origin = {
       rupee: sc.rupee || 0,
@@ -134,95 +236,209 @@
       energy: sc.energy || 0
     };
 
-    /* 精力 / 电池：当前值提示到小字上，不占主界面 */
-    if (sc.stamina !== undefined) {
-      $('hintStamina').textContent = '当前 ' + (sc.stamina / 1000) + ' 圈 · 1 圈 = 1000';
-    }
-    if (sc.energy !== undefined) {
-      $('hintEnergy').textContent = '当前 ' + (sc.energy / 1000) + ' 格 · 满 16 格';
-    }
-
-    renderMatGrid();
+    buildBagItems();
+    renderBag();
     renderEquip();
 
-    /* 蓝图：换了一份存档 → 上一份待导入的蓝图一律作废 */
     state.bp = sw.readBlueprints();
     state.bpImports = [];
-    $('bpPending').hidden = true;
-    $('bpShareBox').hidden = true;
+    if ($('bpSharePanel')) $('bpSharePanel').hidden = true;
     renderBlueprints();
-
-    /* 坐标 */
-    var p = sw.readPos();
-    state.pos = p;
-    $('curPos').textContent = p
-      ? '(' + fmt(p.x) + ', ' + fmt(p.y) + ', ' + fmt(p.z) + ')'
-      : '读取失败';
-    $('btnFillPos').disabled = !p;
 
     $('btnApply').disabled = false;
     $('btnReset').disabled = false;
     updateFoot();
+
+    var hashTab = (location.hash || '').replace(/^#/, '');
+    if (hashTab === 'blueprint') hashTab = 'bp';
+    if (hashTab) switchTab(hashTab);
   }
 
-  /* 材料分类格子：按类统计「你有几种」，点哪类就改哪类。
-   * 数量来自存档实读，不是写死的 —— 每个人背包里的种类不一样。
-   * 分类规则只有一份（save-writer 的 MAT_GROUPS），这里不另抄一套。 */
-  function renderMatGrid() {
-    var m = state.pouch.materials, a = state.pouch.arrows, z = state.pouch.zonai;
-    var box = $('mgGrid');
-
-    var counts = {};
+  /* ---------- Tab 2: 背包物品（4列网格 + 分类 + 搜索 + 分页） ---------- */
+  function buildBagItems() {
+    var list = [];
+    var m = state.pouch.materials, z = state.pouch.zonai, a = state.pouch.arrows;
     if (m && m.ok) {
       m.items.forEach(function (it) {
         var g = window.SaveWriter.classifyMaterial(it.name);
-        counts[g] = (counts[g] || 0) + 1;
+        list.push({
+          key: 'materials|' + it.i, cat: 'materials', i: it.i,
+          name: it.name, cn: matNameOf(it.name) || it.name, group: g, qty: it.qty
+        });
       });
     }
-
-    /* 前几格照 MAT_GROUPS 的顺序，最后一格固定是左纳乌（它是独立容器，不在材料里） */
-    var cells = window.SaveWriter.MAT_GROUPS.map(function (g) {
-      return { key: g.key, label: g.label, n: counts[g.key] || 0 };
-    });
-    if (z && z.ok) cells.push({ key: 'zonai', label: '左纳乌', n: z.items.length });
-
-    box.innerHTML = cells.map(function (c) {
-      var on = !!state.mgSel[c.key];
-      return '<button type="button" class="mg' + (on ? ' on' : '') + '"' +
-        ' data-g="' + c.key + '"' + (c.n === 0 ? ' disabled' : '') +
-        ' aria-pressed="' + (on ? 'true' : 'false') + '">' +
-        '<span class="mg-n">' + (c.n || '—') + '</span>' +
-        '<span class="mg-l">' + c.label + '</span>' +
-        '</button>';
-    }).join('') + ((z && !z.ok)
-      ? '<div class="mg-warn">左纳乌装置读不出来：' + esc(z.error) + '</div>' : '');
-
-    $('arrHint').textContent = a && a.ok
-      ? a.items.length + ' 种箭矢'
-      : (a ? a.error : '—');
-
-    syncMgAll();
+    if (z && z.ok) {
+      z.items.forEach(function (it) {
+        list.push({
+          key: 'zonai|' + it.i, cat: 'zonai', i: it.i,
+          name: it.name, cn: matNameOf(it.name) || it.name, group: 'zonai', qty: it.qty
+        });
+      });
+    }
+    if (a && a.ok) {
+      a.items.forEach(function (it) {
+        list.push({
+          key: 'arrows|' + it.i, cat: 'arrows', i: it.i,
+          name: it.name, cn: matNameOf(it.name) || it.name, group: 'arrows', qty: it.qty
+        });
+      });
+    }
+    state.bagItems = list;
+    $('tabBagBadge').textContent = list.length || '0';
   }
 
-  /* 「全选 / 全不选」的文字跟着当前状态走，不用用户猜点了会发生什么 */
-  function syncMgAll() {
-    var btns = $('mgGrid').querySelectorAll('.mg:not([disabled])');
-    var allOn = btns.length > 0;
-    Array.prototype.forEach.call(btns, function (b) {
-      if (!state.mgSel[b.dataset.g]) allOn = false;
+  function bagFiltered() {
+    var q = state.bagQuery.toLowerCase();
+    return state.bagItems.filter(function (it) {
+      if (state.bagCat !== 'all' && it.group !== state.bagCat) return false;
+      if (q && it.cn.toLowerCase().indexOf(q) < 0 && it.name.toLowerCase().indexOf(q) < 0) return false;
+      return true;
     });
-    $('mgAll').textContent = allOn ? '全不选' : '全选';
-    $('mgAll').classList.toggle('on', allOn);
   }
 
-  /* ---------- 装备列表 ---------- */
+  function renderBag() {
+    var counts = { all: state.bagItems.length };
+    state.bagItems.forEach(function (it) { counts[it.group] = (counts[it.group] || 0) + 1; });
+
+    var cats = [{ key: 'all', label: '全部' }]
+      .concat(window.SaveWriter.MAT_GROUPS.map(function (g) { return { key: g.key, label: g.label }; }))
+      .concat([{ key: 'zonai', label: '左纳乌装置' }, { key: 'arrows', label: '箭矢' }]);
+
+    $('bagCatPills').innerHTML = cats.map(function (c) {
+      var n = counts[c.key] || 0;
+      if (c.key !== 'all' && !n) return '';
+      return '<button type="button" class="bag-cat-pill' + (state.bagCat === c.key ? ' on' : '') +
+        '" data-g="' + c.key + '">' + esc(c.label) + ' (' + n + ')</button>';
+    }).join('');
+
+    var filtered = bagFiltered();
+    var totalPages = Math.max(1, Math.ceil(filtered.length / BAG_PAGE_SIZE));
+    if (state.bagPage > totalPages) state.bagPage = totalPages;
+    var view = state.bagShowAll
+      ? filtered
+      : filtered.slice((state.bagPage - 1) * BAG_PAGE_SIZE, state.bagPage * BAG_PAGE_SIZE);
+
+    var grid = $('bagItemGrid');
+    if (!view.length) {
+      grid.innerHTML = '<div class="empty">没有匹配的物品</div>';
+      $('bagPager').hidden = true;
+      return;
+    }
+
+    grid.innerHTML = view.map(function (it) {
+      var edited = state.bagEdits[it.key] !== undefined;
+      var curQty = edited ? state.bagEdits[it.key] : it.qty;
+      var sel = state.bagSelKey === it.key;
+      return '<div class="bag-card' + (sel ? ' sel' : '') + (edited ? ' mod' : '') + '" data-key="' + esc(it.key) + '">' +
+        '<div class="bag-info">' +
+          '<div class="bag-name" title="' + esc(it.cn) + '">' + esc(it.cn) + '</div>' +
+          '<div class="bag-qty">持有 <b class="' + (edited ? 'mod' : '') + '">' + curQty + '</b>' + (edited ? ' (原 ' + it.qty + ')' : '') + '</div>' +
+        '</div>' +
+        (edited ? '<button type="button" class="undo-mini bag-undo" data-key="' + esc(it.key) + '" title="恢复原数量">↩</button>' : '') +
+      '</div>';
+    }).join('');
+
+    var pager = $('bagPager');
+    if (filtered.length > BAG_PAGE_SIZE) {
+      pager.hidden = false;
+      $('bagPageInfo').textContent = state.bagShowAll
+        ? '共 ' + filtered.length + ' 项（已全部展开）'
+        : '共 ' + filtered.length + ' 项 · 第 ' + state.bagPage + '/' + totalPages + ' 页';
+      $('btnBagPrev').disabled = state.bagShowAll || state.bagPage <= 1;
+      $('btnBagNext').disabled = state.bagShowAll || state.bagPage >= totalPages;
+      $('btnBagShowAll').textContent = state.bagShowAll ? '分页显示' : '展开全部';
+    } else {
+      pager.hidden = true;
+    }
+
+    var bar = $('bagEditorBar');
+    if (state.bagSelKey) {
+      var selItem = state.bagItems.filter(function (x) { return x.key === state.bagSelKey; })[0];
+      if (selItem) {
+        bar.hidden = false;
+        $('bagEdName').textContent = selItem.cn;
+        $('bagEdSub').textContent = selItem.cn !== selItem.name ? selItem.name : '';
+        $('bagEdQty').value = state.bagEdits[selItem.key] !== undefined ? state.bagEdits[selItem.key] : selItem.qty;
+      } else {
+        bar.hidden = true;
+      }
+    } else {
+      bar.hidden = true;
+    }
+  }
+
+  function setSingleBagQty(key, qty) {
+    var it = state.bagItems.filter(function (x) { return x.key === key; })[0];
+    if (!it) return;
+    pushUndo();
+    var v = Math.max(1, Math.min(999, parseInt(qty, 10) || 1));
+    if (v === it.qty) delete state.bagEdits[key];
+    else state.bagEdits[key] = v;
+    renderBag();
+    updateFoot();
+  }
+
+  /* ---------- Tab 3: 装备强化（3列紧凑卡片 + 实时状态标签） ---------- */
+  var EFFECT_LABELS = {
+    'None': '无词条',
+    'AttackUp': '攻击力提升',
+    'AttackUpPlus': '攻击力大提升',
+    'DurabilityUp': '耐久提升',
+    'DurabilityUpPlus': '耐久大提升',
+    'FinishBlow': '终结一击强化',
+    'LongThrow': '投掷距离提升',
+    'RapidFire': '速射',
+    'ThreeWayZoom': '三连射',
+    'FiveWay': '五连射',
+    'GuardUp': '防御力提升',
+    'GuardUpPlus': '防御力大提升'
+  };
+  function effLabel(e) { return EFFECT_LABELS[e] || e || '—'; }
+
+  var EFFECT_ALL = ['None', 'AttackUp', 'AttackUpPlus', 'DurabilityUp', 'DurabilityUpPlus', 'FinishBlow', 'LongThrow'];
+  var EFFECT_BY_CAT = {
+    weapons: ['None', 'AttackUp', 'AttackUpPlus', 'DurabilityUp', 'DurabilityUpPlus', 'FinishBlow', 'LongThrow'],
+    bows: ['None', 'AttackUp', 'AttackUpPlus', 'DurabilityUp', 'DurabilityUpPlus', 'RapidFire', 'ThreeWayZoom', 'FiveWay'],
+    shields: ['None', 'DurabilityUp', 'DurabilityUpPlus', 'GuardUp', 'GuardUpPlus']
+  };
+
+  function eqStatusParts(it, saved, SW) {
+    var curEff = (saved && saved.eff !== undefined) ? saved.eff : (it.eff || 'None');
+    var curVal = (saved && saved.effVal !== undefined) ? saved.effVal : it.effVal;
+    var curLife = (saved && typeof saved.life === 'number') ? saved.life : it.life;
+    var baseDur = window.EQUIP_DURABILITY && window.EQUIP_DURABILITY[it.name];
+    var isInf = (curEff === 'DurabilityUp' || curEff === 'DurabilityUpPlus') && curVal === SW.INF_DURABILITY;
+    var isAtk = curEff === 'AttackUp' || curEff === 'AttackUpPlus' || curEff === 'GuardUp' || curEff === 'GuardUpPlus';
+    var effMod = !!(saved && saved.eff !== undefined);
+    var lifeMod = !!(saved && typeof saved.life === 'number');
+    var effText = effLabel(curEff) + (SW.needsValue(curEff) && !isInf && curVal ? ' +' + curVal : '');
+    var durText = isInf ? '∞ 永不损坏' : ('耐久 ' + (curLife !== undefined ? curLife : '?') + (baseDur ? '/' + baseDur : ''));
+    return {
+      effHtml: '<span class="stag eq-eff-tag' + (effMod ? ' mod-val' : (isAtk ? ' atk' : '')) + '">' + esc(effText) + '</span>',
+      durHtml: '<span class="stag' + (lifeMod ? ' mod-val' : (isInf ? ' inf' : '')) + '">' + esc(durText) + '</span>' +
+        (saved ? '<span class="stag mod">已改</span>' : '')
+    };
+  }
+
+  function updateEqUndoCatBtn() {
+    var btn = $('btnEqUndoCat');
+    if (!btn) return;
+    var prefix = state.eqCat + '|';
+    var has = Object.keys(state.eqEdits).some(function (k) { return k.indexOf(prefix) === 0; });
+    btn.hidden = !has;
+  }
+
   function renderEquip() {
-    /* 三个 tab 都带上数量，用户不用逐个点开才知道哪栏有东西 */
+    var totalEq = 0;
     ['weapons', 'bows', 'shields'].forEach(function (cat) {
       var r = state.pouch[cat];
+      var cnt = (r && r.ok) ? r.items.length : 0;
+      totalEq += cnt;
       var el = document.querySelector('.eq-tab .cnt[data-cnt="' + cat + '"]');
-      if (el) el.textContent = (r && r.ok) ? r.items.length : '—';
+      if (el) el.textContent = (r && r.ok) ? cnt : '—';
     });
+    if ($('tabEquipBadge')) $('tabEquipBadge').textContent = totalEq || '0';
+    updateEqUndoCatBtn();
 
     var r = state.pouch[state.eqCat];
     var box = $('eqList');
@@ -235,60 +451,76 @@
       return;
     }
 
-    /* 只列出「这一类别能用」的附加属性，不把长柄/弓的专属属性混进盾的下拉 */
     var allowed = EFFECT_BY_CAT[state.eqCat] || EFFECT_ALL;
     var opts = allowed.map(function (e) {
       return '<option value="' + e + '">' + effLabel(e) + '</option>';
     }).join('');
+    var SW = window.SaveWriter;
+    var canFuse = (state.eqCat === 'weapons' || state.eqCat === 'shields');
 
     box.innerHTML = r.items.map(function (it) {
+      var key = state.eqCat + '|' + it.i;
+      var saved = state.eqEdits[key];
       var cn = nameOf(it.name);
       var title = cn ? esc(cn) : esc(it.name);
-      var sub = cn ? esc(it.name) : '';
+      var parts = eqStatusParts(it, saved, SW);
+      var curCombName = (saved && saved.combName !== undefined) ? saved.combName : (it.combName || '');
+      var curCombLife = (saved && typeof saved.combLife === 'number') ? saved.combLife : it.combLife;
+      var combMod = !!(saved && saved.combName !== undefined);
+      var fuseText = curCombName ? ('余料：' + fuseNameOf(curCombName)) : '＋ 添加余料…';
+      var fuseRowHtml = canFuse ? (
+        '<div class="eq-card-fuse">' +
+          '<div class="eq-fuse-wrap">' +
+            '<button type="button" class="eq-fuse-btn' + (curCombName ? ' has' : '') + (combMod ? ' is-mod' : '') + '" title="' + esc(curCombName ? fuseNameOf(curCombName) + ' (' + curCombName + ')' : '选择余料附着') + '">' + esc(fuseText) + '</button>' +
+            (curCombName ? '<button type="button" class="eq-fuse-clr" title="清除余料">×</button>' : '') +
+          '</div>' +
+          '<input type="number" class="eq-comb-life" min="0" max="99999" placeholder="' + (curCombName ? (typeof curCombLife === 'number' && curCombLife >= 0 ? '耐久 ' + curCombLife : '耐久') : '无余料') + '"' + (curCombName ? '' : ' disabled') + ' aria-label="余料耐久">' +
+        '</div>'
+      ) : '';
       return '' +
-        '<div class="eq-item" data-i="' + it.i + '" data-cat="' + state.eqCat + '"' +
-             ' data-eff="' + esc(it.eff || '') + '" data-val="' + (it.effVal !== undefined ? it.effVal : '') + '">' +
-          '<div class="eq-name">' + title + (sub ? '<small>' + sub + '</small>' : '') + '</div>' +
-          '<input type="number" class="eq-life" min="1" max="99999" ' +
-            'placeholder="耐久 ' + (it.life !== undefined ? it.life : '?') + '" aria-label="耐久">' +
-          '<select class="eq-eff" aria-label="附加属性">' +
-            '<option value="">附加：不改</option>' + opts +
-          '</select>' +
-          '<span class="eq-valwrap">' +
-            '<input type="number" class="eq-val" disabled aria-label="附加数值">' +
-            '<button type="button" class="eq-inf" title="设为无限耐久（永不损坏）" aria-label="无限耐久">∞</button>' +
-          '</span>' +
+        '<div class="eq-card' + (saved ? ' mod' : '') + '" data-i="' + it.i + '" data-cat="' + state.eqCat + '">' +
+          '<div class="eq-card-top">' +
+            '<div class="eq-card-title" title="' + esc(title) + '">' + title + '</div>' +
+            parts.effHtml +
+            '<button type="button" class="undo-mini eq-undo" data-key="' + esc(key) + '" title="撤销该装备修改"' + (saved ? '' : ' hidden') + '>↩</button>' +
+          '</div>' +
+          '<div class="eq-card-dur">' +
+            '<div class="eq-dur-info">' + parts.durHtml + '</div>' +
+            '<input type="number" class="eq-life" min="1" max="99999" placeholder="改耐久" aria-label="耐久">' +
+          '</div>' +
+          '<div class="eq-card-eff">' +
+            '<select class="eq-eff" aria-label="附加属性"><option value="">改词条…</option>' + opts + '</select>' +
+            '<span class="eq-valwrap">' +
+              '<input type="number" class="eq-val" disabled aria-label="附加数值">' +
+              '<button type="button" class="eq-inf" title="设为无限耐久" aria-label="无限耐久">∞</button>' +
+            '</span>' +
+          '</div>' +
+          fuseRowHtml +
         '</div>';
     }).join('');
 
-    /* 附加属性 → 附加数值 的联动。
-     * 关键：同一格在三种属性下含义不同（攻击力 / 防御力 / 额外耐久），
-     * 不需要数值的属性（连射、投掷距离…）必须禁用输入框，否则会写出无意义的数字。
-     * 无限耐久的值是 2100000000，10 位数塞不进 92px 的框（会被裁成 21000000，用户读到错值），
-     * 所以点 ∞ 之后不再显示数字，改用占位文字「∞ 永不损坏」，真值挂在 dataset 上。 */
-    var SW = window.SaveWriter;
-    Array.prototype.forEach.call(box.querySelectorAll('.eq-item'), function (el) {
+    Array.prototype.forEach.call(box.querySelectorAll('.eq-card'), function (el) {
       var i = +el.dataset.i;
       var it = r.items.filter(function (x) { return x.i === i; })[0];
       if (!it) return;
 
-      var key = state.eqCat + '|' + i;      /* 跨 tab 的稳定标识，别用 DOM 位置 */
+      var key = state.eqCat + '|' + i;
       var sel = el.querySelector('.eq-eff');
       var val = el.querySelector('.eq-val');
       var inf = el.querySelector('.eq-inf');
       var wrap = el.querySelector('.eq-valwrap');
       var lifeIn = el.querySelector('.eq-life');
+      var combLifeIn = el.querySelector('.eq-comb-life');
+      var fuseBtn = el.querySelector('.eq-fuse-btn');
+      var fuseClr = el.querySelector('.eq-fuse-clr');
+      var durInfoEl = el.querySelector('.eq-dur-info');
       var origEff = it.eff || 'None';
       var origVal = it.effVal;
 
-      sel.title = '当前附加：' + effLabel(origEff) + '（数值 ' + (origVal !== undefined ? origVal : '?') + '）';
-
       function promptOf(e) {
-        if (!e) return '—';
-        if (!SW.needsValue(e)) return '不需数值';
-        return SW.valueLabel(e) || '—';
+        if (!e || !SW.needsValue(e)) return '';
+        return SW.valueLabel(e) || '';
       }
-
       function setInf(on) {
         el.dataset.inf = on ? '1' : '';
         wrap.classList.toggle('inf-mode', on);
@@ -297,31 +529,32 @@
         if (on) { val.value = ''; val.disabled = true; }
         else { val.disabled = !SW.needsValue(sel.value || ''); }
       }
-
       function sync(fill) {
         var e = sel.value;
         var need = !!e && SW.needsValue(e);
         var rng = e ? SW.valueRange(e) : null;
         var isDur = e === 'DurabilityUp' || e === 'DurabilityUpPlus';
-
         inf.classList.toggle('show', isDur);
         if (rng) { val.min = rng[0]; val.max = rng[1]; }
         else { val.removeAttribute('min'); val.removeAttribute('max'); }
-
-        /* 选回原本就是「无限耐久」的装备 → 直接进 ∞ 状态 */
         if (isDur && e === origEff && origVal === SW.INF_DURABILITY) { setInf(true); return; }
-
         setInf(false);
         if (!need) { val.value = ''; return; }
         if (fill) {
-          /* 选回原本就有的属性 → 用存档原值（别降级成默认值）；换成别的属性 → 默认 10 */
           var keep = (e === origEff && typeof origVal === 'number' && origVal > 0);
           val.value = keep ? origVal : 10;
         }
       }
-
-      /* 把这一行的输入收进 state —— 重建 DOM 不丢、切 tab 不丢、导出时从这里取 */
+      function syncModStyle() {
+        lifeIn.classList.toggle('is-mod', lifeIn.value.trim() !== '');
+        var hasEff = sel.value !== '';
+        sel.classList.toggle('is-mod', hasEff);
+        val.classList.toggle('is-mod', hasEff && !val.disabled && val.value.trim() !== '');
+        if (combLifeIn) combLifeIn.classList.toggle('is-mod', combLifeIn.value.trim() !== '');
+      }
       function persist() {
+        pushUndo();
+        var prev = state.eqEdits[key];
         var lifeRaw = lifeIn.value.trim();
         var rec = null;
         if (lifeRaw !== '') {
@@ -340,12 +573,35 @@
             }
           }
         }
+        if (prev && prev.combName !== undefined) {
+          rec = rec || {};
+          rec.combName = prev.combName;
+        }
+        if (combLifeIn && !combLifeIn.disabled && combLifeIn.value.trim() !== '') {
+          var clv = parseInt(combLifeIn.value.trim(), 10);
+          if (isFinite(clv)) { rec = rec || {}; rec.combLife = clv; }
+        } else if (prev && prev.combName === '' && typeof prev.combLife === 'number') {
+          rec = rec || {};
+          rec.combLife = prev.combLife;
+        }
         if (rec) state.eqEdits[key] = rec;
         else delete state.eqEdits[key];
+        el.classList.toggle('mod', !!rec);
+        var uBtn = el.querySelector('.eq-undo');
+        if (uBtn) uBtn.hidden = !rec;
+        var parts = eqStatusParts(it, rec, SW);
+        var effTag = el.querySelector('.eq-eff-tag');
+        if (effTag) effTag.outerHTML = parts.effHtml;
+        if (durInfoEl) durInfoEl.innerHTML = parts.durHtml;
+        syncModStyle();
+        updateEqUndoCatBtn();
         updateFoot();
       }
 
       lifeIn.addEventListener('input', persist);
+      if (combLifeIn) combLifeIn.addEventListener('input', persist);
+      if (fuseBtn) fuseBtn.addEventListener('click', function () { openFusePicker(state.eqCat, i); });
+      if (fuseClr) fuseClr.addEventListener('click', function () { setFuseEdit(state.eqCat, i, '', -1); });
       val.addEventListener('input', persist);
       sel.addEventListener('change', function () { sync(true); persist(); });
       inf.addEventListener('click', function () {
@@ -355,9 +611,6 @@
       });
 
       sync(false);
-
-      /* ★ 切回这个 tab 时把之前填的还原。
-         没有这段，切一次 tab 改动就没了 —— 这正是「武器和弓改了不生效」的原因。 */
       var saved = state.eqEdits[key];
       if (saved) {
         if (typeof saved.life === 'number') lifeIn.value = saved.life;
@@ -367,37 +620,19 @@
           if (saved.inf) setInf(true);
           else if (typeof saved.effVal === 'number') val.value = saved.effVal;
         }
+        if (combLifeIn && typeof saved.combLife === 'number' && saved.combLife >= 0 && !combLifeIn.disabled) {
+          combLifeIn.value = saved.combLife;
+        }
       }
+      syncModStyle();
     });
   }
 
-  var EFFECT_LABELS = {
-    'None': '无',
-    'AttackUp': '攻击力提升',
-    'AttackUpPlus': '攻击力大提升',
-    'DurabilityUp': '耐久提升',
-    'DurabilityUpPlus': '耐久大提升',
-    'FinishBlow': '终结一击强化',
-    'LongThrow': '投掷距离提升',
-    'RapidFire': '连射',
-    'ThreeWayZoom': '三连射',
-    'FiveWay': '五连射',
-    'GuardUp': '防御力提升',
-    'GuardUpPlus': '防御力大提升'
-  };
-  function effLabel(e) { return EFFECT_LABELS[e] || e || '—'; }
+  /* ---------- Tab 3: 蓝图工坊（30槽拖拽 + 本地蓝图库 JSON 导入导出） ---------- */
+  function allPresets() {
+    return state.bpLibrary || [];
+  }
 
-  /* 武器 / 弓 / 盾 各能用哪些附加属性 —— 给人看不属于该类别的选项等于埋雷 */
-  var EFFECT_ALL = ['None', 'AttackUp', 'AttackUpPlus', 'DurabilityUp', 'DurabilityUpPlus', 'FinishBlow', 'LongThrow'];
-  var EFFECT_BY_CAT = {
-    weapons: ['None', 'AttackUp', 'AttackUpPlus', 'DurabilityUp', 'DurabilityUpPlus', 'FinishBlow', 'LongThrow'],
-    bows: ['None', 'AttackUp', 'AttackUpPlus', 'DurabilityUp', 'DurabilityUpPlus', 'RapidFire', 'ThreeWayZoom', 'FiveWay'],
-    shields: ['None', 'DurabilityUp', 'DurabilityUpPlus', 'GuardUp', 'GuardUpPlus']
-  };
-
-  /* ---------- 蓝图分享 / 导入 ----------
-   * 字节读写全在 save-writer.js，这里只做「选槽 → 导出/生成分享码 → 读回 → 交给预览」。
-   * 导入不会立刻改档：先记进 state.bpImport，由底部「预览并下载」统一走强制备份流程。 */
   function bpInspectSlot(s) {
     if (!s || !s.used || !window.Blueprint || !window.Blueprint.inspect) return null;
     if (!s._info) s._info = window.Blueprint.inspect(s.data);
@@ -406,137 +641,113 @@
 
   function bpLabel(s) {
     var no = '#' + String(s.i + 1).padStart(2, '0');
-    if (!s.used) return no + ' · 空槽' + (s.index < 0 ? '（未启用）' : '');
+    var alias = state.bpAliases && state.bpAliases[s.i];
+    if (!s.used) return no + (alias ? ' · [' + alias + '] 空槽' : ' · 空槽');
     var info = bpInspectSlot(s);
-    return no + ' · ' + (info && info.valid ? info.actorCount + ' 零件：' + info.summary : '有蓝图');
+    var parts = info && info.valid ? info.actorCount + ' 零件：' + info.summary : '有蓝图';
+    return no + (alias ? ' · [' + alias + '] ' : ' · ') + parts;
+  }
+
+  function nextContiguousSlot() {
+    if (!state.bp || !state.bp.ok) return 0;
+    var qMap = {};
+    state.bpImports.forEach(function (it) { qMap[it.i] = true; });
+    for (var i = 0; i < state.bp.slots.length; i++) {
+      var s = state.bp.slots[i];
+      if (!s.used && !qMap[s.i]) return s.i;
+    }
+    return state.bp.slots.length - 1;
   }
 
   function renderBlueprints() {
-    var src = $('bpSlot'), dst = $('bpTarget'), cnt = $('bpCount');
+    var src = $('bpSlot'), cnt = $('bpCount'), tbody = $('bpSlotBody');
     var b = state.bp;
     if (!b || !b.ok) {
-      cnt.textContent = b ? b.error : '读取失败';
-      src.innerHTML = ''; dst.innerHTML = '';
-      $('bpExport').disabled = true; $('bpShare').disabled = true;
-      if ($('bpToggleOverview')) $('bpToggleOverview').disabled = true;
-      renderBlueprintOverview();
+      if (cnt) cnt.textContent = b ? b.error : '读取失败';
+      if (src) src.innerHTML = '';
+      if (tbody) tbody.innerHTML = '<tr><td colspan="3" class="empty">加载存档后显示 30 个蓝图槽</td></tr>';
+      if ($('bpExport')) $('bpExport').disabled = true;
+      if ($('bpShare')) $('bpShare').disabled = true;
       return;
     }
-    var used = 0, firstUsed = -1, firstEmpty = -1;
-    b.slots.forEach(function (s) {
-      if (s.used) { used++; if (firstUsed < 0) firstUsed = s.i; }
-      else if (firstEmpty < 0) firstEmpty = s.i;
-    });
-    cnt.textContent = b.count + ' 个槽 · ' + used + ' 个有蓝图';
-    var opts = b.slots.map(function (s) {
+
+    var used = 0, firstUsed = -1;
+    b.slots.forEach(function (s) { if (s.used) { used++; if (firstUsed < 0) firstUsed = s.i; } });
+    cnt.textContent = b.count + ' 槽 · 已用 ' + used;
+    src.innerHTML = b.slots.map(function (s) {
       return '<option value="' + s.i + '">' + esc(bpLabel(s)) + '</option>';
     }).join('');
-    src.innerHTML = opts; dst.innerHTML = opts;
-    if (firstUsed >= 0) src.value = String(firstUsed);
-    dst.value = String(firstEmpty >= 0 ? firstEmpty : b.slots[b.slots.length - 1].i);
-    $('bpExport').disabled = firstUsed < 0;
-    $('bpShare').disabled = firstUsed < 0;
-    if ($('bpToggleOverview')) $('bpToggleOverview').disabled = false;
-    renderBlueprintOverview();
-  }
+    if (firstUsed >= 0) src.value = String(state.bpSelSlot >= 0 && b.slots[state.bpSelSlot] ? state.bpSelSlot : firstUsed);
+    if ($('bpSlotAlias')) $('bpSlotAlias').value = (state.bpAliases && state.bpAliases[+src.value]) || '';
+    if ($('bpExport')) $('bpExport').disabled = firstUsed < 0;
+    if ($('bpShare')) $('bpShare').disabled = firstUsed < 0;
 
-  function renderBlueprintOverview() {
-    var wrap = $('bpOverviewWrap'), grid = $('bpOverviewGrid');
-    if (!wrap || !grid || wrap.hidden) return;
-    var b = state.bp;
-    if (!b || !b.ok) { grid.innerHTML = '<div style="font-size:12px;opacity:.6">请先加载存档</div>'; return; }
-    var onlyUsed = $('bpOnlyUsed') && $('bpOnlyUsed').checked;
-    var list = onlyUsed ? b.slots.filter(function (s) { return s.used; }) : b.slots;
-    if (!list.length) {
-      grid.innerHTML = '<div style="font-size:12px;opacity:.6">当前存档还没有已保存的蓝图，可取消勾选「仅显示已有蓝图」查看全部 30 个空槽。</div>';
-      return;
-    }
-    grid.innerHTML = list.map(function (s) {
-      var info = bpInspectSlot(s);
-      var title = '#' + String(s.i + 1).padStart(2, '0') + (s.used ? ' · 已占用' : (s.suspect ? ' · 未初始化' : ' · 空槽'));
-      var desc = s.used && info && info.valid
-        ? '<b>' + info.actorCount + ' 零件</b>：' + esc(info.summary)
-        : (s.index < 0 ? '未启用空槽（导入时自动启用）' : '空槽');
-      var btns = s.used
-        ? '<button type="button" class="btn bp-ov-exp" data-i="' + s.i + '" style="font-size:11px;padding:3px 7px">导出</button>' +
-          '<button type="button" class="btn bp-ov-shr" data-i="' + s.i + '" style="font-size:11px;padding:3px 7px">分享码</button>' +
-          '<button type="button" class="btn bp-ov-tgt" data-i="' + s.i + '" style="font-size:11px;padding:3px 7px">设为目标</button>'
-        : '<button type="button" class="btn bp-ov-tgt" data-i="' + s.i + '" style="font-size:11px;padding:3px 7px">设为导入目标</button>';
-      return '<div style="background:#161c24;border:1px solid ' + (s.used ? '#2e4a62' : '#262f3b') + ';border-radius:7px;padding:8px 10px;display:flex;flex-direction:column;gap:5px">' +
-        '<div style="display:flex;justify-content:space-between;align-items:center;font-size:12px">' +
-          '<span style="font-weight:600;color:' + (s.used ? '#38bdf8' : '#94a3b8') + '">' + title + '</span>' +
-          '<span style="font-size:10px;opacity:.6">Index: ' + s.index + '</span>' +
-        '</div>' +
-        '<div style="font-size:11px;color:#cbd5e1;line-height:1.4">' + desc + '</div>' +
-        '<div style="display:flex;gap:5px;margin-top:auto;padding-top:4px;flex-wrap:wrap">' + btns + '</div>' +
-      '</div>';
+    var qBySlot = {};
+    state.bpImports.forEach(function (q, idx) { qBySlot[q.i] = { q: q, idx: idx }; });
+    var nextEmpty = nextContiguousSlot();
+
+    if (!tbody) return;
+    tbody.innerHTML = b.slots.map(function (s) {
+      var qInfo = qBySlot[s.i];
+      var alias = state.bpAliases && state.bpAliases[s.i];
+      var info = s.used ? bpInspectSlot(s) : null;
+      var partsText = (info && info.valid) ? (info.actorCount + '件 · ' + info.summary) : (s.used ? '已占用（无明细）' : '空槽');
+
+      var cls = [];
+      if (qInfo) cls.push('queued');
+      else if (s.used) cls.push('used');
+      else if (s.i === nextEmpty) cls.push('next-empty');
+      if (state.bpSelSlot === s.i) cls.push('selected');
+
+      var descHtml = '';
+      if (qInfo) {
+        descHtml = '<span class="bp-alias-tag" style="color:var(--tk-gold);background:rgba(212,169,90,.16)">待写入 · ' + esc(qInfo.q.from || '蓝图') + '</span>' +
+          '<span class="bp-parts-txt">' + esc(qInfo.q.summary || partsText) + '</span>';
+      } else {
+        descHtml = (alias ? '<span class="bp-alias-tag">' + esc(alias) + '</span>' : '') +
+          '<span class="bp-parts-txt">' + esc(partsText) + (s.i === nextEmpty && !s.used ? '（可拖放到此）' : '') + '</span>';
+      }
+
+      var opsHtml = '';
+      if (qInfo) {
+        opsHtml = '<button type="button" class="btn-mini bp-slot-rm" data-qidx="' + qInfo.idx + '">移除</button>';
+      } else if (s.used) {
+        opsHtml = '<button type="button" class="btn-mini bp-row-exp" data-slot="' + s.i + '">导出</button>' +
+                  '<button type="button" class="btn-mini bp-row-shr" data-slot="' + s.i + '">分享</button>';
+      } else {
+        opsHtml = '<span style="font-size:12px;color:var(--tk-text-3)">—</span>';
+      }
+
+      return '<tr class="' + cls.join(' ') + '" data-slot="' + s.i + '">' +
+        '<td><b>#' + String(s.i + 1).padStart(2, '0') + '</b></td>' +
+        '<td>' + descHtml + '</td>' +
+        '<td><div class="bp-row-ops">' + opsHtml + '</div></td>' +
+      '</tr>';
     }).join('');
-  }
-
-  function bpSlot() {
-    if (!state.bp || !state.bp.ok) return null;
-    return state.bp.slots[+$('bpSlot').value] || null;
-  }
-
-  function bpExport() {
-    var s = bpSlot();
-    if (!s || !s.used) { showMsg('这个槽里没有蓝图，换一个再导出。', 'warn'); return; }
-    try {
-      var cai = window.Blueprint.toCai(s);
-      window.Blueprint.download(cai, 'blueprint_' + String(s.i + 1).padStart(2, '0') + '.cai');
-      showMsg('<b>已导出 .cai。</b>可以直接发给别人，或上传到 HyruleWorks。', 'ok');
-    } catch (e) { showMsg('<b>导出失败：</b>' + esc(e.message), 'warn'); }
-  }
-
-  function bpShare() {
-    var s = bpSlot();
-    if (!s || !s.used) { showMsg('这个槽里没有蓝图，换一个再分享。', 'warn'); return; }
-    try {
-      var code = window.Blueprint.encodeShare(window.Blueprint.toCai(s));
-      var svg = window.Blueprint.qrSvg(code);
-      $('bpShareText').value = code;
-      $('bpQr').innerHTML = svg || '';
-      $('bpQrHint').textContent = svg
-        ? '用任意扫码工具扫出来就是这串文本，复制粘贴到本页即可导入。'
-        : '这张蓝图太长，二维码放不下，请改用分享码文本或 .cai 文件。';
-      $('bpShareBox').hidden = false;
-    } catch (e) { showMsg('<b>生成分享码失败：</b>' + esc(e.message), 'warn'); }
   }
 
   function renderBpPending() {
-    var el = $('bpPending');
-    if (!state.bpImports.length) {
-      el.hidden = true;
-      el.innerHTML = '';
-      return;
-    }
-    el.hidden = false;
-    var rows = state.bpImports.map(function (item, idx) {
-      var tgt = state.bp.slots[item.i];
-      var action = tgt && tgt.used ? '<b style="color:#fbbf24">覆盖</b>' : '写入';
-      return '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:3px 0;border-bottom:1px dashed rgba(255,255,255,.08)">' +
-        '<span><b>#' + String(item.i + 1).padStart(2, '0') + '</b>（' + action + '）← ' +
-          esc(item.from || '蓝图') + ' <span style="opacity:.75">[' + esc(item.summary || '') + ']</span></span>' +
-        '<button type="button" class="btn bp-rm-item" data-idx="' + idx + '" style="font-size:11px;padding:1px 6px">移除</button>' +
-      '</div>';
-    }).join('');
-    el.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">' +
-      '<b>待写入蓝图队列（共 ' + state.bpImports.length + ' 张，点底部「预览并下载」生效）</b>' +
-      '<button type="button" class="btn" id="bpClearQueue" style="font-size:11px;padding:2px 8px">清空队列</button>' +
-      '</div>' + rows;
+    if ($('tabBpBadge')) $('tabBpBadge').textContent = state.bpImports.length;
+    renderBlueprints();
   }
 
   function bpSetImport(caiBytes, from, targetIdx) {
-    if (!state.bp || !state.bp.ok) { showMsg('先加载存档，再导入蓝图。', 'warn'); return; }
+    if (!state.bp || !state.bp.ok) { showBpMsg('先加载存档，再导入蓝图。', 'warn'); return; }
     try {
       var parsed = window.Blueprint.parseCai(caiBytes);
       var info = window.Blueprint.inspect(parsed.data);
-      var i = typeof targetIdx === 'number' ? targetIdx : +$('bpTarget').value;
+      var next = nextContiguousSlot();
+      var rawTarget = typeof targetIdx === 'number' ? targetIdx : next;
+      var tgtSlot = state.bp.slots[rawTarget];
+      /* 流式防断层：允许覆盖已占槽/已有队列槽，若拖到更后面的空槽则自动顺延对齐到首个连续空槽 */
+      var qExists = state.bpImports.some(function (it) { return it.i === rawTarget; });
+      var i = (tgtSlot && (tgtSlot.used || qExists || rawTarget <= next)) ? rawTarget : next;
       var rec = {
         i: i, data: parsed.data, camPos: parsed.camPos, camAt: parsed.camAt,
         from: from || '蓝图',
         summary: info.valid ? (info.actorCount + ' 零件：' + info.summary) : ''
       };
+      pushUndo();
       var replaced = false;
       for (var k = 0; k < state.bpImports.length; k++) {
         if (state.bpImports[k].i === i) { state.bpImports[k] = rec; replaced = true; break; }
@@ -544,23 +755,23 @@
       if (!replaced) state.bpImports.push(rec);
       renderBpPending();
       updateFoot();
-    } catch (e) { showMsg('<b>导入失败：</b>' + esc(e.message), 'warn'); }
+    } catch (e) { showBpMsg('<b>导入失败：</b>' + esc(e.message), 'warn'); }
   }
 
   function bpBatchQueue(entries) {
-    if (!state.bp || !state.bp.ok) { showMsg('先加载存档，再批量导入蓝图。', 'warn'); return; }
-    var occupied = {};
-    state.bpImports.forEach(function (it) { occupied[it.i] = true; });
-    var emptySlots = state.bp.slots.filter(function (s) { return !s.used && !occupied[s.i]; });
+    if (!state.bp || !state.bp.ok) { showBpMsg('先加载存档，再批量导入蓝图。', 'warn'); return; }
     var added = 0, skipped = 0, errs = [];
     for (var k = 0; k < entries.length; k++) {
-      if (added >= emptySlots.length) { skipped += (entries.length - k); break; }
+      var slotIdx = nextContiguousSlot();
+      var qExists = state.bpImports.some(function (it) { return it.i === slotIdx; });
+      if (state.bp.slots[slotIdx] && state.bp.slots[slotIdx].used && !qExists && slotIdx === state.bp.slots.length - 1) {
+        skipped += (entries.length - k); break;
+      }
       try {
         var parsed = window.Blueprint.parseCai(entries[k].caiBytes);
         var info = window.Blueprint.inspect(parsed.data);
-        var slot = emptySlots[added];
         state.bpImports.push({
-          i: slot.i, data: parsed.data, camPos: parsed.camPos, camAt: parsed.camAt,
+          i: slotIdx, data: parsed.data, camPos: parsed.camPos, camAt: parsed.camAt,
           from: entries[k].from || '蓝图',
           summary: info.valid ? (info.actorCount + ' 零件：' + info.summary) : ''
         });
@@ -571,13 +782,63 @@
     }
     renderBpPending();
     updateFoot();
-    if (errs.length) {
-      showMsg('批量导入部分失败（成功 ' + added + ' 个）：' + esc(errs[0]), 'warn');
-    } else if (skipped > 0) {
-      showMsg('已填入 ' + added + ' 个空槽，剩余 ' + skipped + ' 个因空槽不足未填入（可先手动选槽覆盖）。', 'warn');
-    } else if (added > 0) {
-      showMsg('已将 <b>' + added + '</b> 张蓝图加入待写入队列，点底部「预览并下载」生成新存档。', 'ok');
+    if (errs.length) showBpMsg('批量导入部分失败（成功 ' + added + ' 个）：' + esc(errs[0]), 'warn');
+    else if (skipped > 0) showBpMsg('已填入 ' + added + ' 个空槽，剩余 ' + skipped + ' 个因空槽不足未填入。', 'warn');
+    else if (added > 0) showBpMsg('已将 <b>' + added + '</b> 张蓝图加入写入队列。', 'ok');
+  }
+
+  function bpSlot() {
+    if (!state.bp || !state.bp.ok) return null;
+    return state.bp.slots[+$('bpSlot').value] || null;
+  }
+
+  function bpExport(slotIdx) {
+    var s = (typeof slotIdx === 'number' && state.bp && state.bp.ok) ? state.bp.slots[slotIdx] : bpSlot();
+    if (!s || !s.used) { showBpMsg('这个槽里没有蓝图，换一个再导出。', 'warn'); return; }
+    try {
+      var cai = window.Blueprint.toCai(s);
+      window.Blueprint.download(cai, 'blueprint_' + String(s.i + 1).padStart(2, '0') + '.cai');
+      showBpMsg('<b>已导出 .cai。</b>', 'ok');
+    } catch (e) { showBpMsg('<b>导出失败：</b>' + esc(e.message), 'warn'); }
+  }
+
+  function bpShare(slotIdx) {
+    var s = (typeof slotIdx === 'number' && state.bp && state.bp.ok) ? state.bp.slots[slotIdx] : bpSlot();
+    if (!s || !s.used) { showBpMsg('这个槽里没有蓝图，换一个再分享。', 'warn'); return; }
+    try {
+      var code = window.Blueprint.encodeShare(window.Blueprint.toCai(s));
+      $('bpShareText').value = code;
+      if ($('bpShareDlgTitle')) $('bpShareDlgTitle').textContent = '分享码 · #' + String(s.i + 1).padStart(2, '0');
+      if ($('bpSharePanel')) {
+        $('bpSharePanel').hidden = false;
+        $('bpSharePanel').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    } catch (e) { showBpMsg('<b>生成分享码失败：</b>' + esc(e.message), 'warn'); }
+  }
+
+  function renderBlueprintPresets() {
+    var tbody = $('bpPresetBody');
+    if (!tbody) return;
+    var list = allPresets();
+    if ($('bpLibFootInfo')) {
+      $('bpLibFootInfo').textContent = '已加载 ' + list.length + ' 款蓝图';
     }
+    if (!list.length) {
+      tbody.innerHTML = '<tr><td colspan="2" class="empty">当前蓝图库为空，可点击下方「加载推荐蓝图」或右上角导入 .json</td></tr>';
+      return;
+    }
+    tbody.innerHTML = list.map(function (p, idx) {
+      var chk = state.bpPresetSel[p.id] ? ' checked' : '';
+      var parts = ((p.parts && p.parts.length) ? p.parts.join('、') : (p.desc || '')).replace(/\s*×\s*/g, '×');
+      return '<tr draggable="true" data-idx="' + idx + '" title="双击或拖动到左侧槽位放入">' +
+        '<td><input type="checkbox" class="bp-preset-chk" data-id="' + esc(p.id) + '"' + chk + '></td>' +
+        '<td>' +
+          '<span class="bp-lib-name-badge">' + esc(p.name) + '</span>' +
+          '<span class="bp-lib-ore-badge">' + (p.costOre || '?') + '矿</span>' +
+          '<span class="bp-parts-txt">' + esc(parts) + '</span>' +
+        '</td>' +
+      '</tr>';
+    }).join('');
   }
 
   /* ---------- 收集用户意图 ---------- */
@@ -595,21 +856,14 @@
     var en = segVal('segEnergy');
     if (en !== null) p.energy = en;
 
-    /* 材料 / 左纳乌：按勾选的类别交（左纳乌是独立容器，单独一个开关） */
-    var gs = Object.keys(state.mgSel).filter(function (k) { return state.mgSel[k]; });
-    var matGs = gs.filter(function (k) { return k !== 'zonai'; });
-    if (matGs.length) p.matGroups = matGs;
-    if (state.mgSel.zonai) p.zonai999 = true;
-    if ($('swArr').checked) p.arrows999 = true;
+    /* 单个背包物品数量微调 */
+    var pouchQty = [];
+    Object.keys(state.bagEdits).forEach(function (k) {
+      var bar = k.indexOf('|');
+      pouchQty.push({ cat: k.slice(0, bar), i: +k.slice(bar + 1), qty: state.bagEdits[k] });
+    });
+    if (pouchQty.length) p.pouchQty = pouchQty;
 
-    /* 坐标：三个都填才生效 —— 只改一半等于把人塞进地底 */
-    var xs = $('inPosX').value.trim(), ys = $('inPosY').value.trim(), zs = $('inPosZ').value.trim();
-    if (xs !== '' && ys !== '' && zs !== '') {
-      var x = parseFloat(xs), y = parseFloat(ys), z = parseFloat(zs);
-      if (isFinite(x) && isFinite(y) && isFinite(z)) p.pos = { x: x, y: y, z: z };
-    }
-
-    /* 装备：从 state 取，不读 DOM —— DOM 只显示当前 tab，不能当数据源 */
     var items = [];
     Object.keys(state.eqEdits).forEach(function (k) {
       var bar = k.indexOf('|');
@@ -620,24 +874,22 @@
         one.eff = rec.eff;
         if (typeof rec.effVal === 'number') one.effVal = rec.effVal;
       }
-      if (one.life !== undefined || one.eff !== undefined) items.push(one);
+      if (typeof rec.combName === 'string') one.combName = rec.combName;
+      if (typeof rec.combLife === 'number') one.combLife = rec.combLife;
+      if (one.life !== undefined || one.eff !== undefined || one.combName !== undefined || one.combLife !== undefined) items.push(one);
     });
     if (items.length) p.items = items;
 
-    /* 蓝图导入与其它改动一起进预览，共用强制备份 / 下载流程 */
     if (state.bpImports.length) p.blueprints = state.bpImports;
 
     return p;
   }
 
-  /* ---------- 预览 ---------- */
+  /* ---------- 预览与单文件导出 ---------- */
   function openPreview() {
     var plan = collectPlan();
-
-    /* 「什么都没填」和「填了但值跟存档一样」是两件事，提示必须分开说。
-       以前两种情况都报"你还没改任何东西"，用户明明填了数却被告知没改，只会以为按钮坏了。 */
     if (!Object.keys(plan).length) {
-      showMsg('还没选要改什么 —— 上面的卡片里挑一项填上，再点这里。', '');
+      showMsg('还没选要改什么 —— 改完任意一项再点提交导出。', '');
       return;
     }
 
@@ -648,28 +900,19 @@
       showMsg('<b>生成失败：</b>' + esc(e.message), 'warn');
       return;
     }
-    if (!res.ok) {
-      showMsg('<b>改不了：</b>' + esc(res.error), 'warn');
-      return;
-    }
-    if (!res.changed) {
-      showMsg('你填的值和存档里现在的一样，没有需要写的字节。改一个不一样的值再试。', '');
-      return;
-    }
+    if (!res.ok) { showMsg('<b>改不了：</b>' + esc(res.error), 'warn'); return; }
+    if (!res.changed) { showMsg('你填的值和存档里现在的一样，没有需要写的字节。', ''); return; }
 
     state.pending = res;
-
-    var body = $('previewBody');
-    /* 同类合并显示：材料 90 条数量改动没必要列 90 行 */
     var groups = {};
     res.edits.forEach(function (e) {
+      if (/^蓝图/.test(e.label)) return;
       var key = e.label.replace(/#\d+/, '').replace(/ \d+$/, '');
       if (!groups[key]) groups[key] = { n: 0, label: key, samples: [] };
       groups[key].n++;
       if (groups[key].samples.length < 3) groups[key].samples.push(e);
     });
 
-    /* 一条改动怎么念：枚举字段（附加属性）翻成中文；无限耐久念成 ∞ —— 2100000000 给人看没意义 */
     function one(e, which) {
       var t = which === 'from' ? e.fromText : e.toText;
       if (t !== undefined) return effLabel(t);
@@ -691,215 +934,172 @@
           '<span class="va">' + esc(preview) + ' …</span></div>';
       }
     });
+    if (state.bpImports.length) {
+      state.bpImports.forEach(function (b) {
+        var tgt = state.bp && state.bp.slots && state.bp.slots[b.i];
+        var act = tgt && tgt.used ? '覆盖' : '写入';
+        html += '<div class="chg"><span class="nm">蓝图 · #' + String(b.i + 1).padStart(2, '0') + '</span>' +
+          '<span class="va">' + act + ' ← <b>' + esc(b.from || '蓝图') + '</b></span></div>';
+      });
+    }
 
     var vr = res.verify();
     html += '<div class="tip ok">共改动 <b class="num">' + res.changed + '</b> 处、' +
-      '<b class="num">' + vr.bytes + '</b> 个字节，分布 <b class="num">' + vr.segments.length +
-      '</b> 段，文件长度不变。没有新增或删除任何物品。</div>';
+      '<b class="num">' + vr.bytes + '</b> 个字节，文件长度不变。点击「导出 progress.sav」直接获取改好的存档。</div>';
 
-    body.innerHTML = html;
+    $('previewBody').innerHTML = html;
     $('previewMask').classList.remove('hidden');
-    $('btnCancelPreview').focus();
+    $('btnDownload').focus();
   }
 
-  /* ---------- 下载 ----------
-   *
-   * ★ 这里踩过坑，改之前先读：
-   *   原来点一次就 setTimeout 连下两个文件，然后立刻把弹层关掉、把成功提示写到页面顶部。
-   *   问题出在两处：
-   *     1) 浏览器（Chrome/Edge）把「一次点击内连续两次下载」判定为自动多文件下载，
-   *        第二次会被直接拦掉，只留一个地址栏小图标 —— 用户完全看不出来，就是"点了没反应"。
-   *     2) 提示落在页面顶部，而用户视线在底部弹层上，点完页面毫无变化，同样像没反应。
-   *   现在的做法：
-   *     · 点下去先在弹层里给出可见状态（按钮禁用 + 「正在下载」），绝不让人盯着没动静的界面
-   *     · 两个文件仍按顺序自动下（体验不变），但完成后面板留在弹层里，
-   *       每个文件各带一个「再下一次」按钮 —— 每次都是独立点击，绕过一切多文件拦截
-   *     · 不再对结果打包票（沙箱预览里可能静默失败），文案只说"已交给浏览器"，让用户自己核对
-   */
   function fileTag() {
     var d = new Date();
     var p2 = function (n) { return String(n).padStart(2, '0'); };
     return d.getFullYear() + p2(d.getMonth() + 1) + p2(d.getDate()) + '-' + p2(d.getHours()) + p2(d.getMinutes());
   }
 
-  /* 单次下载：返回空串代表没抛错（不代表一定落盘），抛错就带回原因 */
-  function fire(item) {
-    try {
-      window.SaveWriter.download(item.buf, item.name);
-      return '';
-    } catch (e) {
-      return (e && e.message) || '浏览器拒绝了这次下载';
-    }
-  }
-
   function doDownload() {
     var res = state.pending;
     if (!res) return;
-
-    var tag = fileTag();
-    /* 两份字节先备好：后面的「再下一次」按钮直接复用，不再重算 */
-    state.dlBufs = {
-      backup: {
-        buf: state.file.slice(0),
-        name: 'progress_backup_' + tag + '.sav',
-        label: '原档备份 · 先收好'
-      },
-      edited: {
-        buf: res.bytes.buffer.slice(res.bytes.byteOffset, res.bytes.byteOffset + res.bytes.byteLength),
-        name: 'progress.sav',
-        label: '改好的存档 · 用来覆盖'
-      }
-    };
-
-    var btn = $('btnDownload');
-    btn.disabled = true;
-    btn.textContent = '正在下载…';
-
-    var body = $('previewBody');
-    body.insertAdjacentHTML('afterbegin', '<div class="dl-busy" id="dlBusy">正在把两个文件交给浏览器…</div>');
-
-    /* 铁律 2：先备份，再给改好的档。间隔 320ms —— 浏览器连续两次下载容易吞掉后一个 */
-    var errB = fire(state.dlBufs.backup);
-    setTimeout(function () {
-      var errE = fire(state.dlBufs.edited);
-      renderDone(errB, errE);
-    }, 320);
-  }
-
-  function renderDone(errB, errE) {
-    var anyErr = !!(errB || errE);
-    var n = state.pending ? state.pending.changed : 0;
-
-    var html = '' +
-      '<div class="dl-note ' + (anyErr ? 'warn' : 'ok') + '">' +
-        '<b>改动 ' + n + ' 处已写进 progress.sav</b>' +
-        '<br>' + (anyErr
-          ? '浏览器挡下了其中一次下载（常见于一次点击触发多个文件）。点下面各自的「再下一次」，一次一个就不会被挡。'
-          : '浏览器已开始下载。如果两个文件里只见到一个，点下面缺的那个「再下一次」补上。') +
-      '</div>';
-
-    [['backup', state.dlBufs.backup, errB], ['edited', state.dlBufs.edited, errE]].forEach(function (p) {
-      html += '<div class="dl-row" data-k="' + p[0] + '">' +
-        '<span class="dl-txt"><b>' + esc(p[1].name) + '</b><small>' + esc(p[1].label) +
-          (p[2] ? '<em class="bad">' + esc(p[2]) + '</em>' : '') + '</small></span>' +
-        '<button type="button" class="dl-again">再下一次</button>' +
-      '</div>';
-    });
-
-    html += '<div class="tip">覆盖前务必<b>完全退出游戏和模拟器</b>，否则下次退出游戏会把旧档写回去。' +
-      '文件名必须是 <b>progress.sav</b>，目录：<span class="pth">save › 0000000000000007 › 0 › slot_00</span></div>';
-
-    var body = $('previewBody');
-    body.innerHTML = html;
-
-    /* 每个文件独立一次点击 = 独立用户手势，绕开多文件拦截 */
-    Array.prototype.forEach.call(body.querySelectorAll('.dl-again'), function (b) {
-      b.addEventListener('click', function () {
-        var k = b.parentNode.dataset.k;
-        var e = fire(state.dlBufs[k]);
-        b.textContent = e ? '失败，重试' : '已下载';
-        b.classList.toggle('bad', !!e);
-        setTimeout(function () { b.textContent = '再下一次'; b.classList.remove('bad'); }, 1600);
-      });
-    });
-
-    state.dlDone = true;
-    var btn = $('btnDownload');
-    btn.disabled = false;
-    btn.textContent = '好，去覆盖存档';
-
-    /* 面板已经从"确认要不要改"变成"文件在这儿"，标题和次要按钮跟着换 ——
-       留着"再想想"会让人以为还能撤回，其实字节早就算好并导出过了。 */
-    $('dlgTitle').textContent = '已导出，去覆盖存档';
-    $('btnCancelPreview').hidden = true;
-
-    /* 页面顶部也留一条，关掉弹层后还能对上号 */
-    showMsg('<b>改动已导出。</b>先把 <b>' + esc(state.dlBufs.backup.name) + '</b> 收好，' +
-      '再用 <b>progress.sav</b> 覆盖存档目录里的同名文件。', 'ok');
+    var editedBuf = res.bytes.buffer.slice(res.bytes.byteOffset, res.bytes.byteOffset + res.bytes.byteLength);
+    try {
+      window.SaveWriter.download(editedBuf, 'progress.sav');
+      state.dlDone = true;
+      $('btnDownload').textContent = '已完成，关闭';
+      $('dlgTitle').textContent = '已导出 progress.sav';
+      $('btnCancelPreview').hidden = true;
+      showMsg('<b>已导出修改后的 progress.sav。</b>覆盖存档目录对应槽位即可生效。', 'ok');
+    } catch (e) {
+      showMsg('<b>导出失败：</b>' + esc(e.message), 'warn');
+    }
   }
 
   function closePreview() {
     $('previewMask').classList.add('hidden');
     state.dlDone = false;
-    state.dlBufs = null;
     state.pending = null;
-    var btn = $('btnDownload');
-    btn.disabled = false;
-    btn.textContent = '下载改好的存档';
+    $('btnDownload').disabled = false;
+    $('btnDownload').textContent = '导出 progress.sav';
     $('dlgTitle').textContent = '确认要改这些';
     $('btnCancelPreview').hidden = false;
   }
 
-  /* ---------- 状态面板 + 底栏 ---------- */
+  /* ---------- 状态面板 + 横幅 + 底栏 ---------- */
   function paintStat(id, valHtml, wasHtml, dirty) {
     var el = $(id);
+    if (!el) return;
     el.querySelector('.stat-val').innerHTML = valHtml;
     el.querySelector('.stat-was').innerHTML = wasHtml || '';
     el.classList.toggle('dirty', !!dirty);
+    el.classList.toggle('mod', !!dirty);
+    var u = el.querySelector('.undo-mini');
+    if (u) u.hidden = !dirty;
   }
 
   function updateFoot() {
-    if (!state.sw) { $('footStatus').textContent = '还没有加载存档'; return; }
-
+    if (!state.sw) {
+      if ($('btnUndoAllStats')) $('btnUndoAllStats').hidden = true;
+      $('footStatus').textContent = '还没有加载存档';
+      return;
+    }
     var plan = collectPlan();
     var o = state.origin;
 
-    /* 卢比 */
     var rUp = typeof plan.rupee === 'number';
-    paintStat('statRupee',
-      thou(rUp ? plan.rupee : o.rupee),
-      rUp ? '<s>' + thou(o.rupee) + '</s>' : '',
-      rUp && plan.rupee !== o.rupee);
+    paintStat('statRupee', thou(rUp ? plan.rupee : o.rupee), rUp ? '<s>' + thou(o.rupee) + '</s>' : '', rUp && plan.rupee !== o.rupee);
 
-    /* 生命 */
     var hUp = typeof plan.hearts === 'number';
-    paintStat('statHearts',
-      fmt(hUp ? plan.hearts : o.hearts) + '<small>心</small>',
-      hUp ? '<s>' + fmt(o.hearts) + '</s>' : '',
-      hUp && plan.hearts !== o.hearts);
+    paintStat('statHearts', fmt(hUp ? plan.hearts : o.hearts) + '<small>心</small>', hUp ? '<s>' + fmt(o.hearts) + '</s>' : '', hUp && plan.hearts !== o.hearts);
 
-    /* 精力 */
     var sUp = typeof plan.stamina === 'number';
     var sVal = sUp ? plan.stamina : o.stamina;
-    paintStat('statStamina',
-      fmt(sVal / 1000) + '<small>圈</small>',
-      sUp ? '<s>' + fmt(o.stamina / 1000) + '</s>' : '',
-      sUp && plan.stamina !== o.stamina);
+    paintStat('statStamina', fmt(sVal / 1000) + '<small>圈</small>', sUp ? '<s>' + fmt(o.stamina / 1000) + '</s>' : '', sUp && plan.stamina !== o.stamina);
 
-    /* 电池 */
     var eUp = typeof plan.energy === 'number';
     var eVal = eUp ? plan.energy : o.energy;
-    paintStat('statEnergy',
-      fmt(eVal / 1000) + '<small>格</small>',
-      eUp ? '<s>' + fmt(o.energy / 1000) + '</s>' : '',
-      eUp && plan.energy !== o.energy);
+    paintStat('statEnergy', fmt(eVal / 1000) + '<small>格</small>', eUp ? '<s>' + fmt(o.energy / 1000) + '</s>' : '', eUp && plan.energy !== o.energy);
 
-    /* 底栏计数 */
+    if ($('btnUndoAllStats')) $('btnUndoAllStats').hidden = !(rUp || hUp || sUp || eUp);
+
     var n = 0;
     if (rUp) n++;
     if (hUp) n++;
     if (sUp) n++;
     if (eUp) n++;
-    if (plan.matGroups) n += plan.matGroups.length;
-    if (plan.zonai999) n++;
-    if (plan.arrows999) n++;
+    if (plan.pouchQty) n += plan.pouchQty.length;
     if (plan.pos) n++;
     if (plan.items) n += plan.items.length;
     if (plan.blueprints) n += plan.blueprints.length;
 
+    $('sbCount').textContent = n + ' 项';
+    $('sbCount').className = n ? 'mod' : '';
+    $('sbState').textContent = n ? '有未导出修改' : '未修改';
+    $('sbState').className = n ? 'mod' : '';
+
+    renderModLog(plan, o);
+
     var src = state.source === 'navi' ? 'navi 直连' : '本地文件';
     $('footStatus').innerHTML = n
-      ? '已选 <b>' + n + '</b> 项待修改<span class="sep">·</span>' + esc(src) + '<span class="sep">·</span>版本 ' + esc(state.sw.version)
+      ? '已确认 <b>' + n + '</b> 项修改<span class="sep">·</span>直接导出修改后的 progress.sav'
       : '版本 ' + esc(state.sw.version) + '<span class="sep">·</span>' + esc(src) + '<span class="sep">·</span>还没选要改什么';
+  }
+
+  function renderModLog(plan, o) {
+    var box = $('modLogList');
+    if (!box) return;
+    var logs = [];
+    if (typeof plan.rupee === 'number' && plan.rupee !== o.rupee) {
+      logs.push({ t: 'stat', k: 'rupee', html: '卢比：' + thou(o.rupee) + ' → <b>' + thou(plan.rupee) + '</b>' });
+    }
+    if (typeof plan.hearts === 'number' && plan.hearts !== o.hearts) {
+      logs.push({ t: 'stat', k: 'hearts', html: '生命：' + fmt(o.hearts) + '心 → <b>' + fmt(plan.hearts) + '心</b>' });
+    }
+    if (typeof plan.stamina === 'number' && plan.stamina !== o.stamina) {
+      logs.push({ t: 'stat', k: 'stamina', html: '精力：' + fmt(o.stamina / 1000) + '圈 → <b>' + fmt(plan.stamina / 1000) + '圈</b>' });
+    }
+    if (typeof plan.energy === 'number' && plan.energy !== o.energy) {
+      logs.push({ t: 'stat', k: 'energy', html: '电池：' + fmt(o.energy / 1000) + '格 → <b>' + fmt(plan.energy / 1000) + '格</b>' });
+    }
+    Object.keys(state.bagEdits).forEach(function (k) {
+      var it = state.bagItems.filter(function (x) { return x.key === k; })[0];
+      if (it) logs.push({ t: 'bag', k: k, html: '背包 · ' + esc(it.cn) + '：' + it.qty + ' → <b>' + state.bagEdits[k] + '</b>' });
+    });
+    Object.keys(state.eqEdits).forEach(function (k) {
+      var bar = k.indexOf('|'), cat = k.slice(0, bar), idx = +k.slice(bar + 1);
+      var r = state.pouch[cat] && state.pouch[cat].items ? state.pouch[cat].items.filter(function (x) { return x.i === idx; })[0] : null;
+      var nm = r ? (nameOf(r.name) || r.name) : k;
+      var rec = state.eqEdits[k];
+      var desc = [];
+      if (typeof rec.life === 'number') desc.push('耐久 ' + rec.life);
+      if (rec.eff) desc.push(rec.inf ? '∞无限耐久' : (effLabel(rec.eff) + (rec.effVal ? ' +' + rec.effVal : '')));
+      if (rec.combName !== undefined) desc.push(rec.combName ? ('余料 ' + fuseNameOf(rec.combName)) : '清除余料');
+      if (typeof rec.combLife === 'number' && rec.combName !== '') desc.push('余料耐久 ' + rec.combLife);
+      logs.push({ t: 'eq', k: k, html: '装备 · ' + esc(nm) + '：<b>' + esc(desc.join(' / ')) + '</b>' });
+    });
+    state.bpImports.forEach(function (b, idx) {
+      logs.push({ t: 'bp', k: String(idx), html: '蓝图 · #' + String(b.i + 1).padStart(2, '0') + ' ← <b>' + esc(b.from || '蓝图') + '</b>' });
+    });
+
+    if (!logs.length) {
+      box.innerHTML = '<div class="mod-log-empty">暂无修改，改动后将在此实时显示</div>';
+      return;
+    }
+    box.innerHTML = logs.map(function (it) {
+      return '<div class="mod-log-item">' +
+        '<span class="mod-log-txt">' + it.html + '</span>' +
+        '<button type="button" class="undo-mini" data-log-t="' + it.t + '" data-log-k="' + esc(it.k) + '" title="撤销此项">×</button>' +
+      '</div>';
+    }).join('');
   }
 
   /* ---------- 事件绑定 ---------- */
   function bind() {
-    $('btnBack').addEventListener('click', function () {
-      location.href = '../index.html';
+    $('btnBack').addEventListener('click', function () { location.href = '../index.html'; });
+
+    Array.prototype.forEach.call(document.querySelectorAll('#mainTabs .mtab'), function (btn) {
+      btn.addEventListener('click', function () { switchTab(btn.dataset.tab); });
     });
 
-    /* 选文件 */
     $('btnPick').addEventListener('click', function () { $('fileInput').click(); });
     $('fileInput').addEventListener('change', function (e) {
       var f = e.target.files && e.target.files[0];
@@ -911,56 +1111,332 @@
       fr.readAsArrayBuffer(f);
     });
 
-    /* 拖拽 */
-    var dz = $('dropZone');
-    ['dragenter', 'dragover'].forEach(function (ev) {
-      dz.addEventListener(ev, function (e) { e.preventDefault(); dz.classList.add('over'); });
+    /* 整页支持拖入 progress.sav */
+    document.body.addEventListener('dragover', function (e) {
+      if (e.dataTransfer && e.dataTransfer.types && Array.prototype.indexOf.call(e.dataTransfer.types, 'Files') >= 0) {
+        e.preventDefault();
+      }
     });
-    ['dragleave', 'drop'].forEach(function (ev) {
-      dz.addEventListener(ev, function (e) { e.preventDefault(); dz.classList.remove('over'); });
-    });
-    dz.addEventListener('drop', function (e) {
-      var f = e.dataTransfer.files && e.dataTransfer.files[0];
-      if (!f) return;
+    document.body.addEventListener('drop', function (e) {
+      var f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+      if (!f || !/\.sav$/i.test(f.name)) return;
+      e.preventDefault();
       var fr = new FileReader();
-      fr.onload = function () { loadFromArrayBuffer(fr.result, 'file'); };
+      fr.onload = function () { loadFromArrayBuffer(fr.result, 'file'); showMsg(''); };
       fr.readAsArrayBuffer(f);
     });
 
-    /* 从 navi 拉 */
     $('btnFromNavi').addEventListener('click', function () {
-      /* 离线包是 file:// 打开的，这个协议下浏览器禁止页面访问任何 http 服务（含本机 8766） */
       if (location.protocol === 'file:') {
-        showMsg('<b>离线包方式打不开自动读取。</b>你现在是直接双击 html 打开的（file://），浏览器在这种方式下不允许页面连本机服务。' +
-          '<br>请用左边「选择存档文件」，效果完全一样。', 'warn');
+        showMsg('<b>离线 file:// 方式打不开自动读取</b>，请直接选择存档文件。', 'warn');
         return;
       }
       var btn = $('btnFromNavi');
       btn.disabled = true;
-      showMsg('正在向 totknavi 要最新存档…（请确认定位服务已启动）');
+      showMsg('正在向 totknavi 要最新存档…');
       var ctrl = window.AbortController ? new AbortController() : null;
       var timer = ctrl ? setTimeout(function () { ctrl.abort(); }, 4000) : null;
-
       fetch(NAVI + '/save?t=' + Date.now(), { cache: 'no-store', signal: ctrl ? ctrl.signal : undefined })
-        .then(function (r) {
-          if (!r.ok) throw new Error('HTTP ' + r.status);
-          return r.arrayBuffer();
-        })
-        .then(function (ab) {
-          if (timer) clearTimeout(timer);
-          btn.disabled = false;
-          showMsg('');
-          loadFromArrayBuffer(ab, 'navi');
-        })
-        .catch(function (err) {
-          if (timer) clearTimeout(timer);
-          btn.disabled = false;
-          showMsg('<b>连不上 totknavi。</b>可能是定位服务没启动，或者页面走的是 https 被浏览器拦了本地请求。' +
-            '<br>直接选文件也一样能改，功能完全一致。', 'warn');
+        .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.arrayBuffer(); })
+        .then(function (ab) { if (timer) clearTimeout(timer); btn.disabled = false; showMsg(''); loadFromArrayBuffer(ab, 'navi'); })
+        .catch(function () {
+          if (timer) clearTimeout(timer); btn.disabled = false;
+          showMsg('<b>连不上 totknavi</b>，可直接点击左边「选择存档文件」。', 'warn');
         });
     });
 
-    /* 装备切换 */
+    /* 顶部拖放热区反馈 */
+    var dropBox = $('saveBanner');
+    if (dropBox) {
+      dropBox.addEventListener('dragenter', function (e) {
+        if (e.dataTransfer && e.dataTransfer.types && Array.prototype.indexOf.call(e.dataTransfer.types, 'Files') >= 0) {
+          dropBox.classList.add('drag-over');
+        }
+      });
+      dropBox.addEventListener('dragleave', function (e) {
+        if (!dropBox.contains(e.relatedTarget)) dropBox.classList.remove('drag-over');
+      });
+      dropBox.addEventListener('drop', function () { dropBox.classList.remove('drag-over'); });
+    }
+
+    /* 一键数值全满 & 基础数值修改 + 单项撤销 */
+    if ($('btnMaxAllStats')) {
+      $('btnMaxAllStats').addEventListener('click', function () {
+        if (!state.sw) { showMsg('请先加载存档再一键全满。', 'warn'); return; }
+        pushUndo();
+        $('inRupee').value = '999999';
+        $('inHearts').value = '40';
+        setSeg('segStamina', 3000);
+        setSeg('segEnergy', 16000);
+        updateFoot();
+      });
+    }
+
+    Array.prototype.forEach.call(document.querySelectorAll('.qbtn'), function (b) {
+      b.addEventListener('click', function () {
+        pushUndo();
+        if (b.dataset.hearts) $('inHearts').value = b.dataset.hearts;
+        if (b.dataset.rupee) $('inRupee').value = b.dataset.rupee;
+        Array.prototype.forEach.call(b.parentNode.querySelectorAll('.qbtn'), function (x) { x.classList.remove('on'); });
+        b.classList.add('on');
+        updateFoot();
+      });
+    });
+
+    ['segStamina', 'segEnergy'].forEach(function (id) {
+      $(id).addEventListener('click', function (e) {
+        var b = e.target.closest('button');
+        if (!b) return;
+        pushUndo();
+        setSeg(id, b.dataset.v === '' ? null : +b.dataset.v);
+        updateFoot();
+      });
+    });
+
+    ['inRupee', 'inHearts'].forEach(function (id) {
+      $(id).addEventListener('focus', function () { this._undoPushed = false; });
+      $(id).addEventListener('input', function () {
+        if (!this._undoPushed) { pushUndo(); this._undoPushed = true; }
+        updateFoot();
+      });
+    });
+
+    if ($('btnUndoAllStats')) {
+      $('btnUndoAllStats').addEventListener('click', function () {
+        pushUndo();
+        $('inRupee').value = '';
+        $('inHearts').value = '';
+        setSeg('segStamina', null);
+        setSeg('segEnergy', null);
+        updateFoot();
+      });
+    }
+
+    /* Tab 2: 背包物品 */
+    $('bagSearch').addEventListener('input', function () {
+      state.bagQuery = this.value.trim();
+      state.bagPage = 1;
+      renderBag();
+    });
+    $('bagCatPills').addEventListener('click', function (e) {
+      var b = e.target.closest('.bag-cat-pill');
+      if (!b) return;
+      state.bagCat = b.dataset.g;
+      state.bagPage = 1;
+      renderBag();
+    });
+    $('bagItemGrid').addEventListener('click', function (e) {
+      var u = e.target.closest('.bag-undo');
+      if (u) {
+        e.stopPropagation();
+        pushUndo();
+        delete state.bagEdits[u.dataset.key];
+        renderBag();
+        updateFoot();
+        return;
+      }
+      var card = e.target.closest('.bag-card');
+      if (!card) return;
+      state.bagSelKey = card.dataset.key;
+      renderBag();
+    });
+    $('bagEdQty').addEventListener('change', function () {
+      if (state.bagSelKey) setSingleBagQty(state.bagSelKey, this.value);
+    });
+    $('bagEditorBar').addEventListener('click', function (e) {
+      var b = e.target.closest('[data-bqty]');
+      if (!b || !state.bagSelKey) return;
+      setSingleBagQty(state.bagSelKey, +b.dataset.bqty);
+    });
+    function batchSetBag(items, qty) {
+      pushUndo();
+      items.forEach(function (it) {
+        if (qty === it.qty) delete state.bagEdits[it.key];
+        else state.bagEdits[it.key] = qty;
+      });
+      renderBag();
+      updateFoot();
+    }
+    $('btnBagFill999').addEventListener('click', function () { batchSetBag(bagFiltered(), 999); });
+    $('btnBagFill99').addEventListener('click', function () { batchSetBag(bagFiltered(), 99); });
+    $('btnBagFill1').addEventListener('click', function () { batchSetBag(bagFiltered(), 1); });
+    $('btnBagFillAll').addEventListener('click', function () { batchSetBag(state.bagItems, 999); });
+    $('btnBagPrev').addEventListener('click', function () { if (state.bagPage > 1) { state.bagPage--; renderBag(); } });
+    $('btnBagNext').addEventListener('click', function () { state.bagPage++; renderBag(); });
+    $('btnBagShowAll').addEventListener('click', function () { state.bagShowAll = !state.bagShowAll; renderBag(); });
+
+    /* Tab 2: 装备切换 + 单项撤销 + 批量改耐久（不碰词条） */
+    function batchSetEquipDurability(cats, mode) {
+      if (!state.sw) { msg('loadMsg', '请先加载存档', 'err'); return; }
+      var touched = 0;
+      cats.forEach(function (cat) {
+        var r = state.pouch[cat];
+        if (r && r.ok && r.items.length) touched += r.items.length;
+      });
+      if (!touched) return;
+      pushUndo();
+      cats.forEach(function (cat) {
+        var r = state.pouch[cat];
+        if (!r || !r.ok) return;
+        r.items.forEach(function (it) {
+          var key = cat + '|' + it.i;
+          var targetLife = mode === 'base'
+            ? ((window.EQUIP_DURABILITY && window.EQUIP_DURABILITY[it.name]) || 100)
+            : mode;
+          var rec = state.eqEdits[key] ? cloneSimple(state.eqEdits[key]) : {};
+          if (targetLife === it.life) {
+            delete rec.life;
+          } else {
+            rec.life = targetLife;
+          }
+          if (Object.keys(rec).length) state.eqEdits[key] = rec;
+          else delete state.eqEdits[key];
+        });
+      });
+      renderEquip();
+      updateFoot();
+    }
+    if ($('btnEqFill999')) $('btnEqFill999').addEventListener('click', function () { batchSetEquipDurability([state.eqCat], 999); });
+    if ($('btnEqFillAll999')) $('btnEqFillAll999').addEventListener('click', function () { batchSetEquipDurability(['weapons', 'bows', 'shields'], 999); });
+    if ($('btnEqUndoCat')) {
+      $('btnEqUndoCat').addEventListener('click', function () {
+        var prefix = state.eqCat + '|';
+        var keys = Object.keys(state.eqEdits).filter(function (k) { return k.indexOf(prefix) === 0; });
+        if (!keys.length) return;
+        pushUndo();
+        keys.forEach(function (k) { delete state.eqEdits[k]; });
+        renderEquip();
+        updateFoot();
+      });
+    }
+
+    /* 余料附着弹窗逻辑 */
+    var fuseTarget = null;
+    var fuseCatalog = null;
+    function buildFuseCatalog() {
+      if (fuseCatalog) return fuseCatalog;
+      var list = [], seen = {};
+      function add(id, cn, tag) {
+        if (!id || seen[id] || id.length >= 64) return;
+        if (id === 'SpObj_ElectricBoxGenerCapsule_ator') return;
+        if (id.indexOf('SpObj_') === 0) {
+          id = id.replace(/_Capsule_([AB]_\d+)$/, '_$1');
+        }
+        if (seen[id]) return;
+        seen[id] = 1;
+        list.push({ id: id, cn: cn || id, tag: tag || '', q: (cn + ' ' + id).toLowerCase() });
+      }
+      FUSE_PRESETS.forEach(function (p) { add(p.id, p.cn, p.tag); });
+      if (window.MAT_NAMES) {
+        Object.keys(window.MAT_NAMES).forEach(function (k) {
+          if (/^(Item_Cook_|Item_Roast|Obj_)/.test(k)) return;
+          add(k, window.MAT_NAMES[k], k.indexOf('SpObj_') === 0 ? '左纳乌' : '素材');
+        });
+      }
+      if (window.EQUIP_NAMES) {
+        Object.keys(window.EQUIP_NAMES).forEach(function (k) {
+          if (k.indexOf('Weapon_Bow_') === 0) return;
+          add(k, window.EQUIP_NAMES[k], k.indexOf('Weapon_Shield_') === 0 ? '盾' : '武器');
+        });
+      }
+      if (window.FUSE_NAMES) {
+        Object.keys(window.FUSE_NAMES).forEach(function (k) {
+          add(k, window.FUSE_NAMES[k], k.indexOf('SpObj_') === 0 ? '左纳乌' : '物体');
+        });
+      }
+      fuseCatalog = list;
+      return list;
+    }
+    window.setFuseEdit = function (cat, idx, combName, combLife) {
+      var r = state.pouch[cat];
+      var it = r && r.items ? r.items.filter(function (x) { return x.i === idx; })[0] : null;
+      if (!it) return;
+      var key = cat + '|' + idx;
+      pushUndo();
+      var rec = state.eqEdits[key] ? cloneSimple(state.eqEdits[key]) : {};
+      if (combName === (it.combName || '')) {
+        delete rec.combName;
+      } else {
+        rec.combName = combName;
+      }
+      if (typeof combLife === 'number') {
+        if (combLife === it.combLife) delete rec.combLife;
+        else rec.combLife = combLife;
+      }
+      if (Object.keys(rec).length) state.eqEdits[key] = rec;
+      else delete state.eqEdits[key];
+      renderEquip();
+      updateFoot();
+    };
+    function renderFuseList(kw) {
+      var box = $('fuseResults');
+      if (!box) return;
+      var q = (kw || '').trim().toLowerCase();
+      var all = buildFuseCatalog();
+      var hits = q ? all.filter(function (x) { return x.q.indexOf(q) >= 0; }) : all.slice(0, 60);
+      if (!hits.length) {
+        box.innerHTML = '<div class="empty" style="padding:16px">没有匹配的余料</div>';
+        return;
+      }
+      box.innerHTML = hits.slice(0, 80).map(function (x) {
+        return '<button type="button" class="fuse-row" data-fid="' + esc(x.id) + '">' +
+          '<span>' + esc(x.cn) + (x.tag ? ' <small style="color:var(--tk-gold)">' + esc(x.tag) + '</small>' : '') + '</span>' +
+          '<small>' + esc(x.id) + '</small>' +
+        '</button>';
+      }).join('');
+    }
+    function closeFusePicker() {
+      $('fuseMask').classList.add('hidden');
+      fuseTarget = null;
+    }
+    window.openFusePicker = function (cat, idx) {
+      var r = state.pouch[cat];
+      var it = r && r.items ? r.items.filter(function (x) { return x.i === idx; })[0] : null;
+      if (!it) return;
+      fuseTarget = { cat: cat, idx: idx };
+      $('fuseTargetName').textContent = nameOf(it.name) || it.name;
+      $('fusePresets').innerHTML = FUSE_PRESETS.map(function (p) {
+        return '<button type="button" class="fuse-chip" data-fid="' + esc(p.id) + '">' + esc(p.cn) + '<small>' + esc(p.tag) + '</small></button>';
+      }).join('');
+      $('fuseSearch').value = '';
+      renderFuseList('');
+      $('fuseMask').classList.remove('hidden');
+      setTimeout(function () { $('fuseSearch').focus(); }, 20);
+    };
+    if ($('fuseMask')) {
+      $('fusePresets').addEventListener('click', function (e) {
+        var b = e.target.closest('[data-fid]');
+        if (!b || !fuseTarget) return;
+        var id = b.dataset.fid;
+        setFuseEdit(fuseTarget.cat, fuseTarget.idx, id, defaultFuseLife(id));
+        closeFusePicker();
+      });
+      $('fuseResults').addEventListener('click', function (e) {
+        var b = e.target.closest('[data-fid]');
+        if (!b || !fuseTarget) return;
+        var id = b.dataset.fid;
+        setFuseEdit(fuseTarget.cat, fuseTarget.idx, id, defaultFuseLife(id));
+        closeFusePicker();
+      });
+      $('fuseSearch').addEventListener('input', function () { renderFuseList(this.value); });
+      $('btnFuseClear').addEventListener('click', function () {
+        if (!fuseTarget) return;
+        setFuseEdit(fuseTarget.cat, fuseTarget.idx, '', -1);
+        closeFusePicker();
+      });
+      $('btnCloseFuse').addEventListener('click', closeFusePicker);
+      $('btnCancelFuse').addEventListener('click', closeFusePicker);
+      $('fuseMask').addEventListener('click', function (e) { if (e.target === $('fuseMask')) closeFusePicker(); });
+    }
+
+    $('eqList').addEventListener('click', function (e) {
+      var u = e.target.closest('.eq-undo');
+      if (!u) return;
+      pushUndo();
+      delete state.eqEdits[u.dataset.key];
+      renderEquip();
+      updateFoot();
+    });
     Array.prototype.forEach.call(document.querySelectorAll('.eq-tab'), function (t) {
       t.addEventListener('click', function () {
         Array.prototype.forEach.call(document.querySelectorAll('.eq-tab'), function (x) { x.classList.remove('on'); });
@@ -971,301 +1447,341 @@
       });
     });
 
-    /* 快捷档位：卢比 / 生命 */
-    Array.prototype.forEach.call(document.querySelectorAll('.qbtn'), function (b) {
-      b.addEventListener('click', function () {
-        if (b.dataset.hearts) $('inHearts').value = b.dataset.hearts;
-        if (b.dataset.rupee) $('inRupee').value = b.dataset.rupee;
-        /* 同一组里同时只高亮一个 */
-        var sibs = b.parentNode.querySelectorAll('.qbtn');
-        Array.prototype.forEach.call(sibs, function (x) { x.classList.remove('on'); });
-        b.classList.add('on');
+    /* Tab 3: 蓝图 30 槽表格拖拽 + 行内操作 + 分享弹窗关闭 */
+    $('bpSlotBody').addEventListener('click', function (e) {
+      var rm = e.target.closest('.bp-slot-rm');
+      if (rm) {
+        pushUndo();
+        state.bpImports.splice(+rm.dataset.qidx, 1);
+        renderBpPending();
         updateFoot();
-      });
+        return;
+      }
+      var exp = e.target.closest('.bp-row-exp');
+      if (exp) { bpExport(+exp.dataset.slot); return; }
+      var shr = e.target.closest('.bp-row-shr');
+      if (shr) { bpShare(+shr.dataset.slot); return; }
+
+      var tr = e.target.closest('tr[data-slot]');
+      if (!tr) return;
+      state.bpSelSlot = +tr.dataset.slot;
+      $('bpSlot').value = String(state.bpSelSlot);
+      if ($('bpSlotAlias')) $('bpSlotAlias').value = (state.bpAliases && state.bpAliases[state.bpSelSlot]) || '';
+      renderBlueprints();
+    });
+    $('bpSlotBody').addEventListener('dragover', function (e) {
+      var tr = e.target.closest('tr[data-slot]');
+      if (!tr) return;
+      e.preventDefault();
+      tr.classList.add('drag-over');
+    });
+    $('bpSlotBody').addEventListener('dragleave', function (e) {
+      var tr = e.target.closest('tr[data-slot]');
+      if (tr) tr.classList.remove('drag-over');
+    });
+    $('bpSlotBody').addEventListener('drop', function (e) {
+      var tr = e.target.closest('tr[data-slot]');
+      if (!tr) return;
+      e.preventDefault();
+      tr.classList.remove('drag-over');
+      var idxStr = e.dataTransfer.getData('text/plain');
+      if (idxStr === '') return;
+      var p = allPresets()[+idxStr];
+      if (!p) return;
+      try {
+        var cai = window.Blueprint.decodeShare(p.shareCode);
+        bpSetImport(cai, p.name, +tr.dataset.slot);
+      } catch (err) {
+        showBpMsg('蓝图载入失败：' + esc(err.message), 'warn');
+      }
     });
 
-    /* 分段选择器：精力 / 电池 */
-    ['segStamina', 'segEnergy'].forEach(function (id) {
-      $(id).addEventListener('click', function (e) {
-        var b = e.target.closest('button');
-        if (!b) return;
-        setSeg(id, b.dataset.v === '' ? null : +b.dataset.v);
-        updateFoot();
-      });
-    });
-
-    /* 填入当前坐标 —— 想微调位置时有基准点，不用手动抄三个数 */
-    $('btnFillPos').addEventListener('click', function () {
-      if (!state.pos) return;
-      $('inPosX').value = Math.round(state.pos.x * 100) / 100;
-      $('inPosY').value = Math.round(state.pos.y * 100) / 100;
-      $('inPosZ').value = Math.round(state.pos.z * 100) / 100;
-      updateFoot();
-    });
-
-    /* 任何改动都刷新状态面板与底栏计数 */
-    ['inRupee', 'inHearts', 'inPosX', 'inPosY', 'inPosZ'].forEach(function (id) {
-      $(id).addEventListener('input', updateFoot);
-    });
-    $('swArr').addEventListener('change', updateFoot);
-
-    /* 材料分类格子：点一下切换一类。全选/全不选按当前状态反转 */
-    $('mgGrid').addEventListener('click', function (e) {
-      var b = e.target.closest('.mg');
-      if (!b || b.disabled) return;
-      var g = b.dataset.g;
-      if (state.mgSel[g]) delete state.mgSel[g];
-      else state.mgSel[g] = true;
-      b.classList.toggle('on', !!state.mgSel[g]);
-      b.setAttribute('aria-pressed', state.mgSel[g] ? 'true' : 'false');
-      syncMgAll();
-      updateFoot();
-    });
-    $('mgAll').addEventListener('click', function () {
-      var btns = $('mgGrid').querySelectorAll('.mg:not([disabled])');
-      var allOn = btns.length > 0;
-      Array.prototype.forEach.call(btns, function (b) { if (!state.mgSel[b.dataset.g]) allOn = false; });
-      Array.prototype.forEach.call(btns, function (b) {
-        var g = b.dataset.g;
-        if (allOn) { delete state.mgSel[g]; b.classList.remove('on'); b.setAttribute('aria-pressed', 'false'); }
-        else { state.mgSel[g] = true; b.classList.add('on'); b.setAttribute('aria-pressed', 'true'); }
-      });
-      syncMgAll();
-      updateFoot();
-    });
-
-    /* 重置 */
-    $('btnReset').addEventListener('click', function () {
-      ['inRupee', 'inHearts', 'inPosX', 'inPosY', 'inPosZ'].forEach(function (id) { $(id).value = ''; });
-      setSeg('segStamina', null);
-      setSeg('segEnergy', null);
-      $('swArr').checked = false;
-      Array.prototype.forEach.call(document.querySelectorAll('.qbtn'), function (x) { x.classList.remove('on'); });
-      /* 装备改动和材料勾选都存在 state 里，重置必须连 state 一起清，否则重绘后又被回填回来 */
-      state.eqEdits = {};
-      state.mgSel = {};
-      state.bpImport = null;
-      $('bpPending').hidden = true;
-      $('bpShareBox').hidden = true;
-      $('bpCode').value = '';
-      renderMatGrid();
-      renderEquip();
-      updateFoot();
-      showMsg('已重置所有输入，存档本身一个字节都没动。', '');
-    });
-
-    /* 蓝图分享 / 导入 */
-    $('bpExport').addEventListener('click', bpExport);
-    $('bpShare').addEventListener('click', bpShare);
+    if ($('bpExport')) $('bpExport').addEventListener('click', function () { bpExport(); });
+    if ($('bpShare')) $('bpShare').addEventListener('click', function () { bpShare(); });
+    if ($('btnCloseShare')) $('btnCloseShare').addEventListener('click', function () { $('bpSharePanel').hidden = true; });
+    if ($('btnCloseShareFoot')) $('btnCloseShareFoot').addEventListener('click', function () { $('bpSharePanel').hidden = true; });
     $('bpCopy').addEventListener('click', function () {
       var t = $('bpShareText');
       t.select();
-      var ok = false;
-      try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
-      if (!ok && navigator.clipboard) {
-        navigator.clipboard.writeText(t.value).then(function () {
-          showMsg('分享码已复制。', 'ok');
-        }, function () { showMsg('复制失败，请手动全选文本框里的分享码。', 'warn'); });
-        return;
-      }
-      showMsg(ok ? '分享码已复制。' : '复制失败，请手动全选文本框里的分享码。', ok ? 'ok' : 'warn');
+      try { document.execCommand('copy'); showBpMsg('分享码已复制。', 'ok'); }
+      catch (e) { if (navigator.clipboard) navigator.clipboard.writeText(t.value); }
     });
+
     $('bpFile').addEventListener('change', function () {
       var files = Array.prototype.slice.call(this.files || []);
       this.value = '';
       if (!files.length) return;
-      if (files.length === 1) {
-        var f = files[0], name = f.name;
-        var r = new FileReader();
-        r.onload = function () { bpSetImport(new Uint8Array(r.result), name); };
-        r.onerror = function () { showMsg('文件读不出来，换一个 .cai 试试。', 'warn'); };
-        r.readAsArrayBuffer(f);
-        return;
-      }
-      Promise.all(files.map(function (file) {
-        return new Promise(function (resolve) {
-          var fr = new FileReader();
-          fr.onload = function () { resolve({ caiBytes: new Uint8Array(fr.result), from: file.name }); };
-          fr.onerror = function () { resolve({ caiBytes: new Uint8Array(0), from: file.name }); };
-          fr.readAsArrayBuffer(file);
-        });
-      })).then(bpBatchQueue);
-    });
-    $('bpCodeLoad').addEventListener('click', function () {
-      try {
-        var cai = window.Blueprint.decodeShare($('bpCode').value);
-        bpSetImport(cai, '分享码');
-      } catch (e) { showMsg('<b>分享码读不了：</b>' + esc(e.message), 'warn'); }
-    });
-    $('bpPending').addEventListener('click', function (e) {
-      var t = e.target;
-      if (t && t.id === 'bpClearQueue') {
-        state.bpImports = [];
-        renderBpPending();
-        updateFoot();
-      } else if (t && t.classList.contains('bp-rm-item')) {
-        state.bpImports.splice(+t.dataset.idx, 1);
-        renderBpPending();
-        updateFoot();
-      }
-    });
-    if ($('bpToggleOverview')) {
-      $('bpToggleOverview').addEventListener('click', function () {
-        var wrap = $('bpOverviewWrap');
-        wrap.hidden = !wrap.hidden;
-        this.textContent = wrap.hidden ? '查看全部蓝图' : '收起蓝图总览';
-        if (!wrap.hidden) renderBlueprintOverview();
+      var caiFiles = [], jsonFiles = [];
+      files.forEach(function (f) {
+        if (/\.json$/i.test(f.name)) jsonFiles.push(f);
+        else caiFiles.push(f);
       });
-    }
-    if ($('bpOnlyUsed')) {
-      $('bpOnlyUsed').addEventListener('change', renderBlueprintOverview);
-    }
-    if ($('bpOverviewGrid')) {
-      $('bpOverviewGrid').addEventListener('click', function (e) {
-        var t = e.target;
-        if (!t || !t.dataset || t.dataset.i === undefined) return;
-        var idx = +t.dataset.i;
-        if (t.classList.contains('bp-ov-exp')) {
-          $('bpSlot').value = String(idx);
-          bpExport();
-        } else if (t.classList.contains('bp-ov-shr')) {
-          $('bpSlot').value = String(idx);
-          bpShare();
-        } else if (t.classList.contains('bp-ov-tgt')) {
-          $('bpTarget').value = String(idx);
-          showMsg('已将导入目标槽位设为 <b>#' + String(idx + 1).padStart(2, '0') + '</b>。', 'ok');
-        }
-      });
-    }
-    if ($('bpPresetSelAll')) {
-      $('bpPresetSelAll').addEventListener('click', function () {
-        var list = window.TOTK_BLUEPRINTS_PRESET || [];
-        var allOn = list.length && list.every(function (p) { return !!state.bpPresetSel[p.id]; });
-        list.forEach(function (p) { state.bpPresetSel[p.id] = !allOn; });
-        Array.prototype.forEach.call(document.querySelectorAll('.bp-preset-chk'), function (chk) {
-          chk.checked = !allOn;
-        });
-      });
-    }
-    if ($('bpPresetBatch')) {
-      $('bpPresetBatch').addEventListener('click', function () {
-        var list = window.TOTK_BLUEPRINTS_PRESET || [];
-        var chosen = list.filter(function (p) { return !!state.bpPresetSel[p.id]; });
-        if (!chosen.length) { showMsg('请先勾选要批量填入的精选蓝图。', 'warn'); return; }
-        var entries = [];
-        for (var i = 0; i < chosen.length; i++) {
+      jsonFiles.forEach(function (jf) {
+        var fr = new FileReader();
+        fr.onload = function () {
           try {
-            entries.push({ caiBytes: window.Blueprint.decodeShare(chosen[i].shareCode), from: chosen[i].name });
-          } catch (e) {
-            showMsg('预设【' + esc(chosen[i].name) + '】解码失败：' + esc(e.message), 'warn');
-            return;
+            var arr = JSON.parse(fr.result);
+            if (!Array.isArray(arr)) throw new Error('JSON 根必须是蓝图数组');
+            var added = 0;
+            arr.forEach(function (it, k) {
+              if (it && it.shareCode) {
+                state.bpLibrary.push({
+                  id: it.id || ('custom_' + Date.now() + '_' + k),
+                  name: it.name || ('导入蓝图 #' + (k + 1)),
+                  parts: it.parts || [],
+                  costOre: it.costOre || 0,
+                  shareCode: it.shareCode
+                });
+                added++;
+              }
+            });
+            saveBpLibrary();
+            renderBlueprintPresets();
+            showBpMsg('已从 <b>' + esc(jf.name) + '</b> 导入 ' + added + ' 个蓝图到右侧蓝图库。', 'ok');
+          } catch (err) { showBpMsg('JSON 解析失败：' + esc(err.message), 'warn'); }
+        };
+        fr.readAsText(jf);
+      });
+      if (caiFiles.length) {
+        Promise.all(caiFiles.map(function (file) {
+          return new Promise(function (resolve) {
+            var r = new FileReader();
+            r.onload = function () { resolve({ bytes: new Uint8Array(r.result), name: file.name }); };
+            r.onerror = function () { resolve({ bytes: null, name: file.name }); };
+            r.readAsArrayBuffer(file);
+          });
+        })).then(function (items) {
+          var added = 0, errs = [];
+          items.forEach(function (item, k) {
+            if (!item.bytes) { errs.push(item.name + ' 读取失败'); return; }
+            try {
+              var parsed = window.Blueprint.parseCai(item.bytes);
+              var info = window.Blueprint.inspect(parsed.data);
+              var caiFull = window.Blueprint.toCai({ data: parsed.data, camPos: parsed.camPos, camAt: parsed.camAt });
+              var shareCode = window.Blueprint.encodeShare(caiFull);
+              var parts = (info.parts || []).map(function (pt) {
+                return pt.name + (pt.count > 1 ? '×' + pt.count : '');
+              });
+              state.bpLibrary.push({
+                id: 'cai_' + Date.now() + '_' + k,
+                name: item.name.replace(/\.cai$/i, '') || ('蓝图 #' + (k + 1)),
+                parts: parts,
+                costOre: (info.actorCount || 0) * 3,
+                shareCode: shareCode
+              });
+              added++;
+            } catch (err) {
+              errs.push(item.name + '：' + err.message);
+            }
+          });
+          if (added) {
+            saveBpLibrary();
+            renderBlueprintPresets();
           }
-        }
-        bpBatchQueue(entries);
+          if (errs.length) showBpMsg('部分 .cai 导入失败（成功 ' + added + ' 个）：' + esc(errs[0]), 'warn');
+          else if (added) showBpMsg('已将 <b>' + added + '</b> 个 .cai 蓝图添加到右侧本地蓝图库（双击或拖入左侧槽位使用）。', 'ok');
+        });
+      }
+    });
+
+    $('bpExportJson').addEventListener('click', function () {
+      var list = allPresets();
+      var blob = new Blob([JSON.stringify(list, null, 2)], { type: 'application/json' });
+      window.SaveWriter.download(blob, 'totk_blueprints.json');
+      showBpMsg('已导出蓝图库 <b>totk_blueprints.json</b>（共 ' + list.length + ' 款）。', 'ok');
+    });
+
+    $('bpCodeLoad').addEventListener('click', function () {
+      try { bpSetImport(window.Blueprint.decodeShare($('bpCode').value), '分享码'); }
+      catch (e) { showBpMsg('<b>分享码读不了：</b>' + esc(e.message), 'warn'); }
+    });
+
+    $('bpPresetSelAll').addEventListener('click', function () {
+      var list = allPresets();
+      var allOn = list.length && list.every(function (p) { return !!state.bpPresetSel[p.id]; });
+      list.forEach(function (p) { state.bpPresetSel[p.id] = !allOn; });
+      renderBlueprintPresets();
+    });
+    $('bpPresetBatch').addEventListener('click', function () {
+      var chosen = allPresets().filter(function (p) { return !!state.bpPresetSel[p.id]; });
+      if (!chosen.length) { showBpMsg('请先勾选要批量填入的蓝图。', 'warn'); return; }
+      var entries = [];
+      for (var i = 0; i < chosen.length; i++) {
+        try { entries.push({ caiBytes: window.Blueprint.decodeShare(chosen[i].shareCode), from: chosen[i].name }); }
+        catch (e) { showBpMsg('预设【' + esc(chosen[i].name) + '】解码失败：' + esc(e.message), 'warn'); return; }
+      }
+      bpBatchQueue(entries);
+    });
+
+    $('bpPresetBody').addEventListener('dragstart', function (e) {
+      var tr = e.target.closest('tr[data-idx]');
+      if (tr) e.dataTransfer.setData('text/plain', tr.dataset.idx);
+    });
+    $('bpPresetBody').addEventListener('change', function (e) {
+      if (e.target.classList.contains('bp-preset-chk')) {
+        state.bpPresetSel[e.target.dataset.id] = e.target.checked;
+      }
+    });
+    /* 双击右侧蓝图行放入左侧空槽 */
+    $('bpPresetBody').addEventListener('dblclick', function (e) {
+      if (e.target.closest('input[type="checkbox"]')) return;
+      var tr = e.target.closest('tr[data-idx]');
+      if (!tr) return;
+      var p = allPresets()[+tr.dataset.idx];
+      if (!p) return;
+      if (!state.bp || !state.bp.ok) { showBpMsg('请先加载存档再放入蓝图。', 'warn'); return; }
+      try {
+        bpSetImport(window.Blueprint.decodeShare(p.shareCode), p.name);
+        showBpMsg('已将【' + esc(p.name) + '】加入待写入槽位。', 'ok');
+      } catch (err) {
+        showBpMsg('蓝图载入失败：' + esc(err.message), 'warn');
+      }
+    });
+
+    if ($('bpDeleteSelected')) {
+      $('bpDeleteSelected').addEventListener('click', function () {
+        var before = state.bpLibrary.length;
+        var next = state.bpLibrary.filter(function (p) { return !state.bpPresetSel[p.id]; });
+        var removed = before - next.length;
+        if (!removed) { showBpMsg('请先勾选要清除的蓝图（可点全选一键清空）。', 'warn'); return; }
+        state.bpLibrary = next;
+        state.bpPresetSel = {};
+        saveBpLibrary();
+        renderBlueprintPresets();
+        showBpMsg('已从蓝图库清除 ' + removed + ' 款蓝图。', '');
+      });
+    }
+    if ($('bpLoadRecommended')) {
+      $('bpLoadRecommended').addEventListener('click', function () {
+        var recs = window.TOTK_BLUEPRINTS_PRESET || [];
+        var exist = {};
+        state.bpLibrary.forEach(function (p) { exist[p.id || p.shareCode] = true; });
+        var added = 0;
+        recs.forEach(function (r) {
+          var key = r.id || r.shareCode;
+          if (!exist[key]) { state.bpLibrary.push(r); exist[key] = true; added++; }
+        });
+        saveBpLibrary();
+        renderBlueprintPresets();
       });
     }
 
-    /* 预览 / 下载 */
+    /* 顶部修改日志：点击 × 直接撤销任意单项 */
+    if ($('modLogList')) {
+      $('modLogList').addEventListener('click', function (e) {
+        var btn = e.target.closest('[data-log-t]');
+        if (!btn) return;
+        pushUndo();
+        var t = btn.dataset.logT, k = btn.dataset.logK;
+        if (t === 'stat') {
+          if (k === 'rupee') $('inRupee').value = '';
+          else if (k === 'hearts') $('inHearts').value = '';
+          else if (k === 'stamina') setSeg('segStamina', null);
+          else if (k === 'energy') setSeg('segEnergy', null);
+        } else if (t === 'bag') {
+          delete state.bagEdits[k];
+          renderBag();
+        } else if (t === 'eq') {
+          delete state.eqEdits[k];
+          renderEquip();
+        } else if (t === 'bp') {
+          state.bpImports.splice(+k, 1);
+          renderBpPending();
+        }
+        updateFoot();
+      });
+    }
+
+    /* 蓝图槽位别名 + 队列移除 */
+    if ($('bpSlot')) {
+      $('bpSlot').addEventListener('change', function () {
+        state.bpSelSlot = +this.value;
+        if ($('bpSlotAlias')) $('bpSlotAlias').value = (state.bpAliases && state.bpAliases[state.bpSelSlot]) || '';
+        renderBlueprints();
+      });
+    }
+    if ($('bpSaveAlias')) {
+      $('bpSaveAlias').addEventListener('click', function () {
+        var idx = $('bpSlot') && $('bpSlot').value !== '' ? +$('bpSlot').value : state.bpSelSlot;
+        var val = $('bpSlotAlias') ? $('bpSlotAlias').value.trim() : '';
+        if (val) state.bpAliases[idx] = val;
+        else delete state.bpAliases[idx];
+        try { localStorage.setItem('totkmap_bp_aliases', JSON.stringify(state.bpAliases)); } catch (_) {}
+        renderBlueprints();
+        showBpMsg(val ? ('已为槽位 #' + String(idx + 1).padStart(2, '0') + ' 保存别名「' + esc(val) + '」。') : '已清除该槽位别名。', 'ok');
+      });
+    }
+
+    /* 撤销上一步 & 重置 */
+    if ($('btnUndoStep')) {
+      $('btnUndoStep').addEventListener('click', popUndo);
+    }
+    document.addEventListener('keydown', function (e) {
+      if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key.toLowerCase() === 'z') {
+        var tag = document.activeElement && document.activeElement.tagName;
+        if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+        if (state.undoStack.length) { e.preventDefault(); popUndo(); }
+      }
+    });
+
+    /* 重置 */
+    $('btnReset').addEventListener('click', function () {
+      state.undoStack = [];
+      updateUndoBtn();
+      ['inRupee', 'inHearts'].forEach(function (id) { $(id).value = ''; });
+      setSeg('segStamina', null); setSeg('segEnergy', null);
+      Array.prototype.forEach.call(document.querySelectorAll('.qbtn'), function (x) { x.classList.remove('on'); });
+      state.eqEdits = {};
+      state.bagEdits = {};
+      state.bagSelKey = null;
+      state.bpImports = [];
+      if ($('bpSharePanel')) $('bpSharePanel').hidden = true;
+      showBpMsg('');
+      $('bpCode').value = '';
+      renderBag();
+      renderEquip();
+      renderBpPending();
+      updateFoot();
+      showMsg('');
+    });
+
+    /* 预览与导出 */
     $('btnApply').addEventListener('click', openPreview);
     $('btnClosePreview').addEventListener('click', closePreview);
     $('btnCancelPreview').addEventListener('click', closePreview);
-    /* 同一个按钮两个阶段：还没下载 → 开始下载；已经下载完 → 关弹层。
-       这样用户不用在两个按钮之间找"到底该点哪个"。 */
     $('btnDownload').addEventListener('click', function () {
       if (state.dlDone) closePreview();
       else doDownload();
     });
-
-    /* 无障碍：Esc 关弹层 */
+    $('btnDownloadBackup').addEventListener('click', function () {
+      if (!state.file) return;
+      window.SaveWriter.download(state.file.slice(0), 'progress_backup_' + fileTag() + '.sav');
+    });
     document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape' && !$('previewMask').classList.contains('hidden')) closePreview();
+      if (e.key === 'Escape') {
+        if (!$('previewMask').classList.contains('hidden')) closePreview();
+        if ($('bpSharePanel') && !$('bpSharePanel').hidden) $('bpSharePanel').hidden = true;
+      }
     });
 
     renderBlueprintPresets();
   }
 
-  /* ---------- 精选蓝图工坊渲染 ---------- */
-  function renderBlueprintPresets() {
-    var grid = $('bpPresetGrid');
-    if (!grid) return;
-    var list = window.TOTK_BLUEPRINTS_PRESET || [];
-    if (!list.length) {
-      grid.innerHTML = '<div style="opacity:.6;font-size:12px">暂无预设蓝图</div>';
-      return;
-    }
-    var html = '';
-    list.forEach(function (p, idx) {
-      var chk = state.bpPresetSel[p.id] ? ' checked' : '';
-      var srcLink = p.sourceUrl
-        ? '<a href="' + esc(p.sourceUrl) + '" target="_blank" rel="noopener" style="font-size:10px;color:#64748b;text-decoration:none">来源 #' + esc(p.hwId || '') + ' ↗</a>'
-        : '';
-      html += '<div class="bp-pcard" data-idx="' + idx + '" style="background:#141920;border:1px solid #313b48;border-radius:8px;padding:10px;display:flex;flex-direction:column;gap:6px">' +
-        '<div style="display:flex;justify-content:space-between;align-items:center;gap:6px">' +
-          '<label style="display:inline-flex;align-items:center;gap:5px;font-weight:600;font-size:13px;color:#e8edf4;cursor:pointer">' +
-            '<input type="checkbox" class="bp-preset-chk" data-id="' + esc(p.id) + '"' + chk + '> ' + esc(p.name) +
-          '</label>' +
-          '<span style="font-size:11px;background:#1e293b;color:#38bdf8;padding:2px 6px;border-radius:4px;white-space:nowrap">' + esc(p.tag || '') + '</span>' +
-        '</div>' +
-        '<div style="font-size:11px;color:#94a3b8">' + esc(p.desc) + '</div>' +
-        '<div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;color:#fbbf24;margin-top:2px">' +
-          '<span>💎 消耗矿石：' + p.costOre + ' 块</span>' + srcLink +
-        '</div>' +
-        '<div style="font-size:11px;color:#64748b;line-height:1.4"><b>零件：</b>' + esc((p.parts || []).join('、')) + '</div>' +
-        '<div style="display:flex;gap:6px;margin-top:auto;padding-top:6px">' +
-          '<button type="button" class="btn primary bp-load-btn" data-idx="' + idx + '" style="flex:1;padding:5px 8px;font-size:11px">📥 填入存档</button>' +
-          '<button type="button" class="btn bp-copy-btn" data-idx="' + idx + '" style="padding:5px 8px;font-size:11px">📋 复制码</button>' +
-        '</div>' +
-      '</div>';
-    });
-    grid.innerHTML = html;
-
-    Array.prototype.forEach.call(grid.querySelectorAll('.bp-preset-chk'), function (chk) {
-      chk.addEventListener('change', function () {
-        state.bpPresetSel[this.dataset.id] = this.checked;
-      });
-    });
-
-    Array.prototype.forEach.call(grid.querySelectorAll('.bp-load-btn'), function (btn) {
-      btn.addEventListener('click', function () {
-        var idx = +this.dataset.idx;
-        var p = list[idx];
-        if (!p) return;
-        if (!state.bp || !state.bp.ok) {
-          showMsg('请先在页面顶部【从游戏拉取】或【选择 progress.sav】加载存档，再填入蓝图。', 'warn');
-          return;
-        }
-        try {
-          var cai = window.Blueprint.decodeShare(p.shareCode);
-          bpSetImport(cai, p.name);
-          showMsg('已成功装载【' + p.name + '】至目标槽位，请在底部【预览并下载】写回存档。', 'ok');
-        } catch (e) {
-          showMsg('预设载入失败：' + e.message, 'warn');
-        }
-      });
-    });
-
-    Array.prototype.forEach.call(grid.querySelectorAll('.bp-copy-btn'), function (btn) {
-      btn.addEventListener('click', function () {
-        var idx = +this.dataset.idx;
-        var p = list[idx];
-        if (!p) return;
-        if (navigator.clipboard) {
-          navigator.clipboard.writeText(p.shareCode).then(function () {
-            showMsg('【' + p.name + '】分享码已复制到剪贴板！', 'ok');
-          }, function () {
-            showMsg('复制失败，请手动在分享框复制。', 'warn');
-          });
-        }
-      });
-    });
-  }
-
   if (!window.SaveWriter) {
     document.body.insertAdjacentHTML('afterbegin',
-      '<div style="padding:20px;color:#e0715f">核心库 save-writer.js 没加载成功，检查 ../js/save-writer.js 是否存在。</div>');
+      '<div style="padding:20px;color:#e0715f">核心库 save-writer.js 没加载成功。</div>');
     return;
   }
 
   bind();
+  renderBlueprints();
+  var initTab = (location.hash || '').replace(/^#/, '');
+  if (initTab === 'blueprint') initTab = 'bp';
+  if (initTab) switchTab(initTab);
+  window.addEventListener('hashchange', function () {
+    var ht = (location.hash || '').replace(/^#/, '');
+    if (ht === 'blueprint') ht = 'bp';
+    if (ht) switchTab(ht);
+  });
   updateFoot();
 })();

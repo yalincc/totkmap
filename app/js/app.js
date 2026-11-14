@@ -60,7 +60,7 @@
   var AREA_SKY = window.TOTK_AREA_SKY || [];
   var AREA_DEPTHS = window.TOTK_AREA_DEPTHS || [];
 
-  var VERSION = 'TOTKMAP V2.8.3';
+  var VERSION = 'TOTKMAP V2.8.4';
   /* V2.8 克洛格谜题类型中文名（兜底；正式文案走 i18n 的 korok.type.*）
    * 由 tools/build_korok_info.py 依据 ROMFS 克洛格 actor 自动标注，
    * 分类参考游民星空「呀哈哈机关解密方法汇总」。 */
@@ -2564,10 +2564,19 @@
       }
       if (!pairs.length) return;
       any = true;
+      var gDone = 0, gTotal = 0;
+      pairs.forEach(function (r) { gDone += (r[1] || 0); gTotal += (r[2] || 0); });
+      var gPct = gTotal > 0 ? Math.round((gDone / gTotal) * 100) : 0;
+      if (gTotal > 0 && gDone < gTotal && gPct === 100) gPct = 99;
+      if (gTotal > 0 && gDone > 0 && gPct === 0) gPct = 1;
       var title = window.I18N ? window.I18N.t('progress.group.' + g.key, g.cn) : g.cn;
       /* .prog-group 是给「组与组之间加分割线」用的包裹层（CSS 用 .prog-group + .prog-group 画线），
          只加边框不加内边距，组距保持原样 */
-      html += '<div class="prog-group"><div class="prog-group-title">' + esc(title) + '</div>' + progressGrid(pairs) + '</div>';
+      html += '<div class="prog-group">' +
+        '<div class="prog-group-title' + (gTotal > 0 && gDone >= gTotal ? ' done' : '') + '">' +
+          '<span class="pgt-name">' + esc(title) + '</span>' +
+          '<span class="pgt-pct">' + gPct + '%</span>' +
+        '</div>' + progressGrid(pairs) + '</div>';
     });
     list.innerHTML = any ? html : ('<div class="progress-empty" data-i18n="progress.noData">' + (window.I18N ? window.I18N.t('progress.noData') : '存档中无可同步类别') + '</div>');
   }
@@ -3720,6 +3729,42 @@
   // 版本号
   var vEl = document.querySelector('.version');
   if (vEl) vEl.textContent = VERSION;
+
+  /* ---------------- 版本更新公告弹窗（每版首开自动弹一次，底部版本号可回看） ---------------- */
+  (function initChangelog() {
+    var box = $('changelogBox'), body = $('changelogBody');
+    var list = window.TOTK_CHANGELOG;
+    if (!box || !body || !Array.isArray(list) || !list.length) return;
+    var LS_VER = 'totkmap_seen_ver';
+    function render() {
+      body.innerHTML = list.slice(0, 3).map(function (v) {
+        var lis = (v.items || []).map(function (it) { return '<li>' + esc(it) + '</li>'; }).join('');
+        return '<div class="cl-ver">' +
+          '<div class="cl-head">' +
+            '<span class="cl-tag">' + esc(v.version) + '</span>' +
+            '<span class="cl-title">' + esc(v.title || '') + '</span>' +
+            '<span class="cl-date">' + esc(v.date || '') + '</span>' +
+          '</div>' +
+          '<ul class="cl-list">' + lis + '</ul>' +
+        '</div>';
+      }).join('');
+    }
+    function close(markSeen) {
+      box.classList.add('hidden');
+      if (markSeen) { try { localStorage.setItem(LS_VER, VERSION); } catch (e) {} }
+    }
+    function open() {
+      render();
+      box.classList.remove('hidden');
+    }
+    var btn = $('btnChangelog'), clClose = $('clClose'), clAck = $('clAck');
+    if (btn) btn.addEventListener('click', open);
+    if (clClose) clClose.addEventListener('click', function () { close(true); });
+    if (clAck) clAck.addEventListener('click', function () { close(true); });
+    var seen = null;
+    try { seen = localStorage.getItem(LS_VER); } catch (e) {}
+    if (seen !== VERSION) open();
+  })();
 
   // 调试/扩展句柄
   window.TOTK = {
