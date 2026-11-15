@@ -40,6 +40,7 @@ type ProfileFingerprint struct {
 type MemoryProfile struct {
 	ID           string             `json:"id"`
 	Name         string             `json:"name"`
+	Verified     bool               `json:"verified,omitempty"`
 	Fingerprint  ProfileFingerprint `json:"fingerprint"`
 	MainBase     string             `json:"mainBase,omitempty"`
 	HeapRanges   []HeapRange        `json:"heapRanges"`
@@ -99,7 +100,7 @@ func localProfilePath() string {
 	return filepath.Join(filepath.Dir(exe), "pc_profile_local.json")
 }
 
-// loadLocalProfile 读取本地校准生成的 pc_profile_local.json（不存在或解析失败返回 nil）。
+// loadLocalProfile 读取本地校准生成的 pc_profile_local.json（未通过真身验证或解析失败则返回 nil）。
 func loadLocalProfile() *MemoryProfile {
 	buf, err := os.ReadFile(localProfilePath())
 	if err != nil {
@@ -107,6 +108,9 @@ func loadLocalProfile() *MemoryProfile {
 	}
 	var prof MemoryProfile
 	if err := json.Unmarshal(buf, &prof); err != nil {
+		return nil
+	}
+	if !prof.Verified {
 		return nil
 	}
 	if len(prof.HeapRanges) == 0 && len(prof.StaticChains) == 0 {

@@ -179,8 +179,9 @@ func deepCalibrateAndSave(p Platform, plat *totkpcPlatform, lockedAddr uintptr) 
 	chains := deepReverseStaticChains(h, mainBase, lockedAddr)
 
 	prof := &MemoryProfile{
-		ID:   "local-calibrated",
-		Name: fmt.Sprintf("本地校准配置 (%s)", time.Now().Format("01-02 15:04")),
+		ID:       "local-calibrated",
+		Name:     fmt.Sprintf("本地校准配置 (%s)", time.Now().Format("01-02 15:04")),
+		Verified: true,
 		Fingerprint: ProfileFingerprint{
 			ExeSize:  exeSize,
 			MainBase: formatHexPtr(mainBase),

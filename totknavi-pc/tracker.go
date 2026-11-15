@@ -204,6 +204,7 @@ func runTracker(p Platform, plat *totkpcPlatform, anchor *[3]float32, addr uintp
 	oscCount := 0
 
 	usingStaticChain := false
+	pendingDeepCalib := false
 	var mainBase uintptr
 	if plat != nil {
 		mainBase = plat.MainBase()
@@ -293,7 +294,7 @@ func runTracker(p Platform, plat *totkpcPlatform, anchor *[3]float32, addr uintp
 			if dsReq.hasHUD {
 				mem := [3]float32{dsReq.hud[0], dsReq.hud[2] + elevBias, -dsReq.hud[1]}
 				ref = &mem
-			} else if hasPrev {
+			} else if hasPrev && verified {
 				mem := [3]float32{prev[0], prev[2] + elevBias, -prev[1]}
 				ref = &mem
 			} else {
@@ -310,9 +311,16 @@ func runTracker(p Platform, plat *totkpcPlatform, anchor *[3]float32, addr uintp
 				pstate.setGameStatus(true, p.PID(), lockedAddr)
 				pstate.bumpLock()
 				pstate.bumpRescan()
-				deepCalibrateAndSave(p, plat, lockedAddr)
+				if verified {
+					pendingDeepCalib = false
+					deepCalibrateAndSave(p, plat, lockedAddr)
+				} else {
+					pendingDeepCalib = true
+					logEvent("  [deep-scan] 已命中候选 0x%X，请在游戏内移动角色完成验证后再写入配置", lockedAddr)
+				}
 				logEvent("  [deep-scan] 📍 扩大范围扫描锁定 → 0x%X (verified=%v)", lockedAddr, verified)
 			} else {
+				pendingDeepCalib = false
 				logEvent("  [deep-scan] 全进程扫描仍未命中 —— 请确认已进入 3D 游戏世界，可填写当前 HUD 坐标后再试")
 			}
 		case hud := <-reqCoordChan:
@@ -444,6 +452,10 @@ func runTracker(p Platform, plat *totkpcPlatform, anchor *[3]float32, addr uintp
 						cands = nil
 						fmt.Printf("  [lock] 移动确认成功 → 真身锁定 0x%X (%.1f, %.1f, %.1f)\n",
 							lockedAddr, cur[0], cur[1], cur[2])
+						if pendingDeepCalib {
+							pendingDeepCalib = false
+							deepCalibrateAndSave(p, plat, lockedAddr)
+						}
 					}
 				} else {
 					moveN = 0
