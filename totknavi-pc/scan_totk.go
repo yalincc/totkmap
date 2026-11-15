@@ -252,7 +252,7 @@ func ptkReadStaticChain(h uintptr, mainBase uintptr) (pos [3]float32, targetAddr
 	if mainBase == 0 {
 		return pos, 0, false
 	}
-	for _, chain := range knownStaticChains {
+	for _, chain := range activeStaticChains() {
 		pBytes := readMem(h, mainBase+chain.ptrOffset, 8)
 		if len(pBytes) < 8 {
 			continue

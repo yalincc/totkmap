@@ -38,11 +38,21 @@
         </template>
       </div>
       <div class="flex items-center gap-2.5 shrink-0">
-        <select v-model="cfg.emu" @change="onEmuChange" :title="t('emu.pickTitle')"
+        <select v-if="edition !== 'pc'" v-model="cfg.emu" @change="onEmuChange" :title="t('emu.pickTitle')"
           class="bg-[#0d1117] border border-slate-700 rounded-lg px-2 py-2 text-xs font-medium text-slate-300 hover:border-slate-500 focus:outline-none transition">
           <option value="auto">{{ t('emu.auto') }}</option>
           <option value="ryujinx">{{ t('emu.ryujinx') }}</option>
           <option value="eden">{{ t('emu.eden') }}</option>
+        </select>
+        <select v-else v-model="cfg.customProc" @focus="refreshProcs" @mousedown="refreshProcs" @change="onProcChange" :title="t('proc.pickTitle')"
+          class="max-w-[168px] bg-[#0d1117] border border-slate-700 rounded-lg px-2 py-2 text-xs font-medium text-slate-300 hover:border-slate-500 focus:outline-none transition">
+          <option value="">{{ t('proc.auto') }}</option>
+          <option v-if="cfg.customProc && !procList.some(p => p.name === cfg.customProc)" :value="cfg.customProc">
+            [{{ cfg.customProc }}]
+          </option>
+          <option v-for="p in procList" :key="p.name" :value="p.name">
+            [{{ p.name }}] ({{ p.memMB }}MB)
+          </option>
         </select>
         <button @click="openMap" class="w-[136px] py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-sky-400 text-xs font-medium border border-slate-700 flex items-center justify-center gap-1.5 transition">
           🧭 {{ t('buttons.openMap') }}
@@ -94,8 +104,13 @@
         <section class="bg-[#161b22] border border-slate-800 rounded-xl p-3.5 shrink-0">
           <div class="flex items-center justify-between text-xs pb-2 border-b border-slate-800/80 mb-2.5">
             <span class="font-bold text-emerald-400 flex items-center gap-1.5">🧭 {{ t('locate.calibration') }}</span>
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-1.5">
               <span class="text-[10px] text-slate-500">{{ t('locate.calWhenFail') }}</span>
+              <button v-if="edition === 'pc'" @click="doDeepScan" :disabled="deepBusy || !isLocating" :title="t('locate.deepScanTip')"
+                class="bg-amber-600 hover:bg-amber-500 text-white px-2 py-1 rounded-md text-[10px] font-bold transition flex items-center gap-1 active:scale-95 disabled:opacity-50">
+                <span>🔍</span>
+                <span>{{ t('locate.deepScan') }}</span>
+              </button>
               <button @click="doCalibrate" :disabled="calBusy"
                 class="bg-emerald-600 hover:bg-emerald-500 text-white px-2.5 py-1 rounded-md text-[10px] font-bold transition flex items-center gap-1 active:scale-95 disabled:opacity-60 disabled:cursor-wait">
                 <span>↻</span>
@@ -226,7 +241,8 @@ import { PROGRESS_CATEGORY_KEYS, progressLabel } from '../data/progressCategorie
 import {
   pos, steps, stepClass, stepDot, isLocating, toggleLocating, progressData,
   layerName, sourceLabel, openMap, logs,
-  ver, syncText, syncClass, syncDot, rt, submitCoords, coordsState, cfg, saveSettings,
+  ver, edition, syncText, syncClass, syncDot, rt, submitCoords, submitDeepScan, coordsState, cfg, saveSettings,
+  procList, refreshProcs,
   coordsErrorText, saveTimeAgoText, saveTimeAgoClass, detectSave,
   pickSaveFile, pickSaveDir, doOpenSave, resetSaveDetection
 } from '../composables/useCore'
@@ -239,13 +255,32 @@ function closeWin() { rt.Quit() }
 
 // 模拟器选择（V2.0.0）：改动即保存；core 运行中则提示需重启定位生效
 const emuLabel = computed(() => {
+  if (edition.value === 'pc') return t('emu.pc')
   const e = cfg.emu || 'auto'
   return ['auto', 'ryujinx', 'eden'].includes(e) ? t(`emu.${e}`) : e
 })
+const deepBusy = ref(false)
+async function doDeepScan() {
+  if (deepBusy.value) return
+  deepBusy.value = true
+  try {
+    const x = parseFloat(calX.value), y = parseFloat(calY.value), z = parseFloat(calZ.value)
+    const hasCoords = !Number.isNaN(x) && !Number.isNaN(y) && !Number.isNaN(z)
+    await submitDeepScan(hasCoords, hasCoords ? x : 0, hasCoords ? y : 0, hasCoords ? z : 0)
+  } finally {
+    setTimeout(() => { deepBusy.value = false }, 1500)
+  }
+}
 async function onEmuChange() {
   await saveSettings()
   if (isLocating.value) {
     logs.value.push({ time: new Date().toTimeString().slice(0, 8), text: t('emuSwitch'), level: 'warn', color: 'text-amber-400', levelColor: 'text-amber-500' })
+  }
+}
+async function onProcChange() {
+  await saveSettings()
+  if (isLocating.value) {
+    logs.value.push({ time: new Date().toTimeString().slice(0, 8), text: t('proc.switch'), level: 'warn', color: 'text-amber-400', levelColor: 'text-amber-500' })
   }
 }
 

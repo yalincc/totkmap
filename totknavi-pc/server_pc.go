@@ -15,6 +15,7 @@
 package main
 
 import (
+	"context"
 	_ "embed"
 	"encoding/json"
 	"fmt"
@@ -22,7 +23,9 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"runtime"
 	"sync"
+	"syscall"
 	"time"
 )
 
@@ -147,6 +150,7 @@ func serveRun(p Platform, plat *totkpcPlatform, anchor *[3]float32, addr uintptr
 	mux.HandleFunc("/target", handleTargetPC)
 	mux.HandleFunc("/progress", handleProgressPC)
 	mux.HandleFunc("/rescan", handleRescanPC)
+	mux.HandleFunc("/deep-scan", handleDeepScanPC)
 	mux.HandleFunc("/set-coords", handleSetCoordsPC)
 	mux.HandleFunc("/save", handleSavePC)
 	mux.HandleFunc("/logs", handleLogsPC)
@@ -179,21 +183,6 @@ func serveRun(p Platform, plat *totkpcPlatform, anchor *[3]float32, addr uintptr
 		fmt.Printf("\n  [server] 未找到网页目录（仅提供 /pos 定位接口）\n")
 	}
 
-	// 全接口监听（0.0.0.0:port），允许同一 WiFi 下手机扫码连入
-	listenAddr := fmt.Sprintf(":%d", port)
-	ln, err := net.Listen("tcp", listenAddr)
-	if err != nil {
-		fmt.Printf("\n  [server] 端口 %d 启动失败：%v\n", port, err)
-		fmt.Printf("  换个端口：--port 8767\n")
-		return
-	}
-	fmt.Printf("  [server] 控制台面板 → http://127.0.0.1:%d/gui\n", port)
-	fmt.Printf("  [server] 定位接口   → http://127.0.0.1:%d/pos\n", port)
-	fmt.Println("  ------------------------------------------------------------------")
-	fmt.Println("  [ok] ★★★ 定位服务已就绪！已锁定林克真身坐标，网页地图实时同步中 ★★★")
-	fmt.Println("  [ok] 浏览器访问地图即可实时跟随，或点击上方【🧭 打开网页地图】")
-	fmt.Println("  ------------------------------------------------------------------")
-
 	// 统一包装跨域 CORS、PNA（私有网络访问预检）与自定义暴露头
 	corsHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -208,9 +197,62 @@ func serveRun(p Platform, plat *totkpcPlatform, anchor *[3]float32, addr uintptr
 		mux.ServeHTTP(w, r)
 	})
 
-	if err := http.Serve(ln, corsHandler); err != nil {
+	// 独占多端口监听（参考 xnavi-pc：port..port+4 自动跳过被占端口）
+	listeners, owned, skipped := listenOwnedPortsPC(port, 5)
+	if len(listeners) == 0 {
+		fmt.Printf("\n  [server] 端口 %d~%d 全部被占用，请先关闭其它导航程序后重试\n", port, port+4)
+		return
+	}
+	primaryPort := owned[0]
+	if primaryPort != port {
+		initLanURL(primaryPort)
+	}
+	fmt.Printf("  [server] 监听端口 %v（跳过被占: %v）\n", owned, skipped)
+	fmt.Printf("  [server] 控制台面板 → http://127.0.0.1:%d/gui\n", primaryPort)
+	fmt.Printf("  [server] 定位接口   → http://127.0.0.1:%d/pos\n", primaryPort)
+	fmt.Println("  ------------------------------------------------------------------")
+	fmt.Println("  [ok] ★★★ 定位服务已就绪！已锁定林克真身坐标，网页地图实时同步中 ★★★")
+	fmt.Println("  [ok] 浏览器访问地图即可实时跟随，或点击上方【🧭 打开网页地图】")
+	fmt.Println("  ------------------------------------------------------------------")
+
+	for i := 1; i < len(listeners); i++ {
+		ln := listeners[i]
+		go func() {
+			_ = http.Serve(ln, corsHandler)
+		}()
+	}
+	if err := http.Serve(listeners[0], corsHandler); err != nil {
 		fmt.Printf("  [server] 已停止：%v\n", err)
 	}
+}
+
+const soExclusiveAddrUsePC = -5
+
+func exclusiveAddrControlPC(network, address string, c syscall.RawConn) error {
+	if runtime.GOOS != "windows" {
+		return nil
+	}
+	var serr error
+	if err := c.Control(func(fd uintptr) {
+		serr = syscall.SetsockoptInt(syscall.Handle(fd), syscall.SOL_SOCKET, soExclusiveAddrUsePC, 1)
+	}); err != nil {
+		return err
+	}
+	return serr
+}
+
+func listenOwnedPortsPC(base, count int) (lns []net.Listener, owned, skipped []int) {
+	lc := net.ListenConfig{Control: exclusiveAddrControlPC}
+	for p := base; p < base+count; p++ {
+		ln, err := lc.Listen(context.Background(), "tcp", fmt.Sprintf(":%d", p))
+		if err != nil {
+			skipped = append(skipped, p)
+			continue
+		}
+		lns = append(lns, ln)
+		owned = append(owned, p)
+	}
+	return lns, owned, skipped
 }
 
 func handlePosPC(w http.ResponseWriter, r *http.Request) {
@@ -343,10 +385,21 @@ func handleProgressPC(w http.ResponseWriter, r *http.Request) {
 	w.Write(body)
 }
 
-// handleRescanPC 处理前端请求重扫。
+// handleRescanPC 处理前端请求重扫（?wide=1 时触发独立扩大范围扫描）。
 func handleRescanPC(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Query().Get("wide") == "1" {
+		RequestDeepScan(false, [3]float32{})
+		writeJSONPC(w, map[string]any{"ok": true, "started": true, "wide": true})
+		return
+	}
 	RequestRescan()
 	writeJSONPC(w, map[string]any{"ok": true, "started": true})
+}
+
+// handleDeepScanPC 触发独立扩大范围/全进程兜底扫描。
+func handleDeepScanPC(w http.ResponseWriter, r *http.Request) {
+	RequestDeepScan(false, [3]float32{})
+	writeJSONPC(w, map[string]any{"ok": true, "started": true, "wide": true})
 }
 
 // handleSetCoordsPC 手动提交 HUD 坐标校准重锁。

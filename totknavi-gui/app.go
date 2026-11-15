@@ -2,6 +2,7 @@ package main
 
 import (
 	"archive/zip"
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -13,6 +14,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"regexp"
+	"sort"
 	stdruntime "runtime"
 	"strings"
 	"sync"
@@ -35,6 +37,8 @@ import (
 //         预检弹窗（>50m 警告可强制继续，Vue 悬浮卡）。
 // V2.2.0：核心新增第 6 条锁定途径「指针链快路径」（跑动掉锁后毫秒级重锁）；
 //         GUI 侧无 UI 改动，仅版本号对齐核心。
+// V3.3.0：PC 版支持独立扩大范围扫描、OBS 式进程下拉选择、多端口自动顺延、EdgeOne 诊断直传（同步支持模拟器版）。
+// V3.2.0：PC 版独立扩大范围扫描 + 自动生成本地配置 pc_profile_local.json + EdgeOne 诊断直传 + PC 版隐藏模拟器选项。
 // V3.1.2：对齐核心版本 v3.1.2，PC 重编译版静态指针链直读秒锁 + 修复存档 mtime 乱序。
 // V3.1.1：对齐核心版本 v3.1.1，PC 重编译版补齐 /target 导航目标与状态同步。
 // V3.1.0：对齐核心版本 v3.1.0，支持 PC 重编译版与模拟器版并列架构。
@@ -42,7 +46,10 @@ import (
 //         进度看板新增第 21 类「宝箱」，分类计数文案 20 -> 21。
 // V3.0.0：跨场景持久槽定位（传送 / 神庙零重扫，1.5s 秒锁）；
 //         GUI 与核心版本解耦后同号对齐。
-const guiVersion = "v3.1.2"
+// defaultDiagUploadURL 诊断日志直发接口（EdgeOne Pages Node Function）。
+const defaultDiagUploadURL = "https://botw.yalin.site/api/diag"
+
+const guiVersion = "v3.3.0"
 
 // App Wails 后端：管理核心子进程 + 读 status.json / xnavi-gui-core.log + 网页端端口探测。
 // 与核心的通信完全走文件（status.json、xnavi-gui-core.log），不依赖 8766 HTTP——
@@ -68,6 +75,8 @@ type Config struct {
 	Emu            string `json:"emu,omitempty"` // "auto"（默认）/ "ryujinx" / "eden"
 	TLS            bool   `json:"tls,omitempty"` // 手机防息屏（Https）
 	AutoOpenMap    *bool  `json:"autoOpenMap,omitempty"` // 锁定后自动打开网页地图（默认 true）
+	DiagUrl        string `json:"diagUrl,omitempty"`     // 自定义诊断上传接口（留空走 defaultDiagUploadURL）
+	CustomProc     string `json:"customProc,omitempty"`  // PC 版手动指定游戏进程名（留空自动探测）
 }
 
 func (a *App) configPath() string { return filepath.Join(a.workDir, "xnavi-gui-config.json") }
@@ -553,6 +562,26 @@ func (a *App) ClearTarget() string {
 	return "已请求清除目标（地图同步取消）"
 }
 
+// Edition 返回发行形态（"emu" 模拟器版 | "pc" PC-Recomp 版）。
+func (a *App) Edition() string { return appEdition }
+
+// SubmitDeepScan 触发独立扩大范围/全进程兜底扫描（写 deep-scan-req.json）。
+func (a *App) SubmitDeepScan(hasCoords bool, x, y, z float64) map[string]any {
+	req := map[string]any{
+		"hasCoords": hasCoords,
+		"x":         x,
+		"y":         y,
+		"z":         z,
+		"ts":        time.Now().Unix(),
+	}
+	buf, _ := json.Marshal(req)
+	os.Remove(filepath.Join(a.workDir, "deep-scan-resp.json"))
+	if err := os.WriteFile(filepath.Join(a.workDir, "deep-scan-req.json"), buf, 0644); err != nil {
+		return map[string]any{"ok": false, "error": err.Error()}
+	}
+	return map[string]any{"ok": true}
+}
+
 // corePath 核心子进程 exe 路径：与 GUI 同目录的 totknavi-core.exe（V2.0.0 起双平台统一核心）。
 // 命名不以模拟器为前缀：避免 findPid 的 HasPrefix 匹配误认核心进程。
 func (a *App) corePath() string {
@@ -571,7 +600,9 @@ func (a *App) StartCore() string {
 		return "找不到核心程序 totknavi-core.exe（应放在本程序同目录）"
 	}
 	emu := "auto"
-	if a.cfg != nil && a.cfg.Emu != "" {
+	if appEdition == "pc" {
+		emu = "pc"
+	} else if a.cfg != nil && a.cfg.Emu != "" {
 		emu = a.cfg.Emu
 	}
 	args := []string{"--no-open", "--emu=" + emu}
@@ -580,9 +611,11 @@ func (a *App) StartCore() string {
 	}
 	cmd := exec.Command(exe, args...)
 	cmd.Dir = a.workDir
-	// 存档目录兜底：按平台传对应环境变量；auto 模式两个都传（core 各自平台
-	// 只读自己那个，互不干扰）。留空不传 → core 自动探测。
-	if a.cfg != nil {
+	// 存档目录兜底：按平台传对应环境变量；PC 版传递自定义进程名（若有）。
+	if appEdition == "pc" && a.cfg != nil && strings.TrimSpace(a.cfg.CustomProc) != "" {
+		cmd.Env = append(cmd.Env, "TOTK_PC_PROCESS="+strings.TrimSpace(a.cfg.CustomProc))
+	}
+	if appEdition != "pc" && a.cfg != nil {
 		if a.cfg.SaveDirRyujinx != "" {
 			cmd.Env = append(cmd.Env, "TOTK_SAVE_DIR_RYUJINX="+a.cfg.SaveDirRyujinx)
 		}
@@ -768,7 +801,80 @@ func hostname() string {
 	return h
 }
 
-// ExportDiagnostics 一键导出诊断包（zip）：系统信息 + status.json + core 日志 + 事件日志。
+func tailLinesText(path string, maxLines int) string {
+	buf, err := os.ReadFile(path)
+	if err != nil {
+		return ""
+	}
+	lines := strings.Split(strings.TrimRight(string(buf), "\r\n"), "\n")
+	if len(lines) > maxLines {
+		lines = lines[len(lines)-maxLines:]
+	}
+	return strings.Join(lines, "\n")
+}
+
+// UploadDiagnostics 将脱敏诊断摘要（含本地校准配置 pc_profile_local.json）直接 POST 到 EdgeOne 中转接口。
+func (a *App) UploadDiagnostics(note string) string {
+	targetURL := defaultDiagUploadURL
+	if a.cfg != nil && strings.TrimSpace(a.cfg.DiagUrl) != "" {
+		targetURL = strings.TrimSpace(a.cfg.DiagUrl)
+	}
+	if targetURL == "" {
+		return "未配置上传接口，请先使用「导出诊断包」"
+	}
+
+	statusBuf, _ := os.ReadFile(filepath.Join(a.workDir, "status.json"))
+	profileBuf, _ := os.ReadFile(filepath.Join(a.workDir, "pc_profile_local.json"))
+
+	emu := "auto"
+	if appEdition == "pc" {
+		emu = "pc"
+	} else if a.cfg != nil && a.cfg.Emu != "" {
+		emu = a.cfg.Emu
+	}
+	saveRyu, saveEden := "", ""
+	if appEdition != "pc" && a.cfg != nil {
+		saveRyu, saveEden = a.cfg.SaveDirRyujinx, a.cfg.SaveDirEden
+	}
+	info := fmt.Sprintf(
+		"totknavi diagnostics\n====================\nGUI version: %s\nEdition: %s\nOS: %s/%s\nCPU cores: %d\nHostname: %s\nTime: %s\nSaveDir Ryujinx: %q\nSaveDir Eden: %q\n",
+		guiVersion, appEdition, stdruntime.GOOS, stdruntime.GOARCH,
+		stdruntime.NumCPU(), hostname(),
+		time.Now().Format("2006-01-02 15:04:05"),
+		saveRyu, saveEden,
+	)
+
+	payload := map[string]any{
+		"game":      "totk",
+		"version":   guiVersion,
+		"edition":   appEdition,
+		"emulator":  emu,
+		"note":      strings.TrimSpace(note),
+		"info":      info,
+		"status":    string(statusBuf),
+		"pcProfile": string(profileBuf),
+		"coreLog":   tailLinesText(filepath.Join(a.workDir, "xnavi-gui-core.log"), 200),
+		"eventsLog": tailLinesText(filepath.Join(a.workDir, "run-events.log"), 50),
+	}
+	body, err := json.Marshal(payload)
+	if err != nil {
+		return "打包失败: " + err.Error()
+	}
+
+	client := http.Client{Timeout: 10 * time.Second}
+	resp, err := client.Post(targetURL, "application/json", bytes.NewReader(body))
+	if err != nil {
+		return "上传失败: " + err.Error()
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		respBody, _ := io.ReadAll(io.LimitReader(resp.Body, 512))
+		return fmt.Sprintf("上传失败 (HTTP %d): %s", resp.StatusCode, strings.TrimSpace(string(respBody)))
+	}
+	return "已发送给开发者，感谢反馈"
+}
+
+// ExportDiagnostics 一键导出诊断包（zip）：系统信息 + status.json + core 日志 + 事件日志 + pc_profile_local.json。
 // 用户在反馈问题前点这个，选保存位置，把 zip 发回来即可。
 func (a *App) ExportDiagnostics() string {
 	path, err := runtime.SaveFileDialog(a.ctx, runtime.SaveDialogOptions{
@@ -806,8 +912,8 @@ func (a *App) ExportDiagnostics() string {
 		bw.Write([]byte(info))
 	}
 
-	// 2) 工作目录下的日志/状态文件（core 写的）
-	for _, name := range []string{"status.json", "xnavi-gui-core.log", "run-events.log"} {
+	// 2) 工作目录下的日志/状态/校准配置文件（core 写的）
+	for _, name := range []string{"status.json", "xnavi-gui-core.log", "run-events.log", "pc_profile_local.json"} {
 		buf, err := os.ReadFile(filepath.Join(a.workDir, name))
 		if err != nil {
 			continue
@@ -817,6 +923,110 @@ func (a *App) ExportDiagnostics() string {
 		}
 	}
 	return "已导出: " + path
+}
+
+// ProcessItem 运行中进程条目（供 PC 版 OBS 式下拉选择）。
+type ProcessItem struct {
+	Pid   uint32 `json:"pid"`
+	Name  string `json:"name"`
+	MemMB uint64 `json:"memMB"`
+}
+
+var (
+	procK32Toolhelp   = syscall.NewLazyDLL("kernel32.dll").NewProc("CreateToolhelp32Snapshot")
+	procK32ProcFirst  = syscall.NewLazyDLL("kernel32.dll").NewProc("Process32FirstW")
+	procK32ProcNext   = syscall.NewLazyDLL("kernel32.dll").NewProc("Process32NextW")
+	procK32OpenProc   = syscall.NewLazyDLL("kernel32.dll").NewProc("OpenProcess")
+	procK32CloseH     = syscall.NewLazyDLL("kernel32.dll").NewProc("CloseHandle")
+	procK32GetMemInfo = syscall.NewLazyDLL("kernel32.dll").NewProc("K32GetProcessMemoryInfo")
+)
+
+type winProcEntry32W struct {
+	Size            uint32
+	CntUsage        uint32
+	ProcessID       uint32
+	DefaultHeapID   uintptr
+	ModuleID        uint32
+	CntThreads      uint32
+	ParentProcessID uint32
+	PriClassBase    int32
+	Flags           uint32
+	ExeFile         [260]uint16
+}
+
+type winProcMemCounters struct {
+	CB                         uint32
+	PageFaultCount             uint32
+	PeakWorkingSetSize         uintptr
+	WorkingSetSize             uintptr
+	QuotaPeakPagedPoolUsage    uintptr
+	QuotaPagedPoolUsage        uintptr
+	QuotaPeakNonPagedPoolUsage uintptr
+	QuotaNonPagedPoolUsage     uintptr
+	PagefileUsage              uintptr
+	PeakPagefileUsage          uintptr
+}
+
+// ListProcesses 枚举当前运行中的用户进程（按 totk/zelda 关键字优先、内存降序排列）。
+func (a *App) ListProcesses() []ProcessItem {
+	snap, _, _ := procK32Toolhelp.Call(0x00000002, 0)
+	if snap == 0 || snap == ^uintptr(0) {
+		return nil
+	}
+	defer procK32CloseH.Call(snap)
+
+	selfPid := uint32(os.Getpid())
+	byName := make(map[string]ProcessItem)
+
+	var e winProcEntry32W
+	e.Size = uint32(unsafe.Sizeof(e))
+	r, _, _ := procK32ProcFirst.Call(snap, uintptr(unsafe.Pointer(&e)))
+	for r != 0 {
+		if e.ProcessID != 0 && e.ProcessID != selfPid {
+			name := syscall.UTF16ToString(e.ExeFile[:])
+			low := strings.ToLower(name)
+			if low != "" && !strings.Contains(low, "totknavi") && !strings.Contains(low, "xnavi") &&
+				low != "svchost.exe" && low != "conhost.exe" && low != "csrss.exe" &&
+				low != "smss.exe" && low != "services.exe" && low != "lsass.exe" &&
+				low != "wininit.exe" && low != "winlogon.exe" && low != "dwm.exe" {
+				var memMB uint64
+				h, _, _ := procK32OpenProc.Call(0x1000|0x0010, 0, uintptr(e.ProcessID))
+				if h != 0 {
+					var pmc winProcMemCounters
+					pmc.CB = uint32(unsafe.Sizeof(pmc))
+					if ok, _, _ := procK32GetMemInfo.Call(h, uintptr(unsafe.Pointer(&pmc)), uintptr(pmc.CB)); ok != 0 {
+						memMB = uint64(pmc.WorkingSetSize) / (1024 * 1024)
+					}
+					procK32CloseH.Call(h)
+				}
+				isLikelyGame := strings.Contains(low, "totk") || strings.Contains(low, "zelda") || strings.Contains(low, "tears")
+				if isLikelyGame || memMB >= 30 {
+					if prev, ok := byName[low]; !ok || memMB > prev.MemMB {
+						byName[low] = ProcessItem{Pid: e.ProcessID, Name: name, MemMB: memMB}
+					}
+				}
+			}
+		}
+		r, _, _ = procK32ProcNext.Call(snap, uintptr(unsafe.Pointer(&e)))
+	}
+
+	out := make([]ProcessItem, 0, len(byName))
+	for _, it := range byName {
+		out = append(out, it)
+	}
+	sort.Slice(out, func(i, j int) bool {
+		li, lj := strings.ToLower(out[i].Name), strings.ToLower(out[j].Name)
+		gi := strings.Contains(li, "totk") || strings.Contains(li, "zelda") || strings.Contains(li, "tears")
+		gj := strings.Contains(lj, "totk") || strings.Contains(lj, "zelda") || strings.Contains(lj, "tears")
+		if gi != gj {
+			return gi
+		}
+		if out[i].MemMB != out[j].MemMB {
+			return out[i].MemMB > out[j].MemMB
+		}
+		return li < lj
+	})
+	return out
 }
 
 // portInUse 探测端口是否被占用。

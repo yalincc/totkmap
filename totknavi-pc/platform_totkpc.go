@@ -21,6 +21,7 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -56,8 +57,9 @@ type totkpcPlatform struct {
 	mu          sync.Mutex
 	mainBase    uintptr // 校验通过的主模块基址（0 = 未确认）
 	mainChecked bool    // 是否已完成过自适应探测（防止未命中时重复全盘扫描）
-	exeBase  uintptr // totk.exe 加载基址（ASLR，每次启动变）
-	exeSize  uintptr
+	exeBase     uintptr // totk.exe 加载基址（ASLR，每次启动变）
+	exeSize     uintptr
+	deniedPid   uint32  // 已提示过权限不足的 PID，避免刷屏
 }
 
 func init() { registerPlatform(&totkpcPlatform{}) }
@@ -68,9 +70,9 @@ func (p *totkpcPlatform) PID() uint32        { return p.pid }
 func (p *totkpcPlatform) LittleEndian() bool { return true }
 func (p *totkpcPlatform) IsAlive() bool      { return p.h != 0 && isProcessAlive(p.h) }
 
-// Attach 附加到 totk.exe。进程退出后句柄失效时自动重开。
+// Attach 附加到游戏进程。进程退出后句柄失效时自动重开。
 func (p *totkpcPlatform) Attach() bool {
-	pid := totkPCFindPid()
+	pid, procName := totkPCFindTarget()
 	if pid == 0 {
 		if p.h != 0 {
 			closeHandle(p.h)
@@ -86,9 +88,14 @@ func (p *totkpcPlatform) Attach() bool {
 	}
 	h, err := openProcess(pid)
 	if err != nil || h == 0 {
+		if p.deniedPid != pid {
+			p.deniedPid = pid
+			logEvent("  [platform] 检测到进程 %s (pid=%d) 但无权读取内存，请以管理员身份运行本程序", procName, pid)
+		}
 		p.h, p.pid = 0, 0
 		return false
 	}
+	p.deniedPid = 0
 	p.h, p.pid = h, pid
 
 	// 附加后立即解析模块基址（一次，后面复用）
@@ -96,7 +103,10 @@ func (p *totkpcPlatform) Attach() bool {
 	p.mainBase = 0
 	p.mainChecked = false
 	p.exeBase, p.exeSize = totkPCExeModule(pid)
+	exeSz := p.exeSize
 	p.mu.Unlock()
+	prof := selectActiveProfile(exeSz)
+	fmt.Printf("  [profile] 已加载定位配置：%s (%s)\n", prof.Name, prof.ID)
 	return true
 }
 
@@ -120,8 +130,8 @@ func (p *totkpcPlatform) MainBase() uintptr {
 
 	var foundBase uintptr
 
-	// 1. 优先校验默认基址 0x7000000000（TotK-Recomp 官方固定映射，只要内存可读即确认为主模块镜像）
-	if buf := readMem(p.h, totkPCMainBase, 16); len(buf) >= 8 {
+	// 1. 优先校验默认基址 0x7000000000（校验头 64 字节含 MOD0 魔数，避免误判后跳过 totk.log 自适应）
+	if buf := readMem(p.h, totkPCMainBase, 64); len(buf) >= 16 && bytes.Contains(buf, []byte("MOD0")) {
 		foundBase = totkPCMainBase
 	}
 
@@ -166,24 +176,68 @@ func (p *totkpcPlatform) ExeBase() (uintptr, uintptr) {
 
 // ---- 进程识别 ----
 
-// totkPCFindPid 精确匹配 totk.exe（不前缀匹配：totk_xlate.exe 也以 totk 开头）。
-func totkPCFindPid() uint32 {
+// totkPCFindTarget 按优先级查找目标游戏进程：
+//  1. 环境变量 TOTK_PC_PROCESS（支持精确 exe 名或数字 PID）
+//  2. 精确匹配 totk.exe
+//  3. 模糊匹配含 totk / tears / zelda 的进程（排除 totknavi* / totk_xlate* / xnavi*）
+func totkPCFindTarget() (uint32, string) {
 	snap, _, _ := procCreateToolhelp32Snapshot.Call(th32csSnapprocess, 0)
 	if snap == 0 || snap == uintptr(^uintptr(0)) {
-		return 0
+		return 0, ""
 	}
 	defer closeHandle(snap)
+
+	custom := strings.TrimSpace(strings.ToLower(os.Getenv("TOTK_PC_PROCESS")))
+	var customPid uint32
+	if custom != "" {
+		if v, err := strconv.ParseUint(custom, 10, 32); err == nil && v > 0 {
+			customPid = uint32(v)
+		}
+	}
+
+	selfPid := uint32(os.Getpid())
+	var exactPid, fuzzyPid uint32
+	var exactName, fuzzyName string
+
 	var e ProcessEntry32W
 	e.Size = uint32(unsafe.Sizeof(e))
 	r, _, _ := procProcess32FirstW.Call(snap, uintptr(unsafe.Pointer(&e)))
 	for r != 0 {
-		name := strings.ToLower(utf16ToString(e.ExeFile[:]))
-		if e.ProcessID != uint32(os.Getpid()) && name == totkPCProcName {
-			return e.ProcessID
+		if e.ProcessID != selfPid && e.ProcessID != 0 {
+			rawName := utf16ToString(e.ExeFile[:])
+			name := strings.ToLower(rawName)
+			if custom != "" {
+				if (customPid != 0 && e.ProcessID == customPid) || (customPid == 0 && name == custom) {
+					return e.ProcessID, rawName
+				}
+			} else {
+				if name == totkPCProcName {
+					exactPid, exactName = e.ProcessID, rawName
+					break
+				}
+				if fuzzyPid == 0 &&
+					!strings.Contains(name, "navi") &&
+					!strings.Contains(name, "xlate") &&
+					(strings.Contains(name, "totk") || strings.Contains(name, "tears") || strings.Contains(name, "zelda")) {
+					fuzzyPid, fuzzyName = e.ProcessID, rawName
+				}
+			}
 		}
 		r, _, _ = procProcess32NextW.Call(snap, uintptr(unsafe.Pointer(&e)))
 	}
-	return 0
+	if custom != "" {
+		return 0, ""
+	}
+	if exactPid != 0 {
+		return exactPid, exactName
+	}
+	return fuzzyPid, fuzzyName
+}
+
+// totkPCFindPid 兼容旧调用，返回目标进程 PID。
+func totkPCFindPid() uint32 {
+	pid, _ := totkPCFindTarget()
+	return pid
 }
 
 var procQueryFullProcessImageNameW = syscall.NewLazyDLL("kernel32.dll").NewProc("QueryFullProcessImageNameW")
@@ -283,6 +337,7 @@ func (p *totkpcPlatform) Blocks(minMB float64) []MemBlock {
 	}
 	exeBase, exeSize := p.ExeBase()
 	mb := p.MainBase() // 必须在循环外部单次获取，严禁在迭代中重复调用！
+	heapRanges := activeHeapRanges()
 
 	const limit = uintptr(0x7FFFFFFFFFFF)
 	var out []MemBlock
@@ -304,7 +359,15 @@ func (p *totkpcPlatform) Blocks(minMB float64) []MemBlock {
 				} else {
 					inMain = base >= totkPCScanMainLo && base < totkPCScanMainHi
 				}
-				inHeap := writable && base >= totkPCScanHeapLo && base < totkPCScanHeapHi
+				inHeap := false
+				if writable {
+					for _, hr := range heapRanges {
+						if base >= hr[0] && base < hr[1] {
+							inHeap = true
+							break
+						}
+					}
+				}
 				inExe := writable && exeBase != 0 && base >= exeBase && base < exeBase+exeSize
 				if inMain || inHeap || inExe {
 					out = append(out, MemBlock{Base: base, Size: size, Writable: writable})

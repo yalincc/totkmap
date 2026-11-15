@@ -58,9 +58,15 @@ export default {
   },
   emu: {
     auto: 'PC-Recomp',
+    pc: 'PC-Recomp',
     ryujinx: 'Ryujinx',
     eden: 'Eden',
     pickTitle: 'Select platform (PC edition uses pc-recomp)'
+  },
+  proc: {
+    auto: 'Auto process (totk.exe)',
+    pickTitle: 'Click to refresh running processes and pick the game executable',
+    switch: 'Target process updated. Stop and restart locating to apply.'
   },
   buttons: {
     openMap: 'Open web map',
@@ -76,6 +82,9 @@ export default {
     download: 'Download',
     clear: 'Clear',
     checkUpdate: 'Check for updates',
+    uploadDiag: 'Upload diag',
+    notePlaceholder: 'Optional: describe the issue (sent to developer)',
+    send: 'Send',
     exportDiag: 'Export diagnostics',
     chooseFile: 'Choose File',
     chooseDir: 'Choose Dir',
@@ -90,6 +99,8 @@ export default {
     calibration: 'Coordinate calibration',
     calWhenFail: 'Use when locating fails',
     submit: 'Submit calibration',
+    deepScan: 'Wide scan',
+    deepScanTip: 'Scan all process RW memory and save a local profile for future auto-lock',
     calHint: 'Enter in-game character coordinates; memory scan takes about 5-20s',
     placeholder: 'e.g. {v}',
     localProgress: 'Local save parsing',

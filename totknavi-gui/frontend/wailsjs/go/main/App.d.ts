@@ -12,9 +12,13 @@ export function CoreRunning():Promise<boolean>;
 
 export function CoreStatus():Promise<Record<string, any>>;
 
+export function Edition():Promise<string>;
+
 export function EnvDetect():Promise<Record<string, any>>;
 
 export function ExportDiagnostics():Promise<string>;
+
+export function ListProcesses():Promise<Array<main.ProcessItem>>;
 
 export function LoadConfig():Promise<main.Config>;
 
@@ -40,6 +44,10 @@ export function StopCore():Promise<string>;
 
 export function SubmitCoords(arg1:number,arg2:number,arg3:number):Promise<Record<string, any>>;
 
+export function SubmitDeepScan(arg1:boolean,arg2:number,arg3:number,arg4:number):Promise<Record<string, any>>;
+
 export function TailLog():Promise<Array<string>>;
+
+export function UploadDiagnostics(arg1:string):Promise<string>;
 
 export function Version():Promise<string>;

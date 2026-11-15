@@ -22,12 +22,20 @@ export function CoreStatus() {
   return window['go']['main']['App']['CoreStatus']();
 }
 
+export function Edition() {
+  return window['go']['main']['App']['Edition']();
+}
+
 export function EnvDetect() {
   return window['go']['main']['App']['EnvDetect']();
 }
 
 export function ExportDiagnostics() {
   return window['go']['main']['App']['ExportDiagnostics']();
+}
+
+export function ListProcesses() {
+  return window['go']['main']['App']['ListProcesses']();
 }
 
 export function LoadConfig() {
@@ -78,8 +86,16 @@ export function SubmitCoords(arg1, arg2, arg3) {
   return window['go']['main']['App']['SubmitCoords'](arg1, arg2, arg3);
 }
 
+export function SubmitDeepScan(arg1, arg2, arg3, arg4) {
+  return window['go']['main']['App']['SubmitDeepScan'](arg1, arg2, arg3, arg4);
+}
+
 export function TailLog() {
   return window['go']['main']['App']['TailLog']();
+}
+
+export function UploadDiagnostics(arg1) {
+  return window['go']['main']['App']['UploadDiagnostics'](arg1);
 }
 
 export function Version() {

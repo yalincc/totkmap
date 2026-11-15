@@ -26,6 +26,16 @@ func coordsRespPath() string {
 	return filepath.Join(filepath.Dir(exe), "coords-resp.json")
 }
 
+func deepScanReqPath() string {
+	exe, _ := os.Executable()
+	return filepath.Join(filepath.Dir(exe), "deep-scan-req.json")
+}
+
+func deepScanRespPath() string {
+	exe, _ := os.Executable()
+	return filepath.Join(filepath.Dir(exe), "deep-scan-resp.json")
+}
+
 // startStatusAndCoordsLoop 启动对 totknavi-gui 的 status.json 状态同步与坐标校准通道。
 func startStatusAndCoordsLoop(p Platform) {
 	go statusLoop(p)
@@ -85,7 +95,8 @@ func statusLoop(p Platform) {
 				"jumps":     0,
 				"scans":     rescans,
 			},
-			"target": getTargetPC(),
+			"target":  getTargetPC(),
+			"profile": getActiveProfile().ID,
 		}
 		if lanURL != "" {
 			obj["lanUrl"] = lanURL
@@ -125,6 +136,27 @@ func coordsFileLoop() {
 	defer ticker.Stop()
 
 	for range ticker.C {
+		// 1) 独立扩大范围扫描请求（deep-scan-req.json）
+		if dp := deepScanReqPath(); dp != "" {
+			if ddata, derr := os.ReadFile(dp); derr == nil {
+				os.Remove(dp)
+				ddata = bytes.TrimPrefix(ddata, []byte{0xEF, 0xBB, 0xBF})
+				var dreq struct {
+					HasCoords bool    `json:"hasCoords"`
+					X         float64 `json:"x"`
+					Y         float64 `json:"y"`
+					Z         float64 `json:"z"`
+				}
+				_ = json.Unmarshal(ddata, &dreq)
+				logEvent("  [deep-scan] 收到 GUI 扩大范围扫描请求 (hasCoords=%v)", dreq.HasCoords)
+				RequestDeepScan(dreq.HasCoords, [3]float32{float32(dreq.X), float32(dreq.Y), float32(dreq.Z)})
+				resp := map[string]any{"ok": true, "started": true}
+				buf, _ := json.Marshal(resp)
+				os.WriteFile(deepScanRespPath(), buf, 0644)
+			}
+		}
+
+		// 2) 普通坐标校准请求（coords-req.json）
 		p := coordsReqPath()
 		data, err := os.ReadFile(p)
 		if err != nil {

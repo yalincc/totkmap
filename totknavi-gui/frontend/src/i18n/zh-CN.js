@@ -57,9 +57,15 @@ export default {
   },
   emu: {
     auto: 'PC-Recomp',
+    pc: 'PC-Recomp',
     ryujinx: 'Ryujinx',
     eden: 'Eden',
     pickTitle: '选择平台（PC版默认使用 pc-recomp）'
+  },
+  proc: {
+    auto: '自动进程 (totk.exe)',
+    pickTitle: '点开刷新进程列表，手动指定游戏进程',
+    switch: '已切换目标进程，请停止并重新「开始定位」生效'
   },
   buttons: {
     openMap: '打开网页地图',
@@ -75,6 +81,9 @@ export default {
     download: '下载',
     clear: '清屏',
     checkUpdate: '检查更新',
+    uploadDiag: '上传诊断',
+    notePlaceholder: '可选：补充一句问题描述（点发送直达开发者邮箱）',
+    send: '发送',
     exportDiag: '导出诊断包',
     chooseFile: '选择存档',
     chooseDir: '选择目录',
@@ -89,6 +98,8 @@ export default {
     calibration: '坐标校准',
     calWhenFail: '定位失败时使用',
     submit: '提交校准',
+    deepScan: '扩大范围扫描',
+    deepScanTip: '全进程深度扫描并生成本地校准配置，后续可自动秒锁',
     calHint: '填写游戏内角色坐标，校准扫描内存约 5-20s',
     placeholder: '如 {v}',
     localProgress: '本地解析进度',

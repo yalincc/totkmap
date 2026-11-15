@@ -153,15 +153,29 @@ func scanForPlayer(p Platform, plat *totkpcPlatform, anchor *[3]float32) (uintpt
 	return 0, nil, false
 }
 
+type deepScanReq struct {
+	hasHUD bool
+	hud    [3]float32
+}
+
 var (
-	reqRescanChan = make(chan struct{}, 1)
-	reqCoordChan  = make(chan [3]float32, 1)
+	reqRescanChan   = make(chan struct{}, 1)
+	reqCoordChan    = make(chan [3]float32, 1)
+	reqDeepScanChan = make(chan deepScanReq, 1)
 )
 
 // RequestRescan 请求重扫。
 func RequestRescan() {
 	select {
 	case reqRescanChan <- struct{}{}:
+	default:
+	}
+}
+
+// RequestDeepScan 请求独立扩大范围/全进程兜底扫描。
+func RequestDeepScan(hasHUD bool, hud [3]float32) {
+	select {
+	case reqDeepScanChan <- deepScanReq{hasHUD: hasHUD, hud: hud}:
 	default:
 	}
 }
@@ -273,6 +287,33 @@ func runTracker(p Platform, plat *totkpcPlatform, anchor *[3]float32, addr uintp
 					pstate.bumpRescan()
 					fmt.Printf("  [rescan] 扫描重锁成功 → 0x%X\n", lockedAddr)
 				}
+			}
+		case dsReq := <-reqDeepScanChan:
+			var ref *[3]float32
+			if dsReq.hasHUD {
+				mem := [3]float32{dsReq.hud[0], dsReq.hud[2] + elevBias, -dsReq.hud[1]}
+				ref = &mem
+			} else if hasPrev {
+				mem := [3]float32{prev[0], prev[2] + elevBias, -prev[1]}
+				ref = &mem
+			} else {
+				ref = anchor
+			}
+			if newAddr, newCands, ok := deepScanForPlayer(p, ref); ok {
+				lockedAddr = newAddr
+				cands = newCands
+				usingStaticChain = false
+				verified = len(newCands) > 0 && newCands[0].Rot
+				moveN = 0
+				lostTicks = 0
+				oscCount = 0
+				pstate.setGameStatus(true, p.PID(), lockedAddr)
+				pstate.bumpLock()
+				pstate.bumpRescan()
+				deepCalibrateAndSave(p, plat, lockedAddr)
+				logEvent("  [deep-scan] 📍 扩大范围扫描锁定 → 0x%X (verified=%v)", lockedAddr, verified)
+			} else {
+				logEvent("  [deep-scan] 全进程扫描仍未命中 —— 请确认已进入 3D 游戏世界，可填写当前 HUD 坐标后再试")
 			}
 		case hud := <-reqCoordChan:
 			fmt.Printf("  [coords] 收到手动校准坐标 (%.1f, %.1f, %.1f)，立即校准...\n", hud[0], hud[1], hud[2])

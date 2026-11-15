@@ -17,6 +17,7 @@ export { api, rt }
 // 不要在这里硬编码版本号——那是 xnavi/version.go CoreVersion 的唯一职责，
 // 两处各写一份必然漂移（历史遗留：此处曾写死 v1.2.0）。
 export const ver = ref('')
+export const edition = ref('emu')
 export const coreRunning = ref(false)
 export const isLocating = ref(false)
 export const updateInfo = ref(null)
@@ -52,7 +53,8 @@ export const target = ref(null)
 export const progressData = ref({})
 
 // ---- 配置 / 环境 ----
-export const cfg = reactive({ saveDirRyujinx: '', saveDirEden: '', emu: 'auto', tls: false, autoOpenMap: true })
+export const cfg = reactive({ saveDirRyujinx: '', saveDirEden: '', emu: 'auto', tls: false, autoOpenMap: true, customProc: '' })
+export const procList = ref([])
 export const envDetect = reactive({ save: false, saveRyu: false, saveEden: false })
 export const statusMapUrl = ref('')
 
@@ -224,6 +226,14 @@ function pushLogs(lines) {
       level = 'PROGRESS'
       color = 'text-slate-300'
       levelColor = 'text-emerald-500'
+    } else if (rawTag === 'deep-scan') {
+      level = 'DEEP'
+      color = 'text-amber-300'
+      levelColor = 'text-amber-400 font-semibold'
+    } else if (rawTag === 'profile') {
+      level = 'PROFILE'
+      color = 'text-sky-300'
+      levelColor = 'text-sky-400'
     } else if (rawTag === 'coords') {
       level = 'COORDS'
       color = 'text-teal-300'
@@ -308,8 +318,24 @@ export function coordsErrorText(r) {
   return t('cal.missDefault')
 }
 export async function saveSettings() {
-  await api.SaveConfig({ saveDirRyujinx: cfg.saveDirRyujinx, saveDirEden: cfg.saveDirEden, emu: cfg.emu, tls: cfg.tls, autoOpenMap: cfg.autoOpenMap !== false })
+  await api.SaveConfig({
+    saveDirRyujinx: cfg.saveDirRyujinx,
+    saveDirEden: cfg.saveDirEden,
+    emu: cfg.emu,
+    tls: cfg.tls,
+    autoOpenMap: cfg.autoOpenMap !== false,
+    customProc: cfg.customProc || ''
+  })
   await detectSave()
+}
+
+export async function refreshProcs() {
+  try {
+    const list = await api.ListProcesses()
+    procList.value = Array.isArray(list) ? list : []
+  } catch {
+    procList.value = []
+  }
 }
 export async function pickSaveFile() {
   const f = await api.PickSaveFile()
@@ -352,6 +378,14 @@ export async function checkForUpdates() {
   const r = await api.CheckForUpdates()
   if (r.status === 'available') updateInfo.value = { latest: r.latest, url: r.url }
   return r
+}
+
+export async function submitDeepScan(hasCoords, x, y, z) {
+  return await api.SubmitDeepScan(!!hasCoords, Number(x) || 0, Number(y) || 0, Number(z) || 0)
+}
+
+export async function uploadDiag(note) {
+  return await api.UploadDiagnostics(note || '')
 }
 
 // ---- 事件订阅 / 初始化 ----
@@ -416,10 +450,12 @@ export async function initCore() {
   logs.value = []
   steps.value.forEach(s => { s.state = s.key === 'ready' ? 'done' : 'idle' })
   ver.value = await api.Version()
+  try { edition.value = await api.Edition() } catch {}
   const c = await api.LoadConfig()
   if (c.saveDirRyujinx) cfg.saveDirRyujinx = c.saveDirRyujinx
   if (c.saveDirEden) cfg.saveDirEden = c.saveDirEden
   if (c.emu) cfg.emu = c.emu
+  if (c.customProc) cfg.customProc = c.customProc
   cfg.tls = !!c.tls
   if (c.autoOpenMap !== undefined) cfg.autoOpenMap = !!c.autoOpenMap
   const det = await api.EnvDetect()
