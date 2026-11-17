@@ -10,6 +10,7 @@ package main
 import (
 	"encoding/binary"
 	"fmt"
+	"math"
 	"time"
 )
 
@@ -101,52 +102,136 @@ func deepScanForPlayer(p Platform, anchor *[3]float32) (uintptr, []ptkHit, bool)
 	return 0, nil, false
 }
 
-// deepReverseStaticChains 在 mainBase 静态区中反扫指向 targetAddr 的 64 位指针链。
+// matchCoordOffsets 在堆对象切片内查找与 targetHud 坐标距离 <= maxDist 的 4 字节对齐偏移，
+// 返回 (非28B队列偏移列表, 28B队列兜底偏移列表)，优先使用真正的 Actor 实体坐标槽（载具飞行不冻结）。
+func matchCoordOffsets(heapBuf []byte, targetHud [3]float32, maxDist float32) (actorOffs, ringOffs []uintptr) {
+	for sOff := uintptr(0); sOff+12 <= uintptr(len(heapBuf)); sOff += 4 {
+		cx := math.Float32frombits(binary.LittleEndian.Uint32(heapBuf[sOff:]))
+		czs := math.Float32frombits(binary.LittleEndian.Uint32(heapBuf[sOff+4:]))
+		cyn := math.Float32frombits(binary.LittleEndian.Uint32(heapBuf[sOff+8:]))
+		if !ptkCoordOK(cx, czs, cyn) {
+			continue
+		}
+		cHud := [3]float32{cx, -cyn, czs - elevBias}
+		if dist3(cHud, targetHud) > maxDist {
+			continue
+		}
+		if ptkRun28Length(heapBuf, int(sOff)) >= 2 {
+			ringOffs = append(ringOffs, sOff)
+		} else {
+			actorOffs = append(actorOffs, sOff)
+		}
+	}
+	return actorOffs, ringOffs
+}
+
+// deepReverseStaticChains 在 mainBase 静态区中按当前林克坐标值反扫 64 位指针链，
+// 从而兼容不同 Recomp/游戏版本中与 28B 步进队列分离的 LEVEL-1 Actor 实体真身。
 func deepReverseStaticChains(h, mainBase, targetAddr uintptr) []StaticChainEntry {
-	if h == 0 || mainBase == 0 || targetAddr < deepScanMaxStructOff {
+	if h == 0 || mainBase == 0 || targetAddr == 0 {
 		return nil
 	}
-	var chains []StaticChainEntry
-	seen := make(map[string]bool)
-	const chunk = uintptr(4 * 1024 * 1024)
+	tBytes := readMem(h, targetAddr, 12)
+	if len(tBytes) < 12 {
+		return nil
+	}
+	tx := math.Float32frombits(binary.LittleEndian.Uint32(tBytes[0:]))
+	tzs := math.Float32frombits(binary.LittleEndian.Uint32(tBytes[4:]))
+	tyn := math.Float32frombits(binary.LittleEndian.Uint32(tBytes[8:]))
+	if !ptkCoordOK(tx, tzs, tyn) {
+		return nil
+	}
+	targetHud := [3]float32{tx, -tyn, tzs - elevBias}
 
-	for off := uintptr(0); off < deepScanMainWindow && len(chains) < deepScanMaxChains; off += chunk {
+	var actorChains, ringChains []StaticChainEntry
+	seen := make(map[string]bool)
+	checkedPtr := make(map[uintptr]bool)
+	const chunk = uintptr(4 * 1024 * 1024)
+	const maxCoordDiff = float32(0.5)
+
+	for off := uintptr(0); off < deepScanMainWindow && len(actorChains) < deepScanMaxChains; {
 		var mbi MemoryBasicInformation
 		if virtualQueryEx(h, mainBase+off, &mbi) == 0 {
 			break
 		}
-		if mbi.State != memCommit || mbi.Protect&0x01 != 0 || mbi.Protect&pageGuard != 0 {
+		regEnd := mbi.BaseAddress + mbi.RegionSize
+		nextOff := off + 0x1000
+		if regEnd > mainBase+off {
+			nextOff = regEnd - mainBase
+		}
+
+		readable := mbi.State == memCommit && mbi.Protect&0x01 == 0 && mbi.Protect&pageGuard == 0 && mbi.Protect&0xCC != 0
+		if !readable {
+			off = nextOff
 			continue
 		}
-		readLen := mbi.RegionSize
-		if readLen > chunk {
-			readLen = chunk
+
+		regLimit := nextOff
+		if regLimit > deepScanMainWindow {
+			regLimit = deepScanMainWindow
 		}
-		buf := readMem(h, mainBase+off, int(readLen))
-		for i := 0; i+8 <= len(buf); i += 8 {
-			ptr := uintptr(binary.LittleEndian.Uint64(buf[i : i+8]))
-			if ptr <= targetAddr && targetAddr-ptr <= deepScanMaxStructOff {
-				sOff := targetAddr - ptr
-				if sOff%4 != 0 {
+		for curOff := off; curOff < regLimit && len(actorChains) < deepScanMaxChains; curOff += chunk {
+			readLen := regLimit - curOff
+			if readLen > chunk {
+				readLen = chunk
+			}
+			buf := readMem(h, mainBase+curOff, int(readLen))
+			for i := 0; i+8 <= len(buf); i += 8 {
+				ptr := uintptr(binary.LittleEndian.Uint64(buf[i : i+8]))
+				if ptr < 0x100000000 || ptr >= 0x7FFFFFFFFFFF || ptr%4 != 0 {
 					continue
 				}
-				pOff := off + uintptr(i)
-				key := fmt.Sprintf("%X:%X", pOff, sOff)
-				if seen[key] {
+				if ptr >= mainBase && ptr < mainBase+deepScanMainWindow {
 					continue
 				}
-				seen[key] = true
-				chains = append(chains, StaticChainEntry{
-					PtrOffset:    formatHexPtr(pOff),
-					StructOffset: formatHexPtr(sOff),
-				})
-				if len(chains) >= deepScanMaxChains {
-					break
+				if checkedPtr[ptr] {
+					continue
+				}
+				checkedPtr[ptr] = true
+
+				heapBuf := readMem(h, ptr, int(deepScanMaxStructOff))
+				if len(heapBuf) < 12 {
+					continue
+				}
+				actorOffs, ringOffs := matchCoordOffsets(heapBuf, targetHud, maxCoordDiff)
+				pOff := curOff + uintptr(i)
+				for _, sOff := range actorOffs {
+					key := fmt.Sprintf("%X:%X", pOff, sOff)
+					if seen[key] {
+						continue
+					}
+					seen[key] = true
+					actorChains = append(actorChains, StaticChainEntry{
+						PtrOffset:    formatHexPtr(pOff),
+						StructOffset: formatHexPtr(sOff),
+					})
+					if len(actorChains) >= deepScanMaxChains {
+						break
+					}
+				}
+				if len(actorChains) < deepScanMaxChains {
+					for _, sOff := range ringOffs {
+						key := fmt.Sprintf("%X:%X", pOff, sOff)
+						if seen[key] {
+							continue
+						}
+						seen[key] = true
+						ringChains = append(ringChains, StaticChainEntry{
+							PtrOffset:    formatHexPtr(pOff),
+							StructOffset: formatHexPtr(sOff),
+						})
+					}
 				}
 			}
 		}
+		off = nextOff
 	}
-	return chains
+
+	out := append(actorChains, ringChains...)
+	if len(out) > deepScanMaxChains {
+		out = out[:deepScanMaxChains]
+	}
+	return out
 }
 
 // deepCalibrateAndSave 根据深度扫描命中的真身地址，生成并保存 pc_profile_local.json，
