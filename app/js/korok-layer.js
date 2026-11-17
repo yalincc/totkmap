@@ -13,7 +13,9 @@
   'use strict';
 
   var PATHS = (window.TOTK_KOROK_PATHS && window.TOTK_KOROK_PATHS.items) || [];
+  var CHALLENGES = (window.TOTK_KOROK_CHALLENGE_PATHS && window.TOTK_KOROK_CHALLENGE_PATHS.items) || [];
   var CAT_ID = { 18: 130, 20: 160 };
+  var KOROK_CAT_ID = { 18: 73, 20: 118 };
 
   var map = null;
   var group = null;
@@ -34,6 +36,13 @@
     var s = window.TOTK && window.TOTK.state;
     if (!s || !s.selected) return false;
     var id = CAT_ID[curLayer];
+    return !!(id && s.selected[id]);
+  }
+
+  function isChallengeOn() {
+    var s = window.TOTK && window.TOTK.state;
+    if (!s || !s.selected) return false;
+    var id = KOROK_CAT_ID[curLayer];
     return !!(id && s.selected[id]);
   }
 
@@ -77,14 +86,16 @@
     if (!map) return;
     if (group) { map.removeLayer(group); group = null; }
     campMks.length = 0;
-    if (!isOn() || !PATHS.length) return;
+    var showCarry = isOn() && PATHS.length;
+    var showChallenge = isChallengeOn() && CHALLENGES.length;
+    if (!showCarry && !showChallenge) return;
 
     var g = L.layerGroup();
     var s = window.TOTK && window.TOTK.state;
     var settings = window.TOTK_SETTINGS || {};
     var filter = s ? s.filter : 'all';
 
-    PATHS.forEach(function (p) {
+    if (showCarry) PATHS.forEach(function (p) {
       if (p.layer !== curLayer) return;
 
       var isDone = !!(s && s.done && s.done[p.id]);
@@ -170,6 +181,82 @@
       })(p.campId || p.id);
     });
 
+    if (showChallenge) CHALLENGES.forEach(function (p) {
+      if (p.layer !== curLayer) return;
+
+      var isDone = !!(s && s.done && s.done[p.id]);
+      var hideKorok = (settings.doneMode === 'hide' && (!settings.hideDoneTypes || settings.hideDoneTypes.korok !== false));
+      if (isDone && hideKorok) return;
+      if (filter === 'done' && !isDone) return;
+      if (filter === 'undone' && isDone) return;
+
+      var pts = p.path;
+      if (!pts || pts.length < 2 || !p.start) return;
+
+      var baseColor = '#f5b041';
+      var lineColor = isDone ? '#27ae60' : baseColor;
+      var opacity = isDone ? 0.55 : 0.92;
+
+      L.polyline(pts, {
+        color: 'rgba(15,20,15,0.85)',
+        weight: 4.5,
+        opacity: 0.6,
+        dashArray: '5, 7',
+        lineCap: 'round',
+        lineJoin: 'round',
+        interactive: false
+      }).addTo(g);
+
+      var line = L.polyline(pts, {
+        color: lineColor,
+        weight: 2.5,
+        opacity: opacity,
+        dashArray: '5, 7',
+        lineCap: 'round',
+        lineJoin: 'round',
+        className: 'korok-path-line',
+        interactive: true
+      }).addTo(g);
+
+      var isEn = window.I18N && window.I18N.getLang() === 'en';
+      var kindText = isEn ? (p.kind === 'ring' ? 'Korok Ring Race' : (p.kind === 'stump' ? 'Korok Stump Race' : 'Korok Flower Trail')) : p.kindCn;
+      var startText = isEn ? (p.kind === 'flower' ? 'First Flower (Start)' : 'Start Stump') : (p.kindCn + '起点');
+      var tipLine = (isDone ? '✓ ' : '') + kindText + (isEn ? (' · ~' + p.dist + 'm') : (' · 距终点约 ' + p.dist + 'm'));
+      var tipStart = (isDone ? '✓ ' : '') + startText + (isEn ? (' · ~' + p.dist + 'm') : (' · 距终点约 ' + p.dist + 'm'));
+
+      line.bindTooltip(tipLine, {
+        direction: 'top',
+        className: 'mk-label' + (isDone ? ' done-label' : '')
+      });
+
+      var startDot = L.circleMarker(p.start, {
+        radius: 5,
+        color: '#0f140f',
+        weight: 2,
+        fillColor: lineColor,
+        fillOpacity: opacity,
+        className: 'korok-path-line',
+        interactive: true
+      }).addTo(g);
+
+      startDot.bindTooltip(tipStart, {
+        direction: 'top',
+        offset: [0, -6],
+        className: 'mk-label' + (isDone ? ' done-label' : '')
+      });
+
+      (function (pid) {
+        var openFn = function (e) {
+          var m = findMarkerById(pid);
+          if (m && window.TOTK && window.TOTK.openDetail) {
+            window.TOTK.openDetail(m, e);
+          }
+        };
+        line.on('click', openFn);
+        startDot.on('click', openFn);
+      })(p.id);
+    });
+
     g.addTo(map);
     group = g;
   }
@@ -184,7 +271,7 @@
     var hideKorok = (settings.hideDoneTypes && settings.hideDoneTypes.korok !== false) ? '1' : '0';
     /* V2.6.0：zoom 不再进 signature —— 缩放动画期间 150ms 轮询会判定"变了"而销毁重建图层，
        连线因此在动画途中断开、与端点脱节。尺寸改由 zoomend 就地更新（见 updateSizes）。 */
-    return curLayer + '|' + (isOn() ? '1' : '0') + '|' + filter + '|' + doneCount + '|' + doneMode + '|' + hideKorok;
+    return curLayer + '|' + (isOn() ? '1' : '0') + '|' + (isChallengeOn() ? '1' : '0') + '|' + filter + '|' + doneCount + '|' + doneMode + '|' + hideKorok;
   }
 
   /* 缩放结束后就地换图标（尺寸随 3-Tier 分级变化），不重建图层 */

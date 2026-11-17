@@ -60,7 +60,7 @@
   var AREA_SKY = window.TOTK_AREA_SKY || [];
   var AREA_DEPTHS = window.TOTK_AREA_DEPTHS || [];
 
-  var VERSION = 'TOTKMAP V2.8.4';
+  var VERSION = 'TOTKMAP V2.8.5';
   /* V2.8 克洛格谜题类型中文名（兜底；正式文案走 i18n 的 korok.type.*）
    * 由 tools/build_korok_info.py 依据 ROMFS 克洛格 actor 自动标注，
    * 分类参考游民星空「呀哈哈机关解密方法汇总」。 */
@@ -1311,11 +1311,28 @@
     var ql = q.toLowerCase();
     var nameHits = [];
     var descHits = [];
+    var KI = window.TOTK_KOROK_INFO || {};
+    var korokNoMatch = /^(?:no\.?\s*)?0*(\d{1,4})$/i.exec(q.trim());
+    var korokTargetNo = korokNoMatch ? parseInt(korokNoMatch[1], 10) : null;
+    if (korokTargetNo != null && korokTargetNo > 0 && korokTargetNo <= 1000) {
+      for (var ki = 0; ki < MARKERS.length; ki++) {
+        var km = MARKERS[ki];
+        var info = KI[km.id];
+        if (info && info.no === korokTargetNo) {
+          nameHits.push(km);
+        }
+      }
+    }
     for (var i = 0; i < MARKERS.length; i++) {
       var m = MARKERS[i];
       if (m.layer !== state.layer) continue;
+      if (nameHits.indexOf(m) >= 0) continue;
       var enName = window.I18N ? window.I18N.nameOf(m) : '';
       var nameHay = ((m.name || '') + ' ' + (m.full || '') + ' ' + enName).toLowerCase();
+      var kInfo = KI[m.id];
+      if (kInfo && kInfo.no != null) {
+        nameHay += ' no.' + String(kInfo.no).padStart(4, '0') + ' ' + kInfo.no;
+      }
       /* 残影士兵标点联动武器池检索：支持搜武器名（如近卫双手剑、王族之枪、洁净、无腐蚀等）秒中石柱 */
       if ((m.cat >= 241 && m.cat <= 248) && window.TOTK_SHADOW_WEAPONS) {
         var SW_POOL = window.TOTK_SHADOW_WEAPONS.pools;
@@ -1366,14 +1383,23 @@
     }
     var html = '';
     hits.forEach(function (m) {
-      var cat = catById(state.layer, m.cat);
+      var cat = catById(m.layer, m.cat);
       var catName = cat ? (window.I18N ? window.I18N.catOf(cat.name) : cat.name) : '';
+      if (m.layer !== state.layer) {
+        var lTag = window.I18N ? window.I18N.t('layer.' + (m.layer === 20 ? 'sky' : m.layer === 19 ? 'depths' : 'surface')) : (m.layer === 20 ? '天空' : m.layer === 19 ? '地底' : '地上');
+        catName += (catName ? ' · ' : '') + lTag;
+      }
       if (nameHits.indexOf(m) < 0) {
         catName += (catName ? ' · ' : '') + (window.I18N && window.I18N.getLang() === 'en' ? 'Desc match' : '描述匹配');
       }
+      var kInfo = KI[m.id];
+      var dispName = window.I18N ? window.I18N.nameOf(m) : (m.name || m.full);
+      if (kInfo && kInfo.no != null) {
+        dispName = 'No.' + String(kInfo.no).padStart(4, '0') + ' ' + dispName;
+      }
       html += '<div class="sr-item" data-id="' + m.id + '">' +
         (cat && cat.icon ? '<img src="assets/icons/' + esc(cat.icon) + '" alt="">' : '') +
-        '<span class="sr-name">' + esc(window.I18N ? window.I18N.nameOf(m) : (m.name || m.full)) + '</span>' +
+        '<span class="sr-name">' + esc(dispName) + '</span>' +
         '<span class="sr-cat">' + esc(catName) + '</span>' +
         '</div>';
     });
@@ -1435,6 +1461,9 @@
           if (MARKERS[i].id === id) { m = MARKERS[i]; break; }
         }
         if (!m) return;
+        if (m.layer !== state.layer) {
+          switchLayer(m.layer, true);
+        }
         // 确保该分类被选中
         if (!state.selected[m.cat]) {
           state.selected[m.cat] = true;
@@ -1523,6 +1552,25 @@
       saveJson(LS_AREA, state.areaOn);
       if (sw) sw.checked = !!state.areaOn;
       if (box) box.classList.toggle('cur', !!state.areaOn);
+      // 联动洞穴入口（地上70 / 天空116）与井（地上82）：开启时自动勾选，关闭时自动取消；开启期间仍可手动单独取消
+      var linkedByLayer = { 18: [70, 82], 20: [116] };
+      Object.keys(linkedByLayer).forEach(function (ly) {
+        var bucket = state.selectedByLayer && state.selectedByLayer[ly];
+        if (!bucket) return;
+        linkedByLayer[ly].forEach(function (cid) {
+          if (state.areaOn) bucket[cid] = true;
+          else delete bucket[cid];
+        });
+      });
+      if (state.selected && linkedByLayer[state.layer]) {
+        linkedByLayer[state.layer].forEach(function (cid) {
+          if (state.areaOn) state.selected[cid] = true;
+          else delete state.selected[cid];
+        });
+      }
+      saveSelected();
+      buildCatalogPanel();
+      renderMarkers();
       buildAreaOverlays();
     }
     // label 的 for 属性自动切换 input，change 统一处理
