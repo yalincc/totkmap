@@ -11,6 +11,7 @@ package main
 
 import (
 	"fmt"
+	"math"
 	"time"
 )
 
@@ -24,6 +25,97 @@ func scanGroups(p Platform, plat *totkpcPlatform, blks []MemBlock, anchor *[3]fl
 		}
 	}
 	return ptkGroupHits(ident), true
+}
+
+// huntMoving 判定"锁定候选是静态残影"后的兜底：两次全范围扫描做差分，
+// 只保留同一地址在间隔内发生合理位移的槽，并优先选择靠近任一存档锚点的候选
+// （存档锚点可能过期，但玩家的真实位置通常仍在某个存档点附近，而静态残影不会动）。
+//
+// 扫描两次各约 0.7s，中间 700ms 给玩家移动，整体阻塞约 2.1s，只在验证卡死时调用。
+func huntMoving(p Platform) (uintptr, [3]float32, bool) {
+	blks := p.Blocks(0.0625)
+	if len(blks) == 0 {
+		return 0, [3]float32{}, false
+	}
+
+	g1, _ := scanGroups(p, nil, blks, nil)
+	if len(g1) == 0 {
+		return 0, [3]float32{}, false
+	}
+	time.Sleep(700 * time.Millisecond)
+	g2, _ := scanGroups(p, nil, blks, nil)
+
+	best, ok := selectMovedCandidate(g1, g2, readAnchors(p))
+	if !ok {
+		return 0, [3]float32{}, false
+	}
+	return best.Addr, hudOf(best), true
+}
+
+// selectMovedCandidate 从两次扫描结果里挑出"真正在动的玩家槽"。
+// 纯函数，便于单测；判定顺序：同地址位移合理 → 非局部坐标 → 离任一存档锚点 ≤300m
+// → 最近锚点优先，其次副本数、位移。
+func selectMovedCandidate(g1, g2 []ptkHit, anchors []*SaveAnchor) (ptkHit, bool) {
+	prev := make(map[uintptr]ptkHit, len(g1))
+	for _, g := range g1 {
+		prev[g.Addr] = g
+	}
+
+	type mov struct {
+		h     ptkHit
+		delta float32
+		ancD  float32
+	}
+	var moved []mov
+	for _, g := range g2 {
+		o, ok := prev[g.Addr]
+		if !ok {
+			continue
+		}
+		d := dist3(o.P, g.P)
+		// 0.7s 内合理位移：起步 ~1m，冲刺/滑翔 ~6m；静止与瞬移都丢掉
+		if d < 0.3 || d > 8.0 {
+			continue
+		}
+		// 排除局部坐标系（神庙/物件内部空间）：贴近原点的一律不要
+		if abs32(g.P[0]) < 50 && abs32(-g.P[2]) < 50 {
+			continue
+		}
+		ancD := float32(1e9)
+		for _, a := range anchors {
+			if v := dist3(g.P, a.Pos); v < ancD {
+				ancD = v
+			}
+		}
+		// 玩家通常不会离所有存档点都超过 300m；超出说明大概率是场景杂物
+		if len(anchors) > 0 && ancD > 300 {
+			continue
+		}
+		moved = append(moved, mov{h: g, delta: d, ancD: ancD})
+	}
+	if len(moved) == 0 {
+		return ptkHit{}, false
+	}
+
+	// 先按"离最近存档锚点"由近到远，再按副本数/位移排序；
+	// 玩家通常就在某个存档点附近，而场景里其他运动物体不会刚好贴着存档点。
+	for i := 0; i < len(moved); i++ {
+		for j := i + 1; j < len(moved); j++ {
+			a, b := moved[i], moved[j]
+			better := false
+			if math.Abs(float64(a.ancD-b.ancD)) > 30 {
+				better = b.ancD < a.ancD
+			} else if a.h.Copies != b.h.Copies {
+				better = b.h.Copies > a.h.Copies
+			} else {
+				better = b.delta > a.delta
+			}
+			if better {
+				moved[i], moved[j] = moved[j], moved[i]
+			}
+		}
+	}
+	return moved[0].h, true
 }
 
 // findMoving --find 主流程。
