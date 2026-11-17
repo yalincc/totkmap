@@ -37,6 +37,7 @@ import (
 //         预检弹窗（>50m 警告可强制继续，Vue 悬浮卡）。
 // V2.2.0：核心新增第 6 条锁定途径「指针链快路径」（跑动掉锁后毫秒级重锁）；
 //         GUI 侧无 UI 改动，仅版本号对齐核心。
+// V3.3.1：PC 版扩大范围扫描改为按三维坐标值反推 LEVEL-1 静态指针链，解决「静态链 0 条」与载具飞行轨迹冻结问题；并合入 L2 静止残影自愈与存档锚点清洗。
 // V3.3.0：PC 版支持独立扩大范围扫描、OBS 式进程下拉选择、多端口自动顺延、EdgeOne 诊断直传（同步支持模拟器版）。
 // V3.2.0：PC 版独立扩大范围扫描 + 自动生成本地配置 pc_profile_local.json + EdgeOne 诊断直传 + PC 版隐藏模拟器选项。
 // V3.1.2：对齐核心版本 v3.1.2，PC 重编译版静态指针链直读秒锁 + 修复存档 mtime 乱序。
@@ -49,7 +50,7 @@ import (
 // defaultDiagUploadURL 诊断日志直发接口（EdgeOne Pages Node Function）。
 const defaultDiagUploadURL = "https://botw.yalin.site/api/diag"
 
-const guiVersion = "v3.3.0"
+const guiVersion = "v3.3.1"
 
 // App Wails 后端：管理核心子进程 + 读 status.json / xnavi-gui-core.log + 网页端端口探测。
 // 与核心的通信完全走文件（status.json、xnavi-gui-core.log），不依赖 8766 HTTP——

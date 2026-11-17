@@ -20,4 +20,4 @@ package main
 // 换算常数 K，走固定偏移链读坐标；跑动掉锁后毫秒级重锁，失败回退 known/扫描/校准）。
 // V2.1.2：定位引擎 Bug C~H 修复（两个 if 判据 + known 自愈 + 扫描互斥 +
 // 组代表基准 + 空组拒绝）；手机镜像 Bug A（引导页/根路径/appReady 三态）。
-const CoreVersion = "v3.3.0"
+const CoreVersion = "v3.3.1"
