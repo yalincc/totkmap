@@ -51,7 +51,7 @@
     "npc_en": "Npc_HighMountain003",
     "start_zh": "桃虹想到了需使用冷气果的新点子。但是桃虹手上并没有关键的",
     "start_en": "Talk to Molli at Rito Village. She has an idea for crafting ice arrows but needs an Ice Fruit.",
-    "note_zh": "",
+    "note_zh": "桃虹想用冷气果制作冰冻箭：给她冷气果（白丘丘胶也可：打倒冰丘丘，或对丘丘胶用冰属性）→ 她立刻做出冰冻箭并赠送木箭。前置：在利特村底部与孩子们对话后（孩子们会散开）。",
     "note_en": "Hand an Ice Fruit over to Molli. She will gladly reward you with a bundle of arrows.",
     "reward_zh": [],
     "reward_en": [
@@ -207,7 +207,7 @@
     "npc_en": "Dm_Npc_Raul",
     "start_zh": "巡遍所有破魔神庙，在最后一座神庙的最深处传来了劳鲁的声音。前往时之神殿的话，他似乎就会将某物传授给你……",
     "start_en": "Upon completing all 152 Shrines of Light, Rauru's voice speaks to you at the final shrine, inviting you to the Temple of Time.",
-    "note_zh": "",
+    "note_zh": "接受劳鲁的邀请前往时之神殿 → 开启女神像正后方的宝箱，获得古代勇者服（据说是曾拯救海拉鲁的英雄之魂的证明）。",
     "note_en": "Travel to the Temple of Time on the Great Sky Island and open the treasure chest behind the goddess statue.",
     "reward_zh": [],
     "reward_en": [
@@ -225,7 +225,7 @@
     "npc_en": "科普思",
     "start_zh": "少年科普思正在寻找相传古代鼓隆族居住的都市",
     "start_en": "Speak with the young Goron Kopsha near Goron City. He is searching for the legendary ancient city of Gorondia.",
-    "note_zh": "",
+    "note_zh": "少年科普思想寻找古代鼓隆都市鼓隆提亚。把旁边的矿车放上轨道，与科普思对话让他上车 → 连接第二辆矿车并装上风扇 → 驾驶矿车沿轨道把他平安送到尤诺波公司总部。完成后开启「发现古代都市鼓隆提亚！？」。",
     "note_en": "Place a mine cart on the track, attach a Fan, and transport Kopsha along the rails to the designated tunnel.",
     "reward_zh": [],
     "reward_en": [
@@ -599,7 +599,7 @@
     "npc_en": "谷拉廉斯",
     "start_zh": "从监视堡垒讨伐队本部的谷拉廉斯那里听取了情报。据他所述，讨伐队在阿卡莱地区的北阿卡莱高地发现了岩石块一般的巨大怪物",
     "start_en": "Speak with Gralens in the emergency shelter at Lookout Landing to receive monster bounty intel.",
-    "note_zh": "",
+    "note_zh": "打它头顶的矿石，用炸弹花或锤类武器。",
     "note_en": "Travel to the North Akkala Foothill, locate and eliminate the Stone Talus, then report back to Gralens.",
     "reward_zh": [],
     "reward_en": [
@@ -617,7 +617,7 @@
     "npc_en": "谷拉廉斯",
     "start_zh": "从监视堡垒讨伐队本部的谷拉廉斯那里听取了情报。据他所述，调查队在格鲁德沙漠的东格鲁德发现了如鱼一般游动的巨大怪物",
     "start_en": "Speak with Gralens in the emergency shelter at Lookout Landing to receive monster bounty intel.",
-    "note_zh": "",
+    "note_zh": "站在高处往沙地投炸弹花，把它引出来；别站在沙地上。",
     "note_en": "Travel to East Gerudo in the Gerudo Desert, locate and slay the Molduga, and report back to Gralens.",
     "reward_zh": [],
     "reward_en": [
@@ -635,7 +635,7 @@
     "npc_en": "谷拉廉斯",
     "start_zh": "从监视堡垒讨伐队本部的谷拉廉斯那里听取了情报。据他所述，在海拉鲁平原东北边的森林驿站",
     "start_en": "Speak with Gralens in the emergency shelter at Lookout Landing to receive monster bounty intel.",
-    "note_zh": "",
+    "note_zh": "射它的眼睛，它会捂眼倒地，趁机上前输出。",
     "note_en": "Travel to the forest area near Woodland Stable northeast of Hyrule Field, defeat the Hinox, and return to report to Gralens.",
     "reward_zh": [],
     "reward_en": [
@@ -1133,7 +1133,7 @@
     "npc_en": "NPC_Lanayru001",
     "start_zh": "前职业踩盾滑行家丝莱米下落不明。听说她去寻找踩盾滑行的新赛道，但一直没有回来。据徒弟拉塞尔所说，他的搭档芬正在",
     "start_en": "Talk to Russ at Selmie's Spot in the Hebra Mountains. Selmie went missing while scouting new shield-surfing slopes.",
-    "note_zh": "",
+    "note_zh": "比隆雪原东侧山谷跟烟信号找徒弟芬 → 东比隆雪原洞窟打破红色沉积岩找丝莱米 → 深处破岩开出外出通道 → 回丝莱米据点小屋，获赠盾牌、收为第三名弟子。",
     "note_en": "Follow the smoke down the slope near Lake Kilsi to find Fin. Enter East Biron Snowshelf Cave and break through the cracked rock wall to find and rescue Selmie.",
     "reward_zh": [],
     "reward_en": [
@@ -1313,7 +1313,7 @@
     "npc_en": "夕尔",
     "start_zh": "成功通关了阿沅队策划的“矿车乐园”初级赛道后，夕尔邀请你游玩面向中水平玩家的赛道。",
     "start_en": "After beating the beginner course at Mine-Cart Land, talk to Slergo to unlock the intermediate Quickshot Course.",
-    "note_zh": "",
+    "note_zh": "前置：完成「开园！矿车乐园！」。中级赛道：时限 1:20 内在移动矿车上射爆 7 个气球（用速射弓，或融合眼球做追踪箭；下车即取消资格）。首局免费并赠送 10 支箭。完成后解锁死亡之山赛道。",
     "note_en": "Ride the mine cart and shoot down at least 7 target balloons with your arrows before crossing the finish line.",
     "reward_zh": [],
     "reward_en": [
@@ -1341,7 +1341,7 @@
     "npc_en": "卡贝塔",
     "start_zh": "卡贝塔似乎想出了超高难度的矿车赛道，地点就在死亡之山上。卡贝塔只留下了一句“我在",
     "start_en": "Talk to Bayge after clearing the Quickshot Course to accept his challenge on Death Mountain.",
-    "note_zh": "",
+    "note_zh": "前置：完成「速射矿车游戏！」。死亡之山超高难度赛道：时限 2:00 内射爆 8 个气球。卡贝塔赠送 10 支箭，首局免费（可加风扇倒车修正）。完成全部矿车乐园赛道后获赠鼓隆布料（可去哈特诺村改衣服）。",
     "note_en": "Climb up to Death Mountain's summit, ride the mine cart on the high-speed rails around the crater, and pop at least 8 targets.",
     "reward_zh": [],
     "reward_en": [
@@ -1368,7 +1368,7 @@
     "npc_en": "Npc_HighMountain013",
     "start_zh": "哈库在往利特村搬运雪原驿站分来的物资途中，被",
     "start_en": "Speak with Huck along the road between Snowfield Stable and Rito Village.",
-    "note_zh": "",
+    "note_zh": "哈克从雪原驿站运物资往利特村途中被翼蜥群围困。打倒空中盘旋的翼蜥群——箭上融合眼球（卡西瓦眼球/翼蜥眼球）即可自动追踪，一箭一只。打倒后向哈克报告。",
     "note_en": "Shoot down all the Aerocudas circling overhead that are threatening the supply cart, then talk to Huck.",
     "reward_zh": [],
     "reward_en": [
@@ -1498,7 +1498,7 @@
     "npc_en": "西蒙",
     "start_zh": "面对不愿相信很久以前的灾难故事的孩子们，西蒙认为只要能给孩子们展示“描绘着灾厄的屏风”的",
     "start_en": "Visit the Hateno School during morning class (9:00 AM - 2:00 PM) and speak with the teacher, Symin.",
-    "note_zh": "",
+    "note_zh": "孩子们不信灾厄的故事：去卡卡利科村帕雅宅邸（原英帕宅邸，村西侧长阶梯大宅）二楼，用普尔亚平板拍下「描绘灾厄的屏风」→ 白天回学校把照片给西蒙看。完成后可与西蒙继续接「老师，教教我吧！2」。",
     "note_en": "Travel to Kakariko Village, enter Lady Paya's mansion, take a photo of the ancient Calamity Screen on the second floor, and show it to Symin.",
     "reward_zh": [],
     "reward_en": [
@@ -1755,7 +1755,7 @@
     "npc_en": "Npc_RiverSideHatago002",
     "start_zh": "如果能",
     "start_en": "Speak with Parcy at Riverside Stable.",
-    "note_zh": "",
+    "note_zh": "直接用爆炸花一箭即可",
     "note_en": "Fuse a high-power monster horn or material to a weapon to achieve exceptional striking power, then show the fused weapon to Parcy.",
     "reward_zh": [],
     "reward_en": [
@@ -1801,7 +1801,7 @@
     "npc_en": "Npc_Umii_Ichikara_Scholar_C",
     "start_zh": "左纳乌调查队的悉伊达和松达建筑店一起，正在尝试制作使用了左纳乌装置的载具。虽然只要找到",
     "start_en": "Talk to Fern of the Zonai Survey Team at the Tarrey Town construction grounds.",
-    "note_zh": "",
+    "note_zh": "给试作车装操纵杆（工地旁装置机可出，约3808,1562,0090）→ 时限3:00触碰全部5个光点并回起点（手离操纵杆/出赛道取消资格）。完成后开启「征服一始拉力赛」。",
     "note_en": "Attach a Steering Stick to the prototype wheeled vehicle, hop on, and drive it through all the course gates within the time limit.",
     "reward_zh": [],
     "reward_en": [
@@ -2574,7 +2574,7 @@
     "npc_en": "皮阿斐",
     "start_zh": "格鲁德峡谷驿站的主人皮阿斐想要一幅据说存在于驿站西北方",
     "start_en": "Examine the second blank picture frame inside Gerudo Canyon Stable to speak with Piaffe.",
-    "note_zh": "",
+    "note_zh": "驿站主人皮阿斐想要「被遗忘的剑」的画作。剑位于格鲁德山顶（冰雪古栗欧克正东，-4024,-0956,0709），拍下照片回驿站交给皮阿斐即可。前置：「给地底人拍照！」（主线）+ 完成「受困的皮阿斐」。",
     "note_en": "Climb to the northern peak of Gerudo Summit, photograph the Forgotten Sword held by the colossal Eighth Heroine statue, and show it to Piaffe.",
     "reward_zh": [],
     "reward_en": [
@@ -2855,7 +2855,7 @@
     "npc_en": "Npc_Road_002",
     "start_zh": "餐厅的主厨巴尔达斯对剩饭的本戈感到相当愤慨。看来如果不带来被浪费的食材　，就不会放他回去。据说在",
     "start_en": "Speak with Chef Baldas and Bohne at the Bedrock Bistro. Baldas demands replacement Marbled Rock Roast before letting Bohne leave.",
-    "note_zh": "",
+    "note_zh": "沿餐厅东侧轨道入东餐厅洞窟（内有熔岩，需防火药/防火服），最深处拿岩烧肉（完成「鼓隆城的尤诺波」后为大理石纹岩烧肉）→ 与矿车一起装风扇乘矿车运回交给本戈。",
     "note_en": "Head into Restaurant West Cave nearby, find a piece of Marbled Rock Roast, carry it back on a mine cart to the bistro, and deliver it to Baldas.",
     "reward_zh": [],
     "reward_en": [
@@ -3351,7 +3351,7 @@
     "npc_en": "subchallnpc000_DuelPeak",
     "start_zh": "从多米达克和布利森兄弟口中得知的古代文献如下：“于西哈特尔并列的双子处有着面对面的兄弟石窟，向哥哥展示弟弟的标志，通往宝物的大门便会打开。”据说只要解开这个谜题就能获得大盗拉姆达的财宝。",
     "start_en": "Purchase the clue from Domidak and Prissen outside Cephla Lake Cave regarding the twin mountains.",
-    "note_zh": "",
+    "note_zh": "双子山南北洞窟相对：①北洞窟(1194,-1854,0158)深处拍顶棚图案 → ②通天术出洞进南洞窟(1183,-1948,0246) → ③按照片白色标记放石头到三角形压力板 → 石门开，宝箱=汀空衬衫。",
     "note_en": "Look at the rock pattern on the ceiling of Dueling Peaks North Cave. Go to Dueling Peaks South Cave and arrange the rocks on the floor switches to mirror the exact pattern of the northern cave.",
     "reward_zh": [],
     "reward_en": [
@@ -3417,7 +3417,7 @@
     "npc_en": "subchallnpc000_DuelPeak",
     "start_zh": "从多米达克和布利森兄弟口中得知的古代文献如下：“乌洛克海角眺望哈特尔海，海角之下有一处海盗遗留下来的石窟，用嘴吹出音调，通往宝物的大门便会打开。”据说只要解开这个谜题就能获得大盗拉姆达的财宝。",
     "start_en": "Purchase the Pirate Manuscript from Domidak and Prissen outside Cephla Lake Cave.",
-    "note_zh": "",
+    "note_zh": "谜题：乌洛克海角眺望哈特尔海，海角之下有海盗遗留的石窟。前往凯普卡利斯海角崖底洞窟 (3650,-3211,-0006)，在洞内吹口哨让机关墙打开 → 宝箱在沉船左侧下层箱堆后，获得汀空紧身裤。",
     "note_en": "Sail or glide into Cape Cales Cliffbase Cave beneath Cape Cales. Stand facing the wooden gate inside and press the down button on the D-pad to whistle, opening the entrance to the pirate ship vault.",
     "reward_zh": [],
     "reward_en": [

@@ -1566,11 +1566,11 @@ window.TOTK_SHRINES_GUIDE = {
     "name_en": "Shrine of Resurrection",
     "trial_zh": "",
     "trial_en": "",
-    "place_zh": "",
+    "place_zh": "初始台地复苏神庙洞窟入口",
     "place_en": "Cave entrance leading into the Shrine of Resurrection on the Great Plateau.",
-    "note_zh": "",
+    "note_zh": "通往初始台地复苏神庙的洞窟入口，内有恢复泉水与依盖队据点。",
     "note_en": "Connects to the Shrine of Resurrection, featuring a recovery pool and the Yiga Clan hideout.",
-    "chest_zh": "",
+    "chest_zh": "无神庙宝箱。",
     "chest_en": "No shrine chest."
   },
   "2887": {
@@ -1579,11 +1579,11 @@ window.TOTK_SHRINES_GUIDE = {
     "name_en": "Shrine of Resurrection",
     "trial_zh": "",
     "trial_en": "",
-    "place_zh": "",
+    "place_zh": "初始台地复苏神庙洞窟内部",
     "place_en": "Inside the Shrine of Resurrection cave on the Great Plateau.",
-    "note_zh": "",
+    "note_zh": "击败攀附在复苏神庙洞窟天花板上的魔犹伊，即可收集魔犹伊的遗失物。",
     "note_en": "Defeat the Bubbulfrog clinging to the cavern ceiling to collect its Bubbul Gem.",
-    "chest_zh": "",
+    "chest_zh": "击败魔犹伊可获得魔犹伊的遗失物。",
     "chest_en": "Defeat the Bubbulfrog to obtain a Bubbul Gem."
   },
   "2286": {
