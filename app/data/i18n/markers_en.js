@@ -3833,5 +3833,7 @@ window.TOTK_MARKERS_EN = {
   "8708": "Decayed Gerudo Scimitar",
   "8709": "Decayed Cobble Crusher",
   "8710": "Forest Dweller's Sword (Decayed)",
-  "8711": "Feathered Edge (Decayed)"
+  "8711": "Feathered Edge (Decayed)",
+  "8712": "Pondside Cave",
+  "8713": "Mining Cave"
 };
