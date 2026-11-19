@@ -1,6 +1,6 @@
 # TOTKnavi 问题排查与速查表（TROUBLESHOOTING）
 
-**适用版本**：TOTKnavi v3.0.1。
+**适用版本**：TOTKnavi v3.3.x（Switch 模拟器版 / PC 重编译版通用）。
 **排查原则**：开着 TOTKnavi、界面显示状态时做排查（不要关掉窗口再测，关窗口会导致后台核心停止、端口释放，测出假故障）。
 
 ---
@@ -47,8 +47,20 @@ tasklist /fi "pid eq 12345"
 http://127.0.0.1:8766/pos
 ```
 - 浏览器显示包含 `{"ok":true,"gx":...}` 的 JSON 数据：说明**定位核心与网络完全正常**！
-  此时网页端地图打不开红点，100% 是浏览器安装的某些脚本或全局代理拦截了本地 `127.0.0.1`，把 `127.0.0.1` 与 `localhost` 加入代理白名单即可。
-- 浏览器提示拒绝连接：检查 Windows 防火墙或杀毒软件是否拦截了 `totknavi-core.exe`。
+  此时网页端地图打不开红点，100% 是浏览器权限或代理拦截了本地 `127.0.0.1`，按下方 F12 报错码表对号入座。
+- 浏览器提示拒绝连接：检查 Windows 防火墙、杀毒软件（360/火绒/电脑管家/Defender）或加速器 TUN 模式是否拦截了 `totknavi-core.exe`。
+
+### 第四步：定位成功但网页连不上 —— F12 报错码速查表
+
+在地图网页（`https://totk.yalin.site`）按 `F12` 切换到 **Console（控制台）**，对照红色报错文字：
+
+| 报错码（F12 Console） | 根因 | 解法 |
+|---|---|---|
+| `Permission was denied for this request to access the 'loopback' address space` | **浏览器「设备上的应用 / 本地网络访问」权限被拒绝**（Edge/Chrome 142+ 常见，弹窗点过禁止后重启电脑也不会恢复） | 点地图页**地址栏左侧的锁/权限图标** → 打开 **「设备上的应用」**（或在「此站点的权限」里将 **「本地网络访问」** 改为允许）→ 按 F5 刷新网页 |
+| `ERR_BLOCKED_BY_PRIVATE_NETWORK_ACCESS` | 浏览器私网访问（PNA）拦截（部分第三方内核/企业策略） | 换最新版 Chrome/Edge，或直开本地镜像页 `http://127.0.0.1:8766/botw/` |
+| `ERR_PROXY_CONNECTION_REFUSED` 或请求走了代理 | **代理工具接管了 localhost**（梯子/Clash 等未绕过本地地址）——最常见，重启电脑不解决 | 代理加绕过规则：`127.0.0.1;localhost;192.168.*`，或直接关闭代理再试 |
+| `ERR_CONNECTION_REFUSED` | 那一刻 8766 上没有程序监听：核心没在跑（注意：关掉 TOTKnavi 窗口 = 核心停止），或端口被占 | 保持 TOTKnavi 运行并按上面一、二步用 `netstat`/`tasklist` 核查 |
+| `Failed to fetch`，且 Network 里请求异常 | 线上网页被缓存成旧版 JS | 强刷 `Ctrl + F5`，或清站内缓存后重试 |
 
 ---
 

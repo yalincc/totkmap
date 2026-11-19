@@ -12,6 +12,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"os"
+	"path/filepath"
 	"sort"
 	"strings"
 )
@@ -42,14 +43,13 @@ type parsedSave struct {
 }
 
 // findLatestProgress 返回 (mtime_sec, path)：按平台存档根优先级，每个根内
-// 取 mtime 最新且优先 slot_00（与 live-python _find_save 同口径）。
-// 多根处理（2026-10-09 修复）：Eden 模式 roots=[Eden便携根, ..., APPDATA Ryujinx
-// 兜底]，游戏在 Eden 跑时应显示 Eden 存档进度——按 roots 顺序取第一个有结果的根，
-// 不再全局 mtime 排序（否则 Ryujinx 兜底存档 mtime 更新时进度错显）。
+// 优先按同槽 caption.sav 内置的游戏真实存档时间降序（免疫 save-tx 启动复制假 mtime），
+// 无 caption.sav 时回退到 progress.sav 文件 mtime；同刻写入时优先 slot_00。
 func findLatestProgress() (float64, string) {
 	type cand struct {
-		mt   float64
-		path string
+		saveTs int64   // 排序基准：caption.sav 内置真实存档时间（UnixNano），缺省回退文件 mtime
+		mt     float64 // 文件 mtime（秒），用于变更检测与 X-Save-Mtime
+		path   string
 	}
 	roots := []string{}
 	if p := currentPlatform(); p != nil {
@@ -65,14 +65,19 @@ func findLatestProgress() (float64, string) {
 			if err != nil {
 				continue
 			}
-			rc = append(rc, cand{float64(fi.ModTime().UnixNano()) / 1e9, p})
+			fsNano := fi.ModTime().UnixNano()
+			saveTs := fsNano
+			if st, ok := readCaptionSaveTimeFile(filepath.Join(filepath.Dir(p), "caption.sav")); ok {
+				saveTs = st.UnixNano()
+			}
+			rc = append(rc, cand{saveTs, float64(fsNano) / 1e9, p})
 		}
 		if len(rc) == 0 {
 			continue
 		}
 		sort.Slice(rc, func(i, j int) bool {
-			if rc[i].mt != rc[j].mt {
-				return rc[i].mt > rc[j].mt
+			if rc[i].saveTs != rc[j].saveTs {
+				return rc[i].saveTs > rc[j].saveTs
 			}
 			si := 1
 			if strings.Contains(rc[i].path, "slot_00") {
@@ -82,7 +87,10 @@ func findLatestProgress() (float64, string) {
 			if strings.Contains(rc[j].path, "slot_00") {
 				sj = 0
 			}
-			return si < sj
+			if si != sj {
+				return si < sj
+			}
+			return rc[i].mt > rc[j].mt
 		})
 		return rc[0].mt, rc[0].path
 	}

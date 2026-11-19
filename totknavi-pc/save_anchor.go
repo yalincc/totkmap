@@ -26,7 +26,70 @@ const (
 	progressOff1 = 0x532AC
 	progressOff2 = 0x53324
 	captionOff   = 0x1E0
+
+	// caption.sav 内部 MurmurHash3 键：游戏真实存档时间（不依赖文件系统 mtime，
+	// 免疫 PC 版启动时 save → save-tx\work 顺序复制导致 slot_05 mtime 虚假最新的问题）。
+	captionMagic      = 0x01020304
+	captionTableStart = 0x28
+	hashSaveYear      = 0x9811a3f7
+	hashSaveMonth     = 0xdfd840d3
+	hashSaveDay       = 0xbd46f485
+	hashSaveHour      = 0x23f3d75e
+	hashSaveMinute    = 0x27853bf7
+	hashSaveSecond    = 0x5ee50bed
 )
+
+// parseCaptionSaveTime 从 caption.sav 二进制 hash 表中解析游戏内记录的真实存档时间。
+// 解析失败时返回 (zero, false)，由调用方回退到文件 ModTime。
+func parseCaptionSaveTime(data []byte) (time.Time, bool) {
+	if len(data) < captionTableStart+8 || binary.LittleEndian.Uint32(data[0:4]) != captionMagic {
+		return time.Time{}, false
+	}
+	end := int(binary.LittleEndian.Uint32(data[8:12]))
+	if end < captionTableStart+8 || end > len(data) {
+		end = len(data)
+		if end > 0x400 {
+			end = 0x400
+		}
+	}
+	var year, month, day, hour, minute, second int
+	var gotYear, gotMonth, gotDay bool
+	for off := captionTableStart; off+8 <= end; off += 8 {
+		h := binary.LittleEndian.Uint32(data[off : off+4])
+		v := int(binary.LittleEndian.Uint32(data[off+4 : off+8]))
+		switch h {
+		case hashSaveYear:
+			year, gotYear = v, true
+		case hashSaveMonth:
+			month, gotMonth = v, true
+		case hashSaveDay:
+			day, gotDay = v, true
+		case hashSaveHour:
+			hour = v
+		case hashSaveMinute:
+			minute = v
+		case hashSaveSecond:
+			second = v
+		}
+	}
+	if !gotYear || !gotMonth || !gotDay {
+		return time.Time{}, false
+	}
+	if year < 2000 || year > 2100 || month < 1 || month > 12 || day < 1 || day > 31 ||
+		hour < 0 || hour > 23 || minute < 0 || minute > 59 || second < 0 || second > 59 {
+		return time.Time{}, false
+	}
+	return time.Date(year, time.Month(month), day, hour, minute, second, 0, time.Local), true
+}
+
+// readCaptionSaveTimeFile 以完全共享模式读取指定 caption.sav 的游戏内真实存档时间。
+func readCaptionSaveTimeFile(path string) (time.Time, bool) {
+	data, err := readFileShared(path)
+	if err != nil {
+		return time.Time{}, false
+	}
+	return parseCaptionSaveTime(data)
+}
 
 type SaveAnchor struct {
 	Path string
@@ -111,6 +174,11 @@ func readAnchors(p Platform) []*SaveAnchor {
 			if fi1, err := os.Stat(path); err == nil && !fi1.ModTime().Equal(mt0) {
 				continue
 			}
+			// 排序时间优先取 caption.sav 内置的游戏真实存档时间；读不到时回退到文件 mtime
+			saveTime := mt0
+			if st, ok := parseCaptionSaveTime(data); ok {
+				saveTime = st
+			}
 			slot := 99
 			if i := strings.Index(strings.ToLower(path), "slot_"); i >= 0 && i+7 <= len(path) {
 				if v, err := strconv.Atoi(path[i+5 : i+7]); err == nil {
@@ -139,12 +207,12 @@ func readAnchors(p Platform) []*SaveAnchor {
 					continue
 				}
 				seen[key] = true
-				cands = append(cands, candA{mt0, path, mem, slot})
+				cands = append(cands, candA{saveTime, path, mem, slot})
 			}
 		}
 	}
 	sort.SliceStable(cands, func(i, j int) bool {
-		// mtime 修改时间最新降序优先（权威圆心），同刻写入时 slot_00 手动存档优先兜底
+		// 优先按游戏内置真实存档时间降序（免疫 save-tx 复制假 mtime），同刻写入时 slot_00 手动存档优先兜底
 		if !cands[i].mt.Equal(cands[j].mt) {
 			return cands[i].mt.After(cands[j].mt)
 		}

@@ -2,7 +2,59 @@
 
 package main
 
-import "testing"
+import (
+	"encoding/binary"
+	"testing"
+	"time"
+)
+
+func buildMockCaption(year, month, day, hour, minute, second uint32) []byte {
+	buf := make([]byte, 0x1c0)
+	binary.LittleEndian.PutUint32(buf[0:4], captionMagic)
+	binary.LittleEndian.PutUint32(buf[8:12], 0x1c0)
+	entries := [][2]uint32{
+		{hashSaveSecond, second},
+		{hashSaveYear, year},
+		{hashSaveMinute, minute},
+		{hashSaveHour, hour},
+		{hashSaveMonth, month},
+		{hashSaveDay, day},
+	}
+	off := captionTableStart
+	for _, e := range entries {
+		binary.LittleEndian.PutUint32(buf[off:off+4], e[0])
+		binary.LittleEndian.PutUint32(buf[off+4:off+8], e[1])
+		off += 8
+	}
+	return buf
+}
+
+func TestParseCaptionSaveTime(t *testing.T) {
+	t.Run("valid caption timestamp", func(t *testing.T) {
+		got, ok := parseCaptionSaveTime(buildMockCaption(2026, 11, 17, 21, 25, 57))
+		if !ok {
+			t.Fatalf("expected ok=true")
+		}
+		want := time.Date(2026, 11, 17, 21, 25, 57, 0, time.Local)
+		if !got.Equal(want) {
+			t.Fatalf("got %v, want %v", got, want)
+		}
+	})
+
+	t.Run("invalid magic rejected", func(t *testing.T) {
+		buf := buildMockCaption(2026, 11, 17, 21, 25, 57)
+		buf[0] = 0
+		if _, ok := parseCaptionSaveTime(buf); ok {
+			t.Fatalf("expected ok=false for bad magic")
+		}
+	})
+
+	t.Run("out-of-range date rejected", func(t *testing.T) {
+		if _, ok := parseCaptionSaveTime(buildMockCaption(1999, 13, 32, 0, 0, 0)); ok {
+			t.Fatalf("expected ok=false for invalid date")
+		}
+	})
+}
 
 func TestTotkSane(t *testing.T) {
 	cases := []struct {
