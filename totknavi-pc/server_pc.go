@@ -132,18 +132,9 @@ func clearTargetPC() {
 	curTarget = nil
 }
 
-// serveRun 启动追踪 + HTTP 服务（阻塞）。
+// serveRun 启动 HTTP 服务 + 追踪循环（阻塞）。
 func serveRun(p Platform, plat *totkpcPlatform, anchor *[3]float32, addr uintptr, port int, appRoot string) {
 	loadShrineEntrances()
-	go trackerLoop(p, plat, anchor, addr)
-	startStatusAndCoordsLoop(p)
-
-	// 存档进度（探索度/神庙/任务）——直接复用 totknavi 的 progressWatcher，
-	// 存档格式与模拟器版一致，数据表共用 app/data。
-	if progress == nil {
-		progress = newProgressWatcher()
-		go progress.loop()
-	}
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/pos", handlePosPC)
@@ -166,11 +157,6 @@ func serveRun(p Platform, plat *totkpcPlatform, anchor *[3]float32, addr uintptr
 		// /botw/ 路由：手机镜像专用（契约：live.js 依此识别同源局域网服务）
 		mux.Handle("/botw/", http.StripPrefix("/botw/", fileServer))
 		mux.Handle("/", fileServer)
-		fmt.Printf("\n  [server] 地图网页 → http://127.0.0.1:%d/\n", port)
-		if lanURL != "" {
-			fmt.Printf("  [server] 手机镜像 → %s\n", lanURL)
-		}
-		fmt.Printf("  [server] 网页目录 → %s\n", appRoot)
 	} else {
 		mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 			if r.URL.Path != "/" {
@@ -180,7 +166,6 @@ func serveRun(p Platform, plat *totkpcPlatform, anchor *[3]float32, addr uintptr
 			w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 			fmt.Fprintf(w, "totknavi-pc 定位服务运行中\n\nGET /pos  → 当前位置 JSON\n\n（未找到地图网页目录 app/，可用 --app 指定）\n")
 		})
-		fmt.Printf("\n  [server] 未找到网页目录（仅提供 /pos 定位接口）\n")
 	}
 
 	// 统一包装跨域 CORS、PNA（私有网络访问预检）与自定义暴露头
@@ -197,23 +182,29 @@ func serveRun(p Platform, plat *totkpcPlatform, anchor *[3]float32, addr uintptr
 		mux.ServeHTTP(w, r)
 	})
 
-	// 独占多端口监听（参考 xnavi-pc：port..port+4 自动跳过被占端口）
+	// 独占多端口监听（先就绪 HTTP 服务，再启动追踪与存档轮询，保证日志顺序清晰）
 	listeners, owned, skipped := listenOwnedPortsPC(port, 5)
 	if len(listeners) == 0 {
-		fmt.Printf("\n  [server] 端口 %d~%d 全部被占用，请先关闭其它导航程序后重试\n", port, port+4)
+		logEvent("  [ERR] 端口 %d~%d 全部被占用 —— 请关闭其它导航程序或重启电脑后重试。", port, port+4)
 		return
 	}
 	primaryPort := owned[0]
 	if primaryPort != port {
 		initLanURL(primaryPort)
 	}
-	fmt.Printf("  [server] 监听端口 %v（跳过被占: %v）\n", owned, skipped)
-	fmt.Printf("  [server] 控制台面板 → http://127.0.0.1:%d/gui\n", primaryPort)
-	fmt.Printf("  [server] 定位接口   → http://127.0.0.1:%d/pos\n", primaryPort)
-	fmt.Println("  ------------------------------------------------------------------")
-	fmt.Println("  [ok] ★★★ 定位服务已就绪！已锁定林克真身坐标，网页地图实时同步中 ★★★")
-	fmt.Println("  [ok] 浏览器访问地图即可实时跟随，或点击上方【🧭 打开网页地图】")
-	fmt.Println("  ------------------------------------------------------------------")
+	if len(skipped) > 0 {
+		logEvent("  [INFO] 定位服务已就绪：http://127.0.0.1:%d（端口 %v，已跳过被占 %v）", primaryPort, owned, skipped)
+	} else {
+		logEvent("  [INFO] 定位服务已就绪：http://127.0.0.1:%d", primaryPort)
+	}
+
+	// 启动追踪、状态桥接与存档解析
+	go trackerLoop(p, plat, anchor, addr)
+	startStatusAndCoordsLoop(p)
+	if progress == nil {
+		progress = newProgressWatcher()
+		go progress.loop()
+	}
 
 	for i := 1; i < len(listeners); i++ {
 		ln := listeners[i]
@@ -222,7 +213,7 @@ func serveRun(p Platform, plat *totkpcPlatform, anchor *[3]float32, addr uintptr
 		}()
 	}
 	if err := http.Serve(listeners[0], corsHandler); err != nil {
-		fmt.Printf("  [server] 已停止：%v\n", err)
+		logEvent("  [INFO] 定位服务已停止：%v", err)
 	}
 }
 
@@ -269,20 +260,20 @@ func handlePosPC(w http.ResponseWriter, r *http.Request) {
 		layerVal = layerOf(s.gx, s.gy, s.gz)
 	}
 	payload := map[string]any{
-		"ok":       s.ok,
-		"gx":       s.gx,
-		"gy":       s.gy,
-		"gz":       s.gz,
-		"mx":       s.mx,
-		"my":       s.my,
-		"heading":  heading, // 方位角：北=0°、东=90°；null = 未取到
-		"layer":    layerVal,
-		"age":      age,
-		"verified": s.verified,
-		"copies":   s.copies,
-		"source":   s.source,
-		"locks":    s.locks,
-		"rescans":  s.rescans,
+		"ok":           s.ok,
+		"gx":           s.gx,
+		"gy":           s.gy,
+		"gz":           s.gz,
+		"mx":           s.mx,
+		"my":           s.my,
+		"heading":      heading, // 方位角：北=0°、东=90°；null = 未取到
+		"layer":        layerVal,
+		"age":          age,
+		"verified":     s.verified,
+		"copies":       s.copies,
+		"source":       s.source,
+		"locks":        s.locks,
+		"rescans":      s.rescans,
 		"game":         "totk-pc",
 		"game_running": s.gameRunning,
 		"pid":          s.pid,

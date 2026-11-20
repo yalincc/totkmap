@@ -5,6 +5,15 @@
  */
 window.TOTK_CHANGELOG = [
   {
+    version: 'V2.8.7',
+    date: '2026-11-20',
+    title: '存档修改器背包批量自定义数量与 PC 云端配置单上线',
+    items: [
+      '存档修改器「背包物品」新增本分类与全物品自定义数量（1~999）及一键 999 快捷修改',
+      '上线 PC 重编译版云端定位配置单（/profiles/index.json），配合 TOTKNavi v3.3.3 一键同步 L1 秒锁配置'
+    ]
+  },
+  {
     version: 'V2.8.6',
     date: '2026-11-19',
     title: '存档修改器物品名称全简中化',

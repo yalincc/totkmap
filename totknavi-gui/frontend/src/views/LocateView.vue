@@ -106,43 +106,59 @@
             <span class="font-bold text-emerald-400 flex items-center gap-1.5">🧭 {{ t('locate.calibration') }}</span>
             <div class="flex items-center gap-1.5">
               <span class="text-[10px] text-slate-500">{{ t('locate.calWhenFail') }}</span>
-              <button v-if="edition === 'pc'" @click="doDeepScan" :disabled="deepBusy || !isLocating" :title="t('locate.deepScanTip')"
-                class="bg-amber-600 hover:bg-amber-500 text-white px-2 py-1 rounded-md text-[10px] font-bold transition flex items-center gap-1 active:scale-95 disabled:opacity-50">
-                <span>🔍</span>
-                <span>{{ t('locate.deepScan') }}</span>
+              <button v-if="edition === 'pc'" @click="doDeepScan" :disabled="deepBusy" :title="t('locate.deepScanTip')"
+                class="bg-emerald-600 hover:bg-emerald-500 text-white px-2.5 py-1 rounded-md text-[10px] font-bold transition flex items-center gap-1 active:scale-95 disabled:opacity-50">
+                <span>↻</span>
+                <span>{{ t('locate.calibrateAdapt') }}</span>
               </button>
-              <button @click="doCalibrate" :disabled="calBusy"
+              <button v-else @click="doCalibrate" :disabled="calBusy"
                 class="bg-emerald-600 hover:bg-emerald-500 text-white px-2.5 py-1 rounded-md text-[10px] font-bold transition flex items-center gap-1 active:scale-95 disabled:opacity-60 disabled:cursor-wait">
                 <span>↻</span>
                 <span>{{ t('locate.submit') }}</span>
               </button>
             </div>
           </div>
-          <div class="text-[10px] text-slate-500 mb-2.5 leading-relaxed">{{ t('locate.calHint') }}</div>
+          <div class="text-[10px] text-slate-500 mb-2.5 leading-relaxed">{{ edition === 'pc' ? t('locate.calHintPC') : t('locate.calHint') }}</div>
           <div class="flex items-center gap-2">
             <label class="flex-1 bg-[#0d1117] rounded-lg border border-slate-800 px-2 py-1.5 flex items-center gap-1.5">
               <span class="text-[10px] text-slate-500 shrink-0">X</span>
-              <input v-model="calX" type="number" step="0.1" :placeholder="t('locate.placeholder', { v: '-298.8' })"
+              <input v-model="calX" type="text" inputmode="decimal" :placeholder="t('locate.placeholder', { v: '-298.8' })"
                 class="bg-transparent outline-none text-white font-mono text-xs w-full placeholder:text-slate-600" />
             </label>
             <label class="flex-1 bg-[#0d1117] rounded-lg border border-slate-800 px-2 py-1.5 flex items-center gap-1.5">
               <span class="text-[10px] text-slate-500 shrink-0">Y</span>
-              <input v-model="calY" type="number" step="0.1" :placeholder="t('locate.placeholder', { v: '142.8' })"
+              <input v-model="calY" type="text" inputmode="decimal" :placeholder="t('locate.placeholder', { v: '142.8' })"
                 class="bg-transparent outline-none text-white font-mono text-xs w-full placeholder:text-slate-600" />
             </label>
             <label class="flex-1 bg-[#0d1117] rounded-lg border border-slate-800 px-2 py-1.5 flex items-center gap-1.5">
               <span class="text-[10px] text-slate-500 shrink-0">Z</span>
-              <input v-model="calZ" type="number" step="0.1" :placeholder="t('locate.placeholder', { v: '25.0' })"
+              <input v-model="calZ" type="text" inputmode="decimal" :placeholder="t('locate.placeholder', { v: '25.0' })"
                 class="bg-transparent outline-none text-white font-mono text-xs w-full placeholder:text-slate-600" />
             </label>
           </div>
-          <!-- 预设常用地标 -->
-          <div class="flex items-center gap-1.5 mt-2.5 text-[10px] flex-wrap">
-            <span class="text-slate-500 shrink-0">{{ t('locate.preset') }}:</span>
-            <button @click="fillPreset(-298.8, 142.8, 25.0)" class="px-1.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 transition" :title="t('locate.tower') + ' (-298.8, 142.8, 25.0)'">{{ t('locate.tower') }}</button>
-            <button @click="fillPreset(-257.5, 105.0, 20.0)" class="px-1.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 transition" :title="t('locate.landing') + ' (-257.5, 105.0, 20.0)'">{{ t('locate.landing') }}</button>
-            <button @click="fillPreset(-204.3, 451.0, 21.0)" class="px-1.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 transition" :title="t('locate.northShrine') + ' (巧诺尼希乌神庙: -204.3, 451.0, 21.0)'">{{ t('locate.northShrine') }}</button>
-            <button @click="fillPreset(453.0, -774.0, 1466.0)" class="px-1.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 transition" :title="t('locate.awakeningRoom') + ' (初始空岛: 453.0, -774.0, 1466.0)'">{{ t('locate.awakeningRoom') }}</button>
+          <!-- PC 版：游戏版本与配置状态条 + 云端配置单同步 -->
+          <div v-if="edition === 'pc'" class="mt-2.5 pt-2 border-t border-slate-800/80 flex items-center justify-between gap-2 text-[10px]">
+            <div class="min-w-0 flex-1 space-y-0.5">
+              <div class="text-slate-300 font-mono truncate" :title="pcEnvText">
+                {{ pcEnvText }}
+              </div>
+              <div class="flex items-center gap-1.5 truncate">
+                <span :class="pcProfileBadgeClass" class="shrink-0 font-semibold">{{ pcProfileBadge }}</span>
+                <span class="text-slate-500 truncate" :title="pos.profileName">{{ pos.profileName || t('locate.profileWaiting') }}</span>
+              </div>
+            </div>
+            <div class="flex items-center gap-1 shrink-0">
+              <button @click="doSyncCloud" :disabled="syncingCloud"
+                class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-sky-400 border border-slate-700 transition active:scale-95 disabled:opacity-50"
+                :title="t('locate.syncCloudTip')">
+                {{ syncCloudMsg || t('locate.syncCloud') }}
+              </button>
+              <button @click="doShareProfile" :disabled="sharingProfile"
+                class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-emerald-400 border border-slate-700 transition active:scale-95 disabled:opacity-50"
+                :title="t('locate.shareProfileTip')">
+                {{ shareProfileMsg || t('locate.shareProfile') }}
+              </button>
+            </div>
           </div>
         </section>
       </div>
@@ -242,7 +258,7 @@ import {
   pos, steps, stepClass, stepDot, isLocating, toggleLocating, progressData,
   layerName, sourceLabel, openMap, logs,
   ver, edition, syncText, syncClass, syncDot, rt, submitCoords, submitDeepScan, coordsState, cfg, saveSettings,
-  procList, refreshProcs,
+  procList, refreshProcs, syncCloudProfiles, uploadDiag,
   coordsErrorText, saveTimeAgoText, saveTimeAgoClass, detectSave,
   pickSaveFile, pickSaveDir, doOpenSave, resetSaveDetection
 } from '../composables/useCore'
@@ -260,10 +276,85 @@ const emuLabel = computed(() => {
   return ['auto', 'ryujinx', 'eden'].includes(e) ? t(`emu.${e}`) : e
 })
 const deepBusy = ref(false)
+const syncingCloud = ref(false)
+const syncCloudMsg = ref('')
+const sharingProfile = ref(false)
+const shareProfileMsg = ref('')
+
+const pcEnvText = computed(() => {
+  const parts = []
+  if (pos.recompVersion) parts.push(pos.recompVersion)
+  if (pos.gameVersion) parts.push(`${t('locate.gameVer')} ${pos.gameVersion}`)
+  if (parts.length) return parts.join(' · ')
+  return isLocating.value ? t('locate.envDetecting') : t('locate.envWaiting')
+})
+
+const pcProfileBadge = computed(() => {
+  if (!isLocating.value) return t('locate.profileIdle')
+  if (pos.verified && pos.source === 'chain') return t('locate.profileL1Ok')
+  if (pos.profileExact) return t('locate.profileMatched')
+  return t('locate.profileNeedCal')
+})
+
+const pcProfileBadgeClass = computed(() => {
+  if (!isLocating.value) return 'text-slate-500'
+  if (pos.verified && pos.source === 'chain') return 'text-emerald-400'
+  if (pos.profileExact) return 'text-sky-400'
+  return 'text-amber-400'
+})
+
+async function doSyncCloud() {
+  if (syncingCloud.value) return
+  syncingCloud.value = true
+  syncCloudMsg.value = '...'
+  try {
+    const r = await syncCloudProfiles()
+    syncCloudMsg.value = r && r.ok ? `✓ ${r.count}` : t('locate.syncCloudFail')
+    logs.value.push({
+      time: new Date().toTimeString().slice(0, 8),
+      text: (r && r.msg) || t('locate.syncCloudFail'),
+      level: r && r.ok ? 'OK' : 'WARN',
+      color: r && r.ok ? 'text-emerald-300' : 'text-amber-300',
+      levelColor: r && r.ok ? 'text-emerald-400 font-semibold' : 'text-amber-400 font-bold'
+    })
+  } finally {
+    syncingCloud.value = false
+    setTimeout(() => { syncCloudMsg.value = '' }, 3000)
+  }
+}
+
+async function doShareProfile() {
+  if (sharingProfile.value) return
+  sharingProfile.value = true
+  shareProfileMsg.value = '...'
+  try {
+    const verInfo = [pos.recompVersion, pos.gameVersion].filter(Boolean).join(' ')
+    const note = verInfo ? `[分享本机 L1 配置] ${verInfo}` : '[分享本机 L1 配置]'
+    const msg = await uploadDiag(note)
+    const ok = typeof msg === 'string' && msg.includes('感谢')
+    shareProfileMsg.value = ok ? t('locate.shareProfileOk') : t('locate.shareProfileFail')
+    logs.value.push({
+      time: new Date().toTimeString().slice(0, 8),
+      text: msg || t('locate.shareProfileFail'),
+      level: ok ? 'OK' : 'WARN',
+      color: ok ? 'text-emerald-300' : 'text-amber-300',
+      levelColor: ok ? 'text-emerald-400 font-semibold' : 'text-amber-400 font-bold'
+    })
+  } finally {
+    sharingProfile.value = false
+    setTimeout(() => { shareProfileMsg.value = '' }, 3000)
+  }
+}
+
 async function doDeepScan() {
   if (deepBusy.value) return
   deepBusy.value = true
   try {
+    // 若尚未点「开始定位」，自动先启动核心进程再执行校准适配
+    if (!isLocating.value) {
+      await toggleLocating()
+      await new Promise(r => setTimeout(r, 1200))
+    }
     const x = parseFloat(calX.value), y = parseFloat(calY.value), z = parseFloat(calZ.value)
     const hasCoords = !Number.isNaN(x) && !Number.isNaN(y) && !Number.isNaN(z)
     await submitDeepScan(hasCoords, hasCoords ? x : 0, hasCoords ? y : 0, hasCoords ? z : 0)

@@ -8,6 +8,7 @@ export namespace main {
 	    autoOpenMap?: boolean;
 	    diagUrl?: string;
 	    customProc?: string;
+	    profile?: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new Config(source);
@@ -22,6 +23,7 @@ export namespace main {
 	        this.autoOpenMap = source["autoOpenMap"];
 	        this.diagUrl = source["diagUrl"];
 	        this.customProc = source["customProc"];
+	        this.profile = source["profile"];
 	    }
 	}
 	export class ProcessItem {

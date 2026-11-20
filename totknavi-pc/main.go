@@ -21,6 +21,8 @@ import (
 )
 
 func main() {
+	enableLogTimestamps()
+	defer flushLog()
 	setConsoleTitle("TOTKnavi-PC 定位探针")
 
 	var (
@@ -119,7 +121,8 @@ func main() {
 	signal.Notify(sig, os.Interrupt)
 	go func() {
 		<-sig
-		fmt.Println("\n[exit] 收到中断，退出。")
+		fmt.Println("  [INFO] 收到退出信号，正在停止定位。")
+		flushLog()
 		os.Exit(0)
 	}()
 
@@ -145,28 +148,29 @@ func main() {
 		}
 	}
 
-	fmt.Println("==================================================================")
-	fmt.Printf(" TOTKnavi-PC 定位探针  |  %s\n", plat.describe())
-	fmt.Println("==================================================================")
-
-	// 主模块基址校验
 	mb := plat.MainBase()
-	if mb == 0 {
-		fmt.Println("  [warn] 主模块镜像自适应探测未命中，将回退至特征扫描模式")
-	} else {
-		fmt.Printf("  [ok] 主模块镜像已确认：0x%X（自适应探测成功）\n", mb)
-	}
 	eb, es := plat.ExeBase()
-	fmt.Printf("  [ok] totk.exe 加载基址：0x%X  镜像 %.1fMB（ASLR，每次启动会变）\n", eb, float64(es)/1048576.0)
-
-	// 内存块统计
-	blks := p.Blocks(0.0625)
-	total := uintptr(0)
-	for _, b := range blks {
-		total += b.Size
+	prof := getActiveProfile()
+	recompVer, gameVer := detectGameVersions(plat.PID(), plat.Handle())
+	setDetectedVersions(recompVer, gameVer)
+	verTag := ""
+	if recompVer != "" && gameVer != "" {
+		verTag = fmt.Sprintf(" · %s · 游戏 %s", recompVer, gameVer)
+	} else if recompVer != "" {
+		verTag = fmt.Sprintf(" · %s", recompVer)
+	} else if gameVer != "" {
+		verTag = fmt.Sprintf(" · 游戏 %s", gameVer)
 	}
-	fmt.Printf("  [ok] 扫描范围：%d 块 / %.1fMB（主模块 + exe 数据段 + 主堆）\n", len(blks), float64(total)/1048576.0)
+	logEvent("  [INFO] 已连接 totk.exe (pid=%d, %.1fMB/+0x%X, exe=0x%X)%s",
+		plat.PID(), float64(es)/1048576.0, es, eb, verTag)
+	logEvent("  [INFO] 主模块 0x%X · 配置：%s [%s]",
+		mb, prof.Name, activeProfileMatchTag())
+	if mb == 0 {
+		logEvent("  [WARN] 未检测到主模块基址，将回退至特征扫描模式")
+	}
+
 	if blocksOnly {
+		blks := p.Blocks(0.0625)
 		dumpBlocks(plat, blks)
 		return
 	}
@@ -174,25 +178,14 @@ func main() {
 	// 锚点
 	var anchor *[3]float32
 	if haveCoord {
-		// HUD 序 (gx 东, gy 北, gz 高) → 内存序 (X, Z_stored, Y_north)
-		// 注意：hud 定义是 gy = **-Y_north**（见 tracker.go 注释），所以第三轴要取反。
-		// 2026-10-31 修复：之前漏了取反，锚点会跑到天南地北，导致按距离排序全错。
 		mem := [3]float32{coordsArg[0], coordsArg[2] + elevBias, -coordsArg[1]}
 		anchor = &mem
-		fmt.Printf("  [锚] 手动 HUD 坐标 (%.1f, %.1f, %.1f) → 内存序 (%.1f, %.1f, %.1f)\n",
-			coordsArg[0], coordsArg[1], coordsArg[2], mem[0], mem[1], mem[2])
+		logEvent("  [INFO] 使用指定坐标锚点 (%.1f, %.1f, %.1f)", coordsArg[0], coordsArg[1], coordsArg[2])
 	} else {
 		anchors := readAnchors(p)
 		if len(anchors) > 0 {
 			a := anchors[0].Pos
 			anchor = &a
-			fmt.Printf("  [锚] 存档 (%.1f, %.1f, %.1f) 内存序  |  %s\n", a[0], a[1], a[2], anchors[0].Path)
-			if len(anchors) > 1 {
-				fmt.Printf("       另有 %d 个存档锚点（已按 slot/时间排序）\n", len(anchors)-1)
-			}
-			fmt.Printf("       注意：锚点是你【上次存档】的位置；若之后走远了，请用 --coords 指定当前坐标\n")
-		} else {
-			fmt.Println("  [锚] 未读到存档锚点 → 将全范围扫描（候选较多，建议用 --coords 指定 HUD 坐标）")
 		}
 	}
 
@@ -236,6 +229,7 @@ func main() {
 		}
 
 		_ = fullScan
+		blks := p.Blocks(0.0625)
 		hits := ptkScanBlocks(h, blks, anchor, 0, progress)
 
 		// Run>=2 真身门禁
@@ -364,6 +358,7 @@ func usage() {
 }
 
 func fatalf(format string, a ...any) {
-	fmt.Printf("[错误] "+format+"\n", a...)
+	fmt.Printf("  [ERR] "+format+"\n", a...)
+	flushLog()
 	os.Exit(1)
 }

@@ -1,10 +1,10 @@
-// profile_pc.go — PC 版内存配置档案管理（自动定位与扩大范围扫描之间的唯一连接）。
+// profile_pc.go — PC 版内存配置单管理（支持内置配置单 + profiles/*.json 外部配置 + 兼容旧 pc_profile_local.json）。
 //
 // 设计原则：
-//   - 内置「配置 1（默认 TotK-Recomp）」完整保留原有静态链与堆区间，作为默认快速路径。
-//   - 若同目录存在「扩大范围扫描」生成的 pc_profile_local.json（且指纹匹配或未指定），
-//     自动定位启动/重扫时优先加载，从而无需重复全盘扫描。
-//   - 后续收集到用户回传的不同编译版/游戏版配置，可直接追加到 builtinProfiles。
+//   - 内置「默认配置 (TotK-Recomp 295MB)」完整保留原有静态链与堆区间，作为默认快速路径。
+//   - 外部配置放于可执行文件同目录 profiles/*.json（并兼容旧版 pc_profile_local.json），
+//     启动时按 totk.exe 镜像大小（exeSize）自动精确匹配；也可通过环境变量 TOTK_PC_PROFILE 手动指定。
+//   - ramGB / note 仅作可读标签展示（便于玩家间分享识别），不参与硬过滤（同编译版 16G/32G 通用）。
 
 package main
 
@@ -13,6 +13,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"sort"
 	"strconv"
 	"strings"
 	"sync"
@@ -38,21 +39,29 @@ type ProfileFingerprint struct {
 
 // MemoryProfile 一套完整的 PC 版内存定位配置档案。
 type MemoryProfile struct {
-	ID           string             `json:"id"`
-	Name         string             `json:"name"`
-	Verified     bool               `json:"verified,omitempty"`
-	Fingerprint  ProfileFingerprint `json:"fingerprint"`
-	MainBase     string             `json:"mainBase,omitempty"`
-	HeapRanges   []HeapRange        `json:"heapRanges"`
-	StaticChains []StaticChainEntry `json:"staticChains"`
+	ID            string             `json:"id"`
+	Name          string             `json:"name"`
+	RecompVersion string             `json:"recompVersion,omitempty"`
+	GameVersion   string             `json:"gameVersion,omitempty"`
+	Note          string             `json:"note,omitempty"`
+	RamGB         int                `json:"ramGB,omitempty"`
+	Verified      bool               `json:"verified,omitempty"`
+	Fingerprint   ProfileFingerprint `json:"fingerprint"`
+	MainBase      string             `json:"mainBase,omitempty"`
+	HeapRanges    []HeapRange        `json:"heapRanges"`
+	StaticChains  []StaticChainEntry `json:"staticChains"`
 }
 
-// builtinProfiles 内置配置列表。
-// 配置 1 为原版默认 TotK-Recomp 参数，完整保留；后续可根据用户回传追加配置 2、配置 3。
+// builtinProfiles 内置配置单。
+// 后续可根据社区回传的不同编译版配置直接追加。
 var builtinProfiles = []MemoryProfile{
 	{
-		ID:   "profile-1-default",
-		Name: "配置1（默认 TotK-Recomp）",
+		ID:            "profile-1-default",
+		Name:          "默认配置 (TotK-Recomp · 1.2.1)",
+		RecompVersion: "TotK-Recomp (默认)",
+		GameVersion:   "1.2.1",
+		Note:          "内置默认偏移，适用于 TotK-Recomp 1.2.1 主流编译版",
+		Verified:      true,
 		Fingerprint: ProfileFingerprint{
 			MainBase: "0x7000000000",
 		},
@@ -71,9 +80,32 @@ var builtinProfiles = []MemoryProfile{
 }
 
 var (
-	activeProfMu sync.RWMutex
-	activeProf   *MemoryProfile
+	activeProfMu      sync.RWMutex
+	activeProf        *MemoryProfile
+	activeProfExact   bool
+	activeProfForced  bool
+	detectedRecompVer string
+	detectedGameVer   string
 )
+
+func setDetectedVersions(recompVer, gameVer string) {
+	activeProfMu.Lock()
+	detectedRecompVer = recompVer
+	detectedGameVer = gameVer
+	activeProfMu.Unlock()
+}
+
+func getDetectedVersions() (string, string) {
+	activeProfMu.RLock()
+	defer activeProfMu.RUnlock()
+	return detectedRecompVer, detectedGameVer
+}
+
+func isActiveProfileExact() bool {
+	activeProfMu.RLock()
+	defer activeProfMu.RUnlock()
+	return activeProfExact || activeProfForced
+}
 
 func parseHexPtr(s string) (uintptr, bool) {
 	s = strings.TrimSpace(s)
@@ -91,18 +123,26 @@ func formatHexPtr(v uintptr) string {
 	return fmt.Sprintf("0x%X", v)
 }
 
-// localProfilePath 返回与可执行文件同目录的本地校准配置路径。
-func localProfilePath() string {
+func exeBaseDir() string {
 	exe, err := os.Executable()
 	if err != nil {
-		return "pc_profile_local.json"
+		return "."
 	}
-	return filepath.Join(filepath.Dir(exe), "pc_profile_local.json")
+	return filepath.Dir(exe)
 }
 
-// loadLocalProfile 读取本地校准生成的 pc_profile_local.json（未通过真身验证或解析失败则返回 nil）。
-func loadLocalProfile() *MemoryProfile {
-	buf, err := os.ReadFile(localProfilePath())
+// profilesDir 返回配置单目录路径（可执行文件同级 profiles/）。
+func profilesDir() string {
+	return filepath.Join(exeBaseDir(), "profiles")
+}
+
+// localProfilePath 返回兼容旧版的根目录 pc_profile_local.json 路径。
+func localProfilePath() string {
+	return filepath.Join(exeBaseDir(), "pc_profile_local.json")
+}
+
+func loadProfileFile(path string) *MemoryProfile {
+	buf, err := os.ReadFile(path)
 	if err != nil {
 		return nil
 	}
@@ -117,59 +157,142 @@ func loadLocalProfile() *MemoryProfile {
 		return nil
 	}
 	if prof.ID == "" {
-		prof.ID = "local-calibrated"
+		base := strings.TrimSuffix(filepath.Base(path), filepath.Ext(path))
+		prof.ID = base
 	}
 	if prof.Name == "" {
-		prof.Name = "本地校准配置"
+		prof.Name = prof.ID
 	}
 	return &prof
 }
 
-// saveLocalProfile 将扩大范围扫描得到的配置原子写入 pc_profile_local.json。
-func saveLocalProfile(prof *MemoryProfile) error {
-	if prof == nil {
-		return fmt.Errorf("nil profile")
+// loadExternalProfiles 读取 profiles/*.json 以及兼容的 pc_profile_local.json。
+func loadExternalProfiles() []*MemoryProfile {
+	var out []*MemoryProfile
+	seen := make(map[string]bool)
+
+	if entries, err := os.ReadDir(profilesDir()); err == nil {
+		var names []string
+		for _, e := range entries {
+			if !e.IsDir() && strings.HasSuffix(strings.ToLower(e.Name()), ".json") {
+				names = append(names, e.Name())
+			}
+		}
+		sort.Strings(names)
+		for _, name := range names {
+			if p := loadProfileFile(filepath.Join(profilesDir(), name)); p != nil {
+				if !seen[p.ID] {
+					seen[p.ID] = true
+					out = append(out, p)
+				}
+			}
+		}
 	}
+
+	if legacy := loadProfileFile(localProfilePath()); legacy != nil {
+		if !seen[legacy.ID] {
+			out = append(out, legacy)
+		}
+	}
+	return out
+}
+
+// saveLocalProfile 将校准生成的配置原子写入 profiles/<id>.json，返回写入路径。
+func saveLocalProfile(prof *MemoryProfile) (string, error) {
+	if prof == nil {
+		return "", fmt.Errorf("nil profile")
+	}
+	if err := os.MkdirAll(profilesDir(), 0o755); err != nil {
+		return "", err
+	}
+	fileID := prof.ID
+	if fileID == "" {
+		fileID = "local-calibrated"
+	}
+	fileID = strings.Map(func(r rune) rune {
+		if (r >= 'a' && r <= 'z') || (r >= 'A' && r <= 'Z') || (r >= '0' && r <= '9') || r == '-' || r == '_' || r == '.' {
+			return r
+		}
+		return '_'
+	}, fileID)
+	p := filepath.Join(profilesDir(), fileID+".json")
 	buf, err := json.MarshalIndent(prof, "", "  ")
 	if err != nil {
-		return err
+		return "", err
 	}
-	p := localProfilePath()
 	tmp := p + ".tmp"
-	if err := os.WriteFile(tmp, buf, 0644); err != nil {
-		return err
+	if err := os.WriteFile(tmp, buf, 0o644); err != nil {
+		return "", err
 	}
-	return os.Rename(tmp, p)
+	if err := os.Rename(tmp, p); err != nil {
+		return "", err
+	}
+	return p, nil
 }
 
 // selectActiveProfile 按优先级选择当前生效的配置档案：
-//  1. 本地 pc_profile_local.json（若 exeSize 匹配或未限定 exeSize）
-//  2. builtinProfiles 中 exeSize 精确匹配的配置
-//  3. 默认配置 1（builtinProfiles[0]）
+//  1. 环境变量 TOTK_PC_PROFILE 手动指定（非空且非 "auto"）
+//  2. profiles/*.json（及旧 pc_profile_local.json）中 exeSize 精确匹配的配置
+//  3. profiles/*.json 中未限定 exeSize 的通用本地配置
+//  4. builtinProfiles 中 exeSize 精确匹配的配置
+//  5. 默认配置（builtinProfiles[0]）
 func selectActiveProfile(exeSize uintptr) *MemoryProfile {
-	if local := loadLocalProfile(); local != nil {
-		if local.Fingerprint.ExeSize == 0 || exeSize == 0 || local.Fingerprint.ExeSize == exeSize {
-			setActiveProfile(local)
-			return local
+	externals := loadExternalProfiles()
+
+	forced := strings.TrimSpace(os.Getenv("TOTK_PC_PROFILE"))
+	if forced != "" && !strings.EqualFold(forced, "auto") {
+		for _, p := range externals {
+			if p.ID == forced {
+				setActiveProfileState(p, true, true)
+				return p
+			}
+		}
+		for i := range builtinProfiles {
+			if builtinProfiles[i].ID == forced {
+				p := builtinProfiles[i]
+				setActiveProfileState(&p, true, true)
+				return &p
+			}
+		}
+	}
+
+	if exeSize != 0 {
+		for _, p := range externals {
+			if p.Fingerprint.ExeSize == exeSize {
+				setActiveProfileState(p, true, false)
+				return p
+			}
+		}
+	}
+	for _, p := range externals {
+		if p.Fingerprint.ExeSize == 0 {
+			setActiveProfileState(p, false, false)
+			return p
 		}
 	}
 	if exeSize != 0 {
 		for i := range builtinProfiles {
 			if builtinProfiles[i].Fingerprint.ExeSize == exeSize {
 				p := builtinProfiles[i]
-				setActiveProfile(&p)
+				setActiveProfileState(&p, true, false)
 				return &p
 			}
 		}
 	}
 	p := builtinProfiles[0]
-	setActiveProfile(&p)
+	setActiveProfileState(&p, false, false)
 	return &p
 }
 
 func setActiveProfile(prof *MemoryProfile) {
+	setActiveProfileState(prof, true, false)
+}
+
+func setActiveProfileState(prof *MemoryProfile, exact, forced bool) {
 	activeProfMu.Lock()
 	activeProf = prof
+	activeProfExact = exact
+	activeProfForced = forced
 	activeProfMu.Unlock()
 }
 
@@ -182,6 +305,20 @@ func getActiveProfile() *MemoryProfile {
 	}
 	def := builtinProfiles[0]
 	return &def
+}
+
+func activeProfileMatchTag() string {
+	activeProfMu.RLock()
+	exact := activeProfExact
+	forced := activeProfForced
+	activeProfMu.RUnlock()
+	if forced {
+		return "手动指定"
+	}
+	if exact {
+		return "精确匹配"
+	}
+	return "默认回退"
 }
 
 // activeHeapRanges 返回当前配置中的堆扫描区间（十六进制解析后）。

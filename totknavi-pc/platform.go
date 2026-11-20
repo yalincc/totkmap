@@ -12,7 +12,6 @@
 package main
 
 import (
-	"fmt"
 	"sync"
 )
 
@@ -60,9 +59,6 @@ func setPlatform(p Platform) {
 	platMu.Lock()
 	curPlat = p
 	platMu.Unlock()
-	if p != nil {
-		fmt.Printf("  [platform] selected: %s\n", p.Name())
-	}
 }
 
 func currentPlatform() Platform {
@@ -77,9 +73,6 @@ func probePlatform() Platform {
 	defer platMu.Unlock()
 	for _, p := range probeList {
 		if p.Attach() {
-			if curPlat == nil || curPlat.Name() != p.Name() {
-				fmt.Printf("  [platform] auto-detected: %s\n", p.Name())
-			}
 			curPlat = p
 			return p
 		}

@@ -924,7 +924,24 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .btn-mini.cyan { border-color: rgba(111, 211, 224, .4); background: var(--tk-cyan-soft); color: var(--tk-cyan); font-weight: 600; }
 
 /* ---- Tab 2: 背包物品 4 列网格 ---- */
-.bag-quick-group { display: flex; gap: 6px; flex-wrap: wrap; margin-left: auto; }
+.bag-quick-group { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-left: auto; }
+.bag-batch-ctl {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 3px 8px; border-radius: 7px; border: 1px solid var(--tk-line-2);
+  background: var(--tk-sunken);
+}
+.bag-batch-lbl { font-size: 13.5px; font-weight: 600; color: var(--tk-text); letter-spacing: .3px; white-space: nowrap; }
+.bag-batch-in {
+  width: 44px; padding: 2px 2px; border: none; border-bottom: 1px solid var(--tk-line-2);
+  border-radius: 0; background: transparent; color: var(--tk-text); font-size: 12.5px; font-family: inherit;
+  text-align: center; outline: none;
+}
+.bag-batch-in:focus { border-bottom-color: var(--tk-gold-line); }
+.bag-batch-999 {
+  border: none; background: transparent; padding: 2px 4px; cursor: pointer;
+  color: var(--tk-gold-hi); font-size: 12.5px; font-weight: 600; font-family: inherit;
+}
+.bag-batch-999:hover { text-decoration: underline; }
 .bag-search {
   width: 100%; padding: 9px 12px; border-radius: 9px; border: 1px solid var(--tk-line-2);
   background: var(--tk-sunken); color: var(--tk-text); font-size: 13px; font-family: inherit; outline: none;

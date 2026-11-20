@@ -18,11 +18,15 @@ export function EnvDetect():Promise<Record<string, any>>;
 
 export function ExportDiagnostics():Promise<string>;
 
+export function ListPCProfiles():Promise<Array<Record<string, any>>>;
+
 export function ListProcesses():Promise<Array<main.ProcessItem>>;
 
 export function LoadConfig():Promise<main.Config>;
 
 export function OpenLogDir():Promise<string>;
+
+export function OpenProfilesDir():Promise<string>;
 
 export function OpenSaveDir():Promise<string>;
 
@@ -45,6 +49,8 @@ export function StopCore():Promise<string>;
 export function SubmitCoords(arg1:number,arg2:number,arg3:number):Promise<Record<string, any>>;
 
 export function SubmitDeepScan(arg1:boolean,arg2:number,arg3:number,arg4:number):Promise<Record<string, any>>;
+
+export function SyncCloudProfiles():Promise<Record<string, any>>;
 
 export function TailLog():Promise<Array<string>>;
 

@@ -357,7 +357,7 @@ func (w *progressWatcher) refresh() {
 	mt, path := findLatestProgress()
 	if path == "" {
 		if !w.init {
-			fmt.Println("  [progress] no progress.sav yet - will watch for it")
+			logEvent("  [INFO] 暂未检测到存档文件，将持续监听")
 		}
 		w.ok = false
 		w.init = true
@@ -366,7 +366,7 @@ func (w *progressWatcher) refresh() {
 	p := parseProgressSave(path)
 	if !p.Ok {
 		if !w.init {
-			fmt.Printf("  [progress] parse failed: %s\n", p.Error)
+			logEvent("  [WARN] 存档解析异常（%s）—— 若安装了大型内容 MOD 属正常现象，不影响实时定位。", p.Error)
 		}
 		w.ok = false
 		w.init = true
@@ -418,15 +418,16 @@ func (w *progressWatcher) refresh() {
 	w.body = buf
 
 	if !w.init {
-		fmt.Printf("  [progress] save=%s\n", path)
-		fmt.Printf("  [progress] doneIds=%d  mapped=%d  questDone=%d\n", len(ids), mapped, len(qDone))
-		for _, k := range []string{"鸟望台", "神庙", "树根", "克洛格", "魔犹伊遗失物", "卡邦达立牌", "宝箱"} {
+		slotName := filepath.Base(filepath.Dir(path))
+		var parts []string
+		for _, k := range []string{"鸟望台", "神庙", "树根", "克洛格", "宝箱"} {
 			if c, ok := counts[k]; ok {
-				fmt.Printf("    %s %d/%d\n", k, c.Done, c.Total)
+				parts = append(parts, fmt.Sprintf("%s %d/%d", k, c.Done, c.Total))
 			}
 		}
+		logEvent("  [INFO] 存档就绪：%s（%s）", slotName, strings.Join(parts, " · "))
 	} else if len(newlyDone) > 0 {
-		fmt.Printf("  [progress] save updated! newlyDone count=%d: %v\n", len(newlyDone), newlyDone)
+		logEvent("  [INFO] 存档已更新：新增完成 %d 项", len(newlyDone))
 	}
 	w.init = true
 }

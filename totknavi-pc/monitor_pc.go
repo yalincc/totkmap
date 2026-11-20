@@ -95,8 +95,18 @@ func statusLoop(p Platform) {
 				"jumps":     0,
 				"scans":     rescans,
 			},
-			"target":  getTargetPC(),
-			"profile": getActiveProfile().ID,
+			"target":        getTargetPC(),
+			"profile":       getActiveProfile().ID,
+			"profileName":   getActiveProfile().Name,
+			"profileExact":  isActiveProfileExact(),
+		}
+		if rv, gv := getDetectedVersions(); rv != "" || gv != "" {
+			if rv != "" {
+				obj["recompVersion"] = rv
+			}
+			if gv != "" {
+				obj["gameVersion"] = gv
+			}
 		}
 		if lanURL != "" {
 			obj["lanUrl"] = lanURL
@@ -148,7 +158,6 @@ func coordsFileLoop() {
 					Z         float64 `json:"z"`
 				}
 				_ = json.Unmarshal(ddata, &dreq)
-				logEvent("  [deep-scan] 收到 GUI 扩大范围扫描请求 (hasCoords=%v)", dreq.HasCoords)
 				RequestDeepScan(dreq.HasCoords, [3]float32{float32(dreq.X), float32(dreq.Y), float32(dreq.Z)})
 				resp := map[string]any{"ok": true, "started": true}
 				buf, _ := json.Marshal(resp)

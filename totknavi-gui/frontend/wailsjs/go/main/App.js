@@ -34,6 +34,10 @@ export function ExportDiagnostics() {
   return window['go']['main']['App']['ExportDiagnostics']();
 }
 
+export function ListPCProfiles() {
+  return window['go']['main']['App']['ListPCProfiles']();
+}
+
 export function ListProcesses() {
   return window['go']['main']['App']['ListProcesses']();
 }
@@ -44,6 +48,10 @@ export function LoadConfig() {
 
 export function OpenLogDir() {
   return window['go']['main']['App']['OpenLogDir']();
+}
+
+export function OpenProfilesDir() {
+  return window['go']['main']['App']['OpenProfilesDir']();
 }
 
 export function OpenSaveDir() {
@@ -88,6 +96,10 @@ export function SubmitCoords(arg1, arg2, arg3) {
 
 export function SubmitDeepScan(arg1, arg2, arg3, arg4) {
   return window['go']['main']['App']['SubmitDeepScan'](arg1, arg2, arg3, arg4);
+}
+
+export function SyncCloudProfiles() {
+  return window['go']['main']['App']['SyncCloudProfiles']();
 }
 
 export function TailLog() {

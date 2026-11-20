@@ -10,7 +10,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"math"
 	"os"
 	"path/filepath"
@@ -70,10 +69,9 @@ func loadShrineEntrances() {
 		shrineList = f.Entrances
 		shrineLoaded = true
 		shrineMu.Unlock()
-		fmt.Printf("  [shrine-table] 神庙入口坐标表已加载（%d 座，%s）\n", len(f.Entrances), p)
 		return
 	}
-	fmt.Println("  [shrine-table] 警告：神庙入口坐标表加载失败，进庙入口锁定不可用")
+	logEvent("  [WARN] 神庙入口坐标表加载失败，进庙入口锁定暂不可用")
 }
 
 // nearestShrine 返回玩家 HUD 坐标水平最近的神庙入口；< shrineMatchRadius 时返回名字与距离

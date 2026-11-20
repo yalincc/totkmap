@@ -131,10 +131,18 @@
         <span class="idx">03</span>
         <h2>物品选择器</h2>
         <span class="bag-quick-group">
-          <button type="button" class="btn-mini gold" id="btnBagFill999">本类全部 999</button>
-          <button type="button" class="btn-mini" id="btnBagFill99">99</button>
-          <button type="button" class="btn-mini" id="btnBagFill1">1</button>
-          <button type="button" class="btn-mini gold" id="btnBagFillAll">⚡ 全部已有物品 999</button>
+          <span class="bag-batch-ctl">
+            <span class="bag-batch-lbl">本分类</span>
+            <input type="text" inputmode="numeric" maxlength="3" class="bag-batch-in" id="inBagCatQty" placeholder="1~999" aria-label="本分类自定义数量">
+            <button type="button" class="bag-batch-999" id="btnBagFill999" title="填入 999 并应用">999</button>
+            <button type="button" class="btn-mini" id="btnBagCatApply">修改</button>
+          </span>
+          <span class="bag-batch-ctl">
+            <span class="bag-batch-lbl">全物品</span>
+            <input type="text" inputmode="numeric" maxlength="3" class="bag-batch-in" id="inBagAllQty" placeholder="1~999" aria-label="全物品自定义数量">
+            <button type="button" class="bag-batch-999" id="btnBagFillAll" title="填入 999 并应用">999</button>
+            <button type="button" class="btn-mini" id="btnBagAllApply">修改</button>
+          </span>
         </span>
       </div>
       <div class="card-body">

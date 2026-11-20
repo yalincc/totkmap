@@ -22,7 +22,72 @@ var (
 	procProcess32NextW           = kernel32.NewProc("Process32NextW")
 	procSetConsoleTitleW         = kernel32.NewProc("SetConsoleTitleW")
 	procGetExitCodeProcess       = kernel32.NewProc("GetExitCodeProcess")
+	procGlobalMemoryStatusEx     = kernel32.NewProc("GlobalMemoryStatusEx")
+
+	user32                       = syscall.NewLazyDLL("user32.dll")
+	procEnumWindows              = user32.NewProc("EnumWindows")
+	procGetWindowThreadProcessId = user32.NewProc("GetWindowThreadProcessId")
+	procGetWindowTextW           = user32.NewProc("GetWindowTextW")
+	procIsWindowVisible          = user32.NewProc("IsWindowVisible")
 )
+
+// getProcessWindowTitle 返回指定 PID 首个可见顶层窗口的标题（用于读取 TotK Recomp 版本信息）。
+func getProcessWindowTitle(pid uint32) string {
+	if pid == 0 {
+		return ""
+	}
+	var found string
+	cb := syscall.NewCallback(func(hwnd uintptr, lparam uintptr) uintptr {
+		vis, _, _ := procIsWindowVisible.Call(hwnd)
+		if vis == 0 {
+			return 1
+		}
+		var wpid uint32
+		procGetWindowThreadProcessId.Call(hwnd, uintptr(unsafe.Pointer(&wpid)))
+		if wpid != pid {
+			return 1
+		}
+		buf := make([]uint16, 256)
+		n, _, _ := procGetWindowTextW.Call(hwnd, uintptr(unsafe.Pointer(&buf[0])), uintptr(len(buf)))
+		if n > 0 {
+			title := strings.TrimSpace(utf16ToString(buf[:n]))
+			if title != "" {
+				found = title
+				return 0 // 停止枚举
+			}
+		}
+		return 1
+	})
+	procEnumWindows.Call(cb, 0)
+	return found
+}
+
+type memoryStatusEx struct {
+	Length               uint32
+	MemoryLoad           uint32
+	TotalPhys            uint64
+	AvailPhys            uint64
+	TotalPageFile        uint64
+	AvailPageFile        uint64
+	TotalVirtual         uint64
+	AvailVirtual         uint64
+	AvailExtendedVirtual uint64
+}
+
+// systemRamGB 返回本机物理内存容量（GB，四舍五入，仅作配置标签展示，不参与硬匹配）。
+func systemRamGB() int {
+	var ms memoryStatusEx
+	ms.Length = uint32(unsafe.Sizeof(ms))
+	r, _, _ := procGlobalMemoryStatusEx.Call(uintptr(unsafe.Pointer(&ms)))
+	if r == 0 || ms.TotalPhys == 0 {
+		return 0
+	}
+	gb := int((ms.TotalPhys + (1<<29)) >> 30)
+	if gb < 1 {
+		gb = 1
+	}
+	return gb
+}
 
 const (
 	processQueryInformation = 0x0400

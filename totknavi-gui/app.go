@@ -51,7 +51,10 @@ import (
 // defaultDiagUploadURL 诊断日志直发接口（EdgeOne Pages Node Function）。
 const defaultDiagUploadURL = "https://botw.yalin.site/api/diag"
 
-const guiVersion = "v3.3.2"
+// defaultCloudProfilesURL 社区验证过的 PC 版定位配置单静态索引。
+const defaultCloudProfilesURL = "https://totk.yalin.site/profiles/index.json"
+
+const guiVersion = "v3.3.3"
 
 // App Wails 后端：管理核心子进程 + 读 status.json / xnavi-gui-core.log + 网页端端口探测。
 // 与核心的通信完全走文件（status.json、xnavi-gui-core.log），不依赖 8766 HTTP——
@@ -79,6 +82,7 @@ type Config struct {
 	AutoOpenMap    *bool  `json:"autoOpenMap,omitempty"` // 锁定后自动打开网页地图（默认 true）
 	DiagUrl        string `json:"diagUrl,omitempty"`     // 自定义诊断上传接口（留空走 defaultDiagUploadURL）
 	CustomProc     string `json:"customProc,omitempty"`  // PC 版手动指定游戏进程名（留空自动探测）
+	Profile        string `json:"profile,omitempty"`     // PC 版手动指定定位配置 ID（留空或 "auto" 自动匹配）
 }
 
 func (a *App) configPath() string { return filepath.Join(a.workDir, "xnavi-gui-config.json") }
@@ -613,9 +617,14 @@ func (a *App) StartCore() string {
 	}
 	cmd := exec.Command(exe, args...)
 	cmd.Dir = a.workDir
-	// 存档目录兜底：按平台传对应环境变量；PC 版传递自定义进程名（若有）。
-	if appEdition == "pc" && a.cfg != nil && strings.TrimSpace(a.cfg.CustomProc) != "" {
-		cmd.Env = append(cmd.Env, "TOTK_PC_PROCESS="+strings.TrimSpace(a.cfg.CustomProc))
+	// 存档目录兜底：按平台传对应环境变量；PC 版传递自定义进程名与指定配置单（若有）。
+	if appEdition == "pc" && a.cfg != nil {
+		if strings.TrimSpace(a.cfg.CustomProc) != "" {
+			cmd.Env = append(cmd.Env, "TOTK_PC_PROCESS="+strings.TrimSpace(a.cfg.CustomProc))
+		}
+		if p := strings.TrimSpace(a.cfg.Profile); p != "" && p != "auto" {
+			cmd.Env = append(cmd.Env, "TOTK_PC_PROFILE="+p)
+		}
 	}
 	if appEdition != "pc" && a.cfg != nil {
 		if a.cfg.SaveDirRyujinx != "" {
@@ -826,7 +835,7 @@ func (a *App) UploadDiagnostics(note string) string {
 	}
 
 	statusBuf, _ := os.ReadFile(filepath.Join(a.workDir, "status.json"))
-	profileBuf, _ := os.ReadFile(filepath.Join(a.workDir, "pc_profile_local.json"))
+	profileBuf := a.readDiagnosticsProfiles()
 
 	emu := "auto"
 	if appEdition == "pc" {
@@ -874,6 +883,147 @@ func (a *App) UploadDiagnostics(note string) string {
 		return fmt.Sprintf("上传失败 (HTTP %d): %s", resp.StatusCode, strings.TrimSpace(string(respBody)))
 	}
 	return "已发送给开发者，感谢反馈"
+}
+
+// readDiagnosticsProfiles 收集 profiles/*.json 或旧版 pc_profile_local.json 供诊断上传使用。
+func (a *App) readDiagnosticsProfiles() []byte {
+	var parts []string
+	profDir := filepath.Join(a.workDir, "profiles")
+	if entries, err := os.ReadDir(profDir); err == nil {
+		for _, e := range entries {
+			if !e.IsDir() && strings.HasSuffix(strings.ToLower(e.Name()), ".json") {
+				if b, err := os.ReadFile(filepath.Join(profDir, e.Name())); err == nil && len(b) > 0 {
+					parts = append(parts, fmt.Sprintf("// %s\n%s", e.Name(), string(b)))
+				}
+			}
+		}
+	}
+	if len(parts) > 0 {
+		return []byte(strings.Join(parts, "\n\n"))
+	}
+	b, _ := os.ReadFile(filepath.Join(a.workDir, "pc_profile_local.json"))
+	return b
+}
+
+// ListPCProfiles 返回 PC 版可用定位配置单列表（内置默认 + profiles/*.json + 兼容 pc_profile_local.json）。
+func (a *App) ListPCProfiles() []map[string]any {
+	out := []map[string]any{
+		{
+			"id":      "profile-1-default",
+			"name":    "默认配置 (TotK-Recomp · 1.2.1)",
+			"note":    "内置默认偏移",
+			"builtin": true,
+		},
+	}
+	seen := map[string]bool{"profile-1-default": true}
+	addFile := func(path string) {
+		b, err := os.ReadFile(path)
+		if err != nil {
+			return
+		}
+		var m struct {
+			ID       string `json:"id"`
+			Name     string `json:"name"`
+			Note     string `json:"note"`
+			Verified bool   `json:"verified"`
+		}
+		if err := json.Unmarshal(b, &m); err != nil || !m.Verified {
+			return
+		}
+		if m.ID == "" {
+			m.ID = strings.TrimSuffix(filepath.Base(path), filepath.Ext(path))
+		}
+		if m.Name == "" {
+			m.Name = m.ID
+		}
+		if seen[m.ID] {
+			return
+		}
+		seen[m.ID] = true
+		out = append(out, map[string]any{
+			"id":      m.ID,
+			"name":    m.Name,
+			"note":    m.Note,
+			"builtin": false,
+		})
+	}
+	profDir := filepath.Join(a.workDir, "profiles")
+	if entries, err := os.ReadDir(profDir); err == nil {
+		for _, e := range entries {
+			if !e.IsDir() && strings.HasSuffix(strings.ToLower(e.Name()), ".json") {
+				addFile(filepath.Join(profDir, e.Name()))
+			}
+		}
+	}
+	addFile(filepath.Join(a.workDir, "pc_profile_local.json"))
+	return out
+}
+
+// OpenProfilesDir 打开（若不存在则创建）PC 版配置单目录 profiles/。
+func (a *App) OpenProfilesDir() string {
+	dir := filepath.Join(a.workDir, "profiles")
+	_ = os.MkdirAll(dir, 0o755)
+	_ = exec.Command("explorer", dir).Start()
+	return dir
+}
+
+// SyncCloudProfiles 从云端静态配置单拉取已验证的 PC 版定位配置，写入本地 profiles/ 目录。
+func (a *App) SyncCloudProfiles() map[string]any {
+	client := http.Client{Timeout: 10 * time.Second}
+	resp, err := client.Get(defaultCloudProfilesURL)
+	if err != nil {
+		return map[string]any{"ok": false, "msg": "同步失败：" + err.Error()}
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		return map[string]any{"ok": false, "msg": fmt.Sprintf("云端暂未发布配置单 (HTTP %d)", resp.StatusCode)}
+	}
+	body, err := io.ReadAll(io.LimitReader(resp.Body, 2<<20))
+	if err != nil {
+		return map[string]any{"ok": false, "msg": "读取响应失败：" + err.Error()}
+	}
+	var idx struct {
+		Schema    int               `json:"schema"`
+		UpdatedAt string            `json:"updatedAt"`
+		Profiles  []json.RawMessage `json:"profiles"`
+	}
+	if err := json.Unmarshal(body, &idx); err != nil {
+		return map[string]any{"ok": false, "msg": "配置单格式解析失败"}
+	}
+	dir := filepath.Join(a.workDir, "profiles")
+	if err := os.MkdirAll(dir, 0o755); err != nil {
+		return map[string]any{"ok": false, "msg": "创建 profiles 目录失败：" + err.Error()}
+	}
+	saved := 0
+	for _, raw := range idx.Profiles {
+		var meta struct {
+			ID       string `json:"id"`
+			Verified bool   `json:"verified"`
+		}
+		if err := json.Unmarshal(raw, &meta); err != nil || !meta.Verified || meta.ID == "" {
+			continue
+		}
+		safeID := strings.Map(func(r rune) rune {
+			if (r >= 'a' && r <= 'z') || (r >= 'A' && r <= 'Z') || (r >= '0' && r <= '9') || r == '-' || r == '_' || r == '.' {
+				return r
+			}
+			return '_'
+		}, meta.ID)
+		var pretty bytes.Buffer
+		if err := json.Indent(&pretty, raw, "", "  "); err != nil {
+			continue
+		}
+		dst := filepath.Join(dir, safeID+".json")
+		if err := os.WriteFile(dst, pretty.Bytes(), 0o644); err == nil {
+			saved++
+		}
+	}
+	return map[string]any{
+		"ok":        true,
+		"count":     saved,
+		"updatedAt": idx.UpdatedAt,
+		"msg":       fmt.Sprintf("已同步 %d 份云端配置", saved),
+	}
 }
 
 // ExportDiagnostics 一键导出诊断包（zip）：系统信息 + status.json + core 日志 + 事件日志 + pc_profile_local.json。
@@ -978,7 +1128,19 @@ func (a *App) ListProcesses() []ProcessItem {
 	defer procK32CloseH.Call(snap)
 
 	selfPid := uint32(os.Getpid())
-	byName := make(map[string]ProcessItem)
+	totkByName := make(map[string]ProcessItem)
+	fallbackByName := make(map[string]ProcessItem)
+
+	isIgnoredApp := func(low string) bool {
+		switch low {
+		case "chrome.exe", "msedge.exe", "firefox.exe", "brave.exe", "opera.exe",
+			"explorer.exe", "code.exe", "wechat.exe", "weixin.exe", "qq.exe",
+			"discord.exe", "steam.exe", "steamwebhelper.exe", "searchhost.exe",
+			"msmpeng.exe", "antigravity.exe", "node.exe", "powershell.exe", "pwsh.exe":
+			return true
+		}
+		return false
+	}
 
 	var e winProcEntry32W
 	e.Size = uint32(unsafe.Sizeof(e))
@@ -987,7 +1149,7 @@ func (a *App) ListProcesses() []ProcessItem {
 		if e.ProcessID != 0 && e.ProcessID != selfPid {
 			name := syscall.UTF16ToString(e.ExeFile[:])
 			low := strings.ToLower(name)
-			if low != "" && !strings.Contains(low, "totknavi") && !strings.Contains(low, "xnavi") &&
+			if low != "" && !strings.Contains(low, "totknavi") && !strings.Contains(low, "xnavi") && !strings.Contains(low, "xlate") &&
 				low != "svchost.exe" && low != "conhost.exe" && low != "csrss.exe" &&
 				low != "smss.exe" && low != "services.exe" && low != "lsass.exe" &&
 				low != "wininit.exe" && low != "winlogon.exe" && low != "dwm.exe" {
@@ -1001,10 +1163,15 @@ func (a *App) ListProcesses() []ProcessItem {
 					}
 					procK32CloseH.Call(h)
 				}
-				isLikelyGame := strings.Contains(low, "totk") || strings.Contains(low, "zelda") || strings.Contains(low, "tears")
-				if isLikelyGame || memMB >= 30 {
-					if prev, ok := byName[low]; !ok || memMB > prev.MemMB {
-						byName[low] = ProcessItem{Pid: e.ProcessID, Name: name, MemMB: memMB}
+				isLikelyGame := strings.Contains(low, "totk") || strings.Contains(low, "zelda") ||
+					strings.Contains(low, "tears") || strings.Contains(low, "recomp") || strings.Contains(low, "kingdom")
+				if isLikelyGame {
+					if prev, ok := totkByName[low]; !ok || memMB > prev.MemMB {
+						totkByName[low] = ProcessItem{Pid: e.ProcessID, Name: name, MemMB: memMB}
+					}
+				} else if memMB >= 800 && !isIgnoredApp(low) {
+					if prev, ok := fallbackByName[low]; !ok || memMB > prev.MemMB {
+						fallbackByName[low] = ProcessItem{Pid: e.ProcessID, Name: name, MemMB: memMB}
 					}
 				}
 			}
@@ -1012,8 +1179,12 @@ func (a *App) ListProcesses() []ProcessItem {
 		r, _, _ = procK32ProcNext.Call(snap, uintptr(unsafe.Pointer(&e)))
 	}
 
-	out := make([]ProcessItem, 0, len(byName))
-	for _, it := range byName {
+	chosen := totkByName
+	if len(chosen) == 0 {
+		chosen = fallbackByName
+	}
+	out := make([]ProcessItem, 0, len(chosen))
+	for _, it := range chosen {
 		out = append(out, it)
 	}
 	sort.Slice(out, func(i, j int) bool {

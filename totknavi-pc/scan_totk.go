@@ -432,10 +432,6 @@ func ptkGroupHits(hits []ptkHit) []ptkHit {
 		idx[k] = len(out)
 		out = append(out, h)
 	}
-	isMain := func(a uintptr) bool {
-		return a >= totkPCScanMainLo && a < totkPCScanMainHi
-	}
-
 	sort.SliceStable(out, func(i, j int) bool {
 		// ① 先排除"副本爆炸"的静态表：局部空间骨骼/物件表排最后
 		si := out[i].Copies > 24
@@ -443,13 +439,7 @@ func ptkGroupHits(hits []ptkHit) []ptkHit {
 		if si != sj {
 			return !si
 		}
-		// ② ★ 主模块 .bss 静态段优先（跨场景永不销毁）
-		mi := isMain(out[i].Addr)
-		mj := isMain(out[j].Addr)
-		if mi != mj {
-			return mi
-		}
-		// ③ ★ 结构类型优先：Rot（3x4 旋转矩阵持久槽）排最前，对齐技术手册 Rot > Quat > Dist
+		// ② 结构类型优先：Rot（3x4 旋转矩阵/28B 队列持久槽）排最前
 		if out[i].Rot != out[j].Rot {
 			return out[i].Rot
 		}

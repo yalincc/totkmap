@@ -1,9 +1,10 @@
-// deep_scan_pc.go — 独立「扩大范围 / 全进程兜底扫描」与配置校准模块。
+// deep_scan_pc.go — PC 版「校准适配」核心：主模块 L1 静态指针链直接反算 + 全进程扩大范围兜底扫描。
 //
 // 设计原则：
-//   - 与自动定位（scan_totk.go / platform_totkpc.go）完全解耦，不共享窄窗筛选逻辑。
-//   - 唯一输出产物是 pc_profile_local.json（通过 profile_pc.go 写入），
-//     供自动定位模块直接加载，实现「手工兜底一次 → 后续自动秒锁」。
+//   - 优先路径（<0.3s）：按目标 HUD 坐标直接反扫 mainBase 静态区，收集候选 L1 指针链，
+//     待用户走动 3 秒筛选出真正随角色移动的真身链，立刻升级为 LEVEL-1 并写入 profiles/*.json。
+//   - 自动兜底路径（10~15s）：若主模块直扫未命中，自动转入全进程可读可写内存扫描，
+//     命中并验证后同样反算 L1 并持久化配置。
 
 package main
 
@@ -11,14 +12,16 @@ import (
 	"encoding/binary"
 	"fmt"
 	"math"
+	"path/filepath"
 	"time"
 )
 
 const (
-	deepScanMinBlockSize = uintptr(64 * 1024)
-	deepScanMainWindow   = uintptr(0x8000000) // 主模块指针反扫窗口 128MB
-	deepScanMaxStructOff = uintptr(0x200)     // 结构体偏移反推上限
-	deepScanMaxChains    = 12
+	deepScanMinBlockSize  = uintptr(64 * 1024)
+	deepScanMainWindow    = uintptr(0x8000000) // 主模块指针反扫窗口 128MB
+	deepScanMaxStructOff  = uintptr(0x200)     // 结构体偏移反推上限
+	deepScanMaxChains     = 12                 // 写入配置最多保留的 L1 链数
+	deepScanCandChainCap  = 512                // 走动筛选阶段最多收集的候选链数（覆盖主模块完整 .bss 高偏移区）
 )
 
 // deepScanAllRWBlocks 枚举进程内全部可读可写已提交内存块（不限固定堆上下界）。
@@ -64,7 +67,7 @@ func deepScanForPlayer(p Platform, anchor *[3]float32) (uintptr, []ptkHit, bool)
 	for _, b := range blks {
 		totalMB += float64(b.Size) / 1048576.0
 	}
-	logEvent("  [deep-scan] 启动全进程扩大范围扫描：%d 块 / %.1fMB", len(blks), totalMB)
+	logEvent("  [WAIT] 正在全进程扩大范围扫描（%.0fMB，预计 10~15 秒，若超时未响应请重新开始定位）...", totalMB)
 
 	var radii []float32
 	if anchor != nil {
@@ -74,7 +77,6 @@ func deepScanForPlayer(p Platform, anchor *[3]float32) (uintptr, []ptkHit, bool)
 	}
 
 	for _, radius := range radii {
-		start := time.Now()
 		hits := ptkScanBlocks(h, blks, anchor, radius, nil)
 		var ident []ptkHit
 		for _, x := range hits {
@@ -83,11 +85,6 @@ func deepScanForPlayer(p Platform, anchor *[3]float32) (uintptr, []ptkHit, bool)
 			}
 		}
 		groups := ptkGroupHits(ident)
-		label := fmt.Sprintf("%.0fm", radius)
-		if radius == 0 {
-			label = "全图无锚"
-		}
-		logEvent("  [deep-scan] 窗口 %s → 命中 %d 组（%.2fs）", label, len(groups), time.Since(start).Seconds())
 		if len(groups) == 0 {
 			continue
 		}
@@ -95,9 +92,7 @@ func deepScanForPlayer(p Platform, anchor *[3]float32) (uintptr, []ptkHit, bool)
 		if n > maxCands {
 			n = maxCands
 		}
-		g := groups[0]
-		logEvent("  [deep-scan] 锁定候选 0x%X hud=(%.1f, %.1f, %.1f)", g.Addr, g.P[0], -g.P[2], g.P[1]-elevBias)
-		return g.Addr, groups[:n], true
+		return groups[0].Addr, groups[:n], true
 	}
 	return 0, nil, false
 }
@@ -125,31 +120,55 @@ func matchCoordOffsets(heapBuf []byte, targetHud [3]float32, maxDist float32) (a
 	return actorOffs, ringOffs
 }
 
-// deepReverseStaticChains 在 mainBase 静态区中按当前林克坐标值反扫 64 位指针链，
-// 从而兼容不同 Recomp/游戏版本中与 28B 步进队列分离的 LEVEL-1 Actor 实体真身。
-func deepReverseStaticChains(h, mainBase, targetAddr uintptr) []StaticChainEntry {
-	if h == 0 || mainBase == 0 || targetAddr == 0 {
+// readStaticChainEntry 读取单条静态指针链候选的当前 HUD 坐标与堆内坐标地址。
+func readStaticChainEntry(h, mainBase uintptr, c StaticChainEntry) ([3]float32, uintptr, bool) {
+	var zero [3]float32
+	if h == 0 || mainBase == 0 {
+		return zero, 0, false
+	}
+	po, ok1 := parseHexPtr(c.PtrOffset)
+	so, ok2 := parseHexPtr(c.StructOffset)
+	if !ok1 || !ok2 {
+		return zero, 0, false
+	}
+	pBytes := readMem(h, mainBase+po, 8)
+	if len(pBytes) < 8 {
+		return zero, 0, false
+	}
+	heapPtr := uintptr(binary.LittleEndian.Uint64(pBytes))
+	if heapPtr < 0x100000000 || heapPtr >= 0x7FFFFFFFFFFF {
+		return zero, 0, false
+	}
+	addr := heapPtr + so
+	cBytes := readMem(h, addr, 12)
+	if len(cBytes) < 12 {
+		return zero, 0, false
+	}
+	x := math.Float32frombits(binary.LittleEndian.Uint32(cBytes[0:]))
+	zs := math.Float32frombits(binary.LittleEndian.Uint32(cBytes[4:]))
+	yn := math.Float32frombits(binary.LittleEndian.Uint32(cBytes[8:]))
+	if !ptkCoordOK(x, zs, yn) {
+		return zero, 0, false
+	}
+	return [3]float32{x, -yn, zs - elevBias}, addr, true
+}
+
+// deepReverseStaticChainsByCoord 按 HUD 坐标直接反扫 mainBase 静态区，找出所有指向 targetHud 附近
+// （距离 <= maxCoordDiff）的 64 位一级静态指针链。不依赖固定堆区间、不依赖 28B 队列结构，耗时 <0.3s。
+func deepReverseStaticChainsByCoord(h, mainBase uintptr, targetHud [3]float32, maxCoordDiff float32, capLimit int) []StaticChainEntry {
+	if h == 0 || mainBase == 0 {
 		return nil
 	}
-	tBytes := readMem(h, targetAddr, 12)
-	if len(tBytes) < 12 {
-		return nil
+	if capLimit <= 0 {
+		capLimit = deepScanMaxChains
 	}
-	tx := math.Float32frombits(binary.LittleEndian.Uint32(tBytes[0:]))
-	tzs := math.Float32frombits(binary.LittleEndian.Uint32(tBytes[4:]))
-	tyn := math.Float32frombits(binary.LittleEndian.Uint32(tBytes[8:]))
-	if !ptkCoordOK(tx, tzs, tyn) {
-		return nil
-	}
-	targetHud := [3]float32{tx, -tyn, tzs - elevBias}
 
 	var actorChains, ringChains []StaticChainEntry
 	seen := make(map[string]bool)
 	checkedPtr := make(map[uintptr]bool)
 	const chunk = uintptr(4 * 1024 * 1024)
-	const maxCoordDiff = float32(0.5)
 
-	for off := uintptr(0); off < deepScanMainWindow && len(actorChains) < deepScanMaxChains; {
+	for off := uintptr(0); off < deepScanMainWindow && len(actorChains) < capLimit; {
 		var mbi MemoryBasicInformation
 		if virtualQueryEx(h, mainBase+off, &mbi) == 0 {
 			break
@@ -170,7 +189,7 @@ func deepReverseStaticChains(h, mainBase, targetAddr uintptr) []StaticChainEntry
 		if regLimit > deepScanMainWindow {
 			regLimit = deepScanMainWindow
 		}
-		for curOff := off; curOff < regLimit && len(actorChains) < deepScanMaxChains; curOff += chunk {
+		for curOff := off; curOff < regLimit && len(actorChains) < capLimit; curOff += chunk {
 			readLen := regLimit - curOff
 			if readLen > chunk {
 				readLen = chunk
@@ -205,11 +224,11 @@ func deepReverseStaticChains(h, mainBase, targetAddr uintptr) []StaticChainEntry
 						PtrOffset:    formatHexPtr(pOff),
 						StructOffset: formatHexPtr(sOff),
 					})
-					if len(actorChains) >= deepScanMaxChains {
+					if len(actorChains) >= capLimit {
 						break
 					}
 				}
-				if len(actorChains) < deepScanMaxChains {
+				if len(actorChains) < capLimit {
 					for _, sOff := range ringOffs {
 						key := fmt.Sprintf("%X:%X", pOff, sOff)
 						if seen[key] {
@@ -228,63 +247,120 @@ func deepReverseStaticChains(h, mainBase, targetAddr uintptr) []StaticChainEntry
 	}
 
 	out := append(actorChains, ringChains...)
-	if len(out) > deepScanMaxChains {
-		out = out[:deepScanMaxChains]
+	if len(out) > capLimit {
+		out = out[:capLimit]
 	}
 	return out
 }
 
-// deepCalibrateAndSave 根据深度扫描命中的真身地址，生成并保存 pc_profile_local.json，
-// 同时切换当前活跃配置档案，实现后续自动定位直接复用。
-func deepCalibrateAndSave(p Platform, plat *totkpcPlatform, lockedAddr uintptr) *MemoryProfile {
-	if p == nil || plat == nil || lockedAddr == 0 {
+// deepReverseStaticChains 读取已锁定真身地址的当前坐标，反扫 mainBase 中的 L1 静态指针链。
+func deepReverseStaticChains(h, mainBase, targetAddr uintptr) []StaticChainEntry {
+	if h == 0 || mainBase == 0 || targetAddr == 0 {
 		return nil
+	}
+	tBytes := readMem(h, targetAddr, 12)
+	if len(tBytes) < 12 {
+		return nil
+	}
+	tx := math.Float32frombits(binary.LittleEndian.Uint32(tBytes[0:]))
+	tzs := math.Float32frombits(binary.LittleEndian.Uint32(tBytes[4:]))
+	tyn := math.Float32frombits(binary.LittleEndian.Uint32(tBytes[8:]))
+	if !ptkCoordOK(tx, tzs, tyn) {
+		return nil
+	}
+	targetHud := [3]float32{tx, -tyn, tzs - elevBias}
+	return deepReverseStaticChainsByCoord(h, mainBase, targetHud, 0.5, deepScanMaxChains)
+}
+
+// buildAndSaveLocalProfile 根据已验证的真身地址与 L1 静态指针链，生成并写入 profiles/*.json，
+// 同时切换当前活跃配置单，实现「校准一次，后续启动自动秒锁」。
+func buildAndSaveLocalProfile(p Platform, plat *totkpcPlatform, lockedAddr uintptr, chains []StaticChainEntry) (*MemoryProfile, string) {
+	if p == nil || plat == nil || (lockedAddr == 0 && len(chains) == 0) {
+		return nil, ""
 	}
 	h := p.Handle()
 	mainBase := plat.MainBase()
 	_, exeSize := plat.ExeBase()
+	ramGB := systemRamGB()
 
-	// 1. 确定命中地址所在的堆块区间（向上下对齐 64MB，确保覆盖同区动态分配）
-	const align = uintptr(64 * 1024 * 1024)
-	lo := (lockedAddr / align) * align
-	hi := lo + align
-	var mbi MemoryBasicInformation
-	if virtualQueryEx(h, lockedAddr, &mbi) != 0 && mbi.RegionSize > 0 {
-		bLo := (mbi.BaseAddress / align) * align
-		bHi := ((mbi.BaseAddress + mbi.RegionSize + align - 1) / align) * align
-		if bLo < lo {
-			lo = bLo
+	if len(chains) > deepScanMaxChains {
+		chains = chains[:deepScanMaxChains]
+	}
+
+	// 1. 确定命中地址所在的堆块区间（向上下对齐 64MB）
+	var heapRanges []HeapRange
+	if lockedAddr != 0 {
+		const align = uintptr(64 * 1024 * 1024)
+		lo := (lockedAddr / align) * align
+		hi := lo + align
+		var mbi MemoryBasicInformation
+		if virtualQueryEx(h, lockedAddr, &mbi) != 0 && mbi.RegionSize > 0 {
+			bLo := (mbi.BaseAddress / align) * align
+			bHi := ((mbi.BaseAddress + mbi.RegionSize + align - 1) / align) * align
+			if bLo < lo {
+				lo = bLo
+			}
+			if bHi > hi {
+				hi = bHi
+			}
 		}
-		if bHi > hi {
-			hi = bHi
+		heapRanges = append(heapRanges, HeapRange{Lo: formatHexPtr(lo), Hi: formatHexPtr(hi)})
+	}
+	heapRanges = append(heapRanges, HeapRange{Lo: formatHexPtr(totkPCScanHeapLo), Hi: formatHexPtr(totkPCScanHeapHi)})
+
+	sizeMB := float64(exeSize) / 1048576.0
+	recompVer, gameVer := detectGameVersions(p.PID(), h)
+	profID := "local-calibrated"
+	profName := fmt.Sprintf("本地校准 (%s)", time.Now().Format("01-02 15:04"))
+	if exeSize > 0 {
+		profID = fmt.Sprintf("local-%dmb", int(math.Round(sizeMB)))
+		if recompVer != "" {
+			if gameVer != "" {
+				profName = fmt.Sprintf("%s (%s · %.1fMB)", recompVer, gameVer, sizeMB)
+			} else {
+				profName = fmt.Sprintf("%s (%.1fMB)", recompVer, sizeMB)
+			}
+		} else if ramGB > 0 {
+			profName = fmt.Sprintf("本地校准 (%.1fMB · %dGB)", sizeMB, ramGB)
+		} else {
+			profName = fmt.Sprintf("本地校准 (%.1fMB)", sizeMB)
 		}
 	}
 
-	// 2. 反推主模块静态指针链
-	chains := deepReverseStaticChains(h, mainBase, lockedAddr)
-
 	prof := &MemoryProfile{
-		ID:       "local-calibrated",
-		Name:     fmt.Sprintf("本地校准配置 (%s)", time.Now().Format("01-02 15:04")),
-		Verified: true,
+		ID:            profID,
+		Name:          profName,
+		RecompVersion: recompVer,
+		GameVersion:   gameVer,
+		Note:          "由校准适配自动生成，可分享给同 PC 编译版与同游戏版本玩家",
+		RamGB:         ramGB,
+		Verified:      true,
 		Fingerprint: ProfileFingerprint{
 			ExeSize:  exeSize,
 			MainBase: formatHexPtr(mainBase),
 		},
-		MainBase: formatHexPtr(mainBase),
-		HeapRanges: []HeapRange{
-			{Lo: formatHexPtr(lo), Hi: formatHexPtr(hi)},
-			{Lo: formatHexPtr(totkPCScanHeapLo), Hi: formatHexPtr(totkPCScanHeapHi)},
-		},
+		MainBase:     formatHexPtr(mainBase),
+		HeapRanges:   heapRanges,
 		StaticChains: chains,
 	}
 
-	if err := saveLocalProfile(prof); err != nil {
-		logEvent("  [deep-scan] 写入校准配置失败: %v", err)
+	savedPath, err := saveLocalProfile(prof)
+	if err != nil {
+		logEvent("  [WARN] 本地配置写入失败：%v（本次会话仍生效，重启后需重新校准）", err)
 	} else {
-		logEvent("  [deep-scan] ★ 已生成校准配置 %s（堆区间 %s~%s，静态链 %d 条）",
-			localProfilePath(), formatHexPtr(lo), formatHexPtr(hi), len(chains))
+		logEvent("  [OK] 已保存本机配置：%s（L1 静态链 %d 条），下次启动自动秒锁；欢迎点【↑ 分享配置】造福同版本玩家",
+			filepath.Join("profiles", filepath.Base(savedPath)), len(chains))
 	}
 	setActiveProfile(prof)
+	return prof, savedPath
+}
+
+// deepCalibrateAndSave 根据已验证真身地址反推 L1 静态指针链并保存本地配置。
+func deepCalibrateAndSave(p Platform, plat *totkpcPlatform, lockedAddr uintptr) *MemoryProfile {
+	if p == nil || plat == nil || lockedAddr == 0 {
+		return nil
+	}
+	chains := deepReverseStaticChains(p.Handle(), plat.MainBase(), lockedAddr)
+	prof, _ := buildAndSaveLocalProfile(p, plat, lockedAddr, chains)
 	return prof
 }

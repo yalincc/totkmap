@@ -1257,10 +1257,35 @@
       renderBag();
       updateFoot();
     }
-    $('btnBagFill999').addEventListener('click', function () { batchSetBag(bagFiltered(), 999); });
-    $('btnBagFill99').addEventListener('click', function () { batchSetBag(bagFiltered(), 99); });
-    $('btnBagFill1').addEventListener('click', function () { batchSetBag(bagFiltered(), 1); });
-    $('btnBagFillAll').addEventListener('click', function () { batchSetBag(state.bagItems, 999); });
+    function parseBatchQty(inputId) {
+      var el = $(inputId);
+      if (!el) return null;
+      var v = parseInt(String(el.value || '').trim(), 10);
+      if (isNaN(v)) return null;
+      v = Math.max(1, Math.min(999, v));
+      el.value = String(v);
+      return v;
+    }
+    function applyCatCustomQty() {
+      var v = parseBatchQty('inBagCatQty');
+      if (v !== null) batchSetBag(bagFiltered(), v);
+    }
+    function applyAllCustomQty() {
+      var v = parseBatchQty('inBagAllQty');
+      if (v !== null) batchSetBag(state.bagItems, v);
+    }
+    $('btnBagFill999').addEventListener('click', function () {
+      if ($('inBagCatQty')) $('inBagCatQty').value = '999';
+      batchSetBag(bagFiltered(), 999);
+    });
+    $('btnBagFillAll').addEventListener('click', function () {
+      if ($('inBagAllQty')) $('inBagAllQty').value = '999';
+      batchSetBag(state.bagItems, 999);
+    });
+    if ($('btnBagCatApply')) $('btnBagCatApply').addEventListener('click', applyCatCustomQty);
+    if ($('btnBagAllApply')) $('btnBagAllApply').addEventListener('click', applyAllCustomQty);
+    if ($('inBagCatQty')) $('inBagCatQty').addEventListener('keydown', function (e) { if (e.key === 'Enter') applyCatCustomQty(); });
+    if ($('inBagAllQty')) $('inBagAllQty').addEventListener('keydown', function (e) { if (e.key === 'Enter') applyAllCustomQty(); });
     $('btnBagPrev').addEventListener('click', function () { if (state.bagPage > 1) { state.bagPage--; renderBag(); } });
     $('btnBagNext').addEventListener('click', function () { state.bagPage++; renderBag(); });
     $('btnBagShowAll').addEventListener('click', function () { state.bagShowAll = !state.bagShowAll; renderBag(); });

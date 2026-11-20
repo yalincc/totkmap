@@ -43,7 +43,8 @@ export const syncClass = computed(() => coreRunning.value ? 'text-amber-400' : '
 export const pos = reactive({
   ok: false, gx: 0, gy: 0, gz: 0, mx: 0, my: 0,
   layer: 18, verified: false, source: '-', copies: 0,
-  lockAddr: '', ageSec: 0, pid: 0
+  lockAddr: '', ageSec: 0, pid: 0,
+  recompVersion: '', gameVersion: '', profileName: '', profileExact: false
 })
 
 // ---- 导航目标（core status.json 补 target 字段后可用；未升级时保持 null）----
@@ -53,8 +54,9 @@ export const target = ref(null)
 export const progressData = ref({})
 
 // ---- 配置 / 环境 ----
-export const cfg = reactive({ saveDirRyujinx: '', saveDirEden: '', emu: 'auto', tls: false, autoOpenMap: true, customProc: '' })
+export const cfg = reactive({ saveDirRyujinx: '', saveDirEden: '', emu: 'auto', tls: false, autoOpenMap: true, customProc: '', profile: 'auto' })
 export const procList = ref([])
+export const pcProfiles = ref([])
 export const envDetect = reactive({ save: false, saveRyu: false, saveEden: false })
 export const statusMapUrl = ref('')
 
@@ -194,6 +196,22 @@ function pushLogs(lines) {
       level = rawTag === 'ok' ? 'OK' : 'LOCK'
       color = 'text-emerald-300'
       levelColor = 'text-emerald-400 font-semibold'
+    } else if (rawTag === 'wait' || rawTag === 'verify') {
+      level = rawTag === 'wait' ? 'WAIT' : 'VERIFY'
+      color = 'text-amber-300'
+      levelColor = 'text-amber-400 font-semibold'
+    } else if (rawTag === 'warn') {
+      level = 'WARN'
+      color = 'text-amber-300'
+      levelColor = 'text-amber-400 font-bold'
+    } else if (rawTag === 'err' || rawTag === 'error' || rawTag === 'lost' || /ERROR|FAILED|panic/i.test(text)) {
+      level = rawTag === 'lost' ? 'LOST' : 'ERR'
+      color = 'text-rose-400'
+      levelColor = 'text-rose-400 font-bold'
+    } else if (rawTag === 'info') {
+      level = 'INFO'
+      color = 'text-slate-300'
+      levelColor = 'text-sky-400'
     } else if (rawTag === 'shrine') {
       level = 'SHRINE'
       color = 'text-teal-300'
@@ -324,9 +342,33 @@ export async function saveSettings() {
     emu: cfg.emu,
     tls: cfg.tls,
     autoOpenMap: cfg.autoOpenMap !== false,
-    customProc: cfg.customProc || ''
+    customProc: cfg.customProc || '',
+    profile: cfg.profile || 'auto'
   })
   await detectSave()
+}
+
+export async function refreshPCProfiles() {
+  try {
+    const list = await api.ListPCProfiles()
+    pcProfiles.value = Array.isArray(list) ? list : []
+  } catch {
+    pcProfiles.value = []
+  }
+}
+
+export async function openProfilesDir() {
+  try { await api.OpenProfilesDir() } catch {}
+}
+
+export async function syncCloudProfiles() {
+  try {
+    const r = await api.SyncCloudProfiles()
+    if (r && r.ok) await refreshPCProfiles()
+    return r || { ok: false, msg: '同步失败' }
+  } catch (e) {
+    return { ok: false, msg: String(e) }
+  }
 }
 
 export async function refreshProcs() {
@@ -404,6 +446,10 @@ function applyStatus(st) {
   if (st.lockAddr) pos.lockAddr = st.lockAddr
   pos.ageSec = st.ageSec || 0
   pos.pid = st.pid || 0
+  pos.recompVersion = st.recompVersion || ''
+  pos.gameVersion = st.gameVersion || ''
+  pos.profileName = st.profileName || ''
+  pos.profileExact = !!st.profileExact
   if (st.target !== undefined) target.value = st.target
   if (st.saveMtime) {
     saveMtime.value = st.saveMtime
@@ -456,8 +502,10 @@ export async function initCore() {
   if (c.saveDirEden) cfg.saveDirEden = c.saveDirEden
   if (c.emu) cfg.emu = c.emu
   if (c.customProc) cfg.customProc = c.customProc
+  cfg.profile = c.profile || 'auto'
   cfg.tls = !!c.tls
   if (c.autoOpenMap !== undefined) cfg.autoOpenMap = !!c.autoOpenMap
+  if (edition.value === 'pc') await refreshPCProfiles()
   const det = await api.EnvDetect()
   envDetect.save = !!det.save
   envDetect.saveRyu = !!det.saveRyu

@@ -90,7 +90,7 @@ func (p *totkpcPlatform) Attach() bool {
 	if err != nil || h == 0 {
 		if p.deniedPid != pid {
 			p.deniedPid = pid
-			logEvent("  [platform] 检测到进程 %s (pid=%d) 但无权读取内存，请以管理员身份运行本程序", procName, pid)
+			logEvent("  [ERR] 检测到进程 %s (pid=%d) 但无权读取内存 —— 请右键以【管理员身份】重新运行本程序。", procName, pid)
 		}
 		p.h, p.pid = 0, 0
 		return false
@@ -105,8 +105,7 @@ func (p *totkpcPlatform) Attach() bool {
 	p.exeBase, p.exeSize = totkPCExeModule(pid)
 	exeSz := p.exeSize
 	p.mu.Unlock()
-	prof := selectActiveProfile(exeSz)
-	fmt.Printf("  [profile] 已加载定位配置：%s (%s)\n", prof.Name, prof.ID)
+	selectActiveProfile(exeSz)
 	return true
 }
 
@@ -147,7 +146,6 @@ func (p *totkpcPlatform) MainBase() uintptr {
 							base := uintptr(parsed)
 							if buf := readMem(p.h, base, 16); len(buf) >= 8 {
 								foundBase = base
-								fmt.Printf("  [platform] ★ 从 %s 自适应匹配主模块基址：0x%X\n", logName, base)
 								break
 							}
 						}
@@ -442,4 +440,50 @@ func (p *totkpcPlatform) describe() string {
 	mb := p.MainBase()
 	eb, es := p.ExeBase()
 	return fmt.Sprintf("pid=%d main=0x%X exe=0x%X(+0x%X)", p.pid, mb, eb, es)
+}
+
+// detectGameVersions 尝试从游戏窗口标题或 logs/totk.log 提取 PC 编译版本（如 TotK Recomp 0.4.0 +7a37fc3c）与游戏版本（如 1.2.1）。
+func detectGameVersions(pid uint32, h uintptr) (recompVer, gameVer string) {
+	reRecomp := regexp.MustCompile(`(?i)(totk[\s\-_]*recomp(?:\s+v?\d+\.\d+(?:\.\d+)?(?:\s*\+[0-9a-fA-F]+)?)?)`)
+	reGameVer := regexp.MustCompile(`(?i)\b(1\.\d+\.\d+)\b`)
+
+	if title := getProcessWindowTitle(pid); title != "" {
+		if m := reRecomp.FindStringSubmatch(title); len(m) > 1 {
+			recompVer = strings.TrimSpace(m[1])
+		}
+		if m := reGameVer.FindStringSubmatch(title); len(m) > 1 {
+			gameVer = m[1]
+		}
+	}
+
+	if (recompVer == "" || gameVer == "") && h != 0 {
+		if exePath := totkPCProcessPath(h); exePath != "" {
+			for _, logName := range []string{"totk.log", "totk.1.log"} {
+				logPath := filepath.Join(filepath.Dir(exePath), "logs", logName)
+				data, err := os.ReadFile(logPath)
+				if err != nil {
+					continue
+				}
+				// 只扫前 8KB 头部即可，避免大日志耗时
+				if len(data) > 8192 {
+					data = data[:8192]
+				}
+				head := string(data)
+				if recompVer == "" {
+					if m := reRecomp.FindStringSubmatch(head); len(m) > 1 {
+						recompVer = strings.TrimSpace(m[1])
+					}
+				}
+				if gameVer == "" {
+					if m := reGameVer.FindStringSubmatch(head); len(m) > 1 {
+						gameVer = m[1]
+					}
+				}
+				if recompVer != "" && gameVer != "" {
+					break
+				}
+			}
+		}
+	}
+	return recompVer, gameVer
 }
