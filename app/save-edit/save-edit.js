@@ -492,7 +492,7 @@
             '<select class="eq-eff" aria-label="附加属性"><option value="">改词条…</option>' + opts + '</select>' +
             '<span class="eq-valwrap">' +
               '<input type="number" class="eq-val" disabled aria-label="附加数值">' +
-              '<button type="button" class="eq-inf" title="设为无限耐久" aria-label="无限耐久">∞</button>' +
+              '<button type="button" class="eq-inf" title="设为无限耐久（当前耐久与上限同时拉满，永不损坏）" aria-label="无限耐久">∞</button>' +
             '</span>' +
           '</div>' +
           fuseRowHtml +
@@ -566,7 +566,11 @@
           rec.eff = sel.value;
           if (sel.value === 'None') rec.effVal = 0;
           else if (SW.needsValue(sel.value)) {
-            if (el.dataset.inf === '1') { rec.effVal = SW.INF_DURABILITY; rec.inf = true; }
+            if (el.dataset.inf === '1') {
+              rec.effVal = SW.INF_DURABILITY; rec.inf = true;
+              /* 当前耐久也要拉满：碎裂判定看 Life，只抬上限照样碎 */
+              rec.life = SW.INF_DURABILITY;
+            }
             else {
               var vn = parseInt(val.value.trim(), 10);
               rec.effVal = isFinite(vn) ? vn : 10;

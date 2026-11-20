@@ -666,10 +666,26 @@
             var i = it.i | 0;
             if (i < 0) { errs.push('装备下标非法'); return; }
 
+            /* ★ 无限耐久联动：耐久上限被设为 INF 时，当前耐久(Life)必须一起拉满。
+             * 游戏碎裂判定看的是 Life——只抬上限不抬 Life，砍几下照样碎。
+             * 放在这里兜底，兼容「只传了 effVal 没传 life」的老 UI 状态。 */
+            if (typeof it.effVal === 'number' && it.effVal === INF_DURABILITY) {
+              var infEff = typeof it.eff === 'string' ? it.eff : (function () {
+                var eb0 = def.eff ? blockOff(def.eff) : -1;
+                if (eb0 < 0) return null;
+                return nameByHash(view.getUint32(eb0 + 4 + i * 4, true));
+              })();
+              if (isDurEff(infEff)) it.life = INF_DURABILITY;
+            }
+
             if (typeof it.life === 'number') {
               var lb = blockOff(def.life);
               if (lb < 0) errs.push(def.label + ' 耐久定位失败');
-              else pushI32(lb + 4 + i * 4, clamp(it.life, 1, 99999), def.label + '#' + i + ' 耐久');
+              else {
+                /* 无限耐久特例：当前耐久也要能写 2100000000，不能被 99999 截断 */
+                var lifeVal = it.life === INF_DURABILITY ? INF_DURABILITY : clamp(it.life, 1, 99999);
+                pushI32(lb + 4 + i * 4, lifeVal, def.label + '#' + i + ' 耐久');
+              }
             }
             if (typeof it.eff === 'string') {
               var eb = blockOff(def.eff);
