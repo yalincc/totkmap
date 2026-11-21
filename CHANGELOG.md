@@ -8,15 +8,15 @@
 ## TOTKMAP（待发版蓄水）— 实时语音导航系统（独立模块 + 塞尔达/御姐双离线语音包）（2026-11-21）
 
 > **摘要（Release 正文用这几条）**
-> - 新增网页端实时语音导航独立模块，内置「塞尔达风」与「御姐领航员」双套高音质离线语音包（断网可用，英文界面自动回退英文 TTS）
+> - 新增网页端实时语音导航独立模块，内置「塞尔达风」「御姐领航员」中文双音色与「英式女声」英文离线语音包（断网可用）
 > - 支持罗盘 8 方位绝对方向、三维高低差（上方/下方）、跨层提醒与切回同层补报、偏航纠偏与普尔亚平板雷达感应音
 > - 支持自定义到达距离、高低差阈值、中途播报频次、音量调节与一键关闭（语音交互完全收口在网页端，`TOTKNavi` 桌面端保持轻量纯粹）
 
 - **独立语音导航模块 (`app/voice/`)**：
-  - 封装零耦合 `app/voice/voice-nav.js`（对外暴露 `window.VoiceNav`），通过 `tools/build_voice_packs.py`（`edge-tts` + MPEG 帧级首尾静音裁剪）生成 `zelda` 与 `yujie` 共 64 个 `.mp3` 切片（总计 578 KB），附 `app/voice/README.md` 自定义音色替换指南；
+  - 封装零耦合 `app/voice/voice-nav.js`（对外暴露 `window.VoiceNav`），通过 `tools/build_voice_packs.py`（`edge-tts` + MPEG 帧级首尾静音裁剪）生成 `zelda`、`yujie` 与 `en`（`en-GB-SoniaNeural` 英式女声，英文界面自动启用）共 96 个 `.mp3` 切片，附 `app/voice/README.md` 自定义音色替换指南；
   - 纯网页端对接 `live.js`、`explore-auto.js`、`mat-auto.js`，在实时导航面板与显示设置弹窗双向同步提供 5 档音色（关闭/塞尔达/御姐音/感应音/系统语音）、音量滑块、4 项功能胶囊开关及自定义到达距离（`15~80m`）、高低差阈值（`10~60m`）、中途播报频次（精简/标准/密集）；
   - 补齐跨层切回同层自动补报、传送远离 `+80m` 重置里程碑、浏览器自动播放手势解锁与 `setPaused/isSpeaking` 外部静音避让口，适配 320px 窄窗与手机端；
-  - 递增 `sw.js` 缓存版本至 `v1.9.4-83`，新增 `tools/verify_voice_nav.js` 端到端测试套件。
+  - 递增 `sw.js` 缓存版本至 `v1.9.4-84`，新增 `tools/verify_voice_nav.js` 端到端测试套件。
 
 ---
 

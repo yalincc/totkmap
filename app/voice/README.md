@@ -10,8 +10,9 @@
 app/voice/
 ├── voice-nav.js          ← 独立核心引擎（UMD 纯原生 JS，对外暴露 window.VoiceNav）
 ├── voice-config.json     ← 音色配置与 32 个标准导航词条定义表
-├── zelda/                ← 离线语音包 A：塞尔达公主风（32 个 .mp3 切片）
-├── yujie/                ← 离线语音包 B：御姐领航员（32 个 .mp3 切片）
+├── zelda/                ← 离线语音包 A：塞尔达公主风（中文 32 个 .mp3 切片）
+├── yujie/                ← 离线语音包 B：御姐领航员（中文 32 个 .mp3 切片）
+├── en/                   ← 离线语音包 C：英文女声（英式塞尔达风 32 个 .mp3 切片，英文界面自动启用）
 └── README.md             ← 本说明文档
 ```
 

@@ -22,6 +22,17 @@
       "desc_zh": "成熟干练领航员",
       "desc_en": "Mature & crisp navigator voice"
     },
+    "en": {
+      "id": "en",
+      "name_zh": "英文女声（英式）",
+      "name_en": "English (British Princess)",
+      "lang": "en",
+      "voice": "en-GB-SoniaNeural",
+      "rate": "-4%",
+      "pitch": "+3Hz",
+      "desc_zh": "英文界面离线女声包（英式塞尔达风）",
+      "desc_en": "Offline British English navigator voice pack"
+    },
     "chime": {
       "id": "chime",
       "name_zh": "仅感应音",

@@ -6,9 +6,9 @@
  *      宿主（网页地图 TOTKmap）即使不加载或彻底关闭本模块也 0 报错、0 开销。
  *   2. 罗盘 8 方位绝对方向：与游戏右下角小地图圆盘北向严格一致（正北/东北/正东/东南/正南/西南/正西/西北）。
  *   3. 三维空间感知：支持 3D 距离阶梯（500m / 300m / 100m / 自定义到达距离）、垂直高低差、跨层提醒与同层补报、偏航提醒。
- *   4. 双离线角色语音包 + 双兜底：
- *      - zelda : 塞尔达公主风（温柔空灵少女音，离线 MP3；英文界面自动回退英文 TTS）
- *      - yujie : 御姐领航员（成熟干练御姐音，离线 MP3；英文界面自动回退英文 TTS）
+ *   4. 中英文离线角色语音包 + 双兜底：
+ *      - zelda : 塞尔达公主风（温柔空灵少女音，离线 MP3；英文界面自动切 en/ 英式离线女声包）
+ *      - yujie : 御姐领航员（成熟干练御姐音，离线 MP3；英文界面自动切 en/ 英式离线女声包）
  *      - chime : 仅普尔亚平板雷达感应音（纯 Web Audio 合成，0 音频文件请求）
  *      - tts   : 浏览器原生语音合成（支持直接播报具体神庙/地标名称，自适应中英文）
  * ============================================================================ */
@@ -92,7 +92,8 @@
     lastOffCourseSpeak: 0,  // 上次播报偏航时间戳
     lastRadarPing: 0,       // 上次雷达感应音时间戳
     lastSpokenClips: [],    // 最近一次播报的词条列表（便于测试与状态检查）
-    lastPlaybackMode: ''    // 最近一次播报模式: 'mp3' | 'tts' | 'chime'
+    lastPlaybackMode: '',   // 最近一次播报模式: 'mp3' | 'tts' | 'chime'
+    lastPlaybackPack: ''    // 最近一次实际使用的语音包目录: 'zelda' | 'yujie' | 'en' | ''
   };
 
   var OFF_COURSE_WAIT = 6000;     // 持续反向移动 6 秒触发偏航
@@ -346,6 +347,7 @@
     // 仅感应音模式：只响雷达音，不播人声
     if (cfg.pack === 'chime') {
       state.lastPlaybackMode = 'chime';
+      state.lastPlaybackPack = '';
       if (opts.chime) playChime(opts.chime);
       return;
     }
@@ -359,15 +361,18 @@
       playChime(opts.chime);
     }
 
-    // 系统原生 TTS 模式；英文界面下选中文离线包（zelda/yujie）时亦自动平滑回退英文 TTS
-    if (cfg.pack === 'tts' || isEn()) {
+    // 系统原生 TTS 模式（可读出具体神庙/地标名称，自适应中英文）
+    if (cfg.pack === 'tts') {
       state.lastPlaybackMode = 'tts';
+      state.lastPlaybackPack = '';
       speakViaSystemTTS(clips, opts.targetName);
       return;
     }
 
+    // 离线 MP3 模式：英文界面自动切内置 en/ 英式离线女声包，中文界面按 zelda / yujie 播放
     state.lastPlaybackMode = 'mp3';
-    var pack = (cfg.pack === 'yujie') ? 'yujie' : 'zelda';
+    var pack = isEn() ? 'en' : ((cfg.pack === 'yujie') ? 'yujie' : 'zelda');
+    state.lastPlaybackPack = pack;
     for (var i = 0; i < clips.length; i++) {
       playQueue.push({ pack: pack, clipId: clips[i] });
     }
