@@ -77,7 +77,7 @@
     return best;
   }
 
-  function navTo(m, silent) {
+  function navTo(m, silent, voiceEvent) {
     if (!m || !A) return;
     var mz = m.z != null ? m.z : (m.altitude_y != null ? m.altitude_y : null);
     A.liveNav({
@@ -88,7 +88,8 @@
       z: mz,
       layer: m.layer,
       type: A.catName(m.cat),
-      silent: !!silent
+      silent: !!silent,
+      voiceEvent: voiceEvent || null
     });
   }
 
@@ -115,11 +116,14 @@
     if (!pool.length) {
       stop();
       closeCard();
+      if (window.VoiceNav && typeof window.VoiceNav.feed === 'function') {
+        window.VoiceNav.feed({ event: 'all_done' });
+      }
       A.toast(T('auto.exp.allDone', '本层收集目标已全部完成！'));
       return;
     }
     current = nearest(pool, p);
-    navTo(current, true);
+    navTo(current, true, 'next_target');
     if (p && p.located && dist(current, p) <= ARRIVE_DIST) {
       arrived = true;
       showCard(current);
@@ -178,7 +182,7 @@
         if (dBest + SWITCH_HYST < d) {
           current = best;
           d = dBest;
-          navTo(current, true);
+          navTo(current, true, 'switch_near');
           if (d <= ARRIVE_DIST) {
             arrived = true;
             showCard(current);
@@ -233,7 +237,7 @@
     current = m;
     updatePinForManualPick(m, p);
     arrived = (dist(m, p) <= ARRIVE_DIST);
-    navTo(m, true);
+    navTo(m, true, wasRunning ? 'switch_near' : 'start_auto');
     showCard(m);
     A.toast(T(wasRunning ? 'auto.exp.switchTarget' : 'auto.exp.start',
       wasRunning ? '已切换收集目标：{0}' : '开始收集：{0}',

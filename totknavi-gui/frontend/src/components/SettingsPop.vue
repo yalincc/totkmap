@@ -48,6 +48,20 @@
         <span class="text-slate-300">{{ t("settings.autoOpenMap") }}</span>
       </label>
     </div>
+    <!-- 桌面后台语音导航（独立模块可插拔，全屏游戏不开网页也能播报） -->
+    <div>
+      <label class="block text-slate-400 mb-1">{{ t('settings.voiceNav') }}</label>
+      <div class="flex gap-1.5 items-center">
+        <select :value="voicePack" @change="onVoiceChange($event)" class="flex-1 bg-[#0d1117] border border-slate-700 rounded px-2 py-1.5 text-white text-xs focus:border-blue-500 focus:outline-none">
+          <option value="off">{{ t('settings.voiceOff') }}</option>
+          <option value="zelda">{{ t('settings.voiceZelda') }}</option>
+          <option value="yujie">{{ t('settings.voiceYujie') }}</option>
+          <option value="chime">{{ t('settings.voiceChime') }}</option>
+        </select>
+        <button type="button" @click="testGuiVoice" class="bg-slate-700 hover:bg-slate-600 text-amber-300 px-2.5 py-1.5 rounded text-xs shrink-0">{{ t('settings.voiceTest') }}</button>
+      </div>
+      <div class="text-[10px] text-slate-500 mt-1">{{ t('settings.voiceHint') }}</div>
+    </div>
     <!-- 界面语言（跟随系统 / 中文 / English，即时切换） -->
     <LangSelect />
     <div class="flex items-center gap-2 pt-1">
@@ -61,9 +75,14 @@
 import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import LangSelect from './LangSelect.vue'
-import { cfg, edition, envDetect, pickSave, saveSettings, openLogDir, pcProfiles, refreshPCProfiles, openProfilesDir } from '../composables/useCore'
+import { cfg, edition, envDetect, pickSave, saveSettings, openLogDir, pcProfiles, refreshPCProfiles, openProfilesDir, voicePack, setGuiVoicePack, testGuiVoice } from '../composables/useCore'
 
 const { t } = useI18n()
+
+function onVoiceChange(e) {
+  setGuiVoicePack(e.target.value)
+  if (e.target.value !== 'off') testGuiVoice()
+}
 
 onMounted(() => {
   if (edition.value === 'pc') refreshPCProfiles()

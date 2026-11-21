@@ -589,6 +589,12 @@
     if (!paused && window.EXPLORE_AUTO && typeof window.EXPLORE_AUTO.onTick === 'function') {
       window.EXPLORE_AUTO.onTick();
     }
+    if (!paused && window.VoiceNav && typeof window.VoiceNav.feed === 'function') {
+      window.VoiceNav.feed({
+        player: { x: pos.mx, y: pos.my, z: pos.gz, layer: renderLayer(), located: pos.located },
+        target: target
+      });
+    }
     tickArrival();
     redraw();
     if (window.TOTK_APP && typeof window.TOTK_APP.dodgeExploreCardIfNeeded === 'function') {
@@ -833,6 +839,13 @@
     redraw();
     setStatus();
     if (!opts.silent) toast('已设置导航：' + body.name);
+    if (window.VoiceNav && typeof window.VoiceNav.feed === 'function') {
+      window.VoiceNav.feed({
+        player: { x: pos.mx, y: pos.my, z: pos.gz, layer: renderLayer(), located: pos.located },
+        target: body,
+        event: opts.voiceEvent || (opts.silent ? null : 'start_nav')
+      });
+    }
     fetch(LIVE_API + '/target', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body)
@@ -841,6 +854,9 @@
   }
 
   function clearNav() {
+    if (window.VoiceNav && typeof window.VoiceNav.feed === 'function') {
+      window.VoiceNav.feed({ event: 'clear' });
+    }
     fetch(LIVE_API + '/target', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ clear: true })

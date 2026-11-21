@@ -71,13 +71,14 @@
     return best;
   }
 
-  function navTo(t) {
+  function navTo(t, voiceEvent) {
     var m = A.matById(t.mid);
     A.liveNav({
       name: m ? m.cn : T('auto.matPrefix', '材料') + t.mid,
       x: t.x, y: t.y, z: t.z,
       layer: A.state().layer,
-      type: m ? m.cat : ''
+      type: m ? m.cat : '',
+      voiceEvent: voiceEvent || null
     });
     /* live.js 的 target 是 fetch 异步返回后才设置：延迟重绘卡片，让按钮标签同步 */
     setTimeout(refreshCard, 200);
@@ -94,9 +95,14 @@
     var layer = (p && p.located) ? p.layer : A.state().layer;
     if (p && p.located) { lastPX = p.mx; lastPY = p.my; }
     var pool = poolForLayer(layer);
-    if (!pool.length) { stop(); A.toast(T('auto.mat.allDoneLayer', '本层（{0}）{1}点位已全部收集，收集队列结束', A.layerName(layer), A.matName(curMid))); return; }
+    if (!pool.length) {
+      stop();
+      if (window.VoiceNav && typeof window.VoiceNav.feed === 'function') window.VoiceNav.feed({ event: 'all_done' });
+      A.toast(T('auto.mat.allDoneLayer', '本层（{0}）{1}点位已全部收集，收集队列结束', A.layerName(layer), A.matName(curMid)));
+      return;
+    }
     current = nearest(pool, p);
-    navTo(current);
+    navTo(current, 'next_target');
     A.toast(T('auto.mat.resume', '续导：{0} · 距下一点 {1} 米', A.matName(current.mid), Math.round(dist(current, p))))
   }
 
@@ -166,7 +172,7 @@
     var pool = poolForLayer(p.layer);
     if (!pool.length) { running = false; curMid = null; A.toast(T('auto.mat.allDone', '本层该材料点位已全部收集')); return; }
     current = nearest(pool, p);
-    navTo(current);
+    navTo(current, 'start_auto');
     A.toast(T('auto.mat.start', '收集队列开始：{0}（{1}层）', A.matName(current.mid), A.layerName(p.layer)));
   }
 

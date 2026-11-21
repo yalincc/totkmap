@@ -1,0 +1,74 @@
+{
+  "version": "1.0.0",
+  "defaultPack": "zelda",
+  "packs": {
+    "zelda": {
+      "id": "zelda",
+      "name_zh": "塞尔达风",
+      "name_en": "Princess (Zelda)",
+      "voice": "zh-CN-XiaoyiNeural",
+      "rate": "-4%",
+      "pitch": "+5Hz",
+      "desc_zh": "温柔空灵少女音",
+      "desc_en": "Gentle & ethereal voice"
+    },
+    "yujie": {
+      "id": "yujie",
+      "name_zh": "御姐音",
+      "name_en": "Mature (Navigator)",
+      "voice": "zh-CN-XiaoxiaoNeural",
+      "rate": "+2%",
+      "pitch": "-5Hz",
+      "desc_zh": "成熟干练领航员",
+      "desc_en": "Mature & crisp navigator voice"
+    },
+    "chime": {
+      "id": "chime",
+      "name_zh": "仅感应音",
+      "name_en": "Sensor Chime Only",
+      "desc_zh": "仅播放普尔亚平板雷达感应音",
+      "desc_en": "Purah Pad radar sensor chimes only"
+    },
+    "tts": {
+      "id": "tts",
+      "name_zh": "系统语音",
+      "name_en": "System TTS",
+      "desc_zh": "浏览器原生语音合成（可读具体地名）",
+      "desc_en": "Browser native TTS (reads marker names)"
+    }
+  },
+  "clips": {
+    "welcome": { "zh": "语音导航已就绪。", "en": "Voice navigation ready." },
+    "start_nav": { "zh": "开始导航。", "en": "Starting navigation." },
+    "start_auto": { "zh": "开启自动收集。", "en": "Auto collection started." },
+    "next_target": { "zh": "完成！下一个目标，", "en": "Completed! Next target," },
+    "switch_near": { "zh": "发现更近目标，", "en": "Closer target found," },
+    "dir_n": { "zh": "正北方向，", "en": "North," },
+    "dir_ne": { "zh": "东北方向，", "en": "Northeast," },
+    "dir_e": { "zh": "正东方向，", "en": "East," },
+    "dir_se": { "zh": "东南方向，", "en": "Southeast," },
+    "dir_s": { "zh": "正南方向，", "en": "South," },
+    "dir_sw": { "zh": "西南方向，", "en": "Southwest," },
+    "dir_w": { "zh": "正西方向，", "en": "West," },
+    "dir_nw": { "zh": "西北方向，", "en": "Northwest," },
+    "dist_far": { "zh": "距离较远，建议先传送。", "en": "Far away, consider fast travel." },
+    "dist_800": { "zh": "约八百米。", "en": "about 800 meters." },
+    "dist_500": { "zh": "约五百米。", "en": "about 500 meters." },
+    "dist_400": { "zh": "约四百米。", "en": "about 400 meters." },
+    "dist_300": { "zh": "三百米。", "en": "300 meters." },
+    "dist_200": { "zh": "两百米。", "en": "200 meters." },
+    "dist_150": { "zh": "一百五十米。", "en": "150 meters." },
+    "dist_100": { "zh": "一百米。", "en": "100 meters." },
+    "dist_50": { "zh": "五十米。", "en": "50 meters." },
+    "arrived": { "zh": "已到达目标附近。", "en": "Arrived near target." },
+    "all_done": { "zh": "太棒了，本层目标已全部完成！", "en": "Awesome! All targets on this layer are completed!" },
+    "alt_up": { "zh": "目标在上方。", "en": "Target is above you." },
+    "alt_down": { "zh": "目标在下方。", "en": "Target is below you." },
+    "layer_sky": { "zh": "注意，目标在天空层。", "en": "Note: target is on the Sky layer." },
+    "layer_surface": { "zh": "注意，目标在地上层。", "en": "Note: target is on the Surface layer." },
+    "layer_depths": { "zh": "注意，目标在地下层。", "en": "Note: target is in the Depths." },
+    "off_course": { "zh": "方向偏离，目标在", "en": "Off course, target is" },
+    "korok_near": { "zh": "附近有克洛格的气息哦。", "en": "A Korok is hiding nearby." },
+    "shrine_near": { "zh": "感应到神庙反应。", "en": "Shrine sensor triggered nearby." }
+  }
+}

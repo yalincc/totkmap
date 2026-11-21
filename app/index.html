@@ -123,7 +123,7 @@
     <div class="su-links">
       <a id="saveEditBtn" class="su-link" href="save-edit/editor.html" target="_blank" rel="noopener" data-i18n-title="save.editBtnTip" title="打开存档修改器：卢比 / 材料 / 装备 / 坐标传送">🔧 存档修改</a>
       <a id="bpWorkshopBtn" class="su-link bp" href="save-edit/editor.html#blueprint" target="_blank" rel="noopener" data-i18n-title="save.bpBtnTip" title="打开蓝图工坊：精选蓝图库 · 拖拽导入导出与分享">📐 蓝图工坊</a>
-      <button type="button" id="btnChangelog" class="su-link cl" title="查看最近版本更新内容">📢 更新公告</button>
+      <button type="button" id="btnChangelog" class="su-link cl" data-i18n="save.changelogBtn" data-i18n-title="save.changelogTip" title="查看最近版本更新内容">📢 更新公告</button>
     </div>
   </div>
 
@@ -513,7 +513,7 @@
 <!-- ============ 版本更新公告弹窗 ============ -->
 <div id="changelogBox" class="help-box hidden" role="dialog" aria-modal="true" aria-labelledby="clTitle">
   <h3><span id="clTitle">🎉 版本更新公告</span>
-    <button id="clClose" class="help-close" title="关闭">×</button>
+    <button id="clClose" class="help-close" data-i18n-title="common.close" title="关闭">×</button>
   </h3>
   <div id="changelogBody"></div>
   <div class="cl-foot">
@@ -593,9 +593,10 @@
 <script src="js/totk-canvas-layer.js?v=300"></script>
 <script src="data/changelog.js?v=2"></script>
 <script src="js/app.js?v=315"></script>
-<script src="js/live.js?v=295"></script>
-<script src="js/explore-auto.js?v=198"></script>
-<script src="js/mat-auto.js?v=195"></script>
+<script src="voice/voice-nav.js?v=1"></script>
+<script src="js/live.js?v=296"></script>
+<script src="js/explore-auto.js?v=199"></script>
+<script src="js/mat-auto.js?v=196"></script>
 <!-- 手机防息屏降级（V2.4.1）：wakeLock 不可用（局域网 http / iOS 旧版）时播放静音视频保持屏幕常亮；
      1.5KB 黑帧静音。★ V2.4.1 修正：1px 可见（position:fixed）而非 display:none ——
      Chrome Android 会挂起完全隐藏的视频（V2.4.0 版约 5 分钟息屏的可疑主因），
