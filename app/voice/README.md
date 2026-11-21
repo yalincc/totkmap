@@ -1,6 +1,6 @@
 # TOTKmap 独立语音导航模块 (`app/voice/`) · 架构与自定义音色替换指南
 
-本目录是 **TOTKmap（网页地图）** 与 **TOTKNavi（桌面定位程序）** 共用的**零耦合、可插拔语音导航模块**。
+本目录是 **TOTKmap（网页地图）** 专属的**零耦合、可插拔实时语音导航模块**（语音交互与参数完全收口在网页端，`TOTKNavi` 桌面定位端保持纯粹轻量化，不内置语音）。
 
 ---
 
@@ -29,8 +29,7 @@ app/voice/
    ```powershell
    python tools/build_voice_packs.py
    ```
-   脚本会自动合成全部 64 个 `.mp3` 并执行 **MPEG 帧级首尾静音裁剪**（无需安装 `ffmpeg`），确保方向、距离与高低差多词条连读紧凑无卡顿。
-3. 若需同步到 `TOTKNavi` 桌面端，将 `app/voice/*` 复制到 `totknavi-gui/frontend/public/voice/` 后执行 `wails build` 即可。
+   脚本会自动合成全部 64 个 `.mp3` 并执行 **MPEG 帧级首尾静音裁剪**（无需安装 `ffmpeg`），确保方向、距离与高低差多词条连读紧凑无卡顿。刷新网页地图（或清理缓存）即可生效。
 
 ### 方式 2：使用 `GPT-SoVITS` 等 AI 声音克隆模型或真人录音直接替换
 只需按照 `voice-config.json` 中 `"clips"` 的 32 个键名，导出同名 `.mp3` 覆盖放入 `app/voice/zelda/` 或 `app/voice/yujie/` 即可（无需改动任何代码）：

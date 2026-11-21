@@ -1,14 +1,14 @@
 /* ============================================================================
- * TOTKmap & TOTKNavi · 独立语音导航模块 (app/voice/voice-nav.js)
+ * TOTKmap · 独立网页端实时语音导航模块 (app/voice/voice-nav.js)
  * ----------------------------------------------------------------------------
  * 设计目标：
  *   1. 100% 独立可插拔模块：自带状态机、音频池、Web Audio 普尔亚雷达音合成、独立配置与 UI 挂载；
- *      宿主（网页地图 TOTKmap 或桌面端 TOTKNavi）即使不加载或彻底关闭本模块也 0 报错、0 开销。
+ *      宿主（网页地图 TOTKmap）即使不加载或彻底关闭本模块也 0 报错、0 开销。
  *   2. 罗盘 8 方位绝对方向：与游戏右下角小地图圆盘北向严格一致（正北/东北/正东/东南/正南/西南/正西/西北）。
- *   3. 三维空间感知：支持 3D 距离阶梯（300m / 100m / 35m）、垂直高低差（±25m 上方/下方）、跨层提示、偏航提醒。
+ *   3. 三维空间感知：支持 3D 距离阶梯（500m / 300m / 100m / 自定义到达距离）、垂直高低差、跨层提醒与同层补报、偏航提醒。
  *   4. 双离线角色语音包 + 双兜底：
- *      - zelda : 塞尔达公主风（温柔空灵少女音，离线 MP3）
- *      - yujie : 御姐领航员（成熟干练御姐音，离线 MP3）
+ *      - zelda : 塞尔达公主风（温柔空灵少女音，离线 MP3；英文界面自动回退英文 TTS）
+ *      - yujie : 御姐领航员（成熟干练御姐音，离线 MP3；英文界面自动回退英文 TTS）
  *      - chime : 仅普尔亚平板雷达感应音（纯 Web Audio 合成，0 音频文件请求）
  *      - tts   : 浏览器原生语音合成（支持直接播报具体神庙/地标名称，自适应中英文）
  * ============================================================================ */
@@ -84,17 +84,23 @@
     passed300: false,       // 是否已触发 300m 节点
     passed100: false,       // 是否已触发 100m 节点
     passedArrive: false,    // 是否已触发到达节点
+    wasCrossLayer: false,   // 上一拍是否处于跨层状态（切回同层时自动补报方向距离）
     lastDist: null,         // 上一拍三维距离
     lastPx: null,           // 上一拍玩家 X
     lastPy: null,           // 上一拍玩家 Y
     offCourseSince: 0,      // 连续偏航起始时间戳
     lastOffCourseSpeak: 0,  // 上次播报偏航时间戳
     lastRadarPing: 0,       // 上次雷达感应音时间戳
-    lastSpokenClips: []     // 最近一次播报的词条列表（便于测试与状态检查）
+    lastSpokenClips: [],    // 最近一次播报的词条列表（便于测试与状态检查）
+    lastPlaybackMode: ''    // 最近一次播报模式: 'mp3' | 'tts' | 'chime'
   };
 
   var OFF_COURSE_WAIT = 6000;     // 持续反向移动 6 秒触发偏航
   var OFF_COURSE_COOLDOWN = 22000;// 偏航提醒冷却 22 秒
+  var MILESTONE_RESET_HYST = 80;  // 传送/远离超过里程碑 +80m 时重置对应里程碑
+  var externalPaused = false;     // 外部模块临时静音避让标志（不改动用户 cfg.enabled）
+  var audioUnlocked = false;      // 浏览器首次手势解锁标志
+  var autoplayWarned = false;     // 自动播放被拦截提示防重复标志
 
   function getArriveM() {
     var v = parseInt(cfg.arriveM, 10);
@@ -237,7 +243,7 @@
   }
 
   function playChime(kind) {
-    if (!cfg.enabled || !cfg.chime) return;
+    if (!cfg.enabled || externalPaused || !cfg.chime) return;
     var ctx = ensureAudioCtx();
     if (!ctx) return;
     var now = ctx.currentTime;
@@ -332,13 +338,14 @@
 
   function speakClips(clips, opts) {
     opts = opts || {};
-    if (!cfg.enabled) return;
+    if (!cfg.enabled || externalPaused) return;
     if (!clips || !clips.length) return;
 
     state.lastSpokenClips = clips.slice();
 
     // 仅感应音模式：只响雷达音，不播人声
     if (cfg.pack === 'chime') {
+      state.lastPlaybackMode = 'chime';
       if (opts.chime) playChime(opts.chime);
       return;
     }
@@ -352,12 +359,14 @@
       playChime(opts.chime);
     }
 
-    // 系统原生 TTS 模式（或英文界面且未选仅感应音时可选用离线语音或 TTS）
-    if (cfg.pack === 'tts') {
+    // 系统原生 TTS 模式；英文界面下选中文离线包（zelda/yujie）时亦自动平滑回退英文 TTS
+    if (cfg.pack === 'tts' || isEn()) {
+      state.lastPlaybackMode = 'tts';
       speakViaSystemTTS(clips, opts.targetName);
       return;
     }
 
+    state.lastPlaybackMode = 'mp3';
     var pack = (cfg.pack === 'yujie') ? 'yujie' : 'zelda';
     for (var i = 0; i < clips.length; i++) {
       playQueue.push({ pack: pack, clipId: clips[i] });
@@ -370,7 +379,7 @@
   }
 
   function pumpQueue() {
-    if (!cfg.enabled || currentAudio || !playQueue.length) return;
+    if (!cfg.enabled || externalPaused || currentAudio || !playQueue.length) return;
     var item = playQueue.shift();
     var audio = getAudioEl(item.pack, item.clipId);
     currentAudio = audio;
@@ -403,7 +412,22 @@
       audio.currentTime = 0;
       var pr = audio.play();
       if (pr && typeof pr.catch === 'function') {
-        pr.catch(function () { next(); });
+        pr.catch(function (err) {
+          if (err && err.name === 'NotAllowedError') {
+            // 浏览器尚未获得用户交互解锁音频：清空本次队列并轻提示一次，不静默逐条白吞
+            advanced = true;
+            audio.removeEventListener('ended', next);
+            audio.removeEventListener('error', onErr);
+            if (currentAudio === audio) currentAudio = null;
+            playQueue = [];
+            if (!autoplayWarned && typeof window !== 'undefined' && window.TOTK_APP && typeof window.TOTK_APP.toast === 'function') {
+              autoplayWarned = true;
+              window.TOTK_APP.toast(tr('voice.autoplayHint', '浏览器限制自动语音，请点击地图任意处解锁', 'Browser blocked auto audio — click anywhere on the map to unlock'));
+            }
+            return;
+          }
+          next();
+        });
       }
     } catch (e) {
       next();
@@ -440,7 +464,7 @@
     return clips;
   }
 
-  function resetTargetState(tKey, d) {
+  function resetTargetState(tKey, d, isCrossLayer) {
     var arrM = getArriveM();
     state.targetKey = tKey || '';
     state.announcedStart = true;
@@ -448,6 +472,7 @@
     state.passed300 = (d != null && d <= 300);
     state.passed100 = (d != null && d <= 100);
     state.passedArrive = (d != null && d <= arrM);
+    state.wasCrossLayer = !!isCrossLayer;
     state.lastDist = d;
     state.offCourseSince = 0;
   }
@@ -467,12 +492,14 @@
 
     if (ev === 'clear') {
       state.targetKey = '';
+      state.wasCrossLayer = false;
       stopPlayback();
       return;
     }
 
     if (ev === 'all_done') {
       state.targetKey = '';
+      state.wasCrossLayer = false;
       if (cfg.enabled) {
         speakClips(['all_done'], { chime: 'done', interrupt: true });
       }
@@ -481,16 +508,18 @@
 
     if (!target || target.x == null || target.y == null) {
       state.targetKey = '';
+      state.wasCrossLayer = false;
       return;
     }
 
     var tKey = Math.round(target.x) + ',' + Math.round(target.y) + ',' + (target.layer || '') + ',' + (target.id || target.name || '');
     var hasPlayer = !!(player && player.located !== false && player.x != null && player.y != null);
     var d = hasPlayer ? calcDist3D(player, target) : null;
+    var isCrossLayer = !!(hasPlayer && target.layer && player.layer && Number(target.layer) !== Number(player.layer));
 
     // 1. 显式导航事件（手动点导航 / 开启自动收集 / 完成续导下一个 / 动态切换最近点）
     if (ev === 'start_nav' || ev === 'start_auto' || ev === 'next_target' || ev === 'switch_near') {
-      resetTargetState(tKey, d);
+      resetTargetState(tKey, d, isCrossLayer);
       if (hasPlayer) {
         var clips = buildTargetAnnounceClips(ev, player, target, d);
         var chimeType = (ev === 'next_target') ? 'done' : 'ping';
@@ -509,7 +538,7 @@
 
     // 2. 目标发生隐式切换（例如服务端 /pos 同步过来的新目标）
     if (tKey !== state.targetKey) {
-      resetTargetState(tKey, d);
+      resetTargetState(tKey, d, isCrossLayer);
       var autoClips = buildTargetAnnounceClips('start_nav', player, target, d);
       speakClips(autoClips, { chime: 'ping', interrupt: true, targetName: target.name });
       state.lastPx = player.x;
@@ -517,16 +546,35 @@
       return;
     }
 
-    // 若跨层，不做同层距离里程碑与偏航计算
-    if (target.layer && player.layer && Number(target.layer) !== Number(player.layer)) {
+    // 若跨层，记录跨层状态，不做同层距离里程碑与偏航计算
+    if (isCrossLayer) {
+      state.wasCrossLayer = true;
       state.lastPx = player.x;
       state.lastPy = player.y;
       state.lastDist = d;
       return;
     }
 
+    // 2.5 从跨层切回目标所在同层时，自动补报一次当前方向、距离与高低差
+    if (state.wasCrossLayer) {
+      resetTargetState(tKey, d, false);
+      var backClips = buildTargetAnnounceClips(null, player, target, d);
+      if (backClips.length) {
+        speakClips(backClips, { chime: 'ping', interrupt: true, targetName: target.name });
+      }
+      state.lastPx = player.x;
+      state.lastPy = player.y;
+      return;
+    }
+
     if (d == null) return;
     var arrM = getArriveM();
+
+    // 2.8 传送或大幅远离超过里程碑 +80m 迟滞时，自动重置对应里程碑，确保重飞回来能再次提醒
+    if (state.passedArrive && d > arrM + MILESTONE_RESET_HYST) state.passedArrive = false;
+    if (state.passed100 && d > 100 + MILESTONE_RESET_HYST) state.passed100 = false;
+    if (state.passed300 && d > 300 + MILESTONE_RESET_HYST) state.passed300 = false;
+    if (state.passed500 && d > 500 + MILESTONE_RESET_HYST) state.passed500 = false;
 
     // 3. 距离阶梯里程碑检测（支持自定义到达距离 arrM 与中途播报频率 compact / standard / dense）
     if (d <= arrM && !state.passedArrive) {
@@ -632,9 +680,14 @@
       '.vn-vol-slider{flex:1;accent-color:#eac27e;cursor:pointer;height:4px;}' +
       '.vn-vol-val{width:34px;text-align:right;font-family:monospace;color:#eac27e;font-size:11.5px;}' +
       '.vn-adv-row{display:flex;align-items:center;gap:6px;margin-top:7px;padding-top:6px;border-top:1px dashed rgba(255,255,255,.08);font-size:11.5px;color:#8a93a0;flex-wrap:wrap;}' +
-      '.vn-adv-num{width:46px!important;height:22px!important;padding:1px 4px!important;font-size:11.5px!important;text-align:center;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);border-radius:5px;color:#eac27e;}' +
-      '.vn-adv-sel{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);border-radius:5px;color:#eac27e;font-size:11px;padding:2px 4px;outline:none;cursor:pointer;}' +
-      '.vn-adv-sel option{background:#181b20;color:#e8ecf1;}';
+      '.vn-adv-row.vn-adv-freq-row{border-top:none;margin-top:5px;padding-top:0;justify-content:space-between;}' +
+      '.vn-adv-group{display:inline-flex;align-items:center;gap:4px;}' +
+      '.vn-adv-num{width:42px!important;height:22px!important;padding:1px 4px!important;font-size:11.5px!important;text-align:center;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);border-radius:5px;color:#eac27e;-moz-appearance:textfield;appearance:textfield;}' +
+      '.vn-adv-num::-webkit-outer-spin-button,.vn-adv-num::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}' +
+      '.vn-adv-sel{flex:1;max-width:168px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);border-radius:5px;color:#eac27e;font-size:11px;padding:2px 6px;outline:none;cursor:pointer;}' +
+      '.vn-adv-sel option{background:#181b20;color:#e8ecf1;}' +
+      '#vnSetPackBtns{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;}' +
+      '#vnSetPackBtns .set-opt{padding:5px 2px;font-size:11.5px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}';
     document.head.appendChild(st);
   }
 
@@ -702,9 +755,10 @@
       '</div>' +
       '<div class="set-opts" id="vnSetPackBtns">' +
         '<button type="button" class="set-opt" data-pack="off" id="vnBtnOff">关闭</button>' +
-        '<button type="button" class="set-opt" data-pack="zelda" id="vnBtnZelda">塞尔达风</button>' +
+        '<button type="button" class="set-opt" data-pack="zelda" id="vnBtnZelda">塞尔达</button>' +
         '<button type="button" class="set-opt" data-pack="yujie" id="vnBtnYujie">御姐音</button>' +
         '<button type="button" class="set-opt" data-pack="chime" id="vnBtnChime">感应音</button>' +
+        '<button type="button" class="set-opt" data-pack="tts" id="vnBtnTts">系统</button>' +
       '</div>' +
       '<div id="vnSetDetailWrap" class="set-sub-types" style="margin-top:7px">' +
         '<div class="vn-vol-wrap">' +
@@ -720,11 +774,12 @@
           '<button type="button" class="set-pill on" data-k="chime" id="vnPillChime">普尔亚雷达音</button>' +
         '</div>' +
         '<div class="vn-adv-row" id="vnAdvRow">' +
-          '<span id="vnArrLbl">到达</span>' +
-          '<input type="number" id="vnArriveM" class="vn-adv-num" min="15" max="80" step="5" value="35"><i>m</i>' +
-          '<span id="vnAltLbl" style="margin-left:2px">高低差</span>' +
-          '<input type="number" id="vnAltDiffM" class="vn-adv-num" min="10" max="60" step="5" value="25"><i>m</i>' +
-          '<select id="vnFreqMode" class="vn-adv-sel" style="margin-left:auto">' +
+          '<span class="vn-adv-group"><span id="vnArrLbl">到达</span><input type="number" id="vnArriveM" class="vn-adv-num" min="15" max="80" step="5" value="35"><i>m</i></span>' +
+          '<span class="vn-adv-group" style="margin-left:auto"><span id="vnAltLbl">高低差</span><input type="number" id="vnAltDiffM" class="vn-adv-num" min="10" max="60" step="5" value="25"><i>m</i></span>' +
+        '</div>' +
+        '<div class="vn-adv-row vn-adv-freq-row" id="vnAdvFreqRow">' +
+          '<span id="vnFreqLbl">播报频次</span>' +
+          '<select id="vnFreqMode" class="vn-adv-sel">' +
             '<option value="compact">精简(100m)</option>' +
             '<option value="standard">标准(300/100m)</option>' +
             '<option value="dense">密集(500/300/100m)</option>' +
@@ -851,13 +906,15 @@
     var btnZelda = document.getElementById('vnBtnZelda');
     var btnYujie = document.getElementById('vnBtnYujie');
     var btnChime = document.getElementById('vnBtnChime');
+    var btnTts = document.getElementById('vnBtnTts');
     if (btnOff) btnOff.textContent = tr('voice.off', '关闭', 'Off');
-    if (btnZelda) btnZelda.textContent = tr('voice.pack.zelda', '塞尔达风', 'Zelda');
+    if (btnZelda) btnZelda.textContent = tr('voice.pack.zeldaShort', '塞尔达', 'Zelda');
     if (btnYujie) btnYujie.textContent = tr('voice.pack.yujieShort', '御姐音', 'Mature');
     if (btnChime) btnChime.textContent = tr('voice.pack.chimeShort', '感应音', 'Chime');
+    if (btnTts) btnTts.textContent = tr('voice.pack.ttsShort', '系统', 'TTS');
 
     var packBtns = document.querySelectorAll('#vnSetPackBtns .set-opt');
-    var activePack = cfg.enabled ? (cfg.pack === 'tts' ? 'zelda' : cfg.pack) : 'off';
+    var activePack = cfg.enabled ? (cfg.pack || 'zelda') : 'off';
     for (var i = 0; i < packBtns.length; i++) {
       var b = packBtns[i];
       var match = b.getAttribute('data-pack') === activePack;
@@ -902,11 +959,13 @@
 
     var arrLbl = document.getElementById('vnArrLbl');
     var altLbl = document.getElementById('vnAltLbl');
+    var freqLbl = document.getElementById('vnFreqLbl');
     var inpArr = document.getElementById('vnArriveM');
     var inpAlt = document.getElementById('vnAltDiffM');
     var selFreq = document.getElementById('vnFreqMode');
     if (arrLbl) arrLbl.textContent = tr('voice.adv.arrive', '到达', 'Arrive');
     if (altLbl) altLbl.textContent = tr('voice.adv.alt', '高低差', 'Alt±');
+    if (freqLbl) freqLbl.textContent = tr('voice.adv.freq', '播报频次', 'Frequency');
     if (inpArr) inpArr.value = String(getArriveM());
     if (inpAlt) inpAlt.value = String(getAltDiffM());
     if (selFreq) {
@@ -920,6 +979,13 @@
     }
   }
 
+  function packDisplayName(pack) {
+    if (pack === 'yujie') return tr('voice.pack.yujie', '御姐领航员', 'Navigator (Mature)');
+    if (pack === 'chime') return tr('voice.pack.chime', '仅感应音', 'Sensor Chime');
+    if (pack === 'tts') return tr('voice.pack.tts', '系统语音', 'System TTS');
+    return tr('voice.pack.zelda', '塞尔达风', 'Princess (Zelda)');
+  }
+
   function setEnabled(flag, showToast) {
     cfg.enabled = !!flag;
     if (!cfg.enabled) {
@@ -928,9 +994,37 @@
     saveCfg();
     if (showToast && typeof window !== 'undefined' && window.TOTK_APP && typeof window.TOTK_APP.toast === 'function') {
       window.TOTK_APP.toast(cfg.enabled
-        ? tr('voice.toastOn', '已开启语音导航（' + (cfg.pack === 'yujie' ? '御姐领航员' : cfg.pack === 'chime' ? '仅感应音' : '塞尔达风') + '）', 'Voice navigation enabled')
+        ? (isEn() ? ('Voice navigation enabled (' + packDisplayName(cfg.pack) + ')') : ('已开启语音导航（' + packDisplayName(cfg.pack) + '）'))
         : tr('voice.toastOff', '已关闭语音导航', 'Voice navigation disabled'));
     }
+  }
+
+  function setPaused(flag) {
+    externalPaused = !!flag;
+    if (externalPaused) stopPlayback();
+  }
+
+  function isPaused() {
+    return externalPaused;
+  }
+
+  function isSpeaking() {
+    if (currentAudio && !currentAudio.paused) return true;
+    if (typeof window !== 'undefined' && window.speechSynthesis && window.speechSynthesis.speaking) return true;
+    return false;
+  }
+
+  function bindAutoplayUnlock() {
+    if (audioUnlocked || typeof document === 'undefined') return;
+    function unlock() {
+      audioUnlocked = true;
+      autoplayWarned = false;
+      ensureAudioCtx();
+      document.removeEventListener('pointerdown', unlock, true);
+      document.removeEventListener('keydown', unlock, true);
+    }
+    document.addEventListener('pointerdown', unlock, true);
+    document.addEventListener('keydown', unlock, true);
   }
 
   function setConfig(patch) {
@@ -967,6 +1061,7 @@
       mountNavPanelUI();
       mountSettingsModalUI();
       syncUI();
+      bindAutoplayUnlock();
 
       // 监听语言切换与设置重置按钮，保持零侵入自动同步
       if (typeof window !== 'undefined' && window.I18N && typeof window.I18N.onChange === 'function') {
@@ -999,6 +1094,9 @@
     init: init,
     feed: feed,
     setEnabled: setEnabled,
+    setPaused: setPaused,
+    isPaused: isPaused,
+    isSpeaking: isSpeaking,
     setConfig: setConfig,
     getConfig: getConfig,
     resetConfig: resetConfig,

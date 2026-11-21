@@ -55,25 +55,6 @@ export const progressData = ref({})
 
 // ---- 配置 / 环境 ----
 export const cfg = reactive({ saveDirRyujinx: '', saveDirEden: '', emu: 'auto', tls: false, autoOpenMap: true, customProc: '', profile: 'auto' })
-export const voicePack = ref('off') // TOTKNavi 桌面后台语音播报（默认 off 防与网页端重音；全屏不看浏览器时可独立开启 'zelda' | 'yujie' | 'chime'）
-
-export function setGuiVoicePack(pack) {
-  voicePack.value = pack || 'off'
-  try { localStorage.setItem('totknavi.gui.voicePack', voicePack.value) } catch {}
-  if (typeof window !== 'undefined' && window.VoiceNav) {
-    if (voicePack.value === 'off') {
-      window.VoiceNav.setEnabled(false)
-    } else {
-      window.VoiceNav.setConfig({ enabled: true, pack: voicePack.value })
-    }
-  }
-}
-export function testGuiVoice() {
-  if (typeof window !== 'undefined' && window.VoiceNav) {
-    if (voicePack.value === 'off') setGuiVoicePack('zelda')
-    window.VoiceNav.testPlay()
-  }
-}
 export const procList = ref([])
 export const pcProfiles = ref([])
 export const envDetect = reactive({ save: false, saveRyu: false, saveEden: false })
@@ -470,20 +451,6 @@ function applyStatus(st) {
   pos.profileName = st.profileName || ''
   pos.profileExact = !!st.profileExact
   if (st.target !== undefined) target.value = st.target
-  if (typeof window !== 'undefined' && window.VoiceNav && voicePack.value !== 'off') {
-    window.VoiceNav.feed({
-      player: { x: pos.mx, y: pos.my, z: pos.gz, layer: pos.layer, located: pos.ok },
-      target: target.value ? {
-        id: target.value.id,
-        name: target.value.name,
-        x: target.value.x,
-        y: target.value.y,
-        z: target.value.z,
-        layer: target.value.layer,
-        type: target.value.type
-      } : null
-    })
-  }
   if (st.saveMtime) {
     saveMtime.value = st.saveMtime
   } else if (st.progress && st.progress.mtime) {
@@ -526,13 +493,6 @@ watch(locked, (val, old) => {
 })
 export async function initCore() {
   mapAutoOpened = false // 每次启动重置，仅本次会话真实锁定后才自动开地图
-  try {
-    const savedVp = localStorage.getItem('totknavi.gui.voicePack') || 'off'
-    if (typeof window !== 'undefined' && window.VoiceNav) {
-      window.VoiceNav.init({ basePath: '/voice/', storageKey: 'totknavi.voice.cfg.v1' })
-    }
-    setGuiVoicePack(savedVp)
-  } catch {}
   logs.value = []
   steps.value.forEach(s => { s.state = s.key === 'ready' ? 'done' : 'idle' })
   ver.value = await api.Version()
