@@ -182,37 +182,31 @@ func serveRun(p Platform, plat *totkpcPlatform, anchor *[3]float32, addr uintptr
 		mux.ServeHTTP(w, r)
 	})
 
-	// 独占多端口监听（先就绪 HTTP 服务，再启动追踪与存档轮询，保证日志顺序清晰）
-	listeners, owned, skipped := listenOwnedPortsPC(port, 5)
-	if len(listeners) == 0 {
-		logEvent("  [ERR] 端口 %d~%d 全部被占用 —— 请关闭其它导航程序或重启电脑后重试。", port, port+4)
-		return
-	}
-	primaryPort := owned[0]
-	if primaryPort != port {
-		initLanURL(primaryPort)
-	}
-	if len(skipped) > 0 {
-		logEvent("  [INFO] 定位服务已就绪：http://127.0.0.1:%d（端口 %v，已跳过被占 %v）", primaryPort, owned, skipped)
+	// 独占监听单端口（默认 8766，对齐模拟器版与网页端）；
+	// 若 8766 被占，不退出核心，继续启动定位追踪与 status.json（双入口独立）。
+	lc := net.ListenConfig{Control: exclusiveAddrControlPC}
+	ln, listenErr := lc.Listen(context.Background(), "tcp", fmt.Sprintf(":%d", port))
+	if listenErr != nil {
+		logEvent("  [WARN] HTTP 端口被占用（:%d，可能是重复启动了 totknavi 或被其它程序占用：%v）—— 网页端暂不可用，定位核心继续运行。", port, listenErr)
 	} else {
-		logEvent("  [INFO] 定位服务已就绪：http://127.0.0.1:%d", primaryPort)
+		logEvent("  [INFO] 定位服务已就绪：http://127.0.0.1:%d", port)
 	}
 
-	// 启动追踪、状态桥接与存档解析
-	go trackerLoop(p, plat, anchor, addr)
+	// 启动状态桥接与存档解析
 	startStatusAndCoordsLoop(p)
 	if progress == nil {
 		progress = newProgressWatcher()
 		go progress.loop()
 	}
 
-	for i := 1; i < len(listeners); i++ {
-		ln := listeners[i]
-		go func() {
-			_ = http.Serve(ln, corsHandler)
-		}()
+	if ln == nil {
+		// 网页端端口不可用时，直接在前台运行定位追踪循环（不退出）
+		trackerLoop(p, plat, anchor, addr)
+		return
 	}
-	if err := http.Serve(listeners[0], corsHandler); err != nil {
+
+	go trackerLoop(p, plat, anchor, addr)
+	if err := http.Serve(ln, corsHandler); err != nil {
 		logEvent("  [INFO] 定位服务已停止：%v", err)
 	}
 }
@@ -230,20 +224,6 @@ func exclusiveAddrControlPC(network, address string, c syscall.RawConn) error {
 		return err
 	}
 	return serr
-}
-
-func listenOwnedPortsPC(base, count int) (lns []net.Listener, owned, skipped []int) {
-	lc := net.ListenConfig{Control: exclusiveAddrControlPC}
-	for p := base; p < base+count; p++ {
-		ln, err := lc.Listen(context.Background(), "tcp", fmt.Sprintf(":%d", p))
-		if err != nil {
-			skipped = append(skipped, p)
-			continue
-		}
-		lns = append(lns, ln)
-		owned = append(owned, p)
-	}
-	return lns, owned, skipped
 }
 
 func handlePosPC(w http.ResponseWriter, r *http.Request) {

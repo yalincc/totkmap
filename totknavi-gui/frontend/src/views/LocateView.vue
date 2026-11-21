@@ -309,7 +309,7 @@ async function doSyncCloud() {
   syncCloudMsg.value = '...'
   try {
     const r = await syncCloudProfiles()
-    syncCloudMsg.value = r && r.ok ? `✓ ${r.count}` : t('locate.syncCloudFail')
+    syncCloudMsg.value = r && r.ok ? (r.saved > 0 ? `✓ +${r.saved}` : t('locate.syncCloudLatest')) : t('locate.syncCloudFail')
     logs.value.push({
       time: new Date().toTimeString().slice(0, 8),
       text: (r && r.msg) || t('locate.syncCloudFail'),

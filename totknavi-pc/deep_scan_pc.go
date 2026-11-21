@@ -274,8 +274,9 @@ func deepReverseStaticChains(h, mainBase, targetAddr uintptr) []StaticChainEntry
 
 // buildAndSaveLocalProfile 根据已验证的真身地址与 L1 静态指针链，生成并写入 profiles/*.json，
 // 同时切换当前活跃配置单，实现「校准一次，后续启动自动秒锁」。
+// 注意：没有提取到有效 L1 静态链（len(chains) == 0）时不落盘空壳配置，避免误导分享与重启死循环。
 func buildAndSaveLocalProfile(p Platform, plat *totkpcPlatform, lockedAddr uintptr, chains []StaticChainEntry) (*MemoryProfile, string) {
-	if p == nil || plat == nil || (lockedAddr == 0 && len(chains) == 0) {
+	if p == nil || plat == nil || len(chains) == 0 {
 		return nil, ""
 	}
 	h := p.Handle()
@@ -313,7 +314,7 @@ func buildAndSaveLocalProfile(p Platform, plat *totkpcPlatform, lockedAddr uintp
 	profID := "local-calibrated"
 	profName := fmt.Sprintf("本地校准 (%s)", time.Now().Format("01-02 15:04"))
 	if exeSize > 0 {
-		profID = fmt.Sprintf("local-%dmb", int(math.Round(sizeMB)))
+		profID = fmt.Sprintf("local-%dmb-%x", int(math.Round(sizeMB)), exeSize)
 		if recompVer != "" {
 			if gameVer != "" {
 				profName = fmt.Sprintf("%s (%s · %.1fMB)", recompVer, gameVer, sizeMB)

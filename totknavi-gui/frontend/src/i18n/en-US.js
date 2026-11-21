@@ -114,6 +114,7 @@ export default {
     profileWaiting: 'Waiting for profile',
     syncCloud: '☁ Sync',
     syncCloudTip: 'Download community-verified L1 profiles for different PC Recomp / game builds',
+    syncCloudLatest: '✓ Latest',
     syncCloudFail: 'Failed',
     shareProfile: '↑ Share',
     shareProfileTip: 'Submit your verified local L1 profile to the developer for community review',

@@ -9,6 +9,7 @@ export namespace main {
 	    diagUrl?: string;
 	    customProc?: string;
 	    profile?: string;
+	    sharedProfileHash?: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new Config(source);
@@ -24,6 +25,7 @@ export namespace main {
 	        this.diagUrl = source["diagUrl"];
 	        this.customProc = source["customProc"];
 	        this.profile = source["profile"];
+	        this.sharedProfileHash = source["sharedProfileHash"];
 	    }
 	}
 	export class ProcessItem {

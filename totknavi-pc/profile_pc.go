@@ -150,10 +150,7 @@ func loadProfileFile(path string) *MemoryProfile {
 	if err := json.Unmarshal(buf, &prof); err != nil {
 		return nil
 	}
-	if !prof.Verified {
-		return nil
-	}
-	if len(prof.HeapRanges) == 0 && len(prof.StaticChains) == 0 {
+	if !prof.Verified || len(prof.StaticChains) == 0 {
 		return nil
 	}
 	if prof.ID == "" {

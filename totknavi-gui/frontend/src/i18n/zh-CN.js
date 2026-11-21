@@ -113,6 +113,7 @@ export default {
     profileWaiting: '等待加载配置',
     syncCloud: '☁ 同步配置',
     syncCloudTip: '从云端拉取社区已验证的各 PC 编译版/游戏版本 L1 配置单',
+    syncCloudLatest: '✓ 最新',
     syncCloudFail: '同步失败',
     shareProfile: '↑ 分享配置',
     shareProfileTip: '将本机已验证的 L1 配置提交给开发者审核，造福同版本玩家',

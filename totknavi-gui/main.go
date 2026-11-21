@@ -6,6 +6,7 @@ import (
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
 	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
+	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
 //go:embed all:frontend/dist
@@ -21,6 +22,15 @@ func main() {
 		MinWidth:  900,
 		MinHeight: 600,
 		Frameless: true, // 无边框：前端自绘标题栏（品牌区 --wails-draggable 拖拽，右侧窗口控制按钮）
+		SingleInstanceLock: &options.SingleInstanceLock{
+			UniqueId: "totknavi-gui-" + appEdition,
+			OnSecondInstanceLaunch: func(secondInstanceData options.SecondInstanceData) {
+				if app.ctx != nil {
+					runtime.WindowUnminimise(app.ctx)
+					runtime.Show(app.ctx)
+				}
+			},
+		},
 		AssetServer: &assetserver.Options{
 			Assets: assets,
 		},

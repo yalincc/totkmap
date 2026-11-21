@@ -20,14 +20,12 @@
     <div v-if="edition === 'pc'">
       <label class="block text-slate-400 mb-1">{{ t('settings.pcProfile') }}</label>
       <div class="flex gap-1 items-center">
-        <select v-model="cfg.profile" @focus="refreshPCProfiles" class="flex-1 bg-[#0d1117] border border-slate-700 rounded px-2 py-1.5 text-white text-xs focus:border-blue-500 focus:outline-none">
+        <select v-model="cfg.profile" @focus="refreshPCProfiles" class="flex-1 min-w-0 bg-[#0d1117] border border-slate-700 rounded px-2 py-1.5 text-white text-xs focus:border-blue-500 focus:outline-none">
           <option value="auto">{{ t('settings.pcProfileAuto') }}</option>
           <option v-for="p in pcProfiles" :key="p.id" :value="p.id">{{ p.name }}</option>
         </select>
-        <button @click="doSyncProfiles" :disabled="syncing" class="bg-sky-700 hover:bg-sky-600 px-2 py-1.5 rounded text-xs text-white shrink-0 disabled:opacity-50">{{ t('locate.syncCloud') }}</button>
-        <button @click="openProfilesDir" class="bg-slate-700 hover:bg-slate-600 px-2 py-1.5 rounded text-xs shrink-0">{{ t('settings.openProfilesDir') }}</button>
+        <button @click="openProfilesDir" class="bg-slate-700 hover:bg-slate-600 px-2.5 py-1.5 rounded text-xs shrink-0">{{ t('settings.openProfilesDir') }}</button>
       </div>
-      <div v-if="syncHint" class="text-[10px] text-emerald-400 mt-1">{{ syncHint }}</div>
       <div class="text-[10px] text-slate-500 mt-1">{{ t('settings.pcProfileHint') }}</div>
     </div>
     <div>
@@ -63,23 +61,9 @@
 import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import LangSelect from './LangSelect.vue'
-import { cfg, edition, envDetect, pickSave, saveSettings, openLogDir, pcProfiles, refreshPCProfiles, openProfilesDir, syncCloudProfiles } from '../composables/useCore'
+import { cfg, edition, envDetect, pickSave, saveSettings, openLogDir, pcProfiles, refreshPCProfiles, openProfilesDir } from '../composables/useCore'
 
 const { t } = useI18n()
-const syncing = ref(false)
-const syncHint = ref('')
-
-async function doSyncProfiles() {
-  if (syncing.value) return
-  syncing.value = true
-  try {
-    const r = await syncCloudProfiles()
-    syncHint.value = (r && r.msg) || ''
-    setTimeout(() => { syncHint.value = '' }, 4000)
-  } finally {
-    syncing.value = false
-  }
-}
 
 onMounted(() => {
   if (edition.value === 'pc') refreshPCProfiles()

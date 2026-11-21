@@ -4,6 +4,8 @@ import (
 	"archive/zip"
 	"bytes"
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -37,6 +39,8 @@ import (
 //         预检弹窗（>50m 警告可强制继续，Vue 悬浮卡）。
 // V2.2.0：核心新增第 6 条锁定途径「指针链快路径」（跑动掉锁后毫秒级重锁）；
 //         GUI 侧无 UI 改动，仅版本号对齐核心。
+// V3.3.4：PC 版端口收口为单一 8766（防 5 端口自占冲突）+ GUI 单实例防双开 + 清理残留核心进程；
+//         空壳配置（L1 静态链 0 条）不落盘/不分享；PC 版启动静默同步网站配置单（同内容跳过不重写）；精简设置弹窗。
 // V3.3.2：PC 版改为直读 caption.sav 内置游戏存档时间排序，彻底解决开机复制 save-tx 导致 slot_05 虚假最新的定位/读档偏差。
 // V3.3.1：PC 版扩大范围扫描改为按三维坐标值反推 LEVEL-1 静态指针链，解决「静态链 0 条」与载具飞行轨迹冻结问题；并合入 L2 静止残影自愈与存档锚点清洗。
 // V3.3.0：PC 版支持独立扩大范围扫描、OBS 式进程下拉选择、多端口自动顺延、EdgeOne 诊断直传（同步支持模拟器版）。
@@ -54,7 +58,7 @@ const defaultDiagUploadURL = "https://botw.yalin.site/api/diag"
 // defaultCloudProfilesURL 社区验证过的 PC 版定位配置单静态索引。
 const defaultCloudProfilesURL = "https://totk.yalin.site/profiles/index.json"
 
-const guiVersion = "v3.3.3"
+const guiVersion = "v3.3.4"
 
 // App Wails 后端：管理核心子进程 + 读 status.json / xnavi-gui-core.log + 网页端端口探测。
 // 与核心的通信完全走文件（status.json、xnavi-gui-core.log），不依赖 8766 HTTP——
@@ -81,8 +85,9 @@ type Config struct {
 	TLS            bool   `json:"tls,omitempty"` // 手机防息屏（Https）
 	AutoOpenMap    *bool  `json:"autoOpenMap,omitempty"` // 锁定后自动打开网页地图（默认 true）
 	DiagUrl        string `json:"diagUrl,omitempty"`     // 自定义诊断上传接口（留空走 defaultDiagUploadURL）
-	CustomProc     string `json:"customProc,omitempty"`  // PC 版手动指定游戏进程名（留空自动探测）
-	Profile        string `json:"profile,omitempty"`     // PC 版手动指定定位配置 ID（留空或 "auto" 自动匹配）
+	CustomProc        string `json:"customProc,omitempty"`        // PC 版手动指定游戏进程名（留空自动探测）
+	Profile           string `json:"profile,omitempty"`           // PC 版手动指定定位配置 ID（留空或 "auto" 自动匹配）
+	SharedProfileHash string `json:"sharedProfileHash,omitempty"` // 已成功分享过的本机 L1 配置哈希（防重复发邮件）
 }
 
 func (a *App) configPath() string { return filepath.Join(a.workDir, "xnavi-gui-config.json") }
@@ -135,6 +140,10 @@ func (a *App) startup(ctx context.Context) {
 	go a.eventBridge(ctx)
 	// go a.checkUpdate() // 取消启动自动检查更新
 	go a.ensureWindowVisible()
+	// PC 版启动时静默同步一次网站配置单（失败无感忽略）
+	if appEdition == "pc" {
+		go a.SyncCloudProfiles()
+	}
 	// 手动检查更新
 	runtime.EventsOn(ctx, "update:check", func(data ...interface{}) {
 		go a.checkUpdate()
@@ -596,11 +605,12 @@ func (a *App) corePath() string {
 
 // StartCore 启动核心子进程（totknavi-core.exe --no-open --emu=<auto|ryujinx|eden>）。
 // V2.0.0：双平台统一核心；模拟器由 Config.Emu 决定（默认 auto 自动探测）。
-// 重复调用会先停掉旧进程。
+// 重复调用会先停掉旧进程，并清理可能残留的同名孤儿核心进程，防止 8766 端口冲突。
 func (a *App) StartCore() string {
 	a.mu.Lock()
 	defer a.mu.Unlock()
 	a.stopCoreLocked()
+	killStaleCoreProcesses()
 	exe := a.corePath()
 	if _, err := os.Stat(exe); err != nil {
 		return "找不到核心程序 totknavi-core.exe（应放在本程序同目录）"
@@ -835,7 +845,20 @@ func (a *App) UploadDiagnostics(note string) string {
 	}
 
 	statusBuf, _ := os.ReadFile(filepath.Join(a.workDir, "status.json"))
-	profileBuf := a.readDiagnosticsProfiles()
+	isShareProfile := strings.Contains(note, "[分享本机 L1 配置]")
+	var profileBuf []byte
+	var shareHash string
+	if isShareProfile {
+		profileBuf, shareHash = a.readLocalShareProfiles()
+		if len(profileBuf) == 0 {
+			return "当前暂无本机新生成的 L1 配置（官方已有配置无需重复分享），请先在游戏中完成校准适配后再分享"
+		}
+		if a.cfg != nil && a.cfg.SharedProfileHash != "" && a.cfg.SharedProfileHash == shareHash {
+			return "当前本机配置已分享过，无需重复提交，感谢支持"
+		}
+	} else {
+		profileBuf = a.readDiagnosticsProfiles()
+	}
 
 	emu := "auto"
 	if appEdition == "pc" {
@@ -882,7 +905,77 @@ func (a *App) UploadDiagnostics(note string) string {
 		respBody, _ := io.ReadAll(io.LimitReader(resp.Body, 512))
 		return fmt.Sprintf("上传失败 (HTTP %d): %s", resp.StatusCode, strings.TrimSpace(string(respBody)))
 	}
+	if isShareProfile && shareHash != "" {
+		if a.cfg == nil {
+			a.cfg = a.loadConfig()
+		}
+		a.cfg.SharedProfileHash = shareHash
+		a.SaveConfig(*a.cfg)
+	}
 	return "已发送给开发者，感谢反馈"
+}
+
+// readLocalShareProfiles 只收集本机校准生成的有效 L1 配置（profiles/local-*.json 或旧版 pc_profile_local.json），
+// 排除官方内置或从网站同步下来的配置单；返回拼接字节与 SHA-256 哈希（用于防重复分享）。
+func (a *App) readLocalShareProfiles() ([]byte, string) {
+	isValidL1 := func(b []byte) bool {
+		var m struct {
+			Verified     bool              `json:"verified"`
+			StaticChains []json.RawMessage `json:"staticChains"`
+		}
+		return json.Unmarshal(b, &m) == nil && m.Verified && len(m.StaticChains) > 0
+	}
+	var parts []string
+	profDir := filepath.Join(a.workDir, "profiles")
+	if entries, err := os.ReadDir(profDir); err == nil {
+		var names []string
+		for _, e := range entries {
+			low := strings.ToLower(e.Name())
+			if !e.IsDir() && strings.HasPrefix(low, "local-") && strings.HasSuffix(low, ".json") {
+				names = append(names, e.Name())
+			}
+		}
+		sort.Strings(names)
+		for _, name := range names {
+			if b, err := os.ReadFile(filepath.Join(profDir, name)); err == nil && isValidL1(b) {
+				parts = append(parts, fmt.Sprintf("// %s\n%s", name, string(bytes.TrimSpace(b))))
+			}
+		}
+	}
+	if len(parts) == 0 {
+		if b, err := os.ReadFile(filepath.Join(a.workDir, "pc_profile_local.json")); err == nil && isValidL1(b) {
+			parts = append(parts, fmt.Sprintf("// pc_profile_local.json\n%s", string(bytes.TrimSpace(b))))
+		}
+	}
+	if len(parts) == 0 {
+		return nil, ""
+	}
+	joined := []byte(strings.Join(parts, "\n\n"))
+	sum := sha256.Sum256(joined)
+	return joined, hex.EncodeToString(sum[:])
+}
+
+// killStaleCoreProcesses 清理上次异常退出可能残留的 totknavi-core.exe，防止 8766 端口冲突。
+func killStaleCoreProcesses() {
+	snap, _, _ := procK32Toolhelp.Call(0x00000002, 0)
+	if snap == 0 || snap == ^uintptr(0) {
+		return
+	}
+	defer procK32CloseH.Call(snap)
+	var e winProcEntry32W
+	e.Size = uint32(unsafe.Sizeof(e))
+	r, _, _ := procK32ProcFirst.Call(snap, uintptr(unsafe.Pointer(&e)))
+	for r != 0 {
+		if e.ProcessID != 0 {
+			name := strings.ToLower(syscall.UTF16ToString(e.ExeFile[:]))
+			if name == "totknavi-core.exe" {
+				if p, err := os.FindProcess(int(e.ProcessID)); err == nil {
+					_ = p.Kill()
+				}
+			}
+		}
+		r, _, _ = procK32ProcNext.Call(snap, uintptr(unsafe.Pointer(&e)))
+	}
 }
 
 // readDiagnosticsProfiles 收集 profiles/*.json 或旧版 pc_profile_local.json 供诊断上传使用。
@@ -995,6 +1088,7 @@ func (a *App) SyncCloudProfiles() map[string]any {
 		return map[string]any{"ok": false, "msg": "创建 profiles 目录失败：" + err.Error()}
 	}
 	saved := 0
+	skipped := 0
 	for _, raw := range idx.Profiles {
 		var meta struct {
 			ID       string `json:"id"`
@@ -1014,15 +1108,29 @@ func (a *App) SyncCloudProfiles() map[string]any {
 			continue
 		}
 		dst := filepath.Join(dir, safeID+".json")
+		if existing, err := os.ReadFile(dst); err == nil && bytes.Equal(bytes.TrimSpace(existing), bytes.TrimSpace(pretty.Bytes())) {
+			skipped++
+			continue
+		}
 		if err := os.WriteFile(dst, pretty.Bytes(), 0o644); err == nil {
 			saved++
 		}
 	}
+	msg := fmt.Sprintf("本地配置已是最新（共 %d 份，无需重复下载）", skipped)
+	if saved > 0 && skipped > 0 {
+		msg = fmt.Sprintf("已更新 %d 份配置（跳过 %d 份相同）", saved, skipped)
+	} else if saved > 0 {
+		msg = fmt.Sprintf("已同步 %d 份配置", saved)
+	} else if skipped == 0 {
+		msg = "云端暂无可用配置"
+	}
 	return map[string]any{
 		"ok":        true,
-		"count":     saved,
+		"count":     saved + skipped,
+		"saved":     saved,
+		"skipped":   skipped,
 		"updatedAt": idx.UpdatedAt,
-		"msg":       fmt.Sprintf("已同步 %d 份云端配置", saved),
+		"msg":       msg,
 	}
 }
 

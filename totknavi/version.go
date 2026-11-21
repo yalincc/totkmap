@@ -1,6 +1,7 @@
 package main
 
 // CoreVersion totknavi 核心版本（GUI 壳必须与此一致，见 R11 版本解耦）。
+// V3.3.4：PC 版端口收口为单一 8766 + GUI 单实例防双开 + 清理残留核心进程；空配置不落盘/不分享；网站配置单启动静默同步去重。
 // V3.3.2：PC 重编译版改为直读 caption.sav 内置游戏存档时间排序（彻底免疫开机 save→save-tx 顺序复制
 //   导致 slot_05 文件 mtime 虚假最新的问题）；同步更新 TROUBLESHOOTING.md 浏览器 F12 报错速查表。
 // V3.1.2：PC 重编译版引入主模块静态指针链直读秒锁（0 扫描、0 存档依赖）；
@@ -22,4 +23,4 @@ package main
 // 换算常数 K，走固定偏移链读坐标；跑动掉锁后毫秒级重锁，失败回退 known/扫描/校准）。
 // V2.1.2：定位引擎 Bug C~H 修复（两个 if 判据 + known 自愈 + 扫描互斥 +
 // 组代表基准 + 空组拒绝）；手机镜像 Bug A（引导页/根路径/appReady 三态）。
-const CoreVersion = "v3.3.3"
+const CoreVersion = "v3.3.4"
