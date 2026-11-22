@@ -1642,17 +1642,21 @@
   });
 
   /* ---------------- 自定义标点流程 ---------------- */
-  $('addMarkerBtn').addEventListener('click', function () {
-    if (state.adding) { cancelAdding(); return; }
-    state.adding = true;
-    this.textContent = window.I18N && window.I18N.getLang() === 'en' ? '× Cancel' : '× 取消放置';
-    map.getContainer().style.cursor = 'crosshair';
-    toast('请在地图上点击要放置标点的位置');
-  });
+  var _addBtn = $('addMarkerBtn');
+  if (_addBtn) {
+    _addBtn.addEventListener('click', function () {
+      if (state.adding) { cancelAdding(); return; }
+      state.adding = true;
+      this.textContent = window.I18N && window.I18N.getLang() === 'en' ? '× Cancel' : '× 取消放置';
+      map.getContainer().style.cursor = 'crosshair';
+      toast('请在地图上点击要放置标点的位置');
+    });
+  }
 
   function cancelAdding() {
     state.adding = false;
-    $('addMarkerBtn').textContent = window.I18N ? window.I18N.t('bar.addPin') : '+ 新增标点';
+    var b = $('addMarkerBtn');
+    if (b) b.textContent = window.I18N ? window.I18N.t('bar.addPin') : '+ 新增标点';
     map.getContainer().style.cursor = '';
   }
 

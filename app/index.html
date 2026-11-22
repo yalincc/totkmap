@@ -6,7 +6,7 @@
 <title>塞尔达传说：王国之泪 · 互动地图</title>
 <link rel="stylesheet" href="vendor/leaflet.css">
 <link rel="stylesheet" href="css/style.css?v=245">
-<link rel="stylesheet" href="voice-memories/vm-style.css?v=1">
+<link rel="stylesheet" href="voice-memories/vm-style.css?v=3">
 </head>
 <body>
 
@@ -247,120 +247,153 @@
 
 <!-- ============ 底部工具条 ============ -->
 <div class="bottom-bar">
-  <button id="addMarkerBtn" class="bar-btn" data-i18n="bar.addPin">+ 新增标点</button>
+  <button id="vmBottomBtn" class="bar-btn" title="显示/隐藏声之记忆标点">🎙 声之记忆</button>
   <button id="navBtn" data-i18n-title="bar.navTip" class="bar-btn" title="实时定位导航（需本地 TOTKNavi 服务）" data-i18n="bar.nav">🧭 导航</button>
   <button id="settingsBtn" data-i18n-title="bar.settingsTip" class="bar-btn" title="显示设置（图标大小 / 定位点样式 / 完成标记）" data-i18n="bar.settings">⚙ 设置</button>
 </div>
 
-<!-- ============ 显示设置面板（V2.5.0 v4：锚定设置按钮上方 + 可拖动 + 纵向紧凑） ============ -->
+<!-- ============ 显示设置面板（3 Tab 极简分组：显示 / 定位 / 语音） ============ -->
 <div id="settingsModal" class="set-pop hidden">
   <div class="card-head" id="setHead">
     <span class="chip" data-i18n="settings.title">显示设置</span>
     <button id="setClose" data-i18n-title="settings.closeDragTip" class="detail-close" title="关闭（可按住标题栏拖动）">×</button>
   </div>
-  <div class="set-divider"></div>
+  <div class="set-tabs" id="setTabBar">
+    <button type="button" class="set-tab active" data-tab="display" id="setTabBtnDisplay">显示</button>
+    <button type="button" class="set-tab" data-tab="nav" id="setTabBtnNav">定位</button>
+    <button type="button" class="set-tab" data-tab="voice" id="setTabBtnVoice">语音</button>
+  </div>
 
-  <div class="set-sec">
-    <div class="set-sec-title">
-      <span data-i18n="settings.iconSize">地图标点大小</span>
-      <span class="set-title-hint" data-i18n="settings.iconSizeHint">（快速比例与分类细分矩阵）</span>
-    </div>
-    <div class="set-opts" id="setIconPresetBtns">
-      <button type="button" class="set-opt active" data-preset="tiered" data-i18n="settings.presetTiered">推荐</button>
-      <button type="button" class="set-opt" data-preset="uniform" data-i18n="settings.presetUniform">等大</button>
-      <button type="button" class="set-opt" data-preset="compact" data-i18n="settings.presetCompact">紧凑</button>
-      <button type="button" class="set-opt set-more-toggle" id="setMoreIconBtn" data-i18n="settings.presetMore">更多</button>
-    </div>
-    <div id="setIconMatrixWrap" class="set-matrix-wrap" style="display:none">
-      <div class="set-matrix-table-scroll">
-        <table class="set-matrix-table" id="setIconMatrixTable">
-          <thead>
-            <tr>
-              <th data-i18n="settings.matrixColGroup">大类</th>
-              <th>z3</th>
-              <th>z4</th>
-              <th>z5</th>
-              <th>z6</th>
-              <th>z7</th>
-            </tr>
-          </thead>
-          <tbody id="setIconMatrixBody">
-          </tbody>
-        </table>
-      </div>
-      <div class="set-matrix-actions">
-        <button type="button" class="set-link-btn" id="setResetIconMatrix" data-i18n="settings.matrixReset">重置推荐</button>
+  <!-- Tab 1：显示（语言 / 标点大小 / 完成标记） -->
+  <div class="set-tab-pane" id="setTabDisplay" data-pane="display">
+    <div class="set-sec">
+      <div class="set-sec-title" data-i18n="settings.language">界面语言</div>
+      <div class="set-opts" id="setLangBtns">
+        <button type="button" class="set-opt active" data-lang="zh" data-i18n="settings.langZh">中文</button>
+        <button type="button" class="set-opt" data-lang="en" data-i18n="settings.langEn">English</button>
       </div>
     </div>
-  </div>
 
-  <div class="set-sec">
-    <div class="set-sec-title"><span data-i18n="settings.markerStyle">定位标记</span> <span class="set-title-hint" data-i18n="settings.markerStyleHint">（大小 16-40 · 透明度 30-100%）</span></div>
-    <div class="set-inline3">
-      <input type="number" id="setDotSize" data-i18n-title="settings.dotSizeTip" min="16" max="40" step="2" value="24" title="大小"> <i>px</i>
-      <input type="color" id="setDotColorPick" data-i18n-title="settings.dotColorPickTip" value="#ff3b3b" title="颜色">
-      <input type="text" id="setDotColorHex" data-i18n-title="settings.dotColorHexTip" value="#ff3b3b" maxlength="7" spellcheck="false" title="颜色hex">
-      <input type="number" id="setDotAlpha" data-i18n-title="settings.dotAlphaTip" min="30" max="100" step="5" value="70" title="透明度"> <i>%</i>
-    </div>
-  </div>
-
-  <div class="set-sec">
-    <div class="set-sec-title"><span data-i18n="settings.completedMarkers">完成标记图标</span> <span class="set-title-hint" data-i18n="settings.completedMarkersHint">（隐藏后不显示已标记标点）</span></div>
-    <div class="set-opts" id="setDoneModeBtns">
-      <button class="set-opt" data-v="default" data-i18n="settings.show">显示</button>
-      <button class="set-opt" data-v="hide" data-i18n="settings.hide">隐藏</button>
-    </div>
-    <div class="set-sub-types" id="setDoneSubWrap" style="display:none">
-      <div class="set-sub-head">
-        <span class="set-sub-title" data-i18n="settings.hideSubTitle">隐藏以下分类：</span>
-        <span class="set-sub-actions">
-          <button type="button" class="set-link-btn" id="setDoneAll" data-i18n="settings.selectAll">全选</button>
-          <span class="set-sub-sep">·</span>
-          <button type="button" class="set-link-btn" id="setDoneNone" data-i18n="settings.clearAll">清空</button>
-        </span>
+    <div class="set-sec">
+      <div class="set-sec-title">
+        <span data-i18n="settings.iconSize">地图标点大小</span>
+        <span class="set-title-hint" data-i18n="settings.iconSizeHint">（快速比例与分类细分矩阵）</span>
       </div>
-      <div class="set-pills" id="setDonePills">
-        <button type="button" class="set-pill on" data-type="shrine" data-i18n="pill.shrine">神庙</button>
-        <button type="button" class="set-pill on" data-type="tower" data-i18n="pill.tower">鸟望台</button>
-        <button type="button" class="set-pill on" data-type="root" data-i18n="pill.root">树根</button>
-        <button type="button" class="set-pill on" data-type="korok" data-i18n="pill.korok">克洛格</button>
-        <button type="button" class="set-pill on" data-type="chest" data-i18n="pill.chest">宝箱</button>
-        <button type="button" class="set-pill on" data-type="equip" data-i18n="pill.equip">装备</button>
-        <button type="button" class="set-pill on" data-type="sign" data-i18n="pill.sign">立牌</button>
-        <button type="button" class="set-pill on" data-type="task" data-i18n="pill.task">任务</button>
-        <button type="button" class="set-pill on" data-type="boss" data-i18n="pill.boss">讨伐</button>
+      <div class="set-opts" id="setIconPresetBtns">
+        <button type="button" class="set-opt active" data-preset="tiered" data-i18n="settings.presetTiered">推荐</button>
+        <button type="button" class="set-opt" data-preset="uniform" data-i18n="settings.presetUniform">等大</button>
+        <button type="button" class="set-opt" data-preset="compact" data-i18n="settings.presetCompact">紧凑</button>
+        <button type="button" class="set-opt set-more-toggle" id="setMoreIconBtn" data-i18n="settings.presetMore">更多</button>
+      </div>
+      <div id="setIconMatrixWrap" class="set-matrix-wrap" style="display:none">
+        <div class="set-matrix-table-scroll">
+          <table class="set-matrix-table" id="setIconMatrixTable">
+            <thead>
+              <tr>
+                <th data-i18n="settings.matrixColGroup">大类</th>
+                <th>z3</th>
+                <th>z4</th>
+                <th>z5</th>
+                <th>z6</th>
+                <th>z7</th>
+              </tr>
+            </thead>
+            <tbody id="setIconMatrixBody">
+            </tbody>
+          </table>
+        </div>
+        <div class="set-matrix-actions">
+          <button type="button" class="set-link-btn" id="setResetIconMatrix" data-i18n="settings.matrixReset">重置推荐</button>
+        </div>
       </div>
     </div>
-  </div>
 
-  <div class="set-sec">
-    <div class="set-sec-title"><span data-i18n="settings.trail">移动轨迹</span> <span class="set-title-hint" data-i18n="settings.trailHint">（玩家走过的路线，仅本次会话记录）</span></div>
-    <div class="set-opts" id="setTrailBtns">
-      <button type="button" class="set-opt active" data-v="show" data-i18n="settings.trailShow">显示</button>
-      <button type="button" class="set-opt" data-v="hide" data-i18n="settings.trailHide">隐藏</button>
-      <button type="button" class="set-opt" data-v="clear" data-i18n="settings.trailClear">清除</button>
+    <div class="set-sec">
+      <div class="set-sec-title"><span data-i18n="settings.completedMarkers">完成标记图标</span> <span class="set-title-hint" data-i18n="settings.completedMarkersHint">（隐藏后不显示已标记标点）</span></div>
+      <div class="set-opts" id="setDoneModeBtns">
+        <button class="set-opt" data-v="default" data-i18n="settings.show">显示</button>
+        <button class="set-opt" data-v="hide" data-i18n="settings.hide">隐藏</button>
+      </div>
+      <div class="set-sub-types" id="setDoneSubWrap" style="display:none">
+        <div class="set-sub-head">
+          <span class="set-sub-title" data-i18n="settings.hideSubTitle">隐藏以下分类：</span>
+          <span class="set-sub-actions">
+            <button type="button" class="set-link-btn" id="setDoneAll" data-i18n="settings.selectAll">全选</button>
+            <span class="set-sub-sep">·</span>
+            <button type="button" class="set-link-btn" id="setDoneNone" data-i18n="settings.clearAll">清空</button>
+          </span>
+        </div>
+        <div class="set-pills" id="setDonePills">
+          <button type="button" class="set-pill on" data-type="shrine" data-i18n="pill.shrine">神庙</button>
+          <button type="button" class="set-pill on" data-type="tower" data-i18n="pill.tower">鸟望台</button>
+          <button type="button" class="set-pill on" data-type="root" data-i18n="pill.root">树根</button>
+          <button type="button" class="set-pill on" data-type="korok" data-i18n="pill.korok">克洛格</button>
+          <button type="button" class="set-pill on" data-type="chest" data-i18n="pill.chest">宝箱</button>
+          <button type="button" class="set-pill on" data-type="equip" data-i18n="pill.equip">装备</button>
+          <button type="button" class="set-pill on" data-type="sign" data-i18n="pill.sign">立牌</button>
+          <button type="button" class="set-pill on" data-type="task" data-i18n="pill.task">任务</button>
+          <button type="button" class="set-pill on" data-type="boss" data-i18n="pill.boss">讨伐</button>
+        </div>
+      </div>
     </div>
   </div>
 
-  <div class="set-sec">
-    <div class="set-sec-title" data-i18n="settings.language">界面语言</div>
-    <div class="set-opts" id="setLangBtns">
-      <button type="button" class="set-opt active" data-lang="zh" data-i18n="settings.langZh">中文</button>
-      <button type="button" class="set-opt" data-lang="en" data-i18n="settings.langEn">English</button>
+  <!-- Tab 2：定位（定位红点 / 移动轨迹） -->
+  <div class="set-tab-pane hidden" id="setTabNav" data-pane="nav">
+    <div class="set-sec">
+      <div class="set-sec-title"><span data-i18n="settings.markerStyle">定位标记</span> <span class="set-title-hint" data-i18n="settings.markerStyleHint">（大小 16-40 · 透明度 30-100%）</span></div>
+      <div class="set-inline3">
+        <input type="number" id="setDotSize" data-i18n-title="settings.dotSizeTip" min="16" max="40" step="2" value="24" title="大小"> <i>px</i>
+        <input type="color" id="setDotColorPick" data-i18n-title="settings.dotColorPickTip" value="#ff3b3b" title="颜色">
+        <input type="text" id="setDotColorHex" data-i18n-title="settings.dotColorHexTip" value="#ff3b3b" maxlength="7" spellcheck="false" title="颜色hex">
+        <input type="number" id="setDotAlpha" data-i18n-title="settings.dotAlphaTip" min="30" max="100" step="5" value="70" title="透明度"> <i>%</i>
+      </div>
+    </div>
+
+    <div class="set-sec">
+      <div class="set-sec-title"><span data-i18n="settings.trail">移动轨迹</span> <span class="set-title-hint" data-i18n="settings.trailHint">（玩家走过的路线，仅本次会话记录）</span></div>
+      <div class="set-opts" id="setTrailBtns">
+        <button type="button" class="set-opt active" data-v="show" data-i18n="settings.trailShow">显示</button>
+        <button type="button" class="set-opt" data-v="hide" data-i18n="settings.trailHide">隐藏</button>
+        <button type="button" class="set-opt" data-v="clear" data-i18n="settings.trailClear">清除</button>
+      </div>
     </div>
   </div>
 
-  <div class="set-sec">
-    <div class="set-sec-title"><span data-i18n="settings.saveEdit">存档修改</span> <span class="set-title-hint" data-i18n="settings.saveEditHint">（金手指：卢比 / 材料 / 装备 / 瞬移）</span></div>
-    <div class="set-actions" style="margin-top:0">
-      <a id="setOpenSaveEdit" class="set-ghost" href="save-edit/editor.html" target="_blank" rel="noopener" style="text-decoration:none;display:inline-block" data-i18n="settings.saveEditBtn">打开存档修改器</a>
-    </div>
-  </div>
+  <!-- Tab 3：语音（由 voice-nav.js 与 vm-player.js 自动挂载） -->
+  <div class="set-tab-pane hidden" id="setTabVoice" data-pane="voice"></div>
 
   <div class="set-actions">
     <button id="setReset" class="set-ghost" data-i18n="settings.reset">重置默认</button>
   </div>
 </div>
+<script>
+(function () {
+  var bar = document.getElementById('setTabBar');
+  if (!bar) return;
+  function syncTabLang() {
+    var en = window.I18N && typeof window.I18N.getLang === 'function' && window.I18N.getLang() === 'en';
+    var d = document.getElementById('setTabBtnDisplay');
+    var n = document.getElementById('setTabBtnNav');
+    var v = document.getElementById('setTabBtnVoice');
+    if (d) d.textContent = en ? 'Display' : '显示';
+    if (n) n.textContent = en ? 'Location' : '定位';
+    if (v) v.textContent = en ? 'Voice' : '语音';
+  }
+  bar.addEventListener('click', function (e) {
+    var btn = e.target.closest('.set-tab');
+    if (!btn) return;
+    var tab = btn.getAttribute('data-tab');
+    bar.querySelectorAll('.set-tab').forEach(function (b) { b.classList.toggle('active', b === btn); });
+    document.querySelectorAll('#settingsModal .set-tab-pane').forEach(function (p) {
+      p.classList.toggle('hidden', p.getAttribute('data-pane') !== tab);
+    });
+  });
+  var lb = document.getElementById('setLangBtns');
+  if (lb) lb.addEventListener('click', function () { setTimeout(syncTabLang, 50); });
+  window.addEventListener('DOMContentLoaded', syncTabLang);
+})();
+</script>
 <style id="settings-css">
   /* V2.5.0 v4：设置卡片（detail-card 同款），位置由 JS 锚定到「设置」按钮上方，标题栏可拖动 */
   #settingsModal.set-pop {
@@ -371,12 +404,35 @@
     padding: 12px 14px; font-size: 13px;
   }
   #settingsModal .card-head { margin-bottom: 0; }
+  .set-tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; margin: 9px 0 8px; padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,.10); }
+  .set-tab { padding: 5px 0; border-radius: 7px; border: 1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.04); color: #94a3b8; font-size: 12px; font-weight: 600; cursor: pointer; transition: all .15s ease; }
+  .set-tab:hover { color: #e2e8f0; }
+  .set-tab.active { border-color: #eac27e; background: rgba(234,194,126,.16); color: #eac27e; }
+  .set-tab-pane.hidden { display: none; }
   .set-divider { border-top: 1px solid rgba(255,255,255,.12); margin: 10px -14px 4px; }
   .set-sec { margin: 10px 0; }
   .set-sec-title {
     font-size: 13px; color: #e8ecf1; margin-bottom: 6px;
     display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px;
   }
+  .set-sec-head {
+    display: flex; align-items: center; justify-content: flex-start; gap: 8px;
+    font-size: 13.5px; font-weight: 600; color: #eef2f8; margin-bottom: 2px;
+  }
+  .set-sec-desc { font-size: 11px; color: #8a93a0; margin-bottom: 7px; line-height: 1.4; }
+  .set-switch { position: relative; display: inline-block; width: 34px; height: 19px; flex-shrink: 0; cursor: pointer; }
+  .set-switch input { opacity: 0; width: 0; height: 0; position: absolute; }
+  .set-switch i {
+    position: absolute; inset: 0; border-radius: 19px;
+    background: rgba(255,255,255,.16); border: 1px solid rgba(255,255,255,.18);
+    transition: background .18s ease, border-color .18s ease;
+  }
+  .set-switch i::after {
+    content: ''; position: absolute; top: 2px; left: 2px; width: 13px; height: 13px;
+    border-radius: 50%; background: #cbd5e1; transition: transform .18s ease, background .18s ease;
+  }
+  .set-switch input:checked + i { background: rgba(234,194,126,.32); border-color: #eac27e; }
+  .set-switch input:checked + i::after { transform: translateX(15px); background: #eac27e; }
   .set-title-hint { font-size: 11px; font-weight: normal; color: #8a93a0; }
   .set-sec-title .set-state { font-size: 12px; color: #eac27e; }
   .set-field { display: flex; align-items: center; gap: 4px; color: #8a93a0; font-size: 12px; }
@@ -617,11 +673,11 @@
 <script src="js/card-layout.js?v=302"></script>
 <script src="js/totk-canvas-layer.js?v=300"></script>
 <script src="data/changelog.js?v=2"></script>
-<script src="js/app.js?v=316"></script>
-<script src="voice/voice-nav.js?v=3"></script>
+<script src="js/app.js?v=319"></script>
+<script src="voice/voice-nav.js?v=8"></script>
 <!-- 声之记忆（240 条）独立可插拔模块：独立文件夹与进度隔离，不进入左侧栏 -->
 <script src="voice-memories/vm-data.js?v=2"></script>
-<script src="voice-memories/vm-player.js?v=3"></script>
+<script src="voice-memories/vm-player.js?v=8"></script>
 <script src="js/live.js?v=297"></script>
 <script src="js/explore-auto.js?v=199"></script>
 <script src="js/mat-auto.js?v=196"></script>

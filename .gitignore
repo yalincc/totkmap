@@ -152,3 +152,8 @@ app/assets/icons/_bak_*/
 # 本次验收截图（screen/，本地留底不入库）
 screen/
 
+# 声之记忆 240 条语音包（仅随导航网站部署按需读取，可由 tools/build_vm_audio.py 重建，不入 Git 仓库）
+app/voice-memories/audio/*.mp3
+app/voice-memories/audio/*.webm
+
+

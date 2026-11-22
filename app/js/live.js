@@ -595,6 +595,11 @@
         target: target
       });
     }
+    if (!paused && window.VoiceMemories && typeof window.VoiceMemories.feedPos === 'function') {
+      window.VoiceMemories.feedPos({
+        x: pos.mx, y: pos.my, z: pos.gz, layer: renderLayer(), located: pos.located
+      });
+    }
     tickArrival();
     redraw();
     if (window.TOTK_APP && typeof window.TOTK_APP.dodgeExploreCardIfNeeded === 'function') {

@@ -691,8 +691,8 @@
       '.vn-adv-num::-webkit-outer-spin-button,.vn-adv-num::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}' +
       '.vn-adv-sel{flex:1;max-width:168px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);border-radius:5px;color:#eac27e;font-size:11px;padding:2px 6px;outline:none;cursor:pointer;}' +
       '.vn-adv-sel option{background:#181b20;color:#e8ecf1;}' +
-      '#vnSetPackBtns{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;}' +
-      '#vnSetPackBtns .set-opt{padding:5px 2px;font-size:11.5px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}';
+      '#vnSetPackBtns{display:flex;gap:6px;flex-wrap:nowrap;}' +
+      '#vnSetPackBtns .set-opt{padding:3px 10px;font-size:11.5px;text-align:center;white-space:nowrap;flex:0 0 auto;}';
     document.head.appendChild(st);
   }
 
@@ -754,48 +754,53 @@
     sec.id = 'vnSettingsSec';
     sec.className = 'set-sec';
     sec.innerHTML =
-      '<div class="set-sec-title">' +
-        '<span id="vnSetTitle">语音导航</span> ' +
-        '<span class="set-title-hint" id="vnSetHint">（罗盘8方位 · 塞尔达/御姐离线语音）</span>' +
+      '<div class="set-sec-head">' +
+        '<span id="vnSetTitle">语音导航</span>' +
+        '<label class="set-switch" title="开启或关闭语音导航"><input type="checkbox" id="vnSetToggle"><i></i></label>' +
       '</div>' +
-      '<div class="set-opts" id="vnSetPackBtns">' +
-        '<button type="button" class="set-opt" data-pack="off" id="vnBtnOff">关闭</button>' +
-        '<button type="button" class="set-opt" data-pack="zelda" id="vnBtnZelda">塞尔达</button>' +
-        '<button type="button" class="set-opt" data-pack="yujie" id="vnBtnYujie">御姐音</button>' +
-        '<button type="button" class="set-opt" data-pack="chime" id="vnBtnChime">感应音</button>' +
-        '<button type="button" class="set-opt" data-pack="tts" id="vnBtnTts">系统</button>' +
-      '</div>' +
-      '<div id="vnSetDetailWrap" class="set-sub-types" style="margin-top:7px">' +
-        '<div class="vn-vol-wrap">' +
-          '<span id="vnVolLabel">音量</span>' +
-          '<input type="range" id="vnVolRange" class="vn-vol-slider" min="10" max="100" step="5" value="85">' +
-          '<span id="vnVolText" class="vn-vol-val">85%</span>' +
-          '<button type="button" id="vnSetTestBtn" class="vn-np-test">▶ 试听</button>' +
+      '<div class="set-sec-desc" id="vnSetHint">罗盘 8 方位语音指路（塞尔达 / 御姐离线语音）</div>' +
+      '<div id="vnSetDetailWrap">' +
+        '<div style="display:flex;align-items:center;gap:6px;flex-wrap:nowrap">' +
+          '<span id="vnPackLbl" style="color:#8a93a0;font-size:11.5px;white-space:nowrap;flex-shrink:0">音色选择</span>' +
+          '<div class="set-opts" id="vnSetPackBtns" style="margin-top:0;gap:5px;flex-wrap:nowrap">' +
+            '<button type="button" class="set-opt" data-pack="zelda" id="vnBtnZelda" style="white-space:nowrap;padding:3px 8px;font-size:11.5px;flex:0 0 auto">塞尔达</button>' +
+            '<button type="button" class="set-opt" data-pack="yujie" id="vnBtnYujie" style="white-space:nowrap;padding:3px 8px;font-size:11.5px;flex:0 0 auto">御姐音</button>' +
+            '<button type="button" class="set-opt" data-pack="tts" id="vnBtnTts" style="white-space:nowrap;padding:3px 8px;font-size:11.5px;flex:0 0 auto">系统</button>' +
+          '</div>' +
         '</div>' +
-        '<div class="set-pills" id="vnSetPills" style="margin-top:7px">' +
-          '<button type="button" class="set-pill on" data-k="dirDist" id="vnPillDir">方向与距离</button>' +
-          '<button type="button" class="set-pill on" data-k="altLayer" id="vnPillAlt">高低差/跨层</button>' +
-          '<button type="button" class="set-pill on" data-k="offCourse" id="vnPillOff">偏航提醒</button>' +
-          '<button type="button" class="set-pill on" data-k="chime" id="vnPillChime">普尔亚雷达音</button>' +
-        '</div>' +
-        '<div class="vn-adv-row" id="vnAdvRow">' +
-          '<span class="vn-adv-group"><span id="vnArrLbl">到达</span><input type="number" id="vnArriveM" class="vn-adv-num" min="15" max="80" step="5" value="35"><i>m</i></span>' +
-          '<span class="vn-adv-group" style="margin-left:auto"><span id="vnAltLbl">高低差</span><input type="number" id="vnAltDiffM" class="vn-adv-num" min="10" max="60" step="5" value="25"><i>m</i></span>' +
-        '</div>' +
-        '<div class="vn-adv-row vn-adv-freq-row" id="vnAdvFreqRow">' +
-          '<span id="vnFreqLbl">播报频次</span>' +
-          '<select id="vnFreqMode" class="vn-adv-sel">' +
-            '<option value="compact">精简(100m)</option>' +
-            '<option value="standard">标准(300/100m)</option>' +
-            '<option value="dense">密集(500/300/100m)</option>' +
-          '</select>' +
+        '<div class="set-sub-types" style="margin-top:7px">' +
+          '<div class="vn-vol-wrap">' +
+            '<span id="vnVolLabel">音量</span>' +
+            '<input type="range" id="vnVolRange" class="vn-vol-slider" min="10" max="100" step="5" value="85">' +
+            '<span id="vnVolText" class="vn-vol-val">85%</span>' +
+            '<button type="button" id="vnSetTestBtn" class="vn-np-test">▶ 试听</button>' +
+          '</div>' +
+          '<div style="display:flex;align-items:center;justify-content:flex-start;gap:8px;margin-top:8px">' +
+            '<span id="vnFreqLbl" style="color:#8a93a0;font-size:11.5px;white-space:nowrap">播报频次</span>' +
+            '<select id="vnFreqMode" class="vn-adv-sel" style="flex:0 0 auto" title="精简：100m 提醒，25m 到达，±30m 高低差&#10;标准：300m / 100m 提醒，35m 到达，±25m 高低差&#10;详细：500m / 300m / 100m 提醒，50m 到达，±20m 高低差">' +
+              '<option value="compact">精简（100m）</option>' +
+              '<option value="standard">标准（300/100m）</option>' +
+              '<option value="dense">详细（500/300/100m）</option>' +
+            '</select>' +
+          '</div>' +
         '</div>' +
       '</div>';
 
-    if (anchorSec && anchorSec.nextSibling) {
+    var voiceTabPane = document.getElementById('setTabVoice');
+    if (voiceTabPane) {
+      voiceTabPane.insertBefore(sec, voiceTabPane.firstChild);
+    } else if (anchorSec && anchorSec.nextSibling) {
       modal.insertBefore(sec, anchorSec.nextSibling);
     } else {
       modal.appendChild(sec);
+    }
+
+    var toggleInp = document.getElementById('vnSetToggle');
+    if (toggleInp) {
+      toggleInp.addEventListener('change', function () {
+        ensureAudioCtx();
+        setEnabled(this.checked, true);
+      });
     }
 
     var packBtns = sec.querySelectorAll('#vnSetPackBtns .set-opt');
@@ -803,14 +808,10 @@
       packBtns[i].addEventListener('click', function () {
         ensureAudioCtx();
         var p = this.getAttribute('data-pack');
-        if (p === 'off') {
-          setEnabled(false, true);
-        } else {
-          cfg.enabled = true;
-          cfg.pack = p;
-          saveCfg();
-          testPlay();
-        }
+        cfg.enabled = true;
+        cfg.pack = p;
+        saveCfg();
+        testPlay();
       });
     }
 
@@ -833,38 +834,35 @@
     var pills = sec.querySelectorAll('#vnSetPills .set-pill');
     for (var j = 0; j < pills.length; j++) {
       pills[j].addEventListener('click', function () {
+        ensureAudioCtx();
         var k = this.getAttribute('data-k');
         if (k && cfg[k] !== undefined) {
           cfg[k] = !cfg[k];
           saveCfg();
+          // 激活选项时立刻示范播放对应语音/音效，让玩家秒懂作用
+          if (cfg[k] && cfg.enabled) {
+            if (k === 'dirDist') speakClips(['dir_ne', 'dist_300'], { interrupt: true });
+            else if (k === 'altLayer') speakClips(['alt_up'], { interrupt: true });
+            else if (k === 'offCourse') speakClips(['off_course', 'dir_n'], { interrupt: true });
+            else if (k === 'chime') playChime('ping');
+          }
         }
       });
     }
 
-    var inpArr = document.getElementById('vnArriveM');
-    if (inpArr) {
-      inpArr.addEventListener('change', function () {
-        var v = parseInt(this.value, 10);
-        cfg.arriveM = (isNaN(v) ? 35 : Math.min(80, Math.max(15, v)));
-        this.value = String(cfg.arriveM);
-        saveCfg();
-      });
-    }
-
-    var inpAlt = document.getElementById('vnAltDiffM');
-    if (inpAlt) {
-      inpAlt.addEventListener('change', function () {
-        var v = parseInt(this.value, 10);
-        cfg.altDiffM = (isNaN(v) ? 25 : Math.min(60, Math.max(10, v)));
-        this.value = String(cfg.altDiffM);
-        saveCfg();
-      });
-    }
-
+    var FREQ_PRESETS = {
+      compact:  { arriveM: 25, altDiffM: 30 },
+      standard: { arriveM: 35, altDiffM: 25 },
+      dense:    { arriveM: 50, altDiffM: 20 }
+    };
     var selFreq = document.getElementById('vnFreqMode');
     if (selFreq) {
       selFreq.addEventListener('change', function () {
-        cfg.freqMode = this.value || 'standard';
+        var fm = this.value || 'standard';
+        var preset = FREQ_PRESETS[fm] || FREQ_PRESETS.standard;
+        cfg.freqMode = fm;
+        cfg.arriveM = preset.arriveM;
+        cfg.altDiffM = preset.altDiffM;
         saveCfg();
       });
     }
@@ -904,22 +902,20 @@
     // 2. 同步 #settingsModal 设置弹窗控件
     var setTitle = document.getElementById('vnSetTitle');
     var setHint = document.getElementById('vnSetHint');
+    var setToggle = document.getElementById('vnSetToggle');
     if (setTitle) setTitle.textContent = tr('voice.setTitle', '语音导航', 'Voice Navigation');
-    if (setHint) setHint.textContent = tr('voice.setHint', '（罗盘8方位 · 塞尔达/御姐离线语音）', '(8-Compass · Zelda/Mature Voice Packs)');
+    if (setHint) setHint.textContent = tr('voice.setHint', '罗盘 8 方位语音指路（塞尔达 / 御姐离线语音）', '8-Compass voice guidance (Zelda / Mature packs)');
+    if (setToggle) setToggle.checked = !!cfg.enabled;
 
-    var btnOff = document.getElementById('vnBtnOff');
     var btnZelda = document.getElementById('vnBtnZelda');
     var btnYujie = document.getElementById('vnBtnYujie');
-    var btnChime = document.getElementById('vnBtnChime');
     var btnTts = document.getElementById('vnBtnTts');
-    if (btnOff) btnOff.textContent = tr('voice.off', '关闭', 'Off');
     if (btnZelda) btnZelda.textContent = tr('voice.pack.zeldaShort', '塞尔达', 'Zelda');
     if (btnYujie) btnYujie.textContent = tr('voice.pack.yujieShort', '御姐音', 'Mature');
-    if (btnChime) btnChime.textContent = tr('voice.pack.chimeShort', '感应音', 'Chime');
     if (btnTts) btnTts.textContent = tr('voice.pack.ttsShort', '系统', 'TTS');
 
     var packBtns = document.querySelectorAll('#vnSetPackBtns .set-opt');
-    var activePack = cfg.enabled ? (cfg.pack || 'zelda') : 'off';
+    var activePack = (cfg.pack === 'yujie' || cfg.pack === 'tts') ? cfg.pack : 'zelda';
     for (var i = 0; i < packBtns.length; i++) {
       var b = packBtns[i];
       var match = b.getAttribute('data-pack') === activePack;
@@ -929,7 +925,8 @@
 
     var detailWrap = document.getElementById('vnSetDetailWrap');
     if (detailWrap) {
-      detailWrap.style.display = cfg.enabled ? '' : 'none';
+      detailWrap.style.opacity = cfg.enabled ? '1' : '0.42';
+      detailWrap.style.pointerEvents = cfg.enabled ? '' : 'none';
     }
 
     var volLbl = document.getElementById('vnVolLabel');
@@ -962,24 +959,21 @@
       pillChime.classList.toggle('on', !!cfg.chime);
     }
 
-    var arrLbl = document.getElementById('vnArrLbl');
-    var altLbl = document.getElementById('vnAltLbl');
+    var packLbl = document.getElementById('vnPackLbl');
+    if (packLbl) packLbl.textContent = tr('voice.packLbl', '音色选择', 'Voice');
     var freqLbl = document.getElementById('vnFreqLbl');
-    var inpArr = document.getElementById('vnArriveM');
-    var inpAlt = document.getElementById('vnAltDiffM');
-    var selFreq = document.getElementById('vnFreqMode');
-    if (arrLbl) arrLbl.textContent = tr('voice.adv.arrive', '到达', 'Arrive');
-    if (altLbl) altLbl.textContent = tr('voice.adv.alt', '高低差', 'Alt±');
     if (freqLbl) freqLbl.textContent = tr('voice.adv.freq', '播报频次', 'Frequency');
-    if (inpArr) inpArr.value = String(getArriveM());
-    if (inpAlt) inpAlt.value = String(getAltDiffM());
+    var selFreq = document.getElementById('vnFreqMode');
     if (selFreq) {
       selFreq.value = cfg.freqMode || 'standard';
+      selFreq.title = en
+        ? 'Compact: 100m alert, 25m arrive, ±30m alt\nStandard: 300/100m alert, 35m arrive, ±25m alt\nDetailed: 500/300/100m alert, 50m arrive, ±20m alt'
+        : '精简：100m 提醒，25m 到达，±30m 高低差\n标准：300m / 100m 提醒，35m 到达，±25m 高低差\n详细：500m / 300m / 100m 提醒，50m 到达，±20m 高低差';
       var fOpts = selFreq.options;
       if (fOpts && fOpts.length >= 3) {
-        fOpts[0].text = tr('voice.freq.compact', '精简(100m)', 'Compact (100m)');
-        fOpts[1].text = tr('voice.freq.standard', '标准(300/100m)', 'Standard (300/100m)');
-        fOpts[2].text = tr('voice.freq.dense', '密集(500/300/100m)', 'Dense (500/300/100m)');
+        fOpts[0].text = tr('voice.freq.compact', '精简（100m）', 'Compact (100m)');
+        fOpts[1].text = tr('voice.freq.standard', '标准（300/100m）', 'Standard (300/100m)');
+        fOpts[2].text = tr('voice.freq.dense', '详细（500/300/100m）', 'Detailed (500/300/100m)');
       }
     }
   }

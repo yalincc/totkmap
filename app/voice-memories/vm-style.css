@@ -1,0 +1,279 @@
+/* ============================================================================
+ * TOTKmap · 声之记忆（Voice Memories · 240 条）独立模块极简样式
+ * 独立隔离：底栏一键图层开关 + 地图点选极简剧情卡 + 设置页语音分组挂载
+ * ============================================================================ */
+
+/* ---------- 底栏按钮高亮态 ---------- */
+#vmBottomBtn.vm-on {
+  border-color: #2dd4bf !important;
+  color: #99f6e4 !important;
+  background: rgba(45, 212, 191, 0.16) !important;
+  box-shadow: 0 0 10px rgba(45, 212, 191, 0.25);
+}
+
+/* ---------- 极简三角色剧情电台卡片 ---------- */
+#vmCard {
+  position: fixed;
+  left: 50%;
+  bottom: 62px;
+  transform: translateX(-50%);
+  width: 440px;
+  max-width: calc(100vw - 24px);
+  max-height: 60vh;
+  z-index: 1015;
+  display: flex;
+  flex-direction: column;
+  border-radius: 14px;
+  background: rgba(14, 19, 27, 0.96);
+  color: #eef2f8;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.68);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  overflow: hidden;
+  border: 1.5px solid rgba(245, 197, 66, 0.65);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+
+#vmCard.vm-hidden {
+  display: none !important;
+}
+
+/* 三角色主题色 */
+#vmCard.vm-theme-rauru {
+  border-color: rgba(45, 212, 191, 0.78);
+  box-shadow: 0 0 24px rgba(45, 212, 191, 0.18), 0 12px 36px rgba(0, 0, 0, 0.68);
+}
+#vmCard.vm-theme-rauru .vm-c-head {
+  background: linear-gradient(135deg, rgba(13, 148, 136, 0.32), rgba(15, 23, 42, 0.6));
+}
+#vmCard.vm-theme-rauru .vm-c-avatar {
+  background: rgba(45, 212, 191, 0.2);
+  border-color: #2dd4bf;
+  color: #5eead4;
+}
+#vmCard.vm-theme-rauru .vm-c-role { color: #5eead4; }
+
+#vmCard.vm-theme-zelda {
+  border-color: rgba(245, 197, 66, 0.78);
+  box-shadow: 0 0 24px rgba(245, 197, 66, 0.18), 0 12px 36px rgba(0, 0, 0, 0.68);
+}
+#vmCard.vm-theme-zelda .vm-c-head {
+  background: linear-gradient(135deg, rgba(202, 138, 4, 0.30), rgba(15, 23, 42, 0.6));
+}
+#vmCard.vm-theme-zelda .vm-c-avatar {
+  background: rgba(245, 197, 66, 0.2);
+  border-color: #f5c542;
+  color: #fde047;
+}
+#vmCard.vm-theme-zelda .vm-c-role { color: #fde047; }
+
+#vmCard.vm-theme-kohga {
+  border-color: rgba(239, 68, 68, 0.78);
+  box-shadow: 0 0 24px rgba(239, 68, 68, 0.2), 0 12px 36px rgba(0, 0, 0, 0.68);
+}
+#vmCard.vm-theme-kohga .vm-c-head {
+  background: linear-gradient(135deg, rgba(185, 28, 28, 0.34), rgba(15, 23, 42, 0.6));
+}
+#vmCard.vm-theme-kohga .vm-c-avatar {
+  background: rgba(239, 68, 68, 0.22);
+  border-color: #ef4444;
+  color: #fca5a5;
+}
+#vmCard.vm-theme-kohga .vm-c-role { color: #fca5a5; }
+
+.vm-c-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 13px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.vm-c-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 1.5px solid #f5c542;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 17px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.vm-c-meta {
+  flex: 1;
+  min-width: 0;
+}
+
+.vm-c-role {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+
+.vm-c-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #fff;
+  margin-top: 1px;
+  line-height: 1.25;
+}
+
+.vm-c-sub {
+  font-size: 11.5px;
+  color: #cbd5e1;
+  margin-top: 2px;
+}
+
+.vm-c-close {
+  width: 26px;
+  height: 26px;
+  border: none;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #cbd5e1;
+  font-size: 16px;
+  cursor: pointer;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.vm-c-close:hover {
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff;
+}
+
+.vm-c-body {
+  padding: 12px 14px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.vm-c-transcript {
+  font-size: 13.8px;
+  line-height: 1.68;
+  color: #f1f5f9;
+  white-space: pre-wrap;
+}
+
+.vm-c-foot {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 13px 11px;
+  background: rgba(0, 0, 0, 0.28);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.vm-play-btn {
+  height: 31px;
+  padding: 0 13px;
+  border-radius: 16px;
+  border: none;
+  background: #f5c542;
+  color: #111827;
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.vm-play-btn:hover {
+  filter: brightness(1.08);
+}
+
+.vm-c-status {
+  flex: 1;
+  min-width: 0;
+  font-size: 11.2px;
+  color: #94a3b8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.vm-act-btn {
+  height: 30px;
+  padding: 0 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.06);
+  color: #e2e8f0;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.vm-act-btn:hover {
+  border-color: #f5c542;
+  color: #fff;
+}
+
+.vm-act-btn.vm-is-done {
+  border-color: #22c55e;
+  background: rgba(34, 197, 94, 0.18);
+  color: #86efac;
+}
+
+/* ---------- 地图上的独立记忆标点 ---------- */
+.vm-map-pin {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: #0f172a;
+  border: 2px solid #fff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.55);
+  transition: transform 0.15s ease;
+}
+
+.vm-map-pin:hover {
+  transform: scale(1.18);
+}
+
+.vm-map-pin.rauru { background: #2dd4bf; }
+.vm-map-pin.zelda { background: #f5c542; }
+.vm-map-pin.kohga { background: #ef4444; color: #fff; }
+.vm-map-pin.vm-pin-done {
+  opacity: 0.42;
+  filter: grayscale(0.45);
+}
+
+/* ---------- 设置面板（语音 Tab）内的声之记忆配置区 ---------- */
+#vmSettingsSec .vm-set-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 6px;
+  font-size: 12px;
+  color: #cbd5e1;
+}
+
+#vmSettingsSec .vm-set-cnt {
+  color: #f5c542;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- 手机端响应式适配 ---------- */
+@media (max-width: 768px) {
+  #vmCard {
+    bottom: 58px;
+    width: calc(100vw - 16px);
+    max-height: 52vh;
+  }
+  .vm-c-status {
+    display: none;
+  }
+  .vm-c-foot {
+    justify-content: space-between;
+  }
+}
