@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "updatedAt": "2026-11-20",
+  "updatedAt": "2026-11-22",
   "profiles": [
     {
       "id": "recomp-0.4.0-1.2.1-301mb",
@@ -31,6 +31,99 @@
         { "ptrOffset": "0x46ADB98", "structOffset": "0xC0" },
         { "ptrOffset": "0x46AE0E0", "structOffset": "0x58" },
         { "ptrOffset": "0x46AF320", "structOffset": "0x1E0" }
+      ]
+    },
+    {
+      "id": "recomp-1.4.3-285mb-11d7d000",
+      "name": "TotK Recomp (1.4.3 · 285.5MB)",
+      "recompVersion": "TotK Recomp",
+      "gameVersion": "1.4.3",
+      "note": "社区实机验证通过 · 1.4.3 通用 L1 静态指针链 12 条",
+      "verified": true,
+      "fingerprint": {
+        "exeSize": 299356160,
+        "mainBase": "0x7000000000"
+      },
+      "mainBase": "0x7000000000",
+      "heapRanges": [
+        { "lo": "0x17C000000", "hi": "0x198000000" },
+        { "lo": "0x100000000", "hi": "0x180000000" }
+      ],
+      "staticChains": [
+        { "ptrOffset": "0x3A4CF60", "structOffset": "0x98" },
+        { "ptrOffset": "0x3A4CF68", "structOffset": "0x118" },
+        { "ptrOffset": "0x3A4E6E0", "structOffset": "0x50" },
+        { "ptrOffset": "0x3A4EC80", "structOffset": "0x118" },
+        { "ptrOffset": "0x3A4EC80", "structOffset": "0x178" },
+        { "ptrOffset": "0x3A4FC48", "structOffset": "0xF0" },
+        { "ptrOffset": "0x3A4FC48", "structOffset": "0xFC" },
+        { "ptrOffset": "0x3A5E9A0", "structOffset": "0x150" },
+        { "ptrOffset": "0x3A608C8", "structOffset": "0x1C0" },
+        { "ptrOffset": "0x3A62ED8", "structOffset": "0xC0" },
+        { "ptrOffset": "0x3A63410", "structOffset": "0x58" },
+        { "ptrOffset": "0x3A64660", "structOffset": "0x1E0" }
+      ]
+    },
+    {
+      "id": "recomp-1.4.3-302mb-12dd6000",
+      "name": "TotK Recomp (1.4.3 · 301.8MB)",
+      "recompVersion": "TotK Recomp",
+      "gameVersion": "1.4.3",
+      "note": "社区实机验证通过 · 1.4.3 通用 L1 静态指针链 12 条",
+      "verified": true,
+      "fingerprint": {
+        "exeSize": 316497920,
+        "mainBase": "0x7000000000"
+      },
+      "mainBase": "0x7000000000",
+      "heapRanges": [
+        { "lo": "0x158000000", "hi": "0x178000000" },
+        { "lo": "0x100000000", "hi": "0x180000000" }
+      ],
+      "staticChains": [
+        { "ptrOffset": "0x3A4CF60", "structOffset": "0x98" },
+        { "ptrOffset": "0x3A4CF68", "structOffset": "0x118" },
+        { "ptrOffset": "0x3A4E6E0", "structOffset": "0x50" },
+        { "ptrOffset": "0x3A4EC80", "structOffset": "0x118" },
+        { "ptrOffset": "0x3A4EC80", "structOffset": "0x178" },
+        { "ptrOffset": "0x3A4FC48", "structOffset": "0xF0" },
+        { "ptrOffset": "0x3A4FC48", "structOffset": "0xFC" },
+        { "ptrOffset": "0x3A5E9A0", "structOffset": "0x150" },
+        { "ptrOffset": "0x3A608C8", "structOffset": "0x1C0" },
+        { "ptrOffset": "0x3A62ED8", "structOffset": "0xC0" },
+        { "ptrOffset": "0x3A63410", "structOffset": "0x58" },
+        { "ptrOffset": "0x3A64660", "structOffset": "0x1E0" }
+      ]
+    },
+    {
+      "id": "recomp-0.3.10-1.4.3-330mb",
+      "name": "TotK Recomp 0.3.10+101132a (1.4.3 · 329.5MB)",
+      "recompVersion": "TotK Recomp 0.3.10+101132a",
+      "gameVersion": "1.4.3",
+      "note": "社区实机验证通过 · 1.4.3 通用 L1 静态指针链 12 条",
+      "verified": true,
+      "fingerprint": {
+        "exeSize": 345538560,
+        "mainBase": "0x7000000000"
+      },
+      "mainBase": "0x7000000000",
+      "heapRanges": [
+        { "lo": "0x160000000", "hi": "0x180000000" },
+        { "lo": "0x100000000", "hi": "0x180000000" }
+      ],
+      "staticChains": [
+        { "ptrOffset": "0x3A4CF60", "structOffset": "0x98" },
+        { "ptrOffset": "0x3A4CF68", "structOffset": "0x118" },
+        { "ptrOffset": "0x3A4E6E0", "structOffset": "0x50" },
+        { "ptrOffset": "0x3A4EC80", "structOffset": "0x118" },
+        { "ptrOffset": "0x3A4EC80", "structOffset": "0x178" },
+        { "ptrOffset": "0x3A4FC48", "structOffset": "0xF0" },
+        { "ptrOffset": "0x3A4FC48", "structOffset": "0xFC" },
+        { "ptrOffset": "0x3A5E9A0", "structOffset": "0x150" },
+        { "ptrOffset": "0x3A608C8", "structOffset": "0x1C0" },
+        { "ptrOffset": "0x3A62ED8", "structOffset": "0xC0" },
+        { "ptrOffset": "0x3A63410", "structOffset": "0x58" },
+        { "ptrOffset": "0x3A64660", "structOffset": "0x1E0" }
       ]
     }
   ]
