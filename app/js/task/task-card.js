@@ -64,6 +64,22 @@
 
   /* ---------- 分区构造 ---------- */
 
+  /* 超过 3 条的前置/后续列表默认折叠，提供「展开更多 / 收起」文字按钮 */
+  var LIST_FOLD_LIMIT = 3;
+  function collapsibleListHtml(items) {
+    if (!items || !items.length) return '<ul class="tk-list"></ul>';
+    if (items.length <= LIST_FOLD_LIMIT) {
+      return '<ul class="tk-list">' + items.join('') + '</ul>';
+    }
+    var extra = items.length - LIST_FOLD_LIMIT;
+    var isEn = window.I18N && window.I18N.getLang() === 'en';
+    var moreText = isEn ? ('Show more (+' + extra + ') ▾') : ('展开更多（还有 ' + extra + ' 项） ▾');
+    return '<div class="tk-list-wrap">' +
+      '<ul class="tk-list tk-collapsed">' + items.join('') + '</ul>' +
+      '<button type="button" class="tk-more-btn" data-tk-more="1" data-extra="' + extra + '">' + moreText + '</button>' +
+      '</div>';
+  }
+
   /* 前置任务：quest型给可点链接，flag 型不给（那是条件标记不是任务名） */
   /* 前置条件
    * ------------------------------------------------------------
@@ -122,7 +138,7 @@
       var isEn = window.I18N && window.I18N.getLang() === 'en';
       return section('前置条件', '<ul class="tk-list"><li class="tk-dash">' + (isEn ? 'None' : '无') + '</li></ul>');
     }
-    return section('前置条件', '<ul class="tk-list">' + items.join('') + '</ul>');
+    return section('前置条件', collapsibleListHtml(items));
   }
 
   /* 官方步骤列表（**只出裸列表，不带分区标题**）
@@ -318,7 +334,7 @@
       var isEn = window.I18N && window.I18N.getLang() === 'en';
       return section('后续解锁', '<ul class="tk-list"><li class="tk-dash">' + (isEn ? 'None' : '无') + '</li></ul>');
     }
-    return section('后续解锁', '<ul class="tk-list">' + items.join('') + '</ul>');
+    return section('后续解锁', collapsibleListHtml(items));
   }
 
   /* ---------- M6：任务链 / 系列 ---------- */
@@ -1034,6 +1050,22 @@
     var nx = $('tkNext');
     if (nx) nx.addEventListener('click', function (e) { stopAll(e); navBy(1); });
 
+    /* 前置/后续列表超过 3 条时的「展开更多 / 收起」切换 */
+    Array.prototype.forEach.call(card.querySelectorAll('[data-tk-more]'), function (btn) {
+      btn.addEventListener('click', function (e) {
+        stopAll(e);
+        var wrap = btn.parentNode;
+        var ul = wrap ? wrap.querySelector('.tk-list') : null;
+        if (!ul) return;
+        var collapsed = ul.classList.toggle('tk-collapsed');
+        var extra = btn.getAttribute('data-extra') || '';
+        var isEn = window.I18N && window.I18N.getLang() === 'en';
+        btn.textContent = collapsed
+          ? (isEn ? ('Show more (+' + extra + ') ▾') : ('展开更多（还有 ' + extra + ' 项） ▾'))
+          : (isEn ? 'Show less ▴' : '收起 ▴');
+      });
+    });
+
     /* 坐标链接定位（★ V2.5.0 修复：co-link 是 <span>，此前只有 HTML 没绑事件，
        点击无反应——老大 2026-10-11 实测发现；拖动排除列表已加 [data-tk-locate]） */
     Array.prototype.forEach.call(card.querySelectorAll('[data-tk-locate]'), function (el) {
@@ -1396,6 +1428,13 @@
     '/* 已完成的前置/后继：划掉并压暗，和「未做的前置」一眼能分开 */',
     '.tk-link[data-tk-done] { color:rgba(255,255,255,.42); border-bottom-color:rgba(255,255,255,.16); text-decoration:line-through; }',
     '.tk-none2 { color:rgba(255,255,255,.32); font-size:11px; }',
+    '/* 前置/后续列表超过 3 条时默认折叠 */',
+    '.tk-list.tk-collapsed > li:nth-child(n+4) { display:none; }',
+    '.tk-more-btn {',
+    '  margin-top:4px; padding:1px 0; border:0; background:none;',
+    '  font-size:11.5px; font-family:inherit; color:rgba(234,194,126,.82);',
+    '  cursor:pointer; user-select:none; transition:color .15s; }',
+    '.tk-more-btn:hover { color:#eac27e; text-decoration:underline; }',
 
     /* --- M6 任务链 / 系列 ---
        位置在 meta 之后、正文之前：这是卡片里唯一的结构性信息，
