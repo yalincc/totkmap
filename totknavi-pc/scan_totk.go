@@ -237,13 +237,18 @@ type staticPtrChain struct {
 	structOffset uintptr
 }
 
-// 已知在主模块 .bss 段中恒定指向活跃林克实体的全局指针链（实机验证跨重启有效）
+// 已知在主模块 .bss 段中恒定指向活跃林克实体的全局指针链（实机验证跨重启有效，覆盖 1.2.1 与 1.4.3 全系）
 var knownStaticChains = []staticPtrChain{
+	// 1.2.1
 	{0x4726008, 0x10},
 	{0x4727978, 0x60},
 	{0x4723FF8, 0xA0},
 	{0x46992C8, 0x50},
 	{0x46CE048, 0x90},
+	// 1.4.3
+	{0x3A4CF60, 0x98},
+	{0x3A4E6E0, 0x50},
+	{0x3A4EC80, 0x118},
 }
 
 // ptkReadStaticChain PC 重编译版主路径：通过主模块固定基址 0x7000000000 处的静态指针表

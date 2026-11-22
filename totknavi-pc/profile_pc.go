@@ -77,6 +77,35 @@ var builtinProfiles = []MemoryProfile{
 			{PtrOffset: "0x46CE048", StructOffset: "0x90"},
 		},
 	},
+	{
+		ID:            "profile-2-143",
+		Name:          "默认配置 (TotK-Recomp · 1.4.3)",
+		RecompVersion: "TotK-Recomp (默认)",
+		GameVersion:   "1.4.3",
+		Note:          "内置 1.4.3 全系通用偏移（经 285MB/302MB/330MB 多构建实机交叉验证）",
+		Verified:      true,
+		Fingerprint: ProfileFingerprint{
+			MainBase: "0x7000000000",
+		},
+		MainBase: "0x7000000000",
+		HeapRanges: []HeapRange{
+			{Lo: "0x100000000", Hi: "0x1A0000000"},
+		},
+		StaticChains: []StaticChainEntry{
+			{PtrOffset: "0x3A4CF60", StructOffset: "0x98"},
+			{PtrOffset: "0x3A4CF68", StructOffset: "0x118"},
+			{PtrOffset: "0x3A4E6E0", StructOffset: "0x50"},
+			{PtrOffset: "0x3A4EC80", StructOffset: "0x118"},
+			{PtrOffset: "0x3A4EC80", StructOffset: "0x178"},
+			{PtrOffset: "0x3A4FC48", StructOffset: "0xF0"},
+			{PtrOffset: "0x3A4FC48", StructOffset: "0xFC"},
+			{PtrOffset: "0x3A5E9A0", StructOffset: "0x150"},
+			{PtrOffset: "0x3A608C8", StructOffset: "0x1C0"},
+			{PtrOffset: "0x3A62ED8", StructOffset: "0xC0"},
+			{PtrOffset: "0x3A63410", StructOffset: "0x58"},
+			{PtrOffset: "0x3A64660", StructOffset: "0x1E0"},
+		},
+	},
 }
 
 var (
@@ -270,6 +299,15 @@ func selectActiveProfile(exeSize uintptr) *MemoryProfile {
 	if exeSize != 0 {
 		for i := range builtinProfiles {
 			if builtinProfiles[i].Fingerprint.ExeSize == exeSize {
+				p := builtinProfiles[i]
+				setActiveProfileState(&p, true, false)
+				return &p
+			}
+		}
+	}
+	if _, gv := getDetectedVersions(); gv != "" {
+		for i := range builtinProfiles {
+			if builtinProfiles[i].GameVersion == gv {
 				p := builtinProfiles[i]
 				setActiveProfileState(&p, true, false)
 				return &p

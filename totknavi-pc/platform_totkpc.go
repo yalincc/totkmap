@@ -105,6 +105,9 @@ func (p *totkpcPlatform) Attach() bool {
 	p.exeBase, p.exeSize = totkPCExeModule(pid)
 	exeSz := p.exeSize
 	p.mu.Unlock()
+	if rv, gv := detectGameVersions(pid, h); rv != "" || gv != "" {
+		setDetectedVersions(rv, gv)
+	}
 	selectActiveProfile(exeSz)
 	return true
 }
@@ -445,7 +448,7 @@ func (p *totkpcPlatform) describe() string {
 // detectGameVersions 尝试从游戏窗口标题或 logs/totk.log 提取 PC 编译版本（如 TotK Recomp 0.4.0 +7a37fc3c）与游戏版本（如 1.2.1）。
 func detectGameVersions(pid uint32, h uintptr) (recompVer, gameVer string) {
 	reRecomp := regexp.MustCompile(`(?i)(totk[\s\-_]*recomp(?:\s+v?\d+\.\d+(?:\.\d+)?(?:\s*\+[0-9a-fA-F]+)?)?)`)
-	reGameVer := regexp.MustCompile(`(?i)\b(1\.\d+\.\d+)\b`)
+	reGameVer := regexp.MustCompile(`(?i)\b(1\.\d\.\d)\b`)
 
 	if title := getProcessWindowTitle(pid); title != "" {
 		if m := reRecomp.FindStringSubmatch(title); len(m) > 1 {
