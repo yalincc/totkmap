@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "updatedAt": "2026-11-22",
+  "updatedAt": "2026-11-23",
   "profiles": [
     {
       "id": "recomp-0.4.0-1.2.1-301mb",
@@ -109,6 +109,99 @@
       "mainBase": "0x7000000000",
       "heapRanges": [
         { "lo": "0x160000000", "hi": "0x180000000" },
+        { "lo": "0x100000000", "hi": "0x180000000" }
+      ],
+      "staticChains": [
+        { "ptrOffset": "0x3A4CF60", "structOffset": "0x98" },
+        { "ptrOffset": "0x3A4CF68", "structOffset": "0x118" },
+        { "ptrOffset": "0x3A4E6E0", "structOffset": "0x50" },
+        { "ptrOffset": "0x3A4EC80", "structOffset": "0x118" },
+        { "ptrOffset": "0x3A4EC80", "structOffset": "0x178" },
+        { "ptrOffset": "0x3A4FC48", "structOffset": "0xF0" },
+        { "ptrOffset": "0x3A4FC48", "structOffset": "0xFC" },
+        { "ptrOffset": "0x3A5E9A0", "structOffset": "0x150" },
+        { "ptrOffset": "0x3A608C8", "structOffset": "0x1C0" },
+        { "ptrOffset": "0x3A62ED8", "structOffset": "0xC0" },
+        { "ptrOffset": "0x3A63410", "structOffset": "0x58" },
+        { "ptrOffset": "0x3A64660", "structOffset": "0x1E0" }
+      ]
+    },
+    {
+      "id": "recomp-1.4.3-286mb-11d82000",
+      "name": "TotK Recomp (1.4.3 · 285.5MB · 11d82000)",
+      "recompVersion": "TotK Recomp",
+      "gameVersion": "1.4.3",
+      "note": "社区实机验证通过 · 1.4.3 通用 L1 静态指针链 12 条",
+      "verified": true,
+      "fingerprint": {
+        "exeSize": 299376640,
+        "mainBase": "0x7000000000"
+      },
+      "mainBase": "0x7000000000",
+      "heapRanges": [
+        { "lo": "0x164000000", "hi": "0x180000000" },
+        { "lo": "0x100000000", "hi": "0x180000000" }
+      ],
+      "staticChains": [
+        { "ptrOffset": "0x3A4CF60", "structOffset": "0x98" },
+        { "ptrOffset": "0x3A4CF68", "structOffset": "0x118" },
+        { "ptrOffset": "0x3A4E6E0", "structOffset": "0x50" },
+        { "ptrOffset": "0x3A4EC80", "structOffset": "0x118" },
+        { "ptrOffset": "0x3A4EC80", "structOffset": "0x178" },
+        { "ptrOffset": "0x3A4FC48", "structOffset": "0xF0" },
+        { "ptrOffset": "0x3A4FC48", "structOffset": "0xFC" },
+        { "ptrOffset": "0x3A5E9A0", "structOffset": "0x150" },
+        { "ptrOffset": "0x3A608C8", "structOffset": "0x1C0" },
+        { "ptrOffset": "0x3A62ED8", "structOffset": "0xC0" },
+        { "ptrOffset": "0x3A63410", "structOffset": "0x58" },
+        { "ptrOffset": "0x3A64660", "structOffset": "0x1E0" }
+      ]
+    },
+    {
+      "id": "recomp-1.4.3-286mb-11d83000",
+      "name": "TotK Recomp (1.4.3 · 285.5MB · 11d83000)",
+      "recompVersion": "TotK Recomp",
+      "gameVersion": "1.4.3",
+      "note": "社区实机验证通过 · 1.4.3 通用 L1 静态指针链 12 条",
+      "verified": true,
+      "fingerprint": {
+        "exeSize": 299380736,
+        "mainBase": "0x7000000000"
+      },
+      "mainBase": "0x7000000000",
+      "heapRanges": [
+        { "lo": "0x164000000", "hi": "0x180000000" },
+        { "lo": "0x100000000", "hi": "0x180000000" }
+      ],
+      "staticChains": [
+        { "ptrOffset": "0x3A4CF60", "structOffset": "0x98" },
+        { "ptrOffset": "0x3A4CF68", "structOffset": "0x118" },
+        { "ptrOffset": "0x3A4E6E0", "structOffset": "0x50" },
+        { "ptrOffset": "0x3A4EC80", "structOffset": "0x118" },
+        { "ptrOffset": "0x3A4EC80", "structOffset": "0x178" },
+        { "ptrOffset": "0x3A4FC48", "structOffset": "0xF0" },
+        { "ptrOffset": "0x3A4FC48", "structOffset": "0xFC" },
+        { "ptrOffset": "0x3A5E9A0", "structOffset": "0x150" },
+        { "ptrOffset": "0x3A608C8", "structOffset": "0x1C0" },
+        { "ptrOffset": "0x3A62ED8", "structOffset": "0xC0" },
+        { "ptrOffset": "0x3A63410", "structOffset": "0x58" },
+        { "ptrOffset": "0x3A64660", "structOffset": "0x1E0" }
+      ]
+    },
+    {
+      "id": "recomp-1.4.3-289mb-12153000",
+      "name": "TotK Recomp (1.4.3 · 289.3MB)",
+      "recompVersion": "TotK Recomp",
+      "gameVersion": "1.4.3",
+      "note": "社区实机验证通过 · 1.4.3 通用 L1 静态指针链 12 条",
+      "verified": true,
+      "fingerprint": {
+        "exeSize": 303378432,
+        "mainBase": "0x7000000000"
+      },
+      "mainBase": "0x7000000000",
+      "heapRanges": [
+        { "lo": "0x164000000", "hi": "0x180000000" },
         { "lo": "0x100000000", "hi": "0x180000000" }
       ],
       "staticChains": [
