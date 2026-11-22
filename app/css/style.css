@@ -2090,22 +2090,23 @@ html[lang="en"] .tk-copy {
 .su-links {
   display: flex;
   align-items: center;
-  gap: 6px;
+  justify-content: space-between;
+  gap: 2px;
   margin-top: 8px;
   padding: 2px 0 0;
 }
 .su-link {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 3px;
   background: none;
   border: none;
   color: #cfd8e3;
-  font-size: 12px;
+  font-size: 11.5px;
   font-family: inherit;
   font-weight: 500;
   text-decoration: none;
-  padding: 3px 5px;
+  padding: 3px 4px;
   border-radius: 5px;
   cursor: pointer;
   white-space: nowrap;
@@ -2117,6 +2118,101 @@ html[lang="en"] .tk-copy {
 }
 .su-link.bp:hover, .su-link.bp:focus {
   color: #6fd3e0;
+}
+.su-link.fb:hover, .su-link.fb:focus {
+  color: #8be0a4;
+}
+
+/* ===== 问题反馈与 QQ 群弹窗 ===== */
+.fb-box {
+  width: 380px;
+}
+.fb-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+.fb-qr-wrap {
+  background: #fff;
+  padding: 6px;
+  border-radius: 10px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, .35);
+}
+.fb-qr-img {
+  display: block;
+  width: 210px;
+  max-width: 62vw;
+  height: auto;
+  border-radius: 6px;
+}
+.fb-row {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-size: 12.5px;
+  color: #d6e0ea;
+  background: rgba(255, 255, 255, .04);
+  border: 1px solid rgba(255, 255, 255, .08);
+  border-radius: 7px;
+  padding: 7px 10px;
+}
+.fb-label {
+  color: #9fb0c3;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.fb-code {
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  color: #eac27e;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: .3px;
+}
+.fb-mini-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 7px;
+  font-size: 11.5px;
+  font-family: inherit;
+  color: #e6eef7;
+  background: rgba(255, 255, 255, .09);
+  border: 1px solid rgba(255, 255, 255, .14);
+  border-radius: 4px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background .15s, color .15s;
+}
+.fb-mini-btn:hover {
+  background: rgba(234, 194, 126, .2);
+  color: #eac27e;
+}
+.fb-mini-btn.fb-join {
+  color: #7ee3f0;
+  border-color: rgba(111, 211, 224, .35);
+}
+.fb-mini-btn.fb-join:hover {
+  background: rgba(111, 211, 224, .18);
+  color: #aef2fb;
+}
+.fb-link {
+  color: #6fd3e0;
+  text-decoration: none;
+  word-break: break-all;
+}
+.fb-link:hover {
+  text-decoration: underline;
+  color: #aef2fb;
+}
+.fb-hint {
+  width: 100%;
+  margin: 0;
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: #8ea0b5;
+  text-align: left;
 }
 
 /* ===== 区域轮廓（洞窟/井/空岛/深穴）禁用浏览器点击焦点外方框，不遮挡内部标点 ===== */

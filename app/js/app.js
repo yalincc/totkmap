@@ -3814,6 +3814,54 @@
     if (seen !== VERSION) open();
   })();
 
+  /* ---------------- 问题反馈与 QQ 交流群弹窗 ---------------- */
+  (function initFeedbackModal() {
+    var btn = $('btnFeedback'), box = $('feedbackBox');
+    var closeBtn = $('fbClose'), copyBtn = $('fbCopyQQ');
+    if (!btn || !box) return;
+    function close() { box.classList.add('hidden'); }
+    function toggle(e) {
+      if (e) e.stopPropagation();
+      if (box.classList.contains('hidden')) {
+        box.classList.remove('hidden');
+        if (window.I18N) window.I18N.updateDOM(box);
+      } else {
+        close();
+      }
+    }
+    btn.addEventListener('click', toggle);
+    if (closeBtn) closeBtn.addEventListener('click', close);
+    document.addEventListener('click', function (e) {
+      if (!box.classList.contains('hidden') && !e.target.closest('#feedbackBox') && !e.target.closest('#btnFeedback')) {
+        close();
+      }
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && !box.classList.contains('hidden')) close();
+    });
+    if (copyBtn) {
+      copyBtn.addEventListener('click', function () {
+        var qq = '1129187280';
+        var okMsg = window.I18N ? window.I18N.t('feedback.copied') : ('已复制群号 ' + qq);
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(qq).then(function () { toast(okMsg); }, function () {
+            var ta = document.createElement('textarea');
+            ta.value = qq; document.body.appendChild(ta); ta.select();
+            try { document.execCommand('copy'); } catch (e) {}
+            document.body.removeChild(ta);
+            toast(okMsg);
+          });
+        } else {
+          var ta = document.createElement('textarea');
+          ta.value = qq; document.body.appendChild(ta); ta.select();
+          try { document.execCommand('copy'); } catch (e) {}
+          document.body.removeChild(ta);
+          toast(okMsg);
+        }
+      });
+    }
+  })();
+
   // 调试/扩展句柄
   window.TOTK = {
     map: map,

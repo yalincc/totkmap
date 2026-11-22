@@ -5,7 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>塞尔达传说：王国之泪 · 互动地图</title>
 <link rel="stylesheet" href="vendor/leaflet.css">
-<link rel="stylesheet" href="css/style.css?v=244">
+<link rel="stylesheet" href="css/style.css?v=245">
+<link rel="stylesheet" href="voice-memories/vm-style.css?v=1">
 </head>
 <body>
 
@@ -124,6 +125,7 @@
       <a id="saveEditBtn" class="su-link" href="save-edit/editor.html" target="_blank" rel="noopener" data-i18n-title="save.editBtnTip" title="打开存档修改器：卢比 / 材料 / 装备 / 坐标传送">🔧 存档修改</a>
       <a id="bpWorkshopBtn" class="su-link bp" href="save-edit/editor.html#blueprint" target="_blank" rel="noopener" data-i18n-title="save.bpBtnTip" title="打开蓝图工坊：精选蓝图库 · 拖拽导入导出与分享">📐 蓝图工坊</a>
       <button type="button" id="btnChangelog" class="su-link cl" data-i18n="save.changelogBtn" data-i18n-title="save.changelogTip" title="查看最近版本更新内容">📢 更新公告</button>
+      <button type="button" id="btnFeedback" class="su-link fb" data-i18n="save.feedbackBtn" data-i18n-title="save.feedbackTip" title="问题反馈与 QQ 交流群">💬 反馈</button>
     </div>
   </div>
 
@@ -521,6 +523,29 @@
   </div>
 </div>
 
+<!-- ============ 问题反馈与交流群弹窗 ============ -->
+<div id="feedbackBox" class="help-box fb-box hidden" role="dialog" aria-modal="true" aria-labelledby="fbTitle">
+  <h3><span id="fbTitle" data-i18n="feedback.title">💬 问题反馈与交流</span>
+    <button id="fbClose" class="help-close" data-i18n-title="common.close" title="关闭">×</button>
+  </h3>
+  <div class="fb-body">
+    <div class="fb-qr-wrap">
+      <img src="assets/qq-group-qr.jpg" alt="QQ 交流群二维码" class="fb-qr-img">
+    </div>
+    <div class="fb-row">
+      <span class="fb-label" data-i18n="feedback.qqLabel">QQ 交流群</span>
+      <code class="fb-code">1129187280</code>
+      <button type="button" id="fbCopyQQ" class="fb-mini-btn" data-i18n="feedback.copyBtn">复制群号</button>
+      <a class="fb-mini-btn fb-join" href="https://qm.qq.com/q/p5inNAzp8A" target="_blank" rel="noopener" data-i18n="feedback.joinBtn">一键加群</a>
+    </div>
+    <div class="fb-row">
+      <span class="fb-label" data-i18n="feedback.issueLabel">GitHub Issues</span>
+      <a class="fb-link" href="https://github.com/yalincc/totkmap/issues" target="_blank" rel="noopener">github.com/yalincc/totkmap/issues</a>
+    </div>
+    <p class="fb-hint" data-i18n="feedback.hint">发现任务、标点或定位错误时，欢迎进群或提交 Issue（附带任务编号或坐标处理更快）。</p>
+  </div>
+</div>
+
 <!-- ============ 实时导航面板（V1.8.0） ============ -->
 <div id="navPanel" class="nav-panel hidden">
   <div class="np-head">
@@ -581,7 +606,7 @@
 <!-- 任务数据与底层（提前加载：保证 app.js 首次 buildCatalogPanel 同步渲染任务分类） -->
 <script src="data/armors.js?v=234"></script>
 <script src="data/armor-upgrade.js?v=233"></script>
-<script src="data/task-plan.js?v=277"></script>
+<script src="data/task-plan.js?v=278"></script>
 <script src="data/task-save.js?v=234"></script>
 <script src="js/task/task-data.js?v=272"></script>
 <script src="js/task/task-done.js?v=234"></script>
@@ -592,9 +617,12 @@
 <script src="js/card-layout.js?v=302"></script>
 <script src="js/totk-canvas-layer.js?v=300"></script>
 <script src="data/changelog.js?v=2"></script>
-<script src="js/app.js?v=315"></script>
+<script src="js/app.js?v=316"></script>
 <script src="voice/voice-nav.js?v=3"></script>
-<script src="js/live.js?v=296"></script>
+<!-- 声之记忆（240 条）独立可插拔模块：独立文件夹与进度隔离，不进入左侧栏 -->
+<script src="voice-memories/vm-data.js?v=1"></script>
+<script src="voice-memories/vm-player.js?v=1"></script>
+<script src="js/live.js?v=297"></script>
 <script src="js/explore-auto.js?v=199"></script>
 <script src="js/mat-auto.js?v=196"></script>
 <!-- 手机防息屏降级（V2.4.1）：wakeLock 不可用（局域网 http / iOS 旧版）时播放静音视频保持屏幕常亮；
