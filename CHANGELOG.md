@@ -19,7 +19,8 @@
   - `app/voice-memories/vm-player.js` 实现本地 → 线上站 → 系统 TTS 三级音频回退、手机首次触摸自动播放解锁、35m（可选 15/35/60m）三维接近自动共鸣、`VoiceNav` 播放互斥与独立进度导出/重置；
 - **设置面板 3 Tab 重构与体验打磨**：
   - `app/index.html`、`app/voice/voice-nav.js` 重构设置弹窗为「显示 / 定位 / 语音」3 Tab，移除冗余「打开存档修改器」，语音导航精简为 3 档音色（塞尔达/御姐音/系统）+ 音量试听 + 播报频次下拉，总开关关闭时置灰禁用不折叠；
-  - 递增 `sw.js` 至 `v1.9.4-96`，新增 `tools/verify_voice_memories.js`（6/6 PASS），与 `verify_voice_nav.js`（6/6）、`verify_i18n.js`（13/13）全部通过。
+  - 同步将语音导航 96 个切片统一压制为 `20k` Opus `.webm`（945 KB → 501.8 KB）并打通 `本地 → 线上 → TTS` 三级回退；
+  - 递增 `sw.js` 至 `v1.9.4-97`，新增 `tools/verify_voice_memories.js`（6/6 PASS），与 `verify_voice_nav.js`（6/6）、`verify_i18n.js`（13/13）全部通过。
 
 ---
 

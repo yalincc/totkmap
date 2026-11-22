@@ -23,6 +23,7 @@
 
   var STORAGE_KEY = 'totkmap.voice.cfg.v1';
   var BASE_PATH = 'voice/';
+  var ONLINE_BASE = 'https://totk.yalin.site/voice/';
 
   /* 默认独立配置 */
   var DEFAULT_CFG = {
@@ -302,10 +303,13 @@
     }
   }
 
-  function getAudioEl(pack, clipId) {
-    var key = pack + '/' + clipId;
+  function getAudioEl(pack, clipId, useOnline) {
+    var key = (useOnline ? 'online:' : 'local:') + pack + '/' + clipId;
     if (!audioCache[key]) {
-      var a = new Audio(BASE_PATH + pack + '/' + clipId + '.mp3');
+      var base = useOnline
+        ? ((typeof window !== 'undefined' && window.TOTK_VOICE_ONLINE_BASE) || ONLINE_BASE)
+        : BASE_PATH;
+      var a = new Audio(base + pack + '/' + clipId + '.webm');
       a.preload = 'auto';
       audioCache[key] = a;
     }
@@ -386,57 +390,65 @@
   function pumpQueue() {
     if (!cfg.enabled || externalPaused || currentAudio || !playQueue.length) return;
     var item = playQueue.shift();
-    var audio = getAudioEl(item.pack, item.clipId);
-    currentAudio = audio;
-    audio.volume = Math.max(0.05, Math.min(1, (cfg.volume || 80) / 100));
 
-    var advanced = false;
-    function next() {
-      if (advanced) return;
-      advanced = true;
-      audio.removeEventListener('ended', next);
-      audio.removeEventListener('error', onErr);
-      if (currentAudio === audio) currentAudio = null;
-      // 极短间隔 (25ms) 衔接下一词条
-      queueTimer = setTimeout(pumpQueue, 25);
-    }
-    function onErr() {
-      // 若离线 MP3 加载失败（如路径异常），自动无缝降级到系统 TTS
-      if (advanced) return;
-      advanced = true;
-      audio.removeEventListener('ended', next);
-      audio.removeEventListener('error', onErr);
-      if (currentAudio === audio) currentAudio = null;
-      speakViaSystemTTS([item.clipId]);
-      queueTimer = setTimeout(pumpQueue, 100);
-    }
+    function playOne(useOnline) {
+      var audio = getAudioEl(item.pack, item.clipId, useOnline);
+      currentAudio = audio;
+      audio.volume = Math.max(0.05, Math.min(1, (cfg.volume || 80) / 100));
 
-    audio.addEventListener('ended', next);
-    audio.addEventListener('error', onErr);
-    try {
-      audio.currentTime = 0;
-      var pr = audio.play();
-      if (pr && typeof pr.catch === 'function') {
-        pr.catch(function (err) {
-          if (err && err.name === 'NotAllowedError') {
-            // 浏览器尚未获得用户交互解锁音频：清空本次队列并轻提示一次，不静默逐条白吞
-            advanced = true;
-            audio.removeEventListener('ended', next);
-            audio.removeEventListener('error', onErr);
-            if (currentAudio === audio) currentAudio = null;
-            playQueue = [];
-            if (!autoplayWarned && typeof window !== 'undefined' && window.TOTK_APP && typeof window.TOTK_APP.toast === 'function') {
-              autoplayWarned = true;
-              window.TOTK_APP.toast(tr('voice.autoplayHint', '浏览器限制自动语音，请点击地图任意处解锁', 'Browser blocked auto audio — click anywhere on the map to unlock'));
-            }
-            return;
-          }
-          next();
-        });
+      var advanced = false;
+      function next() {
+        if (advanced) return;
+        advanced = true;
+        audio.removeEventListener('ended', next);
+        audio.removeEventListener('error', onErr);
+        if (currentAudio === audio) currentAudio = null;
+        // 极短间隔 (25ms) 衔接下一词条
+        queueTimer = setTimeout(pumpQueue, 25);
       }
-    } catch (e) {
-      next();
+      function onErr() {
+        if (advanced) return;
+        advanced = true;
+        audio.removeEventListener('ended', next);
+        audio.removeEventListener('error', onErr);
+        if (currentAudio === audio) currentAudio = null;
+        // 三级回退：本地 .webm -> 线上导航站 .webm -> 系统 TTS
+        if (!useOnline) {
+          playOne(true);
+          return;
+        }
+        speakViaSystemTTS([item.clipId]);
+        queueTimer = setTimeout(pumpQueue, 100);
+      }
+
+      audio.addEventListener('ended', next);
+      audio.addEventListener('error', onErr);
+      try {
+        audio.currentTime = 0;
+        var pr = audio.play();
+        if (pr && typeof pr.catch === 'function') {
+          pr.catch(function (err) {
+            if (err && err.name === 'NotAllowedError') {
+              // 浏览器尚未获得用户交互解锁音频：清空本次队列并轻提示一次，不静默逐条白吞
+              advanced = true;
+              audio.removeEventListener('ended', next);
+              audio.removeEventListener('error', onErr);
+              if (currentAudio === audio) currentAudio = null;
+              playQueue = [];
+              if (!autoplayWarned && typeof window !== 'undefined' && window.TOTK_APP && typeof window.TOTK_APP.toast === 'function') {
+                autoplayWarned = true;
+                window.TOTK_APP.toast(tr('voice.autoplayHint', '浏览器限制自动语音，请点击地图任意处解锁', 'Browser blocked auto audio — click anywhere on the map to unlock'));
+              }
+              return;
+            }
+            onErr();
+          });
+        }
+      } catch (e) {
+        onErr();
+      }
     }
+    playOne(false);
   }
 
   /* ---------------- 核心导航语音组装逻辑 ---------------- */
