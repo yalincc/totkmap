@@ -65,6 +65,7 @@
   var currentItem = null;
   var currentAudio = null;
   var isPlayingNow = false;
+  var playGen = 0;
   var audioCtx = null;
   var autoplayUnlocked = false;
   var triggeredAt = {};
@@ -215,6 +216,7 @@
 
   /* ---------------- 三级音频播放（本地 / 线上 / TTS 兜底） ---------------- */
   function stopPlayback() {
+    playGen++;
     isPlayingNow = false;
     if (currentAudio) {
       try {
@@ -281,7 +283,9 @@
     updateCardPlayState(tr('正在加载语音…', 'Loading audio…'));
 
     var urls = getAudioUrls(item);
+    var myGen = playGen;
     function tryPlayIdx(idx) {
+      if (myGen !== playGen) return;
       if (idx >= urls.length) {
         speakFallbackTTS(item);
         return;
@@ -292,24 +296,26 @@
         var audio = new Audio(url);
         currentAudio = audio;
         audio.onplaying = function () {
+          if (myGen !== playGen) return;
           updateCardPlayState(isOnline ? tr('在线角色语音播放中', 'Playing online audio') : tr('角色语音播放中', 'Playing audio'));
         };
         audio.onended = function () {
-          if (currentAudio !== audio) return;
+          if (myGen !== playGen || currentAudio !== audio) return;
           currentAudio = null;
           isPlayingNow = false;
           setVoiceNavPaused(false);
           updateCardPlayState(tr('播放完毕', 'Finished'));
         };
         audio.onerror = function () {
-          if (currentAudio !== audio) return;
+          if (myGen !== playGen || currentAudio !== audio) return;
           currentAudio = null;
           tryPlayIdx(idx + 1);
         };
         var p = audio.play();
         if (p && typeof p.catch === 'function') {
-          p.catch(function () {
-            if (currentAudio !== audio) return;
+          p.catch(function (err) {
+            if (myGen !== playGen || currentAudio !== audio) return;
+            if (err && err.name === 'AbortError') return;
             currentAudio = null;
             tryPlayIdx(idx + 1);
           });

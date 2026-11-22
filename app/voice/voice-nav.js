@@ -74,6 +74,9 @@
     layer_depths:  { zh: '注意，目标在地下层。', en: 'Note: target is in the Depths.' },
     off_course:    { zh: '方向偏离，目标在', en: 'Off course, target is' },
     korok_near:    { zh: '附近有克洛格的气息哦。', en: 'A Korok is hiding nearby.' },
+    korok_start:   { zh: '前往克洛格起点，', en: 'Heading to Korok start,' },
+    korok_to_camp: { zh: '已到达起点，请护送前往朋友营地，', en: "Arrived at start, escort to friend's camp," },
+    korok_to_goal: { zh: '已到达起点，前往挑战终点，', en: 'Arrived at start, heading to goal,' },
     shrine_near:   { zh: '感应到神庙反应。', en: 'Shrine sensor triggered nearby.' }
   };
 
@@ -114,10 +117,11 @@
     return (isNaN(v) || v < 5) ? 25 : Math.min(60, Math.max(10, v));
   }
 
-  /* 音频播放队列与缓存池 */
-  var audioCache = {};      // key: pack + '/' + clipId -> HTMLAudioElement
+  /* 单一全局 Audio 实例 + 播放代次锁（彻底杜绝多实例串扰与 AbortError 重音） */
+  var sharedAudio = null;
   var playQueue = [];       // 待播放 clipId 队列
   var currentAudio = null;  // 当前正在播放的 HTMLAudioElement
+  var playGen = 0;          // 每次 stopPlayback 递增，作废所有旧异步回调
   var queueTimer = null;
   var audioCtx = null;      // Web Audio API 上下文（用于合成普尔亚平板雷达音效）
 
@@ -284,8 +288,9 @@
     }
   }
 
-  /* ---------------- 音频切片队列播放器 ---------------- */
+  /* ---------------- 音频切片队列播放器（单实例 + 代次锁） ---------------- */
   function stopPlayback() {
+    playGen++;
     playQueue = [];
     if (queueTimer) {
       clearTimeout(queueTimer);
@@ -293,8 +298,9 @@
     }
     if (currentAudio) {
       try {
+        currentAudio.onended = null;
+        currentAudio.onerror = null;
         currentAudio.pause();
-        currentAudio.currentTime = 0;
       } catch (e) {}
       currentAudio = null;
     }
@@ -303,17 +309,19 @@
     }
   }
 
-  function getAudioEl(pack, clipId, useOnline) {
-    var key = (useOnline ? 'online:' : 'local:') + pack + '/' + clipId;
-    if (!audioCache[key]) {
-      var base = useOnline
-        ? ((typeof window !== 'undefined' && window.TOTK_VOICE_ONLINE_BASE) || ONLINE_BASE)
-        : BASE_PATH;
-      var a = new Audio(base + pack + '/' + clipId + '.webm');
-      a.preload = 'auto';
-      audioCache[key] = a;
+  function getClipUrl(pack, clipId, useOnline) {
+    var base = useOnline
+      ? ((typeof window !== 'undefined' && window.TOTK_VOICE_ONLINE_BASE) || ONLINE_BASE)
+      : BASE_PATH;
+    return base + pack + '/' + clipId + '.webm';
+  }
+
+  function getSharedAudio() {
+    if (!sharedAudio && typeof Audio !== 'undefined') {
+      sharedAudio = new Audio();
+      sharedAudio.preload = 'auto';
     }
-    return audioCache[key];
+    return sharedAudio;
   }
 
   function speakViaSystemTTS(clips, customTargetName) {
@@ -380,37 +388,39 @@
     for (var i = 0; i < clips.length; i++) {
       playQueue.push({ pack: pack, clipId: clips[i] });
     }
-    // 预加载队列中的所有音频切片
-    for (var j = 0; j < playQueue.length; j++) {
-      getAudioEl(playQueue[j].pack, playQueue[j].clipId);
-    }
     pumpQueue();
   }
 
   function pumpQueue() {
     if (!cfg.enabled || externalPaused || currentAudio || !playQueue.length) return;
     var item = playQueue.shift();
+    var myGen = playGen;
 
     function playOne(useOnline) {
-      var audio = getAudioEl(item.pack, item.clipId, useOnline);
+      if (myGen !== playGen) return;
+      var audio = getSharedAudio();
+      if (!audio) {
+        speakViaSystemTTS([item.clipId]);
+        queueTimer = setTimeout(pumpQueue, 100);
+        return;
+      }
       currentAudio = audio;
       audio.volume = Math.max(0.05, Math.min(1, (cfg.volume || 80) / 100));
 
       var advanced = false;
       function next() {
-        if (advanced) return;
+        if (advanced || myGen !== playGen) return;
         advanced = true;
-        audio.removeEventListener('ended', next);
-        audio.removeEventListener('error', onErr);
+        audio.onended = null;
+        audio.onerror = null;
         if (currentAudio === audio) currentAudio = null;
-        // 极短间隔 (25ms) 衔接下一词条
         queueTimer = setTimeout(pumpQueue, 25);
       }
       function onErr() {
-        if (advanced) return;
+        if (advanced || myGen !== playGen) return;
         advanced = true;
-        audio.removeEventListener('ended', next);
-        audio.removeEventListener('error', onErr);
+        audio.onended = null;
+        audio.onerror = null;
         if (currentAudio === audio) currentAudio = null;
         // 三级回退：本地 .webm -> 线上导航站 .webm -> 系统 TTS
         if (!useOnline) {
@@ -421,18 +431,21 @@
         queueTimer = setTimeout(pumpQueue, 100);
       }
 
-      audio.addEventListener('ended', next);
-      audio.addEventListener('error', onErr);
+      audio.onended = next;
+      audio.onerror = onErr;
       try {
+        audio.src = getClipUrl(item.pack, item.clipId, useOnline);
         audio.currentTime = 0;
         var pr = audio.play();
         if (pr && typeof pr.catch === 'function') {
           pr.catch(function (err) {
+            if (myGen !== playGen) return;
+            // 抢占切播引发的 AbortError 绝不能误进 onErr() 触发重音/TTS
+            if (err && err.name === 'AbortError') return;
             if (err && err.name === 'NotAllowedError') {
-              // 浏览器尚未获得用户交互解锁音频：清空本次队列并轻提示一次，不静默逐条白吞
               advanced = true;
-              audio.removeEventListener('ended', next);
-              audio.removeEventListener('error', onErr);
+              audio.onended = null;
+              audio.onerror = null;
               if (currentAudio === audio) currentAudio = null;
               playQueue = [];
               if (!autoplayWarned && typeof window !== 'undefined' && window.TOTK_APP && typeof window.TOTK_APP.toast === 'function') {
@@ -475,7 +488,7 @@
     }
 
     var altClip = pickAltClip(player, target);
-    if (altClip && (d == null || d > arrM)) {
+    if (altClip) {
       clips.push(altClip);
     }
     return clips;
@@ -534,12 +547,13 @@
     var d = hasPlayer ? calcDist3D(player, target) : null;
     var isCrossLayer = !!(hasPlayer && target.layer && player.layer && Number(target.layer) !== Number(player.layer));
 
-    // 1. 显式导航事件（手动点导航 / 开启自动收集 / 完成续导下一个 / 动态切换最近点）
-    if (ev === 'start_nav' || ev === 'start_auto' || ev === 'next_target' || ev === 'switch_near') {
+    // 1. 显式导航事件（手动点导航 / 开启自动收集 / 完成续导 / 切最近点 / 克洛格起点与二段接力）
+    if (ev === 'start_nav' || ev === 'start_auto' || ev === 'next_target' || ev === 'switch_near' ||
+        ev === 'korok_start' || ev === 'korok_to_camp' || ev === 'korok_to_goal') {
       resetTargetState(tKey, d, isCrossLayer);
       if (hasPlayer) {
         var clips = buildTargetAnnounceClips(ev, player, target, d);
-        var chimeType = (ev === 'next_target') ? 'done' : 'ping';
+        var chimeType = (ev === 'next_target' || ev === 'korok_to_camp' || ev === 'korok_to_goal') ? 'done' : 'ping';
         speakClips(clips, { chime: chimeType, interrupt: true, targetName: target.name });
       } else {
         speakClips([ev], { chime: 'ping', interrupt: true, targetName: target.name });

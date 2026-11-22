@@ -80,6 +80,9 @@
     "layer_depths": { "zh": "注意，目标在地下层。", "en": "Note: target is in the Depths." },
     "off_course": { "zh": "方向偏离，目标在", "en": "Off course, target is" },
     "korok_near": { "zh": "附近有克洛格的气息哦。", "en": "A Korok is hiding nearby." },
+    "korok_start": { "zh": "前往克洛格起点，", "en": "Heading to Korok start," },
+    "korok_to_camp": { "zh": "已到达起点，请护送前往朋友营地，", "en": "Arrived at start, escort to friend's camp," },
+    "korok_to_goal": { "zh": "已到达起点，前往挑战终点，", "en": "Arrived at start, heading to goal," },
     "shrine_near": { "zh": "感应到神庙反应。", "en": "Shrine sensor triggered nearby." }
   }
 }

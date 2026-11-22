@@ -75,6 +75,8 @@
   var arrivedShown = false;
   var singleCardArrived = false;                 // 单点导航 100m 自动弹卡状态
   var lastTargetSetTS = 0;                       // 前端最近一次设置/清除目标的时间戳（防轮询旧 /pos 覆盖）
+  var korokRelay = null;                         // 克洛格二段接力导航状态（起点 → 营地/终点）
+  var korokRelayMap = null;                      // 懒构建的克洛格路径索引（100 运输 + 118 挑战）
   var layerLock = null;                        // 手动层级锁定：null=自动，18/19/20=锁定该层（传送后恢复自动）
   var lastMX = null, lastMY = null;            // 上一采样位置（传送检测）
   var lastLayer = null;                        // 上一采样层（传送检测：层变化 = 传送/深穴，解除手动锁定）
@@ -502,7 +504,7 @@
         }
       }
       hdLastX = pos.mx; hdLastY = pos.my;
-      if (Date.now() - lastTargetSetTS >= 1500) {
+      if (Date.now() - lastTargetSetTS >= 1800) {
         if (p.target && typeof p.target.x === 'number') {
           if (!target || Math.abs(target.x - p.target.x) > 0.05 || Math.abs(target.y - p.target.y) > 0.05) {
             target = p.target;
@@ -685,6 +687,46 @@
       singleCardArrived = false;
       return;
     }
+    /* 克洛格二段自动接力（起点 → 朋友营地/挑战终点） */
+    if (korokRelay && target.id != null && target.id === korokRelay.id) {
+      var ds = Math.hypot(korokRelay.start.x - pos.mx, korokRelay.start.y - pos.my);
+      if (ds <= korokRelay.relayDist) {
+        var relay = korokRelay;
+        korokRelay = null;
+        var nextTarget = {
+          id: relay.id,
+          name: relay.name,
+          x: relay.goal.x,
+          y: relay.goal.y,
+          z: relay.goal.z != null ? relay.goal.z : null,
+          type: relay.type,
+          layer: relay.layer
+        };
+        if (nextTarget.z != null) lastTargetMeta = { x: nextTarget.x, y: nextTarget.y, z: nextTarget.z };
+        target = nextTarget;
+        lastTargetSetTS = Date.now();
+        arrivedShown = false;
+        lastDrawKey = '';
+        redraw();
+        setStatus();
+        var isEnRelay = window.I18N && window.I18N.getLang() === 'en';
+        toast(relay.kind === 'transport'
+          ? (isEnRelay ? "Reached backpack Korok, now guiding to friend's camp" : '已到达背包克洛格起点，自动接力导航至朋友营地')
+          : (isEnRelay ? 'Reached Korok start, now guiding to destination' : '已到达克洛格挑战起点，自动接力导航至终点'));
+        if (window.VoiceNav && typeof window.VoiceNav.feed === 'function') {
+          window.VoiceNav.feed({
+            player: { x: pos.mx, y: pos.my, z: pos.gz, layer: renderLayer(), located: pos.located },
+            target: nextTarget,
+            event: relay.kind === 'transport' ? 'korok_to_camp' : 'korok_to_goal'
+          });
+        }
+        fetch(LIVE_API + '/target', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(nextTarget)
+        }).catch(function () {});
+        return;
+      }
+    }
     var d = distToTarget();
     if (d == null) return;
     if (arrivedShown && d > arriveM * 1.5) arrivedShown = false;
@@ -824,6 +866,46 @@
     if (window.EXPLORE_AUTO && window.EXPLORE_AUTO.onNavEnd) window.EXPLORE_AUTO.onNavEnd();
   }
 
+  /* ---------------- 克洛格二段接力路径查询（100 运输 + 118 挑战） ---------------- */
+  function lookupKorokRelay(id, fallbackGoalZ) {
+    if (id == null) return null;
+    if (!korokRelayMap) {
+      korokRelayMap = Object.create(null);
+      var tp = (window.TOTK_KOROK_PATHS && window.TOTK_KOROK_PATHS.items) || [];
+      for (var i = 0; i < tp.length; i++) {
+        var p = tp[i];
+        if (!p || p.id == null || !p.start || !p.goal) continue;
+        korokRelayMap[p.id] = {
+          kind: 'transport',
+          relayDist: 18,
+          start: { x: p.start[0], y: p.start[1], z: p.start[2] != null ? Number(p.start[2]) : null },
+          goal: { x: p.goal[0], y: p.goal[1], z: p.goal[2] != null ? Number(p.goal[2]) : null }
+        };
+      }
+      var ch = (window.TOTK_KOROK_CHALLENGE_PATHS && window.TOTK_KOROK_CHALLENGE_PATHS.items) || [];
+      for (var j = 0; j < ch.length; j++) {
+        var c = ch[j];
+        if (!c || c.id == null || !(c.dist >= 10) || !c.start || !c.path || c.path.length < 2) continue;
+        if (korokRelayMap[c.id]) continue;
+        var endPt = c.path[c.path.length - 1];
+        korokRelayMap[c.id] = {
+          kind: c.kind || 'challenge',
+          relayDist: 15,
+          start: { x: c.start[0], y: c.start[1], z: null },
+          goal: { x: endPt[0], y: endPt[1], z: null }
+        };
+      }
+    }
+    var entry = korokRelayMap[id];
+    if (!entry) return null;
+    return {
+      kind: entry.kind,
+      relayDist: entry.relayDist,
+      start: { x: entry.start.x, y: entry.start.y, z: entry.start.z },
+      goal: { x: entry.goal.x, y: entry.goal.y, z: entry.goal.z != null ? entry.goal.z : fallbackGoalZ }
+    };
+  }
+
   /* ---------------- 导航目标 ---------------- */
   function navigate(opts) {
     if (!pos.online) { toast('实时定位服务未连接（TOTKNavi 未启动）'); return false; }
@@ -834,7 +916,42 @@
       name: opts.name || '目标', x: opts.x, y: opts.y, z: tz,
       type: opts.type || '', layer: (opts.layer != null ? opts.layer : null)
     };
-    if (tz != null) lastTargetMeta = { x: opts.x, y: opts.y, z: tz };
+    korokRelay = null;
+    var voiceEv = opts.voiceEvent || (opts.silent ? null : 'start_nav');
+    var relay = lookupKorokRelay(body.id, tz);
+    if (relay) {
+      var sameLayer = (body.layer == null || body.layer === renderLayer());
+      var dStart = (pos.mx != null && pos.my != null)
+        ? Math.hypot(relay.start.x - pos.mx, relay.start.y - pos.my) : Infinity;
+      if (sameLayer && dStart <= relay.relayDist) {
+        /* 已身处起点，直接导航至朋友营地/挑战终点 */
+        body.x = relay.goal.x;
+        body.y = relay.goal.y;
+        body.z = relay.goal.z != null ? relay.goal.z : tz;
+        if (!opts.voiceEvent && !opts.silent) {
+          voiceEv = (relay.kind === 'transport') ? 'korok_to_camp' : 'korok_to_goal';
+        }
+      } else {
+        /* 第一段：先导航至克洛格起点，到达后 tickArrival 自动接力第二段 */
+        body.x = relay.start.x;
+        body.y = relay.start.y;
+        body.z = relay.start.z != null ? relay.start.z : null;
+        korokRelay = {
+          id: body.id,
+          name: body.name,
+          type: body.type,
+          layer: body.layer,
+          kind: relay.kind,
+          relayDist: relay.relayDist,
+          start: relay.start,
+          goal: relay.goal
+        };
+        if (!opts.voiceEvent && !opts.silent) {
+          voiceEv = 'korok_start';
+        }
+      }
+    }
+    if (body.z != null) lastTargetMeta = { x: body.x, y: body.y, z: body.z };
     target = body;
     lastTargetSetTS = Date.now();
     arrivedShown = false;
@@ -843,12 +960,21 @@
     lastDrawKey = '';
     redraw();
     setStatus();
-    if (!opts.silent) toast('已设置导航：' + body.name);
+    if (!opts.silent) {
+      if (korokRelay) {
+        var isEnNav = window.I18N && window.I18N.getLang() === 'en';
+        toast(isEnNav
+          ? ('Guiding to Korok start first: ' + body.name)
+          : ('已设置二段导航（先去起点）：' + body.name));
+      } else {
+        toast('已设置导航：' + body.name);
+      }
+    }
     if (window.VoiceNav && typeof window.VoiceNav.feed === 'function') {
       window.VoiceNav.feed({
         player: { x: pos.mx, y: pos.my, z: pos.gz, layer: renderLayer(), located: pos.located },
         target: body,
-        event: opts.voiceEvent || (opts.silent ? null : 'start_nav')
+        event: voiceEv
       });
     }
     fetch(LIVE_API + '/target', {
@@ -859,6 +985,7 @@
   }
 
   function clearNav() {
+    korokRelay = null;
     if (window.VoiceNav && typeof window.VoiceNav.feed === 'function') {
       window.VoiceNav.feed({ event: 'clear' });
     }
@@ -933,7 +1060,8 @@
     if (!pos.online) { toast('实时定位服务未连接（TOTKNavi 未启动）'); return 'offline'; }
     if (!pos.located) { toast('尚未获取玩家位置（请先进入游戏可操作）'); return 'offline'; }
     var cur = target;
-    if (cur && cur.name === (opts.name || '') && cur.x === opts.x && cur.y === opts.y) {
+    var sameById = (cur && cur.id != null && opts.id != null && cur.id === opts.id);
+    if (cur && (sameById || (cur.name === (opts.name || '') && cur.x === opts.x && cur.y === opts.y))) {
       clearNav();
       toast('已停止导航：' + (opts.name || '目标'));
       return 'stopped';
