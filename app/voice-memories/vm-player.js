@@ -8,7 +8,7 @@
  *      绝不被 progress.sav 覆盖清空；设置页「语音」Tab 内提供开关与导出。
  *   3. 实机跑图 20m 自动共鸣：通过 live.js 软钩子 feedPos() 触发，
  *      内置手机首次触摸音频解锁（Autoplay Unlock），跑图放桌上也能自动出声。
- *   4. 三级音频回退：本地 voice-memories/audio/ → 线上导航站 CDN → 系统 TTS 兜底，
+ *   4. 两级音频回退：本地 voice-memories/audio/ → 线上导航站 CDN（绝不回退机械系统 TTS），
  *      手机局域网映射无需在离线包里塞大音频也能直接流式听全套角色配音。
  *   5. 与 VoiceNav 无缝互斥：播放剧情时自动暂停导航播报，播完恢复。
  * ============================================================================ */
@@ -37,15 +37,15 @@
   var ROLE_META = {
     rauru: {
       zh: '劳鲁', en: 'Rauru', layer: 20, layerZh: '天空', layerEn: 'Sky',
-      icon: '🌀', pitch: 0.86, rate: 0.96
+      icon: '🌀'
     },
     zelda: {
       zh: '塞尔达公主', en: 'Princess Zelda', layer: 18, layerZh: '地上', layerEn: 'Surface',
-      icon: '✦', pitch: 1.16, rate: 0.98
+      icon: '✦'
     },
     kohga: {
       zh: '可盖大人', en: 'Master Kohga', layer: 19, layerZh: '地下', layerEn: 'Depths',
-      icon: '🎭', pitch: 1.02, rate: 1.08
+      icon: '🎭'
     }
   };
 
@@ -135,7 +135,7 @@
     return b;
   }
 
-  /* 三级音频回退链：自定义/本地 (.webm -> .mp3) -> 线上导航站 (.webm) -> 系统 TTS */
+  /* 两级音频回退链：自定义/本地 (.webm -> .mp3) -> 线上导航站 (.webm)，不回退系统机械 TTS */
   function getAudioUrls(item) {
     var urls = [];
     var customBase = normBase(cfg.audioBase || (typeof window !== 'undefined' && window.TOTK_VM_AUDIO_BASE) || '');
@@ -214,7 +214,7 @@
     }
   }
 
-  /* ---------------- 三级音频播放（本地 / 线上 / TTS 兜底） ---------------- */
+  /* ---------------- 角色音频播放（本地 / 线上，不回退系统 TTS） ---------------- */
   function stopPlayback() {
     playGen++;
     isPlayingNow = false;
@@ -227,51 +227,8 @@
       } catch (e) {}
       currentAudio = null;
     }
-    if (typeof window !== 'undefined' && window.speechSynthesis) {
-      try { window.speechSynthesis.cancel(); } catch (e) {}
-    }
     setVoiceNavPaused(false);
     updateCardPlayState(tr('点击播放', 'Ready'));
-  }
-
-  function speakFallbackTTS(item) {
-    if (typeof window === 'undefined' || !window.speechSynthesis || typeof window.SpeechSynthesisUtterance !== 'function') {
-      isPlayingNow = false;
-      setVoiceNavPaused(false);
-      updateCardPlayState(tr('音频不可用', 'Audio unavailable'));
-      return;
-    }
-    try { window.speechSynthesis.cancel(); } catch (e) {}
-    var useZh = !isEn() && !!item.transcript_zh;
-    var text = useZh ? item.transcript_zh : (item.transcript_en || item.title_en);
-    var u = new SpeechSynthesisUtterance(text);
-    var role = ROLE_META[item.narrator] || ROLE_META.zelda;
-    u.lang = useZh ? 'zh-CN' : 'en-US';
-    u.pitch = role.pitch;
-    u.rate = role.rate;
-    u.onstart = function () {
-      isPlayingNow = true;
-      updateCardPlayState(tr('系统语音朗读中', 'TTS reading'));
-    };
-    u.onend = function () {
-      isPlayingNow = false;
-      setVoiceNavPaused(false);
-      updateCardPlayState(tr('播放完毕', 'Finished'));
-    };
-    u.onerror = function () {
-      isPlayingNow = false;
-      setVoiceNavPaused(false);
-      updateCardPlayState(tr('已停止', 'Stopped'));
-    };
-    isPlayingNow = true;
-    setVoiceNavPaused(true);
-    updateCardPlayState(tr('系统语音朗读中…', 'TTS reading…'));
-    try {
-      window.speechSynthesis.speak(u);
-    } catch (e) {
-      isPlayingNow = false;
-      setVoiceNavPaused(false);
-    }
   }
 
   function playItem(item) {
@@ -287,7 +244,10 @@
     function tryPlayIdx(idx) {
       if (myGen !== playGen) return;
       if (idx >= urls.length) {
-        speakFallbackTTS(item);
+        currentAudio = null;
+        isPlayingNow = false;
+        setVoiceNavPaused(false);
+        updateCardPlayState(tr('语音加载失败（请检查网络）', 'Audio unavailable (check network)'));
         return;
       }
       var url = urls[idx];
