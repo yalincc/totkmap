@@ -701,22 +701,15 @@
     var st = document.createElement('style');
     st.id = 'totk-voice-nav-css';
     st.textContent =
-      '.vn-np-bar{display:flex;align-items:center;gap:6px;margin-top:6px;padding-top:6px;border-top:1px dashed rgba(255,255,255,.12);font-size:12px;color:#e8e6e0;}' +
-      '.vn-more-wrap{margin-top:6px;}' +
-      '.vn-more-wrap>summary{cursor:pointer;font-size:11.5px;color:#8a93a0;list-style:none;padding:4px 0;user-select:none;}' +
-      '.vn-more-wrap>summary::-webkit-details-marker{display:none;}' +
-      '.vn-more-wrap>summary::before{content:"▸ ";color:#eac27e;}' +
-      '.vn-more-wrap[open]>summary::before{content:"▾ ";}' +
-      '.vn-more-wrap>summary:hover{color:#eac27e;}' +
-      '.vn-more-wrap .vn-adv-freq-row{display:flex;align-items:center;gap:8px;margin-top:8px;}' +
+      '.vn-voice-section{margin-top:8px;padding-top:8px;border-top:1px solid rgba(234,194,126,.3);}' +
+      '.vn-voice-title{font-size:12px;font-weight:600;color:#eac27e;margin-bottom:6px;}' +
+      '.vn-np-bar{display:flex;align-items:center;gap:6px;font-size:12px;color:#e8e6e0;}' +
       '.vn-np-select{flex:1;min-width:0;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);color:#eac27e;border-radius:5px;padding:2px 4px;font-size:11.5px;outline:none;cursor:pointer;}' +
       '.vn-np-select option{background:#181b20;color:#e8ecf1;}' +
       '.vn-np-test{background:rgba(234,194,126,.16);border:1px solid rgba(234,194,126,.45);color:#eac27e;border-radius:5px;padding:2px 7px;font-size:11px;cursor:pointer;white-space:nowrap;transition:all .15s;}' +
       '.vn-np-test:hover{background:rgba(234,194,126,.3);color:#fff;}' +
       '.vn-set-row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:6px;}' +
-      '.vn-vol-wrap{display:flex;align-items:center;gap:6px;margin-top:6px;font-size:12px;color:#8a93a0;}' +
-      '.vn-vol-slider{flex:1;accent-color:#eac27e;cursor:pointer;height:4px;}' +
-      '.vn-vol-val{width:34px;text-align:right;font-family:monospace;color:#eac27e;font-size:11.5px;}' +
+      '.vn-adv-freq-row{display:flex;align-items:center;gap:8px;margin-top:8px;}' +
       '.vn-adv-row{display:flex;align-items:center;gap:6px;margin-top:7px;padding-top:6px;border-top:1px dashed rgba(255,255,255,.08);font-size:11.5px;color:#8a93a0;flex-wrap:wrap;}' +
       '.vn-adv-row.vn-adv-freq-row{border-top:none;margin-top:5px;padding-top:0;justify-content:space-between;}' +
       '.vn-adv-group{display:inline-flex;align-items:center;gap:4px;}' +
@@ -733,44 +726,27 @@
     if (!npBody || document.getElementById('vnNavBar')) return;
     var npActions = npBody.querySelector('.np-actions');
 
-    var bar = document.createElement('div');
-    bar.id = 'vnNavBar';
-    bar.className = 'vn-np-bar';
-    bar.innerHTML =
-      '<label class="np-chk" id="vnNpChkWrap" title="开启或关闭实时语音导航">' +
-        '<input type="checkbox" id="vnNpEnable"> ' +
-        '<span id="vnNpLabel">🔊 语音</span>' +
-      '</label>' +
-      '<select id="vnNpPack" class="vn-np-select" title="选择导航语音角色音色">' +
-        '<option value="zelda">塞尔达风</option>' +
-        '<option value="yujie">御姐领航员</option>' +
-        '<option value="chime">仅感应音</option>' +
-        '<option value="tts">系统语音</option>' +
-      '</select>' +
-      '<button type="button" id="vnNpTest" class="vn-np-test" title="试听当前语音">▶ 试听</button>';
-
-    if (npActions) {
-      npBody.insertBefore(bar, npActions);
-    } else {
-      npBody.appendChild(bar);
-    }
-
-    // 「更多设置」折叠区（音量 / 播报频次 / 播报项），取代原设置弹窗的语音页
-    var more = document.createElement('details');
-    more.id = 'vnMoreWrap';
-    more.className = 'vn-more-wrap';
-    var sum = document.createElement('summary');
-    sum.id = 'vnMoreSummary';
-    sum.textContent = '更多设置（音量 / 频次 / 播报项）';
-    more.appendChild(sum);
-    var moreBody = document.createElement('div');
-    moreBody.id = 'vnMoreBody';
-    more.appendChild(moreBody);
-    if (npActions) {
-      npBody.insertBefore(more, npActions);
-    } else {
-      npBody.appendChild(more);
-    }
+    // 语音导航区：直接平铺在四按钮下方，顶部一条分割线分开「实时导航 / 语音导航」
+    var voiceSec = document.createElement('div');
+    voiceSec.id = 'vnVoiceSection';
+    voiceSec.className = 'vn-voice-section';
+    voiceSec.innerHTML =
+      '<div class="vn-voice-title" id="vnVoiceTitle">🔊 语音导航</div>' +
+      '<div class="vn-np-bar" id="vnNavBar">' +
+        '<label class="np-chk" id="vnNpChkWrap" title="开启或关闭实时语音导航">' +
+          '<input type="checkbox" id="vnNpEnable"> ' +
+          '<span id="vnNpLabel">语音</span>' +
+        '</label>' +
+        '<select id="vnNpPack" class="vn-np-select" title="选择导航语音角色音色">' +
+          '<option value="zelda">塞尔达风</option>' +
+          '<option value="yujie">御姐领航员</option>' +
+          '<option value="chime">仅感应音</option>' +
+          '<option value="tts">系统语音</option>' +
+        '</select>' +
+        '<button type="button" id="vnNpTest" class="vn-np-test" title="试听当前语音">▶ 试听</button>' +
+      '</div>' +
+      '<div id="vnMoreBody"></div>';
+    npBody.appendChild(voiceSec);
 
     var chk = document.getElementById('vnNpEnable');
     var sel = document.getElementById('vnNpPack');
@@ -791,7 +767,7 @@
     });
   }
 
-  function mountNavMoreUI() {
+  function mountNavVoiceUI() {
     if (typeof document === 'undefined') return;
     var host = document.getElementById('vnMoreBody');
     if (!host || document.getElementById('vnSettingsSec')) return;
@@ -800,12 +776,6 @@
     sec.id = 'vnSettingsSec';
     sec.innerHTML =
       '<div id="vnSetDetailWrap">' +
-        '<div class="vn-vol-wrap">' +
-          '<span id="vnVolLabel">音量</span>' +
-          '<input type="range" id="vnVolRange" class="vn-vol-slider" min="10" max="100" step="5" value="85">' +
-          '<span id="vnVolText" class="vn-vol-val">85%</span>' +
-          '<button type="button" id="vnSetTestBtn" class="vn-np-test">▶ 试听</button>' +
-        '</div>' +
         '<div class="vn-adv-freq-row">' +
           '<span id="vnFreqLbl" style="color:#8a93a0;font-size:11.5px;white-space:nowrap">播报频次</span>' +
           '<select id="vnFreqMode" class="vn-adv-sel" style="flex:0 0 auto" title="精简：100m 提醒，25m 到达，±30m 高低差&#10;标准：300m / 100m 提醒，35m 到达，±25m 高低差&#10;详细：500m / 300m / 100m 提醒，50m 到达，±20m 高低差">' +
@@ -823,22 +793,6 @@
       '</div>';
 
     host.appendChild(sec);
-
-    var volRange = document.getElementById('vnVolRange');
-    if (volRange) {
-      volRange.addEventListener('input', function () {
-        cfg.volume = parseInt(this.value, 10) || 80;
-        var vt = document.getElementById('vnVolText');
-        if (vt) vt.textContent = cfg.volume + '%';
-        if (currentAudio) currentAudio.volume = Math.max(0.05, Math.min(1, cfg.volume / 100));
-        saveCfg();
-      });
-    }
-
-    var testBtn = document.getElementById('vnSetTestBtn');
-    if (testBtn) {
-      testBtn.addEventListener('click', function () { testPlay(); });
-    }
 
     var pills = sec.querySelectorAll('#vnSetPills .set-pill');
     for (var j = 0; j < pills.length; j++) {
@@ -902,15 +856,15 @@
         opts[3].text = tr('voice.pack.tts', '系统语音', 'System TTS');
       }
     }
-    if (npLbl) npLbl.textContent = tr('voice.navLabel', '🔊 语音', '🔊 Voice');
+    if (npLbl) npLbl.textContent = tr('voice.navLabel', '语音', 'Voice');
     if (npTest) {
       npTest.textContent = tr('voice.testBtn', '▶ 试听', '▶ Test');
       npTest.setAttribute('title', tr('voice.testTip', '试听当前语音', 'Test current voice pack'));
     }
 
     // 2. 同步导航面板「更多设置」折叠区（音量 / 频次 / 播报项）
-    var moreSum = document.getElementById('vnMoreSummary');
-    if (moreSum) moreSum.textContent = tr('voice.moreTitle', '更多设置（音量 / 频次 / 播报项）', 'More (Volume / Frequency / Alerts)');
+    var voiceTitle = document.getElementById('vnVoiceTitle');
+    if (voiceTitle) voiceTitle.textContent = tr('voice.sectionTitle', '🔊 语音导航', '🔊 Voice Navigation');
 
     var detailWrap = document.getElementById('vnSetDetailWrap');
     if (detailWrap) {
@@ -918,14 +872,8 @@
       detailWrap.style.pointerEvents = cfg.enabled ? '' : 'none';
     }
 
-    var volLbl = document.getElementById('vnVolLabel');
-    var volRange = document.getElementById('vnVolRange');
-    var volText = document.getElementById('vnVolText');
-    var setTestBtn = document.getElementById('vnSetTestBtn');
-    if (volLbl) volLbl.textContent = tr('voice.volume', '音量', 'Vol');
-    if (volRange) volRange.value = String(cfg.volume || 85);
-    if (volText) volText.textContent = (cfg.volume || 85) + '%';
-    if (setTestBtn) setTestBtn.textContent = tr('voice.testBtn', '▶ 试听', '▶ Test');
+    var vnTestBtn = document.getElementById('vnNpTest');
+    if (vnTestBtn) vnTestBtn.textContent = tr('voice.testBtn', '▶ 试听', '▶ Test');
 
     var pillDir = document.getElementById('vnPillDir');
     var pillAlt = document.getElementById('vnPillAlt');
@@ -1047,7 +995,7 @@
     if (typeof document !== 'undefined') {
       injectStyles();
       mountNavPanelUI();
-      mountNavMoreUI();
+      mountNavVoiceUI();
       syncUI();
       bindAutoplayUnlock();
 

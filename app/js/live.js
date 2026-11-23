@@ -1014,6 +1014,15 @@
       var h = panel.classList.contains('hidden');
       panel.classList.toggle('hidden', !h);
       btn.classList.toggle('active', h);
+      // 三底栏入口互斥：打开导航时收起声之记忆面板/剧情卡与显示设置
+      if (h) {
+        var vmModal = $('vmSettingsModal');
+        if (vmModal) vmModal.classList.add('hidden');
+        var setModal = $('settingsModal');
+        if (setModal) setModal.classList.add('hidden');
+        var vmCard = $('vmCard');
+        if (vmCard) vmCard.classList.add('vm-hidden');
+      }
     });
 
     /* V2.4.0 手机镜像面板按钮 */

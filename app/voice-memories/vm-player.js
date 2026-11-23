@@ -571,7 +571,7 @@
           '</div>' +
         '</div>' +
         '<div class="vm-set-row" style="margin-top:9px;justify-content:flex-start;gap:8px;flex-wrap:nowrap">' +
-          '<span id="vmSetLangLbl" style="color:#8a93a0;font-size:11.5px;white-space:nowrap">配音</span>' +
+          '<span id="vmSetLangLbl" style="color:#8a93a0;font-size:11.5px;white-space:nowrap">角色配音</span>' +
           '<div class="set-opts" id="vmLangBtns" style="margin-top:0;gap:5px;flex-wrap:nowrap">' +
             '<button type="button" class="set-opt" data-lang="ja" id="vmLangJa" style="padding:2px 8px;font-size:11px;white-space:nowrap;flex:0 0 auto">日文原声</button>' +
             '<button type="button" class="set-opt" data-lang="zh" id="vmLangZh" style="padding:2px 8px;font-size:11px;white-space:nowrap;flex:0 0 auto">中文</button>' +
@@ -643,14 +643,11 @@
     var done = getDoneCount();
     if (ui.bottomBtn) {
       // 底栏按钮 = 打开/关闭声之记忆独立设置面板（关闭状态也能进来重新开启）
-      var enabled = !!cfg.autoTrigger;
-      var setOpen = !!(ui.settingsModal && !ui.settingsModal.classList.contains('hidden'));
-      ui.bottomBtn.classList.toggle('vm-on', enabled && !!cfg.layerVisible);
-      ui.bottomBtn.classList.toggle('vm-set-open', setOpen);
-      // 面板打开或已启用时高亮（金色），关闭且无标点时弱化但可点
-      var gold = '#eac27e';
-      ui.bottomBtn.style.color = (setOpen || (enabled && cfg.layerVisible)) ? gold : '';
-      ui.bottomBtn.style.borderColor = setOpen ? gold : '';
+      // 高亮只反映功能启用状态：关闭时一律不高亮（即使面板正打开）
+      var on = !!(cfg.autoTrigger && cfg.layerVisible);
+      ui.bottomBtn.classList.toggle('vm-on', on);
+      ui.bottomBtn.style.color = on ? '#eac27e' : '';
+      ui.bottomBtn.style.borderColor = '';
       ui.bottomBtn.textContent = en ? '🎙 Memories' : '🎙 声之记忆';
       ui.bottomBtn.title = en
         ? 'Open Voice Memories settings (' + done + '/' + DATA.length + ' heard)'
@@ -678,7 +675,7 @@
         rbs[i].classList.toggle('active', on);
         rbs[i].classList.toggle('on', on);
       }
-      ui.settingsSec.querySelector('#vmSetLangLbl').textContent = en ? 'Voice' : '配音';
+      ui.settingsSec.querySelector('#vmSetLangLbl').textContent = en ? 'Character Voice' : '角色配音';
       ui.settingsSec.querySelector('#vmLangJa').textContent = en ? 'Japanese' : '日文原声';
       ui.settingsSec.querySelector('#vmLangZh').textContent = en ? 'Chinese' : '中文';
       ui.settingsSec.querySelector('#vmSetLayerLbl').textContent = en ? 'Map pins' : '地图标点';
@@ -721,9 +718,13 @@
     var willOpen = (typeof forceOpen === 'boolean') ? forceOpen : modal.classList.contains('hidden');
     modal.classList.toggle('hidden', !willOpen);
     if (willOpen) {
-      // 与其他浮层互斥：先收起显示设置面板
+      // 三底栏入口互斥：开声之记忆面板时收起导航面板、显示设置面板与声之记忆剧情卡
       var setModal = document.getElementById('settingsModal');
       if (setModal) setModal.classList.add('hidden');
+      var navPanel = document.getElementById('navPanel');
+      if (navPanel) navPanel.classList.add('hidden');
+      var navBtn = document.getElementById('navBtn');
+      if (navBtn) navBtn.classList.remove('active');
       if (!ui.settingsPositioned) { anchorSettingsModal(); ui.settingsPositioned = true; }
       if (ui.card) ui.card.classList.add('vm-hidden');
       syncUI();
@@ -783,10 +784,16 @@
       });
       initSettingsDrag();
     }
-    // 打开显示设置面板时，先收起声之记忆设置面板（互斥）
+    // 打开显示设置面板时，先收起声之记忆面板与导航面板（三入口互斥）
     var setBtn = document.getElementById('settingsBtn');
     if (setBtn) {
-      setBtn.addEventListener('click', function () { toggleSettingsPanel(false); });
+      setBtn.addEventListener('click', function () {
+        toggleSettingsPanel(false);
+        var navPanel = document.getElementById('navPanel');
+        if (navPanel) navPanel.classList.add('hidden');
+        var navBtn = document.getElementById('navBtn');
+        if (navBtn) navBtn.classList.remove('active');
+      });
     }
 
     // 2. 创建极简剧情卡容器
