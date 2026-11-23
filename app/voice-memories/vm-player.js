@@ -558,7 +558,7 @@
       '<div class="set-sec-head">' +
         '<span id="vmSetTitle">声之记忆</span>' +
         '<label class="set-switch" id="vmSetAutoToggleWrap" title="Enable Voice Memories"><input type="checkbox" id="vmSetAutoToggle"><i></i></label>' +
-        '<button type="button" class="set-link-btn" id="vmSetExportBtn" style="margin-left:auto;font-size:11.5px">导出记录</button>' +
+        '<button type="button" class="set-link-btn" id="vmSetExportBtn" style="font-size:11.5px">导出记录</button>' +
       '</div>' +
       '<div class="set-sec-desc" id="vmSetHint">实机跑图走近记忆点时自动弹卡并播放角色独白</div>' +
       '<div id="vmSetDetailWrap">' +
