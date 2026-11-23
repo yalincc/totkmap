@@ -245,6 +245,8 @@ window.TOTK_I18N.en = {
 
   // Bottom Bar
   "bar.addPin": "+ Pin",
+  "bar.vm": "🎙 Memories",
+  "bar.vmTip": "Open Voice Memories settings",
   "bar.nav": "🧭 Live",
   "bar.settings": "⚙ Settings",
 
@@ -295,6 +297,7 @@ window.TOTK_I18N.en = {
   "settings.language": "Language",
   "settings.langZh": "中文",
   "settings.langEn": "English",
+  "vmSettings.title": "Voice Memories Settings",
 
   // Completed Marker Pill Buttons
   "pill.shrine": "Shrines",

@@ -60,7 +60,9 @@
   var ui = {
     bottomBtn: null,
     card: null,
-    settingsSec: null
+    settingsSec: null,
+    settingsModal: null,
+    settingsPositioned: false
   };
 
   var mapLayer = null;
@@ -544,19 +546,18 @@
     } catch (e) {}
   }
 
-  /* ---------------- 设置面板（语音 Tab）挂载 ---------------- */
+  /* ---------------- 独立设置面板（底栏🎙按钮打开）挂载 ---------------- */
   function mountSettingsUI() {
     if (typeof document === 'undefined' || document.getElementById('vmSettingsSec')) return;
-    var host = document.getElementById('setTabVoice') || document.getElementById('settingsModal');
+    var host = document.getElementById('vmSettingsBody');
     if (!host) return;
     var sec = document.createElement('div');
     sec.id = 'vmSettingsSec';
     sec.className = 'set-sec';
     sec.innerHTML =
-      '<div class="set-divider" style="margin-top:12px;margin-bottom:10px"></div>' +
       '<div class="set-sec-head">' +
         '<span id="vmSetTitle">声之记忆</span>' +
-        '<label class="set-switch" title="开启或关闭跑图自动共鸣播报"><input type="checkbox" id="vmSetAutoToggle"><i></i></label>' +
+        '<label class="set-switch" id="vmSetAutoToggleWrap" title="Enable Voice Memories"><input type="checkbox" id="vmSetAutoToggle"><i></i></label>' +
         '<button type="button" class="set-link-btn" id="vmSetExportBtn" style="margin-left:auto;font-size:11.5px">导出记录</button>' +
       '</div>' +
       '<div class="set-sec-desc" id="vmSetHint">实机跑图走近记忆点时自动弹卡并播放角色独白</div>' +
@@ -576,6 +577,10 @@
             '<button type="button" class="set-opt" data-lang="zh" id="vmLangZh" style="padding:2px 8px;font-size:11px;white-space:nowrap;flex:0 0 auto">中文</button>' +
           '</div>' +
         '</div>' +
+        '<div class="vm-set-row" style="margin-top:9px;justify-content:flex-start;gap:8px;flex-wrap:nowrap">' +
+          '<span id="vmSetLayerLbl" style="color:#8a93a0;font-size:11.5px;white-space:nowrap">地图标点</span>' +
+          '<label class="set-switch" id="vmSetLayerWrap"><input type="checkbox" id="vmSetLayerToggle"><i></i></label>' +
+        '</div>' +
         '<div class="vm-set-row" style="margin-top:9px;justify-content:flex-start;gap:10px;flex-wrap:nowrap">' +
           '<span id="vmSetProg" style="white-space:nowrap">已听 <span class="vm-set-cnt">0/240</span></span>' +
           '<button type="button" class="set-pill" id="vmSetHideDoneBtn" style="white-space:nowrap">隐藏已听</button>' +
@@ -590,6 +595,10 @@
       saveJson(LS_CFG, cfg);
       if (!cfg.autoTrigger) closeCard();
       renderMapLayer();
+      syncUI();
+    });
+    sec.querySelector('#vmSetLayerToggle').addEventListener('change', function () {
+      setLayerVisible(!!this.checked, false);
       syncUI();
     });
     var rangeBtns = sec.querySelectorAll('#vmRangeBtns .set-opt');
@@ -633,17 +642,19 @@
     var en = isEn();
     var done = getDoneCount();
     if (ui.bottomBtn) {
+      // 底栏按钮 = 打开/关闭声之记忆独立设置面板（关闭状态也能进来重新开启）
       var enabled = !!cfg.autoTrigger;
-      ui.bottomBtn.disabled = !enabled;
-      ui.bottomBtn.style.opacity = enabled ? '' : '0.42';
-      ui.bottomBtn.style.cursor = enabled ? '' : 'not-allowed';
+      var setOpen = !!(ui.settingsModal && !ui.settingsModal.classList.contains('hidden'));
       ui.bottomBtn.classList.toggle('vm-on', enabled && !!cfg.layerVisible);
+      ui.bottomBtn.classList.toggle('vm-set-open', setOpen);
+      // 面板打开或已启用时高亮（金色），关闭且无标点时弱化但可点
+      var gold = '#eac27e';
+      ui.bottomBtn.style.color = (setOpen || (enabled && cfg.layerVisible)) ? gold : '';
+      ui.bottomBtn.style.borderColor = setOpen ? gold : '';
       ui.bottomBtn.textContent = en ? '🎙 Memories' : '🎙 声之记忆';
-      ui.bottomBtn.title = !enabled
-        ? (en ? 'Voice Memories disabled (re-enable in Settings → Voice)' : '声之记忆已关闭（可在「设置 → 语音」重新开启）')
-        : (en
-          ? 'Toggle Voice Memories on map (' + done + '/' + DATA.length + ')'
-          : '显示/隐藏声之记忆标点（已听 ' + done + '/' + DATA.length + '）');
+      ui.bottomBtn.title = en
+        ? 'Open Voice Memories settings (' + done + '/' + DATA.length + ' heard)'
+        : ('打开声之记忆设置（已听 ' + done + '/' + DATA.length + '）');
     }
     if (ui.settingsSec) {
       ui.settingsSec.querySelector('#vmSetTitle').textContent = en ? 'Voice Memories' : '声之记忆';
@@ -670,6 +681,10 @@
       ui.settingsSec.querySelector('#vmSetLangLbl').textContent = en ? 'Voice' : '配音';
       ui.settingsSec.querySelector('#vmLangJa').textContent = en ? 'Japanese' : '日文原声';
       ui.settingsSec.querySelector('#vmLangZh').textContent = en ? 'Chinese' : '中文';
+      ui.settingsSec.querySelector('#vmSetLayerLbl').textContent = en ? 'Map pins' : '地图标点';
+      ui.settingsSec.querySelector('#vmSetLayerToggle').checked = !!cfg.layerVisible;
+      var layerWrap = ui.settingsSec.querySelector('#vmSetLayerWrap');
+      if (layerWrap) layerWrap.title = en ? 'Show/hide Voice Memories pins on map' : '显示/隐藏地图上的声之记忆标点';
       var curL = getVoiceLang();
       var lbs = ui.settingsSec.querySelectorAll('#vmLangBtns .set-opt');
       for (var li = 0; li < lbs.length; li++) {
@@ -687,16 +702,91 @@
     }
   }
 
+  /* ---------------- 独立设置面板：开关 / 锚定 / 拖动 ---------------- */
+  function anchorSettingsModal() {
+    var modal = ui.settingsModal, btn = ui.bottomBtn;
+    if (!modal || !btn) return;
+    var r = btn.getBoundingClientRect();
+    var w = modal.offsetWidth || 320;
+    var left = Math.max(8, Math.min(r.left, window.innerWidth - w - 8));
+    var h = modal.offsetHeight || 240;
+    var top = Math.max(12, r.top - h - 8);
+    modal.style.left = left + 'px';
+    modal.style.top = top + 'px';
+  }
+
+  function toggleSettingsPanel(forceOpen) {
+    var modal = ui.settingsModal;
+    if (!modal) return;
+    var willOpen = (typeof forceOpen === 'boolean') ? forceOpen : modal.classList.contains('hidden');
+    modal.classList.toggle('hidden', !willOpen);
+    if (willOpen) {
+      // 与其他浮层互斥：先收起显示设置面板
+      var setModal = document.getElementById('settingsModal');
+      if (setModal) setModal.classList.add('hidden');
+      if (!ui.settingsPositioned) { anchorSettingsModal(); ui.settingsPositioned = true; }
+      if (ui.card) ui.card.classList.add('vm-hidden');
+      syncUI();
+    }
+  }
+
+  function initSettingsDrag() {
+    var head = document.getElementById('vmSetHead');
+    var modal = ui.settingsModal;
+    if (!head || !modal) return;
+    var dragging = false, sx = 0, sy = 0, ox = 0, oy = 0;
+    function down(e) {
+      if (e.target.closest && e.target.closest('.detail-close')) return;
+      dragging = true;
+      sx = e.clientX; sy = e.clientY;
+      ox = parseFloat(modal.style.left) || modal.getBoundingClientRect().left;
+      oy = parseFloat(modal.style.top) || modal.getBoundingClientRect().top;
+      if (e.preventDefault) e.preventDefault();
+    }
+    function move(e) {
+      if (!dragging) return;
+      var w = modal.offsetWidth, h = modal.offsetHeight;
+      var nx = Math.max(4, Math.min(ox + e.clientX - sx, window.innerWidth - w - 4));
+      var ny = Math.max(4, Math.min(oy + e.clientY - sy, window.innerHeight - h - 4));
+      modal.style.left = nx + 'px'; modal.style.top = ny + 'px';
+    }
+    function up() { dragging = false; }
+    head.addEventListener('mousedown', down);
+    document.addEventListener('mousemove', move);
+    document.addEventListener('mouseup', up);
+    head.addEventListener('touchstart', function (e) { if (e.touches && e.touches[0]) down(e.touches[0]); }, { passive: true });
+    document.addEventListener('touchmove', function (e) { if (e.touches && e.touches[0]) move(e.touches[0]); }, { passive: true });
+    document.addEventListener('touchend', up);
+  }
+
   function mountUI() {
     if (typeof document === 'undefined' || ui.card) return;
 
-    // 1. 绑定底栏「🎙 声之记忆」按钮
+    // 1. 绑定底栏「🎙 声之记忆」按钮 → 打开/关闭独立设置面板
     ui.bottomBtn = document.getElementById('vmBottomBtn');
+    ui.settingsModal = document.getElementById('vmSettingsModal');
     if (ui.bottomBtn) {
-      ui.bottomBtn.onclick = function () {
-        if (!cfg.autoTrigger) return;
-        setLayerVisible(!cfg.layerVisible, true);
+      ui.bottomBtn.onclick = function (e) {
+        if (e && e.stopPropagation) e.stopPropagation();
+        toggleSettingsPanel();
       };
+    }
+    if (ui.settingsModal) {
+      var closeBtn = document.getElementById('vmSetClose');
+      if (closeBtn) closeBtn.addEventListener('click', function () { toggleSettingsPanel(false); });
+      // 点面板外关闭（排除底栏按钮自身）
+      document.addEventListener('click', function (e) {
+        if (!ui.settingsModal || ui.settingsModal.classList.contains('hidden')) return;
+        if (ui.settingsModal.contains(e.target)) return;
+        if (ui.bottomBtn && (e.target === ui.bottomBtn || ui.bottomBtn.contains(e.target))) return;
+        toggleSettingsPanel(false);
+      });
+      initSettingsDrag();
+    }
+    // 打开显示设置面板时，先收起声之记忆设置面板（互斥）
+    var setBtn = document.getElementById('settingsBtn');
+    if (setBtn) {
+      setBtn.addEventListener('click', function () { toggleSettingsPanel(false); });
     }
 
     // 2. 创建极简剧情卡容器

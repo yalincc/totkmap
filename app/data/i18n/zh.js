@@ -245,6 +245,8 @@ window.TOTK_I18N.zh = {
 
   // 底部工具条
   "bar.addPin": "+ 新增标点",
+  "bar.vm": "🎙 声之记忆",
+  "bar.vmTip": "打开声之记忆设置",
   "bar.nav": "🧭 导航",
   "bar.settings": "⚙ 设置",
 
@@ -297,6 +299,7 @@ window.TOTK_I18N.zh = {
   "settings.language": "界面语言",
   "settings.langZh": "中文",
   "settings.langEn": "English",
+  "vmSettings.title": "声之记忆设置",
 
   // 完成标记 9 大分类胶囊
   "pill.shrine": "神庙",

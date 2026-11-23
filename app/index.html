@@ -247,25 +247,20 @@
 
 <!-- ============ 底部工具条 ============ -->
 <div class="bottom-bar">
-  <button id="vmBottomBtn" class="bar-btn" title="显示/隐藏声之记忆标点">🎙 声之记忆</button>
+  <button id="vmBottomBtn" class="bar-btn" data-i18n="bar.vm" data-i18n-title="bar.vmTip" title="Open Voice Memories settings">🎙 声之记忆</button>
   <button id="navBtn" data-i18n-title="bar.navTip" class="bar-btn" title="实时定位导航（需本地 TOTKNavi 服务）" data-i18n="bar.nav">🧭 导航</button>
   <button id="settingsBtn" data-i18n-title="bar.settingsTip" class="bar-btn" title="显示设置（图标大小 / 定位点样式 / 完成标记）" data-i18n="bar.settings">⚙ 设置</button>
 </div>
 
-<!-- ============ 显示设置面板（3 Tab 极简分组：显示 / 定位 / 语音） ============ -->
+<!-- ============ 显示设置面板（单页：语言 / 标点大小 / 完成标记 / 移动轨迹） ============ -->
+<!-- 语音类设置已拆出：声之记忆 → 底栏🎙按钮；导航语音 → 🧭导航面板「更多设置」 -->
 <div id="settingsModal" class="set-pop hidden">
   <div class="card-head" id="setHead">
     <span class="chip" data-i18n="settings.title">显示设置</span>
     <button id="setClose" data-i18n-title="settings.closeDragTip" class="detail-close" title="关闭（可按住标题栏拖动）">×</button>
   </div>
-  <div class="set-tabs" id="setTabBar">
-    <button type="button" class="set-tab active" data-tab="display" id="setTabBtnDisplay">显示</button>
-    <button type="button" class="set-tab" data-tab="nav" id="setTabBtnNav">定位</button>
-    <button type="button" class="set-tab" data-tab="voice" id="setTabBtnVoice">语音</button>
-  </div>
 
-  <!-- Tab 1：显示（语言 / 标点大小 / 完成标记） -->
-  <div class="set-tab-pane" id="setTabDisplay" data-pane="display">
+  <div id="setTabDisplay">
     <div class="set-sec">
       <div class="set-sec-title" data-i18n="settings.language">界面语言</div>
       <div class="set-opts" id="setLangBtns">
@@ -336,19 +331,6 @@
         </div>
       </div>
     </div>
-  </div>
-
-  <!-- Tab 2：定位（定位红点 / 移动轨迹） -->
-  <div class="set-tab-pane hidden" id="setTabNav" data-pane="nav">
-    <div class="set-sec">
-      <div class="set-sec-title"><span data-i18n="settings.markerStyle">定位标记</span> <span class="set-title-hint" data-i18n="settings.markerStyleHint">（大小 16-40 · 透明度 30-100%）</span></div>
-      <div class="set-inline3">
-        <input type="number" id="setDotSize" data-i18n-title="settings.dotSizeTip" min="16" max="40" step="2" value="24" title="大小"> <i>px</i>
-        <input type="color" id="setDotColorPick" data-i18n-title="settings.dotColorPickTip" value="#ff3b3b" title="颜色">
-        <input type="text" id="setDotColorHex" data-i18n-title="settings.dotColorHexTip" value="#ff3b3b" maxlength="7" spellcheck="false" title="颜色hex">
-        <input type="number" id="setDotAlpha" data-i18n-title="settings.dotAlphaTip" min="30" max="100" step="5" value="70" title="透明度"> <i>%</i>
-      </div>
-    </div>
 
     <div class="set-sec">
       <div class="set-sec-title"><span data-i18n="settings.trail">移动轨迹</span> <span class="set-title-hint" data-i18n="settings.trailHint">（玩家走过的路线，仅本次会话记录）</span></div>
@@ -360,40 +342,20 @@
     </div>
   </div>
 
-  <!-- Tab 3：语音（由 voice-nav.js 与 vm-player.js 自动挂载） -->
-  <div class="set-tab-pane hidden" id="setTabVoice" data-pane="voice"></div>
-
   <div class="set-actions">
     <button id="setReset" class="set-ghost" data-i18n="settings.reset">重置默认</button>
   </div>
 </div>
-<script>
-(function () {
-  var bar = document.getElementById('setTabBar');
-  if (!bar) return;
-  function syncTabLang() {
-    var en = window.I18N && typeof window.I18N.getLang === 'function' && window.I18N.getLang() === 'en';
-    var d = document.getElementById('setTabBtnDisplay');
-    var n = document.getElementById('setTabBtnNav');
-    var v = document.getElementById('setTabBtnVoice');
-    if (d) d.textContent = en ? 'Display' : '显示';
-    if (n) n.textContent = en ? 'Location' : '定位';
-    if (v) v.textContent = en ? 'Voice' : '语音';
-  }
-  bar.addEventListener('click', function (e) {
-    var btn = e.target.closest('.set-tab');
-    if (!btn) return;
-    var tab = btn.getAttribute('data-tab');
-    bar.querySelectorAll('.set-tab').forEach(function (b) { b.classList.toggle('active', b === btn); });
-    document.querySelectorAll('#settingsModal .set-tab-pane').forEach(function (p) {
-      p.classList.toggle('hidden', p.getAttribute('data-pane') !== tab);
-    });
-  });
-  var lb = document.getElementById('setLangBtns');
-  if (lb) lb.addEventListener('click', function () { setTimeout(syncTabLang, 50); });
-  window.addEventListener('DOMContentLoaded', syncTabLang);
-})();
-</script>
+
+<!-- ============ 声之记忆独立设置面板（底栏🎙按钮打开，与显示设置同款样式） ============ -->
+<div id="vmSettingsModal" class="set-pop hidden">
+  <div class="card-head" id="vmSetHead">
+    <span class="chip" data-i18n="vmSettings.title">声之记忆设置</span>
+    <button id="vmSetClose" data-i18n-title="settings.closeDragTip" class="detail-close" title="关闭（可按住标题栏拖动）">×</button>
+  </div>
+  <div id="vmSettingsBody"></div>
+</div>
+
 <style id="settings-css">
   /* V2.5.0 v4：设置卡片（detail-card 同款），位置由 JS 锚定到「设置」按钮上方，标题栏可拖动 */
   #settingsModal.set-pop {
@@ -404,6 +366,15 @@
     padding: 12px 14px; font-size: 13px;
   }
   #settingsModal .card-head { margin-bottom: 0; }
+  /* 声之记忆独立面板：与设置卡片同款，位置由 vm-player.js 锚定到🎙按钮上方 */
+  #vmSettingsModal.set-pop {
+    position: fixed; z-index: 500; width: 320px; box-sizing: border-box;
+    max-height: calc(100vh - 70px); overflow-y: auto;
+    background: rgba(20,22,26,.97); border: 1px solid rgba(255,255,255,.13);
+    border-radius: 12px; box-shadow: 0 10px 34px rgba(0,0,0,.55);
+    padding: 12px 14px; font-size: 13px;
+  }
+  #vmSettingsModal .card-head { margin-bottom: 0; }
   .set-tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; margin: 9px 0 8px; padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,.10); }
   .set-tab { padding: 5px 0; border-radius: 7px; border: 1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.04); color: #94a3b8; font-size: 12px; font-weight: 600; cursor: pointer; transition: all .15s ease; }
   .set-tab:hover { color: #e2e8f0; }
@@ -586,7 +557,7 @@
   </h3>
   <div class="fb-body">
     <div class="fb-qr-wrap">
-      <img src="assets/qq-group-qr.jpg" alt="QQ 交流群二维码" class="fb-qr-img">
+      <img src="assets/qq-group-qr.jpg" alt="QQ group QR code" class="fb-qr-img">
     </div>
     <div class="fb-row">
       <span class="fb-label" data-i18n="feedback.qqLabel">QQ 交流群</span>
@@ -673,11 +644,11 @@
 <script src="js/card-layout.js?v=302"></script>
 <script src="js/totk-canvas-layer.js?v=300"></script>
 <script src="data/changelog.js?v=4"></script>
-<script src="js/app.js?v=322"></script>
-<script src="voice/voice-nav.js?v=10"></script>
+<script src="js/app.js?v=323"></script>
+<script src="voice/voice-nav.js?v=11"></script>
 <!-- 声之记忆（240 条）独立可插拔模块：独立文件夹与进度隔离，不进入左侧栏 -->
 <script src="voice-memories/vm-data.js?v=2"></script>
-<script src="voice-memories/vm-player.js?v=10"></script>
+<script src="voice-memories/vm-player.js?v=11"></script>
 <!-- 多点克洛格独立导航模块（搬运/飞圈圈/树桩/追小花），与单点导航解耦 -->
 <script src="js/korok-nav.js?v=291"></script>
 <script src="js/live.js?v=299"></script>

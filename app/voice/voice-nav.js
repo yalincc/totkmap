@@ -702,6 +702,13 @@
     st.id = 'totk-voice-nav-css';
     st.textContent =
       '.vn-np-bar{display:flex;align-items:center;gap:6px;margin-top:6px;padding-top:6px;border-top:1px dashed rgba(255,255,255,.12);font-size:12px;color:#e8e6e0;}' +
+      '.vn-more-wrap{margin-top:6px;}' +
+      '.vn-more-wrap>summary{cursor:pointer;font-size:11.5px;color:#8a93a0;list-style:none;padding:4px 0;user-select:none;}' +
+      '.vn-more-wrap>summary::-webkit-details-marker{display:none;}' +
+      '.vn-more-wrap>summary::before{content:"▸ ";color:#eac27e;}' +
+      '.vn-more-wrap[open]>summary::before{content:"▾ ";}' +
+      '.vn-more-wrap>summary:hover{color:#eac27e;}' +
+      '.vn-more-wrap .vn-adv-freq-row{display:flex;align-items:center;gap:8px;margin-top:8px;}' +
       '.vn-np-select{flex:1;min-width:0;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);color:#eac27e;border-radius:5px;padding:2px 4px;font-size:11.5px;outline:none;cursor:pointer;}' +
       '.vn-np-select option{background:#181b20;color:#e8ecf1;}' +
       '.vn-np-test{background:rgba(234,194,126,.16);border:1px solid rgba(234,194,126,.45);color:#eac27e;border-radius:5px;padding:2px 7px;font-size:11px;cursor:pointer;white-space:nowrap;transition:all .15s;}' +
@@ -716,9 +723,7 @@
       '.vn-adv-num{width:42px!important;height:22px!important;padding:1px 4px!important;font-size:11.5px!important;text-align:center;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);border-radius:5px;color:#eac27e;-moz-appearance:textfield;appearance:textfield;}' +
       '.vn-adv-num::-webkit-outer-spin-button,.vn-adv-num::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}' +
       '.vn-adv-sel{flex:1;max-width:168px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);border-radius:5px;color:#eac27e;font-size:11px;padding:2px 6px;outline:none;cursor:pointer;}' +
-      '.vn-adv-sel option{background:#181b20;color:#e8ecf1;}' +
-      '#vnSetPackBtns{display:flex;gap:6px;flex-wrap:nowrap;}' +
-      '#vnSetPackBtns .set-opt{padding:3px 10px;font-size:11.5px;text-align:center;white-space:nowrap;flex:0 0 auto;}';
+      '.vn-adv-sel option{background:#181b20;color:#e8ecf1;}';
     document.head.appendChild(st);
   }
 
@@ -750,6 +755,23 @@
       npBody.appendChild(bar);
     }
 
+    // 「更多设置」折叠区（音量 / 播报频次 / 播报项），取代原设置弹窗的语音页
+    var more = document.createElement('details');
+    more.id = 'vnMoreWrap';
+    more.className = 'vn-more-wrap';
+    var sum = document.createElement('summary');
+    sum.id = 'vnMoreSummary';
+    sum.textContent = '更多设置（音量 / 频次 / 播报项）';
+    more.appendChild(sum);
+    var moreBody = document.createElement('div');
+    moreBody.id = 'vnMoreBody';
+    more.appendChild(moreBody);
+    if (npActions) {
+      npBody.insertBefore(more, npActions);
+    } else {
+      npBody.appendChild(more);
+    }
+
     var chk = document.getElementById('vnNpEnable');
     var sel = document.getElementById('vnNpPack');
     var btn = document.getElementById('vnNpTest');
@@ -769,77 +791,38 @@
     });
   }
 
-  function mountSettingsModalUI() {
+  function mountNavMoreUI() {
     if (typeof document === 'undefined') return;
-    var modal = document.getElementById('settingsModal');
-    if (!modal || document.getElementById('vnSettingsSec')) return;
-    var trailBtns = document.getElementById('setTrailBtns');
-    var anchorSec = trailBtns ? trailBtns.parentNode : null;
+    var host = document.getElementById('vnMoreBody');
+    if (!host || document.getElementById('vnSettingsSec')) return;
 
     var sec = document.createElement('div');
     sec.id = 'vnSettingsSec';
-    sec.className = 'set-sec';
     sec.innerHTML =
-      '<div class="set-sec-head">' +
-        '<span id="vnSetTitle">语音导航</span>' +
-        '<label class="set-switch" title="开启或关闭语音导航"><input type="checkbox" id="vnSetToggle"><i></i></label>' +
-      '</div>' +
-      '<div class="set-sec-desc" id="vnSetHint">罗盘 8 方位语音指路（塞尔达 / 御姐离线语音）</div>' +
       '<div id="vnSetDetailWrap">' +
-        '<div style="display:flex;align-items:center;gap:6px;flex-wrap:nowrap">' +
-          '<span id="vnPackLbl" style="color:#8a93a0;font-size:11.5px;white-space:nowrap;flex-shrink:0">音色选择</span>' +
-          '<div class="set-opts" id="vnSetPackBtns" style="margin-top:0;gap:5px;flex-wrap:nowrap">' +
-            '<button type="button" class="set-opt" data-pack="zelda" id="vnBtnZelda" style="white-space:nowrap;padding:3px 8px;font-size:11.5px;flex:0 0 auto">塞尔达</button>' +
-            '<button type="button" class="set-opt" data-pack="yujie" id="vnBtnYujie" style="white-space:nowrap;padding:3px 8px;font-size:11.5px;flex:0 0 auto">御姐音</button>' +
-            '<button type="button" class="set-opt" data-pack="tts" id="vnBtnTts" style="white-space:nowrap;padding:3px 8px;font-size:11.5px;flex:0 0 auto">系统</button>' +
-          '</div>' +
+        '<div class="vn-vol-wrap">' +
+          '<span id="vnVolLabel">音量</span>' +
+          '<input type="range" id="vnVolRange" class="vn-vol-slider" min="10" max="100" step="5" value="85">' +
+          '<span id="vnVolText" class="vn-vol-val">85%</span>' +
+          '<button type="button" id="vnSetTestBtn" class="vn-np-test">▶ 试听</button>' +
         '</div>' +
-        '<div class="set-sub-types" style="margin-top:7px">' +
-          '<div class="vn-vol-wrap">' +
-            '<span id="vnVolLabel">音量</span>' +
-            '<input type="range" id="vnVolRange" class="vn-vol-slider" min="10" max="100" step="5" value="85">' +
-            '<span id="vnVolText" class="vn-vol-val">85%</span>' +
-            '<button type="button" id="vnSetTestBtn" class="vn-np-test">▶ 试听</button>' +
-          '</div>' +
-          '<div style="display:flex;align-items:center;justify-content:flex-start;gap:8px;margin-top:8px">' +
-            '<span id="vnFreqLbl" style="color:#8a93a0;font-size:11.5px;white-space:nowrap">播报频次</span>' +
-            '<select id="vnFreqMode" class="vn-adv-sel" style="flex:0 0 auto" title="精简：100m 提醒，25m 到达，±30m 高低差&#10;标准：300m / 100m 提醒，35m 到达，±25m 高低差&#10;详细：500m / 300m / 100m 提醒，50m 到达，±20m 高低差">' +
-              '<option value="compact">精简（100m）</option>' +
-              '<option value="standard">标准（300/100m）</option>' +
-              '<option value="dense">详细（500/300/100m）</option>' +
-            '</select>' +
-          '</div>' +
+        '<div class="vn-adv-freq-row">' +
+          '<span id="vnFreqLbl" style="color:#8a93a0;font-size:11.5px;white-space:nowrap">播报频次</span>' +
+          '<select id="vnFreqMode" class="vn-adv-sel" style="flex:0 0 auto" title="精简：100m 提醒，25m 到达，±30m 高低差&#10;标准：300m / 100m 提醒，35m 到达，±25m 高低差&#10;详细：500m / 300m / 100m 提醒，50m 到达，±20m 高低差">' +
+            '<option value="compact">精简（100m）</option>' +
+            '<option value="standard">标准（300/100m）</option>' +
+            '<option value="dense">详细（500/300/100m）</option>' +
+          '</select>' +
+        '</div>' +
+        '<div class="set-pills" id="vnSetPills" style="margin-top:8px">' +
+          '<button type="button" class="set-pill on" id="vnPillDir" data-k="dirDist">方向与距离</button>' +
+          '<button type="button" class="set-pill on" id="vnPillAlt" data-k="altLayer">高低差/跨层</button>' +
+          '<button type="button" class="set-pill on" id="vnPillOff" data-k="offCourse">偏航提醒</button>' +
+          '<button type="button" class="set-pill on" id="vnPillChime" data-k="chime">普尔亚雷达音</button>' +
         '</div>' +
       '</div>';
 
-    var voiceTabPane = document.getElementById('setTabVoice');
-    if (voiceTabPane) {
-      voiceTabPane.insertBefore(sec, voiceTabPane.firstChild);
-    } else if (anchorSec && anchorSec.nextSibling) {
-      modal.insertBefore(sec, anchorSec.nextSibling);
-    } else {
-      modal.appendChild(sec);
-    }
-
-    var toggleInp = document.getElementById('vnSetToggle');
-    if (toggleInp) {
-      toggleInp.addEventListener('change', function () {
-        ensureAudioCtx();
-        setEnabled(this.checked, true);
-      });
-    }
-
-    var packBtns = sec.querySelectorAll('#vnSetPackBtns .set-opt');
-    for (var i = 0; i < packBtns.length; i++) {
-      packBtns[i].addEventListener('click', function () {
-        ensureAudioCtx();
-        var p = this.getAttribute('data-pack');
-        cfg.enabled = true;
-        cfg.pack = p;
-        saveCfg();
-        testPlay();
-      });
-    }
+    host.appendChild(sec);
 
     var volRange = document.getElementById('vnVolRange');
     if (volRange) {
@@ -925,29 +908,9 @@
       npTest.setAttribute('title', tr('voice.testTip', '试听当前语音', 'Test current voice pack'));
     }
 
-    // 2. 同步 #settingsModal 设置弹窗控件
-    var setTitle = document.getElementById('vnSetTitle');
-    var setHint = document.getElementById('vnSetHint');
-    var setToggle = document.getElementById('vnSetToggle');
-    if (setTitle) setTitle.textContent = tr('voice.setTitle', '语音导航', 'Voice Navigation');
-    if (setHint) setHint.textContent = tr('voice.setHint', '罗盘 8 方位语音指路（塞尔达 / 御姐离线语音）', '8-Compass voice guidance (Zelda / Mature packs)');
-    if (setToggle) setToggle.checked = !!cfg.enabled;
-
-    var btnZelda = document.getElementById('vnBtnZelda');
-    var btnYujie = document.getElementById('vnBtnYujie');
-    var btnTts = document.getElementById('vnBtnTts');
-    if (btnZelda) btnZelda.textContent = tr('voice.pack.zeldaShort', '塞尔达', 'Zelda');
-    if (btnYujie) btnYujie.textContent = tr('voice.pack.yujieShort', '御姐音', 'Mature');
-    if (btnTts) btnTts.textContent = tr('voice.pack.ttsShort', '系统', 'TTS');
-
-    var packBtns = document.querySelectorAll('#vnSetPackBtns .set-opt');
-    var activePack = (cfg.pack === 'yujie' || cfg.pack === 'tts') ? cfg.pack : 'zelda';
-    for (var i = 0; i < packBtns.length; i++) {
-      var b = packBtns[i];
-      var match = b.getAttribute('data-pack') === activePack;
-      b.classList.toggle('active', match);
-      b.classList.toggle('on', match);
-    }
+    // 2. 同步导航面板「更多设置」折叠区（音量 / 频次 / 播报项）
+    var moreSum = document.getElementById('vnMoreSummary');
+    if (moreSum) moreSum.textContent = tr('voice.moreTitle', '更多设置（音量 / 频次 / 播报项）', 'More (Volume / Frequency / Alerts)');
 
     var detailWrap = document.getElementById('vnSetDetailWrap');
     if (detailWrap) {
@@ -1084,7 +1047,7 @@
     if (typeof document !== 'undefined') {
       injectStyles();
       mountNavPanelUI();
-      mountSettingsModalUI();
+      mountNavMoreUI();
       syncUI();
       bindAutoplayUnlock();
 
