@@ -366,9 +366,9 @@
     padding: 12px 14px; font-size: 13px;
   }
   #settingsModal .card-head { margin-bottom: 0; }
-  /* 声之记忆独立面板：与设置卡片同款，位置由 vm-player.js 锚定到🎙按钮上方 */
+  /* 声之记忆独立面板：比设置卡片窄，贴合内容（内容最长行约 225px + 左右 padding 28px） */
   #vmSettingsModal.set-pop {
-    position: fixed; z-index: 500; width: 320px; box-sizing: border-box;
+    position: fixed; z-index: 500; width: 256px; box-sizing: border-box;
     max-height: calc(100vh - 70px); overflow-y: auto;
     background: rgba(20,22,26,.97); border: 1px solid rgba(255,255,255,.13);
     border-radius: 12px; box-shadow: 0 10px 34px rgba(0,0,0,.55);
