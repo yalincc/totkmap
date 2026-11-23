@@ -926,7 +926,10 @@ html[lang="en"] .progress-section.collapsed .progress-more::after { content: 'Ex
 .panel.collapsed ~ .bottom-bar { left: 0; }
 .bar-btn {
   pointer-events: auto;
-  padding: 5px 14px;
+  min-width: 96px;
+  box-sizing: border-box;
+  text-align: center;
+  padding: 5px 10px;
   border-radius: 6px;
   border: 1px solid rgba(255,255,255,.16);
   background: rgba(26,30,36,.9);
@@ -1918,7 +1921,6 @@ html[lang="en"] .catalog-item span:nth-child(2) {
 }
 
 html[lang="en"] .bottom-bar .bar-btn {
-  padding: 8px 10px !important;
   font-size: 12px !important;
   letter-spacing: normal !important;
 }
