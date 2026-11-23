@@ -155,4 +155,7 @@ screen/
 # 声之记忆中间 MP3 不入库（正式 240 条 libopus .webm 共 ~10.4MB 随 Gitee/EdgeOne 自动部署）
 app/voice-memories/audio/*.mp3
 
+# 声之记忆原声试听/压缩调研的临时工作区（盲听页、调试脚本）不入库
+_vm_work/
+
 

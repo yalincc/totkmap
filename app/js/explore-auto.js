@@ -44,10 +44,14 @@
 
   function dist(m, p) {
     if (!m || !p) return Infinity;
-    var dx = p.mx - m.x, dy = p.my - m.y;
+    /* 多点克洛格统一向 KOROK_NAV 拿当前生效三维航点（未开始=起点，进行中=当前航点） */
+    var pt = (window.KOROK_NAV && typeof window.KOROK_NAV.resolvePoint === 'function')
+      ? window.KOROK_NAV.resolvePoint(m)
+      : { x: m.x, y: m.y, z: (m.z != null ? m.z : (m.altitude_y != null ? m.altitude_y : null)) };
+    var dx = p.mx - pt.x, dy = p.my - pt.y;
     var pz = p.gz != null ? p.gz : (p.z != null ? p.z : 0);
-    var mz = m.z != null ? m.z : (m.altitude_y != null ? m.altitude_y : 0);
-    var dz = pz - mz;
+    var mz = pt.z != null ? pt.z : 0;
+    var dz = (pt.z != null) ? (pz - mz) : 0;
     return Math.sqrt(dx * dx + dy * dy + dz * dz);
   }
 
@@ -174,7 +178,8 @@
       if (moved >= PIN_RELEASE) pinPos = null;
     }
     var d = dist(current, p);
-    if (!pinPos) {
+    var multiLocked = !!(window.KOROK_NAV && typeof window.KOROK_NAV.isLocked === 'function' && window.KOROK_NAV.isLocked());
+    if (!pinPos && !multiLocked) {
       var poolNow = poolForLayer(p.layer, current.cat);
       var best = nearest(poolNow, p);
       if (best && best.id !== current.id) {

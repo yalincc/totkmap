@@ -68,6 +68,8 @@
     carry: '与朋友见面', burn_ivy: '烧掉藤蔓 / 杂草', dandelion: '抓住蒲公英',
     flower: '追小花', pinwheel: '风车射靶', shoot: '射气球 / 橡果',
     lift_rock: '搬起石头', stone_circle: '补齐石头阵', block_puzzle: '方块拼图',
+    repair_roof: '修补屋顶', offering: '供奉水果', pull_plug: '拔出木塞',
+    tree_rock: '树杈放石头', chase_spark: '追移动光点', dive: '跳水入圈',
     ascend_plate: '通天术 / 叶子标记', break_pot: '打碎壶罐', race: '限时到达',
     other: '其他'
   };
@@ -3456,9 +3458,10 @@
       ? window.I18N.towerNoteOf(m.name, sec.note)
       : (sGuide && sGuide.note ? sGuide.note : sec.note);
 
-    /* 2026-11-12：特殊NPC等非神庙标点的 desc 通用上屏展示（如管家魔像显示「解锁蓝图功能」） */
+    /* 2026-11-12：特殊NPC等非神庙标点的 desc 通用上屏展示（如管家魔像显示「解锁蓝图功能」）
+     * 克洛格已在上方「解法」行（ecSolveRow）展示 m.desc，此处排除 isKorok 避免重复 */
     var isDescFallback = false;
-    if (!noteRaw && m.desc && m.desc.trim()) {
+    if (!isKorok && !noteRaw && m.desc && m.desc.trim()) {
       noteRaw = m.desc.trim();
       isDescFallback = true;
     }

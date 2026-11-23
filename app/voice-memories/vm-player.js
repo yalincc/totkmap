@@ -6,9 +6,10 @@
  *      点击标点直接弹出极简三角色单语剧情卡（中文只显中文，英文只显英文）。
  *   2. 存档安全隔离：已听进度独立存入 localStorage('totkmap.vm.done.v1')，
  *      绝不被 progress.sav 覆盖清空；设置页「语音」Tab 内提供开关与导出。
- *   3. 实机跑图 20m 自动共鸣：通过 live.js 软钩子 feedPos() 触发，
+ *   3. 实机跑图 35m 自动共鸣：通过 live.js 软钩子 feedPos() 触发，
  *      内置手机首次触摸音频解锁（Autoplay Unlock），跑图放桌上也能自动出声。
- *   4. 两级音频回退：本地 voice-memories/audio/ → 线上导航站 CDN（绝不回退机械系统 TTS），
+ *   4. 配音双语可选：日文原声（默认，audio-ja/）/ 中文（audio/），设置页「语音」Tab 切换；
+ *      两级音频回退：本地 → 线上导航站 CDN（绝不回退机械系统 TTS），
  *      手机局域网映射无需在离线包里塞大音频也能直接流式听全套角色配音。
  *   5. 与 VoiceNav 无缝互斥：播放剧情时自动暂停导航播报，播完恢复。
  * ============================================================================ */
@@ -23,7 +24,8 @@
 
   var LS_DONE = 'totkmap.vm.done.v1';
   var LS_CFG = 'totkmap.vm.cfg.v1';
-  var DEFAULT_ONLINE_AUDIO_BASE = 'https://totk.yalin.site/voice-memories/audio/';
+  var DEFAULT_ONLINE_ROOT = 'https://totk.yalin.site/voice-memories/';
+  var AUDIO_DIR = { ja: 'audio-ja/', zh: 'audio/' };
   var TRIGGER_COOLDOWN_MS = 18000;
 
   var DEFAULT_CFG = {
@@ -31,7 +33,8 @@
     autoTrigger: true,        // 实机跑图接近时自动共鸣播报
     triggerDist: 35,          // 触发半径：15(近/仿官方) | 35(中/推荐) | 60(远/路过即响)
     hideDonePins: false,      // 隐藏已听标点
-    audioBase: ''             // 可选自定义音频前缀（留空则自动本地 -> 线上站回退）
+    voiceLang: 'ja',          // 配音语言：'ja' 日文原声（默认）| 'zh' 中文
+    audioBase: ''             // 可选自定义音频前缀（指向 voice-memories/ 根，留空则自动本地 -> 线上站回退）
   };
 
   var ROLE_META = {
@@ -135,20 +138,30 @@
     return b;
   }
 
-  /* 两级音频回退链：自定义/本地 (.webm -> .mp3) -> 线上导航站 (.webm)，不回退系统机械 TTS */
+  function getVoiceLang() {
+    return cfg.voiceLang === 'zh' ? 'zh' : 'ja';
+  }
+
+  /* 两级音频回退链：自定义/本地 (.webm -> .mp3) -> 线上导航站 (.webm)，不回退系统机械 TTS
+   * 目录按配音语言切换：日文原声 audio-ja/ | 中文 audio/ */
   function getAudioUrls(item) {
     var urls = [];
+    var dir = AUDIO_DIR[getVoiceLang()];
     var customBase = normBase(cfg.audioBase || (typeof window !== 'undefined' && window.TOTK_VM_AUDIO_BASE) || '');
     if (customBase) {
-      urls.push(customBase + item.id + '.webm');
-      urls.push(customBase + item.id + '.mp3');
+      urls.push(customBase + dir + item.id + '.webm');
+      urls.push(customBase + dir + item.id + '.mp3');
     } else {
-      urls.push('voice-memories/audio/' + item.id + '.webm');
-      urls.push('voice-memories/audio/' + item.id + '.mp3');
-      // 局域网手机映射/精简离线包自动回退线上导航站音频
-      var onlineBase = normBase((typeof window !== 'undefined' && window.TOTK_VM_ONLINE_BASE) || DEFAULT_ONLINE_AUDIO_BASE);
-      if (onlineBase && typeof location !== 'undefined' && location.href.indexOf(onlineBase) < 0) {
-        urls.push(onlineBase + item.id + '.webm');
+      urls.push('voice-memories/' + dir + item.id + '.webm');
+      urls.push('voice-memories/' + dir + item.id + '.mp3');
+      // 局域网手机映射/精简离线包自动回退线上导航站音频（本身就在线上站时不重复请求）
+      var onlineRoot = normBase((typeof window !== 'undefined' && window.TOTK_VM_ONLINE_BASE) || DEFAULT_ONLINE_ROOT);
+      var onSameHost = false;
+      try {
+        onSameHost = typeof location !== 'undefined' && new URL(onlineRoot).host === location.host;
+      } catch (e) {}
+      if (onlineRoot && !onSameHost) {
+        urls.push(onlineRoot + dir + item.id + '.webm');
       }
     }
     return urls;
@@ -556,6 +569,13 @@
             '<button type="button" class="set-opt" data-dist="60" id="vmDist60" style="padding:2px 8px;font-size:11px;white-space:nowrap;flex:0 0 auto">远 60m</button>' +
           '</div>' +
         '</div>' +
+        '<div class="vm-set-row" style="margin-top:9px;justify-content:flex-start;gap:8px;flex-wrap:nowrap">' +
+          '<span id="vmSetLangLbl" style="color:#8a93a0;font-size:11.5px;white-space:nowrap">配音</span>' +
+          '<div class="set-opts" id="vmLangBtns" style="margin-top:0;gap:5px;flex-wrap:nowrap">' +
+            '<button type="button" class="set-opt" data-lang="ja" id="vmLangJa" style="padding:2px 8px;font-size:11px;white-space:nowrap;flex:0 0 auto">日文原声</button>' +
+            '<button type="button" class="set-opt" data-lang="zh" id="vmLangZh" style="padding:2px 8px;font-size:11px;white-space:nowrap;flex:0 0 auto">中文</button>' +
+          '</div>' +
+        '</div>' +
         '<div class="vm-set-row" style="margin-top:9px;justify-content:flex-start;gap:10px;flex-wrap:nowrap">' +
           '<span id="vmSetProg" style="white-space:nowrap">已听 <span class="vm-set-cnt">0/240</span></span>' +
           '<button type="button" class="set-pill" id="vmSetHideDoneBtn" style="white-space:nowrap">隐藏已听</button>' +
@@ -577,6 +597,18 @@
       rangeBtns[i].addEventListener('click', function () {
         cfg.triggerDist = Number(this.getAttribute('data-dist')) || 35;
         saveJson(LS_CFG, cfg);
+        syncUI();
+      });
+    }
+    var langOptBtns = sec.querySelectorAll('#vmLangBtns .set-opt');
+    for (var j = 0; j < langOptBtns.length; j++) {
+      langOptBtns[j].addEventListener('click', function () {
+        var lang = this.getAttribute('data-lang') === 'zh' ? 'zh' : 'ja';
+        if (lang === getVoiceLang()) return;
+        var wasPlaying = isPlayingNow && currentItem;
+        cfg.voiceLang = lang;
+        saveJson(LS_CFG, cfg);
+        if (wasPlaying) playItem(currentItem);
         syncUI();
       });
     }
@@ -634,6 +666,16 @@
         var on = Number(rbs[i].getAttribute('data-dist')) === curD;
         rbs[i].classList.toggle('active', on);
         rbs[i].classList.toggle('on', on);
+      }
+      ui.settingsSec.querySelector('#vmSetLangLbl').textContent = en ? 'Voice' : '配音';
+      ui.settingsSec.querySelector('#vmLangJa').textContent = en ? 'Japanese' : '日文原声';
+      ui.settingsSec.querySelector('#vmLangZh').textContent = en ? 'Chinese' : '中文';
+      var curL = getVoiceLang();
+      var lbs = ui.settingsSec.querySelectorAll('#vmLangBtns .set-opt');
+      for (var li = 0; li < lbs.length; li++) {
+        var lOn = lbs[li].getAttribute('data-lang') === curL;
+        lbs[li].classList.toggle('active', lOn);
+        lbs[li].classList.toggle('on', lOn);
       }
       var bHide = ui.settingsSec.querySelector('#vmSetHideDoneBtn');
       bHide.classList.toggle('on', !!cfg.hideDonePins);
