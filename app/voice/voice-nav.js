@@ -6,11 +6,11 @@
  *      宿主（网页地图 TOTKmap）即使不加载或彻底关闭本模块也 0 报错、0 开销。
  *   2. 罗盘 8 方位绝对方向：与游戏右下角小地图圆盘北向严格一致（正北/东北/正东/东南/正南/西南/正西/西北）。
  *   3. 三维空间感知：支持 3D 距离阶梯（500m / 300m / 100m / 自定义到达距离）、垂直高低差、跨层提醒与同层补报、偏航提醒。
- *   4. 中英文离线角色语音包 + 双兜底：
- *      - zelda : 塞尔达公主风（温柔空灵少女音，离线 MP3；英文界面自动切 en/ 英式离线女声包）
- *      - yujie : 御姐领航员（成熟干练御姐音，离线 MP3；英文界面自动切 en/ 英式离线女声包）
+ *   4. 中英文离线角色语音包 + 仅感应音：
+ *      - zelda : 塞尔达公主风（温柔空灵少女音，离线 .webm；英文界面自动切 en/ 英式离线女声包）
+ *      - yujie : 御姐领航员（成熟干练御姐音，离线 .webm；英文界面自动切 en/ 英式离线女声包）
  *      - chime : 仅普尔亚平板雷达感应音（纯 Web Audio 合成，0 音频文件请求）
- *      - tts   : 浏览器原生语音合成（支持直接播报具体神庙/地标名称，自适应中英文）
+ *      （本地 .webm → 线上站 .webm 两级回退，失败跳过并轻提示一次，绝不回退机械系统 TTS）
  * ============================================================================ */
 (function (root, factory) {
   if (typeof module === 'object' && module.exports) {
@@ -28,7 +28,7 @@
   /* 默认独立配置 */
   var DEFAULT_CFG = {
     enabled: true,         // 语音导航总开关
-    pack: 'zelda',         // 'zelda' | 'yujie' | 'chime' | 'tts'
+    pack: 'zelda',         // 'zelda' | 'yujie' | 'chime'
     volume: 85,            // 音量 0 ~ 100
     dirDist: true,         // 播报罗盘 8 方位与距离
     altLayer: true,        // 播报高低差与跨层提醒
@@ -39,46 +39,11 @@
     freqMode: 'standard'   // 自定义：中途播报密度 'compact'(仅100m) | 'standard'(300m+100m) | 'dense'(500m+300m+100m)
   };
 
-  var cfg = loadCfg();
+  function normalizePack(p) {
+    return (p === 'yujie' || p === 'chime') ? p : 'zelda';
+  }
 
-  /* 32 个标准词条文本（供系统 TTS 模式、中英双语回退及调试日志使用） */
-  var CLIP_TEXT = {
-    welcome:       { zh: '语音导航已就绪。', en: 'Voice navigation ready.' },
-    start_nav:     { zh: '开始导航。', en: 'Starting navigation.' },
-    start_auto:    { zh: '开启自动收集。', en: 'Auto collection started.' },
-    next_target:   { zh: '完成！下一个目标，', en: 'Completed! Next target,' },
-    switch_near:   { zh: '发现更近目标，', en: 'Closer target found,' },
-    dir_n:         { zh: '正北方向，', en: 'North,' },
-    dir_ne:        { zh: '东北方向，', en: 'Northeast,' },
-    dir_e:         { zh: '正东方向，', en: 'East,' },
-    dir_se:        { zh: '东南方向，', en: 'Southeast,' },
-    dir_s:         { zh: '正南方向，', en: 'South,' },
-    dir_sw:        { zh: '西南方向，', en: 'Southwest,' },
-    dir_w:         { zh: '正西方向，', en: 'West,' },
-    dir_nw:        { zh: '西北方向，', en: 'Northwest,' },
-    dist_far:      { zh: '距离较远，建议先传送。', en: 'Far away, consider fast travel.' },
-    dist_800:      { zh: '约八百米。', en: 'about 800 meters.' },
-    dist_500:      { zh: '约五百米。', en: 'about 500 meters.' },
-    dist_400:      { zh: '约四百米。', en: 'about 400 meters.' },
-    dist_300:      { zh: '三百米。', en: '300 meters.' },
-    dist_200:      { zh: '两百米。', en: '200 meters.' },
-    dist_150:      { zh: '一百五十米。', en: '150 meters.' },
-    dist_100:      { zh: '一百米。', en: '100 meters.' },
-    dist_50:       { zh: '五十米。', en: '50 meters.' },
-    arrived:       { zh: '已到达目标附近。', en: 'Arrived near target.' },
-    all_done:      { zh: '太棒了，本层目标已全部完成！', en: 'Awesome! All targets on this layer are completed!' },
-    alt_up:        { zh: '目标在上方。', en: 'Target is above you.' },
-    alt_down:      { zh: '目标在下方。', en: 'Target is below you.' },
-    layer_sky:     { zh: '注意，目标在天空层。', en: 'Note: target is on the Sky layer.' },
-    layer_surface: { zh: '注意，目标在地上层。', en: 'Note: target is on the Surface layer.' },
-    layer_depths:  { zh: '注意，目标在地下层。', en: 'Note: target is in the Depths.' },
-    off_course:    { zh: '方向偏离，目标在', en: 'Off course, target is' },
-    korok_near:    { zh: '附近有克洛格的气息哦。', en: 'A Korok is hiding nearby.' },
-    korok_start:   { zh: '前往克洛格起点，', en: 'Heading to Korok start,' },
-    korok_to_camp: { zh: '已到达起点，请护送前往朋友营地，', en: "Arrived at start, escort to friend's camp," },
-    korok_to_goal: { zh: '已到达起点，前往挑战终点，', en: 'Arrived at start, heading to goal,' },
-    shrine_near:   { zh: '感应到神庙反应。', en: 'Shrine sensor triggered nearby.' }
-  };
+  var cfg = loadCfg();
 
   /* 内部状态机（针对当前导航目标） */
   var state = {
@@ -96,7 +61,7 @@
     lastOffCourseSpeak: 0,  // 上次播报偏航时间戳
     lastRadarPing: 0,       // 上次雷达感应音时间戳
     lastSpokenClips: [],    // 最近一次播报的词条列表（便于测试与状态检查）
-    lastPlaybackMode: '',   // 最近一次播报模式: 'mp3' | 'tts' | 'chime'
+    lastPlaybackMode: '',   // 最近一次播报模式: 'mp3' | 'chime'
     lastPlaybackPack: ''    // 最近一次实际使用的语音包目录: 'zelda' | 'yujie' | 'en' | ''
   };
 
@@ -106,6 +71,7 @@
   var externalPaused = false;     // 外部模块临时静音避让标志（不改动用户 cfg.enabled）
   var audioUnlocked = false;      // 浏览器首次手势解锁标志
   var autoplayWarned = false;     // 自动播放被拦截提示防重复标志
+  var audioFailWarned = false;    // 音频加载失败提示防重复标志
 
   function getArriveM() {
     var v = parseInt(cfg.arriveM, 10);
@@ -138,6 +104,7 @@
         }
       }
     } catch (e) {}
+    res.pack = normalizePack(res.pack);
     return res;
   }
 
@@ -304,9 +271,6 @@
       } catch (e) {}
       currentAudio = null;
     }
-    if (typeof window !== 'undefined' && window.speechSynthesis) {
-      try { window.speechSynthesis.cancel(); } catch (e) {}
-    }
   }
 
   function getClipUrl(pack, clipId, useOnline) {
@@ -316,37 +280,21 @@
     return base + pack + '/' + clipId + '.webm';
   }
 
+  function isOnOnlineHost() {
+    try {
+      var onlineBase = (typeof window !== 'undefined' && window.TOTK_VOICE_ONLINE_BASE) || ONLINE_BASE;
+      return typeof location !== 'undefined' && new URL(onlineBase).host === location.host;
+    } catch (e) {
+      return false;
+    }
+  }
+
   function getSharedAudio() {
     if (!sharedAudio && typeof Audio !== 'undefined') {
       sharedAudio = new Audio();
       sharedAudio.preload = 'auto';
     }
     return sharedAudio;
-  }
-
-  function speakViaSystemTTS(clips, customTargetName) {
-    if (typeof window === 'undefined' || !window.speechSynthesis) return;
-    var lang = isEn() ? 'en' : 'zh';
-    var parts = [];
-    for (var i = 0; i < clips.length; i++) {
-      var c = clips[i];
-      if (CLIP_TEXT[c]) {
-        parts.push(CLIP_TEXT[c][lang] || CLIP_TEXT[c].zh);
-      }
-    }
-    if (customTargetName && (clips[0] === 'start_nav' || clips[0] === 'start_auto' || clips[0] === 'next_target' || clips[0] === 'switch_near')) {
-      parts.splice(1, 0, customTargetName + '，');
-    }
-    var text = parts.join('');
-    if (!text) return;
-    try {
-      window.speechSynthesis.cancel();
-      var u = new SpeechSynthesisUtterance(text);
-      u.lang = isEn() ? 'en-US' : 'zh-CN';
-      u.volume = Math.max(0.1, Math.min(1, (cfg.volume || 80) / 100));
-      u.rate = 1.05;
-      window.speechSynthesis.speak(u);
-    } catch (e) {}
   }
 
   function speakClips(clips, opts) {
@@ -373,15 +321,7 @@
       playChime(opts.chime);
     }
 
-    // 系统原生 TTS 模式（可读出具体神庙/地标名称，自适应中英文）
-    if (cfg.pack === 'tts') {
-      state.lastPlaybackMode = 'tts';
-      state.lastPlaybackPack = '';
-      speakViaSystemTTS(clips, opts.targetName);
-      return;
-    }
-
-    // 离线 MP3 模式：英文界面自动切内置 en/ 英式离线女声包，中文界面按 zelda / yujie 播放
+    // 离线 .webm 模式：英文界面自动切内置 en/ 英式离线女声包，中文界面按 zelda / yujie 播放
     state.lastPlaybackMode = 'mp3';
     var pack = isEn() ? 'en' : ((cfg.pack === 'yujie') ? 'yujie' : 'zelda');
     state.lastPlaybackPack = pack;
@@ -400,8 +340,7 @@
       if (myGen !== playGen) return;
       var audio = getSharedAudio();
       if (!audio) {
-        speakViaSystemTTS([item.clipId]);
-        queueTimer = setTimeout(pumpQueue, 100);
+        queueTimer = setTimeout(pumpQueue, 25);
         return;
       }
       currentAudio = audio;
@@ -411,6 +350,7 @@
       function next() {
         if (advanced || myGen !== playGen) return;
         advanced = true;
+        audioFailWarned = false;
         audio.onended = null;
         audio.onerror = null;
         if (currentAudio === audio) currentAudio = null;
@@ -422,13 +362,16 @@
         audio.onended = null;
         audio.onerror = null;
         if (currentAudio === audio) currentAudio = null;
-        // 三级回退：本地 .webm -> 线上导航站 .webm -> 系统 TTS
-        if (!useOnline) {
+        // 两级回退：本地 .webm -> 线上导航站 .webm -> 跳过并轻提示一次（绝不回退机械系统 TTS）
+        if (!useOnline && !isOnOnlineHost()) {
           playOne(true);
           return;
         }
-        speakViaSystemTTS([item.clipId]);
-        queueTimer = setTimeout(pumpQueue, 100);
+        if (!audioFailWarned && typeof window !== 'undefined' && window.TOTK_APP && typeof window.TOTK_APP.toast === 'function') {
+          audioFailWarned = true;
+          window.TOTK_APP.toast(tr('voice.audioFail', '语音加载失败（请检查网络）', 'Audio unavailable (check network)'));
+        }
+        queueTimer = setTimeout(pumpQueue, 25);
       }
 
       audio.onended = next;
@@ -440,7 +383,7 @@
         if (pr && typeof pr.catch === 'function') {
           pr.catch(function (err) {
             if (myGen !== playGen) return;
-            // 抢占切播引发的 AbortError 绝不能误进 onErr() 触发重音/TTS
+            // 抢占切播引发的 AbortError 绝不能误进 onErr() 触发重音
             if (err && err.name === 'AbortError') return;
             if (err && err.name === 'NotAllowedError') {
               advanced = true;
@@ -741,7 +684,6 @@
           '<option value="zelda">塞尔达风</option>' +
           '<option value="yujie">御姐领航员</option>' +
           '<option value="chime">仅感应音</option>' +
-          '<option value="tts">系统语音</option>' +
         '</select>' +
         '<button type="button" id="vnNpTest" class="vn-np-test" title="试听当前语音">▶ 试听</button>' +
       '</div>' +
@@ -849,11 +791,10 @@
       npSel.disabled = !cfg.enabled;
       npSel.style.opacity = cfg.enabled ? '1' : '0.45';
       var opts = npSel.options;
-      if (opts && opts.length >= 4) {
+      if (opts && opts.length >= 3) {
         opts[0].text = tr('voice.pack.zelda', '塞尔达风', 'Princess (Zelda)');
         opts[1].text = tr('voice.pack.yujie', '御姐领航员', 'Navigator (Mature)');
         opts[2].text = tr('voice.pack.chime', '仅感应音', 'Sensor Chime');
-        opts[3].text = tr('voice.pack.tts', '系统语音', 'System TTS');
       }
     }
     if (npLbl) npLbl.textContent = tr('voice.navLabel', '语音', 'Voice');
@@ -918,7 +859,6 @@
   function packDisplayName(pack) {
     if (pack === 'yujie') return tr('voice.pack.yujie', '御姐领航员', 'Navigator (Mature)');
     if (pack === 'chime') return tr('voice.pack.chime', '仅感应音', 'Sensor Chime');
-    if (pack === 'tts') return tr('voice.pack.tts', '系统语音', 'System TTS');
     return tr('voice.pack.zelda', '塞尔达风', 'Princess (Zelda)');
   }
 
@@ -946,7 +886,6 @@
 
   function isSpeaking() {
     if (currentAudio && !currentAudio.paused) return true;
-    if (typeof window !== 'undefined' && window.speechSynthesis && window.speechSynthesis.speaking) return true;
     return false;
   }
 
@@ -968,6 +907,7 @@
     for (var k in DEFAULT_CFG) {
       if (patch[k] !== undefined) cfg[k] = patch[k];
     }
+    cfg.pack = normalizePack(cfg.pack);
     if (!cfg.enabled) stopPlayback();
     saveCfg();
     return getConfig();
