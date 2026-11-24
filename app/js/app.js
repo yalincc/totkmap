@@ -244,8 +244,7 @@
       labelMinZoom: LABEL_MIN_ZOOM,
       getLabel: function (m) {
         var isDone = !!(state.done && state.done[m.korokStartId || m.id]);
-        var rawName = m.name || m.full || m.drop_zh || m.drop || '';
-        var disp = window.I18N ? (window.I18N.nameOf(rawName) || rawName) : rawName;
+        var disp = formatMarkerDisplay(m);
         return (isDone ? '✓ ' : '') + disp;
       },
       getMarkerSize: function (m, zoom) {
@@ -850,7 +849,7 @@
   var lastMarkerZoom = null;
   function updateMarkerSizes() {
     if (state.canvasLayer) state.canvasLayer.redraw();
-    var z = map.getZoom();
+    var z = Math.round(map.getZoom());
     if (z === lastMarkerZoom) return;
     lastMarkerZoom = z;
     var cats = {};
@@ -1144,7 +1143,7 @@
       name: ch.drop_zh || ch.drop || '宝箱',
       cat: '宝箱',
       desc: descText,
-      m: { id: ch.id, x: ch.z, y: ch.x, z: ch.altitude_y, altitude_y: ch.altitude_y, layer: ch.layer, name: ch.drop_zh || '宝箱' },
+      m: { id: ch.id, no: ch.no, x: ch.z, y: ch.x, z: ch.altitude_y, altitude_y: ch.altitude_y, layer: ch.layer, name: ch.drop_zh || '宝箱' },
       isDone: !!state.done[doneId],
       evt: evt
     });
@@ -1185,6 +1184,28 @@
   function isChestLike(m) {
     return !!(m.drop || m.drop_zh || m.type === 'chest' || (m.id && String(m.id).indexOf('c_') === 0));
   }
+  /* 统一格式化标点展示名（悬停 Tooltip / 搜索结果 / 重叠候选列表共用）：
+   * - 宝箱：Gc-001 左纳尼乌姆之硬盾
+   * - 克洛格：No.0858 克洛格果实（去掉「呀哈哈」俗称，营地类保留描述）
+   * - 其他：官方名 */
+  function formatMarkerDisplay(m) {
+    if (!m) return '';
+    if (isChestLike(m)) {
+      var dropDisp = m.drop_zh || m.drop || (window.I18N ? window.I18N.catOf('宝箱') : '宝箱');
+      if (window.I18N && m.drop_zh) dropDisp = window.I18N.nameOf(m.drop_zh) || dropDisp;
+      return (m.no ? m.no + ' ' : '') + dropDisp;
+    }
+    var KI = window.TOTK_KOROK_INFO || {};
+    var kInfo = KI[String(m.id)];
+    var dispName = window.I18N ? window.I18N.nameOf(m) : (m.name || m.full || '');
+    if (kInfo && kInfo.no != null) {
+      if (/呀哈哈|克洛格/.test(m.name || '')) {
+        dispName = window.I18N ? window.I18N.t('card.korokName', '克洛格果实') : '克洛格果实';
+      }
+      return 'No.' + String(kInfo.no).padStart(4, '0') + ' ' + dispName;
+    }
+    return dispName || ('ID ' + m.id);
+  }
   function pickIconOf(m) {
     if (m.iconUrl) return m.iconUrl;
     if (m.icon) {
@@ -1208,7 +1229,7 @@
     return markers.map(function (m) {
       var chest = isChestLike(m);
       return {
-        name: m.drop_zh || (window.I18N ? window.I18N.nameOf(m) : (m.name || m.full)) || m.drop || ('ID ' + m.id),
+        name: formatMarkerDisplay(m),
         cat: pickCatOf(m),
         icon: pickIconOf(m),
         done: !!state.done[m.korokStartId || m.id],
@@ -1352,6 +1373,38 @@
       if (nameHits.length + descHits.length >= 40) break;
     }
     var hits = nameHits.concat(descHits).slice(0, 30);
+    /* ---------- 宝箱搜索（编号 Gc-001/Dc-001/Sc-001 + 掉落物中英文）---------- */
+    var chestHits = [];
+    var CHESTS = window.TOTK_CHESTS_OFFICIAL;
+    if (CHESTS && Array.isArray(CHESTS)) {
+      var chestCodeMatch = /^([gds])c?-?0*(\d{1,3})$/i.exec(q.trim());
+      if (chestCodeMatch) {
+        var cLayerChar = chestCodeMatch[1].toUpperCase();
+        var cNum = parseInt(chestCodeMatch[2], 10);
+        var cTargetLayer = cLayerChar === 'G' ? 18 : (cLayerChar === 'D' ? 19 : 20);
+        for (var ci = 0; ci < CHESTS.length; ci++) {
+          var ch = CHESTS[ci];
+          if (ch.layer !== cTargetLayer) continue;
+          if (ch.no) {
+            var parts = ch.no.split('-');
+            var chNum = parseInt(parts[1] || '0', 10);
+            if (chNum === cNum) chestHits.push(ch);
+          }
+          if (chestHits.length >= 20) break;
+        }
+      } else {
+        for (var ci2 = 0; ci2 < CHESTS.length; ci2++) {
+          var ch2 = CHESTS[ci2];
+          if (ch2.layer !== state.layer) continue;
+          var enDrop = window.I18N && ch2.drop_zh ? (window.I18N.nameOf(ch2.drop_zh) || '') : '';
+          var chHay = ((ch2.no || '') + ' ' + (ch2.drop_zh || '') + ' ' + (ch2.drop || '') + ' ' + enDrop + ' ' + (ch2.location_type_zh || '') + ' 宝箱 chest').toLowerCase();
+          if (chHay.indexOf(ql) >= 0) {
+            chestHits.push(ch2);
+            if (chestHits.length >= 20) break;
+          }
+        }
+      }
+    }
     /* ---------- 任务也要能搜（2026-10-07 补）----------
      * ★ 缺口：搜索框只遍历 MARKERS（探索标点），**任务从来没接进来**。
      *   输入框 placeholder 写着「搜索神庙/地名/任务/物品」，但「任务」是骗人的——
@@ -1378,7 +1431,7 @@
       if (bn.length) taskHits = bn;
     }
     var box = $('searchResult');
-    if (!hits.length && !taskHits.length) {
+    if (!hits.length && !taskHits.length && !chestHits.length) {
       box.innerHTML = '<div class="sr-empty">' + (window.I18N ? window.I18N.t('search.empty') : '未找到相关标点或任务') + '</div>';
       box.classList.remove('hidden');
       return;
@@ -1394,11 +1447,7 @@
       if (nameHits.indexOf(m) < 0) {
         catName += (catName ? ' · ' : '') + (window.I18N && window.I18N.getLang() === 'en' ? 'Desc match' : '描述匹配');
       }
-      var kInfo = KI[m.id];
-      var dispName = window.I18N ? window.I18N.nameOf(m) : (m.name || m.full);
-      if (kInfo && kInfo.no != null) {
-        dispName = 'No.' + String(kInfo.no).padStart(4, '0') + ' ' + dispName;
-      }
+      var dispName = formatMarkerDisplay(m);
       html += '<div class="sr-item" data-id="' + m.id + '">' +
         (cat && cat.icon ? '<img src="assets/icons/' + esc(cat.icon) + '" alt="">' : '') +
         '<span class="sr-name">' + esc(dispName) + '</span>' +
@@ -1415,8 +1464,44 @@
         (tag ? ' · ' + esc(tag) : '') + '</span>' +
         '</div>';
     });
+    chestHits.forEach(function (ch) {
+      var dropDisp = ch.drop_zh || ch.drop || '宝箱';
+      if (window.I18N && ch.drop_zh) dropDisp = window.I18N.nameOf(ch.drop_zh) || dropDisp;
+      var cDisp = (ch.no ? ch.no + ' ' : '') + dropDisp;
+      var cCat = window.I18N ? window.I18N.catOf('宝箱') : '宝箱';
+      if (ch.layer !== state.layer) {
+        var clTag = window.I18N ? window.I18N.t('layer.' + (ch.layer === 20 ? 'sky' : ch.layer === 19 ? 'depths' : 'surface')) : (ch.layer === 20 ? '天空' : ch.layer === 19 ? '地底' : '地上');
+        cCat += ' · ' + clTag;
+      }
+      html += '<div class="sr-item" data-chest-id="' + esc(ch.id) + '">' +
+        '<img src="assets/icons/origin_3845393_77466.png" alt="">' +
+        '<span class="sr-name">' + esc(cDisp) + '</span>' +
+        '<span class="sr-cat">' + esc(cCat) + '</span>' +
+        '</div>';
+    });
     box.innerHTML = html;
     box.classList.remove('hidden');
+
+    /* 宝箱结果：切层 → 勾宝箱分类 → 飞行 + 光圈 → 开卡片 */
+    Array.prototype.forEach.call(box.querySelectorAll('[data-chest-id]'), function (el) {
+      el.addEventListener('click', function () {
+        var cid = el.getAttribute('data-chest-id');
+        var ch = null;
+        if (window.TOTK_CHESTS_OFFICIAL) {
+          for (var i = 0; i < window.TOTK_CHESTS_OFFICIAL.length; i++) {
+            if (window.TOTK_CHESTS_OFFICIAL[i].id === cid) { ch = window.TOTK_CHESTS_OFFICIAL[i]; break; }
+          }
+        }
+        if (!ch) return;
+        box.classList.add('hidden');
+        $('searchInput').value = '';
+        var chestCatId = ch.layer === 20 ? 9903 : (ch.layer === 19 ? 9902 : 9901);
+        gotoMarker({ id: ch.id, x: ch.z, y: ch.x, layer: ch.layer, cat: chestCatId, name: ch.drop_zh || '宝箱' });
+        setTimeout(function () {
+          openChestDetail(ch);
+        }, 750);
+      });
+    });
 
     /* 任务结果：切层 → 勾分类 → 飞行 + 光圈 → 开卡片 */
     Array.prototype.forEach.call(box.querySelectorAll('[data-tk-search]'), function (el) {
@@ -1455,7 +1540,7 @@
       });
     });
 
-    Array.prototype.forEach.call(box.querySelectorAll('.sr-item'), function (el) {
+    Array.prototype.forEach.call(box.querySelectorAll('.sr-item[data-id]'), function (el) {
       el.addEventListener('click', function () {
         var id = Number(el.getAttribute('data-id'));
         var m = null;
@@ -1463,19 +1548,9 @@
           if (MARKERS[i].id === id) { m = MARKERS[i]; break; }
         }
         if (!m) return;
-        if (m.layer !== state.layer) {
-          switchLayer(m.layer, true);
-        }
-        // 确保该分类被选中
-        if (!state.selected[m.cat]) {
-          state.selected[m.cat] = true;
-          saveSelected();
-          buildCatalogPanel();
-          renderMarkers();
-        }
         box.classList.add('hidden');
         $('searchInput').value = '';
-        map.flyTo([m.x, m.y], Math.max(map.getZoom(), 5), { duration: 0.6 });
+        gotoMarker(m);
         setTimeout(function () {
           var mk = state.markers[m.id];
           if (mk) mk.openTooltip();
@@ -1887,7 +1962,7 @@
      *   动画播完换成静态环再留 3 秒——光脉冲 2.2 秒就没了的话，
      *   玩家还是不知道哪个是目标。 */
     var PULSE_MS = 2300;   /* 2 次 × 1.1s + 余量 */
-    var HOLD_MS = 3000;    /* 静态环保留时长 */
+    var HOLD_MS = 1000;    /* 静态环保留时长 */
     var done = false;
 
     /* 清掉上一次的（避免多次定位叠一堆环） */
@@ -3336,9 +3411,14 @@
     }
     var elNo = $('ecNo');
     if (elNo) {
-      elNo.textContent = (isKorok && kInfo.no != null)
-        ? ('No.' + String(kInfo.no).padStart(4, '0')) : '';
-      elNo.style.display = elNo.textContent ? '' : 'none';
+      var noText = '';
+      if (isKorok && kInfo.no != null) {
+        noText = 'No.' + String(kInfo.no).padStart(4, '0');
+      } else if (m.no) {
+        noText = String(m.no);
+      }
+      elNo.textContent = noText;
+      elNo.style.display = noText ? '' : 'none';
     }
     var elSolve = $('ecSolve'), elSolveRow = $('ecSolveRow');
     if (elSolve) {
@@ -3663,12 +3743,25 @@
       txt.textContent = open ? txt._fullText : (txt._fullText.slice(0, NOTE_LIMIT) + '…');
     }
   });
-  /* V2.0.3 复制标点名称（查攻略用）。名称取 full（含「神庙-」前缀）优先，
-     避免与地图上其他分类重名；自定义标点无 full 时用 name。 */
+  /* 统一复制格式：有编号的分类复制「分类名 序号」（如「克洛格 No.0858」「宝箱 Sc-115」），
+     其余标点复制干净名称（避免「呀哈哈-呀哈哈」）。 */
   $('ecCopy').addEventListener('click', function () {
     var m = state.current;
     if (!m) return;
-    var txt = (m.full || m.name || '').trim();
+    var txt = '';
+    if (isChestLike(m)) {
+      var chestCat = window.I18N ? window.I18N.catOf('宝箱') : '宝箱';
+      txt = m.no ? (chestCat + ' ' + m.no) : (chestCat + ' ' + (m.drop_zh || m.drop || '')).trim();
+    } else {
+      var KI = window.TOTK_KOROK_INFO || {};
+      var kInfo = KI[String(m.id)];
+      if (kInfo && kInfo.no != null) {
+        var korokCat = window.I18N ? window.I18N.catOf('克洛格') : '克洛格';
+        txt = korokCat + ' No.' + String(kInfo.no).padStart(4, '0');
+      } else {
+        txt = (window.I18N ? window.I18N.nameOf(m) : (m.name || m.full || '')).trim();
+      }
+    }
     if (!txt) return;
     copyText(txt, this, '已复制', 'done');
   });
@@ -4317,7 +4410,7 @@
         box.innerHTML = html;
       }
       box.classList.remove('hidden');
-      Array.prototype.forEach.call(box.querySelectorAll('.sr-item'), function (el) {
+      Array.prototype.forEach.call(box.querySelectorAll('.sr-item[data-id]'), function (el) {
         el.addEventListener('click', function () {
           var mid = Number(el.getAttribute('data-mat'));
           state.matSelected[mid] = true;

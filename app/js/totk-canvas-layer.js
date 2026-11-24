@@ -62,6 +62,18 @@
     }
   }
 
+  function showExploreTooltip(text, e) {
+    var el = getMatTooltipEl();
+    if (!el || !text) return;
+    el.textContent = text;
+    var ev = (e && (e.originalEvent || e)) || {};
+    var cx = ev.clientX !== undefined ? ev.clientX : 0;
+    var cy = ev.clientY !== undefined ? ev.clientY : 0;
+    el.style.left = cx + 'px';
+    el.style.top = cy + 'px';
+    el.style.display = 'block';
+  }
+
   function getMarkerLatLng(m) {
     if (!m) return null;
     if (Array.isArray(m)) {
@@ -480,6 +492,7 @@
           if (self._hoveredMarker) {
             self._hoveredMarker = null;
             map.getContainer().style.cursor = '';
+            hideMatTooltip();
           }
           return;
         }
@@ -489,10 +502,27 @@
         if (hit) {
           self._hoveredMarker = hit.marker;
           map.getContainer().style.cursor = 'pointer';
+          var lbl = (typeof self.options.getLabel === 'function')
+            ? self.options.getLabel(hit.marker)
+            : (hit.marker.name || hit.marker.full || hit.marker.drop_zh || hit.marker.drop || '');
+          if (lbl) showExploreTooltip(lbl, e);
         } else if (self._hoveredMarker) {
           self._hoveredMarker = null;
           map.getContainer().style.cursor = '';
+          hideMatTooltip();
         }
+      };
+
+      this._mouseOutHandler = function () {
+        if (self._hoveredMarker) {
+          self._hoveredMarker = null;
+          map.getContainer().style.cursor = '';
+        }
+        hideMatTooltip();
+      };
+
+      this._viewResetHandler = function () {
+        hideMatTooltip();
       };
 
       this._clickHandler = function (e) {
@@ -513,7 +543,13 @@
       };
 
       map.on('mousemove', this._mouseMoveHandler);
+      map.on('mouseout', this._mouseOutHandler);
+      map.on('movestart zoomstart', this._viewResetHandler);
       map.on('click', this._clickHandler);
+    },
+
+    _hideTooltip: function () {
+      hideMatTooltip();
     },
 
     _unbindEvents: function () {
@@ -521,6 +557,8 @@
       if (!this._map) return;
       var map = this._map;
       if (this._mouseMoveHandler) map.off('mousemove', this._mouseMoveHandler);
+      if (this._mouseOutHandler) map.off('mouseout', this._mouseOutHandler);
+      if (this._viewResetHandler) map.off('movestart zoomstart', this._viewResetHandler);
       if (this._clickHandler) map.off('click', this._clickHandler);
       map.getContainer().style.cursor = '';
     }
@@ -994,6 +1032,10 @@
       map.on('mouseout', this._mouseOutHandler);
       map.on('movestart zoomstart', this._viewResetHandler);
       map.on('click', this._clickHandler);
+    },
+
+    _hideTooltip: function () {
+      hideMatTooltip();
     },
 
     _unbindEvents: function () {
