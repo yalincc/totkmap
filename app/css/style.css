@@ -1311,6 +1311,35 @@ html[lang="en"] .progress-section.collapsed .progress-more::after { content: 'Ex
   user-select: none;
   -webkit-user-select: none;
 }
+.ec-head-acts {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.ec-nav {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border-radius: 6px;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.04);
+  color: #aeb6c2;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background .15s, color .15s;
+}
+.ec-nav:hover:not(:disabled) {
+  background: rgba(255,255,255,.12);
+  color: #fff;
+}
+.ec-nav:disabled {
+  opacity: .3;
+  cursor: default;
+}
 .ec-head .chip {
   background: rgba(96,168,128,.22);
   color: #8fd4a6;

@@ -288,38 +288,9 @@
     });
   }
 
-  var tileLayers = {};
-  /* V1.8.0 瓦片优化: z3/z4 已转 WebP q80(23.9MB->1.9MB), z5+ 仍是 PNG —— 按缩放级选扩展名 */
-  var TotkTileLayer = L.TileLayer.extend({
-    getTileUrl: function (coords) {
-      var ext = (coords.z <= 4) ? 'webp' : 'png';
-      return this._url.replace('{z}', coords.z).replace('{x}', coords.x)
-        .replace('{y}', coords.y).replace('{ext}', ext);
-    }
-  });
-  function getTileLayer(layerId) {
-    if (!tileLayers[layerId]) {
-      tileLayers[layerId] = new TotkTileLayer('tiles_obj/' + LAYER_KEY[layerId] + '/{z}/{x}_{y}.{ext}', {
-        minZoom: MIN_ZOOM,
-        maxZoom: MAX_ZOOM,
-        maxNativeZoom: 6,
-        tileSize: 256,
-        noWrap: true,
-        bounds: TILE_BOX,
-        errorTileUrl: 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
-      });
-    }
-    return tileLayers[layerId];
-  }
   function setTileLayer(layerId) {
-    var target = getTileLayer(layerId);
-    for (var k in tileLayers) {
-      if (tileLayers[k] && tileLayers[k] !== target && map.hasLayer(tileLayers[k])) {
-        map.removeLayer(tileLayers[k]);
-      }
-    }
-    if (!map.hasLayer(target)) {
-      target.addTo(map);
+    if (map && map.setTileLayerKey) {
+      map.setTileLayerKey(LAYER_KEY[layerId] || 'ground');
     }
   }
 
@@ -616,46 +587,28 @@
    * T3: z3/z4=18, z5/z6=22, z7=26 */
   /* ---------------- 7大分类图标尺寸自定义矩阵（V2.7.0） ----------------
    * 支持左侧 7 大分类（任务、位置、收集、装备、地点、怪物、材料）在 z3-z7 的独立参数配置 */
-  var LS_ICON_MATRIX = 'totkmap_icon_matrix_v1';
-  var LS_ICON_PRESET = 'totkmap_icon_preset_v1';
+  var LS_ICON_MATRIX = 'totkmap_icon_matrix_v4';
+  var LS_ICON_PRESET = 'totkmap_icon_preset_v3';
   var MATRIX_GROUPS = ['任务', '位置', '收集', '装备', '地点', '怪物', '材料'];
   var MATRIX_ZOOMS = [3, 4, 5, 6, 7];
 
-  var PRESET_TIERED = {
-    '任务': { 3: 22, 4: 22, 5: 26, 6: 26, 7: 30 },
-    '位置': { 3: 24, 4: 24, 5: 28, 6: 28, 7: 32 },
-    '收集': { 3: 18, 4: 18, 5: 22, 6: 22, 7: 26 },
-    '装备': { 3: 20, 4: 20, 5: 24, 6: 24, 7: 28 },
-    '地点': { 3: 22, 4: 22, 5: 26, 6: 26, 7: 30 },
-    '怪物': { 3: 22, 4: 22, 5: 26, 6: 26, 7: 30 },
-    '材料': { 3: 20, 4: 20, 5: 24, 6: 24, 7: 28 }
-  };
+  function makeUniformPreset(px) {
+    var out = {};
+    MATRIX_GROUPS.forEach(function (g) {
+      out[g] = { 3: px, 4: px, 5: px, 6: px, 7: px };
+    });
+    return out;
+  }
 
-  var PRESET_UNIFORM = {
-    '任务': { 3: 24, 4: 24, 5: 24, 6: 24, 7: 24 },
-    '位置': { 3: 24, 4: 24, 5: 24, 6: 24, 7: 24 },
-    '收集': { 3: 24, 4: 24, 5: 24, 6: 24, 7: 24 },
-    '装备': { 3: 24, 4: 24, 5: 24, 6: 24, 7: 24 },
-    '地点': { 3: 24, 4: 24, 5: 24, 6: 24, 7: 24 },
-    '怪物': { 3: 24, 4: 24, 5: 24, 6: 24, 7: 24 },
-    '材料': { 3: 24, 4: 24, 5: 24, 6: 24, 7: 24 }
-  };
-
-  var PRESET_COMPACT = {
-    '任务': { 3: 18, 4: 18, 5: 22, 6: 22, 7: 26 },
-    '位置': { 3: 20, 4: 20, 5: 24, 6: 24, 7: 28 },
-    '收集': { 3: 16, 4: 16, 5: 20, 6: 20, 7: 24 },
-    '装备': { 3: 18, 4: 18, 5: 22, 6: 22, 7: 26 },
-    '地点': { 3: 18, 4: 18, 5: 22, 6: 22, 7: 26 },
-    '怪物': { 3: 20, 4: 20, 5: 24, 6: 24, 7: 28 },
-    '材料': { 3: 18, 4: 18, 5: 22, 6: 22, 7: 26 }
-  };
+  var PRESET_COMPACT = makeUniformPreset(26);
+  var PRESET_UNIFORM = makeUniformPreset(30);
+  var PRESET_LARGE = makeUniformPreset(34);
 
   var iconMatrix = loadJson(LS_ICON_MATRIX, null);
   if (!iconMatrix) {
-    iconMatrix = JSON.parse(JSON.stringify(PRESET_TIERED));
+    iconMatrix = JSON.parse(JSON.stringify(PRESET_UNIFORM));
   }
-  var currentIconPreset = localStorage.getItem(LS_ICON_PRESET) || 'tiered';
+  var currentIconPreset = localStorage.getItem(LS_ICON_PRESET) || 'uniform';
 
   function saveIconMatrix() {
     saveJson(LS_ICON_MATRIX, iconMatrix);
@@ -664,8 +617,8 @@
 
   function getGroupIconSize(group, z) {
     var cz = Math.max(3, Math.min(7, Math.round(z || (map ? map.getZoom() : 5))));
-    var grp = iconMatrix[group] || iconMatrix['位置'] || PRESET_TIERED['位置'];
-    return grp[cz] || 24;
+    var grp = iconMatrix[group] || iconMatrix['位置'] || PRESET_UNIFORM['位置'];
+    return grp[cz] || 30;
   }
 
   function calcIconSize(tier, zoom) {
@@ -1139,13 +1092,15 @@
     var descText = '掉落物品：' + (ch.drop_zh || ch.drop) + '\n' +
                    '位置类型：' + (ch.location_type_zh || '野外宝箱') + ' (' + (ch.height_desc || '') + ')\n' +
                    'GUID: ' + (ch.guid || '');
+    var keepPos = !!(evt && evt.keepPos);
     showExploreCard({
       name: ch.drop_zh || ch.drop || '宝箱',
       cat: '宝箱',
       desc: descText,
       m: { id: ch.id, no: ch.no, x: ch.z, y: ch.x, z: ch.altitude_y, altitude_y: ch.altitude_y, layer: ch.layer, name: ch.drop_zh || '宝箱' },
       isDone: !!state.done[doneId],
-      evt: evt
+      evt: keepPos ? null : evt,
+      keepPos: keepPos
     });
   }
 
@@ -2350,9 +2305,9 @@
         if (b.classList.contains('set-more-toggle')) return;
         b.addEventListener('click', function () {
           var p = b.getAttribute('data-preset');
-          if (p === 'tiered') applyPreset('tiered', PRESET_TIERED);
+          if (p === 'compact') applyPreset('compact', PRESET_COMPACT);
           else if (p === 'uniform') applyPreset('uniform', PRESET_UNIFORM);
-          else if (p === 'compact') applyPreset('compact', PRESET_COMPACT);
+          else if (p === 'large') applyPreset('large', PRESET_LARGE);
         });
       });
     }
@@ -2372,7 +2327,7 @@
     var resetBtn = $('setResetIconMatrix');
     if (resetBtn) {
       resetBtn.addEventListener('click', function () {
-        applyPreset('tiered', PRESET_TIERED);
+        applyPreset('uniform', PRESET_UNIFORM);
       });
     }
 
@@ -3720,11 +3675,97 @@
         });
       };
     }
+    /* 克洛格 / 宝箱卡片顶部 ‹ › 上一个 / 下一个（按序号顺序跳转，卡片保持原位） */
+    var ecPrev = $('ecPrev'), ecNext = $('ecNext');
+    if (ecPrev && ecNext) {
+      var seqInfo = getExploreSeqPos(m);
+      if (seqInfo) {
+        var isEnNav = window.I18N && window.I18N.getLang() === 'en';
+        ecPrev.style.display = '';
+        ecNext.style.display = '';
+        ecPrev.disabled = (seqInfo.idx <= 0);
+        ecNext.disabled = (seqInfo.idx >= seqInfo.list.length - 1);
+        ecPrev.title = isEnNav ? 'Previous' : '上一个';
+        ecNext.title = isEnNav ? 'Next' : '下一个';
+      } else {
+        ecPrev.style.display = 'none';
+        ecNext.style.display = 'none';
+      }
+    }
     var card = $('exploreCard');
     var wasHidden = card.classList.contains('hidden');
     card.classList.remove('hidden');
-    if (wasHidden || opts.evt || opts.reposition) positionExploreCard(opts.evt && (opts.evt.originalEvent || opts.evt) || null);
+    if (!opts.keepPos && (wasHidden || opts.evt || opts.reposition)) positionExploreCard(opts.evt && (opts.evt.originalEvent || opts.evt) || null);
   }
+
+  var _korokSeqCache = null;
+  function getKorokSeq() {
+    if (_korokSeqCache) return _korokSeqCache;
+    var KI = window.TOTK_KOROK_INFO || {};
+    var seen = {}, list = [];
+    for (var i = 0; i < MARKERS.length; i++) {
+      var mk = MARKERS[i];
+      var ki = KI[String(mk.id)];
+      if (!ki || ki.no == null) continue;
+      if (seen[ki.no]) continue;
+      seen[ki.no] = true;
+      list.push({ no: ki.no, m: mk });
+    }
+    list.sort(function (a, b) { return a.no - b.no; });
+    _korokSeqCache = list.map(function (x) { return x.m; });
+    return _korokSeqCache;
+  }
+
+  function getExploreSeqPos(m) {
+    if (!m) return null;
+    if (isChestLike(m) && m.no && Array.isArray(window.TOTK_CHESTS_OFFICIAL)) {
+      var clist = window.TOTK_CHESTS_OFFICIAL;
+      for (var i = 0; i < clist.length; i++) {
+        if (clist[i].id === m.id) return { kind: 'chest', list: clist, idx: i };
+      }
+      return null;
+    }
+    var KI = window.TOTK_KOROK_INFO || {};
+    var kInfo = KI[String(m.id)];
+    if (kInfo && kInfo.no != null) {
+      var klist = getKorokSeq();
+      for (var j = 0; j < klist.length; j++) {
+        var kj = KI[String(klist[j].id)];
+        if (kj && kj.no === kInfo.no) return { kind: 'korok', list: klist, idx: j };
+      }
+    }
+    return null;
+  }
+
+  function stepExploreBy(delta) {
+    var cur = state.current;
+    var seq = getExploreSeqPos(cur);
+    if (!seq) return;
+    var nextIdx = seq.idx + delta;
+    if (nextIdx < 0 || nextIdx >= seq.list.length) return;
+    var target = seq.list[nextIdx];
+    if (seq.kind === 'chest') {
+      var chestCatId = target.layer === 20 ? 9903 : (target.layer === 19 ? 9902 : 9901);
+      gotoMarker({ id: target.id, x: target.z, y: target.x, layer: target.layer, cat: chestCatId, name: target.drop_zh || '宝箱' });
+      openChestDetail(target, { keepPos: true });
+    } else {
+      state.current = target;
+      gotoMarker(target);
+      var cat = catById(target.layer, target.cat);
+      showExploreCard({
+        name: target.name || target.full,
+        cat: cat ? cat.name : '克洛格',
+        desc: target.desc || '',
+        m: target,
+        isDone: !!state.done[target.korokStartId || target.id],
+        evt: null,
+        keepPos: true
+      });
+    }
+  }
+
+  if ($('ecPrev')) $('ecPrev').addEventListener('click', function (e) { e.stopPropagation(); stepExploreBy(-1); });
+  if ($('ecNext')) $('ecNext').addEventListener('click', function (e) { e.stopPropagation(); stepExploreBy(1); });
   $('ecClose').addEventListener('click', function () {
     $('exploreCard').classList.add('hidden');
     state.current = null;

@@ -253,9 +253,9 @@ window.TOTK_I18N.en = {
   // Settings Modal
   "settings.title": "Display Settings",
   "settings.iconSize": "Icon Size",
-  "settings.presetTiered": "Tiered",
-  "settings.presetUniform": "Uniform",
+  "settings.presetUniform": "Default",
   "settings.presetCompact": "Compact",
+  "settings.presetLarge": "Large",
   "settings.presetMore": "More",
   "settings.presetCollapse": "Less",
   "settings.matrixColGroup": "Group",

@@ -4,8 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>塞尔达传说：王国之泪 · 互动地图</title>
-<link rel="stylesheet" href="vendor/leaflet.css">
-<link rel="stylesheet" href="css/style.css?v=246">
+<link rel="stylesheet" href="css/style.css?v=247">
 <link rel="stylesheet" href="voice-memories/vm-style.css?v=3">
 </head>
 <body>
@@ -170,7 +169,11 @@
   <div class="ec-card">
     <div class="ec-head" id="ecHead">
       <span class="chip" id="ecChip"></span>
-      <button type="button" class="detail-close" id="ecClose">×</button>
+      <span class="ec-head-acts">
+        <button type="button" class="ec-nav" id="ecPrev" style="display:none" title="上一个">‹</button>
+        <button type="button" class="ec-nav" id="ecNext" style="display:none" title="下一个">›</button>
+        <button type="button" class="detail-close" id="ecClose">×</button>
+      </span>
     </div>
     <!-- V2.0.3 名字后挂复制按钮（查攻略用：复制名字去搜） -->
     <div class="ec-name-row">
@@ -275,9 +278,9 @@
         <span class="set-title-hint" data-i18n="settings.iconSizeHint">（快速比例与分类细分矩阵）</span>
       </div>
       <div class="set-opts" id="setIconPresetBtns">
-        <button type="button" class="set-opt active" data-preset="tiered" data-i18n="settings.presetTiered">推荐</button>
-        <button type="button" class="set-opt" data-preset="uniform" data-i18n="settings.presetUniform">等大</button>
         <button type="button" class="set-opt" data-preset="compact" data-i18n="settings.presetCompact">紧凑</button>
+        <button type="button" class="set-opt active" data-preset="uniform" data-i18n="settings.presetUniform">默认</button>
+        <button type="button" class="set-opt" data-preset="large" data-i18n="settings.presetLarge">更大</button>
         <button type="button" class="set-opt set-more-toggle" id="setMoreIconBtn" data-i18n="settings.presetMore">更多</button>
       </div>
       <div id="setIconMatrixWrap" class="set-matrix-wrap" style="display:none">
@@ -607,7 +610,7 @@
 <script src="data/i18n/zh.js"></script>
 <script src="data/i18n/en.js"></script>
 <script src="js/i18n.js"></script>
-<script src="vendor/leaflet.js"></script>
+<script src="js/totk-map-engine.js?v=7"></script>
 <script src="vendor/murmurhash3js.min.js"></script>
 <script src="vendor/supercluster.min.js?v=188"></script>
 <script src="data/totk_save_hashes.js"></script>
@@ -642,9 +645,8 @@
 <script>window.TOTK_COMPENDIUM_URL = '';</script>
 <script src="js/save-parser.js?v=1"></script>
 <script src="js/card-layout.js?v=302"></script>
-<script src="js/totk-canvas-layer.js?v=303"></script>
 <script src="data/changelog.js?v=5"></script>
-<script src="js/app.js?v=326"></script>
+<script src="js/app.js?v=331"></script>
 <script src="voice/voice-nav.js?v=13"></script>
 <!-- 声之记忆（240 条）独立可插拔模块：独立文件夹与进度隔离，不进入左侧栏 -->
 <script src="voice-memories/vm-data.js?v=2"></script>

@@ -255,9 +255,9 @@ window.TOTK_I18N.zh = {
   "settings.iconSize": "图标大小",
   // 地图标点大小矩阵（2026-10-28 补齐，此前这批新增 UI 漏了词条；
   // iconSizeHint 原文件已有词条，这里不重复定义）
-  "settings.presetTiered": "推荐",
-  "settings.presetUniform": "等大",
+  "settings.presetUniform": "默认",
   "settings.presetCompact": "紧凑",
+  "settings.presetLarge": "更大",
   "settings.presetMore": "更多",
   "settings.presetCollapse": "收起",
   "settings.matrixColGroup": "大类",
