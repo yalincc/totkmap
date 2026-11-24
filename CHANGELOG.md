@@ -77,6 +77,7 @@
   - `totknavi-pc/deep_scan_pc.go` 与 `profile_pc.go` 禁止写入/加载 `staticChains` 为空的空壳配置，本地文件名附带 `exeSize` 十六进制后缀防同 MB 不同构建撞名；
   - `totknavi-gui/app.go` 分享配置仅认本机校准生成的 `local-*.json` 并按 SHA-256 哈希防重复提交；启动时静默同步网站 `index.json` 且按内容比对去重跳过重写，按钮明确提示「✓ 最新」；设置弹窗移除多余的同步按钮解决越界问题；
   - 归档 1.2.1 基准定位参数与 L1 反推机制至 `docs/TOTKnavi-PC定位技术与真身追踪手册.md` 第七章。
+  - **小修（2026-11-24，不占新版本号）**：L1 配置单重复分享不再发邮件——服务端 `BOTWmap/node-functions/api/diag.js` 按链指纹比对云端 `profiles/index.json`，已收录直接回执感谢（BOTWmap `b2856c4`）；客户端 `totknavi-gui/app.go` 解析 `duplicate` 分流文案、UI 零改动（TOTKmap `1b8877c4`）；双端已 push，EdgeOne 云函数部署生效；归档见 `归档/开发计划/TOTKnavi-v3.3.4-L1配置单重复分享去重-实施归档-20261124.md`。
 
 ---
 
