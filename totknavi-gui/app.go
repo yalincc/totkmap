@@ -901,8 +901,8 @@ func (a *App) UploadDiagnostics(note string) string {
 		return "上传失败: " + err.Error()
 	}
 	defer resp.Body.Close()
+	respBody, _ := io.ReadAll(io.LimitReader(resp.Body, 2048))
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		respBody, _ := io.ReadAll(io.LimitReader(resp.Body, 512))
 		return fmt.Sprintf("上传失败 (HTTP %d): %s", resp.StatusCode, strings.TrimSpace(string(respBody)))
 	}
 	if isShareProfile && shareHash != "" {
@@ -911,6 +911,14 @@ func (a *App) UploadDiagnostics(note string) string {
 		}
 		a.cfg.SharedProfileHash = shareHash
 		a.SaveConfig(*a.cfg)
+	}
+	// 服务端按「游戏版本 + L1 链」去重：已收录时不发邮件，只回执感谢。
+	// 两条文案都含「感谢」，前端现有 msg.includes('感谢') 判断不变，UI 零改动。
+	var ack struct {
+		Duplicate bool `json:"duplicate"`
+	}
+	if json.Unmarshal(respBody, &ack) == nil && ack.Duplicate {
+		return "该版本配置云端已收录，感谢支持"
 	}
 	return "已发送给开发者，感谢反馈"
 }
