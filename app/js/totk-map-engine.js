@@ -574,6 +574,10 @@
     return this;
   };
 
+  TotkCanvasMap.prototype.panTo = function (center, opts) {
+    return this.flyTo(center, this._zoom, opts);
+  };
+
   TotkCanvasMap.prototype.fitBounds = function (bounds, opts) {
     var b = bounds instanceof LatLngBounds ? bounds : new LatLngBounds(bounds[0], bounds[1]);
     var bw = Math.max(1, b.getEast() - b.getWest());
@@ -839,7 +843,10 @@
     window.addEventListener('mousemove', function (e) {
       if (drag) {
         var dx = e.clientX - drag.sx, dy = e.clientY - drag.sy;
-        if (Math.abs(dx) > 3 || Math.abs(dy) > 3) moved = true;
+        if (!moved && (Math.abs(dx) > 3 || Math.abs(dy) > 3)) {
+          moved = true;
+          self.fire('dragstart');
+        }
         self.view.x = drag.vx + dx;
         self.view.y = drag.vy + dy;
         self._syncCenterFromView();
@@ -901,7 +908,10 @@
         e.preventDefault();
         var t = e.touches[0];
         var dx = t.clientX - drag.sx, dy = t.clientY - drag.sy;
-        if (Math.abs(dx) > 4 || Math.abs(dy) > 4) moved = true;
+        if (!moved && (Math.abs(dx) > 4 || Math.abs(dy) > 4)) {
+          moved = true;
+          self.fire('dragstart');
+        }
         self.view.x = drag.vx + dx;
         self.view.y = drag.vy + dy;
         self._syncCenterFromView();
