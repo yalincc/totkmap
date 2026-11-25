@@ -229,6 +229,7 @@
   };
   Polyline.prototype.setLatLngs = function (ll) {
     this._latlngs = (ll || []).map(toLatLng);
+    this._bbox = calcPointsBbox(this._latlngs);
     if (this._map) this._map._schedDraw();
     return this;
   };
