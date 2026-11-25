@@ -812,7 +812,7 @@
    *   死区 30% → 10%（红点偏离视口中心 10% 即拉回，原 30% 太迟钝）；
    *   panTo 300ms 平滑动画 = 软跟随（避免 BOTW 式每拍硬居中跳变）。 */
   function followCenter() {
-    if (pos.mx == null) return;
+    if (pos.mx == null || map._isDragging) return;
     var cp = map.latLngToContainerPoint([pos.mx, pos.my]);
     var cc = map.latLngToContainerPoint(map.getCenter());
     var lim = Math.min(map.getSize().x, map.getSize().y) * 0.1;
@@ -826,25 +826,18 @@
   }
   function toggleFollow() {
     if (pos.mx == null) { toast('尚未获取玩家位置'); return false; }
-    follow = !follow;
-    lsSet(LS_FOLLOW, follow ? '1' : '0');
-    if ($('npFollow')) $('npFollow').checked = follow;
-    if (follow) centerOnPlayer();
-    setLocateBtns();
-    toast(follow ? '已开启：视图跟随玩家（超范围时跟随）' : '已关闭视图跟随');
+    if (!follow) {
+      follow = true;
+      lsSet(LS_FOLLOW, '1');
+      if ($('npFollow')) $('npFollow').checked = true;
+      setLocateBtns();
+      toast('已开启：视图跟随玩家（拖动可暂离，移动自动回中）');
+    }
+    centerOnPlayer();
     return follow;
   }
-  /* 拖动地图 = 手动看别处 → 自动关闭跟随 */
-  function bindFollowDrag() {
-    if (!map) return;
-    map.on('dragstart', function () {
-      if (!follow) return;
-      follow = false;
-      lsSet(LS_FOLLOW, '0');
-      if ($('npFollow')) $('npFollow').checked = false;
-      setLocateBtns();
-    });
-  }
+  /* 拖动地图时不再关闭跟随：静止看图保持当前位置，角色再次移动时自动回中 */
+  function bindFollowDrag() {}
   /* 导航结束广播：材料/探索队列同步停止（防队列状态残留，防重入：队列 stop 先置 running=false） */
   function notifyQueueEnd() {
     if (window.MAT_AUTO && window.MAT_AUTO.onNavEnd) window.MAT_AUTO.onNavEnd();
@@ -1009,8 +1002,25 @@
     panel = $('navPanel');
     if (!panel) return;
 
+    function anchorNavPanel() {
+      if (!panel || panel.dataset.dragged === '1') return;
+      if (window.innerWidth <= 720) {
+        panel.style.left = '';
+        panel.style.top = '';
+        panel.style.bottom = '';
+        return;
+      }
+      var anchor = $('vmBottomBtn') || btn;
+      if (!anchor) return;
+      var r = anchor.getBoundingClientRect();
+      var w = panel.offsetWidth || 270;
+      panel.style.left = Math.max(8, Math.min(r.left, window.innerWidth - w - 8)) + 'px';
+      panel.style.top = 'auto';
+      panel.style.bottom = '52px';
+    }
     var btn = $('navBtn');
-    if (btn) btn.addEventListener('click', function () {
+    if (btn) btn.addEventListener('click', function (e) {
+      e.stopPropagation();
       var h = panel.classList.contains('hidden');
       panel.classList.toggle('hidden', !h);
       btn.classList.toggle('active', h);
@@ -1022,7 +1032,15 @@
         if (setModal) setModal.classList.add('hidden');
         var vmCard = $('vmCard');
         if (vmCard) vmCard.classList.add('vm-hidden');
+        anchorNavPanel();
       }
+    });
+    document.addEventListener('click', function (e) {
+      if (!panel || panel.classList.contains('hidden')) return;
+      if (panel.contains(e.target)) return;
+      if (btn && (e.target === btn || btn.contains(e.target))) return;
+      panel.classList.add('hidden');
+      if (btn) btn.classList.remove('active');
     });
 
     /* V2.4.0 手机镜像面板按钮 */
@@ -1084,6 +1102,7 @@
       }
       function move(e) {
         if (!dragging) return;
+        panel.dataset.dragged = '1';
         var left = Math.max(0, Math.min(ox + e.clientX - sx, window.innerWidth - panel.offsetWidth));
         var top = Math.max(0, Math.min(oy + e.clientY - sy, window.innerHeight - 40));
         panel.style.left = left + 'px';

@@ -443,6 +443,7 @@
     this._matLayers = [];
     this._rafDraw = 0;
     this._flyRaf = 0;
+    this._isDragging = false;
     this._w = 0;
     this._h = 0;
     this._dpr = window.devicePixelRatio || 1;
@@ -837,6 +838,7 @@
       if (self._flyRaf) { cancelAnimationFrame(self._flyRaf); self._flyRaf = 0; }
       drag = { sx: e.clientX, sy: e.clientY, vx: self.view.x, vy: self.view.y };
       moved = false;
+      self._isDragging = false;
       cv.style.cursor = 'grabbing';
     });
 
@@ -845,6 +847,7 @@
         var dx = e.clientX - drag.sx, dy = e.clientY - drag.sy;
         if (!moved && (Math.abs(dx) > 3 || Math.abs(dy) > 3)) {
           moved = true;
+          self._isDragging = true;
           self.fire('dragstart');
         }
         self.view.x = drag.vx + dx;
@@ -864,6 +867,7 @@
     window.addEventListener('mouseup', function () {
       if (!drag) return;
       drag = null;
+      self._isDragging = false;
       cv.style.cursor = '';
       if (moved) self.fire('moveend');
     });
@@ -892,6 +896,7 @@
         drag = { sx: t.clientX, sy: t.clientY, vx: self.view.x, vy: self.view.y };
         pinch = null;
         moved = false;
+        self._isDragging = false;
       } else if (e.touches.length === 2) {
         drag = null;
         var t0 = e.touches[0], t1 = e.touches[1];
@@ -910,6 +915,7 @@
         var dx = t.clientX - drag.sx, dy = t.clientY - drag.sy;
         if (!moved && (Math.abs(dx) > 4 || Math.abs(dy) > 4)) {
           moved = true;
+          self._isDragging = true;
           self.fire('dragstart');
         }
         self.view.x = drag.vx + dx;
@@ -936,6 +942,7 @@
       if (e.touches.length === 0) {
         if (drag && moved) self.fire('moveend');
         drag = null;
+        self._isDragging = false;
         pinch = null;
       }
     });

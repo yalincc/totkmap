@@ -69,10 +69,14 @@
   var lastRenderedLayer = null;
   var currentItem = null;
   var currentAudio = null;
+  var sharedAudio = (typeof Audio !== 'undefined') ? new Audio() : null;
+  var autoCloseTimer = null;
+  var autoCloseOnEnd = false;
   var isPlayingNow = false;
   var playGen = 0;
   var audioCtx = null;
   var autoplayUnlocked = false;
+  var SILENT_WAV = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA';
   var triggeredAt = {};
 
   /* ---------------- 工具函数 ---------------- */
@@ -182,6 +186,24 @@
           if (audioCtx.state === 'suspended') audioCtx.resume();
         }
       } catch (e) {}
+      if (sharedAudio) {
+        try {
+          sharedAudio.muted = true;
+          sharedAudio.src = SILENT_WAV;
+          var up = sharedAudio.play();
+          if (up && typeof up.then === 'function') {
+            up.then(function () {
+              sharedAudio.pause();
+              sharedAudio.muted = false;
+            }).catch(function () {
+              sharedAudio.muted = false;
+            });
+          } else {
+            sharedAudio.pause();
+            sharedAudio.muted = false;
+          }
+        } catch (e) { sharedAudio.muted = false; }
+      }
       document.removeEventListener('pointerdown', unlock, true);
       document.removeEventListener('touchstart', unlock, true);
       document.removeEventListener('click', unlock, true);
@@ -232,9 +254,12 @@
   /* ---------------- 角色音频播放（本地 / 线上，不回退系统 TTS） ---------------- */
   function stopPlayback() {
     playGen++;
+    if (autoCloseTimer) { clearTimeout(autoCloseTimer); autoCloseTimer = null; }
+    autoCloseOnEnd = false;
     isPlayingNow = false;
     if (currentAudio) {
       try {
+        currentAudio.onplaying = null;
         currentAudio.onended = null;
         currentAudio.onerror = null;
         currentAudio.pause();
@@ -246,9 +271,10 @@
     updateCardPlayState(tr('点击播放', 'Ready'));
   }
 
-  function playItem(item) {
+  function playItem(item, autoClose) {
     if (!item) return;
     stopPlayback();
+    autoCloseOnEnd = !!autoClose;
     currentItem = item;
     isPlayingNow = true;
     setVoiceNavPaused(true);
@@ -268,7 +294,9 @@
       var url = urls[idx];
       var isOnline = url.indexOf('http') === 0;
       try {
-        var audio = new Audio(url);
+        var audio = sharedAudio || new Audio();
+        audio.muted = false;
+        audio.src = url;
         currentAudio = audio;
         audio.onplaying = function () {
           if (myGen !== playGen) return;
@@ -279,7 +307,16 @@
           currentAudio = null;
           isPlayingNow = false;
           setVoiceNavPaused(false);
+          if (!doneMap[item.id]) setDone(item.id, true);
           updateCardPlayState(tr('播放完毕', 'Finished'));
+          if (autoCloseOnEnd) {
+            autoCloseTimer = setTimeout(function () {
+              autoCloseTimer = null;
+              if (!isPlayingNow && ui.card && !ui.card.classList.contains('vm-hidden')) {
+                closeCard();
+              }
+            }, 900);
+          }
         };
         audio.onerror = function () {
           if (myGen !== playGen || currentAudio !== audio) return;
@@ -291,6 +328,13 @@
           p.catch(function (err) {
             if (myGen !== playGen || currentAudio !== audio) return;
             if (err && err.name === 'AbortError') return;
+            if (err && err.name === 'NotAllowedError') {
+              currentAudio = null;
+              isPlayingNow = false;
+              setVoiceNavPaused(false);
+              updateCardPlayState(tr('请点击播放', 'Tap ▶ to play'));
+              return;
+            }
             currentAudio = null;
             tryPlayIdx(idx + 1);
           });
@@ -465,7 +509,7 @@
     renderCardContent();
     ui.card.classList.remove('vm-hidden');
     if (autoPlay) {
-      playItem(item);
+      playItem(item, true);
     } else {
       updateCardPlayState(isPlayingNow ? tr('播放中', 'Playing') : tr('点击播放', 'Ready'));
     }
@@ -701,15 +745,21 @@
 
   /* ---------------- 独立设置面板：开关 / 锚定 / 拖动 ---------------- */
   function anchorSettingsModal() {
-    var modal = ui.settingsModal, btn = ui.bottomBtn;
-    if (!modal || !btn) return;
-    var r = btn.getBoundingClientRect();
-    var w = modal.offsetWidth || 320;
-    var left = Math.max(8, Math.min(r.left, window.innerWidth - w - 8));
-    var h = modal.offsetHeight || 240;
-    var top = Math.max(12, r.top - h - 8);
-    modal.style.left = left + 'px';
-    modal.style.top = top + 'px';
+    var modal = ui.settingsModal;
+    if (!modal || modal.dataset.dragged === '1') return;
+    if (window.innerWidth <= 720) {
+      modal.style.left = '';
+      modal.style.top = '';
+      modal.style.bottom = '';
+      return;
+    }
+    var anchor = ui.bottomBtn || document.getElementById('vmBottomBtn') || document.getElementById('navBtn');
+    if (!anchor) return;
+    var r = anchor.getBoundingClientRect();
+    var w = modal.offsetWidth || 256;
+    modal.style.left = Math.max(8, Math.min(r.left, window.innerWidth - w - 8)) + 'px';
+    modal.style.top = 'auto';
+    modal.style.bottom = '52px';
   }
 
   function toggleSettingsPanel(forceOpen) {
@@ -725,7 +775,7 @@
       if (navPanel) navPanel.classList.add('hidden');
       var navBtn = document.getElementById('navBtn');
       if (navBtn) navBtn.classList.remove('active');
-      if (!ui.settingsPositioned) { anchorSettingsModal(); ui.settingsPositioned = true; }
+      anchorSettingsModal();
       if (ui.card) ui.card.classList.add('vm-hidden');
       syncUI();
     }
@@ -740,16 +790,17 @@
       if (e.target.closest && e.target.closest('.detail-close')) return;
       dragging = true;
       sx = e.clientX; sy = e.clientY;
-      ox = parseFloat(modal.style.left) || modal.getBoundingClientRect().left;
-      oy = parseFloat(modal.style.top) || modal.getBoundingClientRect().top;
+      ox = modal.getBoundingClientRect().left;
+      oy = modal.getBoundingClientRect().top;
       if (e.preventDefault) e.preventDefault();
     }
     function move(e) {
       if (!dragging) return;
+      modal.dataset.dragged = '1';
       var w = modal.offsetWidth, h = modal.offsetHeight;
       var nx = Math.max(4, Math.min(ox + e.clientX - sx, window.innerWidth - w - 4));
       var ny = Math.max(4, Math.min(oy + e.clientY - sy, window.innerHeight - h - 4));
-      modal.style.left = nx + 'px'; modal.style.top = ny + 'px';
+      modal.style.left = nx + 'px'; modal.style.top = ny + 'px'; modal.style.bottom = 'auto';
     }
     function up() { dragging = false; }
     head.addEventListener('mousedown', down);

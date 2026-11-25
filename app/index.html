@@ -42,18 +42,6 @@
   <div class="panel-top">
     <div class="panel-head-row">
       <h2 class="panel-title" data-i18n="app.title">王国之泪·全能地图</h2>
-      <div class="top-switches">
-        <div class="name-switch cur" id="toggleNames">
-          <span data-i18n="app.showNames">显示名称</span>
-          <input type="checkbox" id="nameSwitch" checked>
-          <label class="switch" for="nameSwitch"><i></i></label>
-        </div>
-        <label class="name-switch" id="toggleArea">
-          <span data-i18n="app.areaOutline">地区轮廓</span>
-          <input type="checkbox" id="areaSwitch">
-          <span class="switch"><i></i></span>
-        </label>
-      </div>
     </div>
     <div class="layer-switch" id="layerSwitch">
       <button data-layer="20" data-i18n="layer.sky">天空</button>
@@ -343,6 +331,20 @@
         <button type="button" class="set-opt" data-v="clear" data-i18n="settings.trailClear">清除</button>
       </div>
     </div>
+
+    <div class="set-sec">
+      <div class="set-sec-head">
+        <span data-i18n="app.showNames">显示名称</span>
+        <label class="set-switch"><input type="checkbox" id="nameSwitch" checked><i></i></label>
+      </div>
+    </div>
+
+    <div class="set-sec">
+      <div class="set-sec-head">
+        <span data-i18n="app.areaOutline">地区轮廓</span>
+        <label class="set-switch"><input type="checkbox" id="areaSwitch"><i></i></label>
+      </div>
+    </div>
   </div>
 
   <div class="set-actions">
@@ -378,6 +380,17 @@
     padding: 12px 14px; font-size: 13px;
   }
   #vmSettingsModal .card-head { margin-bottom: 0; }
+  @media (max-width: 720px) {
+    #settingsModal.set-pop,
+    #vmSettingsModal.set-pop {
+      left: 8px !important;
+      right: 8px !important;
+      width: auto !important;
+      bottom: 52px !important;
+      top: auto !important;
+      max-height: calc(100vh - 68px);
+    }
+  }
   .set-tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; margin: 9px 0 8px; padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,.10); }
   .set-tab { padding: 5px 0; border-radius: 7px; border: 1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.04); color: #94a3b8; font-size: 12px; font-weight: 600; cursor: pointer; transition: all .15s ease; }
   .set-tab:hover { color: #e2e8f0; }
@@ -610,7 +623,7 @@
 <script src="data/i18n/zh.js"></script>
 <script src="data/i18n/en.js"></script>
 <script src="js/i18n.js"></script>
-<script src="js/totk-map-engine.js?v=8"></script>
+<script src="js/totk-map-engine.js?v=9"></script>
 <script src="vendor/murmurhash3js.min.js"></script>
 <script src="vendor/supercluster.min.js?v=188"></script>
 <script src="data/totk_save_hashes.js"></script>
@@ -646,14 +659,14 @@
 <script src="js/save-parser.js?v=1"></script>
 <script src="js/card-layout.js?v=302"></script>
 <script src="data/changelog.js?v=5"></script>
-<script src="js/app.js?v=331"></script>
+<script src="js/app.js?v=332"></script>
 <script src="voice/voice-nav.js?v=13"></script>
 <!-- 声之记忆（240 条）独立可插拔模块：独立文件夹与进度隔离，不进入左侧栏 -->
 <script src="voice-memories/vm-data.js?v=2"></script>
-<script src="voice-memories/vm-player.js?v=13"></script>
+<script src="voice-memories/vm-player.js?v=14"></script>
 <!-- 多点克洛格独立导航模块（搬运/飞圈圈/树桩/追小花），与单点导航解耦 -->
 <script src="js/korok-nav.js?v=291"></script>
-<script src="js/live.js?v=300"></script>
+<script src="js/live.js?v=301"></script>
 <script src="js/explore-auto.js?v=200"></script>
 <script src="js/mat-auto.js?v=196"></script>
 <!-- 手机防息屏降级（V2.4.1）：wakeLock 不可用（局域网 http / iOS 旧版）时播放静音视频保持屏幕常亮；

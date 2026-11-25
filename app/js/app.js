@@ -1654,24 +1654,27 @@
     $('panel').classList.toggle('collapsed');
   });
   function syncNameSwitchUI() {
-    $('toggleNames').classList.toggle('cur', state.showNames);
-    $('nameSwitch').checked = state.showNames;
+    if ($('toggleNames')) $('toggleNames').classList.toggle('cur', state.showNames);
+    if ($('nameSwitch')) $('nameSwitch').checked = state.showNames;
   }
-  $('toggleNames').addEventListener('click', function (e) {
-    // label 会触发 input change；此处防止重复处理（点击 span/容器时手动切换）
-    if (e.target.tagName === 'INPUT') return;
-    e.preventDefault();
-    state.showNames = !state.showNames;
-    syncNameSwitchUI();
-    saveJson(LS_NAMES, state.showNames);
-    refreshLabels();
-  });
-  $('nameSwitch').addEventListener('change', function () {
-    state.showNames = this.checked;
-    syncNameSwitchUI();
-    saveJson(LS_NAMES, state.showNames);
-    refreshLabels();
-  });
+  if ($('toggleNames')) {
+    $('toggleNames').addEventListener('click', function (e) {
+      if (e.target.tagName === 'INPUT') return;
+      e.preventDefault();
+      state.showNames = !state.showNames;
+      syncNameSwitchUI();
+      saveJson(LS_NAMES, state.showNames);
+      refreshLabels();
+    });
+  }
+  if ($('nameSwitch')) {
+    $('nameSwitch').addEventListener('change', function () {
+      state.showNames = this.checked;
+      syncNameSwitchUI();
+      saveJson(LS_NAMES, state.showNames);
+      refreshLabels();
+    });
+  }
 
   /* ---------------- 自定义标点流程 ---------------- */
   var _addBtn = $('addMarkerBtn');
@@ -2106,20 +2109,31 @@
     function isHexColor(v) { return /^#[0-9a-fA-F]{6}$/.test(v); }
 
     function anchorToButton() {
-      var btn = $('settingsBtn');
-      if (!btn) return;
-      var r = btn.getBoundingClientRect();
+      if (modal.dataset.dragged === '1') return;
+      if (window.innerWidth <= 720) {
+        modal.style.left = '';
+        modal.style.top = '';
+        modal.style.bottom = '';
+        return;
+      }
+      var anchor = $('vmBottomBtn') || $('navBtn') || $('settingsBtn');
+      if (!anchor) return;
+      var r = anchor.getBoundingClientRect();
       var modalW = modal.offsetWidth || 320;
-      var left = Math.max(8, Math.min(r.left, window.innerWidth - modalW - 8));
-      // 预留完整展开分类的高度（约 345px），弹出时往上一点，防止展开隐藏分类后被底栏遮挡截断
-      var neededH = 345;
-      var top = Math.max(12, r.top - neededH);
-      modal.style.left = left + 'px';
-      modal.style.top = top + 'px';
+      modal.style.left = Math.max(8, Math.min(r.left, window.innerWidth - modalW - 8)) + 'px';
+      modal.style.top = 'auto';
+      modal.style.bottom = '52px';
     }
     function open() {
+      // 三底栏入口互斥：打开设置时收起导航面板与声之记忆面板
+      var navPanel = $('navPanel');
+      if (navPanel) navPanel.classList.add('hidden');
+      var navBtn = $('navBtn');
+      if (navBtn) navBtn.classList.remove('active');
+      var vmModal = $('vmSettingsModal');
+      if (vmModal) vmModal.classList.add('hidden');
       modal.classList.remove('hidden');
-      if (!positioned) { anchorToButton(); positioned = true; }
+      anchorToButton();
       syncUI();
     }
     function close() { modal.classList.add('hidden'); }
@@ -2153,12 +2167,15 @@
         if (e.target.closest && e.target.closest('.detail-close')) return;
         dragging = true;
         sx = e.clientX; sy = e.clientY;
-        ox = modal.offsetLeft; oy = modal.offsetTop;
+        var rect = modal.getBoundingClientRect();
+        ox = rect.left; oy = rect.top;
       }
       function move(e) {
         if (!dragging) return;
+        modal.dataset.dragged = '1';
         modal.style.left = Math.max(0, Math.min(ox + e.clientX - sx, window.innerWidth - modal.offsetWidth)) + 'px';
         modal.style.top = Math.max(0, Math.min(oy + e.clientY - sy, window.innerHeight - 60)) + 'px';
+        modal.style.bottom = 'auto';
       }
       function up() { dragging = false; }
       head.addEventListener('mousedown', down);
