@@ -60,7 +60,7 @@
   var AREA_SKY = window.TOTK_AREA_SKY || [];
   var AREA_DEPTHS = window.TOTK_AREA_DEPTHS || [];
 
-  var VERSION = 'TOTKMAP V2.9.1';
+  var VERSION = 'TOTKMAP V2.9.2';
   /* V2.8 克洛格谜题类型中文名（兜底；正式文案走 i18n 的 korok.type.*）
    * 由 tools/build_korok_info.py 依据 ROMFS 克洛格 actor 自动标注，
    * 分类参考游民星空「呀哈哈机关解密方法汇总」。 */
@@ -87,6 +87,7 @@
   var LS_CUSTOM = 'totkmap_custom_v1';
   var LS_LAYER = 'totkmap_layer_v1';
   var LS_NAMES = 'totkmap_names_v1';
+  var LS_TASK_NAMES = 'totkmap_task_names_v1';
   var LS_SAVE = 'totkmap_save_v1';
   var LS_AREA = 'totkmap_area_v1';
   var LS_SELECTED = 'totkmap_selected_v2';   // 各层选中的分类（按层存，切层/刷新均保持）
@@ -97,7 +98,7 @@
   var GROUP_ORDER = [1, 2, 3, 4, 5];
 
   var LABEL_MIN_ZOOM = 6;   // 名称标签显示的最低缩放级别（全分类统一：zoom >= 6 即 800%+ 显示，低于则隐藏）
-  var MAX_ZOOM = 7;   // V1.9.0: z7 尺寸由 z6 瓦片 2× 自动缩放实现（maxNativeZoom=6 保持不变），材料聚合 maxZoom 同步 7
+  var MAX_ZOOM = 7.5;   // +0.5 步长到 2263%（z6=800%, z6.5=1131%, z7=1600%, z7.5=2263%），z6 瓦片平滑超分
   var MIN_ZOOM = 3;
 
   /* 统一坐标口径工具函数（2026-10-27，甲方案收口）:
@@ -130,6 +131,7 @@
     custom: [],            // 自定义标点 [{id,name,desc,x,y,layer}]
     filter: 'all',         // all | done | undone
     showNames: true,
+    showTaskNames: false,
     adding: false,         // 放置自定义标点模式
     groups: {},            // catalogId -> L.LayerGroup
     markers: {},           // markerId -> L.Marker
@@ -241,6 +243,7 @@
         return !!(state.done && state.done[doneId]);
       },
       showNames: !!state.showNames,
+      showTaskNames: !!state.showTaskNames,
       labelMinZoom: LABEL_MIN_ZOOM,
       getLabel: function (m) {
         var isDone = !!(state.done && state.done[m.korokStartId || m.id]);
@@ -826,6 +829,7 @@
   function refreshLabels() {
     if (state.canvasLayer) {
       state.canvasLayer.setShowNames(!!state.showNames);
+      if (state.canvasLayer.setShowTaskNames) state.canvasLayer.setShowTaskNames(!!state.showTaskNames);
     }
     var z = map.getZoom();
     var bounds = map.getBounds();
@@ -878,6 +882,18 @@
   function renderAreas() {
     state.areaMarks.forEach(function (a) { map.removeLayer(a.mk); });
     state.areaMarks = [];
+    if (map.setAreaLabels) {
+      var list = [];
+      for (var i = 0; i < AREAS.length; i++) {
+        var a = AREAS[i];
+        if (a.layer !== state.layer || !a.name) continue;
+        var vis = a.visible ? String(a.visible).split(',').map(Number) : null;
+        var aName = window.I18N ? (window.I18N.nameOf(a.name) || a.name) : a.name;
+        list.push({ x: a.x, y: a.y, name: aName, vis: vis, size: a.size || 14, prio: a.prio || 5 });
+      }
+      map.setAreaLabels(list);
+      return;
+    }
     for (var i = 0; i < AREAS.length; i++) {
       var a = AREAS[i];
       if (a.layer !== state.layer || !a.name) continue;
@@ -899,6 +915,7 @@
   }
 
   function updateAreas() {
+    if (map.setAreaLabels) return;
     var z = Math.round(map.getZoom());
     for (var i = 0; i < state.areaMarks.length; i++) {
       var a = state.areaMarks[i];
@@ -914,6 +931,7 @@
 
   /* 标签防重叠：同缩放级别内重叠的低优先级标签微调或隐藏，防止横屏抽搐乱跳 */
   function avoidOverlap() {
+    if (map.setAreaLabels) return;
     var els = [], vw = window.innerWidth, vh = window.innerHeight;
     document.querySelectorAll('.area-label').forEach(function (el) {
       var inner = el.querySelector('.area-label-inner');
@@ -1603,14 +1621,14 @@
 
   function initAreaOverlays() {
     state.areaOn = loadJson(LS_AREA, false);
-    var sw = $('areaSwitch');
+    var pillArea = $('setPillArea');
     var box = $('toggleArea');
-    if (sw) sw.checked = !!state.areaOn;
+    if (pillArea) pillArea.classList.toggle('on', !!state.areaOn);
     if (box) box.classList.toggle('cur', !!state.areaOn);
     function apply(on) {
       state.areaOn = !!on;
       saveJson(LS_AREA, state.areaOn);
-      if (sw) sw.checked = !!state.areaOn;
+      if (pillArea) pillArea.classList.toggle('on', !!state.areaOn);
       if (box) box.classList.toggle('cur', !!state.areaOn);
       // 联动洞穴入口（地上70 / 天空116）与井（地上82）：开启时自动勾选，关闭时自动取消；开启期间仍可手动单独取消
       var linkedByLayer = { 18: [70, 82], 20: [116] };
@@ -1633,8 +1651,7 @@
       renderMarkers();
       buildAreaOverlays();
     }
-    // label 的 for 属性自动切换 input，change 统一处理
-    if (sw) sw.addEventListener('change', function () { apply(this.checked); });
+    if (pillArea) pillArea.addEventListener('click', function () { apply(!state.areaOn); });
     buildAreaOverlays();
   }
   /* ---------------- 图层切换 ---------------- */
@@ -1683,7 +1700,8 @@
   });
   function syncNameSwitchUI() {
     if ($('toggleNames')) $('toggleNames').classList.toggle('cur', state.showNames);
-    if ($('nameSwitch')) $('nameSwitch').checked = state.showNames;
+    if ($('setPillNames')) $('setPillNames').classList.toggle('on', !!state.showNames);
+    if ($('setPillTaskNames')) $('setPillTaskNames').classList.toggle('on', !!state.showTaskNames);
   }
   if ($('toggleNames')) {
     $('toggleNames').addEventListener('click', function (e) {
@@ -1695,11 +1713,19 @@
       refreshLabels();
     });
   }
-  if ($('nameSwitch')) {
-    $('nameSwitch').addEventListener('change', function () {
-      state.showNames = this.checked;
+  if ($('setPillNames')) {
+    $('setPillNames').addEventListener('click', function () {
+      state.showNames = !state.showNames;
       syncNameSwitchUI();
       saveJson(LS_NAMES, state.showNames);
+      refreshLabels();
+    });
+  }
+  if ($('setPillTaskNames')) {
+    $('setPillTaskNames').addEventListener('click', function () {
+      state.showTaskNames = !state.showTaskNames;
+      syncNameSwitchUI();
+      saveJson(LS_TASK_NAMES, state.showTaskNames);
       refreshLabels();
     });
   }
@@ -2170,6 +2196,12 @@
     $('setClose').addEventListener('click', close);
     $('setReset').addEventListener('click', function () {
       SETTINGS.reset();
+      state.showNames = true;
+      state.showTaskNames = false;
+      saveJson(LS_NAMES, true);
+      saveJson(LS_TASK_NAMES, false);
+      syncNameSwitchUI();
+      refreshLabels();
       iconCache = {};
       doneIconCache = {};
       syncUI();
@@ -2917,10 +2949,10 @@
   var validLayers = LAYERS.map(function (l) { return l.id; });
   if (savedLayer && validLayers.indexOf(savedLayer) >= 0) state.layer = savedLayer;
   var savedNames = loadJson(LS_NAMES, null);
-  if (savedNames !== null) {
-    state.showNames = !!savedNames;
-    syncNameSwitchUI();
-  }
+  if (savedNames !== null) state.showNames = !!savedNames;
+  var savedTaskNames = loadJson(LS_TASK_NAMES, null);
+  if (savedTaskNames !== null) state.showTaskNames = !!savedTaskNames;
+  syncNameSwitchUI();
 
   // 初始图层按钮状态
   Array.prototype.forEach.call($('layerSwitch').querySelectorAll('button'), function (b) {

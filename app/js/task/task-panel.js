@@ -500,13 +500,12 @@
          *   （节点缩小一点、给任务点留白也解决不了——它们中心重合。） */
         zIndexOffset: 900
       });
-      m._taskObj = t;
-      /* 已完成加✓ 前缀，与探索侧 tooltip 口径一致。
-         ★ V2.3.3：tooltip 简化为「#8 迷你挑战 未知的天空巨人」——
-         档内序号 + 档名 + 任务名（不再显示序号/总数）。 */
       var isEn = window.I18N && window.I18N.getLang() === 'en';
       var tName = isEn ? (window.I18N.nameOf(t.name) || t.name) : t.name;
       var gName = isEn ? (window.I18N.catOf(t.group) || t.group) : (t.group || '');
+      m._taskObj = t;
+      m._taskDone = isDone;
+      m._taskLabel = (t.no ? '#' + t.no + ' ' : '') + tName;
       var tip = (isDone ? '✓ ' : '') +
         (t.no ? '#' + t.no + ' ' + esc(gName) + ' ' : '') +
         tName;

@@ -315,7 +315,8 @@
     var self = this;
     el.addEventListener('click', function (e) {
       e.stopPropagation();
-      self.fire('click', { originalEvent: e, latlng: self._latlng });
+      var pt = self._map ? self._map.mouseEventToContainerPoint(e) : null;
+      self.fire('click', { originalEvent: e, latlng: self._latlng, layerPoint: pt, containerPoint: pt });
     });
     el.addEventListener('mouseenter', function () {
       if (self._tip && self._map) {
@@ -806,13 +807,110 @@
     }
   };
 
-  /* ---------------- 主渲染帧（瓦片 + 矢量 + 探索标点 + 材料聚合 + DOM 锚点同帧同步） ---------------- */
+  TotkCanvasMap.prototype.setAreaLabels = function (list) {
+    this._areaLabels = Array.isArray(list) ? list : [];
+    this._schedDraw();
+    return this;
+  };
+  TotkCanvasMap.prototype._drawAreaLabels = function (ctx, iconBoxes) {
+    this._areaBoxes = [];
+    var list = this._areaLabels;
+    if (!list || !list.length) return;
+    var view = this.view, w = this._w, h = this._h;
+    var z = Math.min(7, Math.round(this._zoom));
+    var pad = 120;
+    var cands = [];
+    for (var i = 0; i < list.length; i++) {
+      var a = list[i];
+      if (a.vis && a.vis.indexOf(z) < 0) continue;
+      var ax = view.x + a.y * view.scale;
+      var ay = view.y + a.x * view.scale;
+      if (ax < -pad || ax > w + pad || ay < -pad || ay > h + pad) continue;
+      cands.push({ a: a, x: ax, y: ay });
+    }
+    if (!cands.length) return;
+    cands.sort(function (u, v) { return (u.a.prio || 5) - (v.a.prio || 5); });
+    ctx.save();
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.strokeStyle = '#3f3010';
+    ctx.fillStyle = '#bfae68';
+    ctx.lineJoin = 'round';
+    var boxes = this._areaBoxes;
+    var icons = iconBoxes || [];
+    var offsets = [[0, 0], [0, -24], [0, 24], [-28, 0], [28, 0]];
+    function overlapsAny(bx1, by1, bx2, by2, arr) {
+      for (var n = 0; n < arr.length; n++) {
+        var b = arr[n];
+        if (bx1 < b[2] && bx2 > b[0] && by1 < b[3] && by2 > b[1]) return true;
+      }
+      return false;
+    }
+    for (var j = 0; j < cands.length; j++) {
+      var c = cands[j], a = c.a;
+      var fs = Math.round(Math.max(11, a.size * (0.5 + z * 0.13)));
+      ctx.font = '600 ' + fs + 'px "PingFang SC","Microsoft YaHei","SimSun",sans-serif';
+      var tw = ctx.measureText(a.name).width;
+      var hw = tw / 2 + 4, hh = fs / 2 + 2;
+      var chosen = null, hitIconFallback = false;
+      for (var oi = 0; oi < offsets.length; oi++) {
+        var ox = c.x + offsets[oi][0], oy = c.y + offsets[oi][1];
+        var bx1 = ox - hw, by1 = oy - hh, bx2 = ox + hw, by2 = oy + hh;
+        if (overlapsAny(bx1, by1, bx2, by2, boxes)) continue;
+        if (!overlapsAny(bx1, by1, bx2, by2, icons)) {
+          chosen = [ox, oy, bx1, by1, bx2, by2];
+          break;
+        }
+      }
+      if (!chosen) {
+        var fx1 = c.x - hw, fy1 = c.y - hh, fx2 = c.x + hw, fy2 = c.y + hh;
+        if (overlapsAny(fx1, fy1, fx2, fy2, boxes)) continue;
+        chosen = [c.x, c.y, fx1, fy1, fx2, fy2];
+        hitIconFallback = true;
+      }
+      boxes.push([chosen[2], chosen[3], chosen[4], chosen[5]]);
+      ctx.globalAlpha = hitIconFallback ? 0.58 : 1.0;
+      ctx.lineWidth = 3;
+      ctx.strokeText(a.name, chosen[0], chosen[1]);
+      ctx.fillText(a.name, chosen[0], chosen[1]);
+    }
+    ctx.restore();
+  };
+
+  /* ---------------- 主渲染帧（三步同帧：底图+图标 → 地名偏移避让图标 → 标点文字避让图标+地名） ---------------- */
   TotkCanvasMap.prototype._draw = function () {
     var ctx = this._ctx;
     ctx.clearRect(0, 0, this._w, this._h);
     this._drawTiles(ctx);
     this._drawVectors(ctx);
-    for (var i = 0; i < this._exploreLayers.length; i++) this._exploreLayers[i]._renderOn(ctx);
+    var allIconBoxes = [];
+    for (var i = 0; i < this._exploreLayers.length; i++) {
+      var layer = this._exploreLayers[i];
+      if (layer._renderIcons) {
+        layer._renderIcons(ctx);
+        if (layer._iconBoxes) {
+          for (var ib = 0; ib < layer._iconBoxes.length; ib++) allIconBoxes.push(layer._iconBoxes[ib]);
+        }
+      } else {
+        layer._renderOn(ctx);
+      }
+    }
+    var view = this.view, pad = 48, w = this._w, h = this._h;
+    var dms = this._domMarkers || [];
+    for (var di = 0; di < dms.length; di++) {
+      var dm = dms[di];
+      if (!dm || !dm._latlng || !dm._el || dm._el.style.display === 'none') continue;
+      var dx = view.x + dm._latlng.lng * view.scale;
+      var dy = view.y + dm._latlng.lat * view.scale;
+      if (dx < -pad * 2 || dx > w + pad * 2 || dy < -pad * 2 || dy > h + pad * 2) continue;
+      var icSz = (dm.options && dm.options.icon && dm.options.icon.options && dm.options.icon.options.iconSize) || [26, 26];
+      var dw = (icSz[0] || 26) / 2 + 2, dh = (icSz[1] || 26) / 2 + 2;
+      allIconBoxes.push([dx - dw, dy - dh, dx + dw, dy + dh]);
+    }
+    this._drawAreaLabels(ctx, allIconBoxes);
+    for (var i2 = 0; i2 < this._exploreLayers.length; i2++) {
+      if (this._exploreLayers[i2]._renderLabels) this._exploreLayers[i2]._renderLabels(ctx);
+    }
     for (var j = 0; j < this._matLayers.length; j++) this._matLayers[j]._renderOn(ctx);
     for (var k = 0; k < this._domMarkers.length; k++) this._posDomMarker(this._domMarkers[k]);
   };
@@ -1031,6 +1129,11 @@
     if (this._map) this._map._schedDraw();
     return this;
   };
+  TotkCanvasLayer.prototype.setShowTaskNames = function (show) {
+    this.options.showTaskNames = !!show;
+    if (this._map) this._map._schedDraw();
+    return this;
+  };
   TotkCanvasLayer.prototype.redraw = function () {
     if (this._map) this._map._schedDraw();
     return this;
@@ -1043,13 +1146,18 @@
     if (this._map) this._map._schedDraw();
     return this;
   };
-  TotkCanvasLayer.prototype._renderOn = function (ctx) {
+  TotkCanvasLayer.prototype._renderIcons = function (ctx) {
     var map = this._map, view = map.view, w = map._w, h = map._h;
     var zoom = map._zoom, opt = this.options;
     var items = this._items || [];
-    if (!items.length) { this._visibleMarkers = []; return; }
+    if (!items.length) {
+      this._visibleMarkers = [];
+      this._iconBoxes = [];
+      this._pendingLabels = [];
+      return;
+    }
     var pad = 48;
-    var vis = [], labelList = [];
+    var vis = [], labelList = [], iconBoxes = [];
     var onImg = function () { map._schedDraw(); };
 
     /* 512m 空间网格裁剪，只遍历视口内网格单元 */
@@ -1107,36 +1215,125 @@
           }
 
           vis.push({ marker: m, x: x, y: y, size: size });
-          if (opt.showNames && zoom >= (opt.labelMinZoom || 5)) {
-            if ((!it.isChest && !it.isKorok) || zoom >= 6) {
-              labelList.push({ m: m, x: x, y: y, size: size });
-            }
+          var vh = size / 2 + 1;
+          iconBoxes.push([x - vh, y - vh, x + vh, y + vh]);
+          if (opt.showNames && zoom >= (opt.labelMinZoom || 6)) {
+            labelList.push({ m: m, x: x, y: y, size: size, isDone: isDone });
           }
         }
       }
     }
     if (curAlpha !== 1.0) ctx.globalAlpha = 1.0;
+    this._visibleMarkers = vis;
+    this._iconBoxes = iconBoxes;
+    this._pendingLabels = labelList;
+  };
+  TotkCanvasLayer.prototype._renderLabels = function (ctx) {
+    var map = this._map, view = map.view, w = map._w, h = map._h;
+    var zoom = map._zoom, opt = this.options, pad = 48;
+    var labelList = (this._pendingLabels || []).slice();
+    var placedBoxes = (this._iconBoxes || []).slice();
+    /* 避让区域地名文字包围盒（地名已在 Pass 2 避让图标绘制，标点文字避让地名） */
+    var aboxes = map._areaBoxes || [];
+    for (var ai = 0; ai < aboxes.length; ai++) {
+      placedBoxes.push(aboxes[ai]);
+    }
+    /* 避让视口内可见的 DomMarker（任务图标等），并在最大缩放时收集未完成任务名 */
+    var dms = map._domMarkers || [];
+    for (var di = 0; di < dms.length; di++) {
+      var dm = dms[di];
+      if (!dm || !dm._latlng || !dm._el || dm._el.style.display === 'none') continue;
+      var dx = view.x + dm._latlng.lng * view.scale;
+      var dy = view.y + dm._latlng.lat * view.scale;
+      if (dx < -pad * 2 || dx > w + pad * 2 || dy < -pad * 2 || dy > h + pad * 2) continue;
+      var icSz = (dm.options && dm.options.icon && dm.options.icon.options && dm.options.icon.options.iconSize) || [26, 26];
+      var dw = (icSz[0] || 26) / 2 + 2;
+      var dh = (icSz[1] || 26) / 2 + 2;
+      placedBoxes.push([dx - dw, dy - dh, dx + dw, dy + dh]);
+      if (opt.showTaskNames && zoom >= 7 && dm._taskObj && !dm._taskDone && dm._taskLabel) {
+        labelList.push({ isTask: true, m: dm._taskObj, x: dx, y: dy, size: Math.max(icSz[0] || 26, icSz[1] || 26), isDone: false, label: dm._taskLabel });
+      }
+    }
 
     if (labelList.length) {
+      var PRIORITY_CATS = { 62: 1, 66: 1, 67: 2, 63: 2, 109: 2, 97: 2, 70: 3, 116: 3, 82: 3, 69: 3 };
+      labelList.sort(function (a, b) {
+        var pa = a.isTask ? 5 : (PRIORITY_CATS[a.m.cat] || 9);
+        var pb = b.isTask ? 5 : (PRIORITY_CATS[b.m.cat] || 9);
+        if (pa !== pb) return pa - pb;
+        if (a.isDone !== b.isDone) return a.isDone ? 1 : -1;
+        return (a.y - b.y) || (a.x - b.x);
+      });
       var fs = Math.min(Math.max(10, Math.round(zoom * 2)), 13);
+      var fs2 = Math.max(9, fs - 1);
+      var font1 = '600 ' + fs + 'px "PingFang SC","Microsoft YaHei",sans-serif';
+      var font2 = '600 ' + fs2 + 'px "PingFang SC","Microsoft YaHei",sans-serif';
       ctx.save();
-      ctx.font = '600 ' + fs + 'px "PingFang SC","Microsoft YaHei",sans-serif';
-      ctx.textAlign = 'center';
       ctx.textBaseline = 'top';
+      ctx.lineWidth = 3;
+      ctx.strokeStyle = 'rgba(8, 12, 10, 0.85)';
       for (var j = 0; j < labelList.length; j++) {
         var it = labelList[j];
-        var lbl = typeof opt.getLabel === 'function' ? opt.getLabel(it.m) : (it.m.name || it.m.drop_zh || '');
+        var lbl = it.isTask ? it.label : (typeof opt.getLabel === 'function' ? opt.getLabel(it.m) : (it.m.name || it.m.drop_zh || ''));
         if (!lbl) continue;
-        var ly = it.y + it.size / 2 + 3;
-        ctx.lineWidth = 3;
-        ctx.strokeStyle = 'rgba(0,0,0,0.85)';
-        ctx.strokeText(lbl, it.x, ly);
-        ctx.fillStyle = '#ffffff';
-        ctx.fillText(lbl, it.x, ly);
+        var lines = String(lbl).split('\n');
+        var line1 = lines[0] || '';
+        var line2 = lines[1] || '';
+        ctx.font = font1;
+        var w1 = ctx.measureText(line1).width;
+        var w2 = 0;
+        if (line2) {
+          ctx.font = font2;
+          w2 = ctx.measureText(line2).width;
+        }
+        var bw = Math.max(w1, w2) + 8;
+        var bh = line2 ? (fs + fs2 + 5) : (fs + 3);
+        var halfIcon = it.size / 2;
+        /* 四方向尝试：下 → 上 → 右 → 左 */
+        var cands = [
+          { tx: it.x, ty: it.y + halfIcon + 3, align: 'center', bx1: it.x - bw / 2, by1: it.y + halfIcon + 2 },
+          { tx: it.x, ty: it.y - halfIcon - 3 - bh, align: 'center', bx1: it.x - bw / 2, by1: it.y - halfIcon - 4 - bh },
+          { tx: it.x + halfIcon + 5, ty: it.y - bh / 2, align: 'left', bx1: it.x + halfIcon + 2, by1: it.y - bh / 2 - 1 },
+          { tx: it.x - halfIcon - 5, ty: it.y - bh / 2, align: 'right', bx1: it.x - halfIcon - 2 - bw, by1: it.y - bh / 2 - 1 }
+        ];
+        var chosen = null;
+        for (var ci = 0; ci < cands.length; ci++) {
+          var cd = cands[ci];
+          var cx1 = cd.bx1, cy1 = cd.by1, cx2 = cx1 + bw, cy2 = cy1 + bh;
+          var overlap = false;
+          for (var pbIdx = 0; pbIdx < placedBoxes.length; pbIdx++) {
+            var b = placedBoxes[pbIdx];
+            if (cx1 < b[2] && cx2 > b[0] && cy1 < b[3] && cy2 > b[1]) {
+              overlap = true;
+              break;
+            }
+          }
+          if (!overlap) {
+            chosen = cd;
+            placedBoxes.push([cx1, cy1, cx2, cy2]);
+            break;
+          }
+        }
+        if (!chosen) continue;
+        ctx.textAlign = chosen.align;
+        ctx.font = font1;
+        ctx.strokeText(line1, chosen.tx, chosen.ty);
+        ctx.fillStyle = it.isTask ? '#ffe59e' : (it.isDone ? 'rgba(180, 205, 185, 0.85)' : '#ffffff');
+        ctx.fillText(line1, chosen.tx, chosen.ty);
+        if (line2) {
+          var ly2 = chosen.ty + fs + 2;
+          ctx.font = font2;
+          ctx.strokeText(line2, chosen.tx, ly2);
+          ctx.fillStyle = it.isDone ? 'rgba(160, 195, 170, 0.75)' : 'rgba(215, 238, 222, 0.92)';
+          ctx.fillText(line2, chosen.tx, ly2);
+        }
       }
       ctx.restore();
     }
-    this._visibleMarkers = vis;
+  };
+  TotkCanvasLayer.prototype._renderOn = function (ctx) {
+    this._renderIcons(ctx);
+    this._renderLabels(ctx);
   };
   TotkCanvasLayer.prototype._pickCandidates = function (px, py) {
     var out = [], defR = this.options.hitRadius || 16;

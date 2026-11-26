@@ -117,7 +117,7 @@
   </div>
 
   <footer class="side-foot">
-    <p class="foot-version">TOTKMAP V2.9.1 © 2026 yalincc</p>
+    <p class="foot-version">TOTKMAP V2.9.2 © 2026 yalincc</p>
     <p>GitHub <a href="https://github.com/yalincc/totkmap" target="_blank" rel="noopener">https://github.com/yalincc/totkmap</a></p>
   </footer>
 </aside>
@@ -333,16 +333,11 @@
     </div>
 
     <div class="set-sec">
-      <div class="set-sec-head">
-        <span data-i18n="app.showNames">显示名称</span>
-        <label class="set-switch"><input type="checkbox" id="nameSwitch" checked><i></i></label>
-      </div>
-    </div>
-
-    <div class="set-sec">
-      <div class="set-sec-head">
-        <span data-i18n="app.areaOutline">地区轮廓</span>
-        <label class="set-switch"><input type="checkbox" id="areaSwitch"><i></i></label>
+      <div class="set-sec-title" data-i18n="settings.mapDisplay">地图显示</div>
+      <div class="set-pills" id="setMapDisplayPills">
+        <button type="button" class="set-pill on" id="setPillNames" data-i18n="app.showNames">显示名称</button>
+        <button type="button" class="set-pill" id="setPillTaskNames" data-i18n="app.showTaskNames">显示任务名</button>
+        <button type="button" class="set-pill" id="setPillArea" data-i18n="app.areaOutline">地形轮廓</button>
       </div>
     </div>
   </div>
@@ -623,7 +618,7 @@
 <script src="data/i18n/zh.js"></script>
 <script src="data/i18n/en.js"></script>
 <script src="js/i18n.js"></script>
-<script src="js/totk-map-engine.js?v=9"></script>
+<script src="js/totk-map-engine.js?v=16"></script>
 <script src="vendor/murmurhash3js.min.js"></script>
 <script src="vendor/supercluster.min.js?v=188"></script>
 <script src="data/totk_save_hashes.js"></script>
@@ -638,7 +633,7 @@
 <script src="data/area_cave.js?v=2"></script>
 <script src="data/area_sky.js"></script>
 <script src="data/area_depths.js"></script>
-<script src="data/markers.js?v=286"></script>
+<script src="data/markers.js?v=287"></script>
 <script src="data/materials.js?v=285"></script>
 <!-- 龙轨迹：ROM 官方轨道数据（Set_DragonRail_Static） -->
 <script src="data/dragon_paths_rom.js?v=255"></script>
@@ -658,8 +653,8 @@
 <script>window.TOTK_COMPENDIUM_URL = '';</script>
 <script src="js/save-parser.js?v=1"></script>
 <script src="js/card-layout.js?v=302"></script>
-<script src="data/changelog.js?v=5"></script>
-<script src="js/app.js?v=333"></script>
+<script src="data/changelog.js?v=6"></script>
+<script src="js/app.js?v=336"></script>
 <script src="voice/voice-nav.js?v=13"></script>
 <!-- 声之记忆（240 条）独立可插拔模块：独立文件夹与进度隔离，不进入左侧栏 -->
 <script src="voice-memories/vm-data.js?v=2"></script>
