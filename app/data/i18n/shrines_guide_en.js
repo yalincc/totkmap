@@ -999,7 +999,7 @@ window.TOTK_SHRINES_GUIDE_EN = {
     "note": "Use Hover Stones to create stepping stones and floating platforms, then use Ascend beneath them to climb up to the altar.",
     "chest": "Located in an alcove on the upper ledge. Place a Hover Stone under the opening and Ascend to reach the chest with Arrows x5."
   },
-  "摩嘠瓦卡神庙": {
+  "摩嘎瓦卡神庙": {
     "place": "Located underneath the entrance bridge to Zora's Domain.",
     "note": "Attach wooden boards to waterwheels to generate hydroelectric power, charge the portable battery, and power the elevator to reach the altar.",
     "chest": "Located in a barred room across the pool. Connect the submerged iron balls to complete the circuit, power the door, and open the chest for an Opal."

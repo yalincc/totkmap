@@ -1276,7 +1276,7 @@ window.TOTK_SHRINES_GUIDE = {
   },
   "99": {
     "id": 99,
-    "name_zh": "摩嘠瓦卡神庙",
+    "name_zh": "摩嘎瓦卡神庙",
     "name_en": "Mogawak Shrine",
     "trial_zh": "水力发电",
     "trial_en": "The Power of Water",
