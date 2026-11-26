@@ -96,7 +96,7 @@
   var GROUP_NAME = { 1: '位置', 2: '收集', 3: '装备', 4: '地点', 5: '怪物' };
   var GROUP_ORDER = [1, 2, 3, 4, 5];
 
-  var LABEL_MIN_ZOOM = 4;   // 名称标签显示的最低缩放级别
+  var LABEL_MIN_ZOOM = 6;   // 名称标签显示的最低缩放级别（全分类统一：zoom >= 6 即 800%+ 显示，低于则隐藏）
   var MAX_ZOOM = 7;   // V1.9.0: z7 尺寸由 z6 瓦片 2× 自动缩放实现（maxNativeZoom=6 保持不变），材料聚合 maxZoom 同步 7
   var MIN_ZOOM = 3;
 
@@ -244,7 +244,7 @@
       labelMinZoom: LABEL_MIN_ZOOM,
       getLabel: function (m) {
         var isDone = !!(state.done && state.done[m.korokStartId || m.id]);
-        var disp = formatMarkerDisplay(m);
+        var disp = formatMapLabel(m);
         return (isDone ? '✓ ' : '') + disp;
       },
       getMarkerSize: function (m, zoom) {
@@ -1159,7 +1159,27 @@
       }
       return 'No.' + String(kInfo.no).padStart(4, '0') + ' ' + dispName;
     }
-    return dispName || ('ID ' + m.id);
+    var baseName = dispName || ('ID ' + m.id);
+    return m.no ? (m.no + ' ' + baseName) : baseName;
+  }
+  /* 地图 Canvas 双行标签：名字第一行，编号第二行，避免超长单行互相打架 */
+  function formatMapLabel(m) {
+    if (isChestLike(m)) {
+      var dropDisp = m.drop_zh || m.drop || (window.I18N ? window.I18N.catOf('宝箱') : '宝箱');
+      if (window.I18N && m.drop_zh) dropDisp = window.I18N.nameOf(m.drop_zh) || dropDisp;
+      return m.no ? (dropDisp + '\n' + m.no) : dropDisp;
+    }
+    var KI = window.TOTK_KOROK_INFO || {};
+    var kInfo = KI[String(m.id)];
+    var dispName = window.I18N ? window.I18N.nameOf(m) : (m.name || m.full || '');
+    if (kInfo && kInfo.no != null) {
+      if (/呀哈哈|克洛格/.test(m.name || '')) {
+        dispName = window.I18N ? window.I18N.t('card.korokName', '克洛格果实') : '克洛格果实';
+      }
+      return dispName + '\nNo.' + String(kInfo.no).padStart(4, '0');
+    }
+    var baseName = dispName || ('ID ' + m.id);
+    return m.no ? (baseName + '\n' + m.no) : baseName;
   }
   function pickIconOf(m) {
     if (m.iconUrl) return m.iconUrl;
@@ -1301,12 +1321,20 @@
         }
       }
     }
+    /* 分类编号直达（Gm-001/Sm-001/Gk-001/So-001/Sw-001/Gt-001，支持 gm1 / gm001 简写，跨层可搜） */
+    var markerCodeMatch = /^([gds])([mkowt])-?0*(\d{1,3})$/i.exec(q.trim());
+    if (markerCodeMatch) {
+      var targetCode = markerCodeMatch[1].toUpperCase() + markerCodeMatch[2].toLowerCase() + '-' + String(parseInt(markerCodeMatch[3], 10)).padStart(3, '0');
+      for (var mi = 0; mi < MARKERS.length; mi++) {
+        if (MARKERS[mi].no === targetCode) nameHits.push(MARKERS[mi]);
+      }
+    }
     for (var i = 0; i < MARKERS.length; i++) {
       var m = MARKERS[i];
       if (m.layer !== state.layer) continue;
       if (nameHits.indexOf(m) >= 0) continue;
       var enName = window.I18N ? window.I18N.nameOf(m) : '';
-      var nameHay = ((m.name || '') + ' ' + (m.full || '') + ' ' + enName).toLowerCase();
+      var nameHay = ((m.no || '') + ' ' + (m.name || '') + ' ' + (m.full || '') + ' ' + enName).toLowerCase();
       var kInfo = KI[m.id];
       if (kInfo && kInfo.no != null) {
         nameHay += ' no.' + String(kInfo.no).padStart(4, '0') + ' ' + kInfo.no;
@@ -3751,6 +3779,17 @@
         if (kj && kj.no === kInfo.no) return { kind: 'korok', list: klist, idx: j };
       }
     }
+    if (m.no) {
+      var nlist = [];
+      for (var ni = 0; ni < MARKERS.length; ni++) {
+        var xm = MARKERS[ni];
+        if (xm.cat === m.cat && xm.layer === m.layer && xm.no) nlist.push(xm);
+      }
+      nlist.sort(function (a, b) { return String(a.no).localeCompare(String(b.no)); });
+      for (var nk = 0; nk < nlist.length; nk++) {
+        if (nlist[nk].id === m.id) return { kind: 'marker_no', list: nlist, idx: nk };
+      }
+    }
     return null;
   }
 
@@ -3817,7 +3856,8 @@
         var korokCat = window.I18N ? window.I18N.catOf('克洛格') : '克洛格';
         txt = korokCat + ' No.' + String(kInfo.no).padStart(4, '0');
       } else {
-        txt = (window.I18N ? window.I18N.nameOf(m) : (m.name || m.full || '')).trim();
+        var baseCopy = (window.I18N ? window.I18N.nameOf(m) : (m.name || m.full || '')).trim();
+        txt = m.no ? (m.no + ' ' + baseCopy).trim() : baseCopy;
       }
     }
     if (!txt) return;

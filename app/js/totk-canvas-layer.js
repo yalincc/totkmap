@@ -399,38 +399,77 @@
           radius: (m.hitRadius || m.radius || hitRadiusDefault)
         });
 
-        // 标签收集：全图不显示标签，zoom >= 5 显示重要地点，宝箱与呀哈哈在近景（zoom >= 6 即 800%+）才显示
-        if (this.options.showNames && currentZoom >= (this.options.labelMinZoom || 5)) {
-          var isChest = !!(m.drop || m.drop_zh || m.type === 'chest' || (m.id && String(m.id).indexOf('c_') === 0));
-          var isKorok = (m.cat === 130 || m.cat === 160 || (m.name && m.name.indexOf('克洛格') >= 0));
-          if (isChest) {
-            // 选项 A：近景（zoom >= 6 即 800%+）才显示宝箱内容，避免远景密集轰炸
-            if (currentZoom >= 6) {
-              labelList.push({ m: m, x: x, y: y, size: size, isDone: isDone });
-            }
-          } else if (!isKorok || currentZoom >= 6) {
-            labelList.push({ m: m, x: x, y: y, size: size, isDone: isDone });
-          }
+        // 标签收集：全图统一由 labelMinZoom 控制显隐（默认 zoom >= 6）
+        if (this.options.showNames && currentZoom >= (this.options.labelMinZoom || 6)) {
+          labelList.push({ m: m, x: x, y: y, size: size, isDone: isDone });
         }
       }
 
-      // 顶层统一绘制文字标签
+      // 顶层统一绘制文字标签（支持双行 + 包围盒碰撞防重叠）
       if (labelList.length > 0) {
+        var PRIORITY_CATS = { 62: 1, 66: 1, 67: 2, 63: 2, 109: 2, 97: 2, 70: 3, 116: 3, 82: 3, 69: 3 };
+        labelList.sort(function (a, b) {
+          var pa = PRIORITY_CATS[a.m.cat] || 9;
+          var pb = PRIORITY_CATS[b.m.cat] || 9;
+          if (pa !== pb) return pa - pb;
+          if (a.isDone !== b.isDone) return a.isDone ? 1 : -1;
+          return (a.y - b.y) || (a.x - b.x);
+        });
+        var placedBoxes = [];
+        var fs = Math.min(Math.max(10, Math.round(currentZoom * 2)), 13);
+        var fs2 = Math.max(9, fs - 1);
+        var font1 = '600 ' + fs + 'px "PingFang SC","Microsoft YaHei",sans-serif';
+        var font2 = '600 ' + fs2 + 'px "PingFang SC","Microsoft YaHei",sans-serif';
         for (var j = 0; j < labelList.length; j++) {
           var it = labelList[j];
           var lbl = (typeof this.options.getLabel === 'function') ? this.options.getLabel(it.m) : (it.m.name || it.m.full || it.m.drop_zh || it.m.drop);
           if (!lbl) continue;
+          var lines = String(lbl).split('\n');
+          var line1 = lines[0] || '';
+          var line2 = lines[1] || '';
           ctx.save();
-          var fs = Math.min(Math.max(10, Math.round(currentZoom * 2)), 13);
-          ctx.font = '600 ' + fs + 'px "PingFang SC","Microsoft YaHei",sans-serif';
+          ctx.font = font1;
+          var w1 = ctx.measureText(line1).width;
+          var w2 = 0;
+          if (line2) {
+            ctx.font = font2;
+            w2 = ctx.measureText(line2).width;
+          }
+          var bw = Math.max(w1, w2) + 8;
+          var bh = line2 ? (fs + fs2 + 5) : (fs + 3);
+          var ly = it.y + it.size / 2 + 3;
+          var bx1 = it.x - bw / 2;
+          var by1 = ly - 1;
+          var bx2 = it.x + bw / 2;
+          var by2 = ly + bh;
+          var overlap = false;
+          for (var pbIdx = 0; pbIdx < placedBoxes.length; pbIdx++) {
+            var b = placedBoxes[pbIdx];
+            if (bx1 < b[2] && bx2 > b[0] && by1 < b[3] && by2 > b[1]) {
+              overlap = true;
+              break;
+            }
+          }
+          if (overlap) {
+            ctx.restore();
+            continue;
+          }
+          placedBoxes.push([bx1, by1, bx2, by2]);
           ctx.textAlign = 'center';
           ctx.textBaseline = 'top';
-          var ly = it.y + it.size / 2 + 3;
           ctx.lineWidth = 3;
           ctx.strokeStyle = 'rgba(8, 12, 10, 0.85)';
-          ctx.strokeText(lbl, it.x, ly);
+          ctx.font = font1;
+          ctx.strokeText(line1, it.x, ly);
           ctx.fillStyle = it.isDone ? 'rgba(180, 205, 185, 0.85)' : '#ffffff';
-          ctx.fillText(lbl, it.x, ly);
+          ctx.fillText(line1, it.x, ly);
+          if (line2) {
+            var ly2 = ly + fs + 2;
+            ctx.font = font2;
+            ctx.strokeText(line2, it.x, ly2);
+            ctx.fillStyle = it.isDone ? 'rgba(160, 195, 170, 0.75)' : 'rgba(215, 238, 222, 0.92)';
+            ctx.fillText(line2, it.x, ly2);
+          }
           ctx.restore();
         }
       }
