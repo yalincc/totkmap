@@ -164,65 +164,197 @@
    * ★ heading 保持连续累积（不做 %360 归零）：取模会让角度从 359.x 跳回 0.x，
    *   CSS transition 插值走 358° 大圈 —— 表现为箭头"乱转"，2026-10-17 实测修复。
    * 断线 ≥5 次清空回退圆点。静止保持上次方向（老大 2026-10-17 拍板）。 */
-  var heading = null;                 // 当前箭头角度（度，连续累积，0=北顺时针；null=无朝向画圆点）
+  var heading = null;                 // 当前目标角色朝向（度，罗盘角 0=北顺时针；null=无朝向）
+  var camFacing = null;               // 相机视野朝向（度，罗盘角 0=北顺时针；来自 /pos.camFacing，缺失回退 heading）
   var hdLastX = null, hdLastY = null; // 位移推算用的上一帧位置（与传送检测的 lastMX 分开）
-  var lastIconKey = null;             // 玩家标记形态 key（箭头/圆点 × verified），避免重复 setIcon
 
-  var playerMark = null, trailLine = null;
-  var guideLine = null, targetRing = null, distLabel = null;
+  /* ---------------- 60Hz 解耦渲染与时间步长 dt 指数平滑（移植自 BOTWmap v1.8.0） ---------------- */
+  var SMOOTH_RATE = 14;               // 帧率无关指数收敛速度（约 150ms 贴合）
+  var smooth = {
+    hasPos: false,
+    mx: 0, my: 0,
+    targetMx: 0, targetMy: 0,
+    heading: null, targetHeading: null,
+    camFacing: null, targetCamFacing: null,
+    rafId: 0,
+    lastStepAt: 0,
+    lastDrawAt: 0,
+    followActive: false
+  };
 
-  /* 玩家标记图标：有朝向 = SVG 箭头（默认朝北，rotate 与 dragon-layer arrowIcon 同款
-   * 范式）；无朝向 = 圆点 div。角度旋转不经 setIcon（重建 DOM），由 redraw 直接改
-   * svg.style.transform（见 updatePlayerIcon）。
-   * ★ 2026-10-27：transform-origin 从盒中心改成 50% 56% —— 燕尾箭头 path 的视觉质心
-   *   在 y≈7.83/14（不是几何中心 7），绕盒中心转会有一个「甩一下」的尾巴；
-   *   图标盒中心与角色坐标实测零偏移（anchor 没问题），所以只调旋转原点。 */
-  function playerIcon(hd, verified) {
-    /* V2.5.0：大小/颜色/透明度从显示设置读取（window.TOTK_SETTINGS，设置面板实时生效）。
-     * 圆点直径 = 定位点大小 × 0.58（箭头与圆点同一主尺寸参数）。 */
-    var C = window.TOTK_SETTINGS || {};
-    var color = C.dotColor || '#ff3b3b';
-    var alpha = (C.dotAlpha == null ? 0.7 : C.dotAlpha);
-    var size = clampPx(C.dotSize, 24);
-    var dot = Math.round(size * 0.58);
-    if (hd == null) {
-      return L.divIcon({
-        className: '', iconSize: [size, size], iconAnchor: [size / 2, size / 2],
-        html: '<div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);' +
-              'width:' + dot + 'px;height:' + dot + 'px;border-radius:50%;' +
-              'background:' + color + ';border:2px solid #fff;box-shadow:0 0 10px 2px rgba(255,60,60,.55);' +
-              'box-sizing:border-box;opacity:' + alpha + '"></div>'
+  function lerpAngleDeg(cur, tgt, alpha) {
+    var diff = ((tgt - cur + 540) % 360 + 360) % 360 - 180;
+    return ((cur + diff * alpha) % 360 + 360) % 360;
+  }
+
+  function angleDiffAbs(a, b) {
+    if (a == null || b == null) return 0;
+    var d = ((b - a + 540) % 360 + 360) % 360 - 180;
+    return d < 0 ? -d : d;
+  }
+
+  /* V2.6.0：轨迹显示开关（设置面板三选项）；隐藏时不绘制轨迹线，采样仍在继续 */
+  function trailShowOn() {
+    var s = window.TOTK_SETTINGS;
+    return !s || s.trailShow !== false;
+  }
+
+  /* Canvas 顶层动态覆盖层绘制器（仅由 map.draw({ dynamicOnly: true }) 触发，0 静态重建） */
+  function drawLiveOverlay(ctx, mapInst) {
+    if (!pos.located || !smooth.hasPos) return;
+    var view = mapInst.view;
+    var px = view.x + smooth.my * view.scale;
+    var py = view.y + smooth.mx * view.scale;
+
+    /* 1. 红色虚线移动轨迹 */
+    if (trailShowOn() && trail.length >= 1) {
+      ctx.save();
+      ctx.beginPath();
+      for (var i = 0; i < trail.length; i++) {
+        var tx = view.x + trail[i][1] * view.scale;
+        var ty = view.y + trail[i][0] * view.scale;
+        if (i === 0) ctx.moveTo(tx, ty); else ctx.lineTo(tx, ty);
+      }
+      ctx.lineTo(px, py);
+      ctx.setLineDash([5, 4]);
+      ctx.strokeStyle = 'rgba(255, 90, 90, 0.55)';
+      ctx.lineWidth = 2;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    /* 2. 目标金色虚线引导线 + 距离胶囊（不跨层） */
+    if (target && pos.online && (!target.layer || target.layer === renderLayer())) {
+      var gx = view.x + target.y * view.scale;
+      var gy = view.y + target.x * view.scale;
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(px, py);
+      ctx.lineTo(gx, gy);
+      ctx.setLineDash([7, 5]);
+      ctx.strokeStyle = 'rgba(255, 183, 3, 0.92)';
+      ctx.lineWidth = 1.8;
+      ctx.lineCap = 'round';
+      ctx.stroke();
+      ctx.restore();
+
+      var d = distToTarget();
+      if (d != null && isFinite(d)) {
+        var txt = Math.round(d) + 'm';
+        ctx.save();
+        ctx.font = '700 11px Consolas, "PingFang SC", sans-serif';
+        var tw = ctx.measureText(txt).width;
+        var bw = tw + 10, bh = 16;
+        var bx = px - bw / 2, by = py + 14;
+        ctx.fillStyle = 'rgba(12, 16, 14, 0.82)';
+        ctx.strokeStyle = 'rgba(255, 183, 3, 0.72)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.roundRect ? ctx.roundRect(bx, by, bw, bh, 4) : ctx.rect(bx, by, bw, bh);
+        ctx.fill();
+        ctx.stroke();
+        ctx.fillStyle = '#ffd166';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(txt, px, by + bh / 2 + 0.5);
+        ctx.restore();
+      }
+    }
+
+    /* 3. 视野扇形锥 + 导航箭头（罗盘角 0=北 → Canvas 角 0=东，统一 -90°） */
+    var canvasHd = (typeof smooth.heading === 'number' && isFinite(smooth.heading))
+      ? (smooth.heading - 90) : null;
+    var rawFov = (typeof smooth.camFacing === 'number' && isFinite(smooth.camFacing))
+      ? smooth.camFacing : smooth.heading;
+    var canvasFov = (typeof rawFov === 'number' && isFinite(rawFov))
+      ? (rawFov - 90) : null;
+
+    if (window.TOTK_ADV && typeof window.TOTK_ADV.drawPlayer === 'function') {
+      window.TOTK_ADV.drawPlayer(ctx, px, py, {
+        verified: pos.verified,
+        heading: canvasHd,
+        fovAngle: canvasFov
       });
+    } else {
+      ctx.save();
+      ctx.fillStyle = '#ff3b3b';
+      ctx.beginPath();
+      ctx.arc(px, py, 6.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = '#ffffff';
+      ctx.stroke();
+      ctx.restore();
     }
-    return L.divIcon({
-      className: '', iconSize: [size, size], iconAnchor: [size / 2, size / 2],
-      html: '<svg class="lv-arrow" width="' + size + '" height="' + size +
-            '" viewBox="0 0 14 14" style="transform:rotate(' + (hd || 0) +
-            'deg);transition:transform .18s ease-out;transform-origin:50% 56%;filter:drop-shadow(0 0 4px rgba(255,60,60,.7));opacity:' + alpha + '">' +
-            '<path d="M7 0.5 L12 13 L7 10 L2 13 Z" fill="' + color + '" stroke="rgba(0,0,0,.8)"' +
-            ' stroke-width="1.2" stroke-linejoin="round"/></svg>'
-    });
-  }
-  function clampPx(v, def) {
-    v = parseInt(v, 10);
-    if (isNaN(v)) return def;
-    return Math.min(40, Math.max(16, v));
   }
 
-  /* 更新玩家标记形态 + 旋转角。形态（箭头↔圆点、verified 尺寸）变化才 setIcon；
-   * 角度直接改 svg transform，5Hz 更新零重建。 */
-  function updatePlayerIcon() {
-    /* key 含设置修订号 _rev：面板改大小/颜色/透明度后无需刷新，下一帧自动重建图标 */
-    var rev = (window.TOTK_SETTINGS && window.TOTK_SETTINGS._rev) || 0;
-    var key = (heading == null ? 'dot' : 'arrow') + (pos.verified ? 'v' : '') + 'r' + rev;
-    if (key !== lastIconKey) {
-      lastIconKey = key;
-      playerMark.setIcon(playerIcon(heading, pos.verified));
+  function wakeRenderLoop() {
+    if (smooth.rafId || !map) return;
+    smooth.lastStepAt = 0;
+    smooth.rafId = requestAnimationFrame(renderLoopStep);
+  }
+
+  function renderLoopStep(now) {
+    smooth.rafId = 0;
+    if (!map || !pos.located || !smooth.hasPos) return;
+
+    var fps = (window.TOTK_ADV && window.TOTK_ADV.getFpsCap) ? window.TOTK_ADV.getFpsCap() : 60;
+    var minFrameMs = fps > 0 ? (1000 / fps) * 0.92 : 0;
+    if (minFrameMs > 0 && smooth.lastDrawAt && (now - smooth.lastDrawAt) < minFrameMs) {
+      smooth.rafId = requestAnimationFrame(renderLoopStep);
+      return;
     }
-    if (heading != null) {
-      var el = playerMark.getElement();
-      var svg = el && el.querySelector('svg.lv-arrow');
-      if (svg) svg.style.transform = 'rotate(' + heading + 'deg)';
+
+    var dt = smooth.lastStepAt
+      ? Math.min(0.1, Math.max(0.008, (now - smooth.lastStepAt) / 1000))
+      : (1 / 60);
+    smooth.lastStepAt = now;
+    smooth.lastDrawAt = now;
+
+    var alpha = 1 - Math.exp(-SMOOTH_RATE * dt);
+    smooth.mx += (smooth.targetMx - smooth.mx) * alpha;
+    smooth.my += (smooth.targetMy - smooth.my) * alpha;
+
+    if (smooth.targetHeading != null) {
+      smooth.heading = (smooth.heading == null)
+        ? smooth.targetHeading
+        : lerpAngleDeg(smooth.heading, smooth.targetHeading, alpha);
+    }
+    if (smooth.targetCamFacing != null) {
+      smooth.camFacing = (smooth.camFacing == null)
+        ? smooth.targetCamFacing
+        : lerpAngleDeg(smooth.camFacing, smooth.targetCamFacing, alpha);
+    }
+
+    /* 平滑视图跟随（在 rAF 中同帧平移 view，彻底消灭 panTo 300ms 拉扯） */
+    var followMoving = false;
+    if (follow && !paused && !map._isDragging && !map._flyRaf && smooth.followActive) {
+      var view = map.view;
+      var px = view.x + smooth.my * view.scale;
+      var py = view.y + smooth.mx * view.scale;
+      var cx = map._w / 2, cy = map._h / 2;
+      var dx = cx - px, dy = cy - py;
+      if (Math.abs(dx) > 0.35 || Math.abs(dy) > 0.35) {
+        view.x += dx * alpha;
+        view.y += dy * alpha;
+        map._syncCenterFromView();
+        followMoving = (Math.abs(dx) > 0.8 || Math.abs(dy) > 0.8);
+      } else {
+        smooth.followActive = false;
+      }
+    }
+
+    map.draw({ dynamicOnly: true });
+
+    /* 静止自动休眠：位置误差 < 0.05px 且角度误差 < 0.2° 且无需跟随平移时停止 rAF（0 功耗） */
+    var scale = map.view.scale || 1;
+    var posErrPx = Math.hypot((smooth.targetMy - smooth.my) * scale, (smooth.targetMx - smooth.mx) * scale);
+    var hdErr = angleDiffAbs(smooth.heading, smooth.targetHeading);
+    var camErr = angleDiffAbs(smooth.camFacing, smooth.targetCamFacing);
+    if (posErrPx >= 0.05 || hdErr >= 0.2 || camErr >= 0.2 || followMoving) {
+      smooth.rafId = requestAnimationFrame(renderLoopStep);
     }
   }
 
@@ -232,48 +364,6 @@
 
   function lsGet(k, def) { try { var v = localStorage.getItem(k); return v === null ? def : v; } catch (e) { return def; } }
   function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
-
-  /* ---------------- 地图元素 ---------------- */
-  function ensurePlayerMark() {
-    if (playerMark) return;
-    playerMark = L.marker([0, 0], {
-      pane: 'markerPane', interactive: false, zIndexOffset: 1000,
-      icon: playerIcon(heading == null ? null : 0, pos.verified)
-    });
-    lastIconKey = (heading == null ? 'dot' : 'arrow') + (pos.verified ? 'v' : '');
-    playerMark.addTo(map);
-  }
-  /* V2.6.0：轨迹显示开关（设置面板三选项）；隐藏时不绘制轨迹线，采样仍在继续，
-     重新显示时可立刻看到已记录的路线 */
-  function trailShowOn() {
-    var s = window.TOTK_SETTINGS;
-    return !s || s.trailShow !== false;
-  }
-  function ensureTrail() {
-    if (trailLine) return;
-    trailLine = L.polyline([], { pane: 'overlayPane', color: 'rgba(255,90,90,.5)',
-      weight: 2, dashArray: '5,4', interactive: false });
-    trailLine.addTo(map);
-  }
-  function drawGuide() {
-    if (guideLine) { map.removeLayer(guideLine); guideLine = null; }
-    if (targetRing) { map.removeLayer(targetRing); targetRing = null; }
-    if (distLabel) { map.removeLayer(distLabel); distLabel = null; }
-    if (!target || !pos.online || pos.mx == null) return;
-    // 不跨层：目标在其他层时只提示，不画误导线
-    if (target.layer && target.layer !== renderLayer()) return;
-    guideLine = L.polyline([[pos.mx, pos.my], [target.x, target.y]], {
-      pane: 'overlayPane', color: 'rgba(255,183,3,.92)', weight: 1.6, dashArray: '7,5', interactive: false
-    });
-    guideLine.addTo(map);    // targetRing 已按用户确认移除，避免黄色圆圈遮挡底部标点图标
-    var d = Math.round(distToTarget());
-    distLabel = L.marker([pos.mx, pos.my], {
-      pane: 'markerPane', interactive: false, zIndexOffset: 2000,
-      icon: L.divIcon({ className: '', html: '<div class="lv-dist">' + d + 'm</div>',
-        iconSize: [70, 16], iconAnchor: [35, -8] })
-    });
-    distLabel.addTo(map);
-  }
   var lastTargetMeta = null;
   function resolveTargetZ(t) {
     if (!t || typeof t.x !== 'number' || typeof t.y !== 'number') return null;
@@ -389,7 +479,7 @@
   var sawOnline = false;       // 本次会话是否成功连上过服务
   var offlineSince = 0;        // 首次离线时刻
   var probeFail = 0;           // 连续失败次数（用于退避）
-  var POLL_MS = 600;           // 在线时的轮询间隔（原值）
+  var POLL_MS = 80;            // 在线时的串行轮询间隔（60Hz 解耦架构）
   var OFFLINE_MAX_MS = 5000;   // 离线时的退避间隔
 
   async function fetchPos() {
@@ -466,42 +556,28 @@
        * 角度口径两端一致：0°=北、顺时针（罗盘角），箭头 SVG 基准朝北可直接 rotate。 */
       var srvHd = (typeof p.heading === 'number' && isFinite(p.heading)) ? p.heading : null;
       if (srvHd != null) {
-        if (heading == null) {
-          heading = srvHd;
-        } else {
-          var sdiff = ((srvHd - heading) % 360 + 540) % 360 - 180;
-          var sadiff = sdiff < 0 ? -sdiff : sdiff;
-          if (sadiff > 60) heading = srvHd;                      /* 大转身：一帧到位 */
-          else if (sadiff > 20) heading = heading + sdiff * 0.8; /* 中角度：1~2 帧 */
-          else heading = heading + sdiff * 0.45;                 /* 小角度：平滑防抖 */
-        }
-      } else if (hdLastX != null) {
-        /* ★ 轴向口径（实测 2026-10-17 + 坐标速查 §2 定案）：
-         * pos.mx = 游戏 Z_objmap，北为负（向北跑 mx 减小）→ 北向位移 = -(Δmx)；
-         * pos.my = X 东西，东为正 → 东向位移 = +(Δmy)。
-         * 此前把 Δmx 直接当北向增量 → 罗盘角南北镜像（北↔南、东北↔东南），已修。 */
+        heading = ((srvHd % 360) + 360) % 360;
+        hdLastX = pos.mx; hdLastY = pos.my;
+      } else if (hdLastX == null) {
+        hdLastX = pos.mx; hdLastY = pos.my;
+      } else {
         var dE = pos.my - hdLastY, dN = hdLastX - pos.mx;
         var hdLen = Math.sqrt(dE * dE + dN * dN);
-        if (hdLen >= 0.8 && hdLen <= 120) {
-          var tgt = Math.atan2(dE, dN) * 180 / Math.PI;
-          if (heading == null) {
-            heading = tgt;
-          } else {
-            /* 最短弧差（归一到 -180..180，兼容连续累积的大角度值） */
-            var hdiff = ((tgt - heading) % 360 + 540) % 360 - 180;
-            /* 2026-10-27 实测改造（老大反馈「80° 掉头像画小圈、方向跟不上」）：
-             * 原来一律 ×0.45 逼近，而 /pos 是 600ms 轮询一次 —— 实测一次 180° 掉头：
-             *   0.6s→81°  1.3s→125°  1.9s→150°  2.5s→163°  3.7s→175°  5.0s→179.5°
-             * 也就是掉个头要磨 5 秒，箭头绕着角色慢慢爬。
-             * 改成分档：大角度原地转身（一帧到位）、中角度两帧内、小角度才做平滑防抖。 */
-            var adiff = hdiff < 0 ? -hdiff : hdiff;
-            if (adiff > 60) heading = tgt;                        /* 大掉头：直接切到目标角 */
-            else if (adiff > 20) heading = heading + hdiff * 0.8; /* 中角度：1~2 帧到位 */
-            else heading = heading + hdiff * 0.45;                /* 小角度：保持原平滑 */
-          }
+        if (hdLen > 120) {
+          /* 传送大跳变：重置基准点不改方向 */
+          hdLastX = pos.mx; hdLastY = pos.my;
+        } else if (hdLen >= 0.8) {
+          /* 累积位移满 0.8m 才更新方向并推进基准点，避免 80ms 高频轮询下小步被阈值吞掉 */
+          heading = ((Math.atan2(dE, dN) * 180 / Math.PI) % 360 + 360) % 360;
+          hdLastX = pos.mx; hdLastY = pos.my;
         }
       }
-      hdLastX = pos.mx; hdLastY = pos.my;
+      /* 相机视野朝向（/pos.camFacing，单位度；罗盘角 0=北顺时针，缺失时自动回退 heading） */
+      if (typeof p.camFacing === 'number' && isFinite(p.camFacing)) {
+        camFacing = ((p.camFacing % 360) + 360) % 360;
+      } else {
+        camFacing = null;
+      }
       if (Date.now() - lastTargetSetTS >= 1800) {
         if (p.target && typeof p.target.x === 'number') {
           if (!target || Math.abs(target.x - p.target.x) > 0.05 || Math.abs(target.y - p.target.y) > 0.05) {
@@ -546,8 +622,8 @@
       offlineStreak++;
       lastPosKey = null;
       if (offlineStreak >= 5) {
-        /* 断线 ≥5 次：清朝向与推算基准，重连后重新起步（防箭头指着断线前旧方向） */
         heading = null;
+        camFacing = null;
         hdLastX = hdLastY = null;
       }
     }
@@ -739,85 +815,48 @@
     }
   }
 
-  /* 重绘：轨迹 / 红点 / 引导线，仅在关键状态变化时执行（含高度 pos.gz 与目标坐标变化） */
+  /* 重绘：更新 60Hz 平滑插值目标并唤醒 rAF 动态层渲染（0 静态层重绘） */
   function redraw() {
-    var dk = (pos.online ? '1' : '0') + (pos.verified ? 'v' : '') +
-             (pos.mx != null ? Math.round(pos.mx / 2) + ':' + Math.round(pos.my / 2) + ':' + Math.round((pos.gz || 0) / 2) : '') +
-             (heading != null ? 'h' + Math.round(heading / 4) : '') +
-             (target ? ('t' + Math.round(target.x) + ',' + Math.round(target.y)) : '') + (arrivedShown ? 'a' : '') +
-             (pos.layer || '');
-    if (dk === lastDrawKey) return;
-    lastDrawKey = dk;
-
-    // 离线/未定位：连续 2 次失败后清空实时图层，避免残留假点
     if (!pos.located || pos.mx == null) {
       if (offlineStreak < 2) return;
-      [playerMark, trailLine, guideLine, targetRing, distLabel].forEach(function (ly) {
-        if (ly) { map.removeLayer(ly); }
-      });
-      playerMark = trailLine = guideLine = targetRing = distLabel = null;
+      smooth.hasPos = false;
+      smooth.heading = smooth.targetHeading = null;
+      smooth.camFacing = smooth.targetCamFacing = null;
+      smooth.followActive = false;
+      if (smooth.rafId) { cancelAnimationFrame(smooth.rafId); smooth.rafId = 0; }
       trail = [];
+      if (map && map.draw) map.draw({ dynamicOnly: true });
       return;
     }
 
-    if (trailShowOn()) {
-      ensureTrail();
-      if (trail.length) trailLine.setLatLngs(trail);
-    } else if (trailLine) {
-      map.removeLayer(trailLine);
-      trailLine = null;
+    var jumpDist = smooth.hasPos
+      ? Math.hypot(pos.mx - smooth.mx, pos.my - smooth.my)
+      : Infinity;
+    if (!smooth.hasPos || jumpDist > 150) {
+      smooth.mx = pos.mx;
+      smooth.my = pos.my;
+      smooth.hasPos = true;
     }
-
-    ensurePlayerMark();
-    animatePlayerTo(pos.mx, pos.my);
-    updatePlayerIcon();
-    drawGuide();
+    smooth.targetMx = pos.mx;
+    smooth.targetMy = pos.my;
+    smooth.targetHeading = heading;
+    smooth.targetCamFacing = camFacing;
+    wakeRenderLoop();
   }
 
-  /* ---------------- 红点位置插值（治"跟随顿挫"） ----------------
-   * /pos 600ms 一帧，红点若直接 setLatLng 会一步一跳。这里在两次采样之间
-   * 50ms 一小步线性插值挪过去，视觉变连续；传送/跳变 >200 游戏单位直接落点
-   * 不动画。只动 marker，不进 redraw 主流程（drawKey/轨迹逻辑不受影响）。 */
-  var animTimer = null, animFrom = null, animTo = null, animStart = 0;
-  function animatePlayerTo(mx, my) {
-    if (!playerMark) return;
-    var cur = playerMark.getLatLng();
-    if (animFrom == null || Math.abs(mx - cur.lat) + Math.abs(my - cur.lng) > 200) {
-      playerMark.setLatLng([mx, my]);
-      animFrom = null;
-      return;
-    }
-    animFrom = [cur.lat, cur.lng];
-    animTo = [mx, my];
-    animStart = performance.now();
-    if (animTimer) return;
-    animTimer = setInterval(function () {
-      if (!playerMark || animTo == null) { clearInterval(animTimer); animTimer = null; return; }
-      var t = Math.min(1, (performance.now() - animStart) / POLL_MS);
-      playerMark.setLatLng([
-        animFrom[0] + (animTo[0] - animFrom[0]) * t,
-        animFrom[1] + (animTo[1] - animFrom[1]) * t
-      ]);
-      if (t >= 1) { clearInterval(animTimer); animTimer = null; }
-    }, 50);
-  }
-
-  /* ---------------- 视图跟随（V1.8.3：范围跟随，防持续动画晕眩/卡顿） ---------------- */
-  /* 单次定位：居中玩家，保持缩放 */
+  /* ---------------- 视图跟随（60Hz rAF 丝滑跟随，无 panTo 拉扯） ---------------- */
   function centerOnPlayer() {
     if (pos.mx == null) return;
-    map.flyTo([pos.mx, pos.my], Math.max(map.getZoom(), 6), { duration: 0.6 }); // V2.4.0: 800%
+    map.flyTo([pos.mx, pos.my], Math.max(map.getZoom(), 6), { duration: 0.45 });
   }
-  /* 跟随（V2.4.0 方案2+3，2026-10-09 老大拍板）：
-   *   死区 30% → 10%（红点偏离视口中心 10% 即拉回，原 30% 太迟钝）；
-   *   panTo 300ms 平滑动画 = 软跟随（避免 BOTW 式每拍硬居中跳变）。 */
   function followCenter() {
-    if (pos.mx == null || map._isDragging) return;
+    if (pos.mx == null || !map || map._isDragging) return;
     var cp = map.latLngToContainerPoint([pos.mx, pos.my]);
     var cc = map.latLngToContainerPoint(map.getCenter());
-    var lim = Math.min(map.getSize().x, map.getSize().y) * 0.1;
+    var lim = Math.min(map.getSize().x, map.getSize().y) * 0.08;
     if (Math.abs(cp.x - cc.x) > lim || Math.abs(cp.y - cc.y) > lim) {
-      map.panTo([pos.mx, pos.my], { animate: true, duration: 0.3 });
+      smooth.followActive = true;
+      wakeRenderLoop();
     }
   }
   function setLocateBtns() {
@@ -1165,6 +1204,9 @@
     var h = parseInt(lsGet(LS_HOLD, String(HOLD_DEF)), 10);
     holdSec = (isNaN(h) || h < 0) ? HOLD_DEF : Math.min(h, 10);
 
+    if (map && typeof map.setLiveOverlay === 'function') {
+      map.setLiveOverlay(drawLiveOverlay);
+    }
     buildPanel();
     setLocateBtns();
     bindFollowDrag();
@@ -1211,16 +1253,10 @@
       clearTrail: function () {
         trail = [];
         lastPosKey = null;
-        if (trailLine) trailLine.setLatLngs([]);
+        if (map && map.draw) map.draw({ dynamicOnly: true });
       },
       refreshTrail: function () {
-        if (trailShowOn()) {
-          ensureTrail();
-          trailLine.setLatLngs(trail);
-        } else if (trailLine) {
-          map.removeLayer(trailLine);
-          trailLine = null;
-        }
+        if (map && map.draw) map.draw({ dynamicOnly: true });
       }
     };
   }

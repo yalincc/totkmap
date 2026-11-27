@@ -58,7 +58,7 @@ const defaultDiagUploadURL = "https://botw.yalin.site/api/diag"
 // defaultCloudProfilesURL 社区验证过的 PC 版定位配置单静态索引。
 const defaultCloudProfilesURL = "https://totk.yalin.site/profiles/index.json"
 
-const guiVersion = "v3.3.4"
+const guiVersion = "v3.3.5"
 
 // App Wails 后端：管理核心子进程 + 读 status.json / xnavi-gui-core.log + 网页端端口探测。
 // 与核心的通信完全走文件（status.json、xnavi-gui-core.log），不依赖 8766 HTTP——

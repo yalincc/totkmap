@@ -36,6 +36,10 @@
     return cat === 73 || cat === 130 || cat === 118 || cat === 160 || cat === 96 || cat === 145;
   }
 
+  function isShrineCat(cat) {
+    return cat === 63 || cat === 109;
+  }
+
   function online() { return !!(window.LIVENAV && window.LIVENAV.online()); }
 
   function pos() {
@@ -55,10 +59,11 @@
     return Math.sqrt(dx * dx + dy * dy + dz * dz);
   }
 
-  /* 候选池：同层 + 未完成 + 同类别（克洛格类天然包含全部克洛格起点，排除目的地营地 96/145 单独导航） */
+  /* 候选池：同层 + 未完成 + 同类别（克洛格与地上/天空神庙均跨子分类聚合，排除目的地营地 96/145 单独导航） */
   function poolForLayer(layer, targetCat) {
     var st = A.state();
     var isKorok = isKorokCat(targetCat);
+    var isShrine = isShrineCat(targetCat);
     return A.markers().filter(function (m) {
       if (m.layer !== layer) return false;
       if (m.cat === 96 || m.cat === 145) return false; // 朋友营地不单独作为起点目标
@@ -67,6 +72,9 @@
 
       if (isKorok) {
         return isKorokCat(m.cat);
+      }
+      if (isShrine) {
+        return isShrineCat(m.cat);
       }
       return m.cat === targetCat;
     });

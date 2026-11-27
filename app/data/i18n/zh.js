@@ -272,6 +272,7 @@ window.TOTK_I18N.zh = {
   "settings.hideSubTitle": "隐藏以下分类：",
   "settings.selectAll": "全选",
   "settings.clearAll": "清空",
+  "settings.advBtn": "⚙ 更多高级设置",
   "settings.reset": "重置默认",
   // 存档修改器入口（V2.7.0，独立页 app/save-edit/）
   "settings.saveEdit": "存档修改",

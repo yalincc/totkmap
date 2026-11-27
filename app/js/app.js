@@ -60,7 +60,7 @@
   var AREA_SKY = window.TOTK_AREA_SKY || [];
   var AREA_DEPTHS = window.TOTK_AREA_DEPTHS || [];
 
-  var VERSION = 'TOTKMAP V2.9.2';
+  var VERSION = 'TOTKMAP V2.9.3';
   /* V2.8 克洛格谜题类型中文名（兜底；正式文案走 i18n 的 korok.type.*）
    * 由 tools/build_korok_info.py 依据 ROMFS 克洛格 actor 自动标注，
    * 分类参考游民星空「呀哈哈机关解密方法汇总」。 */
@@ -2562,6 +2562,7 @@
       if (p['大世界宝箱'] && !p['宝箱']) { p['宝箱'] = p['大世界宝箱']; delete p['大世界宝箱']; }
       state.save = p;
       state.saveVersion = saved.version || null;
+      state.worldXP = saved.worldXP || null;
     }
   }
   /* ---------------- 探索度（V2.6.0 改版） ----------------
@@ -2710,6 +2711,31 @@
     /* 2026-10-27：顶部「存档已同步」提示行已去掉 —— 同步状态由下方「从存档加载进度」
      * 按钮承载（已同步时按钮自身显示「已同步 ✓ 重新加载」），不再重复占一行。 */
     var html = '';
+    /* 世界等级（隐藏 XP）极简单行入口 + 距下一阶差值 + 2px 进度条（点击弹出详情卡片） */
+    if (state.worldXP && typeof state.worldXP.xp === 'number') {
+      var isEnXp = window.I18N && window.I18N.getLang() === 'en';
+      var curXp = state.worldXP.xp;
+      var xpTitle = isEnXp ? 'World XP' : '世界经验';
+      var ths = [0, 3901, 5601, 8101];
+      var tIdx = Math.max(0, Math.min(3, state.worldXP.lynelTier || 0));
+      var nextNames = isEnXp ? ['', 'Blue', 'White', 'Silver'] : ['', '蓝鬃', '白鬃', '白银'];
+      var pct = 100, rightTxt = isEnXp ? 'Silver Max ✓ ›' : '白银已满 ✓ ›';
+      if (tIdx < 3) {
+        var lo = ths[tIdx], hi = ths[tIdx + 1];
+        var diff = Math.max(0, hi - curXp);
+        pct = Math.max(2, Math.min(100, Math.round(((curXp - lo) / (hi - lo)) * 100)));
+        rightTxt = isEnXp
+          ? ('To ' + nextNames[tIdx + 1] + ' -' + diff.toLocaleString() + ' ›')
+          : ('距' + nextNames[tIdx + 1] + ' -' + diff.toLocaleString() + ' ›');
+      }
+      html += '<button type="button" class="wxp-bar" id="wxpOpenBtn">' +
+        '<span class="wxp-line">' +
+          '<span class="wxp-left">' + xpTitle + ' <span class="wxp-val">' + curXp.toLocaleString() + ' XP</span></span>' +
+          '<span class="wxp-hint' + (tIdx >= 3 ? ' max' : '') + '">' + rightTxt + '</span>' +
+        '</span>' +
+        '<span class="wxp-prog"><span class="wxp-prog-fill' + (tIdx >= 3 ? ' max' : '') + '" style="width:' + pct + '%"></span></span>' +
+      '</button>';
+    }
     var any = false;
     PROGRESS_GROUPS.forEach(function (g) {
       var pairs = [];
@@ -2740,6 +2766,93 @@
         '</div>' + progressGrid(pairs) + '</div>';
     });
     list.innerHTML = any ? html : ('<div class="progress-empty" data-i18n="progress.noData">' + (window.I18N ? window.I18N.t('progress.noData') : '存档中无可同步类别') + '</div>');
+    var wxpBtn = $('wxpOpenBtn');
+    if (wxpBtn) wxpBtn.addEventListener('click', openWorldXpModal);
+  }
+
+  function openWorldXpModal() {
+    if (!state.worldXP || typeof state.worldXP.xp !== 'number') return;
+    var isEn = window.I18N && window.I18N.getLang() === 'en';
+    var curXp = state.worldXP.xp;
+    var tIdx = Math.max(0, Math.min(3, state.worldXP.lynelTier || 0));
+    var tierNames = isEn ? ['Red-Maned', 'Blue-Maned', 'White-Maned', 'Silver'] : ['红鬃', '蓝鬃', '白鬃', '白银'];
+    var tierCls = ['lv-red', 'lv-blue', 'lv-white', 'lv-silver'];
+    var nextTxt = state.worldXP.nextThreshold
+      ? (isEn ? ('Next Lynel tier: ' + state.worldXP.nextThreshold.toLocaleString() + ' XP')
+              : ('距下一阶人马还差 ' + Math.max(0, state.worldXP.nextThreshold - curXp).toLocaleString() + ' XP（阈值 ' + state.worldXP.nextThreshold.toLocaleString() + '）'))
+      : (isEn ? 'Max Lynel tier reached (Silver)' : '已达最高可升阶人马等级（白银莱尼尔）');
+
+    var rows = isEn ? [
+      ['1,201 / 1,734', 'Early weapons unlock White/Blue & Gold modifiers', curXp >= 1734],
+      ['3,901', '9 Scalable Lynels upgrade → Blue-Maned Lynel', curXp >= 3901],
+      ['5,000+', 'Royal / Royal Guard Gold mods & 5-Shot Savage Lynel Bow', curXp >= 5000],
+      ['5,601', '9 Scalable Lynels upgrade → White-Maned Lynel', curXp >= 5601],
+      ['8,101', '9 Scalable Lynels upgrade → Silver Lynel', curXp >= 8101],
+      ['14,001', 'Top-tier shield Gold modifier cap (e.g. Royal Guard Shield)', curXp >= 14001]
+    ] : [
+      ['1,201 / 1,734', '早期武器依次解锁白/蓝词条与金色词条', curXp >= 1734],
+      ['3,901', '全图 9 只可升阶人马 → 蓝鬃莱尼尔', curXp >= 3901],
+      ['5,000+', '王族/近卫金色词条、兽神弓五连发陆续解锁', curXp >= 5000],
+      ['5,601', '全图 9 只可升阶人马 → 白鬃莱尼尔', curXp >= 5601],
+      ['8,101', '全图 9 只可升阶人马 → 白银莱尼尔', curXp >= 8101],
+      ['14,001', '顶级盾牌金色词条上限（如近卫盾）', curXp >= 14001]
+    ];
+    var rowsHtml = rows.map(function (r) {
+      return '<div class="wxp-mrow' + (r[2] ? ' hit' : '') + '">' +
+        '<span class="wxp-mmark">' + (r[2] ? '✓' : '○') + '</span>' +
+        '<span class="wxp-mxp">' + r[0] + '</span>' +
+        '<span class="wxp-mdesc">' + r[1] + '</span>' +
+      '</div>';
+    }).join('');
+
+    var tipsHtml = isEn ? (
+      '<ul>' +
+        '<li><b>Defeat Strong Enemies &amp; Bosses</b>: Counts up to first <b>10 kills</b> per enemy variant (Lynels 50–80 XP, Frox / Molduga / Gloom Spawn / Silver enemies 30–70 XP); Dungeon Bosses count up to <b>2 kills</b> (100 XP each). Low-tier enemies (Chuchu, Keese, Red/Blue Bokoblin) give 0 XP.</li>' +
+        '<li><b>Combat Skill Bonuses (2× XP!)</b>: Defeating an enemy with <b>Flurry Rush (Bullet Time)</b> or <b>Perfect Parry</b> grants an extra <b>+100% XP</b> (up to 10× per variant); <b>Headshot</b> or <b>No-Damage kill</b> grants <b>+50% XP</b> (up to 20× per variant).</li>' +
+        '<li><b>Why Base XP</b>: Save files only record kill counts, not skill bonuses — your actual in-game XP is always ≥ this number.</li>' +
+      '</ul>'
+    ) : (
+      '<ul>' +
+        '<li><b>击杀高阶怪物与 Boss</b>：每种怪物最多计前 <b>10 次</b>击杀（红/蓝/白鬃人马 50/60/80 分，白银怪/瘴气魔/莫尔德拉吉克/巨霸迦马 30~70 分）；神殿 Boss 每种计前 <b>2 次</b>（100 分/次）。丘丘、蝙蝠、红/蓝波克布林等低阶怪 0 分。</li>' +
+        '<li><b>战斗技巧翻倍加分</b>：触发<b>林克时间（完美回避）或盾反</b>击杀额外 <b>+100%（翻倍，每种怪上限 10 次）</b>；<b>爆头或无伤击杀</b>额外 <b>+50%（上限 20 次）</b>。</li>' +
+        '<li><b>关于「保底分」</b>：存档仅统计击杀次数、未记录林克时间等技巧加分，游戏内实际隐藏经验只会 <b>≥ 此数值</b>。</li>' +
+      '</ul>'
+    );
+
+    var el = $('wxpModal');
+    if (!el) {
+      el = document.createElement('div');
+      el.id = 'wxpModal';
+      el.className = 'adv-overlay hidden';
+      document.body.appendChild(el);
+      el.addEventListener('click', function (e) { if (e.target === el) el.classList.add('hidden'); });
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && el && !el.classList.contains('hidden')) el.classList.add('hidden');
+      });
+    }
+    el.innerHTML =
+      '<div class="wxp-dialog" role="dialog" aria-modal="true">' +
+        '<div class="wxp-mhead">' +
+          '<span class="wxp-mtitle">' + (isEn ? 'World Experience (Hidden XP)' : '世界经验（隐藏 XP）') + '</span>' +
+          '<button type="button" class="detail-close" id="wxpModalClose" title="' + (isEn ? 'Close' : '关闭') + '">×</button>' +
+        '</div>' +
+        '<div class="wxp-mbody">' +
+          '<div class="wxp-summary">' +
+            '<div class="wxp-sum-top">' +
+              '<span class="wxp-sum-num">' + (isEn ? 'Base XP ≥ ' : '当前保底 ≥ ') + '<b>' + curXp.toLocaleString() + '</b> XP</span>' +
+              '<span class="ec-lv-badge ' + tierCls[tIdx] + '">' + (isEn ? ('Scalable Lynel: ' + tierNames[tIdx]) : ('可升阶人马：' + tierNames[tIdx])) + '</span>' +
+            '</div>' +
+            '<div class="wxp-sum-sub">' + nextTxt + '</div>' +
+          '</div>' +
+          '<div class="wxp-msec-title">' + (isEn ? 'Monster Scaling & Weapon Modifier Milestones' : '怪物升阶与武器词条里程碑') + '</div>' +
+          '<div class="wxp-mlist">' + rowsHtml + '</div>' +
+          '<div class="wxp-msec-title">' + (isEn ? 'How to Gain World XP Faster' : '如何获取与快速提升世界经验') + '</div>' +
+          '<div class="wxp-mtips">' + tipsHtml + '</div>' +
+        '</div>' +
+      '</div>';
+    el.classList.remove('hidden');
+    var clsBtn = $('wxpModalClose');
+    if (clsBtn) clsBtn.addEventListener('click', function () { el.classList.add('hidden'); });
   }
 
   /* 存档按钮文案（跟随 state.save）—— 2026-10-27 单独抽出：
@@ -2769,9 +2882,10 @@
     if (!parsed || !parsed.ok || !progress) return;
     state.save = progress;
     state.saveVersion = (parsed.version || '') + ' · 服务端自动同步';
+    state.worldXP = (window.TOTKSaveParser && TOTKSaveParser.calcWorldXP) ? TOTKSaveParser.calcWorldXP(parsed) : null;
     var m = String(slot || '').match(/slot_(\d+)/);
     serverSaveSlot = m ? m[1] : '';
-    try { saveJson(LS_SAVE, { version: parsed.version, progress: progress }); } catch (e) {}
+    try { saveJson(LS_SAVE, { version: parsed.version, progress: progress, worldXP: state.worldXP }); } catch (e) {}
     applySavePointDone(parsed);   /* 复刻手动路径：全量标点打勾 + 任务完成态 */
     renderProgress();
     buildCatalogPanel();
@@ -2900,7 +3014,8 @@
         var progress = TOTKSaveParser.collect(parsed);
         state.save = progress;
         state.saveVersion = parsed.version;
-        saveJson(LS_SAVE, { version: parsed.version, progress: progress });
+        state.worldXP = (TOTKSaveParser.calcWorldXP) ? TOTKSaveParser.calcWorldXP(parsed) : null;
+        saveJson(LS_SAVE, { version: parsed.version, progress: progress, worldXP: state.worldXP });
         /* V1.8.0 M3: 可逐点映射类别（鸟望台/龙之泪/魔犹伊）以存档为准写入 state.done */
         applySavePointDone(parsed);
         applySaveSync();
@@ -3611,13 +3726,39 @@
       aeBox.innerHTML = html;
       bindArmorEnhance(aeBox);
     }
-    /* 人马（莱尼尔）强敌机制提示：游戏底层无官方讨伐勋章记录，红月刷新，需手动标记 */
-    var isLynel = m.cat === 81 || m.cat === 104 || (/莱尼尔|人马/.test(m.name || '') && m.cat !== 144 && m.cat !== 76 && m.cat !== 77);
-    if (isLynel) {
-      var lynelNote = (window.I18N && window.I18N.getLang() === 'en')
-        ? 'Note: Lynels are standard enemies without defeat medals. They respawn with Blood Moons and require manual completion marking.'
-        : '提示：莱尼尔（人马）属于普通强敌，游戏无官方讨伐勋章记录（红月会刷新），需手动点击完成标记。';
-      noteRaw = noteRaw ? (noteRaw + '\n\n' + lynelNote) : lynelNote;
+    /* 人马（莱尼尔）顶部当前等级徽章（紧邻分类标签，不再往「注意」里塞重复文字） */
+    var lvBadge = $('ecLvBadge');
+    var isLynel = m.cat === 81 || m.cat === 104;
+    if (lvBadge) {
+      var wxpData = window.TOTK_WORLD_XP_DATA;
+      var lInfo = isLynel && wxpData && wxpData.lynelInfo && wxpData.lynelInfo[String(m.id)];
+      if (lInfo) {
+        var isEnLy = window.I18N && window.I18N.getLang() === 'en';
+        var tierShort = isEnLy ? ['Red-Maned', 'Blue-Maned', 'White-Maned', 'Silver'] : ['红鬃', '蓝鬃', '白鬃', '白银'];
+        var tierCls = ['lv-red', 'lv-blue', 'lv-white', 'lv-silver'];
+        var badgeTxt = '', cls = 'lv-silver';
+        if (lInfo.arena) {
+          badgeTxt = isEnLy ? '5-Wave Fixed' : '五连固定';
+          cls = 'lv-silver';
+        } else if (lInfo.s) {
+          if (state.worldXP && typeof state.worldXP.lynelTier === 'number') {
+            var curT = Math.max(lInfo.t, state.worldXP.lynelTier);
+            badgeTxt = isEnLy ? ('Now: ' + tierShort[curT]) : ('当前：' + tierShort[curT]);
+            cls = tierCls[curT];
+          } else {
+            badgeTxt = isEnLy ? ('Base: ' + tierShort[lInfo.t] + ' ↑') : ('初始：' + tierShort[lInfo.t] + '·可升阶');
+            cls = tierCls[lInfo.t];
+          }
+        } else {
+          badgeTxt = isEnLy ? ('Fixed: ' + tierShort[lInfo.t]) : ('固定：' + tierShort[lInfo.t]);
+          cls = tierCls[lInfo.t];
+        }
+        lvBadge.textContent = badgeTxt;
+        lvBadge.className = 'ec-lv-badge ' + cls;
+      } else {
+        lvBadge.textContent = '';
+        lvBadge.className = 'ec-lv-badge hidden';
+      }
     }
     /* 残影士兵专属：地底未腐朽洁净武器（✨）极简格式（如：卓拉之剑 - 19攻击 - 27耐久） */
     var isShadowSoldier = (m.cat >= 241 && m.cat <= 248);

@@ -270,6 +270,7 @@ window.TOTK_I18N.en = {
   "settings.hideSubTitle": "Hide categories below:",
   "settings.selectAll": "Select All",
   "settings.clearAll": "Clear All",
+  "settings.advBtn": "⚙ More Settings",
   "settings.reset": "Reset Defaults",
   // Save editor entry (V2.7.0, standalone page app/save-edit/)
   "settings.saveEdit": "Save Editing",

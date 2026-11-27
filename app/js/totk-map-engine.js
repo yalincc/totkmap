@@ -442,12 +442,26 @@
     this._domMarkers = [];
     this._exploreLayers = [];
     this._matLayers = [];
+    this._liveOverlay = null;
     this._rafDraw = 0;
     this._flyRaf = 0;
     this._isDragging = false;
     this._w = 0;
     this._h = 0;
-    this._dpr = window.devicePixelRatio || 1;
+    this._dpr = (root.TOTK_ADV && root.TOTK_ADV.getEffectiveDpr) ? root.TOTK_ADV.getEffectiveDpr() : (window.devicePixelRatio || 1);
+    this._staticCache = {
+      canvas: document.createElement('canvas'),
+      ctx: null,
+      dirty: true,
+      vx: 0,
+      vy: 0,
+      scale: 0,
+      w: 0,
+      h: 0,
+      pad: 128,
+      dpr: 1
+    };
+    this._staticCache.ctx = this._staticCache.canvas.getContext('2d');
 
     this._resize();
     this._syncViewFromCenterZoom();
@@ -457,9 +471,20 @@
   }
   TotkCanvasMap.prototype = Object.create(Emitter.prototype);
 
+  TotkCanvasMap.prototype._invalidateStatic = function () {
+    if (this._staticCache) this._staticCache.dirty = true;
+  };
+
+  TotkCanvasMap.prototype.setLiveOverlay = function (fn) {
+    this._liveOverlay = (typeof fn === 'function') ? fn : null;
+    this.draw({ dynamicOnly: true });
+    return this;
+  };
+
   TotkCanvasMap.prototype.setTileLayerKey = function (key) {
     if (this._layerKey === key) return;
     this._layerKey = key;
+    this._invalidateStatic();
     this._prewarmZ3();
     this._schedDraw();
   };
@@ -478,10 +503,11 @@
     var rect = this._container.getBoundingClientRect();
     this._w = Math.max(1, Math.round(rect.width || this._container.clientWidth || window.innerWidth));
     this._h = Math.max(1, Math.round(rect.height || this._container.clientHeight || window.innerHeight));
-    this._dpr = window.devicePixelRatio || 1;
+    this._dpr = (root.TOTK_ADV && root.TOTK_ADV.getEffectiveDpr) ? root.TOTK_ADV.getEffectiveDpr() : (window.devicePixelRatio || 1);
     this._canvas.width = Math.round(this._w * this._dpr);
     this._canvas.height = Math.round(this._h * this._dpr);
     this._ctx.setTransform(this._dpr, 0, 0, this._dpr, 0, 0);
+    this._invalidateStatic();
   };
 
   TotkCanvasMap.prototype._syncViewFromCenterZoom = function () {
@@ -643,12 +669,23 @@
   };
 
   TotkCanvasMap.prototype._schedDraw = function () {
+    this._invalidateStatic();
     if (this._rafDraw) return;
     var self = this;
     this._rafDraw = requestAnimationFrame(function () {
       self._rafDraw = 0;
       self._draw();
     });
+  };
+
+  TotkCanvasMap.prototype.draw = function (opts) {
+    if (opts && opts.dynamicOnly) {
+      this._draw({ dynamicOnly: true });
+    } else {
+      this._invalidateStatic();
+      this._draw();
+    }
+    return this;
   };
 
   /* ---------------- 瓦片渲染（含低阶缓存瓦片降级铺底，彻底 0 黑屏） ---------------- */
@@ -831,10 +868,13 @@
     if (!cands.length) return;
     cands.sort(function (u, v) { return (u.a.prio || 5) - (v.a.prio || 5); });
     ctx.save();
+    var disp = (root.TOTK_ADV && root.TOTK_ADV.s && root.TOTK_ADV.s.display) || {};
+    var areaScale = disp.areaSizeScale || 1.0;
+    var areaAlphaBase = (disp.areaAlpha != null ? disp.areaAlpha : 100) / 100;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.strokeStyle = '#3f3010';
-    ctx.fillStyle = '#bfae68';
+    ctx.fillStyle = disp.areaColor || '#bfae68';
     ctx.lineJoin = 'round';
     var boxes = this._areaBoxes;
     var icons = iconBoxes || [];
@@ -848,7 +888,7 @@
     }
     for (var j = 0; j < cands.length; j++) {
       var c = cands[j], a = c.a;
-      var fs = Math.round(Math.max(11, a.size * (0.5 + z * 0.13)));
+      var fs = Math.round(Math.max(10, a.size * (0.5 + z * 0.13) * areaScale));
       ctx.font = '600 ' + fs + 'px "PingFang SC","Microsoft YaHei","SimSun",sans-serif';
       var tw = ctx.measureText(a.name).width;
       var hw = tw / 2 + 4, hh = fs / 2 + 2;
@@ -869,7 +909,7 @@
         hitIconFallback = true;
       }
       boxes.push([chosen[2], chosen[3], chosen[4], chosen[5]]);
-      ctx.globalAlpha = hitIconFallback ? 0.58 : 1.0;
+      ctx.globalAlpha = (hitIconFallback ? 0.58 : 1.0) * areaAlphaBase;
       ctx.lineWidth = 3;
       ctx.strokeText(a.name, chosen[0], chosen[1]);
       ctx.fillText(a.name, chosen[0], chosen[1]);
@@ -877,42 +917,108 @@
     ctx.restore();
   };
 
-  /* ---------------- 主渲染帧（三步同帧：底图+图标 → 地名偏移避让图标 → 标点文字避让图标+地名） ---------------- */
-  TotkCanvasMap.prototype._draw = function () {
+  /* ---------------- 离屏静态层重建（动静分离缓存核心） ---------------- */
+  TotkCanvasMap.prototype._rebuildStaticCache = function () {
+    var sc = this._staticCache;
+    var isMob = !!(root.TOTK_ADV && root.TOTK_ADV.isMobileDevice && root.TOTK_ADV.isMobileDevice());
+    var pad = isMob ? 64 : 128;
+    var cw = this._w + pad * 2;
+    var ch = this._h + pad * 2;
+    var dpr = this._dpr || 1;
+    var pxW = Math.max(1, Math.round(cw * dpr));
+    var pxH = Math.max(1, Math.round(ch * dpr));
+    if (sc.canvas.width !== pxW || sc.canvas.height !== pxH) {
+      sc.canvas.width = pxW;
+      sc.canvas.height = pxH;
+    }
+    var sctx = sc.ctx;
+    sctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    sctx.clearRect(0, 0, cw, ch);
+
+    var origVx = this.view.x, origVy = this.view.y, origW = this._w, origH = this._h;
+    sc.vx = origVx;
+    sc.vy = origVy;
+    sc.scale = this.view.scale;
+    sc.w = cw;
+    sc.h = ch;
+    sc.pad = pad;
+    sc.dpr = dpr;
+    sc.dirty = false;
+
+    this.view.x = origVx + pad;
+    this.view.y = origVy + pad;
+    this._w = cw;
+    this._h = ch;
+    try {
+      this._drawTiles(sctx);
+      this._drawVectors(sctx);
+      var allIconBoxes = [];
+      for (var i = 0; i < this._exploreLayers.length; i++) {
+        var layer = this._exploreLayers[i];
+        if (layer._renderIcons) {
+          layer._renderIcons(sctx);
+          if (layer._iconBoxes) {
+            for (var ib = 0; ib < layer._iconBoxes.length; ib++) allIconBoxes.push(layer._iconBoxes[ib]);
+          }
+        } else {
+          layer._renderOn(sctx);
+        }
+      }
+      var view = this.view, dpad = 48, w = this._w, h = this._h;
+      var dms = this._domMarkers || [];
+      for (var di = 0; di < dms.length; di++) {
+        var dm = dms[di];
+        if (!dm || !dm._latlng || !dm._el || dm._el.style.display === 'none') continue;
+        var dx = view.x + dm._latlng.lng * view.scale;
+        var dy = view.y + dm._latlng.lat * view.scale;
+        if (dx < -dpad * 2 || dx > w + dpad * 2 || dy < -dpad * 2 || dy > h + dpad * 2) continue;
+        var icSz = (dm.options && dm.options.icon && dm.options.icon.options && dm.options.icon.options.iconSize) || [26, 26];
+        var dw = (icSz[0] || 26) / 2 + 2, dh = (icSz[1] || 26) / 2 + 2;
+        allIconBoxes.push([dx - dw, dy - dh, dx + dw, dy + dh]);
+      }
+      this._drawAreaLabels(sctx, allIconBoxes);
+      for (var i2 = 0; i2 < this._exploreLayers.length; i2++) {
+        if (this._exploreLayers[i2]._renderLabels) this._exploreLayers[i2]._renderLabels(sctx);
+      }
+      for (var j = 0; j < this._matLayers.length; j++) this._matLayers[j]._renderOn(sctx);
+    } finally {
+      this.view.x = origVx;
+      this.view.y = origVy;
+      this._w = origW;
+      this._h = origH;
+    }
+  };
+
+  /* ---------------- 主渲染帧（动静分离：1 次 drawImage 静态缓存 + 动态覆盖层） ---------------- */
+  TotkCanvasMap.prototype._draw = function (opts) {
+    var sc = this._staticCache;
+    var view = this.view;
+    var needStatic = sc.dirty ||
+      sc.scale !== view.scale ||
+      sc.dpr !== this._dpr ||
+      Math.abs(view.x - sc.vx) > sc.pad ||
+      Math.abs(view.y - sc.vy) > sc.pad;
+    if (needStatic) {
+      this._rebuildStaticCache();
+    }
     var ctx = this._ctx;
     ctx.clearRect(0, 0, this._w, this._h);
-    this._drawTiles(ctx);
-    this._drawVectors(ctx);
-    var allIconBoxes = [];
-    for (var i = 0; i < this._exploreLayers.length; i++) {
-      var layer = this._exploreLayers[i];
-      if (layer._renderIcons) {
-        layer._renderIcons(ctx);
-        if (layer._iconBoxes) {
-          for (var ib = 0; ib < layer._iconBoxes.length; ib++) allIconBoxes.push(layer._iconBoxes[ib]);
-        }
-      } else {
-        layer._renderOn(ctx);
-      }
+    var ox = view.x - sc.vx - sc.pad;
+    var oy = view.y - sc.vy - sc.pad;
+    ctx.drawImage(sc.canvas, ox, oy, sc.w, sc.h);
+    if (this._liveOverlay) {
+      try { this._liveOverlay(ctx, this); } catch (e) { console.error('[TotkMap] liveOverlay', e); }
     }
-    var view = this.view, pad = 48, w = this._w, h = this._h;
-    var dms = this._domMarkers || [];
-    for (var di = 0; di < dms.length; di++) {
-      var dm = dms[di];
-      if (!dm || !dm._latlng || !dm._el || dm._el.style.display === 'none') continue;
-      var dx = view.x + dm._latlng.lng * view.scale;
-      var dy = view.y + dm._latlng.lat * view.scale;
-      if (dx < -pad * 2 || dx > w + pad * 2 || dy < -pad * 2 || dy > h + pad * 2) continue;
-      var icSz = (dm.options && dm.options.icon && dm.options.icon.options && dm.options.icon.options.iconSize) || [26, 26];
-      var dw = (icSz[0] || 26) / 2 + 2, dh = (icSz[1] || 26) / 2 + 2;
-      allIconBoxes.push([dx - dw, dy - dh, dx + dw, dy + dh]);
-    }
-    this._drawAreaLabels(ctx, allIconBoxes);
-    for (var i2 = 0; i2 < this._exploreLayers.length; i2++) {
-      if (this._exploreLayers[i2]._renderLabels) this._exploreLayers[i2]._renderLabels(ctx);
-    }
-    for (var j = 0; j < this._matLayers.length; j++) this._matLayers[j]._renderOn(ctx);
     for (var k = 0; k < this._domMarkers.length; k++) this._posDomMarker(this._domMarkers[k]);
+  };
+
+  /* 将屏幕点转换到静态缓存坐标系（确保离屏缓存平移期内点击/悬停像素级精准） */
+  TotkCanvasMap.prototype._screenToStaticPt = function (pt) {
+    var sc = this._staticCache;
+    if (!sc || sc.dirty) return pt;
+    var ox = this.view.x - sc.vx - sc.pad;
+    var oy = this.view.y - sc.vy - sc.pad;
+    return new Point(pt.x - ox, pt.y - oy);
   };
 
   /* ---------------- 鼠标与触控交互 ---------------- */
@@ -951,7 +1057,7 @@
         self.view.x = drag.vx + dx;
         self.view.y = drag.vy + dy;
         self._syncCenterFromView();
-        self._schedDraw();
+        self._draw({ dynamicOnly: true });
         self.fire('move');
         hideTooltip();
         return;
@@ -975,13 +1081,14 @@
     cv.addEventListener('click', function (e) {
       if (moved) { moved = false; return; }
       var pt = self.mouseEventToContainerPoint(e);
+      var spt = self._screenToStaticPt(pt);
       var ll = self.containerPointToLatLng(pt);
       var ev = { originalEvent: e, containerPoint: pt, layerPoint: pt, latlng: ll };
       for (var i = self._exploreLayers.length - 1; i >= 0; i--) {
-        if (self._exploreLayers[i]._handleClick(pt, ev)) return;
+        if (self._exploreLayers[i]._handleClick(spt, ev)) return;
       }
       for (var j = self._matLayers.length - 1; j >= 0; j--) {
-        if (self._matLayers[j]._handleClick(pt, ev)) return;
+        if (self._matLayers[j]._handleClick(spt, ev)) return;
       }
       self.fire('click', ev);
     });
@@ -1053,11 +1160,12 @@
   };
 
   TotkCanvasMap.prototype._handleHover = function (pt, e) {
+    var spt = this._screenToStaticPt(pt);
     for (var i = this._exploreLayers.length - 1; i >= 0; i--) {
-      if (this._exploreLayers[i]._handleHover(pt, e)) return;
+      if (this._exploreLayers[i]._handleHover(spt, e)) return;
     }
     for (var j = this._matLayers.length - 1; j >= 0; j--) {
-      if (this._matLayers[j]._handleHover(pt, e)) return;
+      if (this._matLayers[j]._handleHover(spt, e)) return;
     }
     this._canvas.style.cursor = '';
     hideTooltip();
@@ -1217,7 +1325,9 @@
           vis.push({ marker: m, x: x, y: y, size: size });
           var vh = size / 2 + 1;
           iconBoxes.push([x - vh, y - vh, x + vh, y + vh]);
-          if (opt.showNames && zoom >= (opt.labelMinZoom || 6)) {
+          var dispCfg = (root.TOTK_ADV && root.TOTK_ADV.s && root.TOTK_ADV.s.display) || {};
+          var minLabelZ = dispCfg.labelMinZoom != null ? dispCfg.labelMinZoom : (opt.labelMinZoom || 6);
+          if (opt.showNames && zoom >= minLabelZ) {
             labelList.push({ m: m, x: x, y: y, size: size, isDone: isDone });
           }
         }
@@ -1264,8 +1374,11 @@
         if (a.isDone !== b.isDone) return a.isDone ? 1 : -1;
         return (a.y - b.y) || (a.x - b.x);
       });
-      var fs = Math.min(Math.max(10, Math.round(zoom * 2)), 13);
-      var fs2 = Math.max(9, fs - 1);
+      var dispCfg2 = (root.TOTK_ADV && root.TOTK_ADV.s && root.TOTK_ADV.s.display) || {};
+      var fsDelta = dispCfg2.labelSizeDelta || 0;
+      var singleLineOnly = dispCfg2.labelLines === 1;
+      var fs = Math.min(Math.max(8, Math.round(zoom * 2) + fsDelta), 18);
+      var fs2 = Math.max(8, fs - 1);
       var font1 = '600 ' + fs + 'px "PingFang SC","Microsoft YaHei",sans-serif';
       var font2 = '600 ' + fs2 + 'px "PingFang SC","Microsoft YaHei",sans-serif';
       ctx.save();
@@ -1278,7 +1391,7 @@
         if (!lbl) continue;
         var lines = String(lbl).split('\n');
         var line1 = lines[0] || '';
-        var line2 = lines[1] || '';
+        var line2 = singleLineOnly ? '' : (lines[1] || '');
         ctx.font = font1;
         var w1 = ctx.measureText(line1).width;
         var w2 = 0;

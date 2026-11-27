@@ -495,9 +495,35 @@ var TOTKSaveParser = (function () {
     return out;
   }
 
+  /* 计算世界等级隐藏经验（保底击杀基础 XP + 可升阶莱尼尔当前阶位） */
+  function calcWorldXP(parsed) {
+    var data = (typeof window !== 'undefined' && window.TOTK_WORLD_XP_DATA) ||
+               (typeof global !== 'undefined' && global.TOTK_WORLD_XP_DATA) || null;
+    if (!parsed || !parsed.ok || !data || !Array.isArray(data.hashes)) return null;
+    var dv = parsed.dv, vb = parsed.valueByHash || {};
+    var totalXp = 0;
+    for (var i = 0; i < data.hashes.length; i++) {
+      var row = data.hashes[i]; // [hash_u32, xp_per_kill, kill_cap]
+      var off = vb[row[0]];
+      if (off === undefined) continue;
+      var kills = dv.getUint32(off, true);
+      if (kills > 0 && kills < 100000) {
+        totalXp += Math.min(kills, row[2]) * row[1];
+      }
+    }
+    var th = data.lynelThresholds || [3901, 5601, 8101];
+    var tier = 0;
+    if (totalXp >= th[2]) tier = 3;
+    else if (totalXp >= th[1]) tier = 2;
+    else if (totalXp >= th[0]) tier = 1;
+    var nextTh = tier < 3 ? th[tier] : null;
+    return { xp: totalXp, lynelTier: tier, nextThreshold: nextTh };
+  }
+
   var exp = {
     parse: parse,
     collect: collect,
+    calcWorldXP: calcWorldXP,
     pointDone: pointDone,
     matchExploreDone: matchExploreDone,
     questDone: questDone,

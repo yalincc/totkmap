@@ -45,9 +45,11 @@ type posState struct {
 	rescans    int // 本会话重扫次数
 
 	// 朝向：方位角，北=0°、东=90°（顺时针递增）。hasHeading=false 时字段无效。
-	heading     float32
-	hasHeading  bool
-	verified    bool // 移动确认已通过（对齐 totknavi 的 verified 语义）
+	heading      float32
+	hasHeading   bool
+	camFacing    float32
+	hasCamFacing bool
+	verified     bool // 移动确认已通过（对齐 totknavi 的 verified 语义）
 	gameRunning bool
 	pid         uint32
 	lockedAddr  uintptr
@@ -79,9 +81,17 @@ func (s *posState) publish(g [3]float32, heading float32, hasHeading bool, verif
 	s.mu.Unlock()
 }
 
+func (s *posState) setCamFacing(cf float32, ok bool) {
+	s.mu.Lock()
+	s.camFacing = cf
+	s.hasCamFacing = ok
+	s.mu.Unlock()
+}
+
 func (s *posState) markLost() {
 	s.mu.Lock()
 	s.ok = false
+	s.hasCamFacing = false
 	s.mu.Unlock()
 }
 
@@ -234,6 +244,10 @@ func handlePosPC(w http.ResponseWriter, r *http.Request) {
 	if s.hasHeading {
 		heading = s.heading
 	}
+	var camFacing any // 相机视野罗盘角（北=0°、东=90° 顺时针）；null = 未取到
+	if s.hasCamFacing {
+		camFacing = s.camFacing
+	}
 	// 分层判定（18 地底 / 19 地表 / 20 天空）：四级漏斗地形高度图 + 天空多边形 + 3D点云
 	var layerVal any
 	if s.ok {
@@ -246,7 +260,8 @@ func handlePosPC(w http.ResponseWriter, r *http.Request) {
 		"gz":           s.gz,
 		"mx":           s.mx,
 		"my":           s.my,
-		"heading":      heading, // 方位角：北=0°、东=90°；null = 未取到
+		"heading":      heading,   // 方位角：北=0°、东=90°；null = 未取到
+		"camFacing":    camFacing, // 相机视野方位角：北=0°、东=90°；null = 未取到
 		"layer":        layerVal,
 		"age":          age,
 		"verified":     s.verified,
@@ -440,6 +455,15 @@ func trackerLoop(p Platform, plat *totkpcPlatform, anchor *[3]float32, addr uint
 			return
 		}
 		pstate.publish(pos, hd, hasH, verified, src)
+		if plat != nil {
+			if mb := plat.MainBase(); mb != 0 {
+				if cf, ok := pcCam.sample(p.Handle(), p.PID(), mb, pos); ok {
+					pstate.setCamFacing(cf, true)
+				} else {
+					pstate.setCamFacing(0, false)
+				}
+			}
+		}
 	})
 }
 

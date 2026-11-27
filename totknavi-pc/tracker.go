@@ -42,7 +42,7 @@ func logTick(addr uintptr, pos [3]float32, hd float32, hasH, verified bool, src 
 }
 
 const (
-	tickInterval = 100 * time.Millisecond
+	tickInterval = 50 * time.Millisecond
 	failRetry    = 3
 	failRetryGap = 30 * time.Millisecond
 
