@@ -227,37 +227,60 @@ var TOTKSaveParser = (function () {
     c('设计图石板', C.SCHEMATICS_STONE_FOUND.concat(C.SCHEMATICS_YIGA_FOUND));
     c('左纳乌制造机', DEVICE_DISPENSERS);
 
-    // 宝箱 (1,334 官方宝箱 GUID)
-    var chestGuids = [];
+    // 宝箱 (1,324 官方宝箱 GUID，支持 alt_guids 互斥双版本匹配)
+    var chestDone = 0;
+    var chestTotal = 0;
     var official = (typeof window !== 'undefined' && (window.TOTK_CHESTS_OFFICIAL || window.CHESTS_OFFICIAL)) ||
                    (typeof global !== 'undefined' && (global.TOTK_CHESTS_OFFICIAL || global.CHESTS_OFFICIAL)) || null;
     if (official) {
+      var gsSet = new Set();
+      for (var gsi = 0; gsi < gs.length; gsi++) gsSet.add(normalizeGuid(gs[gsi]));
       if (Array.isArray(official)) {
+        chestTotal = official.length;
         for (var ci = 0; ci < official.length; ci++) {
-          var og = official[ci] && (official[ci].guid || official[ci].hash || official[ci].save_guid);
-          if (og) chestGuids.push(og);
+          var item = official[ci];
+          if (!item) continue;
+          var og = item.guid || item.hash || item.save_guid;
+          var hit = !!(og && gsSet.has(normalizeGuid(og)));
+          if (!hit && Array.isArray(item.alt_guids)) {
+            for (var ai = 0; ai < item.alt_guids.length; ai++) {
+              if (item.alt_guids[ai] && gsSet.has(normalizeGuid(item.alt_guids[ai]))) { hit = true; break; }
+            }
+          }
+          if (hit) chestDone++;
         }
       } else if (typeof official === 'object') {
         for (var ok in official) {
+          chestTotal++;
           var ov = official[ok];
           var og2 = typeof ov === 'string' ? ov : (ov && (ov.guid || ov.hash || ov.save_guid));
-          if (og2) chestGuids.push(og2);
+          var hit2 = !!(og2 && gsSet.has(normalizeGuid(og2)));
+          if (!hit2 && ov && Array.isArray(ov.alt_guids)) {
+            for (var ai2 = 0; ai2 < ov.alt_guids.length; ai2++) {
+              if (ov.alt_guids[ai2] && gsSet.has(normalizeGuid(ov.alt_guids[ai2]))) { hit2 = true; break; }
+            }
+          }
+          if (hit2) chestDone++;
         }
       }
     }
-    if (!chestGuids.length) {
+    if (!chestTotal) {
+      var chestGuids = [];
       var expMap = getExploreMap();
       if (expMap && expMap.chests) {
         for (var chid in expMap.chests) {
           chestGuids.push(expMap.chests[chid]);
         }
       }
+      if (chestGuids.length) {
+        chestDone = countGuids(gs, chestGuids);
+        chestTotal = Math.max(1324, chestGuids.length);
+      } else {
+        chestDone = 0;
+        chestTotal = 1324;
+      }
     }
-    if (chestGuids.length) {
-      out['宝箱'] = { done: countGuids(gs, chestGuids), total: Math.max(1334, chestGuids.length) };
-    } else {
-      out['宝箱'] = { done: 0, total: 1334 };
-    }
+    out['宝箱'] = { done: chestDone, total: chestTotal };
 
     // 战斗讨伐
     c('独眼巨人', C.BOSSES_HINOXES_DEFEATED);
@@ -395,7 +418,13 @@ var TOTKSaveParser = (function () {
           if (!item) continue;
           var chestId = item.id != null ? item.id : (item.markerId != null ? item.markerId : i);
           var cGuid = item.guid || item.hash || item.save_guid || item.saveGuid || item.instanceId;
-          if (cGuid && hasGuid(cGuid)) {
+          var matched = !!(cGuid && hasGuid(cGuid));
+          if (!matched && Array.isArray(item.alt_guids)) {
+            for (var ai3 = 0; ai3 < item.alt_guids.length; ai3++) {
+              if (item.alt_guids[ai3] && hasGuid(item.alt_guids[ai3])) { matched = true; break; }
+            }
+          }
+          if (matched) {
             out[chestId] = true;
           }
         }
